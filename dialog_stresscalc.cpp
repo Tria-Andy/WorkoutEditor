@@ -1,0 +1,124 @@
+#include "dialog_stresscalc.h"
+#include "ui_dialog_stresscalc.h"
+#include <QDebug>
+
+Dialog_stresscalc::Dialog_stresscalc(QWidget *parent,settings *p_settings) :
+    QDialog(parent),
+    ui(new Ui::Dialog_stresscalc)
+{
+    ui->setupUi(this);
+    stress_settings = p_settings;
+    t_power = new double[4];
+    t_pace = new double[4];
+    combo_sport << "--" << stress_settings->isSwim << stress_settings->isBike << stress_settings->isRun;
+    ui->comboBox_sport->addItems(combo_sport);
+    lab_power = "Threshold ----:";
+    lab_workout = "Workout ----:";
+    ui->lineEdit_power->setText("0");
+    ui->label_threshold->setText(lab_power);
+    ui->label_workout_power->setText(lab_workout);
+    this->read_threshold_values();
+}
+
+Dialog_stresscalc::~Dialog_stresscalc()
+{
+    delete ui;
+    delete t_pace;
+    delete t_power;
+}
+
+void Dialog_stresscalc::read_threshold_values()
+{
+    double *p;
+    QString pace;
+
+    p = stress_settings->get_powerList();
+
+    for(int i = 1; i < 4; ++i)
+    {
+        t_power[i] = p[i-1];
+        pace = stress_settings->get_paceList().at(i-1);
+        t_pace[i] = stress_settings->get_timesec(pace);
+    }
+
+}
+
+void Dialog_stresscalc::estimate_stress()
+{
+    int current;
+
+    if(sport == stress_settings->isSwim || sport == stress_settings->isRun)
+    {
+        current = stress_settings->get_timesec(ui->lineEdit_goal_power->text());
+        est_power = t_power[sport_index] * (t_pace[sport_index] / (double)current);
+        ui->lineEdit_intensity->setText(QString::number(est_power / t_power[sport_index]));
+        raw_effort = (stress_settings->get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")) * est_power) * ui->lineEdit_intensity->text().toDouble();
+        cv_effort = t_power[sport_index] * 3600;
+        est_stress = (raw_effort / cv_effort) * 100;
+        ui->lineEdit_stressScore->setText(QString::number(est_stress));
+    }
+    if(sport == stress_settings->isBike)
+    {   
+        current = ui->lineEdit_goal_power->text().toDouble();
+        ui->lineEdit_intensity->setText(QString::number(current / t_power[sport_index]));
+        raw_effort = (stress_settings->get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")) * current) * ui->lineEdit_intensity->text().toDouble();
+        cv_effort = t_power[sport_index] * 3600;
+        est_stress = (raw_effort / cv_effort) * 100;
+        ui->lineEdit_stressScore->setText(QString::number(est_stress));
+    }
+}
+
+void Dialog_stresscalc::set_sport_threshold()
+{
+    if(sport == stress_settings->isSwim || sport == stress_settings->isRun)
+    {
+        ui->label_threshold->setText("Threshold Pace:");
+        ui->label_workout_power->setText("Workout Pace:");
+        ui->lineEdit_power->setText(stress_settings->set_time(t_pace[sport_index]));
+        ui->lineEdit_goal_power->setInputMask("00:00");
+    }
+    if(sport == stress_settings->isBike)
+    {
+        ui->label_threshold->setText("Threshold Power:");
+        ui->label_workout_power->setText("Workout Power:");
+        ui->lineEdit_power->setText(QString::number(t_power[sport_index]));
+        ui->lineEdit_goal_power->setInputMask("000");
+    }
+}
+
+void Dialog_stresscalc::on_pushButton_close_clicked()
+{
+    reject();
+}
+
+void Dialog_stresscalc::reset_calc()
+{
+    ui->label_threshold->setText(lab_power);
+    ui->label_workout_power->setText(lab_workout);
+    ui->timeEdit_duration->setTime(QTime::fromString("00:00:00"));
+    ui->lineEdit_power->clear();
+    ui->lineEdit_stressScore->clear();
+    ui->lineEdit_goal_power->clear();
+    ui->lineEdit_intensity->clear();
+}
+
+void Dialog_stresscalc::on_pushButton_calc_clicked()
+{
+    this->estimate_stress();
+}
+
+void Dialog_stresscalc::on_comboBox_sport_currentIndexChanged(int index)
+{
+    this->reset_calc();
+    sport_index = index;
+    sport = ui->comboBox_sport->currentText();
+    this->set_sport_threshold();
+}
+
+
+void Dialog_stresscalc::on_pushButton_clear_clicked()
+{
+    ui->comboBox_sport->setCurrentIndex(0);
+    this->reset_calc();
+
+}
