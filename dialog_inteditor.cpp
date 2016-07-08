@@ -798,6 +798,10 @@ void Dialog_inteditor::on_pushButton_delete_std_clicked()
     if (reply == QMessageBox::Yes)
     {
         stdWorkouts->delete_stdWorkout(current_workID,true);
+        current_workID = QString();
+        this->clearIntTree();
+        this->reset_values();
+        this->reset_workoutInfo();
         this->get_workouts(current_sport);
     }
 }
@@ -835,7 +839,6 @@ void Dialog_inteditor::save_workout()
 {
    int counter = 1;
    int workcounter;
-   bool idExist = false;
    QString workID,sport,phase,subphase,worktime,currWorkID;
    QStringList workoutValues,existWorkIDs,sportWorkIDs;
    sport = ui->comboBox_sport->currentText();
@@ -868,14 +871,10 @@ void Dialog_inteditor::save_workout()
             if(workID == sportWorkIDs.at(i))
             {
                 workcounter++;
-                idExist = true;
-            }
-            else
-            {
-                idExist = false;
+                workID = sport + "_" + QString::number(workcounter+1);
+                i = 0;
             }
        }
-       workID = sport + "_" + QString::number(workcounter+1);
        current_workID = workID;
    }
    else
