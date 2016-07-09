@@ -797,7 +797,12 @@ void Dialog_inteditor::on_pushButton_delete_std_clicked()
 
     if (reply == QMessageBox::Yes)
     {
-        stdWorkouts->delete_stdWorkout(current_workID);
+        stdWorkouts->delete_stdWorkout(current_workID,true);
+        current_workID = QString();
+        this->clearIntTree();
+        this->reset_values();
+        this->reset_workoutInfo();
+        this->get_workouts(current_sport);
     }
 }
 
@@ -833,32 +838,48 @@ void Dialog_inteditor::save_workout_values(QStringList values, QStandardItemMode
 void Dialog_inteditor::save_workout()
 {
    int counter = 1;
-   QString workID,sport,phase,subphase,worktime;
-   QStringList workoutValues;
+   int workcounter;
+   QString workID,sport,phase,subphase,worktime,currWorkID;
+   QStringList workoutValues,existWorkIDs,sportWorkIDs;
    sport = ui->comboBox_sport->currentText();
    QTreeWidgetItem *currentItem;
    QStandardItemModel *workmodel;
    workmodel = stdWorkouts->workouts_meta;
    QList<QStandardItem*> workList = workmodel->findItems(sport,Qt::MatchExactly,0);
 
+   existWorkIDs = stdWorkouts->get_workoutIds();
+
+   for(int i = 0; i < existWorkIDs.count(); ++i)
+   {
+       currWorkID = existWorkIDs.at(i);
+       if(currWorkID.contains(sport))
+       {
+           sportWorkIDs << currWorkID;
+       }
+   }
+
    worktime = pop_settings->set_time((int)time_sum*60);
 
    //Update Workout -> delete first
    if(current_workID.isEmpty())
    {
-       workID = sport + "_" + QString::number(workList.count()+1);
+       workcounter = workList.count();
+       workID = sport + "_" + QString::number(workcounter+1);
+
+       for(int i = 0; i < sportWorkIDs.count(); ++i)
+       {
+            if(workID == sportWorkIDs.at(i))
+            {
+                workcounter++;
+                workID = sport + "_" + QString::number(workcounter+1);
+                i = 0;
+            }
+       }
        current_workID = workID;
    }
    else
    {
-       QList<QStandardItem*> list = workmodel->findItems(current_workID,Qt::MatchExactly,1);
-       workmodel->removeRow(workmodel->indexFromItem(list.at(0)).row(),QModelIndex());
-
-       list = stdWorkouts->workouts_steps->findItems(current_workID,Qt::MatchExactly,0);
-       for(int i = 0; i < list.count(); ++i)
-       {
-           stdWorkouts->workouts_steps->removeRow(stdWorkouts->workouts_steps->indexFromItem(list.at(i)).row(),QModelIndex());
-       }
+       stdWorkouts->delete_stdWorkout(current_workID,false);
 
        workID = current_workID;
    }

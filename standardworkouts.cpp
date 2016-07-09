@@ -77,6 +77,7 @@ void standardWorkouts::read_standard_workouts()
         }
     }
 
+    this->set_workoutIds();
 }
 
 void standardWorkouts::write_standard_workouts()
@@ -147,8 +148,27 @@ void standardWorkouts::write_standard_workouts()
     }
 }
 
-void standardWorkouts::delete_stdWorkout(QString workID)
+void standardWorkouts::set_workoutIds()
 {
-    qDebug() << workID;
+    workoutIDs = QStringList();
+    for(int i = 0; i < workouts_meta->rowCount(); ++i)
+    {
+        workoutIDs << workouts_meta->data(workouts_meta->index(i,1,QModelIndex())).toString();
+    }
+}
+
+void standardWorkouts::delete_stdWorkout(QString workID,bool isdelete)
+{
+    QList<QStandardItem*> list = workouts_meta->findItems(workID,Qt::MatchExactly,1);
+    workouts_meta->removeRow(workouts_meta->indexFromItem(list.at(0)).row(),QModelIndex());
+
+    list = workouts_steps->findItems(workID,Qt::MatchExactly,0);
+    for(int i = 0; i < list.count(); ++i)
+    {
+        workouts_steps->removeRow(workouts_steps->indexFromItem(list.at(i)).row(),QModelIndex());
+    }
+
+    if(isdelete) this->set_workoutIds();
+    this->write_standard_workouts();
 }
 
