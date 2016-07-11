@@ -217,8 +217,10 @@ void MainWindow::summery_view()
             index = workSchedule->workout_schedule->indexFromItem(list.at(i));
             sport = workSchedule->workout_schedule->item(index.row(),3)->text();
 
-            this->summery_calc(0,index,isWeekMode);
-
+            if(sport != editorSettings->isOther)
+            {
+                this->summery_calc(0,index,isWeekMode);
+            }
             if(sport == editorSettings->isSwim)
             {
                 this->summery_calc(1,index,isWeekMode);
