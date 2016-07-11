@@ -22,11 +22,6 @@ Dialog_inteditor::Dialog_inteditor(QWidget *parent, settings *p_setting,standard
     isSeries = "Series";
     isGroup = "Group";
     clearFlag = false;
-    powerfactor = new double [7];
-    for(int i = 1; i <= 7; ++i)
-    {
-        powerfactor[i-1] = 2.5 * i;
-    }
 
     this->init_model();
     this->set_plot_graphic(0);
@@ -57,7 +52,6 @@ Dialog_inteditor::Dialog_inteditor(QWidget *parent, settings *p_setting,standard
 Dialog_inteditor::~Dialog_inteditor()
 {
     delete ui;
-    delete [] powerfactor;
     delete plot_model;
 }
 
@@ -201,8 +195,7 @@ QString Dialog_inteditor::calc_threshold(double percent)
         {
             ui->label_thresValue->setText(QString::number(threshold_power * (percent/100)));
             thresValue = QString::number(threshold_power * (percent/100));
-            current_pace = static_cast<int>(round(3600/(((3600/threshold_pace)*0.7) + (speedfactor * (percent/100.0)))));
-            //current_pace = static_cast<int>(round(threshold_pace / (percent/100.0)));
+            current_pace = static_cast<int>(round(threshold_pace / (percent/100.0)));
         }
         if(current_sport == pop_settings->isRun)
         {
@@ -654,7 +647,6 @@ void Dialog_inteditor::set_min_max(int index, QString sport)
     if(sport == pop_settings->isBike)
     {
         range = pop_settings->get_bikeRange().at(index);
-        speedfactor = powerfactor[index];
     }
     if(sport == pop_settings->isRun)
     {

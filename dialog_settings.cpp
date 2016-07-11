@@ -301,10 +301,6 @@ void Dialog_settings::on_lineEdit_thresPace_textEdited(const QString &value)
 void Dialog_settings::on_lineEdit_thresPower_textEdited(const QString &value)
 {
     Q_UNUSED(value)
-    if(ui->comboBox_thresSport->currentText() == set_settings->isBike)
-    {
-        ui->lineEdit_thresPace->setText(set_settings->set_time(static_cast<int>(3600/(round(ui->lineEdit_thresPower->text().toDouble()/6.5)))));
-    }
     this->enableSavebutton();
 }
 
