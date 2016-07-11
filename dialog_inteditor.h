@@ -78,8 +78,8 @@ private:
     QString current_sport,isSeries,isGroup,current_workID;
     int threshold_pace,current_pace;
     int threshold_power,current_power;
-    double *powerlist;
-    double time_sum,dist_sum,stress_sum;
+    double *powerlist,*powerfactor;
+    double time_sum,dist_sum,stress_sum,speedfactor;
     bool clearFlag;
 
     QStringList add_int_values();
