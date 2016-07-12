@@ -501,7 +501,7 @@ void MainWindow::on_actionNew_triggered()
             curr_workout->add_workout(workSchedule->workout_schedule);
             this->refresh_model();
         }
-        delete curr_workout;
+        //delete curr_workout;
     }
 }
 
@@ -563,7 +563,6 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
             day_pop.setModal(true);
             dialog_code = day_pop.exec();
 
-
             if(dialog_code == QDialog::Accepted)
             {
 
@@ -578,7 +577,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
                   this->refresh_model();
               }
             }
-            delete curr_workout;
+            //delete curr_workout;
         }
         else
         {
