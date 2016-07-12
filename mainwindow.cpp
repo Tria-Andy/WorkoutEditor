@@ -559,9 +559,6 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
 
             QString getdate = calendar_model->data(index,Qt::DisplayRole).toString().left(9);
             QDate selectDate = QDate::fromString(getdate,"dd MMM yy").addYears(100);
-            //day_popup *day_pop = new day_popup(this,selectDate,workSchedule,curr_workout,editorSettings);
-            //day_pop->setModal(true);
-            //dialog_code = day_pop->exec();
             day_popup day_pop(this,selectDate,workSchedule,curr_workout,editorSettings);
             day_pop.setModal(true);
             dialog_code = day_pop.exec();
@@ -569,9 +566,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
 
             if(dialog_code == QDialog::Accepted)
             {
-              //Dialog_edit *edit_workout = new Dialog_edit(this,selectDate,workSchedule,curr_workout,editorSettings,stdWorkout);
-              //edit_workout->setModal(true);
-              //dialog_code = edit_workout->exec();
+
               Dialog_edit edit_workout(this,selectDate,workSchedule,curr_workout,editorSettings,stdWorkout);
               edit_workout.setModal(true);
               dialog_code = edit_workout.exec();
@@ -582,9 +577,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
                   if(edit_workout.get_result() == 3) curr_workout->delete_workout(edit_workout.get_edit_index(),workSchedule->workout_schedule);
                   this->refresh_model();
               }
-                //delete edit_workout;
             }
-            //delete day_pop;
             delete curr_workout;
         }
         else
@@ -592,9 +585,6 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
             QString selected_week =  calendar_model->data(index,Qt::DisplayRole).toString();
             weeknumber = selected_week.split("#").at(0);
             this->summery_view();
-            //week_popup *week_pop = new week_popup(this,selected_week,workSchedule,editorSettings);
-            //week_pop->setModal(true);
-            //dialog_code = week_pop->exec();
 
             week_popup week_pop(this,selected_week,workSchedule,editorSettings);
             week_pop.setModal(true);
@@ -602,9 +592,6 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
 
             if(dialog_code == QDialog::Accepted)
             {
-                //Dialog_week_copy *week_copy = new Dialog_week_copy(this,selected_week,workSchedule);
-                //week_copy->setModal(true);
-                //dialog_code = week_copy->exec();
                 Dialog_week_copy week_copy(this,selected_week,workSchedule);
                 week_copy.setModal(true);
                 dialog_code = week_copy.exec();
@@ -614,7 +601,6 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
                     workSchedule->copyWeek();
                     this->workout_calendar();
                 }
-                //delete week_copy;
             }
 
             if(dialog_code == QDialog::Rejected)
@@ -622,7 +608,6 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
                 weekCounter = 0;
                 this->set_calender();
             }
-            //delete week_pop;
         }
     }
     else
@@ -631,20 +616,15 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
         {
             QString selected_week = calendar_model->data(index,Qt::DisplayRole).toString();
 
-            //Dialog_addweek *new_week = new Dialog_addweek(this,selected_week,workSchedule,editorSettings);
-            //new_week->setModal(true);
-            //int dialog_code = new_week->exec();
             Dialog_addweek new_week(this,selected_week,workSchedule,editorSettings);
             new_week.setModal(true);
             int dialog_code = new_week.exec();
-
 
             if(dialog_code == QDialog::Accepted)
             {
                 this->workout_calendar();
                 this->summery_view();
             }
-            //delete new_week;
         }
     }
 
