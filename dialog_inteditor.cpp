@@ -789,6 +789,8 @@ void Dialog_inteditor::on_pushButton_addtop_clicked()
 void Dialog_inteditor::on_pushButton_save_std_clicked()
 {
     this->save_workout();
+    ui->pushButton_copy_std->setEnabled(true);
+    ui->pushButton_delete_std->setEnabled(true);
 }
 
 void Dialog_inteditor::on_pushButton_copy_std_clicked()
