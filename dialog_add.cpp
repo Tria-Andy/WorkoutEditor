@@ -124,16 +124,15 @@ void Dialog_add::on_comboBox_sport_currentTextChanged(const QString &sport)
 
 void Dialog_add::on_pushButton_workouts_clicked()
 {
-    std_workouts = new Dialog_workouts(this,ui->comboBox_sport->currentText(),stdWorkouts);
-    std_workouts->setModal(true);
-    int returnCode = std_workouts->exec();
+    Dialog_workouts std_workouts(this,ui->comboBox_sport->currentText(),stdWorkouts);
+    std_workouts.setModal(true);
+    int returnCode = std_workouts.exec();
     if(returnCode == QDialog::Accepted)
     {
-        ui->comboBox_wcode->setCurrentText(std_workouts->get_workout_code());
-        ui->lineEdit_wtitle->setText(std_workouts->get_workout_title());
-        ui->timeEdit_duration->setTime(std_workouts->get_workout_duration());
-        ui->doubleSpinBox_dist->setValue(std_workouts->get_workout_distance());
-        ui->spinBox_stress_score->setValue(std_workouts->get_workout_stress());
+        ui->comboBox_wcode->setCurrentText(std_workouts.get_workout_code());
+        ui->lineEdit_wtitle->setText(std_workouts.get_workout_title());
+        ui->timeEdit_duration->setTime(std_workouts.get_workout_duration());
+        ui->doubleSpinBox_dist->setValue(std_workouts.get_workout_distance());
+        ui->spinBox_stress_score->setValue(std_workouts.get_workout_stress());
     }
-    delete std_workouts;
 }

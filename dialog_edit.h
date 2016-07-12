@@ -23,7 +23,6 @@ private:
     schedule *workSched;
     settings *edit_settings;
     standardWorkouts *std_workouts;
-    Dialog_workouts *stdWorkouts;
     QStandardItemModel *workout_model;
     QModelIndex curr_index;
     QList<QStandardItem*> list;

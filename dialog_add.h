@@ -23,7 +23,6 @@ private:
     standardWorkouts *stdWorkouts;
     schedule *workSched;
     workout *curr_workout;
-    Dialog_workouts *std_workouts;
     QDate *current_date;
     QDate workout_date;
     QString w_date;

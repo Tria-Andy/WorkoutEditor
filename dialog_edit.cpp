@@ -130,19 +130,17 @@ void Dialog_edit::on_timeEdit_duration_timeChanged(const QTime &time)
 
 void Dialog_edit::on_pushButton_clicked()
 {
-    stdWorkouts = new Dialog_workouts(this,ui->lineEdit_sport->text(),std_workouts);
-    stdWorkouts->setModal(true);
-    int returnCode = stdWorkouts->exec();
+    Dialog_workouts stdWorkouts(this,ui->lineEdit_sport->text(),std_workouts);
+    stdWorkouts.setModal(true);
+    int returnCode = stdWorkouts.exec();
     if(returnCode == QDialog::Accepted)
     {
-        ui->comboBox_wcode->setCurrentText(stdWorkouts->get_workout_code());
-        ui->lineEdit_wtitle->setText(stdWorkouts->get_workout_title());
-        ui->timeEdit_duration->setTime(stdWorkouts->get_workout_duration());
-        ui->doubleSpinBox_distance->setValue(stdWorkouts->get_workout_distance());
-        ui->spinBox_stress->setValue(stdWorkouts->get_workout_stress());
+        ui->comboBox_wcode->setCurrentText(stdWorkouts.get_workout_code());
+        ui->lineEdit_wtitle->setText(stdWorkouts.get_workout_title());
+        ui->timeEdit_duration->setTime(stdWorkouts.get_workout_duration());
+        ui->doubleSpinBox_distance->setValue(stdWorkouts.get_workout_distance());
+        ui->spinBox_stress->setValue(stdWorkouts.get_workout_stress());
     }
-
-    delete stdWorkouts;
 }
 
 void Dialog_edit::on_dateEdit_edit_date_dateChanged(const QDate &date)
