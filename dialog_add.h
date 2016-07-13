@@ -40,20 +40,15 @@ public:
 
 private slots:
 
-    void set_workout_date();
-    void set_workout_time();
-    void set_workout_calweek();
-    void set_workout_duration();
-    void set_workout_distance();
-    void set_workout_stress();
-
     void on_pushButton_cancel_clicked();
     void on_pushButton_add_clicked();
     void on_doubleSpinBox_dist_valueChanged(double arg1);
     void on_timeEdit_duration_timeChanged(const QTime &time);
     void on_comboBox_sport_currentTextChanged(const QString &arg1);
-
     void on_pushButton_workouts_clicked();
+    void on_dateEdit_wdate_dateChanged(const QDate &date);
+    void on_timeEdit_time_timeChanged(const QTime &time);
+    void on_spinBox_stress_score_valueChanged(int arg1);
 
 private:
     Ui::Dialog_add *ui;
