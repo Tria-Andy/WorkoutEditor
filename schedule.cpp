@@ -234,7 +234,6 @@ void schedule::read_workout_values(QDomDocument workouts)
 
 void schedule::copyWeek()
 {
-    copyworkout = new workout();
     QModelIndex index;
     QList<QStandardItem*> fromList,toList;
     QString fromWeek,toWeek,fromYear,toYear,workdate;
@@ -268,7 +267,7 @@ void schedule::copyWeek()
     {
         for(int i = 0; i < toList.count(); ++i)
         {
-            copyworkout->delete_workout(workout_schedule->indexFromItem(toList.at(i)),workout_schedule);
+            this->delete_workout(workout_schedule->indexFromItem(toList.at(i)));
         }
     }
 
@@ -276,19 +275,18 @@ void schedule::copyWeek()
     {
         index = workout_schedule->indexFromItem(fromList.at(i));
         workdate = workout_schedule->item(index.row(),1)->text();
-        copyworkout->set_workout_calweek(copyTo);
-        copyworkout->set_workout_date(workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy"));
-        copyworkout->set_workout_time(workout_schedule->item(index.row(),2)->text());
-        copyworkout->set_workout_sport(workout_schedule->item(index.row(),3)->text());
-        copyworkout->set_workout_code(workout_schedule->item(index.row(),4)->text());
-        copyworkout->set_workout_title(workout_schedule->item(index.row(),5)->text());
-        copyworkout->set_workout_duration(workout_schedule->item(index.row(),6)->text());
-        copyworkout->set_workout_distance(workout_schedule->item(index.row(),7)->text().toDouble());
-        copyworkout->set_workout_stress(workout_schedule->item(index.row(),8)->text().toInt());
-        copyworkout->add_workout(workout_schedule);
-    }
 
-    delete copyworkout;
+        workout_calweek = copyTo;
+        workout_date = workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy");
+        workout_time = workout_schedule->item(index.row(),2)->text();
+        workout_sport = workout_schedule->item(index.row(),3)->text();
+        workout_title = workout_schedule->item(index.row(),5)->text();
+        workout_duration = workout_schedule->item(index.row(),6)->text();
+        workout_distance = workout_schedule->item(index.row(),7)->text().toDouble();
+        workout_stress_score = workout_schedule->item(index.row(),8)->text().toInt();
+
+        this->add_workout();
+    }
 }
 
 
@@ -325,4 +323,38 @@ void schedule::changeYear()
             week_content->setData(week_content->index(week,1,QModelIndex()),weekid);
         }
     }
+}
+
+void schedule::add_workout()
+{
+    int row = workout_schedule->rowCount();
+
+    workout_schedule->insertRows(row,1,QModelIndex());
+    workout_schedule->setData(workout_schedule->index(row,0,QModelIndex()),workout_calweek);
+    workout_schedule->setData(workout_schedule->index(row,1,QModelIndex()),workout_date);
+    workout_schedule->setData(workout_schedule->index(row,2,QModelIndex()),workout_time);
+    workout_schedule->setData(workout_schedule->index(row,3,QModelIndex()),workout_sport);
+    workout_schedule->setData(workout_schedule->index(row,4,QModelIndex()),workout_code);
+    workout_schedule->setData(workout_schedule->index(row,5,QModelIndex()),workout_title);
+    workout_schedule->setData(workout_schedule->index(row,6,QModelIndex()),workout_duration);
+    workout_schedule->setData(workout_schedule->index(row,7,QModelIndex()),QString::number(workout_distance));
+    workout_schedule->setData(workout_schedule->index(row,8,QModelIndex()),workout_stress_score);
+}
+
+void schedule::edit_workout(QModelIndex index)
+{
+    workout_schedule->setData(workout_schedule->index(index.row(),0,QModelIndex()),workout_calweek);
+    workout_schedule->setData(workout_schedule->index(index.row(),1,QModelIndex()),workout_date);
+    workout_schedule->setData(workout_schedule->index(index.row(),2,QModelIndex()),workout_time);
+    workout_schedule->setData(workout_schedule->index(index.row(),3,QModelIndex()),workout_sport);
+    workout_schedule->setData(workout_schedule->index(index.row(),4,QModelIndex()),workout_code);
+    workout_schedule->setData(workout_schedule->index(index.row(),5,QModelIndex()),workout_title);
+    workout_schedule->setData(workout_schedule->index(index.row(),6,QModelIndex()),workout_duration);
+    workout_schedule->setData(workout_schedule->index(index.row(),7,QModelIndex()),QString::number(workout_distance));
+    workout_schedule->setData(workout_schedule->index(index.row(),8,QModelIndex()),workout_stress_score);
+}
+
+void schedule::delete_workout(QModelIndex index)
+{
+    workout_schedule->removeRow(index.row(),QModelIndex());
 }

@@ -2,13 +2,12 @@
 #include "dialog_add.h"
 #include "ui_dialog_add.h"
 
-Dialog_add::Dialog_add(QWidget *parent,schedule *p_sched,workout *p_workout,settings *p_settings,standardWorkouts *p_stdWorkout) :
+Dialog_add::Dialog_add(QWidget *parent,schedule *p_sched,settings *p_settings,standardWorkouts *p_stdWorkout) :
     QDialog(parent),
     ui(new Ui::Dialog_add)
 {
     ui->setupUi(this);
     workSched = p_sched;
-    curr_workout = p_workout;
     add_settings = p_settings;
     stdWorkouts = p_stdWorkout;
     current_date = new QDate();
@@ -42,15 +41,15 @@ void Dialog_add::on_pushButton_cancel_clicked()
 
 void Dialog_add::on_pushButton_add_clicked()
 {
-    curr_workout->set_workout_date(w_date);
-    curr_workout->set_workout_time(w_time);
-    curr_workout->set_workout_calweek(w_cal_week);
-    curr_workout->set_workout_sport(ui->comboBox_sport->currentText());
-    curr_workout->set_workout_code(ui->comboBox_wcode->currentText());
-    curr_workout->set_workout_title(ui->lineEdit_wtitle->text());
-    curr_workout->set_workout_duration(w_duration);
-    curr_workout->set_workout_distance(w_distance);
-    curr_workout->set_workout_stress(w_stress);
+    workSched->set_workout_date(w_date);
+    workSched->set_workout_time(w_time);
+    workSched->set_workout_calweek(w_cal_week);
+    workSched->set_workout_sport(ui->comboBox_sport->currentText());
+    workSched->set_workout_code(ui->comboBox_wcode->currentText());
+    workSched->set_workout_title(ui->lineEdit_wtitle->text());
+    workSched->set_workout_duration(w_duration);
+    workSched->set_workout_distance(w_distance);
+    workSched->set_workout_stress(w_stress);
 
     accept();
 }

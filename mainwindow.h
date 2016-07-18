@@ -12,7 +12,6 @@
 #include "del_spinbox_double.h"
 #include "del_spinbox_int.h"
 #include "schedule.h"
-#include "workout.h"
 #include "dialog_add.h"
 #include "dialog_addweek.h"
 #include "dialog_version.h"
@@ -42,7 +41,6 @@ private:
     Ui::MainWindow *ui;
 
     schedule *workSchedule;
-    workout *curr_workout;
     Activity *curr_activity;
     settings *editorSettings;
     standardWorkouts *stdWorkout;

@@ -4,7 +4,6 @@
 #include <QtGui>
 #include <QDialog>
 #include <QTimeEdit>
-#include "workout.h"
 #include "schedule.h"
 #include "dialog_workouts.h"
 #include "settings.h"
@@ -22,7 +21,6 @@ private:
     settings *add_settings;
     standardWorkouts *stdWorkouts;
     schedule *workSched;
-    workout *curr_workout;
     QDate *current_date;
     QDate workout_date;
     QString w_date;
@@ -35,7 +33,7 @@ private:
 
     QString get_weekPhase(QDate);
 public:
-    explicit Dialog_add(QWidget *parent = 0,schedule *p_sched = 0, workout *p_workout = 0, settings *p_settings = 0, standardWorkouts *p_stdworkouts = 0);
+    explicit Dialog_add(QWidget *parent = 0,schedule *p_sched = 0, settings *p_settings = 0, standardWorkouts *p_stdworkouts = 0);
     ~Dialog_add();
 
 private slots:

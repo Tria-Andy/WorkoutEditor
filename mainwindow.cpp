@@ -491,17 +491,15 @@ void MainWindow::on_actionNew_triggered()
 
     if(isWeekMode)
     {
-        curr_workout = new workout();
-        Dialog_add new_workout(this,workSchedule,curr_workout,editorSettings,stdWorkout);
+        Dialog_add new_workout(this,workSchedule,editorSettings,stdWorkout);
         new_workout.setModal(true);
         dialog_code = new_workout.exec();
 
         if(dialog_code == QDialog::Accepted)
         {
-            curr_workout->add_workout(workSchedule->workout_schedule);
+            workSchedule->add_workout();
             this->refresh_model();
         }
-        //delete curr_workout;
     }
 }
 
@@ -555,29 +553,26 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
     {
         if(index.column() != 0)
         {
-            curr_workout = new workout();
-
             QString getdate = calendar_model->data(index,Qt::DisplayRole).toString().left(9);
             QDate selectDate = QDate::fromString(getdate,"dd MMM yy").addYears(100);
-            day_popup day_pop(this,selectDate,workSchedule,curr_workout,editorSettings);
+            day_popup day_pop(this,selectDate,workSchedule,editorSettings);
             day_pop.setModal(true);
             dialog_code = day_pop.exec();
 
             if(dialog_code == QDialog::Accepted)
             {
 
-              Dialog_edit edit_workout(this,selectDate,workSchedule,curr_workout,editorSettings,stdWorkout);
+              Dialog_edit edit_workout(this,selectDate,workSchedule,editorSettings,stdWorkout);
               edit_workout.setModal(true);
               dialog_code = edit_workout.exec();
               if(dialog_code == QDialog::Accepted)
               {
-                  if(edit_workout.get_result() == 1) curr_workout->edit_workout(edit_workout.get_edit_index(),workSchedule->workout_schedule);
-                  if(edit_workout.get_result() == 2) curr_workout->add_workout(workSchedule->workout_schedule);
-                  if(edit_workout.get_result() == 3) curr_workout->delete_workout(edit_workout.get_edit_index(),workSchedule->workout_schedule);
+                  if(edit_workout.get_result() == 1) workSchedule->edit_workout(edit_workout.get_edit_index());
+                  if(edit_workout.get_result() == 2) workSchedule->add_workout();
+                  if(edit_workout.get_result() == 3) workSchedule->delete_workout(edit_workout.get_edit_index());
                   this->refresh_model();
               }
             }
-            //delete curr_workout;
         }
         else
         {
