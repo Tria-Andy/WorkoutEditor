@@ -12,9 +12,8 @@ Dialog_export::Dialog_export(QWidget *parent,QStandardItemModel *w_model,setting
     QModelIndex index;
     workout_model = w_model;
     export_settings = p_settings;
-    current_date = new QDate();
-    ui->dateEdit_export->setDate(current_date->currentDate());
-    workout_time = workout_model->findItems(current_date->currentDate().toString("dd.MM.yyyy"),Qt::MatchExactly,1);
+    ui->dateEdit_export->setDate(QDate().currentDate());
+    workout_time = workout_model->findItems(QDate().currentDate().toString("dd.MM.yyyy"),Qt::MatchExactly,1);
     workout_model->sort(0);
     QSet<QString> uniqueWeek;
     for(int i = 0; i < workout_model->rowCount();++i)
@@ -36,7 +35,6 @@ Dialog_export::Dialog_export(QWidget *parent,QStandardItemModel *w_model,setting
 
 Dialog_export::~Dialog_export()
 {
-    delete current_date;
     delete ui;
 }
 

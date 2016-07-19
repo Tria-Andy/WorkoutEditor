@@ -57,8 +57,6 @@ Dialog_inteditor::Dialog_inteditor(QWidget *parent, settings *p_setting,standard
 Dialog_inteditor::~Dialog_inteditor()
 {
     delete ui;
-    delete [] powerfactor;
-    delete plot_model;
 }
 
 void Dialog_inteditor::init_model()
@@ -704,6 +702,8 @@ void Dialog_inteditor::clearIntTree()
 void Dialog_inteditor::on_pushButton_close_clicked()
 {
     this->clearIntTree();
+    delete [] powerfactor;
+    delete plot_model;
     reject();
 }
 

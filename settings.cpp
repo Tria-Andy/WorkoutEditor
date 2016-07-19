@@ -126,11 +126,17 @@ void settings::loadSettings()
     isAlt = sportList.at(4);
     isTria = sportList.at(5);
     isOther = sportList.at(6);
+
+    delete mysettings;
+    delete myvalues;
+
     }
     else
     {
 
     }
+
+
 }
 void settings::writeSettings(QString selection, QStringList plist, QStringList p_paceList,QStringList p_hfList)
 {    
@@ -229,6 +235,8 @@ void settings::saveSettings()
     myvalues->beginGroup("IntEditor");
         myvalues->setValue("parts",this->setSettingString(intPlanList));
     myvalues->endGroup();
+
+    delete myvalues;
 }
 
 QStringList settings::get_int_header()

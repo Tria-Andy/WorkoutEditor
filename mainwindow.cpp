@@ -64,18 +64,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    //delete [] work_sum;
-    //delete [] dur_sum;
-    //delete [] dist_sum;
-    //delete [] stress_sum;
+    delete ui;
+}
+
+void MainWindow::freeMem()
+{
+    delete [] work_sum;
+    delete [] dur_sum;
+    delete [] dist_sum;
+    delete [] stress_sum;
     calendar_model->clear();
     delete stdWorkout;
     delete workSchedule;
     delete sum_model;
     delete calendar_model;
     delete editorSettings;
-
-    delete ui;
 }
 
 void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
@@ -990,12 +993,14 @@ void MainWindow::on_actionPlaner_triggered()
 
 void MainWindow::on_actionExit_triggered()
 {
+    this->freeMem();
     close();
 }
 
 void MainWindow::on_actionExit_and_Save_triggered()
 {
     workSchedule->save_workout_file();
+    this->freeMem();
 }
 
 void MainWindow::on_actionSelect_File_triggered()

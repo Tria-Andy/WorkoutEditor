@@ -86,6 +86,8 @@ private:
     void set_menuItems(bool,bool);
     void reset_jsontext();
 
+    void freeMem();
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();

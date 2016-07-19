@@ -36,7 +36,6 @@ private slots:
 private:
     Ui::Dialog_export *ui;
     settings *export_settings;
-    QDate *current_date;
     QStandardItemModel *workout_model;
     QList<QStandardItem*> workout_time;
     QStringList weeks;

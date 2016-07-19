@@ -36,12 +36,13 @@ Dialog_settings::Dialog_settings(QWidget *parent, settings *p_settings) :
 Dialog_settings::~Dialog_settings()
 {
     delete ui;
-    delete level_model;
-    delete hf_model;
+
 }
 
 void Dialog_settings::on_pushButton_cancel_clicked()
 {
+    delete level_model;
+    delete hf_model;
     reject();
 }
 

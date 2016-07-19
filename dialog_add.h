@@ -21,7 +21,6 @@ private:
     settings *add_settings;
     standardWorkouts *stdWorkouts;
     schedule *workSched;
-    QDate *current_date;
     QDate workout_date;
     QString w_date;
     QString w_time;

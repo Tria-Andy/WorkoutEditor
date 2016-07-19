@@ -237,7 +237,7 @@ void schedule::copyWeek()
     QModelIndex index;
     QList<QStandardItem*> fromList,toList;
     QString fromWeek,toWeek,fromYear,toYear,workdate;
-    int fromWeek_int,fromYear_int,toWeek_int,toYear_int,addfactor;
+    int fromWeek_int,fromYear_int,toWeek_int,toYear_int,addfactor = 0;
     int days = 7;
     fromWeek = copyFrom.split("_").first();
     fromYear = copyFrom.split("_").last();

@@ -10,8 +10,7 @@ Dialog_add::Dialog_add(QWidget *parent,schedule *p_sched,settings *p_settings,st
     workSched = p_sched;
     add_settings = p_settings;
     stdWorkouts = p_stdWorkout;
-    current_date = new QDate();
-    workout_date = current_date->currentDate();
+    workout_date = QDate().currentDate();
 
     w_date = workout_date.toString("dd.MM.yyyy");
     w_time = ui->timeEdit_time->time().toString("hh:mm");
@@ -30,7 +29,6 @@ Dialog_add::Dialog_add(QWidget *parent,schedule *p_sched,settings *p_settings,st
 
 Dialog_add::~Dialog_add()
 {
-    delete current_date;
     delete ui;
 }
 
