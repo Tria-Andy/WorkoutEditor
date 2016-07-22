@@ -784,6 +784,7 @@ void Dialog_inteditor::on_treeWidget_planer_itemClicked(QTreeWidgetItem *item, i
 void Dialog_inteditor::on_pushButton_addtop_clicked()
 {
     this->add_topItem(ui->comboBox_topitem->currentText());
+    ui->comboBox_reps->setCurrentIndex(0);
 }
 
 void Dialog_inteditor::on_pushButton_save_std_clicked()
