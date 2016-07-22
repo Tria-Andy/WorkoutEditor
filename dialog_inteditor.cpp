@@ -49,9 +49,6 @@ Dialog_inteditor::Dialog_inteditor(QWidget *parent, settings *p_setting,standard
     ui->pushButton_copy_std->setEnabled(false);
     ui->pushButton_delete_std->setEnabled(false);
     this->set_pushbutton(false);
-    //ui->tableView_steps->setModel(stdWorkouts->workouts_steps);
-    //connect(ui->treeWidget_planer, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),this, SLOT(refresh_model()));
-
 }
 
 Dialog_inteditor::~Dialog_inteditor()
@@ -200,7 +197,6 @@ QString Dialog_inteditor::calc_threshold(double percent)
             ui->label_thresValue->setText(QString::number(threshold_power * (percent/100)));
             thresValue = QString::number(threshold_power * (percent/100));
             current_pace = static_cast<int>(round(3600/(((3600/threshold_pace)*0.7) + (speedfactor * (percent/100.0)))));
-            //current_pace = static_cast<int>(round(threshold_pace / (percent/100.0)));
         }
         if(current_sport == pop_settings->isRun)
         {
@@ -356,7 +352,6 @@ void Dialog_inteditor::open_stdWorkout(QString workID)
 
     for(int i = 0; i < workout.count();++i)
     {
-
         valueList = QStringList();
         index = step_model->indexFromItem(workout.at(i));
 
@@ -421,7 +416,6 @@ void Dialog_inteditor::set_plot_model()
                 {
                     for(int c_childs = 0; c_childs < childCount ; ++c_childs)
                     {
-
                         subchildCount = ui->treeWidget_planer->topLevelItem(c_item)->child(c_childs)->childCount();
                         subphase = ui->treeWidget_planer->topLevelItem(c_item)->child(c_childs)->data(0,Qt::DisplayRole).toString();
 
@@ -437,7 +431,6 @@ void Dialog_inteditor::set_plot_model()
                                         this->add_to_plot(ui->treeWidget_planer->topLevelItem(c_item)->child(c_childs)->child(c_subchilds));
                                     }
                                 }
-
                             }
                         }
                         else
@@ -458,7 +451,6 @@ void Dialog_inteditor::set_plot_model()
                     {
                         this->add_to_plot(ui->treeWidget_planer->topLevelItem(c_item)->child(c_childs));
                     }
-
                 }
             }
         }
