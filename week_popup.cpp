@@ -42,70 +42,114 @@ void week_popup::set_plotModel()
 void week_popup::set_weekInfos()
 {
     int size = 8;
-    QVector<double> x(size),y_stress(size),y_dura(size);
-    QVector<double> ticks;
-    QVector<QString> x_labels(size);
-    ticks << 0 << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8;
+    QVector<double> stress(size),dura(size);;
+    double v_stress,v_dura,max_stress = 0.0,max_dura = 0.0;;
+    QLineSeries *stressLine = new QLineSeries();
+    QBarSet *duraBar = new QBarSet("Duration");
+    QBarSeries *duraBars = new QBarSeries();
+    QBarCategoryAxis *axisX = new QBarCategoryAxis();
+    QStringList axisValues;
+    QMargins chartMargins(5,5,5,5);
+    chart = new QChart();
+    QList<QDateTime> workDateList;
+    qreal stressY;
     QString v_date1,v_date2;
+    QValueAxis *yStress,*yDura;
     QDateTime workDate;
-    double v_stress,v_dura, max_stress = 0.0, max_dura = 0.0;
+    QPen linePen;
+    linePen.setColor(QColor(Qt::green));
+    linePen.setWidth(2);
 
     for(int i = 0,day = 0; i < plotmodel->rowCount(); ++i)
     {
         v_date1 = plotmodel->data(plotmodel->index(i,0,QModelIndex())).toDateTime().toString("dd.MM.yyyy");
         v_stress = plotmodel->data(plotmodel->index(i,1,QModelIndex())).toDouble();
         v_dura = plotmodel->data(plotmodel->index(i,2,QModelIndex())).toDouble() / 60.0;
+        v_dura = pop_settings->set_doubleValue(v_dura);
+
         workDate = QDateTime::fromString(v_date1,"dd.MM.yyyy");
-            if(i != 0)
+        if(i != 0)
+        {
+            v_date2 = plotmodel->data(plotmodel->index(i-1,0,QModelIndex())).toDateTime().toString("dd.MM.yyyy");
+            if(v_date1 == v_date2)
             {
-                v_date2 = plotmodel->data(plotmodel->index(i-1,0,QModelIndex())).toDateTime().toString("dd.MM.yyyy");
-                if(v_date1 == v_date2)
-                {
-                    y_stress[day] = y_stress[day] + v_stress;
-                    y_dura[day] = y_dura[day] + v_dura;
-                }
-                else
-                {
-                    ++day;
-                    y_stress[day] = v_stress;
-                    y_dura[day] = v_dura;
-                }
+                stress[day] = stress[day] + v_stress;
+                dura[day] = dura[day] + v_dura;
             }
             else
             {
-                y_stress[day] = v_stress;
-                y_dura[day] = v_dura;
+                ++day;
+                stress[day] = v_stress;
+                dura[day] = v_dura;
+                workDateList.append(workDate);
             }
-            x[day] = day;
-            x_labels[day] = workDate.toString("dd.MM.");
-            if(max_stress < y_stress[day]) max_stress = y_stress[day];
-            if(max_dura < y_dura[day]) max_dura = y_dura[day];
+        }
+        else
+        {
+            stress[day] = v_stress;
+            dura[day] = v_dura;
+            workDateList.append(workDate);
+        }
+        if(max_stress < stress[day]) max_stress = stress[day];
+        if(max_dura < dura[day]) max_dura = dura[day];
     }
-    ui->widget_plot->xAxis->setAutoTicks(false);
-    ui->widget_plot->xAxis->setAutoTickLabels(false);
-    ui->widget_plot->xAxis->setTickVector(ticks);
-    ui->widget_plot->xAxis->setTickVectorLabels(x_labels);
-    ui->widget_plot->xAxis->setLabel("Date");
-    ui->widget_plot->xAxis->setRange(-1,7);
 
-    ui->widget_plot->yAxis->setLabel("Stress Score");
-    ui->widget_plot->yAxis->setRange(0,max_stress + 20.0);
+    for(int i = 0; i < size-1; ++i)
+    {
+        axisValues << workDateList.at(i).toString("dd.MM");
+        stressY = stress[i];
+        duraBar->append(dura[i]);
+        stressLine->append(i,stressY);
+    }
 
-    QCPGraph *stress = ui->widget_plot->addGraph();
-    stress->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssStar));
-    stress->setData(x,y_stress);
-    stress->setPen(QPen(Qt::red));
-    stress->setBrush(QColor(255,0,0,60));
+    duraBar->setPen(QPen(Qt::blue));
+    duraBar->setBrush(QColor(0, 0, 255, 120));
+    duraBars->setLabelsFormat("@value");
+    duraBars->setLabelsVisible(true);
+    duraBars->append(duraBar);
 
-    QCPBars *duration = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis2);
-    ui->widget_plot->addPlottable(duration);
-    ui->widget_plot->yAxis2->setLabel("Duration");
-    ui->widget_plot->yAxis2->setRange(0,max_dura + 0.5);
-    ui->widget_plot->yAxis2->setVisible(true);
-    duration->setWidth(4/(double)x.size());
-    duration->setData(x,y_dura);
-    duration->setPen(QPen(Qt::blue));
-    duration->setBrush(QColor(0, 0, 255, 120));
+    stressLine->setPointLabelsVisible(true);
+    stressLine->setPointLabelsClipping(false);
+    stressLine->setPointLabelsFormat("@yPoint");
+    stressLine->setPointLabelsColor(QColor(Qt::darkRed));
+    stressLine->setPointsVisible(true);
+    stressLine->setPen(linePen);
+
+    chartview = new QChartView(chart);
+    chartview->setRenderHint(QPainter::Antialiasing);
+    ui->verticalLayout_plot->addWidget(chartview);
+    chart->addSeries(duraBars);
+    chart->addSeries(stressLine);
+
+    axisX->append(axisValues);
+    axisX->setTitleText("Week");
+    axisX->setTitleVisible(true);
+
+    yStress = new QValueAxis;
+    yStress->setTitleText("Stress");
+    yStress->setTitleVisible(true);
+    yStress->setRange(0,max_stress);
+    yStress->setTickCount(10);
+    yStress->applyNiceNumbers();
+
+    yDura = new QValueAxis;
+    yDura->setTitleText("Duration");
+    yDura->setTitleVisible(true);
+    yDura->setRange(0,max_dura);
+    yDura->setTickCount(10);
+    yDura->applyNiceNumbers();
+
+    chart->addAxis(yStress,Qt::AlignLeft);
+    chart->addAxis(yDura,Qt::AlignRight);
+    stressLine->attachAxis(yStress);
+    duraBars->attachAxis(yDura);
+    chart->setAxisX(axisX,duraBars);
+    chart->setAxisX(axisX,stressLine);
+    axisX->setRange(workDateList.first().addDays(-1).toString("dd.MM"),workDateList.last().addDays(1).toString("dd.MM"));
+    chart->setMargins(chartMargins);
+    chart->setBackgroundRoundness(5);
+    chart->setDropShadowEnabled(true);
+    chart->legend()->hide();
 }
 
 void week_popup::on_pushButton_clicked()

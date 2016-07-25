@@ -3,8 +3,11 @@
 
 #include <QDialog>
 #include <QStandardItemModel>
+#include <QtCharts>
 #include "schedule.h"
 #include "settings.h"
+
+QT_CHARTS_USE_NAMESPACE
 
 namespace Ui {
 class week_popup;
@@ -29,6 +32,10 @@ private:
     QStandardItemModel *plotmodel;
     settings *pop_settings;
     schedule *workSched;
+
+    QChartView *chartview;
+    QChart *chart;
+
     void set_plotModel();
     void set_weekInfos();
 };
