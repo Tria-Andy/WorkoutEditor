@@ -645,6 +645,7 @@ void Activity::set_edit_samp_model()
 {
     edit_samp_model = new QStandardItemModel(samp_model->rowCount(),5);
       new_dist = new double[samp_model->rowCount()];
+      calc_dist.resize(samp_model->rowCount());
       double msec = 0.0;
       int cadence,int_start,int_stop;
       double overall = 0.0;
