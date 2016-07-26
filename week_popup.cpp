@@ -18,6 +18,19 @@ week_popup::~week_popup()
     delete ui;
 }
 
+void week_popup::freeMem()
+{
+    delete weekchart;
+    delete yStress;
+    delete yDura;
+    delete axisX;
+    delete stressLine;
+    delete duraBar;
+    delete duraBars;
+    delete chartview;
+    delete plotmodel;
+}
+
 void week_popup::set_plotModel()
 {
     QModelIndex index;
@@ -43,22 +56,24 @@ void week_popup::set_weekInfos()
 {
     int size = 8;
     QVector<double> stress(size),dura(size);;
-    double v_stress,v_dura,max_stress = 0.0,max_dura = 0.0;;
-    QLineSeries *stressLine = new QLineSeries();
-    QBarSet *duraBar = new QBarSet("Duration");
-    QBarSeries *duraBars = new QBarSeries();
-    QBarCategoryAxis *axisX = new QBarCategoryAxis();
+    double v_stress,v_dura,max_stress = 0.0,max_dura = 0.0;
+    weekchart = new QChart();
+    chartview = new QChartView(weekchart);
+    chartview->setRenderHint(QPainter::Antialiasing);
+    ui->verticalLayout_plot->addWidget(chartview);
+
+    stressLine = workSched->get_qLineSeries(true);
+    duraBar = new QBarSet("Duration");
+    duraBars = new QBarSeries();
+    axisX = new QBarCategoryAxis();
+
     QStringList axisValues;
     QMargins chartMargins(5,5,5,5);
-    chart = new QChart();
+
     QList<QDateTime> workDateList;
     qreal stressY;
     QString v_date1,v_date2;
-    QValueAxis *yStress,*yDura;
     QDateTime workDate;
-    QPen linePen;
-    linePen.setColor(QColor(Qt::green));
-    linePen.setWidth(2);
 
     for(int i = 0,day = 0; i < plotmodel->rowCount(); ++i)
     {
@@ -104,62 +119,42 @@ void week_popup::set_weekInfos()
 
     duraBar->setPen(QPen(Qt::blue));
     duraBar->setBrush(QColor(0, 0, 255, 120));
+
     duraBars->setLabelsFormat("@value");
     duraBars->setLabelsVisible(true);
     duraBars->append(duraBar);
 
-    stressLine->setPointLabelsVisible(true);
-    stressLine->setPointLabelsClipping(false);
-    stressLine->setPointLabelsFormat("@yPoint");
-    stressLine->setPointLabelsColor(QColor(Qt::darkRed));
-    stressLine->setPointsVisible(true);
-    stressLine->setPen(linePen);
-
-    chartview = new QChartView(chart);
-    chartview->setRenderHint(QPainter::Antialiasing);
-    ui->verticalLayout_plot->addWidget(chartview);
-    chart->addSeries(duraBars);
-    chart->addSeries(stressLine);
+    weekchart->addSeries(duraBars);
+    weekchart->addSeries(stressLine);
 
     axisX->append(axisValues);
     axisX->setTitleText("Week");
     axisX->setTitleVisible(true);
 
-    yStress = new QValueAxis;
-    yStress->setTitleText("Stress");
-    yStress->setTitleVisible(true);
-    yStress->setRange(0,max_stress);
-    yStress->setTickCount(10);
-    yStress->applyNiceNumbers();
-
-    yDura = new QValueAxis;
-    yDura->setTitleText("Duration");
-    yDura->setTitleVisible(true);
-    yDura->setRange(0,max_dura);
-    yDura->setTickCount(10);
-    yDura->applyNiceNumbers();
-
-    chart->addAxis(yStress,Qt::AlignLeft);
-    chart->addAxis(yDura,Qt::AlignRight);
+    yStress = workSched->get_qValueAxis("Stress",true,max_stress,10);
+    weekchart->addAxis(yStress,Qt::AlignLeft);
     stressLine->attachAxis(yStress);
-    duraBars->attachAxis(yDura);
-    chart->setAxisX(axisX,duraBars);
-    chart->setAxisX(axisX,stressLine);
-    axisX->setRange(workDateList.first().addDays(-1).toString("dd.MM"),workDateList.last().addDays(1).toString("dd.MM"));
-    chart->setMargins(chartMargins);
-    chart->setBackgroundRoundness(5);
-    chart->setDropShadowEnabled(true);
-    chart->legend()->hide();
+    weekchart->setAxisX(axisX,stressLine);
+
+    yDura = workSched->get_qValueAxis("Duration",true,max_dura,10);
+    weekchart->addAxis(yDura,Qt::AlignRight);
+    duraBars->attachAxis(yDura);  
+    weekchart->setAxisX(axisX,duraBars);
+
+    weekchart->setMargins(chartMargins);
+    weekchart->setBackgroundRoundness(5);
+    weekchart->setDropShadowEnabled(true);
+    weekchart->legend()->hide();
 }
 
 void week_popup::on_pushButton_clicked()
 {
-    delete plotmodel;
+    this->freeMem();
     reject();
 }
 
 void week_popup::on_pushButton_2_clicked()
 {
-    delete plotmodel;
+    this->freeMem();
     accept();
 }

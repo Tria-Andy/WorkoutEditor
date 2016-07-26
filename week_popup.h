@@ -33,11 +33,19 @@ private:
     settings *pop_settings;
     schedule *workSched;
 
+    QChart *weekchart;
     QChartView *chartview;
-    QChart *chart;
+    QValueAxis *yStress,*yDura;
+    QBarCategoryAxis *axisX;
+    QLineSeries *stressLine;
+    QBarSet *duraBar;
+    QBarSeries *duraBars;
+
 
     void set_plotModel();
     void set_weekInfos();
+
+    void freeMem();
 };
 
 #endif // WEEK_POPUP_H

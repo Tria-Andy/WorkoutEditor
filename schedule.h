@@ -3,8 +3,11 @@
 
 #include <QStandardItemModel>
 #include <QtXml>
+#include <QtCharts>
 #include <QMessageBox>
 #include "settings.h"
+
+QT_CHARTS_USE_NAMESPACE
 
 class schedule
 {
@@ -43,6 +46,12 @@ public:
     void add_workout();
     void edit_workout(QModelIndex);
     void delete_workout(QModelIndex);
+
+//Charts Objects
+    QValueAxis* get_qValueAxis(QString,bool,double,int);
+    QLineSeries* get_qLineSeries(bool);
+    QBarSeries* get_qBarSeries();
+    QBarSet* get_qBarSet();
 
 private:
     settings *sched_settings;
