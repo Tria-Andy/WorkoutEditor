@@ -383,7 +383,6 @@ QValueAxis* schedule::get_qValueAxis(QString title,bool p_visible,double max,int
     axis->setTitleVisible(p_visible);
     axis->setRange(0,max);
     axis->setTickCount(tickcount);
-    axis->applyNiceNumbers();
 
     return axis;
 }

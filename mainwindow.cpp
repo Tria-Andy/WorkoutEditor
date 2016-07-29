@@ -69,10 +69,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::freeMem()
 {
-    delete [] work_sum;
-    delete [] dur_sum;
-    delete [] dist_sum;
-    delete [] stress_sum;
+    //delete [] work_sum;
+    //delete [] dur_sum;
+    //delete [] dist_sum;
+    //delete [] stress_sum;
     calendar_model->clear();
     delete stdWorkout;
     delete workSchedule;
