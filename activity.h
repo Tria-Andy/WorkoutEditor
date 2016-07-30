@@ -21,12 +21,13 @@ private:
     int swim_pace;
     int hf_threshold,hf_avg;
     double swim_cv,swim_sri;
-    double *p_swim_time,*new_dist;
-    QVector<double> calc_dist;
-    int *p_swim_timezone;
-    int *p_hf_timezone;
-    int *hf_zone_avg;
-    int *p_swimlaps;
+    //double *p_swim_time,*new_dist;
+    QVector<double> calc_dist,p_swim_time,new_dist;
+    QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg,p_swimlaps;
+    //int *p_swim_timezone;
+    //int *p_hf_timezone;
+    //int *hf_zone_avg;
+    //int *p_swimlaps;
 
 
     int get_int_duration(int,bool);
@@ -99,7 +100,11 @@ public:
     double get_swim_cv() {return swim_cv;}
     void set_hf_time_in_zone();
     double get_swim_track() {return swim_track;}
-    double * get_new_dist() { return new_dist;}
+    QVector<double> * get_new_dist()
+    {
+        QVector<double> *dist = &new_dist;
+        return dist;
+    }
 
 signals:
 

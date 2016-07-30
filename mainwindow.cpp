@@ -1167,11 +1167,11 @@ void MainWindow::on_actionCopy_new_Distance_triggered()
     QClipboard *clipboard = QApplication::clipboard();
     QByteArray km_array;
     QMimeData *mimeData = new QMimeData();
-    double *dist = curr_activity->get_new_dist();
+    QVector<double> *dist = curr_activity->get_new_dist();
 
     for (int i = 0; i < curr_activity->edit_samp_model->rowCount();i++)
     {
-            km_array.append(QString::number(dist[i]));
+            km_array.append(QString::number((*dist)[i]));
             km_array.append("\r\n");
     }
 

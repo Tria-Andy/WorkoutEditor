@@ -211,10 +211,10 @@ void year_popup::set_plot(int index)
         selectBars->setBarWidth((weekcount/2)/static_cast<double>(weekcount));
     }
 
-    yStress->setMax(max_stress);
+    yStress->setMax(max_stress+20);
     yStress->setTickCount(8);
     yStress->applyNiceNumbers();
-    yBars->setMax(maxValues[index]);
+    yBars->setMax(maxValues[index]+(maxValues[index]*0.05));
     yBars->setTickCount(8);
     yBars->applyNiceNumbers();
     yBars->setTitleText(selectList.at(index));

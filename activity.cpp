@@ -22,15 +22,7 @@ const QString Activity::isRun = "Run ";
 
 void Activity::act_reset()
 {
-    delete[] p_swim_time;
-    delete[] p_swim_timezone;
-    delete[] hf_zone_avg;
-    delete[] p_hf_timezone;
-    if(act_settings->get_act_isrecalc())
-    {
-        delete[] p_swimlaps;
-        delete[] new_dist;
-    }
+
 }
 
 void Activity::read_jsonFile(QString fileContent)
@@ -130,10 +122,10 @@ void Activity::read_jsonFile(QString fileContent)
 
     if(this->get_sport() == this->isSwim)
     {
-        p_swim_timezone = new int [zone_count+1];
-        p_swim_time = new double [zone_count+1];
-        p_hf_timezone = new int [zone_count];
-        hf_zone_avg = new int[zone_count];
+        p_swim_timezone.resize(zone_count+1);
+        p_swim_time.resize(zone_count+1);
+        p_hf_timezone.resize(zone_count);
+        hf_zone_avg.resize(zone_count);
         hf_avg = 0;
         move_time = 0.0;
         this->read_swim_data();
@@ -564,7 +556,7 @@ void Activity::recalculate_intervalls(bool recalc)
 
     if(this->get_sport() == this->isSwim && recalc)
     {
-        p_swimlaps = new int [edit_dist_model->rowCount()];
+        p_swimlaps.resize(edit_dist_model->rowCount());
         this->adjust_intervalls();
         for(int i = 0; i < edit_dist_model->rowCount();++i)
         {
@@ -644,7 +636,7 @@ int Activity::check_is_intervall(int row)
 void Activity::set_edit_samp_model()
 {
     edit_samp_model = new QStandardItemModel(samp_model->rowCount(),5);
-      new_dist = new double[samp_model->rowCount()];
+      new_dist.resize(samp_model->rowCount());
       calc_dist.resize(samp_model->rowCount());
       double msec = 0.0;
       int cadence,int_start,int_stop;
