@@ -16,7 +16,6 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched,settin
 week_popup::~week_popup()
 {
     delete ui;
-    delete plotmodel;
 }
 
 void week_popup::set_plotModel()
@@ -111,10 +110,12 @@ void week_popup::set_weekInfos()
 
 void week_popup::on_pushButton_clicked()
 {
+    delete plotmodel;
     reject();
 }
 
 void week_popup::on_pushButton_2_clicked()
 {
+    delete plotmodel;
     accept();
 }

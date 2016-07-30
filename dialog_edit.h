@@ -4,7 +4,6 @@
 #include <QDialog>
 #include <QStandardItemModel>
 #include "day_popup.h"
-#include "workout.h"
 #include "schedule.h"
 #include "dialog_workouts.h"
 #include "settings.h"
@@ -19,11 +18,9 @@ class Dialog_edit : public QDialog
     Q_OBJECT
 
 private:
-    workout *edit_workout;
     schedule *workSched;
     settings *edit_settings;
     standardWorkouts *std_workouts;
-    Dialog_workouts *stdWorkouts;
     QStandardItemModel *workout_model;
     QModelIndex curr_index;
     QList<QStandardItem*> list;
@@ -34,7 +31,7 @@ private:
     void set_workout_data();
 
 public:
-    explicit Dialog_edit(QWidget *parent = 0, const QDate edit_date = QDate(), schedule *p_sched = 0, workout *p_workout = 0, settings *p_setting = 0, standardWorkouts *p_stdworkouts = 0);
+    explicit Dialog_edit(QWidget *parent = 0, const QDate edit_date = QDate(), schedule *p_sched = 0, settings *p_setting = 0, standardWorkouts *p_stdworkouts = 0);
     ~Dialog_edit();
     bool delete_workout;
     void set_workout_info(const QDate &d);

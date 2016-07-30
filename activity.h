@@ -22,6 +22,7 @@ private:
     int hf_threshold,hf_avg;
     double swim_cv,swim_sri;
     double *p_swim_time,*new_dist;
+    QVector<double> calc_dist;
     int *p_swim_timezone;
     int *p_hf_timezone;
     int *hf_zone_avg;

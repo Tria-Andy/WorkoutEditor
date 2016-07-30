@@ -4,12 +4,11 @@
 #include "dialog_edit.h"
 #include "ui_dialog_edit.h"
 
-Dialog_edit::Dialog_edit(QWidget *parent, const QDate w_date, schedule *p_sched, workout *p_workout, settings *p_setting,standardWorkouts *p_stdworkout) :
+Dialog_edit::Dialog_edit(QWidget *parent, const QDate w_date, schedule *p_sched, settings *p_setting,standardWorkouts *p_stdworkout) :
     QDialog(parent),
     ui(new Ui::Dialog_edit)
 {
     ui->setupUi(this);
-    edit_workout = p_workout;
     edit_settings = p_setting;
     workSched = p_sched;
     std_workouts = p_stdworkout;
@@ -74,15 +73,15 @@ void Dialog_edit::set_edit_calweek()
 
 void Dialog_edit::set_workout_data()
 {
-    edit_workout->set_workout_date(ui->dateEdit_edit_date->date().toString("dd.MM.yyyy"));
-    edit_workout->set_workout_time(ui->timeEdit_edit_time->time().toString("hh:mm"));
-    edit_workout->set_workout_calweek(ui->lineEdit_cweek->text()+"_"+QString::number(ui->dateEdit_edit_date->date().year()));
-    edit_workout->set_workout_sport(ui->lineEdit_sport->text());
-    edit_workout->set_workout_code(ui->comboBox_wcode->currentText());
-    edit_workout->set_workout_title(ui->lineEdit_wtitle->text());
-    edit_workout->set_workout_duration(ui->timeEdit_duration->time().toString("hh:mm:ss"));
-    edit_workout->set_workout_distance(ui->doubleSpinBox_distance->value());
-    edit_workout->set_workout_stress(ui->spinBox_stress->value());
+    workSched->set_workout_date(ui->dateEdit_edit_date->date().toString("dd.MM.yyyy"));
+    workSched->set_workout_time(ui->timeEdit_edit_time->time().toString("hh:mm"));
+    workSched->set_workout_calweek(ui->lineEdit_cweek->text()+"_"+QString::number(ui->dateEdit_edit_date->date().year()));
+    workSched->set_workout_sport(ui->lineEdit_sport->text());
+    workSched->set_workout_code(ui->comboBox_wcode->currentText());
+    workSched->set_workout_title(ui->lineEdit_wtitle->text());
+    workSched->set_workout_duration(ui->timeEdit_duration->time().toString("hh:mm:ss"));
+    workSched->set_workout_distance(ui->doubleSpinBox_distance->value());
+    workSched->set_workout_stress(ui->spinBox_stress->value());
 }
 
 
@@ -130,19 +129,17 @@ void Dialog_edit::on_timeEdit_duration_timeChanged(const QTime &time)
 
 void Dialog_edit::on_pushButton_clicked()
 {
-    stdWorkouts = new Dialog_workouts(this,ui->lineEdit_sport->text(),std_workouts);
-    stdWorkouts->setModal(true);
-    int returnCode = stdWorkouts->exec();
+    Dialog_workouts stdWorkouts(this,ui->lineEdit_sport->text(),std_workouts);
+    stdWorkouts.setModal(true);
+    int returnCode = stdWorkouts.exec();
     if(returnCode == QDialog::Accepted)
     {
-        ui->comboBox_wcode->setCurrentText(stdWorkouts->get_workout_code());
-        ui->lineEdit_wtitle->setText(stdWorkouts->get_workout_title());
-        ui->timeEdit_duration->setTime(stdWorkouts->get_workout_duration());
-        ui->doubleSpinBox_distance->setValue(stdWorkouts->get_workout_distance());
-        ui->spinBox_stress->setValue(stdWorkouts->get_workout_stress());
+        ui->comboBox_wcode->setCurrentText(stdWorkouts.get_workout_code());
+        ui->lineEdit_wtitle->setText(stdWorkouts.get_workout_title());
+        ui->timeEdit_duration->setTime(stdWorkouts.get_workout_duration());
+        ui->doubleSpinBox_distance->setValue(stdWorkouts.get_workout_distance());
+        ui->spinBox_stress->setValue(stdWorkouts.get_workout_stress());
     }
-
-    delete stdWorkouts;
 }
 
 void Dialog_edit::on_dateEdit_edit_date_dateChanged(const QDate &date)

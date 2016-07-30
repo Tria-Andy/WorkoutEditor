@@ -21,12 +21,14 @@ public:
 private slots:
     void on_pushButton_close_clicked();
 
+    void on_comboBox_select_currentIndexChanged(int index);
+
 private:
     Ui::year_popup *ui;
 
-    QStringList partInfo,phaseList;
+    QStringList partInfo,phaseList,selectList;
     QString phase;
-    int col,phaseindex,widthFactor;
+    int col,phaseindex,widthFactor,selectAxis;
     settings *pop_settings;
     schedule *workSched;
 

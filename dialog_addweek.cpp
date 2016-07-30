@@ -10,9 +10,7 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
     workSched = p_sched;
     ui->comboBox_phase->addItems(add_settings->get_phaseList());
     ui->comboBox_cycle->addItems(add_settings->get_cycleList());
-
-    current_date = new QDate();
-    ui->dateEdit_selectDate->setDate(current_date->currentDate());
+    ui->dateEdit_selectDate->setDate(QDate().currentDate());
     empty = "0-0-00:00-0";
     swimValues = bikeValues = runValues = stgValues = altValues = sumValues = empty;
 

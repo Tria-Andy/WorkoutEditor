@@ -21,11 +21,11 @@ Dialog_paceCalc::Dialog_paceCalc(QWidget *parent, settings *p_settings) :
 Dialog_paceCalc::~Dialog_paceCalc()
 {
     delete ui;
-    delete pace_model;
 }
 
 void Dialog_paceCalc::on_pushButton_close_clicked()
 {
+    delete pace_model;
     reject();
 }
 

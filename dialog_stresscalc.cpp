@@ -23,8 +23,6 @@ Dialog_stresscalc::Dialog_stresscalc(QWidget *parent,settings *p_settings) :
 Dialog_stresscalc::~Dialog_stresscalc()
 {
     delete ui;
-    delete t_pace;
-    delete t_power;
 }
 
 void Dialog_stresscalc::read_threshold_values()
@@ -88,6 +86,8 @@ void Dialog_stresscalc::set_sport_threshold()
 
 void Dialog_stresscalc::on_pushButton_close_clicked()
 {
+    delete t_pace;
+    delete t_power;
     reject();
 }
 
