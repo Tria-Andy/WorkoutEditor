@@ -22,7 +22,7 @@ Dialog_inteditor::Dialog_inteditor(QWidget *parent, settings *p_setting,standard
     isSeries = "Series";
     isGroup = "Group";
     clearFlag = false;
-    powerfactor = new double [7];
+    powerfactor.resize(7);
     for(int i = 1; i <= 7; ++i)
     {
         powerfactor[i-1] = 2.5 * i;
@@ -694,7 +694,6 @@ void Dialog_inteditor::clearIntTree()
 void Dialog_inteditor::on_pushButton_close_clicked()
 {
     this->clearIntTree();
-    delete [] powerfactor;
     delete plot_model;
     reject();
 }

@@ -55,10 +55,8 @@ private:
     int fontSize,sel_count;
     QDate selectedDate,firstdayofweek;
     QString weeknumber,phaseFilter;
-    int *work_sum;
-    int *dur_sum;
-    double *dist_sum;
-    int *stress_sum;
+    QVector<int> work_sum,dur_sum,stress_sum;
+    QVector<double> dist_sum;
     int weekRange,weekpos;
     int weekDays;
     unsigned int weekCounter;

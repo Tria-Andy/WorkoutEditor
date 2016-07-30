@@ -29,10 +29,10 @@ MainWindow::MainWindow(QWidget *parent) :
     weekpos = 0;
     weekDays = 7;
     weekCounter = 0;
-    work_sum = new int[7];
-    dur_sum = new int[7];
-    dist_sum = new double[7];
-    stress_sum = new int[7];
+    work_sum.resize(7);
+    dur_sum.resize(7);
+    dist_sum.resize(7);
+    stress_sum.resize(7);
     isWeekMode = true;
     sel_count = 0;
     ui->label_month->setText("Woche " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*7).weekNumber()-1));
@@ -69,10 +69,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::freeMem()
 {
-    //delete [] work_sum;
-    //delete [] dur_sum;
-    //delete [] dist_sum;
-    //delete [] stress_sum;
     calendar_model->clear();
     delete stdWorkout;
     delete workSchedule;
@@ -203,13 +199,10 @@ void MainWindow::summery_view()
     QStringList sumValues;
     int rowcount;
 
-    for(int i = 0; i < 8; ++i)
-    {
-        work_sum[i] = 0;
-        dur_sum[i] = 0;
-        dist_sum[i] = 0;
-        stress_sum[i] = 0;
-    }
+    work_sum.fill(0);
+    dur_sum.fill(0);
+    dist_sum.fill(0);
+    stress_sum.fill(0);
 
     if(isWeekMode)
     {
