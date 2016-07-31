@@ -131,12 +131,14 @@ void week_popup::set_weekInfos()
     axisX->setTitleText("Week");
     axisX->setTitleVisible(true);
 
-    yStress = workSched->get_qValueAxis("Stress",true,max_stress,10);
+    yStress = workSched->get_qValueAxis("Stress",true,max_stress+(max_stress*0.05),10);
+    yStress->applyNiceNumbers();
     weekchart->addAxis(yStress,Qt::AlignLeft);
     stressLine->attachAxis(yStress);
     weekchart->setAxisX(axisX,stressLine);
 
-    yDura = workSched->get_qValueAxis("Duration",true,max_dura,10);
+    yDura = workSched->get_qValueAxis("Duration",true,max_dura+(max_dura*0.05),10);
+    yDura->applyNiceNumbers();
     weekchart->addAxis(yDura,Qt::AlignRight);
     duraBars->attachAxis(yDura);  
     weekchart->setAxisX(axisX,duraBars);

@@ -21,14 +21,8 @@ private:
     int swim_pace;
     int hf_threshold,hf_avg;
     double swim_cv,swim_sri;
-    //double *p_swim_time,*new_dist;
-    QVector<double> calc_dist,p_swim_time,new_dist;
+    QVector<double> calc_speed,p_swim_time,new_dist;
     QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg,p_swimlaps;
-    //int *p_swim_timezone;
-    //int *p_hf_timezone;
-    //int *hf_zone_avg;
-    //int *p_swimlaps;
-
 
     int get_int_duration(int,bool);
     double get_int_distance(int,bool);
@@ -37,6 +31,7 @@ private:
     double get_int_watts(int);
     int get_swim_laps(int,bool);
     bool check_speed(int);
+    double interpolate_speed(int,int);
     int check_is_intervall(int);
 
     void read_swim_data();

@@ -50,9 +50,7 @@ private slots:
     void on_pushButton_delete_clicked();
     void on_doubleSpinBox_distance_valueChanged(double arg1);
     void on_timeEdit_duration_timeChanged(const QTime &time);
-
     void on_pushButton_clicked();
-
     void on_dateEdit_edit_date_dateChanged(const QDate &date);
 
 private:

@@ -457,17 +457,6 @@ int Activity::get_int_pace(int row,bool recalc)
     return pace;
 }
 
-double Activity::get_int_speed(int row,bool recalc)
-{
-    double speed;
-
-    int pace = this->get_int_duration(row,recalc) / (edit_dist_model->data(edit_dist_model->index(row,1,QModelIndex())).toDouble() * 10.0);
-
-    speed = 360.0 / pace;
-
-    return speed;
-}
-
 int Activity::get_swim_cv_pace(double swim_cv)
 {
     const int hour = 60;
@@ -605,6 +594,41 @@ void Activity::recalculate_intervalls(bool recalc)
     this->set_curr_act_model(recalc);
 }
 
+
+double Activity::get_int_speed(int row,bool recalc)
+{
+    double speed;
+
+    int pace = this->get_int_duration(row,recalc) / (edit_dist_model->data(edit_dist_model->index(row,1,QModelIndex())).toDouble() * 10.0);
+
+    speed = 360.0 / pace;
+
+    return speed;
+}
+
+double Activity::interpolate_speed(int row,int sec)
+{
+    double curr_speed = samp_model->data(samp_model->index(sec,2,QModelIndex())).toDouble();
+    double avg_speed = this->get_int_speed(row,act_settings->get_act_isrecalc());
+    double factor = 0.03;
+    double randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX))) /10;
+
+    if(curr_speed < avg_speed-(avg_speed*factor))
+    {
+        return avg_speed-((avg_speed*factor)+randfact);
+    }
+    if(curr_speed > avg_speed+(avg_speed*factor))
+    {
+        return avg_speed+((avg_speed*factor)-randfact);
+    }
+    if(curr_speed > avg_speed-(avg_speed*factor) && curr_speed < avg_speed+(avg_speed*factor))
+    {
+        return curr_speed;
+    }
+
+    return 0;
+}
+
 bool Activity::check_speed(int sec)
 {
     double speed = samp_model->data(samp_model->index(sec,2,QModelIndex())).toDouble();
@@ -637,7 +661,7 @@ void Activity::set_edit_samp_model()
 {
     edit_samp_model = new QStandardItemModel(samp_model->rowCount(),5);
       new_dist.resize(samp_model->rowCount());
-      calc_dist.resize(samp_model->rowCount());
+      calc_speed.resize(samp_model->rowCount());
       double msec = 0.0;
       int cadence,int_start,int_stop;
       double overall = 0.0;
@@ -717,6 +741,7 @@ void Activity::set_edit_samp_model()
                   }
                   else
                   {
+                      calc_speed[c_dist] = this->interpolate_speed(c_int,c_dist);
                       new_dist[c_dist] = new_dist[c_dist-1] + msec;
                   }
               }
@@ -728,6 +753,7 @@ void Activity::set_edit_samp_model()
       {
           edit_samp_model->setData(edit_samp_model->index(i,0,QModelIndex()),samp_model->data(samp_model->index(i,0,QModelIndex())).toInt());
           edit_samp_model->setData(edit_samp_model->index(i,1,QModelIndex()),QString::number(new_dist[i]));
+          edit_samp_model->setData(edit_samp_model->index(i,2,QModelIndex()),QString::number(calc_speed[i]));
           edit_samp_model->setData(edit_samp_model->index(i,4,QModelIndex()),samp_model->data(samp_model->index(i,4,QModelIndex())).toDouble());
       }
 }
