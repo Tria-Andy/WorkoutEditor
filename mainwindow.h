@@ -131,6 +131,7 @@ private slots:
     void on_actionSwitch_Year_triggered();
     void on_comboBox_phasefilter_currentIndexChanged(int index);
     void on_actionVersion_triggered();
+    void on_actionCopy_new_Speed_triggered();
 };
 
 #endif // MAINWINDOW_H

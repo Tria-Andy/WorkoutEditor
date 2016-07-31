@@ -995,6 +995,7 @@
     <addaction name="actionEdit_Undo"/>
     <addaction name="actionUnselect_all_rows"/>
     <addaction name="actionCopy_new_Distance"/>
+    <addaction name="actionCopy_new_Speed"/>
    </widget>
    <widget class="QMenu" name="menuModus">
     <property name="title">
@@ -1053,6 +1054,7 @@
    <addaction name="actionEdit_Distance"/>
    <addaction name="actionEdit_Undo"/>
    <addaction name="actionCopy_new_Distance"/>
+   <addaction name="actionCopy_new_Speed"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSelect_File">
@@ -1225,6 +1227,15 @@
    </property>
    <property name="text">
     <string>Edit Year Schedule</string>
+   </property>
+  </action>
+  <action name="actionCopy_new_Speed">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/images/icons/Clipboard.png</normaloff>:/images/icons/Clipboard.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy new Speed</string>
    </property>
   </action>
  </widget>

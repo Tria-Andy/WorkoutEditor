@@ -612,20 +612,25 @@ double Activity::interpolate_speed(int row,int sec)
     double avg_speed = this->get_int_speed(row,act_settings->get_act_isrecalc());
     double factor = 0.03;
     double randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX))) /10;
-
-    if(curr_speed < avg_speed-(avg_speed*factor))
-    {
-        return avg_speed-((avg_speed*factor)+randfact);
-    }
-    if(curr_speed > avg_speed+(avg_speed*factor))
-    {
-        return avg_speed+((avg_speed*factor)-randfact);
-    }
-    if(curr_speed > avg_speed-(avg_speed*factor) && curr_speed < avg_speed+(avg_speed*factor))
+    if(row == 0 && sec < 10)
     {
         return curr_speed;
     }
-
+    else
+    {
+        if(curr_speed < avg_speed-(avg_speed*factor))
+        {
+            return avg_speed-((avg_speed*factor)+randfact);
+        }
+        if(curr_speed > avg_speed+(avg_speed*factor))
+        {
+            return avg_speed+((avg_speed*factor)-randfact);
+        }
+        if(curr_speed > avg_speed-(avg_speed*factor) && curr_speed < avg_speed+(avg_speed*factor))
+        {
+            return curr_speed;
+        }
+    }
     return 0;
 }
 
