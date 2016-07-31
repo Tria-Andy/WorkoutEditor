@@ -100,6 +100,11 @@ public:
         QVector<double> *dist = &new_dist;
         return dist;
     }
+    QVector<double> * get_new_speed()
+    {
+        QVector<double> *speed = &calc_speed;
+        return speed;
+    }
 
 signals:
 

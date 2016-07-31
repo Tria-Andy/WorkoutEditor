@@ -103,12 +103,14 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionEdit_Distance->setVisible(mEditor);
     ui->actionEdit_Undo->setVisible(mEditor);
     ui->actionCopy_new_Distance->setVisible(mEditor);
+    ui->actionCopy_new_Speed->setVisible(mEditor);
 
     ui->actionReset->setEnabled(editorSettings->get_act_isload());
     ui->actionUnselect_all_rows->setEnabled(editorSettings->get_act_isload());
     ui->actionEdit_Distance->setEnabled(editorSettings->get_act_isload());
     ui->actionEdit_Undo->setEnabled(editorSettings->get_act_isload());
     ui->actionCopy_new_Distance->setEnabled(editorSettings->get_act_isload());
+    ui->actionCopy_new_Speed->setEnabled(editorSettings->get_act_isload());
 
     //Schedule
     ui->menuWorkout->setEnabled(mPlaner);
@@ -1162,21 +1164,32 @@ void MainWindow::on_actionEdit_Undo_triggered()
     this->set_activty_infos();
 }
 
-void MainWindow::on_actionCopy_new_Distance_triggered()
+void MainWindow::copyIntoClipboard(QVector<double> *vect)
 {
     QClipboard *clipboard = QApplication::clipboard();
     QByteArray km_array;
     QMimeData *mimeData = new QMimeData();
-    QVector<double> *dist = curr_activity->get_new_dist();
 
     for (int i = 0; i < curr_activity->edit_samp_model->rowCount();i++)
     {
-            km_array.append(QString::number((*dist)[i]));
+            km_array.append(QString::number((*vect)[i]));
             km_array.append("\r\n");
     }
 
     mimeData->setData("text/plain",km_array);
     clipboard->setMimeData(mimeData);
+}
+
+void MainWindow::on_actionCopy_new_Distance_triggered()
+{
+    QVector<double> *dist = curr_activity->get_new_dist();
+    this->copyIntoClipboard(dist);
+}
+
+void MainWindow::on_actionCopy_new_Speed_triggered()
+{
+    QVector<double> *speed = curr_activity->get_new_speed();
+    this->copyIntoClipboard(speed);
 }
 
 void MainWindow::on_pushButton_clear_ovr_clicked()

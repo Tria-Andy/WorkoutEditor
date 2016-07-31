@@ -84,6 +84,8 @@ private:
     void set_menuItems(bool,bool);
     void reset_jsontext();
 
+    void copyIntoClipboard(QVector<double>*);
+
     void freeMem();
 
 public:

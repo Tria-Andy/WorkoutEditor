@@ -35,5 +35,6 @@
         <file>icons/Stopwatch.png</file>
         <file>icons/Schedule.png</file>
         <file>icons/Question.png</file>
+        <file>icons/Clipboard.png</file>
     </qresource>
 </RCC>
