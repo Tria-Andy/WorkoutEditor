@@ -599,34 +599,61 @@ double Activity::get_int_speed(int row,bool recalc)
 {
     double speed;
 
-    int pace = this->get_int_duration(row,recalc) / (edit_dist_model->data(edit_dist_model->index(row,1,QModelIndex())).toDouble() * 10.0);
+    double pace = this->get_int_duration(row,recalc) / (edit_dist_model->data(edit_dist_model->index(row,1,QModelIndex())).toDouble() * 10.0);
 
     speed = 360.0 / pace;
 
     return speed;
 }
 
-double Activity::interpolate_speed(int row,int sec)
+double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double factor)
+{
+    double randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX))) /10;
+
+    if(currSpeed < avgSpeed-(avgSpeed*factor))
+    {
+        return avgSpeed-((avgSpeed*factor)+randfact);
+    }
+    if(currSpeed > avgSpeed+(avgSpeed*factor))
+    {
+        return avgSpeed+((avgSpeed*factor)-randfact);
+    }
+    if(currSpeed > avgSpeed-(avgSpeed*factor) && currSpeed < avgSpeed+(avgSpeed*factor))
+    {
+        return currSpeed;
+    }
+    return 0;
+}
+
+double Activity::interpolate_speed(int row,int sec,double limit)
 {
     double curr_speed = samp_model->data(samp_model->index(sec,2,QModelIndex())).toDouble();
     double avg_speed = this->get_int_speed(row,act_settings->get_act_isrecalc());
     double factor = 0.03;
     double randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX))) /10;
+
     if(row == 0 && sec < 10)
     {
         return curr_speed;
     }
     else
     {
-        if(curr_speed < avg_speed-(avg_speed*factor))
+        if(avg_speed >= limit)
         {
-            return avg_speed-((avg_speed*factor)+randfact);
+            if(curr_speed < avg_speed-(avg_speed*factor))
+            {
+                return avg_speed-((avg_speed*factor)+randfact);
+            }
+            if(curr_speed > avg_speed+(avg_speed*factor))
+            {
+                return avg_speed+((avg_speed*factor)-randfact);
+            }
+            if(curr_speed > avg_speed-(avg_speed*factor) && curr_speed < avg_speed+(avg_speed*factor))
+            {
+                return curr_speed;
+            }
         }
-        if(curr_speed > avg_speed+(avg_speed*factor))
-        {
-            return avg_speed+((avg_speed*factor)-randfact);
-        }
-        if(curr_speed > avg_speed-(avg_speed*factor) && curr_speed < avg_speed+(avg_speed*factor))
+        else
         {
             return curr_speed;
         }
@@ -670,6 +697,7 @@ void Activity::set_edit_samp_model()
       double msec = 0.0;
       int cadence,int_start,int_stop;
       double overall = 0.0;
+      double lowLimit = 10.5;
       double p_int,speed;
       bool isInt;
 
@@ -706,24 +734,28 @@ void Activity::set_edit_samp_model()
                           {
                               new_dist[c_dist] = overall;
                               new_dist[c_dist-1] = overall;
-                              edit_samp_model->setData(edit_samp_model->index(c_dist,2,QModelIndex()),0);
+                              calc_speed[c_dist] = 0.0;
+                              //edit_samp_model->setData(edit_samp_model->index(c_dist,2,QModelIndex()),0);
                           }
                           if(c_dist == int_start)
                           {
                               new_dist[c_dist] = p_int;
-                              edit_samp_model->setData(edit_samp_model->index(c_dist,2,QModelIndex()),0);
+                              calc_speed[c_dist] = 0.0;
+                              //edit_samp_model->setData(edit_samp_model->index(c_dist,2,QModelIndex()),0);
                           }
                           else
                           {
                               new_dist[c_dist] = new_dist[c_dist-1] + msec;
                               if(this->check_speed(c_dist))
                               {
-                                  edit_samp_model->setData(edit_samp_model->index(c_dist,2,QModelIndex()),QString::number(samp_model->data(samp_model->index(c_dist,2,QModelIndex())).toDouble()));
+                                  calc_speed[c_dist] = samp_model->data(samp_model->index(c_dist,2,QModelIndex())).toDouble();
+                                  //edit_samp_model->setData(edit_samp_model->index(c_dist,2,QModelIndex()),QString::number(samp_model->data(samp_model->index(c_dist,2,QModelIndex())).toDouble()));
                                   edit_samp_model->setData(edit_samp_model->index(c_dist,3,QModelIndex()),samp_model->data(samp_model->index(c_dist,3,QModelIndex())).toString());
                               }
                               else
                               {
-                                  edit_samp_model->setData(edit_samp_model->index(c_dist,2,QModelIndex()),QString::number(speed));
+                                  calc_speed[c_dist] = speed;
+                                  //edit_samp_model->setData(edit_samp_model->index(c_dist,2,QModelIndex()),QString::number(speed));
                                   edit_samp_model->setData(edit_samp_model->index(c_dist,3,QModelIndex()),QString::number(cadence));
                               }
 
@@ -738,7 +770,8 @@ void Activity::set_edit_samp_model()
                       else
                       {
                           new_dist[c_dist] = overall;
-                          edit_samp_model->setData(edit_samp_model->index(c_dist,2,QModelIndex()),0);
+                          calc_speed[c_dist] = 0.0;
+                          //edit_samp_model->setData(edit_samp_model->index(c_dist,2,QModelIndex()),0);
                           edit_samp_model->setData(edit_samp_model->index(c_dist,3,QModelIndex()),0);
                       }
                       speed = edit_samp_model->data(edit_samp_model->index(c_dist-1,2,QModelIndex())).toDouble();
@@ -746,7 +779,7 @@ void Activity::set_edit_samp_model()
                   }
                   else
                   {
-                      calc_speed[c_dist] = this->interpolate_speed(c_int,c_dist);
+                      calc_speed[c_dist] = this->interpolate_speed(c_int,c_dist,lowLimit);
                       new_dist[c_dist] = new_dist[c_dist-1] + msec;
                   }
               }

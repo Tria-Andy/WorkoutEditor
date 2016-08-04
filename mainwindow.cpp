@@ -754,6 +754,43 @@ void MainWindow::loadfile(const QString &filename)
         editorSettings->set_act_isload(true);
         this->set_menuItems(true,false);
         this->set_activty_infos();
+
+        intChart = new QChart();
+        intChartview = new QChartView(intChart);
+        intChartview->setRenderHint(QPainter::Antialiasing);
+        ui->verticalLayout_interpol->addWidget(intChartview);
+
+        avgLine = workSchedule->get_qLineSeries(false);
+        avgLine->setColor(QColor(Qt::yellow));
+        avgLine->setName("Avg Speed");
+        speedLine = workSchedule->get_qLineSeries(false);
+        speedLine->setColor(QColor(Qt::green));
+        speedLine->setName("Speed");
+        polishLine = workSchedule->get_qLineSeries(false);
+        polishLine->setColor(QColor(Qt::red));
+        polishLine->setName("Polished Speed");
+
+        axisX = new QCategoryAxis();
+        axisX->setVisible(false);
+
+        intChart->addSeries(avgLine);
+        intChart->addSeries(speedLine);
+        intChart->addSeries(polishLine);
+
+        ySpeed = workSchedule->get_qValueAxis("Speed",true,20,5);
+        intChart->addAxis(ySpeed,Qt::AlignLeft);
+        avgLine->attachAxis(ySpeed);
+        speedLine->attachAxis(ySpeed);
+        polishLine->attachAxis(ySpeed);
+        intChart->setAxisX(axisX,avgLine);
+        intChart->setAxisX(axisX,speedLine);
+        intChart->setAxisX(axisX,polishLine);
+
+        QStandardItemModel *intModel = curr_activity->edit_int_model;
+        for(int i = 0; i < intModel->rowCount();++i)
+        {
+            ui->comboBox_intervals->addItem(intModel->data(intModel->index(i,0,QModelIndex())).toString());
+        }
         this->set_activty_intervalls();
      }
 }
@@ -844,7 +881,87 @@ void MainWindow::set_activty_intervalls()
         ui->lineEdit_swimtime->setText(QDateTime::fromTime_t(curr_activity->get_move_time()).toUTC().toString("hh:mm:ss"));
         ui->lineEdit_swimpace->setText(editorSettings->set_time(curr_activity->get_swim_pace()));
     }
+}
 
+void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
+{
+    ui->label_factorValue->setText(QString::number(10-value) + "%");
+    double factor = static_cast<double>(value)/100;
+    this->set_polishValues(ui->comboBox_intervals->currentIndex(),factor);
+}
+
+void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
+{
+    ui->horizontalSlider_factor->setValue(0);
+    if(editorSettings->get_act_isload())
+    {
+        ui->lineEdit_lapTime->setText(editorSettings->set_time(curr_activity->get_int_duration(index,editorSettings->get_act_isrecalc())));
+        ui->lineEdit_lapPace->setText(editorSettings->set_time(curr_activity->get_int_pace(index,editorSettings->get_act_isrecalc())));
+        ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,editorSettings->get_act_isrecalc())));
+        this->set_intChartValues(index);
+        this->set_polishValues(index,0.0);
+    }
+}
+
+void MainWindow::set_polishValues(int lap,double factor)
+{
+    double value;
+    double avg = curr_activity->get_int_speed(lap,editorSettings->get_act_isrecalc());
+    if(polishLine->count() > 0)
+    {
+        polishLine->clear();
+        avgLine->clear();
+    }
+    for(int i = 0; i < speedValues.count(); ++i)
+    {
+        if(lap == 0 && i < 5)
+        {
+            value = speedValues[i];
+        }
+        else
+        {
+            value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.1-factor);
+        }
+        avgLine->append(i,avg);
+        polishLine->append(i,value);
+    }
+
+}
+
+void MainWindow::set_intChartValues(int lapindex)
+{
+    QStandardItemModel *intmodel = curr_activity->edit_int_model;
+    QStandardItemModel *sampmodel = curr_activity->samp_model;
+    int start = intmodel->data(intmodel->index(lapindex,1,QModelIndex())).toInt();
+    int stop = intmodel->data(intmodel->index(lapindex,2,QModelIndex())).toInt();
+    double max = 0.0,min = 25.0,current;
+
+    if(speedValues.count() > 0)
+    {
+        speedValues.clear();
+    }
+    speedValues.resize((stop-start)+1);
+
+    if(speedLine->count() > 0)
+    {
+        speedLine->clear();
+    }
+
+    for(int i = start, pos=0; i <= stop; ++i,++pos)
+    {
+        current = sampmodel->data(sampmodel->index(i,2,QModelIndex())).toDouble();
+        speedLine->append(pos,current);
+        speedValues[pos] = current;
+        //axisValues << QString::number(pos);
+        if(max < current) max = current;
+        if(min > current) min = current;
+    }
+
+    axisX->setMin(0);
+    axisX->setMax(stop-start);
+    ySpeed->setMax(max);
+    ySpeed->setMin(min);
+    ySpeed->applyNiceNumbers();
 }
 
 void MainWindow::write_int_infos()
@@ -854,6 +971,7 @@ void MainWindow::write_int_infos()
     for(int i = 0; i < curr_activity->edit_int_model->rowCount(); ++i)
     {
         lapname = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,0,QModelIndex())).toString();
+        ui->comboBox_intervals->setItemText(i,lapname);
         int_start = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,1,QModelIndex())).toString();
         int_stop = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,2,QModelIndex())).toString();
         ui->plainTextEdit_int_infos->appendPlainText("{ \"NAME\":\" " + lapname + "\", \"START\": " + int_start + ", \"STOP\": " + int_stop +" },");
@@ -1101,6 +1219,13 @@ void MainWindow::on_actionReset_triggered()
     this->set_avg_fields();
     this->set_menuItems(true,false);
 
+    ui->verticalLayout_interpol->removeWidget(intChartview);
+    ui->lineEdit_lapPace->setText("-");
+    ui->lineEdit_lapTime->setText("-");
+    ui->lineEdit_lapSpeed->setText("-");
+    ui->comboBox_intervals->clear();
+    delete intChartview;
+
     delete curr_activity;
 }
 
@@ -1340,3 +1465,5 @@ void MainWindow::on_actionVersion_triggered()
     versionBox.setModal(true);
     versionBox.exec();
 }
+
+

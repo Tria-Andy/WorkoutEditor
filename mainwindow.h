@@ -6,6 +6,7 @@
 #include <QAbstractItemModel>
 #include <QTextBrowser>
 #include <QtXml>
+#include <QtCharts>
 #include "calendar_delegate.h"
 #include "week_delegate.h"
 #include "summery_delegate.h"
@@ -51,6 +52,16 @@ private:
     del_spinbox_int time_del;
     QStandardItemModel *calendar_model,*sum_model;
     QStringList modus_list,cal_header,work_list,sum_name,sum_list,year_header,schedMode,sum_header;
+
+    //Intercall Chart
+    QChart *intChart;
+    QChartView *intChartview;
+    QLineSeries *avgLine,*speedLine, *polishLine;
+    QValueAxis *ySpeed;
+    QCategoryAxis *axisX;
+    QVector<double> speedValues;
+    void set_intChartValues(int);
+    void set_polishValues(int,double);
 
     int fontSize,sel_count;
     QDate selectedDate,firstdayofweek;
@@ -132,6 +143,8 @@ private slots:
     void on_comboBox_phasefilter_currentIndexChanged(int index);
     void on_actionVersion_triggered();
     void on_actionCopy_new_Speed_triggered();
+    void on_horizontalSlider_factor_valueChanged(int value);
+    void on_comboBox_intervals_currentIndexChanged(int index);
 };
 
 #endif // MAINWINDOW_H
