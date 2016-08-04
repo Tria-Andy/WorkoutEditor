@@ -29,10 +29,10 @@ MainWindow::MainWindow(QWidget *parent) :
     weekpos = 0;
     weekDays = 7;
     weekCounter = 0;
-    work_sum = new int[7];
-    dur_sum = new int[7];
-    dist_sum = new double[7];
-    stress_sum = new int[7];
+    work_sum.resize(7);
+    dur_sum.resize(7);
+    dist_sum.resize(7);
+    stress_sum.resize(7);
     isWeekMode = true;
     sel_count = 0;
     ui->label_month->setText("Woche " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*7).weekNumber()-1));
@@ -64,18 +64,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    //delete [] work_sum;
-    //delete [] dur_sum;
-    //delete [] dist_sum;
-    //delete [] stress_sum;
+    delete ui;
+}
+
+void MainWindow::freeMem()
+{
     calendar_model->clear();
     delete stdWorkout;
     delete workSchedule;
     delete sum_model;
     delete calendar_model;
     delete editorSettings;
-
-    delete ui;
 }
 
 void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
@@ -104,12 +103,14 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionEdit_Distance->setVisible(mEditor);
     ui->actionEdit_Undo->setVisible(mEditor);
     ui->actionCopy_new_Distance->setVisible(mEditor);
+    ui->actionCopy_new_Speed->setVisible(mEditor);
 
     ui->actionReset->setEnabled(editorSettings->get_act_isload());
     ui->actionUnselect_all_rows->setEnabled(editorSettings->get_act_isload());
     ui->actionEdit_Distance->setEnabled(editorSettings->get_act_isload());
     ui->actionEdit_Undo->setEnabled(editorSettings->get_act_isload());
     ui->actionCopy_new_Distance->setEnabled(editorSettings->get_act_isload());
+    ui->actionCopy_new_Speed->setEnabled(editorSettings->get_act_isload());
 
     //Schedule
     ui->menuWorkout->setEnabled(mPlaner);
@@ -200,13 +201,10 @@ void MainWindow::summery_view()
     QStringList sumValues;
     int rowcount;
 
-    for(int i = 0; i < 8; ++i)
-    {
-        work_sum[i] = 0;
-        dur_sum[i] = 0;
-        dist_sum[i] = 0;
-        stress_sum[i] = 0;
-    }
+    work_sum.fill(0);
+    dur_sum.fill(0);
+    dist_sum.fill(0);
+    stress_sum.fill(0);
 
     if(isWeekMode)
     {
@@ -217,8 +215,10 @@ void MainWindow::summery_view()
             index = workSchedule->workout_schedule->indexFromItem(list.at(i));
             sport = workSchedule->workout_schedule->item(index.row(),3)->text();
 
-            this->summery_calc(0,index,isWeekMode);
-
+            if(sport != editorSettings->isOther)
+            {
+                this->summery_calc(0,index,isWeekMode);
+            }
             if(sport == editorSettings->isSwim)
             {
                 this->summery_calc(1,index,isWeekMode);
@@ -489,29 +489,23 @@ void MainWindow::on_actionNew_triggered()
 
     if(isWeekMode)
     {
-        curr_workout = new workout();
-        Dialog_add *new_workout = new Dialog_add(this,workSchedule,curr_workout,editorSettings,stdWorkout);
-        new_workout->setModal(true);
-        dialog_code = new_workout->exec();
+        Dialog_add new_workout(this,workSchedule,editorSettings,stdWorkout);
+        new_workout.setModal(true);
+        dialog_code = new_workout.exec();
 
         if(dialog_code == QDialog::Accepted)
         {
-            curr_workout->add_workout(workSchedule->workout_schedule);
+            workSchedule->add_workout();
             this->refresh_model();
         }
-
-        delete new_workout;
-        delete curr_workout;
     }
 }
 
 void MainWindow::on_actionStress_Calculator_triggered()
 {
-    Dialog_stresscalc *stressCalc = new Dialog_stresscalc(this,editorSettings);
-    stressCalc->setModal(true);
-    stressCalc->exec();
-
-    delete stressCalc;
+    Dialog_stresscalc stressCalc(this,editorSettings);
+    stressCalc.setModal(true);
+    stressCalc.exec();
 }
 
 void MainWindow::on_actionSave_Workout_Schedule_triggered()
@@ -557,52 +551,48 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
     {
         if(index.column() != 0)
         {
-            curr_workout = new workout();
-
             QString getdate = calendar_model->data(index,Qt::DisplayRole).toString().left(9);
             QDate selectDate = QDate::fromString(getdate,"dd MMM yy").addYears(100);
-            day_popup *day_pop = new day_popup(this,selectDate,workSchedule,curr_workout,editorSettings);
-            day_pop->setModal(true);
-            dialog_code = day_pop->exec();
+            day_popup day_pop(this,selectDate,workSchedule,editorSettings);
+            day_pop.setModal(true);
+            dialog_code = day_pop.exec();
 
             if(dialog_code == QDialog::Accepted)
             {
-              Dialog_edit *edit_workout = new Dialog_edit(this,selectDate,workSchedule,curr_workout,editorSettings,stdWorkout);
-              edit_workout->setModal(true);
-              dialog_code = edit_workout->exec();
+
+              Dialog_edit edit_workout(this,selectDate,workSchedule,editorSettings,stdWorkout);
+              edit_workout.setModal(true);
+              dialog_code = edit_workout.exec();
               if(dialog_code == QDialog::Accepted)
               {
-                  if(edit_workout->get_result() == 1) curr_workout->edit_workout(edit_workout->get_edit_index(),workSchedule->workout_schedule);
-                  if(edit_workout->get_result() == 2) curr_workout->add_workout(workSchedule->workout_schedule);
-                  if(edit_workout->get_result() == 3) curr_workout->delete_workout(edit_workout->get_edit_index(),workSchedule->workout_schedule);
+                  if(edit_workout.get_result() == 1) workSchedule->edit_workout(edit_workout.get_edit_index());
+                  if(edit_workout.get_result() == 2) workSchedule->add_workout();
+                  if(edit_workout.get_result() == 3) workSchedule->delete_workout(edit_workout.get_edit_index());
                   this->refresh_model();
               }
-                delete edit_workout;
             }
-            delete day_pop;
-            delete curr_workout;
         }
         else
         {
             QString selected_week =  calendar_model->data(index,Qt::DisplayRole).toString();
             weeknumber = selected_week.split("#").at(0);
             this->summery_view();
-            week_popup *week_pop = new week_popup(this,selected_week,workSchedule,editorSettings);
-            week_pop->setModal(true);
-            dialog_code = week_pop->exec();
+
+            week_popup week_pop(this,selected_week,workSchedule,editorSettings);
+            week_pop.setModal(true);
+            dialog_code = week_pop.exec();
 
             if(dialog_code == QDialog::Accepted)
             {
-                Dialog_week_copy *week_copy = new Dialog_week_copy(this,selected_week,workSchedule);
-                week_copy->setModal(true);
-                dialog_code = week_copy->exec();
+                Dialog_week_copy week_copy(this,selected_week,workSchedule);
+                week_copy.setModal(true);
+                dialog_code = week_copy.exec();
 
                 if(dialog_code == QDialog::Accepted)
                 {
                     workSchedule->copyWeek();
                     this->workout_calendar();
                 }
-                delete week_copy;
             }
 
             if(dialog_code == QDialog::Rejected)
@@ -610,7 +600,6 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
                 weekCounter = 0;
                 this->set_calender();
             }
-            delete week_pop;
         }
     }
     else
@@ -619,16 +608,15 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
         {
             QString selected_week = calendar_model->data(index,Qt::DisplayRole).toString();
 
-            Dialog_addweek *new_week = new Dialog_addweek(this,selected_week,workSchedule,editorSettings);
-            new_week->setModal(true);
-            int dialog_code = new_week->exec();
+            Dialog_addweek new_week(this,selected_week,workSchedule,editorSettings);
+            new_week.setModal(true);
+            int dialog_code = new_week.exec();
 
             if(dialog_code == QDialog::Accepted)
             {
                 this->workout_calendar();
                 this->summery_view();
             }
-            delete new_week;
         }
     }
 
@@ -636,11 +624,9 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
 
 void MainWindow::on_actionExport_to_Golden_Cheetah_triggered()
 {
-    Dialog_export *export_workout = new Dialog_export(this,workSchedule->workout_schedule,editorSettings);
-    export_workout->setModal(true);
-    export_workout->exec();
-
-    delete export_workout;
+    Dialog_export export_workout(this,workSchedule->workout_schedule,editorSettings);
+    export_workout.setModal(true);
+    export_workout.exec();
 }
 
 QString MainWindow::get_weekRange()
@@ -768,6 +754,43 @@ void MainWindow::loadfile(const QString &filename)
         editorSettings->set_act_isload(true);
         this->set_menuItems(true,false);
         this->set_activty_infos();
+
+        intChart = new QChart();
+        intChartview = new QChartView(intChart);
+        intChartview->setRenderHint(QPainter::Antialiasing);
+        ui->verticalLayout_interpol->addWidget(intChartview);
+
+        avgLine = workSchedule->get_qLineSeries(false);
+        avgLine->setColor(QColor(Qt::yellow));
+        avgLine->setName("Avg Speed");
+        speedLine = workSchedule->get_qLineSeries(false);
+        speedLine->setColor(QColor(Qt::green));
+        speedLine->setName("Speed");
+        polishLine = workSchedule->get_qLineSeries(false);
+        polishLine->setColor(QColor(Qt::red));
+        polishLine->setName("Polished Speed");
+
+        axisX = new QCategoryAxis();
+        axisX->setVisible(false);
+
+        intChart->addSeries(avgLine);
+        intChart->addSeries(speedLine);
+        intChart->addSeries(polishLine);
+
+        ySpeed = workSchedule->get_qValueAxis("Speed",true,20,5);
+        intChart->addAxis(ySpeed,Qt::AlignLeft);
+        avgLine->attachAxis(ySpeed);
+        speedLine->attachAxis(ySpeed);
+        polishLine->attachAxis(ySpeed);
+        intChart->setAxisX(axisX,avgLine);
+        intChart->setAxisX(axisX,speedLine);
+        intChart->setAxisX(axisX,polishLine);
+
+        QStandardItemModel *intModel = curr_activity->edit_int_model;
+        for(int i = 0; i < intModel->rowCount();++i)
+        {
+            ui->comboBox_intervals->addItem(intModel->data(intModel->index(i,0,QModelIndex())).toString());
+        }
         this->set_activty_intervalls();
      }
 }
@@ -858,7 +881,87 @@ void MainWindow::set_activty_intervalls()
         ui->lineEdit_swimtime->setText(QDateTime::fromTime_t(curr_activity->get_move_time()).toUTC().toString("hh:mm:ss"));
         ui->lineEdit_swimpace->setText(editorSettings->set_time(curr_activity->get_swim_pace()));
     }
+}
 
+void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
+{
+    ui->label_factorValue->setText(QString::number(10-value) + "%");
+    double factor = static_cast<double>(value)/100;
+    this->set_polishValues(ui->comboBox_intervals->currentIndex(),factor);
+}
+
+void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
+{
+    ui->horizontalSlider_factor->setValue(0);
+    if(editorSettings->get_act_isload())
+    {
+        ui->lineEdit_lapTime->setText(editorSettings->set_time(curr_activity->get_int_duration(index,editorSettings->get_act_isrecalc())));
+        ui->lineEdit_lapPace->setText(editorSettings->set_time(curr_activity->get_int_pace(index,editorSettings->get_act_isrecalc())));
+        ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,editorSettings->get_act_isrecalc())));
+        this->set_intChartValues(index);
+        this->set_polishValues(index,0.0);
+    }
+}
+
+void MainWindow::set_polishValues(int lap,double factor)
+{
+    double value;
+    double avg = curr_activity->get_int_speed(lap,editorSettings->get_act_isrecalc());
+    if(polishLine->count() > 0)
+    {
+        polishLine->clear();
+        avgLine->clear();
+    }
+    for(int i = 0; i < speedValues.count(); ++i)
+    {
+        if(lap == 0 && i < 5)
+        {
+            value = speedValues[i];
+        }
+        else
+        {
+            value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.1-factor);
+        }
+        avgLine->append(i,avg);
+        polishLine->append(i,value);
+    }
+
+}
+
+void MainWindow::set_intChartValues(int lapindex)
+{
+    QStandardItemModel *intmodel = curr_activity->edit_int_model;
+    QStandardItemModel *sampmodel = curr_activity->samp_model;
+    int start = intmodel->data(intmodel->index(lapindex,1,QModelIndex())).toInt();
+    int stop = intmodel->data(intmodel->index(lapindex,2,QModelIndex())).toInt();
+    double max = 0.0,min = 25.0,current;
+
+    if(speedValues.count() > 0)
+    {
+        speedValues.clear();
+    }
+    speedValues.resize((stop-start)+1);
+
+    if(speedLine->count() > 0)
+    {
+        speedLine->clear();
+    }
+
+    for(int i = start, pos=0; i <= stop; ++i,++pos)
+    {
+        current = sampmodel->data(sampmodel->index(i,2,QModelIndex())).toDouble();
+        speedLine->append(pos,current);
+        speedValues[pos] = current;
+        //axisValues << QString::number(pos);
+        if(max < current) max = current;
+        if(min > current) min = current;
+    }
+
+    axisX->setMin(0);
+    axisX->setMax(stop-start);
+    ySpeed->setMax(max);
+    ySpeed->setMin(min);
+    ySpeed->applyNiceNumbers();
 }
 
 void MainWindow::write_int_infos()
@@ -868,6 +971,7 @@ void MainWindow::write_int_infos()
     for(int i = 0; i < curr_activity->edit_int_model->rowCount(); ++i)
     {
         lapname = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,0,QModelIndex())).toString();
+        ui->comboBox_intervals->setItemText(i,lapname);
         int_start = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,1,QModelIndex())).toString();
         int_stop = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,2,QModelIndex())).toString();
         ui->plainTextEdit_int_infos->appendPlainText("{ \"NAME\":\" " + lapname + "\", \"START\": " + int_start + ", \"STOP\": " + int_stop +" },");
@@ -1002,12 +1106,14 @@ void MainWindow::on_actionPlaner_triggered()
 
 void MainWindow::on_actionExit_triggered()
 {
+    this->freeMem();
     close();
 }
 
 void MainWindow::on_actionExit_and_Save_triggered()
 {
     workSchedule->save_workout_file();
+    this->freeMem();
 }
 
 void MainWindow::on_actionSelect_File_triggered()
@@ -1113,6 +1219,13 @@ void MainWindow::on_actionReset_triggered()
     this->set_avg_fields();
     this->set_menuItems(true,false);
 
+    ui->verticalLayout_interpol->removeWidget(intChartview);
+    ui->lineEdit_lapPace->setText("-");
+    ui->lineEdit_lapTime->setText("-");
+    ui->lineEdit_lapSpeed->setText("-");
+    ui->comboBox_intervals->clear();
+    delete intChartview;
+
     delete curr_activity;
 }
 
@@ -1176,21 +1289,32 @@ void MainWindow::on_actionEdit_Undo_triggered()
     this->set_activty_infos();
 }
 
-void MainWindow::on_actionCopy_new_Distance_triggered()
+void MainWindow::copyIntoClipboard(QVector<double> *vect)
 {
     QClipboard *clipboard = QApplication::clipboard();
     QByteArray km_array;
     QMimeData *mimeData = new QMimeData();
-    double *dist = curr_activity->get_new_dist();
 
     for (int i = 0; i < curr_activity->edit_samp_model->rowCount();i++)
     {
-            km_array.append(QString::number(dist[i]));
+            km_array.append(QString::number((*vect)[i]));
             km_array.append("\r\n");
     }
 
     mimeData->setData("text/plain",km_array);
     clipboard->setMimeData(mimeData);
+}
+
+void MainWindow::on_actionCopy_new_Distance_triggered()
+{
+    QVector<double> *dist = curr_activity->get_new_dist();
+    this->copyIntoClipboard(dist);
+}
+
+void MainWindow::on_actionCopy_new_Speed_triggered()
+{
+    QVector<double> *speed = curr_activity->get_new_speed();
+    this->copyIntoClipboard(speed);
 }
 
 void MainWindow::on_pushButton_clear_ovr_clicked()
@@ -1235,26 +1359,23 @@ void MainWindow::on_pushButton_copy_samp_clicked()
 
 void MainWindow::on_actionIntervall_Editor_triggered()
 {
-    Dialog_inteditor *intEditor = new Dialog_inteditor(this,editorSettings,stdWorkout);
-    intEditor->setModal(true);
-    intEditor->exec();
-    delete intEditor;
+    Dialog_inteditor intEditor(this,editorSettings,stdWorkout);
+    intEditor.setModal(true);
+    intEditor.exec();
 }
 
 void MainWindow::on_actionPreferences_triggered()
 {
-    Dialog_settings *dia_settings = new Dialog_settings(this,editorSettings);
-    dia_settings->setModal(true);
-    dia_settings->exec();
-    delete dia_settings;
+    Dialog_settings dia_settings(this,editorSettings);
+    dia_settings.setModal(true);
+    dia_settings.exec();
 }
 
 void MainWindow::on_actionPace_Calculator_triggered()
 {
-    Dialog_paceCalc *dia_pace = new Dialog_paceCalc(this,editorSettings);
-    dia_pace->setModal(true);
-    dia_pace->exec();
-    delete dia_pace;
+    Dialog_paceCalc dia_pace(this,editorSettings);
+    dia_pace.setModal(true);
+    dia_pace.exec();
 }
 
 
@@ -1294,14 +1415,13 @@ void MainWindow::on_tableView_summery_clicked(const QModelIndex &index)
     if(!isWeekMode)
     {
         int dialog_code;
-        year_popup *year_pop = new year_popup(this,sum_model->data(index,Qt::DisplayRole).toString(),index.row(),workSchedule,phaseFilter,filterindex,editorSettings);
-        year_pop->setModal(true);
-        dialog_code = year_pop->exec();
+        year_popup year_pop(this,sum_model->data(index,Qt::DisplayRole).toString(),index.row(),workSchedule,phaseFilter,filterindex,editorSettings);
+        year_pop.setModal(true);
+        dialog_code = year_pop.exec();
         if(dialog_code == QDialog::Rejected)
         {
             this->set_calender();
         }
-        delete year_pop;
     }
 }
 
@@ -1341,9 +1461,9 @@ void MainWindow::on_comboBox_phasefilter_currentIndexChanged(int index)
 
 void MainWindow::on_actionVersion_triggered()
 {
-    Dialog_version *versionBox = new Dialog_version(this);
-    versionBox->setModal(true);
-    versionBox->exec();
-
-    delete versionBox;
+    Dialog_version versionBox(this);
+    versionBox.setModal(true);
+    versionBox.exec();
 }
+
+

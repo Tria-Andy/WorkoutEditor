@@ -1,14 +1,13 @@
 #include "day_popup.h"
 #include "ui_day_popup.h"
 
-day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched, workout *w_pop, settings *p_settings) :
+day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched, settings *p_settings) :
     QDialog(parent),
     ui(new Ui::day_popup)
 {
     ui->setupUi(this);
     workout_date = &w_date;
     workSched = p_sched;
-    pop_workout = w_pop;
     pop_settings = p_settings;
     weekPhase = workSched->get_weekPhase(w_date);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);

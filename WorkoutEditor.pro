@@ -4,6 +4,7 @@
 #
 #-------------------------------------------------
 
+QT       += charts
 QT       += core gui
 QT       += xml
 
@@ -15,7 +16,6 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    workout.cpp \
     settings.cpp \
     dialog_add.cpp \
     dialog_edit.cpp \
@@ -38,7 +38,6 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     calendar_delegate.h \
-    workout.h \
     settings.h \
     dialog_add.h \
     dialog_edit.h \

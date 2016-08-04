@@ -35,8 +35,6 @@ public:
         painter->fillRect(rect_head,QBrush(QColor(128,128,128)));
         QTextOption dateOption(Qt::AlignLeft);
 
-        //if(calendar_values.at(0) == QDate::currentDate().toString("dd MMM"))
-
         if(QDate::fromString(calendar_values.at(0),"dd MMM yy").addYears(100) ==(QDate::currentDate()))
         {
             painter->fillRect(rect_head,QBrush(QColor(200,0,0)));

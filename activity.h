@@ -21,20 +21,14 @@ private:
     int swim_pace;
     int hf_threshold,hf_avg;
     double swim_cv,swim_sri;
-    double *p_swim_time,*new_dist;
-    int *p_swim_timezone;
-    int *p_hf_timezone;
-    int *hf_zone_avg;
-    int *p_swimlaps;
+    QVector<double> calc_speed,p_swim_time,new_dist;
+    QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg,p_swimlaps;
 
-
-    int get_int_duration(int,bool);
     double get_int_distance(int,bool);
-    int get_int_pace(int,bool);
-    double get_int_speed(int,bool);
     double get_int_watts(int);
     int get_swim_laps(int,bool);
     bool check_speed(int);
+    double interpolate_speed(int,int,double);
     int check_is_intervall(int);
 
     void read_swim_data();
@@ -60,8 +54,11 @@ public:
     QStandardItemModel *swim_pace_model, *swim_hf_model;
 
     //Recalculation
-
     void recalculate_intervalls(bool);
+    int get_int_duration(int,bool);
+    int get_int_pace(int,bool);
+    double get_int_speed(int,bool);
+    double polish_SpeedValues(double,double,double);
 
     //Value Getter and Setter
     void set_date(QString a_date) {v_date = a_date;}
@@ -98,7 +95,16 @@ public:
     double get_swim_cv() {return swim_cv;}
     void set_hf_time_in_zone();
     double get_swim_track() {return swim_track;}
-    double * get_new_dist() { return new_dist;}
+    QVector<double> * get_new_dist()
+    {
+        QVector<double> *dist = &new_dist;
+        return dist;
+    }
+    QVector<double> * get_new_speed()
+    {
+        QVector<double> *speed = &calc_speed;
+        return speed;
+    }
 
 signals:
 

@@ -6,13 +6,13 @@
 #include <QAbstractItemModel>
 #include <QTextBrowser>
 #include <QtXml>
+#include <QtCharts>
 #include "calendar_delegate.h"
 #include "week_delegate.h"
 #include "summery_delegate.h"
 #include "del_spinbox_double.h"
 #include "del_spinbox_int.h"
 #include "schedule.h"
-#include "workout.h"
 #include "dialog_add.h"
 #include "dialog_addweek.h"
 #include "dialog_version.h"
@@ -42,7 +42,6 @@ private:
     Ui::MainWindow *ui;
 
     schedule *workSchedule;
-    workout *curr_workout;
     Activity *curr_activity;
     settings *editorSettings;
     standardWorkouts *stdWorkout;
@@ -54,13 +53,21 @@ private:
     QStandardItemModel *calendar_model,*sum_model;
     QStringList modus_list,cal_header,work_list,sum_name,sum_list,year_header,schedMode,sum_header;
 
+    //Intercall Chart
+    QChart *intChart;
+    QChartView *intChartview;
+    QLineSeries *avgLine,*speedLine, *polishLine;
+    QValueAxis *ySpeed;
+    QCategoryAxis *axisX;
+    QVector<double> speedValues;
+    void set_intChartValues(int);
+    void set_polishValues(int,double);
+
     int fontSize,sel_count;
     QDate selectedDate,firstdayofweek;
     QString weeknumber,phaseFilter;
-    int *work_sum;
-    int *dur_sum;
-    double *dist_sum;
-    int *stress_sum;
+    QVector<int> work_sum,dur_sum,stress_sum;
+    QVector<double> dist_sum;
     int weekRange,weekpos;
     int weekDays;
     unsigned int weekCounter;
@@ -87,6 +94,10 @@ private:
 
     void set_menuItems(bool,bool);
     void reset_jsontext();
+
+    void copyIntoClipboard(QVector<double>*);
+
+    void freeMem();
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -131,6 +142,9 @@ private slots:
     void on_actionSwitch_Year_triggered();
     void on_comboBox_phasefilter_currentIndexChanged(int index);
     void on_actionVersion_triggered();
+    void on_actionCopy_new_Speed_triggered();
+    void on_horizontalSlider_factor_valueChanged(int value);
+    void on_comboBox_intervals_currentIndexChanged(int index);
 };
 
 #endif // MAINWINDOW_H

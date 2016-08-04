@@ -422,7 +422,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QListView" name="listView_workouts"/>
+       <widget class="QListView" name="listView_workouts">
+        <property name="editTriggers">
+         <set>QAbstractItemView::SelectedClicked</set>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="pushButton_close">

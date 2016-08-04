@@ -3,8 +3,11 @@
 
 #include <QDialog>
 #include <QStandardItemModel>
+#include <QtCharts>
 #include "schedule.h"
 #include "settings.h"
+
+QT_CHARTS_USE_NAMESPACE
 
 namespace Ui {
 class year_popup;
@@ -21,16 +24,29 @@ public:
 private slots:
     void on_pushButton_close_clicked();
 
+    void on_comboBox_select_currentIndexChanged(int index);
+
 private:
     Ui::year_popup *ui;
 
-    QStringList partInfo,phaseList;
+    QStringList partInfo,phaseList,selectList;
     QString phase;
-    int col,phaseindex,widthFactor;
+    int col,phaseindex,widthFactor,selectAxis,weekcount;
+    double max_stress;
     settings *pop_settings;
     schedule *workSched;
+    QVector<double> y_stress,y_dura,y_dist,y_work,maxValues;
 
-    void set_plot();
+    QChart *phasechart;
+    QChartView *chartview;
+    QValueAxis *yStress,*yBars;
+    QBarCategoryAxis *axisX;
+    QLineSeries *stressLine;
+    QBarSet *selectBar;
+    QBarSeries *selectBars;
+
+    void fill_values();
+    void set_plot(int);
 };
 
 #endif // YEAR_POPUP_H

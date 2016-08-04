@@ -67,8 +67,6 @@ private:
     Ui::Dialog_addweek *ui;
     settings *add_settings;
     schedule *workSched;
-    QDate *current_date;
-    QDate workout_date;
     QString openID,selYear,weekID,swimValues,bikeValues,runValues,stgValues,altValues,sumValues,empty;
     QStringList weekMeta,weekContent;
     bool update;

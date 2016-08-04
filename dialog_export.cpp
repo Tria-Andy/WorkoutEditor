@@ -12,9 +12,8 @@ Dialog_export::Dialog_export(QWidget *parent,QStandardItemModel *w_model,setting
     QModelIndex index;
     workout_model = w_model;
     export_settings = p_settings;
-    current_date = new QDate();
-    ui->dateEdit_export->setDate(current_date->currentDate());
-    workout_time = workout_model->findItems(current_date->currentDate().toString("dd.MM.yyyy"),Qt::MatchExactly,1);
+    ui->dateEdit_export->setDate(QDate().currentDate());
+    workout_time = workout_model->findItems(QDate().currentDate().toString("dd.MM.yyyy"),Qt::MatchExactly,1);
     workout_model->sort(0);
     QSet<QString> uniqueWeek;
     for(int i = 0; i < workout_model->rowCount();++i)
@@ -36,7 +35,6 @@ Dialog_export::Dialog_export(QWidget *parent,QStandardItemModel *w_model,setting
 
 Dialog_export::~Dialog_export()
 {
-    delete current_date;
     delete ui;
 }
 
@@ -95,6 +93,7 @@ void Dialog_export::workout_export()
     fileName = QString();
     fileContent = QString();
     QList<QStandardItem*> list;
+    QModelIndex index;
 
     if(export_mode == 2)
     {
@@ -103,8 +102,12 @@ void Dialog_export::workout_export()
 
         for(int i = 0; i < list.count(); ++i)
         {
-            this->set_filecontent(workout_model->indexFromItem(list.at(i)));
-            ui->progressBar->setValue((100/list.count())*i);
+            index = workout_model->indexFromItem(list.at(i));
+            if(workout_model->data(workout_model->index(index.row(),3,QModelIndex())).toString() != export_settings->isOther)
+            {
+                this->set_filecontent(workout_model->indexFromItem(list.at(i)));
+                ui->progressBar->setValue((100/list.count())*i);
+            }
         }
         ui->progressBar->setValue(100);
 
@@ -116,18 +119,22 @@ void Dialog_export::workout_export()
 
         for(int i = 0; i < list.count(); ++i)
         {
-            if(export_mode == 0)
+            index = workout_model->indexFromItem(list.at(i));
+            if(workout_model->data(workout_model->index(index.row(),3,QModelIndex())).toString() != export_settings->isOther)
             {
-                this->set_filecontent(workout_model->indexFromItem(list.at(i)));
-                ui->progressBar->setValue((100/list.count())*i);
-            }
-            if(export_mode == 1)
-            {
-                QString time_value = workout_model->data(workout_model->index(workout_model->indexFromItem(list.at(i)).row(),2,QModelIndex()),Qt::DisplayRole).toString();
-                if(time_value == ui->comboBox_time_export->currentText())
+                if(export_mode == 0)
                 {
                     this->set_filecontent(workout_model->indexFromItem(list.at(i)));
                     ui->progressBar->setValue((100/list.count())*i);
+                }
+                if(export_mode == 1)
+                {
+                    QString time_value = workout_model->data(workout_model->index(workout_model->indexFromItem(list.at(i)).row(),2,QModelIndex()),Qt::DisplayRole).toString();
+                    if(time_value == ui->comboBox_time_export->currentText())
+                    {
+                        this->set_filecontent(workout_model->indexFromItem(list.at(i)));
+                        ui->progressBar->setValue((100/list.count())*i);
+                    }
                 }
             }
         }
@@ -170,7 +177,8 @@ void Dialog_export::set_exportselection(bool b_day,bool b_week)
 void Dialog_export::get_exportinfo(QString v_week,QString v_date,bool week)
 {
     QList<QStandardItem*> list;
-
+    QModelIndex index;
+    int workcount = 0;
     if(week)
     {
         list = workout_model->findItems(v_week,Qt::MatchExactly,0);
@@ -182,7 +190,15 @@ void Dialog_export::get_exportinfo(QString v_week,QString v_date,bool week)
 
     if(export_mode == 0 || export_mode == 2)
     {
-        this->set_infolabel(list.count());
+        for(int i = 0; i < list.count(); i++)
+        {
+            index = workout_model->indexFromItem(list.at(i));
+            if(workout_model->data(workout_model->index(index.row(),3,QModelIndex())).toString() != export_settings->isOther)
+            {
+                ++workcount;
+            }
+        }
+        this->set_infolabel(workcount);
     }
     else
     {
