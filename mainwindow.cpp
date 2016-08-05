@@ -1224,6 +1224,12 @@ void MainWindow::on_actionReset_triggered()
     ui->lineEdit_lapTime->setText("-");
     ui->lineEdit_lapSpeed->setText("-");
     ui->comboBox_intervals->clear();
+
+    delete ySpeed;
+    delete speedLine;
+    delete polishLine;
+    delete avgLine;
+    delete axisX;
     delete intChartview;
 
     delete curr_activity;

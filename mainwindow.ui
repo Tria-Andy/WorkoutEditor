@@ -675,7 +675,7 @@
                 <widget class="QComboBox" name="comboBox_intervals">
                  <property name="minimumSize">
                   <size>
-                   <width>100</width>
+                   <width>125</width>
                    <height>0</height>
                   </size>
                  </property>
