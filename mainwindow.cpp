@@ -1472,4 +1472,20 @@ void MainWindow::on_actionVersion_triggered()
     versionBox.exec();
 }
 
+void MainWindow::on_pushButton_addLap_clicked()
+{
+    int addRow = ui->spinBox_rowPos->value()-1;
+    curr_activity->edit_int_model->insertRow(addRow,QModelIndex());
+    curr_activity->edit_dist_model->insertRow(addRow,QModelIndex());
+    curr_activity->curr_act_model->insertRow(addRow,QModelIndex());
+    curr_activity->set_changeRowCount(true);
+}
 
+void MainWindow::on_pushButton_delLap_clicked()
+{
+    int delRow = ui->spinBox_rowPos->value()-1;
+    curr_activity->edit_int_model->removeRow(delRow,QModelIndex());
+    curr_activity->edit_dist_model->removeRow(delRow,QModelIndex());
+    curr_activity->curr_act_model->removeRow(delRow,QModelIndex());
+    curr_activity->set_changeRowCount(true);
+}

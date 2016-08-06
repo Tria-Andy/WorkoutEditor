@@ -14,6 +14,7 @@ Activity::Activity(settings *p_settings)
 {
     act_settings = p_settings;
     zone_count = 7;
+    changeRowCount = false;
 }
 
 const QString Activity::isSwim = "Swim ";
@@ -22,7 +23,7 @@ const QString Activity::isRun = "Run ";
 
 void Activity::act_reset()
 {
-
+    changeRowCount = false;
 }
 
 void Activity::read_jsonFile(QString fileContent)
@@ -542,6 +543,15 @@ void Activity::recalculate_intervalls(bool recalc)
 {
     QString lapname;
     int lapcounter = 1;
+
+    if(changeRowCount)
+    {
+        for(int i = 0; i < edit_int_model->rowCount(); ++i)
+        {
+            edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),i);
+            edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),i);
+        }
+    }
 
     if(this->get_sport() == this->isSwim && recalc)
     {

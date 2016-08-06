@@ -23,6 +23,7 @@ private:
     double swim_cv,swim_sri;
     QVector<double> calc_speed,p_swim_time,new_dist;
     QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg,p_swimlaps;
+    bool changeRowCount;
 
     double get_int_distance(int,bool);
     double get_int_watts(int);
@@ -66,6 +67,7 @@ public:
     void set_sport(QString a_sport) {v_sport = a_sport;}
     QString get_sport() {return v_sport;}
     int get_header_num();
+    void set_changeRowCount(bool setCount) {changeRowCount = setCount;}
 
     //Averages
     void set_dist_factor();
