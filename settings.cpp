@@ -364,6 +364,7 @@ QString settings::get_speed(QTime pace,int dist,QString sport,bool fixdist)
             else
             {
                 speed = 3600.0/sec;
+
             }
         }
         else

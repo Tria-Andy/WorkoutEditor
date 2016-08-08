@@ -59,8 +59,7 @@ public:
     int get_int_duration(int,bool);
     int get_int_pace(int,bool);
     double get_int_speed(int,bool);
-    double polish_SpeedValues(double,double,double);
-    double polish_MinMax(double,bool);
+    double polish_SpeedValues(double,double,double,bool);
 
     //Value Getter and Setter
     void set_date(QString a_date) {v_date = a_date;}
