@@ -888,6 +888,8 @@ void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
     ui->label_factorValue->setText(QString::number(10-value) + "%");
     double factor = static_cast<double>(value)/100;
     this->set_polishValues(ui->comboBox_intervals->currentIndex(),factor);
+    ui->lineEdit_polMax->setText(QString::number(curr_activity->polish_SpeedValues(40.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),editorSettings->get_act_isrecalc()),0.1-factor,false)));
+    ui->lineEdit_polMin->setText(QString::number(curr_activity->polish_SpeedValues(1.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),editorSettings->get_act_isrecalc()),0.1-factor,false)));
 }
 
 void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
@@ -920,7 +922,7 @@ void MainWindow::set_polishValues(int lap,double factor)
         }
         else
         {
-            value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.1-factor);
+            value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.1-factor,false);
         }
         avgLine->append(i,avg);
         polishLine->append(i,value);
@@ -1224,6 +1226,12 @@ void MainWindow::on_actionReset_triggered()
     ui->lineEdit_lapTime->setText("-");
     ui->lineEdit_lapSpeed->setText("-");
     ui->comboBox_intervals->clear();
+
+    delete ySpeed;
+    delete speedLine;
+    delete polishLine;
+    delete avgLine;
+    delete axisX;
     delete intChartview;
 
     delete curr_activity;
@@ -1466,4 +1474,20 @@ void MainWindow::on_actionVersion_triggered()
     versionBox.exec();
 }
 
+void MainWindow::on_pushButton_addLap_clicked()
+{
+    int addRow = ui->spinBox_rowPos->value()-1;
+    curr_activity->edit_int_model->insertRow(addRow,QModelIndex());
+    curr_activity->edit_dist_model->insertRow(addRow,QModelIndex());
+    curr_activity->curr_act_model->insertRow(addRow,QModelIndex());
+    curr_activity->set_changeRowCount(true);
+}
 
+void MainWindow::on_pushButton_delLap_clicked()
+{
+    int delRow = ui->spinBox_rowPos->value()-1;
+    curr_activity->edit_int_model->removeRow(delRow,QModelIndex());
+    curr_activity->edit_dist_model->removeRow(delRow,QModelIndex());
+    curr_activity->curr_act_model->removeRow(delRow,QModelIndex());
+    curr_activity->set_changeRowCount(true);
+}

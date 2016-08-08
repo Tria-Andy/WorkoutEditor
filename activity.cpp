@@ -14,6 +14,7 @@ Activity::Activity(settings *p_settings)
 {
     act_settings = p_settings;
     zone_count = 7;
+    changeRowCount = false;
 }
 
 const QString Activity::isSwim = "Swim ";
@@ -22,7 +23,7 @@ const QString Activity::isRun = "Run ";
 
 void Activity::act_reset()
 {
-
+    changeRowCount = false;
 }
 
 void Activity::read_jsonFile(QString fileContent)
@@ -543,6 +544,15 @@ void Activity::recalculate_intervalls(bool recalc)
     QString lapname;
     int lapcounter = 1;
 
+    if(changeRowCount)
+    {
+        for(int i = 0; i < edit_int_model->rowCount(); ++i)
+        {
+            edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),i);
+            edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),i);
+        }
+    }
+
     if(this->get_sport() == this->isSwim && recalc)
     {
         p_swimlaps.resize(edit_dist_model->rowCount());
@@ -594,7 +604,6 @@ void Activity::recalculate_intervalls(bool recalc)
     this->set_curr_act_model(recalc);
 }
 
-
 double Activity::get_int_speed(int row,bool recalc)
 {
     double speed;
@@ -606,21 +615,39 @@ double Activity::get_int_speed(int row,bool recalc)
     return speed;
 }
 
-double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double factor)
+double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double factor,bool setrand)
 {
     double randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX))) /10;
 
-    if(currSpeed < avgSpeed-(avgSpeed*factor))
+    if(setrand)
     {
-        return avgSpeed-((avgSpeed*factor)+randfact);
+        if(currSpeed < avgSpeed-(avgSpeed*factor))
+        {
+            return avgSpeed-((avgSpeed*factor)+randfact);
+        }
+        if(currSpeed > avgSpeed+(avgSpeed*factor))
+        {
+            return avgSpeed+((avgSpeed*factor)-randfact);
+        }
+        if(currSpeed > avgSpeed-(avgSpeed*factor) && currSpeed < avgSpeed+(avgSpeed*factor))
+        {
+            return currSpeed;
+        }
     }
-    if(currSpeed > avgSpeed+(avgSpeed*factor))
+    else
     {
-        return avgSpeed+((avgSpeed*factor)-randfact);
-    }
-    if(currSpeed > avgSpeed-(avgSpeed*factor) && currSpeed < avgSpeed+(avgSpeed*factor))
-    {
-        return currSpeed;
+        if(currSpeed < avgSpeed-(avgSpeed*factor))
+        {
+            return avgSpeed-((avgSpeed*factor));
+        }
+        if(currSpeed > avgSpeed+(avgSpeed*factor))
+        {
+            return avgSpeed+((avgSpeed*factor));
+        }
+        if(currSpeed > avgSpeed-(avgSpeed*factor) && currSpeed < avgSpeed+(avgSpeed*factor))
+        {
+            return currSpeed;
+        }
     }
     return 0;
 }
@@ -630,7 +657,6 @@ double Activity::interpolate_speed(int row,int sec,double limit)
     double curr_speed = samp_model->data(samp_model->index(sec,2,QModelIndex())).toDouble();
     double avg_speed = this->get_int_speed(row,act_settings->get_act_isrecalc());
     double factor = 0.03;
-    double randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX))) /10;
 
     if(row == 0 && sec < 10)
     {
@@ -640,18 +666,7 @@ double Activity::interpolate_speed(int row,int sec,double limit)
     {
         if(avg_speed >= limit)
         {
-            if(curr_speed < avg_speed-(avg_speed*factor))
-            {
-                return avg_speed-((avg_speed*factor)+randfact);
-            }
-            if(curr_speed > avg_speed+(avg_speed*factor))
-            {
-                return avg_speed+((avg_speed*factor)-randfact);
-            }
-            if(curr_speed > avg_speed-(avg_speed*factor) && curr_speed < avg_speed+(avg_speed*factor))
-            {
-                return curr_speed;
-            }
+            return this->polish_SpeedValues(curr_speed,avg_speed,factor,true);
         }
         else
         {
@@ -696,8 +711,12 @@ void Activity::set_edit_samp_model()
       calc_speed.resize(samp_model->rowCount());
       double msec = 0.0;
       int cadence,int_start,int_stop;
-      double overall = 0.0;
-      double lowLimit = 10.5;
+      double overall = 0.0,lowLimit;
+      if(this->get_sport() == this->isRun)
+      {
+        lowLimit = act_settings->get_speed(QTime::fromString(act_settings->get_paceList().at(2),"mm:ss"),0,v_sport.trimmed(),true).toDouble();
+        lowLimit = lowLimit - (lowLimit*0.20);
+      }
       double p_int,speed;
       bool isInt;
 
@@ -779,7 +798,14 @@ void Activity::set_edit_samp_model()
                   }
                   else
                   {
-                      calc_speed[c_dist] = this->interpolate_speed(c_int,c_dist,lowLimit);
+                      if(this->get_sport() == this->isRun)
+                      {
+                        calc_speed[c_dist] = this->interpolate_speed(c_int,c_dist,lowLimit);
+                      }
+                      else
+                      {
+                        calc_speed[c_dist] = samp_model->data(samp_model->index(c_dist,2,QModelIndex())).toDouble();
+                      }
                       new_dist[c_dist] = new_dist[c_dist-1] + msec;
                   }
               }
@@ -825,7 +851,6 @@ void Activity::adjust_intervalls()
                     edit_int_model->setData(edit_int_model->index(i,1,QModelIndex()),i_stop);        
                 }
             }
-
         }
         else
         {
