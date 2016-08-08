@@ -616,6 +616,20 @@ double Activity::get_int_speed(int row,bool recalc)
     return speed;
 }
 
+double Activity::polish_MinMax(double avg, bool isMax)
+{
+
+    if(isMax)
+    {
+        return avg
+    }
+    else
+    {
+
+    }
+    return 0;
+}
+
 double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double factor)
 {
     double randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX))) /10;

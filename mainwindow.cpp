@@ -888,6 +888,8 @@ void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
     ui->label_factorValue->setText(QString::number(10-value) + "%");
     double factor = static_cast<double>(value)/100;
     this->set_polishValues(ui->comboBox_intervals->currentIndex(),factor);
+    ui->lineEdit_polMax->setText("");
+    ui->lineEdit_polMin->setText("");
 }
 
 void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
