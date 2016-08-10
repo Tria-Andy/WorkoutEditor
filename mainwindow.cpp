@@ -900,7 +900,8 @@ void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
         ui->lineEdit_lapTime->setText(editorSettings->set_time(curr_activity->get_int_duration(index,editorSettings->get_act_isrecalc())));
         ui->lineEdit_lapPace->setText(editorSettings->set_time(curr_activity->get_int_pace(index,editorSettings->get_act_isrecalc())));
         ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,editorSettings->get_act_isrecalc())));
-        this->set_intChartValues(index);
+        double avg = curr_activity->get_int_speed(index,editorSettings->get_act_isrecalc());
+        this->set_intChartValues(index,avg);
         this->set_polishValues(index,0.0);
     }
 }
@@ -912,7 +913,6 @@ void MainWindow::set_polishValues(int lap,double factor)
     if(polishLine->count() > 0)
     {
         polishLine->clear();
-        avgLine->clear();
     }
     for(int i = 0; i < speedValues.count(); ++i)
     {
@@ -924,13 +924,12 @@ void MainWindow::set_polishValues(int lap,double factor)
         {
             value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.1-factor,false);
         }
-        avgLine->append(i,avg);
         polishLine->append(i,value);
     }
 
 }
 
-void MainWindow::set_intChartValues(int lapindex)
+void MainWindow::set_intChartValues(int lapindex,double avgSpeed)
 {
     QStandardItemModel *intmodel = curr_activity->edit_int_model;
     QStandardItemModel *sampmodel = curr_activity->samp_model;
@@ -941,6 +940,7 @@ void MainWindow::set_intChartValues(int lapindex)
     if(speedValues.count() > 0)
     {
         speedValues.clear();
+        avgLine->clear();
     }
     speedValues.resize((stop-start)+1);
 
@@ -953,6 +953,7 @@ void MainWindow::set_intChartValues(int lapindex)
     {
         current = sampmodel->data(sampmodel->index(i,2,QModelIndex())).toDouble();
         speedLine->append(pos,current);
+        avgLine->append(pos,avgSpeed);
         speedValues[pos] = current;
         //axisValues << QString::number(pos);
         if(max < current) max = current;
@@ -1444,6 +1445,17 @@ void MainWindow::on_actionSwitch_Year_triggered()
     if (reply == QMessageBox::Yes)
     {
         workSchedule->changeYear();
+        /*
+        if(QDate::currentDate() >= QDate::fromString(editorSettings->get_saisonFDW(),"dd.MM.yyyy"))
+        {
+            workSchedule->changeYear();
+            this->workout_calendar();
+        }
+        else
+        {
+            QMessageBox::warning(this,"Season not finished","Season Schedule can not be changed!",QMessageBox::Ok);
+        }
+        */
     }
 }
 

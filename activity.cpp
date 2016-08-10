@@ -618,33 +618,35 @@ double Activity::get_int_speed(int row,bool recalc)
 double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double factor,bool setrand)
 {
     double randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX))) /10;
+    double avgLow = avgSpeed-(avgSpeed*factor);
+    double avgHigh = avgSpeed+(avgSpeed*factor);
 
     if(setrand)
     {
-        if(currSpeed < avgSpeed-(avgSpeed*factor))
+        if(currSpeed < avgLow)
         {
-            return avgSpeed-((avgSpeed*factor)+randfact);
+            return avgLow+randfact;
         }
-        if(currSpeed > avgSpeed+(avgSpeed*factor))
+        if(currSpeed > avgHigh)
         {
-            return avgSpeed+((avgSpeed*factor)-randfact);
+            return avgHigh-randfact;
         }
-        if(currSpeed > avgSpeed-(avgSpeed*factor) && currSpeed < avgSpeed+(avgSpeed*factor))
+        if(currSpeed > avgLow && currSpeed < avgHigh)
         {
             return currSpeed;
         }
     }
     else
     {
-        if(currSpeed < avgSpeed-(avgSpeed*factor))
+        if(currSpeed < avgLow)
         {
-            return avgSpeed-((avgSpeed*factor));
+            return avgLow;
         }
-        if(currSpeed > avgSpeed+(avgSpeed*factor))
+        if(currSpeed > avgHigh)
         {
-            return avgSpeed+((avgSpeed*factor));
+            return avgHigh;
         }
-        if(currSpeed > avgSpeed-(avgSpeed*factor) && currSpeed < avgSpeed+(avgSpeed*factor))
+        if(currSpeed > avgLow && currSpeed < avgHigh)
         {
             return currSpeed;
         }
@@ -710,11 +712,13 @@ void Activity::set_edit_samp_model()
       new_dist.resize(samp_model->rowCount());
       calc_speed.resize(samp_model->rowCount());
       double msec = 0.0;
-      int cadence,int_start,int_stop;
+      int cadence,int_start,int_stop,sportindex;
       double overall = 0.0,lowLimit;
-      if(this->get_sport() == this->isRun)
+      if(this->get_sport() != this->isSwim)
       {
-        lowLimit = act_settings->get_speed(QTime::fromString(act_settings->get_paceList().at(2),"mm:ss"),0,v_sport.trimmed(),true).toDouble();
+        if(this->get_sport() == this->isBike) sportindex = 1;
+        if(this->get_sport() == this->isRun) sportindex = 2;
+        lowLimit = act_settings->get_speed(QTime::fromString(act_settings->get_paceList().at(sportindex),"mm:ss"),0,v_sport.trimmed(),true).toDouble();
         lowLimit = lowLimit - (lowLimit*0.20);
       }
       double p_int,speed;

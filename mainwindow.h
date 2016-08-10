@@ -60,7 +60,7 @@ private:
     QValueAxis *ySpeed;
     QCategoryAxis *axisX;
     QVector<double> speedValues;
-    void set_intChartValues(int);
+    void set_intChartValues(int,double);
     void set_polishValues(int,double);
 
     int fontSize,sel_count;

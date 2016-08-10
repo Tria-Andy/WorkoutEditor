@@ -318,11 +318,15 @@ void schedule::changeYear()
         if(id == week+1)
         {
             weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
+            qDebug() << id << weekid << startDate.addDays(week*7).toString("dd.MM.yyyy");
+            /*
             week_meta->setData(week_meta->index(week,1,QModelIndex()),weekid);
             week_meta->setData(week_meta->index(week,3,QModelIndex()),startDate.addDays(week*7).toString("dd.MM.yyyy"));
             week_content->setData(week_content->index(week,1,QModelIndex()),weekid);
+            */
         }
     }
+    this->save_week_files();
 }
 
 void schedule::add_workout()
