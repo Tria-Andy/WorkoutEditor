@@ -18,15 +18,15 @@ public:
 
 private slots:
     void on_pushButton_close_clicked();
-
     void on_radioButton_add_clicked();
-
     void on_radioButton_del_clicked();
+    void on_pushButton_ok_clicked();
 
 private:
     Ui::Dialog_lapeditor *ui;
     Activity *curr_act;
     void set_components(bool);
+    void edit_laps(bool,int);
 };
 
 #endif // DIALOG_LAPEDITOR_H

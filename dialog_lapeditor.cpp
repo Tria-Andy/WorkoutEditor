@@ -31,6 +31,22 @@ void Dialog_lapeditor::set_components(bool bSet)
     ui->spinBox_endtime->setEnabled(bSet);
 }
 
+void Dialog_lapeditor::edit_laps(bool isAdd,int index)
+{
+    if(isAdd)
+    {
+        curr_act->edit_dist_model->insertRow(index,QModelIndex());
+        curr_act->edit_int_model->insertRow(index,QModelIndex());
+        curr_act->curr_act_model->insertRow(index,QModelIndex());
+    }
+    else
+    {
+        curr_act->edit_dist_model->removeRow(index,QModelIndex());
+        curr_act->edit_int_model->removeRow(index,QModelIndex());
+        curr_act->curr_act_model->removeRow(index,QModelIndex());
+    }
+}
+
 
 void Dialog_lapeditor::on_radioButton_add_clicked()
 {
@@ -40,4 +56,12 @@ void Dialog_lapeditor::on_radioButton_add_clicked()
 void Dialog_lapeditor::on_radioButton_del_clicked()
 {
     this->set_components(false);
+}
+
+void Dialog_lapeditor::on_pushButton_ok_clicked()
+{
+    bool isAdd;
+    if(ui->radioButton_add->isChecked()) isAdd = true;
+    if(ui->radioButton_del->isChecked()) isAdd = false;
+    this->edit_laps(isAdd,ui->comboBox_lap->currentIndex());
 }
