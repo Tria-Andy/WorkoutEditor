@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     year_popup.cpp \
     schedule.cpp \
     dialog_week_copy.cpp \
-    dialog_version.cpp
+    dialog_version.cpp \
+    dialog_lapeditor.cpp
 
 HEADERS  += mainwindow.h \
     calendar_delegate.h \
@@ -60,7 +61,8 @@ HEADERS  += mainwindow.h \
     year_popup.h \
     schedule.h \
     dialog_week_copy.h \
-    dialog_version.h
+    dialog_version.h \
+    dialog_lapeditor.h
 
 FORMS    += mainwindow.ui \
     dialog_add.ui \
@@ -76,7 +78,8 @@ FORMS    += mainwindow.ui \
     dialog_addweek.ui \
     year_popup.ui \
     dialog_week_copy.ui \
-    dialog_version.ui
+    dialog_version.ui \
+    dialog_lapeditor.ui
 
 RESOURCES += \
     resources.qrc

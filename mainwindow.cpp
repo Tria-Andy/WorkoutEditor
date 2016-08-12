@@ -104,6 +104,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionEdit_Undo->setVisible(mEditor);
     ui->actionCopy_new_Distance->setVisible(mEditor);
     ui->actionCopy_new_Speed->setVisible(mEditor);
+    ui->actionLapEditor->setVisible(mEditor);
 
     ui->actionReset->setEnabled(editorSettings->get_act_isload());
     ui->actionUnselect_all_rows->setEnabled(editorSettings->get_act_isload());
@@ -111,6 +112,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionEdit_Undo->setEnabled(editorSettings->get_act_isload());
     ui->actionCopy_new_Distance->setEnabled(editorSettings->get_act_isload());
     ui->actionCopy_new_Speed->setEnabled(editorSettings->get_act_isload());
+    ui->actionLapEditor->setEnabled(editorSettings->get_act_isload());
 
     //Schedule
     ui->menuWorkout->setEnabled(mPlaner);
@@ -1486,20 +1488,9 @@ void MainWindow::on_actionVersion_triggered()
     versionBox.exec();
 }
 
-void MainWindow::on_pushButton_addLap_clicked()
+void MainWindow::on_actionLapEditor_triggered()
 {
-    int addRow = ui->spinBox_rowPos->value()-1;
-    curr_activity->edit_int_model->insertRow(addRow,QModelIndex());
-    curr_activity->edit_dist_model->insertRow(addRow,QModelIndex());
-    curr_activity->curr_act_model->insertRow(addRow,QModelIndex());
-    curr_activity->set_changeRowCount(true);
-}
-
-void MainWindow::on_pushButton_delLap_clicked()
-{
-    int delRow = ui->spinBox_rowPos->value()-1;
-    curr_activity->edit_int_model->removeRow(delRow,QModelIndex());
-    curr_activity->edit_dist_model->removeRow(delRow,QModelIndex());
-    curr_activity->curr_act_model->removeRow(delRow,QModelIndex());
-    curr_activity->set_changeRowCount(true);
+    Dialog_lapeditor lapeditor(this,curr_activity);
+    lapeditor.setModal(true);
+    lapeditor.exec();
 }

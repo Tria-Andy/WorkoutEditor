@@ -36,5 +36,7 @@
         <file>icons/Schedule.png</file>
         <file>icons/Question.png</file>
         <file>icons/Clipboard.png</file>
+        <file>icons/Modify.png</file>
+        <file>icons/Diagram.png</file>
     </qresource>
 </RCC>
