@@ -38,5 +38,6 @@
         <file>icons/Clipboard.png</file>
         <file>icons/Modify.png</file>
         <file>icons/Diagram.png</file>
+        <file>icons/3d bar chart.png</file>
     </qresource>
 </RCC>

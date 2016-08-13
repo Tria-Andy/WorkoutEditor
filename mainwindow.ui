@@ -1468,7 +1468,7 @@
   <action name="actionIntervall_Editor">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Table.png</normaloff>:/images/icons/Table.png</iconset>
+     <normaloff>:/images/icons/3d bar chart.png</normaloff>:/images/icons/3d bar chart.png</iconset>
    </property>
    <property name="text">
     <string>Intervall Editor</string>
@@ -1522,7 +1522,7 @@
   <action name="actionLapEditor">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Tune.png</normaloff>:/images/icons/Tune.png</iconset>
+     <normaloff>:/images/icons/Table.png</normaloff>:/images/icons/Table.png</iconset>
    </property>
    <property name="text">
     <string>LapEditor</string>
