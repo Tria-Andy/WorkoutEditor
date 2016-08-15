@@ -617,7 +617,7 @@ double Activity::get_int_speed(int row,bool recalc)
 
 double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double factor,bool setrand)
 {
-    double randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX))) /10;
+    double randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) / (avgSpeed/(factor*100)));
     double avgLow = avgSpeed-(avgSpeed*factor);
     double avgHigh = avgSpeed+(avgSpeed*factor);
 

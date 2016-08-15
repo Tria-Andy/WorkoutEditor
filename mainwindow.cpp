@@ -924,7 +924,7 @@ void MainWindow::set_polishValues(int lap,double factor)
         }
         else
         {
-            value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.1-factor,false);
+            value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.1-factor,true);
         }
         polishLine->append(i,value);
     }
