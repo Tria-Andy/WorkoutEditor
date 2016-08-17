@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionPlaner->setIcon(QIcon(":/images/icons/Yes.png"));
     ui->actionPlaner->setEnabled(false);
     ui->stackedWidget->setGeometry(5,5,0,0);
-
+    ui->frame_avgValue->setVisible(false);
     this->summery_view();
     ui->comboBox_schedMode->addItems(schedMode);
     ui->comboBox_phasefilter->addItem("All");
@@ -924,7 +924,7 @@ void MainWindow::set_polishValues(int lap,double factor)
         }
         else
         {
-            value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.1-factor,true);
+            value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.10-factor,true);
         }
         polishLine->append(i,value);
     }
@@ -937,7 +937,7 @@ void MainWindow::set_intChartValues(int lapindex,double avgSpeed)
     QStandardItemModel *sampmodel = curr_activity->samp_model;
     int start = intmodel->data(intmodel->index(lapindex,1,QModelIndex())).toInt();
     int stop = intmodel->data(intmodel->index(lapindex,2,QModelIndex())).toInt();
-    double max = 0.0,min = 25.0,current;
+    double max = 0.0,min = 40.0,current;
 
     if(speedValues.count() > 0)
     {
@@ -1133,6 +1133,25 @@ void MainWindow::set_avg_fields()
     ui->lineEdit_pace->setText(editorSettings->set_time(curr_activity->get_avg_pace()));
     ui->lineEdit_dist->setText(QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor()));
     ui->lineEdit_watt->setText(QString::number(curr_activity->get_avg_watts()));
+
+    if(sel_count > 0)
+    {
+        ui->frame_avgValue->setVisible(true);
+    }
+    else
+    {
+        ui->frame_avgValue->setVisible(false);
+    }
+    if(curr_activity->get_sport() == curr_activity->isBike)
+    {
+        ui->lineEdit_watt->setVisible(true);
+        ui->label_avgWatt->setVisible(true);
+    }
+    else
+    {
+        ui->lineEdit_watt->setVisible(false);
+        ui->label_avgWatt->setVisible(false);
+    }
 }
 
 void MainWindow::set_add_swim_values()
