@@ -22,6 +22,8 @@ private slots:
     void on_radioButton_del_clicked();
     void on_pushButton_ok_clicked();
 
+    void on_comboBox_lap_currentIndexChanged(int index);
+
 private:
     Ui::Dialog_lapeditor *ui;
     Activity *curr_act;

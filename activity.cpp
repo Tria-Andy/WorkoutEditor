@@ -660,9 +660,9 @@ double Activity::interpolate_speed(int row,int sec,double limit)
     double avg_speed = this->get_int_speed(row,act_settings->get_act_isrecalc());
     double factor = 0.03;
 
-    if(row == 0 && sec < 10)
+    if(row == 0 && sec < 5)
     {
-        return curr_speed;
+        return (static_cast<double>(sec) + ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)))) * 1.5;
     }
     else
     {

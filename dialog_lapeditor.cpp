@@ -38,6 +38,10 @@ void Dialog_lapeditor::edit_laps(bool isAdd,int index)
         curr_act->edit_dist_model->insertRow(index,QModelIndex());
         curr_act->edit_int_model->insertRow(index,QModelIndex());
         curr_act->curr_act_model->insertRow(index,QModelIndex());
+        curr_act->edit_int_model->setData(curr_act->edit_int_model->index(index,1,QModelIndex()),ui->spinBox_starttime->value());
+        curr_act->edit_int_model->setData(curr_act->edit_int_model->index(index,2,QModelIndex()),ui->spinBox_endtime->value());
+        curr_act->edit_int_model->setData(curr_act->edit_int_model->index(index+1,1,QModelIndex()),ui->spinBox_endtime->value());
+
     }
     else
     {
@@ -45,6 +49,7 @@ void Dialog_lapeditor::edit_laps(bool isAdd,int index)
         curr_act->edit_int_model->removeRow(index,QModelIndex());
         curr_act->curr_act_model->removeRow(index,QModelIndex());
     }
+    accept();
 }
 
 
@@ -64,4 +69,10 @@ void Dialog_lapeditor::on_pushButton_ok_clicked()
     if(ui->radioButton_add->isChecked()) isAdd = true;
     if(ui->radioButton_del->isChecked()) isAdd = false;
     this->edit_laps(isAdd,ui->comboBox_lap->currentIndex());
+}
+
+void Dialog_lapeditor::on_comboBox_lap_currentIndexChanged(int vLap)
+{
+    ui->spinBox_starttime->setValue(curr_act->edit_int_model->data(curr_act->edit_int_model->index(vLap,1,QModelIndex())).toInt());
+    ui->spinBox_endtime->setValue(curr_act->edit_int_model->data(curr_act->edit_int_model->index(vLap,2,QModelIndex())).toInt());
 }
