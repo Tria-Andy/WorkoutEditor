@@ -20,7 +20,7 @@ private:
     int move_time;
     int swim_pace;
     int hf_threshold,hf_avg;
-    double swim_cv,swim_sri;
+    double swim_cv,swim_sri,polishFactor;
     QVector<double> calc_speed,p_swim_time,new_dist;
     QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg,p_swimlaps;
     bool changeRowCount;
@@ -68,6 +68,7 @@ public:
     QString get_sport() {return v_sport;}
     int get_header_num();
     void set_changeRowCount(bool setCount) {changeRowCount = setCount;}
+    void set_polishFactor(double vFactor) {polishFactor = vFactor;}
 
     //Averages
     void set_dist_factor();

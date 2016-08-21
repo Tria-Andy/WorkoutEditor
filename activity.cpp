@@ -658,7 +658,6 @@ double Activity::interpolate_speed(int row,int sec,double limit)
 {
     double curr_speed = samp_model->data(samp_model->index(sec,2,QModelIndex())).toDouble();
     double avg_speed = this->get_int_speed(row,act_settings->get_act_isrecalc());
-    double factor = 0.03;
 
     if(row == 0 && sec < 5)
     {
@@ -668,7 +667,7 @@ double Activity::interpolate_speed(int row,int sec,double limit)
     {
         if(avg_speed >= limit)
         {
-            return this->polish_SpeedValues(curr_speed,avg_speed,factor,true);
+            return this->polish_SpeedValues(curr_speed,avg_speed,polishFactor,true);
         }
         else
         {

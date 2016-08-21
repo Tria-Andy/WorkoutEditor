@@ -54,6 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionPlaner->setEnabled(false);
     ui->stackedWidget->setGeometry(5,5,0,0);
     ui->frame_avgValue->setVisible(false);
+    ui->frame_polish->setVisible(false);
     this->summery_view();
     ui->comboBox_schedMode->addItems(schedMode);
     ui->comboBox_phasefilter->addItem("All");
@@ -883,6 +884,10 @@ void MainWindow::set_activty_intervalls()
         ui->lineEdit_swimtime->setText(QDateTime::fromTime_t(curr_activity->get_move_time()).toUTC().toString("hh:mm:ss"));
         ui->lineEdit_swimpace->setText(editorSettings->set_time(curr_activity->get_swim_pace()));
     }
+    if(curr_activity->get_sport() == curr_activity->isRun)
+    {
+        ui->frame_polish->setVisible(true);
+    }
 }
 
 void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
@@ -1243,6 +1248,8 @@ void MainWindow::on_actionReset_triggered()
     this->set_avg_fields();
     this->set_menuItems(true,false);
 
+    ui->frame_polish->setVisible(false);
+
     ui->verticalLayout_interpol->removeWidget(intChartview);
     ui->lineEdit_lapPace->setText("-");
     ui->lineEdit_lapTime->setText("-");
@@ -1512,4 +1519,10 @@ void MainWindow::on_actionLapEditor_triggered()
     Dialog_lapeditor lapeditor(this,curr_activity);
     lapeditor.setModal(true);
     lapeditor.exec();
+}
+
+void MainWindow::on_horizontalSlider_polish_valueChanged(int value)
+{
+    ui->label_WorkFactor->setText(QString::number(10-value) + "%");
+    curr_activity->set_polishFactor(0.1-(static_cast<double>(value)/100));
 }

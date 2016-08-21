@@ -147,6 +147,7 @@ private slots:
     void on_horizontalSlider_factor_valueChanged(int value);
     void on_comboBox_intervals_currentIndexChanged(int index);
     void on_actionLapEditor_triggered();
+    void on_horizontalSlider_polish_valueChanged(int value);
 };
 
 #endif // MAINWINDOW_H
