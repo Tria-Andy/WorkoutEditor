@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>600</height>
+    <width>1200</width>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -649,15 +649,24 @@
           <verstretch>1</verstretch>
          </sizepolicy>
         </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item>
        <widget class="QFrame" name="frame_9">
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::Panel</enum>
         </property>
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
+        </property>
+        <property name="lineWidth">
+         <number>1</number>
+        </property>
+        <property name="midLineWidth">
+         <number>0</number>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <property name="spacing">

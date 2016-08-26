@@ -853,12 +853,6 @@ void MainWindow::set_activty_infos()
 
 void MainWindow::set_activty_intervalls()
 {
-    ui->tableView_int_times->setModel(curr_activity->edit_int_model);
-    ui->tableView_int_times->setItemDelegate(&time_del);
-    ui->tableView_int_times->hideColumn(3);
-    ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_int_times->verticalHeader()->setVisible(false);
-
     ui->tableView_int_dist->setModel(curr_activity->edit_dist_model);
     ui->tableView_int_dist->setItemDelegate(&dist_del);
     ui->tableView_int_dist->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -871,6 +865,11 @@ void MainWindow::set_activty_intervalls()
 
     if(curr_activity->get_sport() == curr_activity->isSwim)
     {
+        ui->tableView_int_times->setModel(curr_activity->swim_xdata);
+        ui->tableView_int_times->setItemDelegate(&swimlap_del);
+        ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_int_times->verticalHeader()->setVisible(false);
+
         ui->tableView_swimzone->setModel(curr_activity->swim_pace_model);
         ui->tableView_swimzone->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
@@ -883,6 +882,14 @@ void MainWindow::set_activty_intervalls()
         ui->lineEdit_laplen->setText(QString::number(curr_activity->get_swim_track()));
         ui->lineEdit_swimtime->setText(QDateTime::fromTime_t(curr_activity->get_move_time()).toUTC().toString("hh:mm:ss"));
         ui->lineEdit_swimpace->setText(editorSettings->set_time(curr_activity->get_swim_pace()));
+    }
+    else
+    {
+        ui->tableView_int_times->setModel(curr_activity->edit_int_model);
+        ui->tableView_int_times->setItemDelegate(&time_del);
+        ui->tableView_int_times->hideColumn(3);
+        ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_int_times->verticalHeader()->setVisible(false);
     }
     if(curr_activity->get_sport() == curr_activity->isRun)
     {
@@ -1232,6 +1239,7 @@ void MainWindow::on_actionReset_triggered()
     {
         curr_activity->swim_pace_model->clear();
         curr_activity->swim_hf_model->clear();
+        curr_activity->swim_xdata->clear();
         curr_activity->act_reset();
         ui->lineEdit_swimcv->clear();
         ui->lineEdit_hf_threshold->clear();

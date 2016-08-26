@@ -21,8 +21,8 @@ private:
     int swim_pace;
     int hf_threshold,hf_avg;
     double swim_cv,swim_sri,polishFactor;
-    QVector<double> calc_speed,p_swim_time,new_dist;
-    QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg,p_swimlaps;
+    QVector<double> calc_speed,calc_cadence,p_swim_time,new_dist;
+    QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg,p_swimlaps,vect_lapstart;
     bool changeRowCount;
 
     double get_int_distance(int,bool);
@@ -51,7 +51,7 @@ public:
     void set_additional_ride_info();
     void set_curr_act_model(bool);
     void act_reset();
-    QStandardItemModel *ride_model,*int_model,*samp_model,*curr_act_model,*edit_int_model,*edit_samp_model,*edit_dist_model;
+    QStandardItemModel *ride_model,*int_model,*samp_model,*curr_act_model,*edit_int_model,*swim_xdata,*edit_samp_model,*edit_dist_model;
     QStandardItemModel *swim_pace_model, *swim_hf_model;
 
     //Recalculation

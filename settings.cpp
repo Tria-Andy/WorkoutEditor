@@ -11,6 +11,7 @@ settings::settings()
     header_swim = "Swim Laps";
     header_bike = "Watt";
     header_int_time << "Interval" << "Start Sec" << "Stop Sec";
+    header_swim_time << "Lap" << "Start" << "Time" << "Strokes" << "Speed";
     header_int_km << "Interval" << "Distance new";
     act_isloaded = false;
     act_isrecalc = false;

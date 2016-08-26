@@ -62,7 +62,8 @@ HEADERS  += mainwindow.h \
     schedule.h \
     dialog_week_copy.h \
     dialog_version.h \
-    dialog_lapeditor.h
+    dialog_lapeditor.h \
+    del_swimlap.h
 
 FORMS    += mainwindow.ui \
     dialog_add.ui \
