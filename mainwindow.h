@@ -12,6 +12,7 @@
 #include "summery_delegate.h"
 #include "del_spinbox_double.h"
 #include "del_spinbox_int.h"
+#include "del_swimlap.h"
 #include "schedule.h"
 #include "dialog_add.h"
 #include "dialog_addweek.h"
@@ -25,6 +26,7 @@
 #include "dialog_inteditor.h"
 #include "dialog_settings.h"
 #include "dialog_pacecalc.h"
+#include "dialog_lapeditor.h"
 #include "dialog_week_copy.h"
 #include "settings.h"
 #include "activity.h"
@@ -50,6 +52,7 @@ private:
     summery_delegate sum_del;
     del_spinbox_double dist_del;
     del_spinbox_int time_del;
+    del_swimlap swimlap_del;
     QStandardItemModel *calendar_model,*sum_model;
     QStringList modus_list,cal_header,work_list,sum_name,sum_list,year_header,schedMode,sum_header;
 
@@ -145,8 +148,8 @@ private slots:
     void on_actionCopy_new_Speed_triggered();
     void on_horizontalSlider_factor_valueChanged(int value);
     void on_comboBox_intervals_currentIndexChanged(int index);
-    void on_pushButton_addLap_clicked();
-    void on_pushButton_delLap_clicked();
+    void on_actionLapEditor_triggered();
+    void on_horizontalSlider_polish_valueChanged(int value);
 };
 
 #endif // MAINWINDOW_H

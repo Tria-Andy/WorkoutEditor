@@ -341,7 +341,7 @@ void Dialog_addweek::on_timeEdit_bike_dur_timeChanged(const QTime &time)
     this->sum_duration();
     this->store_values(2);
     this->calc_percent();
-    ui->spinBox_bike_stress->setValue(round(add_settings->get_timesec(ui->timeEdit_bike_dur->time().toString("hh:mm"))*1.2));
+    ui->spinBox_bike_stress->setValue(round(add_settings->get_timesec(ui->timeEdit_bike_dur->time().toString("hh:mm"))*1.05));
 }
 
 void Dialog_addweek::on_timeEdit_run_dur_timeChanged(const QTime &time)

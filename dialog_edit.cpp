@@ -144,8 +144,19 @@ void Dialog_edit::on_pushButton_clicked()
 
 void Dialog_edit::on_dateEdit_edit_date_dateChanged(const QDate &date)
 {
+    bool sameDate;
     QList<QStandardItem*> workCount = workSched->workout_schedule->findItems(date.toString("dd.MM.yyyy"),Qt::MatchExactly,1);
-    if(workCount.count() == 3)
+
+    if(ui->dateEdit_workoutdate->date() == ui->dateEdit_edit_date->date())
+    {
+        sameDate = true;
+    }
+    else
+    {
+        sameDate = false;
+    }
+
+    if(workCount.count() == 3 && !sameDate)
     {
         ui->pushButton_copy->setEnabled(false);
         ui->pushButton_edit->setEnabled(false);

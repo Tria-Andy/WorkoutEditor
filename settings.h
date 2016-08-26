@@ -11,7 +11,7 @@ private:
     QString settingFile,valueFile,valueFilePath,splitter;
     QStringList keyList,gc_infos,phaseList,sportList,paceList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
     double powerList[4];
-    QStringList table_header,header_int,header_int_time, header_int_km;
+    QStringList table_header,header_int,header_int_time,header_swim_time,header_int_km;
     QString header_swim,header_bike,saisonFDW;
     QString gcPath,schedulePath,workoutsPath,act_sport,saison_year;
     bool act_isloaded,act_isrecalc;
@@ -71,6 +71,7 @@ public:
 
     QStringList get_int_header();
     QStringList get_time_header() {return header_int_time;}
+    QStringList get_swimtime_header(){return header_swim_time;}
     QStringList get_km_header() {return header_int_km;}
     void set_act_sport(QString sport) {act_sport = sport;}
     void set_act_isload(bool isloaded) {act_isloaded = isloaded;}

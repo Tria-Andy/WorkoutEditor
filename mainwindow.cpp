@@ -53,7 +53,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionPlaner->setIcon(QIcon(":/images/icons/Yes.png"));
     ui->actionPlaner->setEnabled(false);
     ui->stackedWidget->setGeometry(5,5,0,0);
-
+    ui->frame_avgValue->setVisible(false);
+    ui->frame_polish->setVisible(false);
     this->summery_view();
     ui->comboBox_schedMode->addItems(schedMode);
     ui->comboBox_phasefilter->addItem("All");
@@ -104,6 +105,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionEdit_Undo->setVisible(mEditor);
     ui->actionCopy_new_Distance->setVisible(mEditor);
     ui->actionCopy_new_Speed->setVisible(mEditor);
+    ui->actionLapEditor->setVisible(mEditor);
 
     ui->actionReset->setEnabled(editorSettings->get_act_isload());
     ui->actionUnselect_all_rows->setEnabled(editorSettings->get_act_isload());
@@ -111,6 +113,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionEdit_Undo->setEnabled(editorSettings->get_act_isload());
     ui->actionCopy_new_Distance->setEnabled(editorSettings->get_act_isload());
     ui->actionCopy_new_Speed->setEnabled(editorSettings->get_act_isload());
+    ui->actionLapEditor->setEnabled(editorSettings->get_act_isload());
 
     //Schedule
     ui->menuWorkout->setEnabled(mPlaner);
@@ -850,12 +853,6 @@ void MainWindow::set_activty_infos()
 
 void MainWindow::set_activty_intervalls()
 {
-    ui->tableView_int_times->setModel(curr_activity->edit_int_model);
-    ui->tableView_int_times->setItemDelegate(&time_del);
-    ui->tableView_int_times->hideColumn(3);
-    ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_int_times->verticalHeader()->setVisible(false);
-
     ui->tableView_int_dist->setModel(curr_activity->edit_dist_model);
     ui->tableView_int_dist->setItemDelegate(&dist_del);
     ui->tableView_int_dist->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -868,6 +865,11 @@ void MainWindow::set_activty_intervalls()
 
     if(curr_activity->get_sport() == curr_activity->isSwim)
     {
+        ui->tableView_int_times->setModel(curr_activity->swim_xdata);
+        ui->tableView_int_times->setItemDelegate(&swimlap_del);
+        ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_int_times->verticalHeader()->setVisible(false);
+
         ui->tableView_swimzone->setModel(curr_activity->swim_pace_model);
         ui->tableView_swimzone->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
@@ -880,6 +882,18 @@ void MainWindow::set_activty_intervalls()
         ui->lineEdit_laplen->setText(QString::number(curr_activity->get_swim_track()));
         ui->lineEdit_swimtime->setText(QDateTime::fromTime_t(curr_activity->get_move_time()).toUTC().toString("hh:mm:ss"));
         ui->lineEdit_swimpace->setText(editorSettings->set_time(curr_activity->get_swim_pace()));
+    }
+    else
+    {
+        ui->tableView_int_times->setModel(curr_activity->edit_int_model);
+        ui->tableView_int_times->setItemDelegate(&time_del);
+        ui->tableView_int_times->hideColumn(3);
+        ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_int_times->verticalHeader()->setVisible(false);
+    }
+    if(curr_activity->get_sport() == curr_activity->isRun)
+    {
+        ui->frame_polish->setVisible(true);
     }
 }
 
@@ -922,7 +936,7 @@ void MainWindow::set_polishValues(int lap,double factor)
         }
         else
         {
-            value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.1-factor,false);
+            value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.10-factor,true);
         }
         polishLine->append(i,value);
     }
@@ -935,7 +949,7 @@ void MainWindow::set_intChartValues(int lapindex,double avgSpeed)
     QStandardItemModel *sampmodel = curr_activity->samp_model;
     int start = intmodel->data(intmodel->index(lapindex,1,QModelIndex())).toInt();
     int stop = intmodel->data(intmodel->index(lapindex,2,QModelIndex())).toInt();
-    double max = 0.0,min = 25.0,current;
+    double max = 0.0,min = 40.0,current;
 
     if(speedValues.count() > 0)
     {
@@ -1131,6 +1145,25 @@ void MainWindow::set_avg_fields()
     ui->lineEdit_pace->setText(editorSettings->set_time(curr_activity->get_avg_pace()));
     ui->lineEdit_dist->setText(QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor()));
     ui->lineEdit_watt->setText(QString::number(curr_activity->get_avg_watts()));
+
+    if(sel_count > 0)
+    {
+        ui->frame_avgValue->setVisible(true);
+    }
+    else
+    {
+        ui->frame_avgValue->setVisible(false);
+    }
+    if(curr_activity->get_sport() == curr_activity->isBike)
+    {
+        ui->lineEdit_watt->setVisible(true);
+        ui->label_avgWatt->setVisible(true);
+    }
+    else
+    {
+        ui->lineEdit_watt->setVisible(false);
+        ui->label_avgWatt->setVisible(false);
+    }
 }
 
 void MainWindow::set_add_swim_values()
@@ -1206,6 +1239,7 @@ void MainWindow::on_actionReset_triggered()
     {
         curr_activity->swim_pace_model->clear();
         curr_activity->swim_hf_model->clear();
+        curr_activity->swim_xdata->clear();
         curr_activity->act_reset();
         ui->lineEdit_swimcv->clear();
         ui->lineEdit_hf_threshold->clear();
@@ -1221,6 +1255,8 @@ void MainWindow::on_actionReset_triggered()
     this->reset_jsontext();
     this->set_avg_fields();
     this->set_menuItems(true,false);
+
+    ui->frame_polish->setVisible(false);
 
     ui->verticalLayout_interpol->removeWidget(intChartview);
     ui->lineEdit_lapPace->setText("-");
@@ -1486,20 +1522,15 @@ void MainWindow::on_actionVersion_triggered()
     versionBox.exec();
 }
 
-void MainWindow::on_pushButton_addLap_clicked()
+void MainWindow::on_actionLapEditor_triggered()
 {
-    int addRow = ui->spinBox_rowPos->value()-1;
-    curr_activity->edit_int_model->insertRow(addRow,QModelIndex());
-    curr_activity->edit_dist_model->insertRow(addRow,QModelIndex());
-    curr_activity->curr_act_model->insertRow(addRow,QModelIndex());
-    curr_activity->set_changeRowCount(true);
+    Dialog_lapeditor lapeditor(this,curr_activity);
+    lapeditor.setModal(true);
+    lapeditor.exec();
 }
 
-void MainWindow::on_pushButton_delLap_clicked()
+void MainWindow::on_horizontalSlider_polish_valueChanged(int value)
 {
-    int delRow = ui->spinBox_rowPos->value()-1;
-    curr_activity->edit_int_model->removeRow(delRow,QModelIndex());
-    curr_activity->edit_dist_model->removeRow(delRow,QModelIndex());
-    curr_activity->curr_act_model->removeRow(delRow,QModelIndex());
-    curr_activity->set_changeRowCount(true);
+    ui->label_WorkFactor->setText(QString::number(10-value) + "%");
+    curr_activity->set_polishFactor(0.1-(static_cast<double>(value)/100));
 }
