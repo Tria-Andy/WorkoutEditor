@@ -22,6 +22,7 @@ public:
         QStringList calendar_values;
         QString delimiter = "-";
         QColor rect_color;
+        int textMargin = 2;
         QString phase;
         phase_font.setBold(true);
         phase_font.setPixelSize(16);
@@ -37,11 +38,13 @@ public:
         {
             headInfo = calendar_values.at(0) + " - " + calendar_values.at(1) + " - " + calendar_values.at(2);
             QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),20);
+            QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(), option.rect.width(),20);
             painter->fillRect(rect_head,QBrush(QColor(128,128,128)));
+            painter->fillRect(rect_head_text,QBrush(QColor(128,128,128)));
             QTextOption dateOption(Qt::AlignLeft);
             painter->setPen(Qt::white);
             painter->setFont(date_font);
-            painter->drawText(rect_head,headInfo,dateOption);
+            painter->drawText(rect_head_text,headInfo,dateOption);
             phase = calendar_values.at(3);
             if(phase.contains("OFF")) rect_color.setRgb(0,170,255);
             if(phase.contains("PREP")) rect_color.setRgb(0,170,0);
@@ -51,11 +54,13 @@ public:
             if(phase.contains("WK")) rect_color.setRgb(255,50,0);
 
             QRect rect_phase(option.rect.x(),option.rect.y()+21, option.rect.width(),option.rect.height()-21);
+            QRect rect_phase_text(option.rect.x()+textMargin,option.rect.y()+21, option.rect.width(),option.rect.height()-21);
             painter->fillRect(rect_phase,QBrush(rect_color));
+            painter->fillRect(rect_phase_text,QBrush(rect_color));
             QTextOption phaseOption(Qt::AlignVCenter);
             painter->setPen(Qt::black);
             painter->setFont(phase_font);
-            painter->drawText(rect_phase,phase,phaseOption);
+            painter->drawText(rect_phase_text,phase,phaseOption);
         }
         else
         {
@@ -73,11 +78,13 @@ public:
             labels = labels + "Stress:";
 
             QRect rect_label(option.rect.x(),option.rect.y(),option.rect.width()/2,option.rect.height());
+            QRect rect_label_text(option.rect.x()+textMargin,option.rect.y(),option.rect.width()/2,option.rect.height());
             painter->fillRect(rect_label,QBrush(rect_color));
+            painter->fillRect(rect_label_text,QBrush(rect_color));
             QTextOption labeloption(Qt::AlignLeft);
             painter->setPen(Qt::black);
             painter->setFont(work_font);
-            painter->drawText(rect_label,labels,labeloption);
+            painter->drawText(rect_label_text,labels,labeloption);
 
             if(!calendar_values.isEmpty())
             {

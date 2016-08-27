@@ -20,6 +20,7 @@ public:
         QStringList sum_values;
         QString delimiter = "-";
         QColor rect_color;
+        int textMargin = 2;
         phase_font.setBold(true);
         phase_font.setPixelSize(16);
         date_font.setBold(true);
@@ -40,13 +41,15 @@ public:
         if(sum_values.at(0) == "Other") rect_color.setRgb(170,255,255);
 
         QRect rect_head(option.rect.x(),option.rect.y(),option.rect.width(),20);
+        QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(),option.rect.width(),20);
         painter->setBrush(QBrush(rect_color));
         painter->fillRect(rect_head,QBrush(rect_color));
+        painter->fillRect(rect_head_text,QBrush(rect_color));
         painter->drawRect(rect_head);
         QTextOption headoption(Qt::AlignLeft);
         painter->setPen(Qt::black);
         painter->setFont(date_font);
-        painter->drawText(rect_head,sum_values.at(0),headoption);
+        painter->drawText(rect_head_text,sum_values.at(0),headoption);
 
         QString labels;
         labels = "Workouts:\n";
@@ -56,12 +59,14 @@ public:
         labels = labels + "Stress(TSS):";
 
         QRect rect_label(option.rect.x(),option.rect.y()+21,option.rect.width()/2,option.rect.height()-21);
+        QRect rect_label_text(option.rect.x()+textMargin,option.rect.y()+21,option.rect.width()/2,option.rect.height()-21);
         painter->setBrush(QBrush(rect_color));
         painter->fillRect(rect_label,QBrush(rect_color));
+        painter->fillRect(rect_label_text,QBrush(rect_color));
         QTextOption labeloption(Qt::AlignLeft);
         painter->setPen(Qt::black);
         painter->setFont(work_font);
-        painter->drawText(rect_label,labels,labeloption);
+        painter->drawText(rect_label_text,labels,labeloption);
 
         if(!sum_values.isEmpty())
         {
