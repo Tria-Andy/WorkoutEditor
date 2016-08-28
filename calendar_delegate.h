@@ -17,7 +17,7 @@ public:
     {
         painter->save();
         QFont phase_font,date_font, work_font;
-        QString temp_value;
+        QString temp_value,dayDate;
         QStringList calendar_values;
         QString delimiter = "#";
         QColor rect_color;
@@ -32,7 +32,8 @@ public:
 
         temp_value = index.data(Qt::DisplayRole).toString();
         calendar_values = temp_value.split(delimiter);
-
+        dayDate = calendar_values.at(0);
+        dayDate = dayDate.left(7);
         QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),20);
         QRect rect_head_text(option.rect.x()+ textMargin,option.rect.y(), option.rect.width(),20);
         rect_color.setRgb(128,128,128);
@@ -51,7 +52,7 @@ public:
 
         painter->setPen(Qt::white);
         painter->setFont(date_font);
-        painter->drawText(rect_head_text,calendar_values.at(0),dateOption);
+        painter->drawText(rect_head_text,dayDate,dateOption);
 
         if(index.column() != 0)
         {

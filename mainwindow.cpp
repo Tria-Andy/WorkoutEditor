@@ -867,7 +867,7 @@ void MainWindow::set_activty_intervalls()
     {
         ui->tableView_int_times->setModel(curr_activity->swim_xdata);
         ui->tableView_int_times->setItemDelegate(&swimlap_del);
-        ui->tableView_int_times->hideColumn(1);
+        //ui->tableView_int_times->hideColumn(1);
         ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_int_times->verticalHeader()->setVisible(false);
 

@@ -84,19 +84,35 @@ public:
 
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
     {
-        QModelIndex new_index = model->index(index.row()+1,index.column()-1,QModelIndex());
-        QModelIndex curr_index = model->index(index.row(),index.column()-1,QModelIndex());
+        QModelIndex new_index,curr_index;
         QModelIndex speed_index = model->index(index.row(),4,QModelIndex());
         QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
         spinBox->interpretText();
+        QString isBreak = "Break";
+        QString currLap;
+        int lapTime,startTime;
+
 
         int value = spinBox->value();
-        int lapstart = model->data(curr_index,Qt::DisplayRole).toInt();
         double lapSpeed = settings().get_speed(QTime::fromString(settings().set_time(value),"mm:ss"),50,settings().isSwim,false).toDouble();
 
         model->setData(index, value, Qt::EditRole);
-        model->setData(new_index,lapstart+value, Qt::EditRole);
         model->setData(speed_index,lapSpeed);
+
+        int laprow = index.row();
+
+        do
+        {
+            curr_index = model->index(laprow,1,QModelIndex());
+            startTime = model->data(model->index(laprow,1,QModelIndex())).toInt();
+            lapTime = model->data(model->index(laprow,2,QModelIndex())).toInt();
+
+            new_index = model->index(laprow+1,1,QModelIndex());
+            model->setData(new_index,startTime+lapTime,Qt::EditRole);
+            ++laprow;
+            currLap = model->data(model->index(laprow,0,QModelIndex())).toString();
+
+        } while (currLap != isBreak);
     }
 
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -104,7 +120,6 @@ public:
         Q_UNUSED(index)
         editor->setGeometry(option.rect);
     }
-
 };
 
 #endif // DEL_SWIMLAP_H
