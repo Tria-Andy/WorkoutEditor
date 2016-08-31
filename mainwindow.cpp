@@ -8,19 +8,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    editorSettings = new settings();
     workSchedule = new schedule();
     work_list << "Phase:" << "Week:" << "Date:" << "Time:" << "Sport:" << "Code:" << "Title:" << "Duration:" << "Distance:" << "Stress:";
     sum_name << "Workouts:" << "Duration:" << "Distance:" << "StressScore:";
-    sum_list << "Summery:" << "Swim:" << "Bike:" << "Run:" << "Other:";
     schedMode << "Week" << "Year";
     sum_header << "Summery:";
     year_header << "Week"
-                << editorSettings->isSwim
-                << editorSettings->isBike
-                << editorSettings->isRun
-                << editorSettings->isStrength
-                << editorSettings->isAlt
+                << editorSettings.isSwim
+                << editorSettings.isBike
+                << editorSettings.isRun
+                << editorSettings.isStrength
+                << editorSettings.isAlt
                 << "Summery";
     selectedDate = QDate::currentDate();
     firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
@@ -58,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->summery_view();
     ui->comboBox_schedMode->addItems(schedMode);
     ui->comboBox_phasefilter->addItem("All");
-    ui->comboBox_phasefilter->addItems(editorSettings->get_phaseList());
+    ui->comboBox_phasefilter->addItems(editorSettings.get_phaseList());
     ui->comboBox_phasefilter->setEnabled(false);
     this->set_menuItems(false,true);
 }
@@ -75,7 +73,6 @@ void MainWindow::freeMem()
     delete workSchedule;
     delete sum_model;
     delete calendar_model;
-    delete editorSettings;
 }
 
 void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
@@ -107,13 +104,13 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionCopy_new_Speed->setVisible(mEditor);
     ui->actionLapEditor->setVisible(mEditor);
 
-    ui->actionReset->setEnabled(editorSettings->get_act_isload());
-    ui->actionUnselect_all_rows->setEnabled(editorSettings->get_act_isload());
-    ui->actionEdit_Distance->setEnabled(editorSettings->get_act_isload());
-    ui->actionEdit_Undo->setEnabled(editorSettings->get_act_isload());
-    ui->actionCopy_new_Distance->setEnabled(editorSettings->get_act_isload());
-    ui->actionCopy_new_Speed->setEnabled(editorSettings->get_act_isload());
-    ui->actionLapEditor->setEnabled(editorSettings->get_act_isload());
+    ui->actionReset->setEnabled(editorSettings.get_act_isload());
+    ui->actionUnselect_all_rows->setEnabled(editorSettings.get_act_isload());
+    ui->actionEdit_Distance->setEnabled(editorSettings.get_act_isload());
+    ui->actionEdit_Undo->setEnabled(editorSettings.get_act_isload());
+    ui->actionCopy_new_Distance->setEnabled(editorSettings.get_act_isload());
+    ui->actionCopy_new_Speed->setEnabled(editorSettings.get_act_isload());
+    ui->actionLapEditor->setEnabled(editorSettings.get_act_isload());
 
     //Schedule
     ui->menuWorkout->setEnabled(mPlaner);
@@ -133,12 +130,12 @@ QString MainWindow::set_summeryString(int pos,bool week)
         if(pos == 0)
         {
             percent = (static_cast<double>(dur_sum[pos]) / static_cast<double>(dur_sum[0]))*100;
-            sumString = sum_name +"-"+ QString::number(work_sum[pos]) +"-"+ editorSettings->set_time(dur_sum[pos]) +"-"+ QString::number(editorSettings->set_doubleValue(percent)) +"-"+ QString::number(dist_sum[pos]) +"-"+ QString::number(stress_sum[pos]);
+            sumString = sum_name +"-"+ QString::number(work_sum[pos]) +"-"+ editorSettings.set_time(dur_sum[pos]) +"-"+ QString::number(editorSettings.set_doubleValue(percent)) +"-"+ QString::number(dist_sum[pos]) +"-"+ QString::number(stress_sum[pos]);
         }
         else
         {
             percent = static_cast<double>(dur_sum[pos]) / (static_cast<double>(dur_sum[0]))*100;
-            sumString = editorSettings->get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos]) +"-"+ editorSettings->set_time(dur_sum[pos]) +"-"+ QString::number(editorSettings->set_doubleValue(percent)) +"-"+ QString::number(dist_sum[pos]) +"-"+QString::number(stress_sum[pos]);
+            sumString = editorSettings.get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos]) +"-"+ editorSettings.set_time(dur_sum[pos]) +"-"+ QString::number(editorSettings.set_doubleValue(percent)) +"-"+ QString::number(dist_sum[pos]) +"-"+QString::number(stress_sum[pos]);
         }
     }
     else
@@ -146,12 +143,12 @@ QString MainWindow::set_summeryString(int pos,bool week)
         if(pos == 0)
         {
             percent = (static_cast<double>(dur_sum[5]) / static_cast<double>(dur_sum[5]))*100;
-            sumString = sum_name +"-"+ QString::number(work_sum[5]) +"-"+ editorSettings->set_time(dur_sum[5]) +"-"+ QString::number(editorSettings->set_doubleValue(percent)) +"-"+ QString::number(dist_sum[5]) +"-"+ QString::number(stress_sum[5]);
+            sumString = sum_name +"-"+ QString::number(work_sum[5]) +"-"+ editorSettings.set_time(dur_sum[5]) +"-"+ QString::number(editorSettings.set_doubleValue(percent)) +"-"+ QString::number(dist_sum[5]) +"-"+ QString::number(stress_sum[5]);
         }
         else
         {
             percent = (static_cast<double>(dur_sum[pos-1]) / static_cast<double>(dur_sum[5]))*100;
-            sumString = editorSettings->get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos-1]) +"-"+ editorSettings->set_time(dur_sum[pos-1]) +"-"+ QString::number(editorSettings->set_doubleValue(percent)) +"-"+ QString::number(dist_sum[pos-1]) +"-"+QString::number(stress_sum[pos-1]);
+            sumString = editorSettings.get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos-1]) +"-"+ editorSettings.set_time(dur_sum[pos-1]) +"-"+ QString::number(editorSettings.set_doubleValue(percent)) +"-"+ QString::number(dist_sum[pos-1]) +"-"+QString::number(stress_sum[pos-1]);
         }
     }
     return sumString;
@@ -162,7 +159,7 @@ void MainWindow::summery_calc(int pos, QModelIndex index,bool week)
     if(week)
     {
         work_sum[pos] = work_sum[pos] + 1;
-        dur_sum[pos] = dur_sum[pos] + editorSettings->get_timesec(workSchedule->workout_schedule->item(index.row(),6)->text());
+        dur_sum[pos] = dur_sum[pos] + editorSettings.get_timesec(workSchedule->workout_schedule->item(index.row(),6)->text());
         dist_sum[pos] = dist_sum[pos] + workSchedule->workout_schedule->item(index.row(),7)->text().toDouble();
         stress_sum[pos] = stress_sum[pos] + workSchedule->workout_schedule->item(index.row(),8)->text().toInt();
     }
@@ -178,7 +175,7 @@ void MainWindow::summery_calc(int pos, QModelIndex index,bool week)
         stress = sumValues.at(3);
 
         work_sum[pos] = work_sum[pos] + work.toInt();
-        dur_sum[pos] = dur_sum[pos] + (editorSettings->get_timesec(dura)*60);
+        dur_sum[pos] = dur_sum[pos] + (editorSettings.get_timesec(dura)*60);
         dist_sum[pos] = dist_sum[pos] + dist.toDouble();
         stress_sum[pos] = stress_sum[pos] + stress.toInt();
     }
@@ -218,31 +215,31 @@ void MainWindow::summery_view()
             index = workSchedule->workout_schedule->indexFromItem(list.at(i));
             sport = workSchedule->workout_schedule->item(index.row(),3)->text();
 
-            if(sport != editorSettings->isOther)
+            if(sport != editorSettings.isOther)
             {
                 this->summery_calc(0,index,isWeekMode);
             }
-            if(sport == editorSettings->isSwim)
+            if(sport == editorSettings.isSwim)
             {
                 this->summery_calc(1,index,isWeekMode);
             }
-            if(sport == editorSettings->isBike)
+            if(sport == editorSettings.isBike)
             {
                 this->summery_calc(2,index,isWeekMode);
             }
-            if(sport == editorSettings->isRun)
+            if(sport == editorSettings.isRun)
             {
                 this->summery_calc(3,index,isWeekMode);
             }
-            if(sport == editorSettings->isStrength)
+            if(sport == editorSettings.isStrength)
             {
                 this->summery_calc(4,index,isWeekMode);
             }
-            if(sport == editorSettings->isAlt)
+            if(sport == editorSettings.isAlt)
             {
                 this->summery_calc(5,index,isWeekMode);
             }
-            if(sport == editorSettings->isTria)
+            if(sport == editorSettings.isTria)
             {
                 this->summery_calc(6,index,isWeekMode);
             }
@@ -375,7 +372,7 @@ void MainWindow::workout_calendar()
                     }
                     else
                     {
-                        phase_value = "No Phase";
+                        phase_value = editorSettings.get_emptyPhase();
                     }
                     calendar_model->setData(cal_index,weekValue + delimiter + phase_value);
                 }
@@ -754,7 +751,7 @@ void MainWindow::loadfile(const QString &filename)
         curr_activity->read_jsonFile(filecontent);
         file.close();
 
-        editorSettings->set_act_isload(true);
+        editorSettings.set_act_isload(true);
         this->set_menuItems(true,false);
         this->set_activty_infos();
 
@@ -883,7 +880,7 @@ void MainWindow::set_activty_intervalls()
 
         ui->lineEdit_laplen->setText(QString::number(curr_activity->get_swim_track()));
         ui->lineEdit_swimtime->setText(QDateTime::fromTime_t(curr_activity->get_move_time()).toUTC().toString("hh:mm:ss"));
-        ui->lineEdit_swimpace->setText(editorSettings->set_time(curr_activity->get_swim_pace()));
+        ui->lineEdit_swimpace->setText(editorSettings.set_time(curr_activity->get_swim_pace()));
     }
     else
     {
@@ -904,19 +901,19 @@ void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
     ui->label_factorValue->setText(QString::number(10-value) + "%");
     double factor = static_cast<double>(value)/100;
     this->set_polishValues(ui->comboBox_intervals->currentIndex(),factor);
-    ui->lineEdit_polMax->setText(QString::number(curr_activity->polish_SpeedValues(40.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),editorSettings->get_act_isrecalc()),0.1-factor,false)));
-    ui->lineEdit_polMin->setText(QString::number(curr_activity->polish_SpeedValues(1.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),editorSettings->get_act_isrecalc()),0.1-factor,false)));
+    ui->lineEdit_polMax->setText(QString::number(curr_activity->polish_SpeedValues(40.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),editorSettings.get_act_isrecalc()),0.1-factor,false)));
+    ui->lineEdit_polMin->setText(QString::number(curr_activity->polish_SpeedValues(1.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),editorSettings.get_act_isrecalc()),0.1-factor,false)));
 }
 
 void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
 {
     ui->horizontalSlider_factor->setValue(0);
-    if(editorSettings->get_act_isload())
+    if(editorSettings.get_act_isload())
     {
-        ui->lineEdit_lapTime->setText(editorSettings->set_time(curr_activity->get_int_duration(index,editorSettings->get_act_isrecalc())));
-        ui->lineEdit_lapPace->setText(editorSettings->set_time(curr_activity->get_int_pace(index,editorSettings->get_act_isrecalc())));
-        ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,editorSettings->get_act_isrecalc())));
-        double avg = curr_activity->get_int_speed(index,editorSettings->get_act_isrecalc());
+        ui->lineEdit_lapTime->setText(editorSettings.set_time(curr_activity->get_int_duration(index,editorSettings.get_act_isrecalc())));
+        ui->lineEdit_lapPace->setText(editorSettings.set_time(curr_activity->get_int_pace(index,editorSettings.get_act_isrecalc())));
+        ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,editorSettings.get_act_isrecalc())));
+        double avg = curr_activity->get_int_speed(index,editorSettings.get_act_isrecalc());
         this->set_intChartValues(index,avg);
         this->set_polishValues(index,0.0);
     }
@@ -925,7 +922,7 @@ void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
 void MainWindow::set_polishValues(int lap,double factor)
 {
     double value;
-    double avg = curr_activity->get_int_speed(lap,editorSettings->get_act_isrecalc());
+    double avg = curr_activity->get_int_speed(lap,editorSettings.get_act_isrecalc());
     if(polishLine->count() > 0)
     {
         polishLine->clear();
@@ -1005,7 +1002,7 @@ void MainWindow::write_hf_infos()
 
     for(int i = 0; i < 6; i++)
     {
-        hf_value = editorSettings->get_timesec(curr_activity->swim_hf_model->data(curr_activity->swim_hf_model->index(i,3,QModelIndex())).toString());
+        hf_value = editorSettings.get_timesec(curr_activity->swim_hf_model->data(curr_activity->swim_hf_model->index(i,3,QModelIndex())).toString());
         ui->plainTextEdit_hf->appendPlainText("{ \"time_in_zone_H" + QString::number(i+1) + "\":{ \"value\":\"" + QString::number(hf_value) + "\" }},");
     }
     ui->plainTextEdit_hf->appendPlainText("{ \"total_work\":{ \"value\":\""  + ui->lineEdit_kj->text() + "\" }} \n ],");
@@ -1066,7 +1063,7 @@ void MainWindow::on_pushButton_week_plus_clicked()
     else
     {
         ++weekpos;
-        if(weekpos + 12 == editorSettings->get_saisonWeeks())
+        if(weekpos + 12 == editorSettings.get_saisonWeeks())
         {
             ui->pushButton_fourplus->setEnabled(false);
             ui->pushButton_week_plus->setEnabled(false);
@@ -1094,9 +1091,9 @@ void MainWindow::on_pushButton_fourplus_clicked()
     else
     {
         weekpos = weekpos+4;
-        if(weekpos + 12 >= editorSettings->get_saisonWeeks())
+        if(weekpos + 12 >= editorSettings.get_saisonWeeks())
         {
-            weekpos = editorSettings->get_saisonWeeks()-12;
+            weekpos = editorSettings.get_saisonWeeks()-12;
             ui->pushButton_fourplus->setEnabled(false);
             ui->pushButton_week_plus->setEnabled(false);
             this->workout_calendar();
@@ -1143,8 +1140,8 @@ void MainWindow::on_actionSelect_File_triggered()
 void MainWindow::set_avg_fields()
 {
     ui->lineEdit_numsel->setText(QString::number(sel_count));
-    ui->lineEdit_lap->setText(editorSettings->set_time(curr_activity->get_avg_laptime()));
-    ui->lineEdit_pace->setText(editorSettings->set_time(curr_activity->get_avg_pace()));
+    ui->lineEdit_lap->setText(editorSettings.set_time(curr_activity->get_avg_laptime()));
+    ui->lineEdit_pace->setText(editorSettings.set_time(curr_activity->get_avg_pace()));
     ui->lineEdit_dist->setText(QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor()));
     ui->lineEdit_watt->setText(QString::number(curr_activity->get_avg_watts()));
 
@@ -1232,11 +1229,11 @@ void MainWindow::on_actionReset_triggered()
     curr_activity->samp_model->clear();
     curr_activity->edit_int_model->clear();
     curr_activity->edit_dist_model->clear();
-    if(editorSettings->get_act_isrecalc())
+    if(editorSettings.get_act_isrecalc())
     {
         curr_activity->edit_samp_model->clear();
     }
-    editorSettings->set_act_recalc(false);
+    editorSettings.set_act_recalc(false);
     if(curr_activity->get_sport() == curr_activity->isSwim)
     {
         curr_activity->swim_pace_model->clear();
@@ -1252,7 +1249,7 @@ void MainWindow::on_actionReset_triggered()
         ui->lineEdit_kj->clear();     
     }
 
-    editorSettings->set_act_isload(false);
+    editorSettings.set_act_isload(false);
     this->sel_count = 0;
     this->reset_jsontext();
     this->set_avg_fields();
@@ -1317,8 +1314,8 @@ void MainWindow::on_pushButton_calcHF_clicked()
 void MainWindow::on_actionEdit_Distance_triggered()
 {
     this->reset_jsontext();
-    editorSettings->set_act_recalc(true);
-    curr_activity->recalculate_intervalls(editorSettings->get_act_isrecalc());
+    editorSettings.set_act_recalc(true);
+    curr_activity->recalculate_intervalls(editorSettings.get_act_isrecalc());
     curr_activity->set_additional_ride_info();
     this->set_activty_intervalls();
     this->write_int_infos();
@@ -1328,9 +1325,9 @@ void MainWindow::on_actionEdit_Distance_triggered()
 
 void MainWindow::on_actionEdit_Undo_triggered()
 {
-    editorSettings->set_act_recalc(false);
+    editorSettings.set_act_recalc(false);
     this->reset_jsontext();
-    curr_activity->recalculate_intervalls(editorSettings->get_act_isrecalc());
+    curr_activity->recalculate_intervalls(editorSettings.get_act_isrecalc());
     curr_activity->set_additional_ride_info();
     this->set_activty_intervalls();
     this->set_activty_infos();
@@ -1484,7 +1481,7 @@ void MainWindow::on_actionSwitch_Year_triggered()
     {
         workSchedule->changeYear();
         /*
-        if(QDate::currentDate() >= QDate::fromString(editorSettings->get_saisonFDW(),"dd.MM.yyyy"))
+        if(QDate::currentDate() >= QDate::fromString(editorSettings.get_saisonFDW(),"dd.MM.yyyy"))
         {
             workSchedule->changeYear();
             this->workout_calendar();

@@ -11,10 +11,11 @@ private:
     QString settingFile,valueFile,valueFilePath,splitter;
     QStringList phaseList;
     QStringList keyList,gc_infos,sportList,paceList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
+    QStringList sportColor,phaseColor;
     double powerList[4];
     QStringList table_header,header_int,header_int_time,header_swim_time,header_int_km;
     QString header_swim,header_bike,saisonFDW;
-    QString gcPath,schedulePath,workoutsPath,act_sport,saison_year;
+    QString gcPath,schedulePath,workoutsPath,act_sport,saison_year,emptyPhase,emptyPhaseColor;
     bool act_isloaded,act_isrecalc;
     void loadSettings();
     void saveSettings();
@@ -29,10 +30,14 @@ public:
     QString get_workoutsPath() {return workoutsPath;}
     QString get_saisonYear() {return saison_year;}
     QString get_saisonFDW() {return saisonFDW;}
+    QString get_emptyPhaseColor() {return emptyPhaseColor;}
+    QString get_emptyPhase() {return emptyPhase;}
     QStringList get_keyList() {return keyList;}
     QStringList get_gcInfo() {return gc_infos;}
     QStringList get_phaseList() {return phaseList;}
+    QStringList get_phaseColor() {return phaseColor;}
     QStringList get_sportList() {return sportList;}
+    QStringList get_sportColor() {return sportColor;}
     QStringList get_paceList() {return paceList;}
     QStringList get_hfList() {return hfList;}
     QStringList get_cycleList() {return cycleList;}
@@ -60,6 +65,11 @@ public:
         saison_weeks = v_weeks;
         saisonFDW = v_fdw.toString("dd.MM.yyyy");
         saison_start = v_start;
+    }
+
+    QString get_colorValues(QString cString)
+    {
+
     }
 
     QString set_time(int);

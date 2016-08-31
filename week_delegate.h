@@ -5,6 +5,7 @@
 #include <QTableView>
 #include <QDebug>
 #include <QDate>
+#include "settings.h"
 
 class week_delegate : public QItemDelegate
 {
@@ -22,6 +23,7 @@ public:
         QStringList calendar_values;
         QString delimiter = "-";
         QColor rect_color;
+        QString cRed,cGreen,cBlue;
         int textMargin = 2;
         QString phase;
         phase_font.setBold(true);
@@ -46,12 +48,19 @@ public:
             painter->setFont(date_font);
             painter->drawText(rect_head_text,headInfo,dateOption);
             phase = calendar_values.at(3);
-            if(phase.contains("OFF")) rect_color.setRgb(0,170,255);
-            if(phase.contains("PREP")) rect_color.setRgb(0,170,0);
-            if(phase.contains("BASE")) rect_color.setRgb(240,240,0);
-            if(phase.contains("BUILD")) rect_color.setRgb(255,150,0);
-            if(phase.contains("PEAK")) rect_color.setRgb(255,85,0);
-            if(phase.contains("WK")) rect_color.setRgb(255,50,0);
+
+            for(int pos = 0; pos < settings().get_phaseList().count();++pos)
+            {
+                if(phase.contains(settings().get_phaseList().at(pos)))
+                {
+                    QString sColor = settings().get_phaseColor().at(pos);
+                    cRed = sColor.split("-").at(0);
+                    cGreen = sColor.split("-").at(1);
+                    cBlue = sColor.split("-").at(2);
+                    rect_color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+                    break;
+                }
+            }
 
             QRect rect_phase(option.rect.x(),option.rect.y()+21, option.rect.width(),option.rect.height()-21);
             QRect rect_phase_text(option.rect.x()+textMargin,option.rect.y()+21, option.rect.width(),option.rect.height()-21);
@@ -70,7 +79,20 @@ public:
             if(index.column() == 4) rect_color.setRgb(192,192,192);
             if(index.column() == 5) rect_color.setRgb(255,255,0);
             if(index.column() == 6) rect_color.setRgb(0,255,255);
-
+            /*
+            for(int pos = 0; pos < settings().get_sportList().count();++pos)
+            {
+                if(index.column() == pos+1)
+                {
+                    QString sColor = settings().get_sportColor().at(pos);
+                    cRed = sColor.split("-").at(0);
+                    cGreen = sColor.split("-").at(1);
+                    cBlue = sColor.split("-").at(2);
+                    rect_color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+                    break;
+                }
+            }
+            */
             QString labels;
             labels = "Workouts:\n";
             labels = labels + "Distance:\n";

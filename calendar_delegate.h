@@ -21,6 +21,7 @@ public:
         QString temp_value,dayDate;
         QStringList calendar_values;
         QString delimiter = "#";
+        QString cRed,cGreen,cBlue;
         QColor rect_color;
         int textMargin = 2;
         int celloffset = 21;
@@ -75,23 +76,19 @@ public:
 
                     y += height+1;
 
-                    if(workout.contains(settings().isSwim,Qt::CaseSensitive)) rect_color.setRgb(0,154,231);
-                    if(workout.contains(settings().isBike,Qt::CaseSensitive)) rect_color.setRgb(255,170,0);
-                    if(workout.contains(settings().isRun,Qt::CaseSensitive)) rect_color.setRgb(0,170,0);
-                    if(workout.contains(settings().isStrength,Qt::CaseSensitive)) rect_color.setRgb(192,192,192);
-                    if(workout.contains(settings().isAlt,Qt::CaseSensitive)) rect_color.setRgb(255,255,0);
-                    if(workout.contains(settings().isTria,Qt::CaseSensitive)) rect_color.setRgb(255,0,0);
-                    if(workout.contains(settings().isOther,Qt::CaseSensitive)) rect_color.setRgb(170,255,255);
-
-                    /*
                     for(int pos = 0; pos < settings().get_sportList().count();++pos)
                     {
                         if(workout.contains(settings().get_sportList().at(pos)))
                         {
-                            qDebug() << workout << settings().get_sportList().at(pos);
+                            QString sColor = settings().get_sportColor().at(pos);
+                            cRed = sColor.split("-").at(0);
+                            cGreen = sColor.split("-").at(1);
+                            cBlue = sColor.split("-").at(2);
+                            rect_color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+                            break;
                         }
                     }
-                    */
+
                     painter->fillRect(rect_work,QBrush(rect_color));
                     painter->fillRect(rect_work_text,QBrush(rect_color));
 
@@ -111,13 +108,26 @@ public:
             phase = phase.remove(0,phase.indexOf(delimiter)+1);
             if(!phase.isEmpty())
             {
-                if(phase.contains(settings().get_phaseList().at(0))) rect_color.setRgb(0,185,255);
-                if(phase.contains(settings().get_phaseList().at(1))) rect_color.setRgb(60,235,60);
-                if(phase.contains(settings().get_phaseList().at(2))) rect_color.setRgb(230,255,0);
-                if(phase.contains(settings().get_phaseList().at(3))) rect_color.setRgb(255,150,100);
-                if(phase.contains(settings().get_phaseList().at(4))) rect_color.setRgb(255,85,0);
-                if(phase.contains(settings().get_phaseList().at(5))) rect_color.setRgb(255,50,0);
-                if(phase.contains("Phase")) rect_color.setRgb(125,125,200);
+                for(int pos = 0; pos < settings().get_phaseList().count();++pos)
+                {
+                    if(phase.contains(settings().get_phaseList().at(pos)))
+                    {
+                        QString sColor = settings().get_phaseColor().at(pos);
+                        cRed = sColor.split("-").at(0);
+                        cGreen = sColor.split("-").at(1);
+                        cBlue = sColor.split("-").at(2);
+                        rect_color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+                        break;
+                    }
+                    else
+                    {
+                        QString sColor = settings().get_emptyPhaseColor();
+                        cRed = sColor.split("-").at(0);
+                        cGreen = sColor.split("-").at(1);
+                        cBlue = sColor.split("-").at(2);
+                        rect_color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+                    }
+                }
 
                 QRect rect_phase(option.rect.x(),option.rect.y()+celloffset, option.rect.width(),option.rect.height()-celloffset);
                 QRect rect_phase_text(option.rect.x()+ textMargin,option.rect.y()+celloffset, option.rect.width(),option.rect.height()-celloffset);
@@ -130,7 +140,6 @@ public:
                 painter->drawText(rect_phase_text,phase,phaseOption);
              }
         }
-
         painter->restore();
     }
 

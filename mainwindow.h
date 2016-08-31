@@ -45,7 +45,7 @@ private:
 
     schedule *workSchedule;
     Activity *curr_activity;
-    settings *editorSettings;
+    settings editorSettings;
     standardWorkouts *stdWorkout;
     calendar_delegate calender_del;
     week_delegate week_del;
@@ -54,7 +54,7 @@ private:
     del_spinbox_int time_del;
     del_swimlap swimlap_del;
     QStandardItemModel *calendar_model,*sum_model;
-    QStringList modus_list,cal_header,work_list,sum_name,sum_list,year_header,schedMode,sum_header;
+    QStringList modus_list,cal_header,work_list,sum_name,year_header,schedMode,sum_header;
 
     //Intercall Chart
     QChart *intChart;

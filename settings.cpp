@@ -57,6 +57,8 @@ settings::settings()
     myvalues->beginGroup("Sport");
         QString sport_childs = myvalues->value("sports").toString();
         sportList << sport_childs.split(splitter);
+        sport_childs = myvalues->value("color").toString();
+        sportColor << sport_childs.split(splitter);
     myvalues->endGroup();
 
     myvalues->beginGroup("Threshold");
@@ -94,6 +96,10 @@ settings::settings()
     myvalues->beginGroup("Phase");
         QString phase_childs = myvalues->value("phases").toString();
         phaseList << phase_childs.split(splitter);
+        phase_childs = myvalues->value("color").toString();
+        phaseColor << phase_childs.split(splitter);
+        emptyPhase = myvalues->value("empty").toString();
+        emptyPhaseColor = myvalues->value("emptycolor").toString();
     myvalues->endGroup();
 
     myvalues->beginGroup("Cycle");
