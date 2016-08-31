@@ -13,7 +13,7 @@ class schedule
 {
 
 public:
-    schedule(settings *p_settings = 0);
+    schedule();
     QStandardItemModel *workout_schedule,*week_meta,*week_content;
     void load_workouts_file();
     void save_workout_file();
@@ -54,7 +54,6 @@ public:
     QBarSet* get_qBarSet();
 
 private:
-    settings *sched_settings;
     QStringList workoutTags,metaTags,contentTags;
     QString copyFrom, copyTo;
     QDate firstdayofweek;

@@ -53,7 +53,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -192,6 +192,22 @@
              </item>
              <item>
               <widget class="QLineEdit" name="lineEdit_addedit"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_color">
+               <property name="text">
+                <string/>
+               </property>
+               <property name="autoDefault">
+                <bool>false</bool>
+               </property>
+               <property name="default">
+                <bool>true</bool>
+               </property>
+               <property name="flat">
+                <bool>false</bool>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QFrame" name="frame_4">

@@ -41,6 +41,10 @@ void Dialog_lapeditor::edit_laps(bool isAdd,int index)
         curr_act->edit_int_model->setData(curr_act->edit_int_model->index(index,1,QModelIndex()),ui->spinBox_starttime->value());
         curr_act->edit_int_model->setData(curr_act->edit_int_model->index(index,2,QModelIndex()),ui->spinBox_endtime->value());
         curr_act->edit_int_model->setData(curr_act->edit_int_model->index(index+1,1,QModelIndex()),ui->spinBox_endtime->value());
+        if(curr_act->get_sport() == curr_act->isSwim)
+        {
+
+        }
 
     }
     else

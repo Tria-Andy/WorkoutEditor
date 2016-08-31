@@ -9,7 +9,8 @@ class settings
 
 private:
     QString settingFile,valueFile,valueFilePath,splitter;
-    QStringList keyList,gc_infos,phaseList,sportList,paceList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
+    QStringList phaseList;
+    QStringList keyList,gc_infos,sportList,paceList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
     double powerList[4];
     QStringList table_header,header_int,header_int_time,header_swim_time,header_int_km;
     QString header_swim,header_bike,saisonFDW;

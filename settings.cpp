@@ -15,11 +15,7 @@ settings::settings()
     header_int_km << "Interval" << "Distance new";
     act_isloaded = false;
     act_isrecalc = false;
-    this->loadSettings();
-}
 
-void settings::loadSettings()
-{
     //General Settings
     if(QFile(settingFile).exists())
     {
@@ -132,13 +128,10 @@ void settings::loadSettings()
     delete myvalues;
 
     }
-    else
-    {
-
-    }
-
-
 }
+
+//QStringList settings::phaseList;
+
 void settings::writeSettings(QString selection, QStringList plist, QStringList p_paceList,QStringList p_hfList)
 {    
     if(selection == keyList.at(0))

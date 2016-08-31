@@ -15,7 +15,7 @@ class Dialog_addweek : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_addweek(QWidget *parent = 0,QString sel_week = QString(), schedule *p_sched = 0,settings *p_settings = 0);
+    explicit Dialog_addweek(QWidget *parent = 0,QString sel_week = QString(), schedule *p_sched = 0);
     ~Dialog_addweek();
 
 private slots:
@@ -65,7 +65,6 @@ private slots:
 
 private:
     Ui::Dialog_addweek *ui;
-    settings *add_settings;
     schedule *workSched;
     QString openID,selYear,weekID,swimValues,bikeValues,runValues,stgValues,altValues,sumValues,empty;
     QStringList weekMeta,weekContent;

@@ -1,7 +1,6 @@
 #ifndef DIALOG_WORKOUTS_H
 #define DIALOG_WORKOUTS_H
 
-#include "settings.h"
 #include <QDialog>
 #include <QStandardItemModel>
 #include <QAbstractItemModel>

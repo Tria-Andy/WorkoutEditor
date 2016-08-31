@@ -42,7 +42,8 @@ private:
     void set_edit_samp_model();
 
 public:
-    explicit Activity(settings *p_settings = 0);
+    //explicit Activity(settings *p_settings = 0);
+    explicit Activity();
     static const QString isSwim;
     static const QString isBike;
     static const QString isRun;

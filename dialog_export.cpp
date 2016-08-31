@@ -4,14 +4,13 @@
 #include <math.h>
 #include <QDir>
 
-Dialog_export::Dialog_export(QWidget *parent,QStandardItemModel *w_model,settings *p_settings) :
+Dialog_export::Dialog_export(QWidget *parent,QStandardItemModel *w_model) :
     QDialog(parent),
     ui(new Ui::Dialog_export)
 {
     ui->setupUi(this);
     QModelIndex index;
     workout_model = w_model;
-    export_settings = p_settings;
     ui->dateEdit_export->setDate(QDate().currentDate());
     workout_time = workout_model->findItems(QDate().currentDate().toString("dd.MM.yyyy"),Qt::MatchExactly,1);
     workout_model->sort(0);
@@ -66,10 +65,10 @@ void Dialog_export::set_filecontent(QModelIndex index)
     workoutDateTime = QDateTime::fromString(tempDate+"T"+tempTime+":00","dd.MM.yyyyThh:mm:ss").toUTC();
 
     sport = workout_model->item(index.row(),3)->text();
-    if(sport == export_settings->isSwim) stressType = "swimscore";
-    if(sport == export_settings->isBike) stressType = "skiba_bike_score";
-    if(sport == export_settings->isRun) stressType = "govss";
-    if(sport == export_settings->isAlt || sport == export_settings->isStrength) stressType = "triscore";
+    if(sport == settings().isSwim) stressType = "swimscore";
+    if(sport == settings().isBike) stressType = "skiba_bike_score";
+    if(sport == settings().isRun) stressType = "govss";
+    if(sport == settings().isAlt || sport == settings().isStrength) stressType = "triscore";
 
     fileContent = "{ \n \"RIDE\":{\n";
     fileContent.append("\"STARTTIME\":\"" + workoutDateTime.toString("yyyy\\/MM\\/dd hh:mm:ss UTC ") +"\",\n");
@@ -77,8 +76,8 @@ void Dialog_export::set_filecontent(QModelIndex index)
     fileContent.append("\"DEVICETYPE\":\"Manual \",\n");
     fileContent.append("\"IDENTIFIER\":\" \",\n");
     fileContent.append("\"OVERRIDES\":[\n");
-    fileContent.append("{ \"time_riding\":{ \"value\":\""+QString::number(export_settings->get_timesec(workout_model->item(index.row(),6)->text()))+"\" }},\n");
-    fileContent.append("{ \"workout_time\":{ \"value\":\""+QString::number(export_settings->get_timesec(workout_model->item(index.row(),6)->text()))+"\" }},\n");
+    fileContent.append("{ \"time_riding\":{ \"value\":\""+QString::number(settings().get_timesec(workout_model->item(index.row(),6)->text()))+"\" }},\n");
+    fileContent.append("{ \"workout_time\":{ \"value\":\""+QString::number(settings().get_timesec(workout_model->item(index.row(),6)->text()))+"\" }},\n");
     fileContent.append("{ \""+stressType+"\":{ \"value\":\""+workout_model->item(index.row(),8)->text()+"\" }}\n ],\n");
     fileContent.append("\"TAGS\":{\n");
     fileContent.append("\"Sport\":\""+workout_model->item(index.row(),3)->text()+" \",\n");
@@ -103,7 +102,7 @@ void Dialog_export::workout_export()
         for(int i = 0; i < list.count(); ++i)
         {
             index = workout_model->indexFromItem(list.at(i));
-            if(workout_model->data(workout_model->index(index.row(),3,QModelIndex())).toString() != export_settings->isOther)
+            if(workout_model->data(workout_model->index(index.row(),3,QModelIndex())).toString() != settings().isOther)
             {
                 this->set_filecontent(workout_model->indexFromItem(list.at(i)));
                 ui->progressBar->setValue((100/list.count())*i);
@@ -120,7 +119,7 @@ void Dialog_export::workout_export()
         for(int i = 0; i < list.count(); ++i)
         {
             index = workout_model->indexFromItem(list.at(i));
-            if(workout_model->data(workout_model->index(index.row(),3,QModelIndex())).toString() != export_settings->isOther)
+            if(workout_model->data(workout_model->index(index.row(),3,QModelIndex())).toString() != settings().isOther)
             {
                 if(export_mode == 0)
                 {
@@ -144,7 +143,7 @@ void Dialog_export::workout_export()
 
 void Dialog_export::write_file(QString filename, QString filecontent)
 {
-    QFile file(export_settings->get_gcPath() + QDir::separator() + filename);
+    QFile file(settings().get_gcPath() + QDir::separator() + filename);
     if(!file.open(QFile::WriteOnly | QFile::Text))
     {
         qDebug() << "File not open!";
@@ -193,7 +192,7 @@ void Dialog_export::get_exportinfo(QString v_week,QString v_date,bool week)
         for(int i = 0; i < list.count(); i++)
         {
             index = workout_model->indexFromItem(list.at(i));
-            if(workout_model->data(workout_model->index(index.row(),3,QModelIndex())).toString() != export_settings->isOther)
+            if(workout_model->data(workout_model->index(index.row(),3,QModelIndex())).toString() != settings().isOther)
             {
                 ++workcount;
             }

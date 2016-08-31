@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     editorSettings = new settings();
-    workSchedule = new schedule(editorSettings);
+    workSchedule = new schedule();
     work_list << "Phase:" << "Week:" << "Date:" << "Time:" << "Sport:" << "Code:" << "Title:" << "Duration:" << "Distance:" << "Stress:";
     sum_name << "Workouts:" << "Duration:" << "Distance:" << "StressScore:";
     sum_list << "Summery:" << "Swim:" << "Bike:" << "Run:" << "Other:";
@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         cal_header << QDate::longDayName(d);
     }
-    stdWorkout = new standardWorkouts(editorSettings);
+    stdWorkout = new standardWorkouts();
     calendar_model = new QStandardItemModel();
     sum_model = new QStandardItemModel();
     connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
@@ -492,7 +492,7 @@ void MainWindow::on_actionNew_triggered()
 
     if(isWeekMode)
     {
-        Dialog_add new_workout(this,workSchedule,editorSettings,stdWorkout);
+        Dialog_add new_workout(this,workSchedule,stdWorkout);
         new_workout.setModal(true);
         dialog_code = new_workout.exec();
 
@@ -506,7 +506,7 @@ void MainWindow::on_actionNew_triggered()
 
 void MainWindow::on_actionStress_Calculator_triggered()
 {
-    Dialog_stresscalc stressCalc(this,editorSettings);
+    Dialog_stresscalc stressCalc(this);
     stressCalc.setModal(true);
     stressCalc.exec();
 }
@@ -556,14 +556,14 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
         {
             QString getdate = calendar_model->data(index,Qt::DisplayRole).toString().left(9);
             QDate selectDate = QDate::fromString(getdate,"dd MMM yy").addYears(100);
-            day_popup day_pop(this,selectDate,workSchedule,editorSettings);
+            day_popup day_pop(this,selectDate,workSchedule);
             day_pop.setModal(true);
             dialog_code = day_pop.exec();
 
             if(dialog_code == QDialog::Accepted)
             {
 
-              Dialog_edit edit_workout(this,selectDate,workSchedule,editorSettings,stdWorkout);
+              Dialog_edit edit_workout(this,selectDate,workSchedule,stdWorkout);
               edit_workout.setModal(true);
               dialog_code = edit_workout.exec();
               if(dialog_code == QDialog::Accepted)
@@ -581,7 +581,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
             weeknumber = selected_week.split("#").at(0);
             this->summery_view();
 
-            week_popup week_pop(this,selected_week,workSchedule,editorSettings);
+            week_popup week_pop(this,selected_week,workSchedule);
             week_pop.setModal(true);
             dialog_code = week_pop.exec();
 
@@ -611,7 +611,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
         {
             QString selected_week = calendar_model->data(index,Qt::DisplayRole).toString();
 
-            Dialog_addweek new_week(this,selected_week,workSchedule,editorSettings);
+            Dialog_addweek new_week(this,selected_week,workSchedule);
             new_week.setModal(true);
             int dialog_code = new_week.exec();
 
@@ -627,7 +627,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
 
 void MainWindow::on_actionExport_to_Golden_Cheetah_triggered()
 {
-    Dialog_export export_workout(this,workSchedule->workout_schedule,editorSettings);
+    Dialog_export export_workout(this,workSchedule->workout_schedule);
     export_workout.setModal(true);
     export_workout.exec();
 }
@@ -749,7 +749,7 @@ void MainWindow::loadfile(const QString &filename)
                                      .arg(file.errorString()));
            return;
         }
-        curr_activity = new Activity(editorSettings);
+        curr_activity = new Activity();
         filecontent = file.readAll();
         curr_activity->read_jsonFile(filecontent);
         file.close();
@@ -1406,21 +1406,21 @@ void MainWindow::on_pushButton_copy_samp_clicked()
 
 void MainWindow::on_actionIntervall_Editor_triggered()
 {
-    Dialog_inteditor intEditor(this,editorSettings,stdWorkout);
+    Dialog_inteditor intEditor(this,stdWorkout);
     intEditor.setModal(true);
     intEditor.exec();
 }
 
 void MainWindow::on_actionPreferences_triggered()
 {
-    Dialog_settings dia_settings(this,editorSettings);
+    Dialog_settings dia_settings(this);
     dia_settings.setModal(true);
     dia_settings.exec();
 }
 
 void MainWindow::on_actionPace_Calculator_triggered()
 {
-    Dialog_paceCalc dia_pace(this,editorSettings);
+    Dialog_paceCalc dia_pace(this);
     dia_pace.setModal(true);
     dia_pace.exec();
 }
@@ -1462,7 +1462,7 @@ void MainWindow::on_tableView_summery_clicked(const QModelIndex &index)
     if(!isWeekMode)
     {
         int dialog_code;
-        year_popup year_pop(this,sum_model->data(index,Qt::DisplayRole).toString(),index.row(),workSchedule,phaseFilter,filterindex,editorSettings);
+        year_popup year_pop(this,sum_model->data(index,Qt::DisplayRole).toString(),index.row(),workSchedule,phaseFilter,filterindex);
         year_pop.setModal(true);
         dialog_code = year_pop.exec();
         if(dialog_code == QDialog::Rejected)

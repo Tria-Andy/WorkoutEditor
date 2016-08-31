@@ -16,7 +16,7 @@ class Dialog_settings : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_settings(QWidget *parent = 0,settings *p_settings = 0);
+    explicit Dialog_settings(QWidget *parent = 0);
     ~Dialog_settings();
 
 private slots:
@@ -52,9 +52,10 @@ private slots:
 
     void on_dateEdit_saisonStart_dateChanged(const QDate &date);
 
+    void on_pushButton_color_clicked();
+
 private:
     Ui::Dialog_settings *ui;
-    settings *set_settings;
     QStandardItemModel *level_model,*hf_model;
     QStringList sportList,model_header,paceList,hfList;
     double *powerlist;

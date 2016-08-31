@@ -1,8 +1,7 @@
 #include "standardworkouts.h"
 
-standardWorkouts::standardWorkouts(settings *p_settings)
+standardWorkouts::standardWorkouts()
 {
-    work_setting = p_settings;
     meta_tags << "sport" << "id" << "code" << "title" << "duration" << "distance" << "stress";
     step_tags << "sport-id" << "id" << "part" << "level" << "threshold" << "int-time" << "int-dist" << "repeats" << "parent";
 
@@ -18,7 +17,7 @@ void standardWorkouts::read_standard_workouts()
     QDomNodeList meta_list,step_list;
     QDomElement work_ele,step_ele;
 
-    QFile metaWork(work_setting->get_workoutsPath() + QDir::separator() + "standard_workouts_meta.xml");
+    QFile metaWork(settings().get_workoutsPath() + QDir::separator() + "standard_workouts_meta.xml");
 
     if(!metaWork.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -47,7 +46,7 @@ void standardWorkouts::read_standard_workouts()
         }
     }
 
-    QFile stepWork(work_setting->get_workoutsPath() + QDir::separator() + "standard_workouts_steps.xml");
+    QFile stepWork(settings().get_workoutsPath() + QDir::separator() + "standard_workouts_steps.xml");
 
     if(!stepWork.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -105,7 +104,7 @@ void standardWorkouts::write_standard_workouts()
             xmlroot.appendChild(std_workout);
         }
 
-        QFile metaFile(work_setting->get_workoutsPath() + QDir::separator() + "standard_workouts_meta.xml");
+        QFile metaFile(settings().get_workoutsPath() + QDir::separator() + "standard_workouts_meta.xml");
 
         if(!metaFile.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -134,7 +133,7 @@ void standardWorkouts::write_standard_workouts()
             xmlroot.appendChild(std_workout);
         }
 
-        QFile stepFile(work_setting->get_workoutsPath() + QDir::separator() + "standard_workouts_steps.xml");
+        QFile stepFile(settings().get_workoutsPath() + QDir::separator() + "standard_workouts_steps.xml");
 
         if(!stepFile.open(QIODevice::WriteOnly | QIODevice::Text))
         {

@@ -1,14 +1,13 @@
 #include "week_popup.h"
 #include "ui_week_popup.h"
 
-week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched,settings *p_settings) :
+week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
     QDialog(parent),
     ui(new Ui::week_popup)
 {
     ui->setupUi(this);
     week_info << weekinfo.split("#");
     workSched = p_sched;
-    pop_settings = p_settings;
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     this->set_plotModel();
 }
@@ -44,7 +43,7 @@ void week_popup::set_plotModel()
         workoutDate = QDateTime::fromString(workSched->workout_schedule->item(index.row(),1)->text(),"dd.MM.yyyy");
         plotmodel->setData(plotmodel->index(i,0,QModelIndex()),workoutDate);
         plotmodel->setData(plotmodel->index(i,1,QModelIndex()),workSched->workout_schedule->item(index.row(),8)->text().toInt());
-        plotmodel->setData(plotmodel->index(i,2,QModelIndex()),pop_settings->get_timesec(workSched->workout_schedule->item(index.row(),6)->text()) / 60.0);
+        plotmodel->setData(plotmodel->index(i,2,QModelIndex()),settings().get_timesec(workSched->workout_schedule->item(index.row(),6)->text()) / 60.0);
     }
     plotmodel->sort(0);
 
@@ -80,7 +79,7 @@ void week_popup::set_weekInfos()
         v_date1 = plotmodel->data(plotmodel->index(i,0,QModelIndex())).toDateTime().toString("dd.MM.yyyy");
         v_stress = plotmodel->data(plotmodel->index(i,1,QModelIndex())).toDouble();
         v_dura = plotmodel->data(plotmodel->index(i,2,QModelIndex())).toDouble() / 60.0;
-        v_dura = pop_settings->set_doubleValue(v_dura);
+        v_dura = settings().set_doubleValue(v_dura);
 
         workDate = QDateTime::fromString(v_date1,"dd.MM.yyyy");
         if(i != 0)
@@ -155,8 +154,14 @@ void week_popup::on_pushButton_clicked()
     reject();
 }
 
-void week_popup::on_pushButton_2_clicked()
+
+void week_popup::on_pushButton_copy_clicked()
 {
     this->freeMem();
     accept();
+}
+
+void week_popup::on_pushButton_save_clicked()
+{
+
 }

@@ -15,7 +15,7 @@ class Dialog_export : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_export(QWidget *parent = 0,QStandardItemModel *w_model = 0, settings *p_settings = 0);
+    explicit Dialog_export(QWidget *parent = 0,QStandardItemModel *w_model = 0);
     ~Dialog_export();
 
 private slots:
@@ -35,7 +35,6 @@ private slots:
 
 private:
     Ui::Dialog_export *ui;
-    settings *export_settings;
     QStandardItemModel *workout_model;
     QList<QStandardItem*> workout_time;
     QStringList weeks;

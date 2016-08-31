@@ -14,7 +14,7 @@ class Dialog_stresscalc : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_stresscalc(QWidget *parent = 0,settings *p_settings = 0);
+    explicit Dialog_stresscalc(QWidget *parent = 0);
     ~Dialog_stresscalc();
 
 private slots:
@@ -34,7 +34,6 @@ private:
     int sport_index,est_stress;
     double est_power,raw_effort,cv_effort;
 
-    settings *stress_settings;
     QStringList combo_sport;
     QString sport;
     QString lab_power,lab_workout;

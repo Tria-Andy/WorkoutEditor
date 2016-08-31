@@ -1,8 +1,7 @@
 #include "schedule.h"
 
-schedule::schedule(settings *p_settings)
+schedule::schedule()
 {
-    sched_settings = p_settings;
     workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress";
     metaTags << "id" << "week" << "name" << "fdw";
     contentTags << "id" << "week" << "swim" << "bike" << "run" << "strength" << "alternativ" << "summery";
@@ -12,7 +11,7 @@ schedule::schedule(settings *p_settings)
 
 void schedule::load_workouts_file()
 {
-    QFile workouts(sched_settings->get_schedulePath() + QDir::separator() + "workout_schedule.xml");
+    QFile workouts(settings().get_schedulePath() + QDir::separator() + "workout_schedule.xml");
     QDomDocument doc_workouts;
 
     if(!workouts.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -28,7 +27,7 @@ void schedule::load_workouts_file()
         workouts.close();
     }
 
-    QFile weekMeta(sched_settings->get_schedulePath() + QDir::separator() + "workout_phase_meta.xml");
+    QFile weekMeta(settings().get_schedulePath() + QDir::separator() + "workout_phase_meta.xml");
     QDomDocument doc_week_meta;
     if(!weekMeta.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -43,7 +42,7 @@ void schedule::load_workouts_file()
         weekMeta.close();
     }
 
-    QFile weekContent(sched_settings->get_schedulePath() + QDir::separator() + "workout_phase_content.xml");
+    QFile weekContent(settings().get_schedulePath() + QDir::separator() + "workout_phase_content.xml");
     QDomDocument doc_week_content;
     if(!weekContent.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -85,7 +84,7 @@ void schedule::save_workout_file()
             xmlroot.appendChild(xml_workout);
         }
 
-        QFile file(sched_settings->get_schedulePath() + QDir::separator() + "workout_schedule.xml");
+        QFile file(settings().get_schedulePath() + QDir::separator() + "workout_schedule.xml");
 
         if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -166,7 +165,7 @@ void schedule::save_week_files()
             xmlroot.appendChild(xml_phase);
         }
 
-        QFile meta_file(sched_settings->get_schedulePath() + QDir::separator() + "workout_phase_meta.xml");
+        QFile meta_file(settings().get_schedulePath() + QDir::separator() + "workout_phase_meta.xml");
 
         if(!meta_file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -192,7 +191,7 @@ void schedule::save_week_files()
             xmlroot.appendChild(xml_phase);
         }
 
-        QFile content_file(sched_settings->get_schedulePath() + QDir::separator() + "workout_phase_content.xml");
+        QFile content_file(settings().get_schedulePath() + QDir::separator() + "workout_phase_content.xml");
 
         if(!content_file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -305,14 +304,14 @@ QString schedule::get_weekPhase(QDate currDate)
 
 void schedule::changeYear()
 {
-    QDate startDate = QDate::fromString(sched_settings->get_saisonFDW(),"dd.MM.yyyy");
+    QDate startDate = QDate::fromString(settings().get_saisonFDW(),"dd.MM.yyyy");
     QString weekid;
     int id;
 
     week_meta->sort(0);
     week_content->sort(0);
 
-    for(int week = 0; week < sched_settings->get_saisonWeeks(); ++week)
+    for(int week = 0; week < settings().get_saisonWeeks(); ++week)
     {
         id = week_meta->data(week_meta->index(week,0,QModelIndex())).toInt();
         if(id == week+1)
