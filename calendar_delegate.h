@@ -135,7 +135,7 @@ public:
                 painter->fillRect(rect_phase_text,QBrush(rect_color));
 
                 QTextOption phaseOption(Qt::AlignVCenter);
-                painter->setPen(Qt::white);
+                painter->setPen(Qt::black);
                 painter->setFont(phase_font);
                 painter->drawText(rect_phase_text,phase,phaseOption);
              }

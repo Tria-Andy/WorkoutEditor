@@ -8,6 +8,7 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
     ui->setupUi(this);
     week_info << weekinfo.split("#");
     workSched = p_sched;
+    filledWeek = true;
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     this->set_plotModel();
 }
@@ -37,6 +38,8 @@ void week_popup::set_plotModel()
     QDateTime workoutDate;
     plotmodel = new QStandardItemModel(list.count(),3);
 
+    if(!list.isEmpty())
+    {
     for(int i = 0; i < list.count(); ++i)
     {
         index = workSched->workout_schedule->indexFromItem(list.at(i));
@@ -49,6 +52,13 @@ void week_popup::set_plotModel()
 
     ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(list.count()));
     this->set_weekInfos();
+    }
+    else
+    {
+        filledWeek = false;
+        ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(list.count()));
+    }
+
 }
 
 void week_popup::set_weekInfos()
@@ -150,7 +160,10 @@ void week_popup::set_weekInfos()
 
 void week_popup::on_pushButton_clicked()
 {
-    this->freeMem();
+    if(filledWeek)
+    {
+        this->freeMem();
+    }
     reject();
 }
 

@@ -244,6 +244,7 @@ void MainWindow::summery_view()
                 this->summery_calc(6,index,isWeekMode);
             }
         }
+
         for(int i = 0; i < 7; ++i)
         {
             if(work_sum[i] > 0)
@@ -1479,8 +1480,6 @@ void MainWindow::on_actionSwitch_Year_triggered()
                                   );
     if (reply == QMessageBox::Yes)
     {
-        workSchedule->changeYear();
-        /*
         if(QDate::currentDate() >= QDate::fromString(editorSettings.get_saisonFDW(),"dd.MM.yyyy"))
         {
             workSchedule->changeYear();
@@ -1490,7 +1489,6 @@ void MainWindow::on_actionSwitch_Year_triggered()
         {
             QMessageBox::warning(this,"Season not finished","Season Schedule can not be changed!",QMessageBox::Ok);
         }
-        */
     }
 }
 

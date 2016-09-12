@@ -15,6 +15,7 @@ settings::settings()
     header_int_km << "Interval" << "Distance new";
     act_isloaded = false;
     act_isrecalc = false;
+    powerList.resize(4);
 
     //General Settings
     if(QFile(settingFile).exists())

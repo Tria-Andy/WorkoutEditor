@@ -26,7 +26,7 @@ Dialog_stresscalc::~Dialog_stresscalc()
 
 void Dialog_stresscalc::read_threshold_values()
 {
-    double *p;
+    QVector<double> p;
     QString pace;
 
     p = settings().get_powerList();

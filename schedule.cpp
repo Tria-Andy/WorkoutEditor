@@ -279,6 +279,7 @@ void schedule::copyWeek()
         workout_date = workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy");
         workout_time = workout_schedule->item(index.row(),2)->text();
         workout_sport = workout_schedule->item(index.row(),3)->text();
+        workout_code = workout_schedule->item(index.row(),4)->text();
         workout_title = workout_schedule->item(index.row(),5)->text();
         workout_duration = workout_schedule->item(index.row(),6)->text();
         workout_distance = workout_schedule->item(index.row(),7)->text().toDouble();
@@ -317,13 +318,15 @@ void schedule::changeYear()
         if(id == week+1)
         {
             weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
-            qDebug() << id << weekid << startDate.addDays(week*7).toString("dd.MM.yyyy");
-            /*
             week_meta->setData(week_meta->index(week,1,QModelIndex()),weekid);
             week_meta->setData(week_meta->index(week,3,QModelIndex()),startDate.addDays(week*7).toString("dd.MM.yyyy"));
             week_content->setData(week_content->index(week,1,QModelIndex()),weekid);
-            */
         }
+    }
+    if(week_meta->rowCount() > settings().get_saisonWeeks())
+    {
+        week_meta->removeRow(week_meta->rowCount()-1,QModelIndex());
+        week_content->removeRow(week_content->rowCount()-1,QModelIndex());
     }
     this->save_week_files();
 }

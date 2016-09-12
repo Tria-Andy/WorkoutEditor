@@ -12,7 +12,7 @@ private:
     QStringList phaseList;
     QStringList keyList,gc_infos,sportList,paceList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
     QStringList sportColor,phaseColor;
-    double powerList[4];
+    QVector<double> powerList;
     QStringList table_header,header_int,header_int_time,header_swim_time,header_int_km;
     QString header_swim,header_bike,saisonFDW;
     QString gcPath,schedulePath,workoutsPath,act_sport,saison_year,emptyPhase,emptyPhaseColor;
@@ -53,11 +53,7 @@ public:
     int get_saisonWeeks() {return saison_weeks;}
     int get_saisonStart() {return saison_start;}
 
-    double *get_powerList()
-    {
-        double *pw = powerList;
-        return pw;
-    }
+    QVector<double> get_powerList() {return powerList;}
 
     void set_saisonInfos(QString v_saison,QDate v_fdw ,int v_weeks,int v_start)
     {
@@ -65,11 +61,6 @@ public:
         saison_weeks = v_weeks;
         saisonFDW = v_fdw.toString("dd.MM.yyyy");
         saison_start = v_start;
-    }
-
-    QString get_colorValues(QString cString)
-    {
-
     }
 
     QString set_time(int);

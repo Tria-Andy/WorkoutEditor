@@ -34,7 +34,7 @@ private:
     QStringList week_info;
     QStandardItemModel *plotmodel;
     schedule *workSched;
-
+    bool filledWeek;
     QChart *weekchart;
     QChartView *chartview;
     QValueAxis *yStress,*yDura;
