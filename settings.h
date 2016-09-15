@@ -14,13 +14,14 @@ private:
     static QStringList keyList,gc_infos,sportList,paceList,phaseList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
     static QStringList sportColor,phaseColor;
     static QVector<double> powerList;
+    static QVector<int> fontSize;
     static QString gcPath,schedulePath,workoutsPath,act_sport,saison_year,emptyPhase,emptyPhaseColor;
     static bool act_isloaded,act_isrecalc;
     static int saison_weeks,saison_start;
+    static int weekRange,weekOffSet;
 
     static void saveSettings();
     int set_range_values(QString);
-
 
 public:
     settings();
@@ -54,8 +55,10 @@ public:
     static QStringList get_hfRange() {return hfRangeList;}
     static int get_saisonWeeks() {return saison_weeks;}
     static int get_saisonStart() {return saison_start;}
-
+    static int get_weekRange() {return weekRange;}
+    static int get_weekOffSet() {return weekOffSet;}
     static QVector<double> get_powerList() {return powerList;}
+    static QVector<int> get_fontSize() {return fontSize;}
 
     static void set_saisonInfos(QString v_saison,QDate v_fdw ,int v_weeks,int v_start)
     {

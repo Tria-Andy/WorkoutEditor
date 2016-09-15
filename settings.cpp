@@ -50,6 +50,7 @@ QStringList settings::sportColor;
 QStringList settings::phaseColor;
 
 QVector<double> settings::powerList;
+QVector<int> settings::fontSize;
 
 bool settings::act_isloaded = false;
 bool settings::act_isrecalc = false;
@@ -64,6 +65,8 @@ QString settings::header_bike = "Watt";
 
 int settings::saison_weeks;
 int settings::saison_start;
+int settings::weekRange;
+int settings::weekOffSet;
 
 void settings::loadSettings()
 {
@@ -73,6 +76,7 @@ void settings::loadSettings()
     header_swim_time << "Lap" << "Start" << "Time" << "Strokes" << "Speed";
     header_int_km << "Interval" << "Distance new";
     powerList.resize(4);
+    fontSize.resize(3);
 
     settingFile = QApplication::applicationDirPath() + "/WorkoutEditor.ini";
 
@@ -191,7 +195,25 @@ void settings::loadSettings()
         isOther = sportList.at(6);
 
         QDesktopWidget desk;
-        qDebug() << desk.width() << desk.height();
+        int screenWight = desk.screenGeometry(0).width();
+        int screenHeight = desk.screenGeometry(0).height();
+
+        if(screenHeight > 1000)
+        {
+            fontSize[0] = 16;
+            fontSize[1] = 14;
+            fontSize[2] = 12;
+            weekRange = 8;
+            weekOffSet = 12;
+        }
+        else
+        {
+            fontSize[0] = 14;
+            fontSize[1] = 12;
+            fontSize[2] = 10;
+            weekRange = 6;
+            weekOffSet = 8;
+        }
 
         delete mysettings;
         delete myvalues;
