@@ -93,7 +93,7 @@ public:
         int lapTime,startTime;
 
         int value = spinBox->value();
-        double lapSpeed = settings().get_speed(QTime::fromString(settings().set_time(value),"mm:ss"),50,settings().isSwim,false).toDouble();
+        double lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(value),"mm:ss"),50,settings::isSwim,false).toDouble();
 
         model->setData(index, value, Qt::EditRole);
         model->setData(speed_index,lapSpeed);

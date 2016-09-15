@@ -42,11 +42,11 @@ public:
         if(sum_values.at(0) == "Alternativ") rect_color.setRgb(255,255,0);
         if(sum_values.at(0) == "Other") rect_color.setRgb(170,255,255);
         */
-        for(int i = 0; i < settings().get_sportList().count(); ++i)
+        for(int i = 0; i < settings::get_sportList().count(); ++i)
         {
-            if(sum_values.at(0) == settings().get_sportList().at(i))
+            if(sum_values.at(0) == settings::get_sportList().at(i))
             {
-                QString sColor = settings().get_sportColor().at(i);
+                QString sColor = settings::get_sportColor().at(i);
                 cRed = sColor.split("-").at(0);
                 cGreen = sColor.split("-").at(1);
                 cBlue = sColor.split("-").at(2);

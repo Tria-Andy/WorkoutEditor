@@ -39,9 +39,9 @@ year_popup::year_popup(QWidget *parent, QString pInfo,int position,schedule *p_s
        selectBars->attachAxis(yBars);
        phasechart->setAxisX(axisX,selectBars);
 
-       for(int i = 0; i < settings().get_phaseList().count(); ++i)
+       for(int i = 0; i < settings::get_phaseList().count(); ++i)
        {
-           phaseList << settings().get_phaseList().at(i);
+           phaseList << settings::get_phaseList().at(i);
        }
 
        if(position == 0) col = 7;
@@ -86,7 +86,7 @@ void year_popup::fill_values()
 
     if(phaseindex == 0)
     {
-        weekcount = settings().get_saisonWeeks();
+        weekcount = settings::get_saisonWeeks();
     }
     else
     {
@@ -121,9 +121,9 @@ void year_popup::fill_values()
             y_stress[week] = stress.toDouble();
             if(max_stress < y_stress[week]) max_stress = y_stress[week];
 
-            y_dura[week] = settings().set_doubleValue(static_cast<double>(settings().get_timesec(duration) / 60.0));
+            y_dura[week] = settings::set_doubleValue(static_cast<double>(settings::get_timesec(duration) / 60.0));
             if(maxValues[0] < y_dura[week]) maxValues[0] = y_dura[week];
-            y_dist[week] = settings().set_doubleValue(distance.toDouble());
+            y_dist[week] = settings::set_doubleValue(distance.toDouble());
             if(maxValues[1] < y_dist[week]) maxValues[1] = y_dist[week];
             y_work[week] = workouts.toDouble();
             if(maxValues[2] < y_work[week]) maxValues[2] = y_work[week];
@@ -150,9 +150,9 @@ void year_popup::fill_values()
                     y_stress[week] = stress.toDouble();
                     if(max_stress < y_stress[week]) max_stress = y_stress[week];
 
-                    y_dura[week] = settings().set_doubleValue(static_cast<double>(settings().get_timesec(duration) / 60.0));
+                    y_dura[week] = settings::set_doubleValue(static_cast<double>(settings::get_timesec(duration) / 60.0));
                     if(maxValues[0] < y_dura[week]) maxValues[0] = y_dura[week];
-                    y_dist[week] = settings().set_doubleValue(distance.toDouble());
+                    y_dist[week] = settings::set_doubleValue(distance.toDouble());
                     if(maxValues[1] < y_dist[week]) maxValues[1] = y_dist[week];
                     y_work[week] = workouts.toDouble();
                     if(maxValues[2] < y_work[week]) maxValues[2] = y_work[week];

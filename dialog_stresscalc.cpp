@@ -9,7 +9,7 @@ Dialog_stresscalc::Dialog_stresscalc(QWidget *parent) :
     ui->setupUi(this);
     t_power = new double[4];
     t_pace = new double[4];
-    combo_sport << "--" << settings().isSwim << settings().isBike << settings().isRun;
+    combo_sport << "--" << settings::isSwim << settings::isBike << settings::isRun;
     ui->comboBox_sport->addItems(combo_sport);
     lab_power = "Threshold ----:";
     lab_workout = "Workout ----:";
@@ -29,13 +29,13 @@ void Dialog_stresscalc::read_threshold_values()
     QVector<double> p;
     QString pace;
 
-    p = settings().get_powerList();
+    p = settings::get_powerList();
 
     for(int i = 1; i < 4; ++i)
     {
         t_power[i] = p[i-1];
-        pace = settings().get_paceList().at(i-1);
-        t_pace[i] = settings().get_timesec(pace);
+        pace = settings::get_paceList().at(i-1);
+        t_pace[i] = settings::get_timesec(pace);
     }
 
 }
@@ -44,21 +44,21 @@ void Dialog_stresscalc::estimate_stress()
 {
     int current;
 
-    if(sport == settings().isSwim || sport == settings().isRun)
+    if(sport == settings::isSwim || sport == settings::isRun)
     {
-        current = settings().get_timesec(ui->lineEdit_goal_power->text());
+        current = settings::get_timesec(ui->lineEdit_goal_power->text());
         est_power = t_power[sport_index] * (t_pace[sport_index] / (double)current);
         ui->lineEdit_intensity->setText(QString::number(est_power / t_power[sport_index]));
-        raw_effort = (settings().get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")) * est_power) * ui->lineEdit_intensity->text().toDouble();
+        raw_effort = (settings::get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")) * est_power) * ui->lineEdit_intensity->text().toDouble();
         cv_effort = t_power[sport_index] * 3600;
         est_stress = (raw_effort / cv_effort) * 100;
         ui->lineEdit_stressScore->setText(QString::number(est_stress));
     }
-    if(sport == settings().isBike)
+    if(sport == settings::isBike)
     {   
         current = ui->lineEdit_goal_power->text().toDouble();
         ui->lineEdit_intensity->setText(QString::number(current / t_power[sport_index]));
-        raw_effort = (settings().get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")) * current) * ui->lineEdit_intensity->text().toDouble();
+        raw_effort = (settings::get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")) * current) * ui->lineEdit_intensity->text().toDouble();
         cv_effort = t_power[sport_index] * 3600;
         est_stress = (raw_effort / cv_effort) * 100;
         ui->lineEdit_stressScore->setText(QString::number(est_stress));
@@ -67,14 +67,14 @@ void Dialog_stresscalc::estimate_stress()
 
 void Dialog_stresscalc::set_sport_threshold()
 {
-    if(sport == settings().isSwim || sport == settings().isRun)
+    if(sport == settings::isSwim || sport == settings::isRun)
     {
         ui->label_threshold->setText("Threshold Pace:");
         ui->label_workout_power->setText("Workout Pace:");
-        ui->lineEdit_power->setText(settings().set_time(t_pace[sport_index]));
+        ui->lineEdit_power->setText(settings::set_time(t_pace[sport_index]));
         ui->lineEdit_goal_power->setInputMask("00:00");
     }
-    if(sport == settings().isBike)
+    if(sport == settings::isBike)
     {
         ui->label_threshold->setText("Threshold Power:");
         ui->label_workout_power->setText("Workout Power:");

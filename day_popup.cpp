@@ -85,7 +85,7 @@ void day_popup::show_workouts()
             cellcursor = cell.firstCursorPosition();
             if(x == 7)
             {
-                cellcursor.insertText(settings().get_workout_pace(workSched->workout_schedule->item(index.row(),7)->text().toDouble(),QTime::fromString(workSched->workout_schedule->item(index.row(),6)->text(),"hh:mm:ss"),workSched->workout_schedule->item(index.row(),3)->text(),true));
+                cellcursor.insertText(settings::get_workout_pace(workSched->workout_schedule->item(index.row(),7)->text().toDouble(),QTime::fromString(workSched->workout_schedule->item(index.row(),6)->text(),"hh:mm:ss"),workSched->workout_schedule->item(index.row(),3)->text(),true));
             }
             else
             {

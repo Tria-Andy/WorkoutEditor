@@ -76,11 +76,11 @@ public:
 
                     y += height+1;
 
-                    for(int pos = 0; pos < settings().get_sportList().count();++pos)
+                    for(int pos = 0; pos < settings::get_sportList().count();++pos)
                     {
-                        if(workout.contains(settings().get_sportList().at(pos)))
+                        if(workout.contains(settings::get_sportList().at(pos)))
                         {
-                            QString sColor = settings().get_sportColor().at(pos);
+                            QString sColor = settings::get_sportColor().at(pos);
                             cRed = sColor.split("-").at(0);
                             cGreen = sColor.split("-").at(1);
                             cBlue = sColor.split("-").at(2);
@@ -108,11 +108,11 @@ public:
             phase = phase.remove(0,phase.indexOf(delimiter)+1);
             if(!phase.isEmpty())
             {
-                for(int pos = 0; pos < settings().get_phaseList().count();++pos)
+                for(int pos = 0; pos < settings::get_phaseList().count();++pos)
                 {
-                    if(phase.contains(settings().get_phaseList().at(pos)))
+                    if(phase.contains(settings::get_phaseList().at(pos)))
                     {
-                        QString sColor = settings().get_phaseColor().at(pos);
+                        QString sColor = settings::get_phaseColor().at(pos);
                         cRed = sColor.split("-").at(0);
                         cGreen = sColor.split("-").at(1);
                         cBlue = sColor.split("-").at(2);
@@ -121,7 +121,7 @@ public:
                     }
                     else
                     {
-                        QString sColor = settings().get_emptyPhaseColor();
+                        QString sColor = settings::get_emptyPhaseColor();
                         cRed = sColor.split("-").at(0);
                         cGreen = sColor.split("-").at(1);
                         cBlue = sColor.split("-").at(2);

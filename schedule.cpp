@@ -11,7 +11,7 @@ schedule::schedule()
 
 void schedule::load_workouts_file()
 {
-    QFile workouts(settings().get_schedulePath() + QDir::separator() + "workout_schedule.xml");
+    QFile workouts(settings::get_schedulePath() + QDir::separator() + "workout_schedule.xml");
     QDomDocument doc_workouts;
 
     if(!workouts.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -27,7 +27,7 @@ void schedule::load_workouts_file()
         workouts.close();
     }
 
-    QFile weekMeta(settings().get_schedulePath() + QDir::separator() + "workout_phase_meta.xml");
+    QFile weekMeta(settings::get_schedulePath() + QDir::separator() + "workout_phase_meta.xml");
     QDomDocument doc_week_meta;
     if(!weekMeta.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -42,7 +42,7 @@ void schedule::load_workouts_file()
         weekMeta.close();
     }
 
-    QFile weekContent(settings().get_schedulePath() + QDir::separator() + "workout_phase_content.xml");
+    QFile weekContent(settings::get_schedulePath() + QDir::separator() + "workout_phase_content.xml");
     QDomDocument doc_week_content;
     if(!weekContent.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -84,7 +84,7 @@ void schedule::save_workout_file()
             xmlroot.appendChild(xml_workout);
         }
 
-        QFile file(settings().get_schedulePath() + QDir::separator() + "workout_schedule.xml");
+        QFile file(settings::get_schedulePath() + QDir::separator() + "workout_schedule.xml");
 
         if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -165,7 +165,7 @@ void schedule::save_week_files()
             xmlroot.appendChild(xml_phase);
         }
 
-        QFile meta_file(settings().get_schedulePath() + QDir::separator() + "workout_phase_meta.xml");
+        QFile meta_file(settings::get_schedulePath() + QDir::separator() + "workout_phase_meta.xml");
 
         if(!meta_file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -191,7 +191,7 @@ void schedule::save_week_files()
             xmlroot.appendChild(xml_phase);
         }
 
-        QFile content_file(settings().get_schedulePath() + QDir::separator() + "workout_phase_content.xml");
+        QFile content_file(settings::get_schedulePath() + QDir::separator() + "workout_phase_content.xml");
 
         if(!content_file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -305,14 +305,14 @@ QString schedule::get_weekPhase(QDate currDate)
 
 void schedule::changeYear()
 {
-    QDate startDate = QDate::fromString(settings().get_saisonFDW(),"dd.MM.yyyy");
+    QDate startDate = QDate::fromString(settings::get_saisonFDW(),"dd.MM.yyyy");
     QString weekid;
     int id;
 
     week_meta->sort(0);
     week_content->sort(0);
 
-    for(int week = 0; week < settings().get_saisonWeeks(); ++week)
+    for(int week = 0; week < settings::get_saisonWeeks(); ++week)
     {
         id = week_meta->data(week_meta->index(week,0,QModelIndex())).toInt();
         if(id == week+1)
@@ -323,7 +323,7 @@ void schedule::changeYear()
             week_content->setData(week_content->index(week,1,QModelIndex()),weekid);
         }
     }
-    if(week_meta->rowCount() > settings().get_saisonWeeks())
+    if(week_meta->rowCount() > settings::get_saisonWeeks())
     {
         week_meta->removeRow(week_meta->rowCount()-1,QModelIndex());
         week_content->removeRow(week_content->rowCount()-1,QModelIndex());

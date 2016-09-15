@@ -49,11 +49,11 @@ public:
             painter->drawText(rect_head_text,headInfo,dateOption);
             phase = calendar_values.at(3);
 
-            for(int pos = 0; pos < settings().get_phaseList().count();++pos)
+            for(int pos = 0; pos < settings::get_phaseList().count();++pos)
             {
-                if(phase.contains(settings().get_phaseList().at(pos)))
+                if(phase.contains(settings::get_phaseList().at(pos)))
                 {
-                    QString sColor = settings().get_phaseColor().at(pos);
+                    QString sColor = settings::get_phaseColor().at(pos);
                     cRed = sColor.split("-").at(0);
                     cGreen = sColor.split("-").at(1);
                     cBlue = sColor.split("-").at(2);
@@ -80,11 +80,11 @@ public:
             if(index.column() == 5) rect_color.setRgb(255,255,0);
             if(index.column() == 6) rect_color.setRgb(0,255,255);
             /*
-            for(int pos = 0; pos < settings().get_sportList().count();++pos)
+            for(int pos = 0; pos < settings::get_sportList().count();++pos)
             {
                 if(index.column() == pos+1)
                 {
-                    QString sColor = settings().get_sportColor().at(pos);
+                    QString sColor = settings::get_sportColor().at(pos);
                     cRed = sColor.split("-").at(0);
                     cGreen = sColor.split("-").at(1);
                     cBlue = sColor.split("-").at(2);
