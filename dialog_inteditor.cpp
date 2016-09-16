@@ -150,25 +150,25 @@ void Dialog_inteditor::set_sport_threshold(QString sport)
     }
     if(sport == settings::isSwim)
     {
-       threshold_power = powerlist[0];
+       threshold_power = (*powerlist)[0];
        threshold_pace = settings::get_timesec(settings::get_paceList().at(0));
        ui->label_sportThreshold->setText(settings::set_time(threshold_pace) + " /100m");
     }
     if(sport == settings::isBike)
     {
-       threshold_power = powerlist[1];
+       threshold_power = (*powerlist)[1];
        threshold_pace = settings::get_timesec(settings::get_paceList().at(1));
        ui->label_sportThreshold->setText(QString::number(threshold_power) + " Watt");
     }
     if(sport == settings::isRun)
     {
-       threshold_power = powerlist[2];
+       threshold_power = (*powerlist)[2];
        threshold_pace = settings::get_timesec(settings::get_paceList().at(2));
        ui->label_sportThreshold->setText(settings::set_time(threshold_pace) + " /km");
     }
     if(sport == settings::isStrength)
     {
-       threshold_power = powerlist[3];
+       threshold_power = (*powerlist)[3];
        threshold_pace = 0;
        ui->label_sportThreshold->setText(QString::number(threshold_power) + " Watt");
     }

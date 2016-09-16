@@ -49,7 +49,8 @@ QStringList settings::hfRangeList;
 QStringList settings::sportColor;
 QStringList settings::phaseColor;
 
-QVector<double> settings::powerList;
+QVector<double>  settings::powerList;
+QVector<double>  settings::factorList;
 QVector<int> settings::fontSize;
 
 bool settings::act_isloaded = false;
@@ -70,12 +71,12 @@ int settings::weekOffSet;
 
 void settings::loadSettings()
 {
-
     header_int << "Interval" << "Duration" << "Distance" << "Distance (Int)" << "Pace";
     header_int_time << "Interval" << "Start Sec" << "Stop Sec";
     header_swim_time << "Lap" << "Start" << "Time" << "Strokes" << "Speed";
     header_int_km << "Interval" << "Distance new";
     powerList.resize(4);
+    factorList.resize(3);
     fontSize.resize(3);
 
     settingFile = QApplication::applicationDirPath() + "/WorkoutEditor.ini";
@@ -135,8 +136,12 @@ void settings::loadSettings()
         myvalues->beginGroup("Threshold");
             QString thres_childs = myvalues->value("pace").toString();
             paceList << thres_childs.split(splitter);
+            factorList[0] = myvalues->value("swimfactor").toDouble();
+            factorList[1] = myvalues->value("bikefactor").toDouble();
+            factorList[2] = myvalues->value("runfactor").toDouble();
             thres_childs = myvalues->value("hf").toString();
             hfList << thres_childs.split(splitter);
+
         myvalues->endGroup();
 
         myvalues->beginGroup("Level");
@@ -195,7 +200,7 @@ void settings::loadSettings()
         isOther = sportList.at(6);
 
         QDesktopWidget desk;
-        int screenWight = desk.screenGeometry(0).width();
+        //int screenWight = desk.screenGeometry(0).width();
         int screenHeight = desk.screenGeometry(0).height();
 
         if(screenHeight > 1000)
@@ -276,6 +281,9 @@ void settings::saveSettings()
         myvalues->setValue("swimpower",QString::number(powerList[0]));
         myvalues->setValue("bikepower",QString::number(powerList[1]));
         myvalues->setValue("runpower",QString::number(powerList[2]));
+        myvalues->setValue("swimfactor",QString::number(factorList[0]));
+        myvalues->setValue("bikefactor",QString::number(factorList[1]));
+        myvalues->setValue("runfactor",QString::number(factorList[2]));
     myvalues->endGroup();
 
     myvalues->beginGroup("Saisoninfo");

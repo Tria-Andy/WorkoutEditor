@@ -9,7 +9,10 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
 {
     ui->setupUi(this);
     powerlist = settings::get_powerList();
+    factorList = settings::get_factorList();
     paceList = settings::get_paceList();
+    sportColor = settings::get_sportColor();
+    phaseColor = settings::get_phaseColor();
     hfList = settings::get_hfList();
     sportList << settings::isSwim << settings::isBike << settings::isRun;
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
@@ -30,6 +33,7 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     ui->lineEdit_startWeek->setText(QString::number(settings::get_saisonStart()));
     ui->comboBox_thresSport->addItems(sportList);
     ui->pushButton_save->setEnabled(false);
+    ui->pushButton_color->setEnabled(false);
     this->set_hfmodel();
 }
 
@@ -58,17 +62,20 @@ void Dialog_settings::writeChangedValues()
 
     if(ui->comboBox_thresSport->currentText() == settings::isSwim)
     {
-        powerlist[0] = ui->lineEdit_thresPower->text().toDouble();
+        (*powerlist)[0] = ui->lineEdit_thresPower->text().toDouble();
+        (*factorList)[0] = ui->doubleSpinBox_factor->value();
         paceList.replace(0,ui->lineEdit_thresPace->text());
     }
     if(ui->comboBox_thresSport->currentText() == settings::isBike)
     {
-        powerlist[1] = ui->lineEdit_thresPower->text().toDouble();
+        (*powerlist)[1] = ui->lineEdit_thresPower->text().toDouble();
+        (*factorList)[1] = ui->doubleSpinBox_factor->value();
         paceList.replace(1,ui->lineEdit_thresPace->text());
     }
     if(ui->comboBox_thresSport->currentText() == settings::isRun)
     {
-        powerlist[2] = ui->lineEdit_thresPower->text().toDouble();
+        (*powerlist)[2] = ui->lineEdit_thresPower->text().toDouble();
+        (*factorList)[2] = ui->doubleSpinBox_factor->value();
         paceList.replace(2,ui->lineEdit_thresPace->text());
     }
 
@@ -126,23 +133,26 @@ void Dialog_settings::set_thresholdView(QString sport)
 {
     if(sport == settings::isSwim)
     {
-        ui->lineEdit_thresPower->setText(QString::number(powerlist[0]));
+        ui->lineEdit_thresPower->setText(QString::number((*powerlist)[0]));
         ui->lineEdit_thresPace->setText(paceList.at(0));
         ui->lineEdit_speed->setText(settings::get_speed(QTime::fromString(ui->lineEdit_thresPace->text(),"mm:ss"),100,ui->comboBox_thresSport->currentText(),true));
+        ui->doubleSpinBox_factor->setValue((*factorList)[0]);
         this->set_thresholdModel(settings::get_swimRange());
     }
     if(sport == settings::isBike)
     {
-        ui->lineEdit_thresPower->setText(QString::number(powerlist[1]));
+        ui->lineEdit_thresPower->setText(QString::number((*powerlist)[1]));
         ui->lineEdit_thresPace->setText(paceList.at(1));
         ui->lineEdit_speed->setText(settings::get_speed(QTime::fromString(ui->lineEdit_thresPace->text(),"mm:ss"),1000,ui->comboBox_thresSport->currentText(),true));
+        ui->doubleSpinBox_factor->setValue((*factorList)[1]);
         this->set_thresholdModel(settings::get_bikeRange());
     }
     if(sport == settings::isRun)
     {
-        ui->lineEdit_thresPower->setText(QString::number(powerlist[2]));
+        ui->lineEdit_thresPower->setText(QString::number((*powerlist)[2]));
         ui->lineEdit_thresPace->setText(paceList.at(2));
         ui->lineEdit_speed->setText(settings::get_speed(QTime::fromString(ui->lineEdit_thresPace->text(),"mm:ss"),1000,ui->comboBox_thresSport->currentText(),true));
+        ui->doubleSpinBox_factor->setValue((*factorList)[2]);
         this->set_thresholdModel(settings::get_runRange());
     }
 }
@@ -205,12 +215,60 @@ void Dialog_settings::set_thresholdModel(QStringList levelList)
             level_model->setData(level_model->index(i,4,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace + ((threshold_pace/100)*(100-level_model->data(level_model->index(i,3,QModelIndex())).toDouble()))))));
         }
     }
+}
 
+void Dialog_settings::set_color(QColor color,bool write)
+{
+    QPalette palette = ui->pushButton_color->palette();
+    palette.setColor(ui->pushButton_color->backgroundRole(),color);
+    ui->pushButton_color->setAutoFillBackground(true);
+    ui->pushButton_color->setPalette(palette);
+
+    if(write)
+    {
+        qDebug() << color.red() << color.green() << color.blue();
+    }
 }
 
 void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem *item)
 {
-    ui->lineEdit_addedit->setText(item->data(Qt::DisplayRole).toString());
+    QString comboValue = ui->comboBox_selInfo->currentText();
+    QString listValue = item->data(Qt::DisplayRole).toString();
+    QString sColor;
+    QColor color;
+    int pos;
+    bool useColor = false;
+    QString cRed,cGreen,cBlue;
+    ui->lineEdit_addedit->setText(listValue);
+
+    if(comboValue == settings::get_keyList().at(0))
+    {
+        pos = settings::get_sportList().indexOf(listValue,0);
+        sColor = sportColor.at(pos);
+        useColor = true;
+    }
+    if(comboValue == settings::get_keyList().at(2))
+    {
+        pos = settings::get_phaseList().indexOf(listValue,0);
+        sColor = phaseColor.at(pos);
+        useColor = true;
+    }
+
+    if(useColor)
+    {
+        cRed = sColor.split("-").at(0);
+        cGreen = sColor.split("-").at(1);
+        cBlue = sColor.split("-").at(2);
+        color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+        this->set_color(color,false);
+        ui->pushButton_color->setEnabled(true);
+    }
+    else
+    {
+        color.setRgb(255,255,255,0);
+        this->set_color(color,false);
+        ui->pushButton_color->setEnabled(false);
+    }
 }
 
 void Dialog_settings::on_pushButton_up_clicked()
@@ -330,9 +388,10 @@ void Dialog_settings::on_dateEdit_saisonStart_dateChanged(const QDate &date)
 
 void Dialog_settings::on_pushButton_color_clicked()
 {
-    QColor color = QColorDialog::getColor(Qt::white,this);
-    QPalette palette = ui->pushButton_color->palette();
-    palette.setColor(ui->pushButton_color->backgroundRole(),color);
-    ui->pushButton_color->setAutoFillBackground(true);
-    ui->pushButton_color->setPalette(palette);
+    QColor color = QColorDialog::getColor(ui->pushButton_color->palette().color(ui->pushButton_color->backgroundRole()),this);
+    if(color.isValid())
+    {
+        this->set_color(color,true);
+        this->enableSavebutton();
+    }
 }

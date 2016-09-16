@@ -57,9 +57,10 @@ private slots:
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;
-    QStringList sportList,model_header,paceList,hfList;
-    QVector<double> powerlist;
+    QStringList sportList,model_header,paceList,hfList,sportColor,phaseColor;
+    QVector<double> *powerlist,*factorList;
     void set_listEntries(QString);
+    void set_color(QColor,bool);
     void save_settingsChanges();
     void set_thresholdView(QString);
     void set_thresholdModel(QStringList);

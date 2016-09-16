@@ -77,7 +77,8 @@ private:
     QString current_sport,isSeries,isGroup,current_workID;
     int threshold_pace,current_pace;
     int threshold_power,current_power;
-    QVector<double> powerfactor,powerlist;
+    QVector<double> *powerlist;
+    QVector<double> powerfactor;
     double time_sum,dist_sum,stress_sum,speedfactor;
     bool clearFlag;
 

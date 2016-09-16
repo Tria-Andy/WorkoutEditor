@@ -195,6 +195,9 @@
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_color">
+               <property name="autoFillBackground">
+                <bool>true</bool>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -202,10 +205,10 @@
                 <bool>false</bool>
                </property>
                <property name="default">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
                <property name="flat">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -546,6 +549,29 @@
                    <bool>false</bool>
                   </property>
                  </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox_factor"/>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="label_17">
+                  <property name="text">
+                   <string>Factor:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <spacer name="verticalSpacer_5">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>10</height>
+                   </size>
+                  </property>
+                 </spacer>
                 </item>
                </layout>
               </widget>
