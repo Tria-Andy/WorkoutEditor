@@ -226,7 +226,7 @@ void Dialog_settings::set_color(QColor color,bool write)
 
     if(write)
     {
-        qDebug() << color.red() << color.green() << color.blue();
+
     }
 }
 
