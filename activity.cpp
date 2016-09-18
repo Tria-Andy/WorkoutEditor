@@ -49,6 +49,7 @@ void Activity::read_jsonFile(QString fileContent)
     settings::set_act_sport(v_sport.toString());
     QJsonValue v_bahn = item_tags["Pool Length"].toString().toDouble();
     swim_track = v_bahn.toDouble();
+    settings::set_swimLaplen(v_bahn.toInt());
 
     ride_model->setData(ride_model->index(0,0,QModelIndex()),"Date:");
     ride_model->setData(ride_model->index(0,1,QModelIndex()),this->get_date());

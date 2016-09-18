@@ -58,9 +58,10 @@ private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;
     QStringList sportList,model_header,paceList,hfList,sportColor,phaseColor;
+    QStringList *currColorList;
     QVector<double> *powerlist,*factorList;
     void set_listEntries(QString);
-    void set_color(QColor,bool);
+    void set_color(QColor,bool,int);
     void save_settingsChanges();
     void set_thresholdView(QString);
     void set_thresholdModel(QStringList);

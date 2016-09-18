@@ -53,7 +53,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -666,27 +666,17 @@
            <string>Saison Info</string>
           </property>
           <layout class="QFormLayout" name="formLayout_5">
-           <item row="1" column="0">
+           <item row="4" column="0">
             <widget class="QLabel" name="label_13">
              <property name="text">
               <string>Saison Weeks:</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_saisonWeeks"/>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_14">
-             <property name="text">
-              <string>Saison Start:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QDateEdit" name="dateEdit_saisonStart">
-             <property name="calendarPopup">
-              <bool>true</bool>
+           <item row="4" column="1">
+            <widget class="QLineEdit" name="lineEdit_saisonWeeks">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -704,14 +694,42 @@
              </property>
             </widget>
            </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_14">
+             <property name="text">
+              <string>Saison Start:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDateEdit" name="dateEdit_saisonStart">
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
            <item row="3" column="0">
+            <widget class="QLabel" name="label_18">
+             <property name="text">
+              <string>Expected End:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QDateEdit" name="dateEdit">
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
             <widget class="QLabel" name="label_16">
              <property name="text">
               <string>Start Week:</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
+           <item row="2" column="1">
             <widget class="QLineEdit" name="lineEdit_startWeek">
              <property name="enabled">
               <bool>false</bool>

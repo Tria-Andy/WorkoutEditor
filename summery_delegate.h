@@ -22,7 +22,6 @@ public:
         QStringList sum_values;
         QString delimiter = "-";
         QColor rect_color;
-        QString cRed,cGreen,cBlue;
         int textMargin = 2;
         phase_font.setBold(true);
         phase_font.setPixelSize(fontsize[0]);
@@ -33,25 +32,12 @@ public:
 
         temp_value = index.data(Qt::DisplayRole).toString();
         sum_values = temp_value.split(delimiter);
-        /*
-        if(sum_values.at(0) == "Summery") rect_color.setRgb(0,255,255);
-        if(sum_values.at(0) == "Swim") rect_color.setRgb(0,154,231);
-        if(sum_values.at(0) == "Bike") rect_color.setRgb(255,170,0);
-        if(sum_values.at(0) == "Run") rect_color.setRgb(0,170,0);
-        if(sum_values.at(0) == "Strength") rect_color.setRgb(192,192,192);
-        if(sum_values.at(0) == "Tria") rect_color.setRgb(255,0,0);
-        if(sum_values.at(0) == "Alternativ") rect_color.setRgb(255,255,0);
-        if(sum_values.at(0) == "Other") rect_color.setRgb(170,255,255);
-        */
+
         for(int i = 0; i < settings::get_sportList().count(); ++i)
         {
             if(sum_values.at(0) == settings::get_sportList().at(i))
             {
-                QString sColor = settings::get_sportColor().at(i);
-                cRed = sColor.split("-").at(0);
-                cGreen = sColor.split("-").at(1);
-                cBlue = sColor.split("-").at(2);
-                rect_color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+                rect_color = settings::get_color(settings::get_sportColor().at(i));
                 break;
             }
             else

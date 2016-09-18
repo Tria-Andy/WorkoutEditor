@@ -68,6 +68,7 @@ int settings::saison_weeks;
 int settings::saison_start;
 int settings::weekRange;
 int settings::weekOffSet;
+int settings::swimLaplen;
 
 void settings::loadSettings()
 {
@@ -329,6 +330,9 @@ void settings::saveSettings()
     delete myvalues;
 }
 
+
+
+
 QStringList settings::get_int_header()
 {
     table_header.clear();
@@ -509,7 +513,8 @@ double settings::estimate_stress(QString sport, QString p_goal, QTime duration)
     {
         if(sport == settings::isSwim)
         {
-            est_power = powerList[sport_index] * ((settings::get_timesec(paceList.at(sport_index)) / (goal / settings::get_timesec(paceList.at(sport_index))))/100.0);
+            goal = sqrt(pow(goal,3.0))/10;
+            est_power = powerList[sport_index] * (settings::get_timesec(paceList.at(sport_index)) / goal);
             raw_effort = (settings::get_timesec(duration.toString("mm:ss")) * est_power) * (est_power / powerList[sport_index]);
             cv_effort = powerList[sport_index] * 3600;
 
@@ -521,7 +526,7 @@ double settings::estimate_stress(QString sport, QString p_goal, QTime duration)
         }
         if(sport == settings::isRun)
         {
-            est_power = powerList[sport_index] * (settings::get_timesec(paceList.at(sport_index)) / goal);
+            est_power = powerList[sport_index] * (2 - (goal / settings::get_timesec(paceList.at(sport_index))));
             raw_effort = (settings::get_timesec(duration.toString("mm:ss")) * est_power) * (est_power / powerList[sport_index]);
             cv_effort = powerList[sport_index] * 3600;
 
@@ -535,4 +540,21 @@ double settings::estimate_stress(QString sport, QString p_goal, QTime duration)
 double settings::set_doubleValue(double value)
 {
     return ((static_cast<int>(value *100 +.5)) / 100.0);
+}
+
+QColor settings::get_color(QString colorValue)
+{
+    QColor color;
+    QString cRed,cGreen,cBlue;
+    cRed = colorValue.split("-").at(0);
+    cGreen = colorValue.split("-").at(1);
+    cBlue = colorValue.split("-").at(2);
+    color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+
+    return color;
+}
+
+QString settings::get_colorValues(QColor color)
+{
+    return QString::number(color.red())+"-"+QString::number(color.green())+"-"+QString::number(color.blue());;
 }

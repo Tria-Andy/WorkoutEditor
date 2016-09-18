@@ -54,11 +54,7 @@ public:
             {
                 if(phase.contains(settings::get_phaseList().at(pos)))
                 {
-                    QString sColor = settings::get_phaseColor().at(pos);
-                    cRed = sColor.split("-").at(0);
-                    cGreen = sColor.split("-").at(1);
-                    cBlue = sColor.split("-").at(2);
-                    rect_color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+                    rect_color = settings::get_color(settings::get_phaseColor().at(pos));
                     break;
                 }
             }
@@ -74,26 +70,22 @@ public:
         }
         else
         {
-            if(index.column() == 1) rect_color.setRgb(0,154,231);
-            if(index.column() == 2) rect_color.setRgb(255,170,0);
-            if(index.column() == 3) rect_color.setRgb(0,170,0);
-            if(index.column() == 4) rect_color.setRgb(192,192,192);
-            if(index.column() == 5) rect_color.setRgb(255,255,0);
-            if(index.column() == 6) rect_color.setRgb(0,255,255);
-            /*
             for(int pos = 0; pos < settings::get_sportList().count();++pos)
             {
                 if(index.column() == pos+1)
                 {
-                    QString sColor = settings::get_sportColor().at(pos);
-                    cRed = sColor.split("-").at(0);
-                    cGreen = sColor.split("-").at(1);
-                    cBlue = sColor.split("-").at(2);
-                    rect_color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+                    if(index.column() != 6)
+                    {
+                        rect_color = settings::get_color(settings::get_sportColor().at(pos));
+                    }
+                    else
+                    {
+                        rect_color.setRgb(0,255,255);
+                    }
                     break;
                 }
             }
-            */
+
             QString labels;
             labels = "Workouts:\n";
             labels = labels + "Distance:\n";

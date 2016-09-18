@@ -15,6 +15,7 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     phaseColor = settings::get_phaseColor();
     hfList = settings::get_hfList();
     sportList << settings::isSwim << settings::isBike << settings::isRun;
+
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
     level_model = new QStandardItemModel();
     hf_model = new QStandardItemModel();
@@ -102,6 +103,7 @@ void Dialog_settings::set_listEntries(QString selection)
     if(selection == settings::get_keyList().at(0))
     {
         ui->listWidget_selection->addItems(settings::get_sportList());
+        currColorList = &sportColor;
     }
     if(selection == settings::get_keyList().at(1))
     {
@@ -110,6 +112,7 @@ void Dialog_settings::set_listEntries(QString selection)
     if(selection == settings::get_keyList().at(2))
     {
         ui->listWidget_selection->addItems(settings::get_phaseList());
+        currColorList = &phaseColor;
     }
     if(selection == settings::get_keyList().at(3))
     {
@@ -127,6 +130,10 @@ void Dialog_settings::set_listEntries(QString selection)
     {
         ui->listWidget_selection->addItems(settings::get_intPlanerList());
     }
+
+    QColor color;
+    color.setRgb(255,255,255,0);
+    this->set_color(color,false,0);
 }
 
 void Dialog_settings::set_thresholdView(QString sport)
@@ -217,7 +224,7 @@ void Dialog_settings::set_thresholdModel(QStringList levelList)
     }
 }
 
-void Dialog_settings::set_color(QColor color,bool write)
+void Dialog_settings::set_color(QColor color,bool write,int pos)
 {
     QPalette palette = ui->pushButton_color->palette();
     palette.setColor(ui->pushButton_color->backgroundRole(),color);
@@ -226,7 +233,7 @@ void Dialog_settings::set_color(QColor color,bool write)
 
     if(write)
     {
-
+        currColorList->replace(pos,settings::get_colorValues(color));
     }
 }
 
@@ -238,7 +245,6 @@ void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem 
     QColor color;
     int pos;
     bool useColor = false;
-    QString cRed,cGreen,cBlue;
     ui->lineEdit_addedit->setText(listValue);
 
     if(comboValue == settings::get_keyList().at(0))
@@ -256,17 +262,14 @@ void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem 
 
     if(useColor)
     {
-        cRed = sColor.split("-").at(0);
-        cGreen = sColor.split("-").at(1);
-        cBlue = sColor.split("-").at(2);
-        color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
-        this->set_color(color,false);
+        color = settings::get_color(sColor);
+        this->set_color(color,false,pos);
         ui->pushButton_color->setEnabled(true);
     }
     else
     {
         color.setRgb(255,255,255,0);
-        this->set_color(color,false);
+        this->set_color(color,false,pos);
         ui->pushButton_color->setEnabled(false);
     }
 }
@@ -391,7 +394,7 @@ void Dialog_settings::on_pushButton_color_clicked()
     QColor color = QColorDialog::getColor(ui->pushButton_color->palette().color(ui->pushButton_color->backgroundRole()),this);
     if(color.isValid())
     {
-        this->set_color(color,true);
+        this->set_color(color,true,ui->listWidget_selection->currentRow());
         this->enableSavebutton();
     }
 }

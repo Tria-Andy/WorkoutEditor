@@ -18,8 +18,8 @@ private:
     static QString gcPath,schedulePath,workoutsPath,act_sport,saison_year,emptyPhase,emptyPhaseColor;
     static bool act_isloaded,act_isrecalc;
     static int saison_weeks,saison_start;
-    static int weekRange,weekOffSet;
-
+    static int weekRange,weekOffSet,swimLaplen;
+    QCache settingCache;
     static void saveSettings();
     int set_range_values(QString);
 
@@ -77,6 +77,8 @@ public:
         saison_start = v_start;
     }
 
+    static int get_swimLaplen() {return swimLaplen;}
+
     static QString set_time(int);
     static QString get_workout_pace(double, QTime, QString,bool);
     static QString get_speed(QTime,int,QString,bool);
@@ -84,6 +86,9 @@ public:
     static int get_hfvalue(QString);
     static int get_timesec(QString time);
     static double set_doubleValue(double);
+
+    static QColor get_color(QString);
+    static QString get_colorValues(QColor);
 
     static QStringList get_int_header();
     static QStringList get_time_header() {return header_int_time;}
@@ -94,6 +99,7 @@ public:
     static bool get_act_isload() {return act_isloaded;}
     static void set_act_recalc(bool isrecalc) {act_isrecalc = isrecalc;}
     static bool get_act_isrecalc() {return act_isrecalc;}
+    static void set_swimLaplen(int lapLen) {swimLaplen = lapLen;}
     static void writeSettings(QString,QStringList,QStringList,QStringList);
     static QString setSettingString(QStringList);
 };

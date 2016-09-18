@@ -22,7 +22,6 @@ public:
         QString temp_value,dayDate;
         QStringList calendar_values;
         QString delimiter = "#";
-        QString cRed,cGreen,cBlue;
         QColor rect_color;
         int textMargin = 2;
         int celloffset = 21;
@@ -81,11 +80,7 @@ public:
                     {
                         if(workout.contains(settings::get_sportList().at(pos)))
                         {
-                            QString sColor = settings::get_sportColor().at(pos);
-                            cRed = sColor.split("-").at(0);
-                            cGreen = sColor.split("-").at(1);
-                            cBlue = sColor.split("-").at(2);
-                            rect_color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+                            rect_color = settings::get_color(settings::get_sportColor().at(pos));
                             break;
                         }
                     }
@@ -113,20 +108,12 @@ public:
                 {
                     if(phase.contains(settings::get_phaseList().at(pos)))
                     {
-                        QString sColor = settings::get_phaseColor().at(pos);
-                        cRed = sColor.split("-").at(0);
-                        cGreen = sColor.split("-").at(1);
-                        cBlue = sColor.split("-").at(2);
-                        rect_color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+                        rect_color = settings::get_color(settings::get_sportColor().at(pos));
                         break;
                     }
                     else
                     {
-                        QString sColor = settings::get_emptyPhaseColor();
-                        cRed = sColor.split("-").at(0);
-                        cGreen = sColor.split("-").at(1);
-                        cBlue = sColor.split("-").at(2);
-                        rect_color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+                        rect_color = settings::get_color(settings::get_emptyPhaseColor());
                     }
                 }
 
