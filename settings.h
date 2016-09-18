@@ -19,7 +19,6 @@ private:
     static bool act_isloaded,act_isrecalc;
     static int saison_weeks,saison_start;
     static int weekRange,weekOffSet,swimLaplen;
-    QCache settingCache;
     static void saveSettings();
     int set_range_values(QString);
 
