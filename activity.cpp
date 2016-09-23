@@ -86,36 +86,49 @@ void Activity::read_jsonFile(QString fileContent)
         QJsonObject item_xdata = arr_swimXdata.at(0).toObject();
         QJsonArray arr_lapData = item_xdata["SAMPLES"].toArray();
         swim_xdata = new QStandardItemModel(arr_lapData.count(),5);
-        //swim_xdata->setHorizontalHeaderLabels(act_settings->get_swimtime_header());
         swim_xdata->setHorizontalHeaderLabels(settings::get_swimtime_header());
         int lapNr = 0;
         int intCount = 1;
-        double lappace;
-        double lapSpeed;
+        double lapStart,lapStartPrev,lapPacePrev = 0;
+        double lapSpeed,lapPace;
         row = 0;
+
         foreach (const QJsonValue & v_xdata, arr_lapData)
         {
-            QJsonObject obj_xdata = v_xdata.toObject();
-            lappace = round(obj_xdata["VALUES"].toArray().at(1).toDouble());
-            if(lappace > 0)
+            QJsonObject obj_xdata = v_xdata.toObject();     
+            lapPace = round((obj_xdata["VALUES"].toArray().at(1).toDouble() - 0.1));
+            if(lapPace > 0)
             {
                 swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),QString::number(intCount)+"_"+QString::number(++lapNr*swim_track));
-                lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(lappace),"mm:ss"),swim_track,settings::isSwim,false).toDouble();
+                lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(lapPace),"mm:ss"),swim_track,settings::isSwim,false).toDouble();
+
             }
             else
             {
                 lapNr = 0;
                 swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),"Break");
+                lapStart = obj_xdata["SECS"].toDouble();
                 lapSpeed = 0;
                 ++intCount;
             }
+
+            if(row == 0)
+            {
+                lapStart = 0;
+            }
+            if(row == 1)
+            {
+                lapStart = lapPacePrev-1;
+            }
+
             swim_xdata->setData(swim_xdata->index(row,1,QModelIndex()),obj_xdata["SECS"].toDouble());
-            swim_xdata->setData(swim_xdata->index(row,2,QModelIndex()),lappace);
+            swim_xdata->setData(swim_xdata->index(row,2,QModelIndex()),lapPace);
             swim_xdata->setData(swim_xdata->index(row,3,QModelIndex()),obj_xdata["VALUES"].toArray().at(2).toDouble());
             swim_xdata->setData(swim_xdata->index(row,4,QModelIndex()),lapSpeed);
+            //lapPacePrev = lapPace;
+            //lapStartPrev = lapStart;
             ++row;
-
-        }
+        }    
     }
 
     QJsonArray arr_samp = item_ride["SAMPLES"].toArray();
@@ -393,7 +406,8 @@ void Activity::set_swim_pace()
 
 void Activity::set_swim_sri()
 {
-    swim_sri = static_cast<double>(pace_cv) / static_cast<double>(swim_pace);
+    double goal = sqrt(pow(static_cast<double>(swim_pace),3.0))/10;
+    swim_sri = static_cast<double>(pace_cv) / goal;
 }
 
 int Activity::get_zone_values(double factor, int max, bool ispace)

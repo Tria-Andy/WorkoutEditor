@@ -866,7 +866,7 @@ void MainWindow::set_activty_intervalls()
     {
         ui->tableView_int_times->setModel(curr_activity->swim_xdata);
         ui->tableView_int_times->setItemDelegate(&swimlap_del);
-        ui->tableView_int_times->hideColumn(1);
+        //ui->tableView_int_times->hideColumn(1);
         ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_int_times->verticalHeader()->setVisible(false);
 
@@ -1170,7 +1170,7 @@ void MainWindow::set_avg_fields()
 void MainWindow::set_add_swim_values()
 {
     const int kal_100 = 25;
-    const int kal_100_p = 26;
+    const int kal_100_p = kal_100 + (kal_100 / 10);
     double kal,kj;
 
     if(ui->checkBox_powerswim->isChecked())
@@ -1181,8 +1181,9 @@ void MainWindow::set_add_swim_values()
     {
         kal = (kal_100 * curr_activity->get_swim_sri())*(curr_activity->samp_model->data(curr_activity->samp_model->index(curr_activity->samp_model->rowCount()-1,1,QModelIndex())).toDouble()*10);
     }
-    kj = (kal*4.1867)/4;
+    ui->lineEdit_kal->setText(QString::number(ceil(kal)));
 
+    kj = (kal*4.1867)/4;
     ui->lineEdit_kj->setText(QString::number(ceil(kj)));
 }
 

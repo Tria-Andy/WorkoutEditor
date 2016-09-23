@@ -110,6 +110,7 @@ public:
             model->setData(new_index,startTime+lapTime,Qt::EditRole);
             ++laprow;
             currLap = model->data(model->index(laprow,0,QModelIndex())).toString();
+            if(laprow >= model->rowCount()-1) break;
 
         } while (currLap != isBreak);
     }

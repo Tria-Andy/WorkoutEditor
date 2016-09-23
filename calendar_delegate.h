@@ -108,7 +108,7 @@ public:
                 {
                     if(phase.contains(settings::get_phaseList().at(pos)))
                     {
-                        rect_color = settings::get_color(settings::get_sportColor().at(pos));
+                        rect_color = settings::get_color(settings::get_phaseColor().at(pos));
                         break;
                     }
                     else
