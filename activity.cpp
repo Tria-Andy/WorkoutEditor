@@ -89,7 +89,7 @@ void Activity::read_jsonFile(QString fileContent)
         swim_xdata->setHorizontalHeaderLabels(settings::get_swimtime_header());
         int lapNr = 0;
         int intCount = 1;
-        double lapStart,lapStartPrev,lapPacePrev = 0;
+        double lapStart,lapStartPrev = 0,lapPacePrev = 0;
         double lapSpeed,lapPace;
         row = 0;
 
@@ -100,33 +100,34 @@ void Activity::read_jsonFile(QString fileContent)
             if(lapPace > 0)
             {
                 swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),QString::number(intCount)+"_"+QString::number(++lapNr*swim_track));
-                lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(lapPace),"mm:ss"),swim_track,settings::isSwim,false).toDouble();
+                if(lapPacePrev == 0)
+                {
+                    lapStart = obj_xdata["SECS"].toDouble();
 
+                }
+                else
+                {
+                    lapStart = lapStartPrev + lapPacePrev;
+                }
+                if(row == 1) lapStart = lapPacePrev-1;
+                lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(lapPace),"mm:ss"),swim_track,settings::isSwim,false).toDouble();
             }
             else
             {
                 lapNr = 0;
                 swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),"Break");
-                lapStart = obj_xdata["SECS"].toDouble();
+                lapStart = lapStartPrev + lapPacePrev;
                 lapSpeed = 0;
                 ++intCount;
             }
 
-            if(row == 0)
-            {
-                lapStart = 0;
-            }
-            if(row == 1)
-            {
-                lapStart = lapPacePrev-1;
-            }
-
-            swim_xdata->setData(swim_xdata->index(row,1,QModelIndex()),obj_xdata["SECS"].toDouble());
+            //swim_xdata->setData(swim_xdata->index(row,1,QModelIndex()),obj_xdata["SECS"].toDouble());
+            swim_xdata->setData(swim_xdata->index(row,1,QModelIndex()),lapStart);
             swim_xdata->setData(swim_xdata->index(row,2,QModelIndex()),lapPace);
             swim_xdata->setData(swim_xdata->index(row,3,QModelIndex()),obj_xdata["VALUES"].toArray().at(2).toDouble());
             swim_xdata->setData(swim_xdata->index(row,4,QModelIndex()),lapSpeed);
-            //lapPacePrev = lapPace;
-            //lapStartPrev = lapStart;
+            lapPacePrev = lapPace;
+            lapStartPrev = lapStart;
             ++row;
         }    
     }
@@ -984,7 +985,7 @@ void Activity::set_curr_act_model(bool recalc)
 void Activity::set_avg_values(int counter, int row, bool add)
 {
     avg_counter = counter;
-    int t_laptime = settings::get_timesec(curr_act_model->data(curr_act_model->index(row,1,QModelIndex())).toString());
+    double t_laptime = static_cast<double>(settings::get_timesec(curr_act_model->data(curr_act_model->index(row,1,QModelIndex())).toString()));
     int t_pace = settings::get_timesec(curr_act_model->data(curr_act_model->index(row,4,QModelIndex())).toString());
     double t_dist = curr_act_model->data(curr_act_model->index(row,3,QModelIndex())).toDouble();
     double t_watt = 0.0;
