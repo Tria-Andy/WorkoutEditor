@@ -76,11 +76,7 @@ public:
     int get_dist_factor() {return dist_factor;}
     void set_avg_values(int,int,bool);
     void reset_avg();
-    int get_avg_laptime()
-    {
-        qDebug() << avg_laptime/avg_counter;
-        return round(avg_laptime/avg_counter);
-    }
+    int get_avg_laptime() {return round(avg_laptime/avg_counter);}
     int get_avg_pace() {return avg_pace/avg_counter;}
     double get_avg_dist() {return avg_dist/avg_counter;}
     double get_avg_watts() {return avg_watt/avg_counter;}
