@@ -103,6 +103,8 @@ void Activity::read_jsonFile(QString fileContent)
                 if(lapPacePrev == 0)
                 {
                     lapStart = obj_xdata["SECS"].toDouble();
+                    int breakTime = lapStart - lapStartPrev;
+                    swim_xdata->setData(swim_xdata->index(row-1,2,QModelIndex()),breakTime);
 
                 }
                 else
@@ -121,7 +123,6 @@ void Activity::read_jsonFile(QString fileContent)
                 ++intCount;
             }
 
-            //swim_xdata->setData(swim_xdata->index(row,1,QModelIndex()),obj_xdata["SECS"].toDouble());
             swim_xdata->setData(swim_xdata->index(row,1,QModelIndex()),lapStart);
             swim_xdata->setData(swim_xdata->index(row,2,QModelIndex()),lapPace);
             swim_xdata->setData(swim_xdata->index(row,3,QModelIndex()),obj_xdata["VALUES"].toArray().at(2).toDouble());
@@ -622,28 +623,32 @@ void Activity::recalculate_intervalls(bool recalc)
 
             if(i == 0)
             {
-                lapname = "Warmup_";
-                edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),QString::number(lapcounter)+"_"+lapname+QString::number(swim_track*p_swimlaps[i]));
+                lapname = QString::number(lapcounter)+"_Warmup_"+QString::number(swim_track*p_swimlaps[i]);
+                edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
+                edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
                 ++lapcounter;
             }
             if(i != 0 && i < edit_dist_model->rowCount()-1)
             {
                 if(this->check_is_intervall(i) == 1)
                 {
-                    lapname = "Int_";
-                    edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),QString::number(lapcounter)+"_"+lapname+QString::number(swim_track*p_swimlaps[i]));
+                    lapname = QString::number(lapcounter)+"_Int_"+QString::number(swim_track*p_swimlaps[i]);
+                    edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
+                    edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
                     ++lapcounter;
                 }
                 else
                 {
                     lapname = "Break";
                     edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
+                    edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
                 }
             }
             if(i == edit_dist_model->rowCount()-1)
             {
-                lapname = "Cooldown_";
-                edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),QString::number(lapcounter)+"_"+lapname+QString::number(swim_track*p_swimlaps[i]));
+                lapname = QString::number(lapcounter)+"_Cooldown_"+QString::number(swim_track*p_swimlaps[i]);
+                edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
+                edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
             }
             if(i == 0)
             {
@@ -821,6 +826,8 @@ void Activity::set_edit_samp_model()
             swimSpeed = swim_xdata->data(swim_xdata->index(sLap,4,QModelIndex()),Qt::DisplayRole).toDouble();
             swimCycle = swim_xdata->data(swim_xdata->index(sLap,3,QModelIndex()),Qt::DisplayRole).toDouble();
 
+            qDebug() << swim_xdata->data(swim_xdata->index(sLap,0,QModelIndex())).toString() << int_start << swimPace << swimSpeed;
+
             if(sLap == swim_xdata->rowCount()-1)
             {
                 int_stop = sampRowCount-1;
@@ -830,7 +837,7 @@ void Activity::set_edit_samp_model()
                 int_stop = swim_xdata->data(swim_xdata->index(sLap+1,1,QModelIndex()),Qt::DisplayRole).toInt();
             }
 
-            if(swimPace > 0)
+            if(swimSpeed > 0)
             {
                 ++swimLaps;
                 msec = (swim_track / swimPace) / 1000;

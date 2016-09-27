@@ -88,7 +88,7 @@ public:
         QModelIndex speed_index = model->index(index.row(),4,QModelIndex());
         QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
         spinBox->interpretText();
-        QString isBreak = "Break";
+        //QString isBreak = "Break";
         QString currLap;
         int lapTime,startTime;
 
@@ -110,9 +110,8 @@ public:
             model->setData(new_index,startTime+lapTime,Qt::EditRole);
             ++laprow;
             currLap = model->data(model->index(laprow,0,QModelIndex())).toString();
-            if(laprow >= model->rowCount()-1) break;
 
-        } while (currLap != isBreak);
+        } while (laprow < model->rowCount());
     }
 
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
