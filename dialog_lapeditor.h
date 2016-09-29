@@ -37,7 +37,9 @@ private:
 
     void set_lapinfo();
     void set_components(bool);
+    void set_visible(bool,bool);
     void edit_laps(int,int);
+    int calc_strokes(int);
 };
 
 #endif // DIALOG_LAPEDITOR_H

@@ -10,7 +10,7 @@ private:
     static QString splitter,header_swim,header_bike;
     static QStringList table_header,header_int,header_int_time,header_swim_time,header_int_km;
 
-    static QString settingFile,valueFile,valueFilePath,saisonFDW;
+    static QString settingFile,valueFile,valueFilePath,saisonFDW,breakName;
     static QStringList keyList,gc_infos,sportList,paceList,phaseList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
     static QStringList sportColor,phaseColor;
     static QVector<double> powerList,factorList;
@@ -34,6 +34,7 @@ public:
     static QString get_saisonFDW() {return saisonFDW;}
     static QString get_emptyPhaseColor() {return emptyPhaseColor;}
     static QString get_emptyPhase() {return emptyPhase;}
+    static QString get_breakName() {return breakName;}
     static QStringList get_keyList() {return keyList;}
     static QStringList get_gcInfo() {return gc_infos;}
     static QStringList get_phaseList() {return phaseList;}

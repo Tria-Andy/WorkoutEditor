@@ -117,7 +117,7 @@ void Activity::read_jsonFile(QString fileContent)
             else
             {
                 lapNr = 0;
-                swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),"Break");
+                swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),settings::get_breakName());
                 lapStart = lapStartPrev + lapPacePrev;
                 lapSpeed = 0;
                 ++intCount;
@@ -639,7 +639,7 @@ void Activity::recalculate_intervalls(bool recalc)
                 }
                 else
                 {
-                    lapname = "Break";
+                    lapname = settings::get_breakName();
                     edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
                     edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
                 }
@@ -826,8 +826,6 @@ void Activity::set_edit_samp_model()
             swimSpeed = swim_xdata->data(swim_xdata->index(sLap,4,QModelIndex()),Qt::DisplayRole).toDouble();
             swimCycle = swim_xdata->data(swim_xdata->index(sLap,3,QModelIndex()),Qt::DisplayRole).toDouble();
 
-            qDebug() << swim_xdata->data(swim_xdata->index(sLap,0,QModelIndex())).toString() << int_start << swimPace << swimSpeed;
-
             if(sLap == swim_xdata->rowCount()-1)
             {
                 int_stop = sampRowCount-1;
@@ -875,7 +873,6 @@ void Activity::set_edit_samp_model()
                 calc_speed[lapsec] = swimSpeed;
                 calc_cadence[lapsec] = swimCycle;
             }
-
         }
     }
     else

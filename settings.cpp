@@ -21,6 +21,7 @@ QString settings::act_sport;
 QString settings::saison_year;
 QString settings::emptyPhase;
 QString settings::emptyPhaseColor;
+QString settings::breakName;
 
 QString settings::isSwim;
 QString settings::isBike;
@@ -148,6 +149,8 @@ void settings::loadSettings()
         myvalues->beginGroup("Level");
             QString level_childs = myvalues->value("levels").toString();
             levelList << level_childs.split(splitter);
+            level_childs = myvalues->value("breakname").toString();
+            breakName = level_childs;
         myvalues->endGroup();
 
         myvalues->beginGroup("Range");

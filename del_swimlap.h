@@ -1,58 +1,46 @@
 #ifndef DEL_SWIMLAP_H
 #define DEL_SWIMLAP_H
 #include <QtGui>
-#include <QStyledItemDelegate>
+#include <QItemDelegate>
 #include <QSpinBox>
 #include <QDebug>
 #include "settings.h"
 
-class del_swimlap : public QStyledItemDelegate
+class del_swimlap : public QItemDelegate
 {
     Q_OBJECT
 
 public:
-    explicit del_swimlap(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_swimlap(QObject *parent = 0) : QItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
         QFont cFont;
+        QString lapName;
+        const QAbstractItemModel *model = index.model();
         cFont.setPixelSize(12);
         QColor lapColor,breakColor;
         lapColor.setRgb(192,192,192);
         breakColor.setRgb(128,128,128);
         QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
-        if(index.column() == 0)
-        {
 
-            if(index.data(Qt::DisplayRole) == "Break")
-            {
-                painter->setPen(Qt::white);
-                painter->fillRect(option.rect,QBrush(breakColor));
-                painter->fillRect(rect_text,QBrush(breakColor));
-            }
-            else
-            {
-                painter->setPen(Qt::black);
-                painter->fillRect(option.rect,QBrush(lapColor));
-                painter->fillRect(rect_text,QBrush(lapColor));
-            }
+        lapName = model->data(model->index(index.row(),0,QModelIndex())).toString();
+
+        if(lapName == settings::get_breakName())
+        {
+            painter->setPen(Qt::white);
+            painter->fillRect(option.rect,QBrush(breakColor));
+            painter->fillRect(rect_text,QBrush(breakColor));
         }
         else
         {
-            if(index.data(Qt::DisplayRole).toInt() > 0)
-            {
-                painter->setPen(Qt::black);
-                painter->fillRect(option.rect,QBrush(lapColor));
-                painter->fillRect(rect_text,QBrush(lapColor));
-            }
-            else
-            {
-                painter->setPen(Qt::white);
-                painter->fillRect(option.rect,QBrush(breakColor));
-                painter->fillRect(rect_text,QBrush(breakColor));
-            }
+            painter->setPen(Qt::black);
+            painter->fillRect(option.rect,QBrush(lapColor));
+            painter->fillRect(rect_text,QBrush(lapColor));
         }
+
+
         painter->setFont(cFont);
         painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->restore();
@@ -60,7 +48,10 @@ public:
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
-        if(index.column() == 2)
+        const QAbstractItemModel *model = index.model();
+        QString lapName = model->data(model->index(index.row(),0,QModelIndex())).toString();
+
+        if(index.column() == 2 && lapName != settings::get_breakName())
         {
             Q_UNUSED(option)
             Q_UNUSED(index)
@@ -88,7 +79,6 @@ public:
         QModelIndex speed_index = model->index(index.row(),4,QModelIndex());
         QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
         spinBox->interpretText();
-        //QString isBreak = "Break";
         QString currLap;
         int lapTime,startTime;
 
@@ -111,8 +101,13 @@ public:
             ++laprow;
             currLap = model->data(model->index(laprow,0,QModelIndex())).toString();
 
-        } while (laprow < model->rowCount());
+        } while (currLap != settings::get_breakName());
+
+        startTime = model->data(new_index).toInt();
+        lapTime = model->data(model->index(laprow+1,1,QModelIndex())).toInt() - startTime;
+        model->setData(model->index(laprow,2,QModelIndex()),lapTime);
     }
+
 
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
