@@ -10,9 +10,8 @@
 #include <QJsonDocument>
 #include <QDateTime>
 
-Activity::Activity(settings *p_settings)
+Activity::Activity()
 {
-    act_settings = p_settings;
     zone_count = 7;
     changeRowCount = false;
 }
@@ -40,24 +39,25 @@ void Activity::read_jsonFile(QString fileContent)
     QJsonValue v_tags = item_ride.value(QString("TAGS"));
     QJsonObject item_tags = v_tags.toObject();
 
-    ride_model = new QStandardItemModel(act_settings->get_jsoninfos().count()+1,2);
+    ride_model = new QStandardItemModel(settings::get_jsoninfos().count()+1,2);
 
     //Get and Set RIDE and TAGS Entries
     QJsonValue v_date = item_ride["STARTTIME"];
     this->set_date(v_date.toString());
     QJsonValue v_sport = item_tags["Sport"];
     this->set_sport(v_sport.toString());
-    act_settings->set_act_sport(v_sport.toString());
+    settings::set_act_sport(v_sport.toString());
     QJsonValue v_bahn = item_tags["Pool Length"].toString().toDouble();
     swim_track = v_bahn.toDouble();
+    settings::set_swimLaplen(v_bahn.toInt());
 
     ride_model->setData(ride_model->index(0,0,QModelIndex()),"Date:");
     ride_model->setData(ride_model->index(0,1,QModelIndex()),this->get_date());
 
-    for(int i = 0, row = 1; i < act_settings->get_jsoninfos().count();++i,++row)
+    for(int i = 0, row = 1; i < settings::get_jsoninfos().count();++i,++row)
     {
-        QJsonValue value = item_tags[act_settings->get_jsoninfos().at(i)];
-        ride_model->setData(ride_model->index(row,0,QModelIndex()),act_settings->get_jsoninfos().at(i)+":");
+        QJsonValue value = item_tags[settings::get_jsoninfos().at(i)];
+        ride_model->setData(ride_model->index(row,0,QModelIndex()),settings::get_jsoninfos().at(i)+":");
         ride_model->setData(ride_model->index(row,1,QModelIndex()),value.toString());
     }
 
@@ -86,35 +86,51 @@ void Activity::read_jsonFile(QString fileContent)
         QJsonObject item_xdata = arr_swimXdata.at(0).toObject();
         QJsonArray arr_lapData = item_xdata["SAMPLES"].toArray();
         swim_xdata = new QStandardItemModel(arr_lapData.count(),5);
-        swim_xdata->setHorizontalHeaderLabels(act_settings->get_swimtime_header());
+        swim_xdata->setHorizontalHeaderLabels(settings::get_swimtime_header());
         int lapNr = 0;
         int intCount = 1;
-        double lappace;
-        double lapSpeed;
+        double lapStart,lapStartPrev = 0,lapPacePrev = 0;
+        double lapSpeed,lapPace;
         row = 0;
+
         foreach (const QJsonValue & v_xdata, arr_lapData)
         {
-            QJsonObject obj_xdata = v_xdata.toObject();
-            lappace = round(obj_xdata["VALUES"].toArray().at(1).toDouble());
-            if(lappace > 0)
+            QJsonObject obj_xdata = v_xdata.toObject();     
+            lapPace = round((obj_xdata["VALUES"].toArray().at(1).toDouble() - 0.1));
+            if(lapPace > 0)
             {
                 swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),QString::number(intCount)+"_"+QString::number(++lapNr*swim_track));
-                lapSpeed = act_settings->get_speed(QTime::fromString(act_settings->set_time(lappace),"mm:ss"),swim_track,act_settings->isSwim,false).toDouble();
+                if(lapPacePrev == 0)
+                {
+                    lapStart = obj_xdata["SECS"].toDouble();
+                    int breakTime = lapStart - lapStartPrev;
+                    swim_xdata->setData(swim_xdata->index(row-1,2,QModelIndex()),breakTime);
+
+                }
+                else
+                {
+                    lapStart = lapStartPrev + lapPacePrev;
+                }
+                if(row == 1) lapStart = lapPacePrev-1;
+                lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(lapPace),"mm:ss"),swim_track,settings::isSwim,false).toDouble();
             }
             else
             {
                 lapNr = 0;
-                swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),"Break");
+                swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),settings::get_breakName());
+                lapStart = lapStartPrev + lapPacePrev;
                 lapSpeed = 0;
                 ++intCount;
             }
-            swim_xdata->setData(swim_xdata->index(row,1,QModelIndex()),obj_xdata["SECS"].toDouble());
-            swim_xdata->setData(swim_xdata->index(row,2,QModelIndex()),lappace);
+
+            swim_xdata->setData(swim_xdata->index(row,1,QModelIndex()),lapStart);
+            swim_xdata->setData(swim_xdata->index(row,2,QModelIndex()),lapPace);
             swim_xdata->setData(swim_xdata->index(row,3,QModelIndex()),obj_xdata["VALUES"].toArray().at(2).toDouble());
             swim_xdata->setData(swim_xdata->index(row,4,QModelIndex()),lapSpeed);
+            lapPacePrev = lapPace;
+            lapStartPrev = lapStart;
             ++row;
-
-        }
+        }    
     }
 
     QJsonArray arr_samp = item_ride["SAMPLES"].toArray();
@@ -134,10 +150,10 @@ void Activity::read_jsonFile(QString fileContent)
 
     int_model->setData(int_model->index(int_model->rowCount()-1,2,QModelIndex()),samp_model->rowCount()-1);
     edit_int_model->setData(edit_int_model->index(edit_int_model->rowCount()-1,2,QModelIndex()),samp_model->rowCount()-1);
-    edit_int_model->setHorizontalHeaderLabels(act_settings->get_time_header());
+    edit_int_model->setHorizontalHeaderLabels(settings::get_time_header());
 
     edit_dist_model = new QStandardItemModel(int_model->rowCount(),2);
-    edit_dist_model->setHorizontalHeaderLabels(act_settings->get_km_header());
+    edit_dist_model->setHorizontalHeaderLabels(settings::get_km_header());
     for(int i = 0; i < int_model->rowCount();++i)
     {
         edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),int_model->data(int_model->index(i,0,QModelIndex())).toString());
@@ -173,7 +189,7 @@ void Activity::read_jsonFile(QString fileContent)
 
 void Activity::set_additional_ride_info()
 {
-    if(act_settings->get_act_isrecalc())
+    if(settings::get_act_isrecalc())
     {
         ride_model->setData(ride_model->index(6,1,QModelIndex()),QString::number(edit_samp_model->data(edit_samp_model->index(edit_samp_model->rowCount()-1,1,QModelIndex())).toDouble()));
         ride_model->setData(ride_model->index(7,1,QModelIndex()),QDateTime::fromTime_t(edit_samp_model->rowCount()).toUTC().toString("hh:mm:ss"));
@@ -202,16 +218,16 @@ void Activity::read_swim_data()
     swim_hf_model->setHorizontalHeaderLabels(hf_header);
 
     //Read current CV and HF Threshold
-    QString temp_cv = act_settings->get_paceList().at(0);
-    swim_cv = (3600.0 / act_settings->get_timesec(temp_cv)) / 10.0;
-    pace_cv = act_settings->get_timesec(temp_cv);
+    QString temp_cv = settings::get_paceList().at(0);
+    swim_cv = (3600.0 / settings::get_timesec(temp_cv)) / 10.0;
+    pace_cv = settings::get_timesec(temp_cv);
 
-    swimZone = act_settings->get_swimRange();
-    hfZone = act_settings->get_hfRange();
-    hfThres = act_settings->get_hfList().at(0);
+    swimZone = settings::get_swimRange();
+    hfZone = settings::get_hfRange();
+    hfThres = settings::get_hfList().at(0);
     hf_threshold = hfThres.toInt();
-    hfMax = act_settings->get_hfList().at(1);
-    levels = act_settings->get_levelList();
+    hfMax = settings::get_hfList().at(1);
+    levels = settings::get_levelList();
 
     //Set Swim zone low and high
 
@@ -222,13 +238,13 @@ void Activity::read_swim_data()
             zone_high = temp.split("-").last();
 
             swim_pace_model->setData(swim_pace_model->index(i,0,QModelIndex()),levels.at(i));
-            swim_pace_model->setData(swim_pace_model->index(i,1,QModelIndex()),act_settings->set_time(this->get_zone_values(zone_low.toDouble(),pace_cv,true)));
+            swim_pace_model->setData(swim_pace_model->index(i,1,QModelIndex()),settings::set_time(this->get_zone_values(zone_low.toDouble(),pace_cv,true)));
 
             p_swim_time[i] = swim_cv*(zone_low.toDouble()/100);
 
             if(i < zone_count-1)
             {
-                swim_pace_model->setData(swim_pace_model->index(i,2,QModelIndex()),act_settings->set_time(this->get_zone_values(zone_high.toDouble(),pace_cv,true)));
+                swim_pace_model->setData(swim_pace_model->index(i,2,QModelIndex()),settings::set_time(this->get_zone_values(zone_high.toDouble(),pace_cv,true)));
             }
             else
             {
@@ -240,7 +256,7 @@ void Activity::read_swim_data()
 
         for (int x = 1; x <= zone_count;x++)
         {
-            swim_pace_model->setData(swim_pace_model->index(x-1,3,QModelIndex()),act_settings->set_time(p_swim_timezone[x]));
+            swim_pace_model->setData(swim_pace_model->index(x-1,3,QModelIndex()),settings::set_time(p_swim_timezone[x]));
         }
 
     //Set HF zone low and high
@@ -354,7 +370,7 @@ void Activity::set_hf_time_in_zone()
 
      for(int i = 0; i < zone_count; i++)
      {
-         swim_hf_model->setData(swim_hf_model->index(i,3,QModelIndex()),act_settings->set_time(p_hf_timezone[i]));
+         swim_hf_model->setData(swim_hf_model->index(i,3,QModelIndex()),settings::set_time(p_hf_timezone[i]));
      }
     hf_avg = 0;
     this->set_hf_avg();
@@ -392,7 +408,8 @@ void Activity::set_swim_pace()
 
 void Activity::set_swim_sri()
 {
-    swim_sri = static_cast<double>(pace_cv) / static_cast<double>(swim_pace);
+    double goal = sqrt(pow(static_cast<double>(swim_pace),3.0))/10;
+    swim_sri = static_cast<double>(pace_cv) / goal;
 }
 
 int Activity::get_zone_values(double factor, int max, bool ispace)
@@ -509,7 +526,7 @@ int Activity::get_swim_cv_pace(double swim_cv)
 
 QString Activity::get_swim_pace_time(int pace)
 {
-    return act_settings->set_time(pace);
+    return settings::set_time(pace);
 }
 
 int Activity::get_swim_laps(int row,bool recalc)
@@ -606,28 +623,32 @@ void Activity::recalculate_intervalls(bool recalc)
 
             if(i == 0)
             {
-                lapname = "Warmup_";
-                edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),QString::number(lapcounter)+"_"+lapname+QString::number(swim_track*p_swimlaps[i]));
+                lapname = QString::number(lapcounter)+"_Warmup_"+QString::number(swim_track*p_swimlaps[i]);
+                edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
+                edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
                 ++lapcounter;
             }
             if(i != 0 && i < edit_dist_model->rowCount()-1)
             {
                 if(this->check_is_intervall(i) == 1)
                 {
-                    lapname = "Int_";
-                    edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),QString::number(lapcounter)+"_"+lapname+QString::number(swim_track*p_swimlaps[i]));
+                    lapname = QString::number(lapcounter)+"_Int_"+QString::number(swim_track*p_swimlaps[i]);
+                    edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
+                    edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
                     ++lapcounter;
                 }
                 else
                 {
-                    lapname = "Break";
+                    lapname = settings::get_breakName();
                     edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
+                    edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
                 }
             }
             if(i == edit_dist_model->rowCount()-1)
             {
-                lapname = "Cooldown_";
-                edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),QString::number(lapcounter)+"_"+lapname+QString::number(swim_track*p_swimlaps[i]));
+                lapname = QString::number(lapcounter)+"_Cooldown_"+QString::number(swim_track*p_swimlaps[i]);
+                edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
+                edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
             }
             if(i == 0)
             {
@@ -723,7 +744,7 @@ double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double fact
 double Activity::interpolate_speed(int row,int sec,double limit)
 {
     double curr_speed = samp_model->data(samp_model->index(sec,2,QModelIndex())).toDouble();
-    double avg_speed = this->get_int_speed(row,act_settings->get_act_isrecalc());
+    double avg_speed = this->get_int_speed(row,settings::get_act_isrecalc());
     if(curr_speed == 0)
     {
         curr_speed = limit;
@@ -791,7 +812,7 @@ void Activity::set_edit_samp_model()
     {
         if(this->get_sport() == this->isBike) sportindex = 1;
         if(this->get_sport() == this->isRun) sportindex = 2;
-        lowLimit = act_settings->get_speed(QTime::fromString(act_settings->get_paceList().at(sportindex),"mm:ss"),0,v_sport.trimmed(),true).toDouble();
+        lowLimit = settings::get_speed(QTime::fromString(settings::get_paceList().at(sportindex),"mm:ss"),0,v_sport.trimmed(),true).toDouble();
         lowLimit = lowLimit - (lowLimit*0.20);
     }
 
@@ -814,7 +835,7 @@ void Activity::set_edit_samp_model()
                 int_stop = swim_xdata->data(swim_xdata->index(sLap+1,1,QModelIndex()),Qt::DisplayRole).toInt();
             }
 
-            if(swimPace > 0)
+            if(swimSpeed > 0)
             {
                 ++swimLaps;
                 msec = (swim_track / swimPace) / 1000;
@@ -852,7 +873,6 @@ void Activity::set_edit_samp_model()
                 calc_speed[lapsec] = swimSpeed;
                 calc_cadence[lapsec] = swimCycle;
             }
-
         }
     }
     else
@@ -954,23 +974,23 @@ void Activity::set_curr_act_model(bool recalc)
     {
             data_index = p_int_model->index(row,0,QModelIndex());
             curr_act_model->setData(curr_act_model->index(row,0,QModelIndex()),p_int_model->data(data_index,Qt::DisplayRole).toString());
-            curr_act_model->setData(curr_act_model->index(row,1,QModelIndex()),act_settings->set_time(this->get_int_duration(row,recalc)));
+            curr_act_model->setData(curr_act_model->index(row,1,QModelIndex()),settings::set_time(this->get_int_duration(row,recalc)));
             data_index = p_samp_model->index(p_int_model->data(p_int_model->index(row,2,QModelIndex()),Qt::DisplayRole).toInt()-1,1,QModelIndex());
             curr_act_model->setData(curr_act_model->index(row,2,QModelIndex()),p_samp_model->data(data_index,Qt::DisplayRole).toDouble());
             curr_act_model->setData(curr_act_model->index(row,3,QModelIndex()),this->get_int_distance(row,recalc));
-            curr_act_model->setData(curr_act_model->index(row,4,QModelIndex()),act_settings->set_time(this->get_int_pace(row,recalc)));
+            curr_act_model->setData(curr_act_model->index(row,4,QModelIndex()),settings::set_time(this->get_int_pace(row,recalc)));
             if(this->get_sport() == this->isSwim) curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),this->get_swim_laps(row,recalc));
             if(this->get_sport() == this->isBike) curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),this->get_int_watts(row));
     }
 
-    curr_act_model->setHorizontalHeaderLabels(act_settings->get_int_header());
+    curr_act_model->setHorizontalHeaderLabels(settings::get_int_header());
 }
 
 void Activity::set_avg_values(int counter, int row, bool add)
 {
     avg_counter = counter;
-    int t_laptime = act_settings->get_timesec(curr_act_model->data(curr_act_model->index(row,1,QModelIndex())).toString());
-    int t_pace = act_settings->get_timesec(curr_act_model->data(curr_act_model->index(row,4,QModelIndex())).toString());
+    double t_laptime = static_cast<double>(settings::get_timesec(curr_act_model->data(curr_act_model->index(row,1,QModelIndex())).toString()));
+    int t_pace = settings::get_timesec(curr_act_model->data(curr_act_model->index(row,4,QModelIndex())).toString());
     double t_dist = curr_act_model->data(curr_act_model->index(row,3,QModelIndex())).toDouble();
     double t_watt = 0.0;
     if(this->get_sport() == this->isBike) t_watt = curr_act_model->data(curr_act_model->index(row,5,QModelIndex())).toDouble();

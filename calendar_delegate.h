@@ -5,6 +5,7 @@
 #include <QTableView>
 #include <QDebug>
 #include <QDate>
+#include "settings.h"
 
 class calendar_delegate : public QItemDelegate
 {
@@ -16,23 +17,30 @@ public:
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
+        QVector<int> fontsize = settings::get_fontSize();
         QFont phase_font,date_font, work_font;
-        QString temp_value;
+        QString temp_value,dayDate;
         QStringList calendar_values;
         QString delimiter = "#";
         QColor rect_color;
+        int textMargin = 2;
+        int celloffset = 21;
         phase_font.setBold(true);
-        phase_font.setPixelSize(16);
+        phase_font.setPixelSize(fontsize[0]);
         date_font.setBold(true);
-        date_font.setPixelSize(14);
+        date_font.setPixelSize(fontsize[1]);
         work_font.setBold(false);
-        work_font.setPixelSize(11);
+        work_font.setPixelSize(fontsize[2]-1);
 
         temp_value = index.data(Qt::DisplayRole).toString();
         calendar_values = temp_value.split(delimiter);
-
+        dayDate = calendar_values.at(0);
+        dayDate = dayDate.left(7);
         QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),20);
-        painter->fillRect(rect_head,QBrush(QColor(128,128,128)));
+        QRect rect_head_text(option.rect.x()+ textMargin,option.rect.y(), option.rect.width(),20);
+        rect_color.setRgb(128,128,128);
+        painter->fillRect(rect_head,QBrush(rect_color));
+        painter->fillRect(rect_head_text,QBrush(rect_color));
         QTextOption dateOption(Qt::AlignLeft);
 
         if(QDate::fromString(calendar_values.at(0),"dd MMM yy").addYears(100) ==(QDate::currentDate()))
@@ -41,12 +49,12 @@ public:
         }
         else
         {
-            painter->fillRect(rect_head,QBrush(QColor(128,128,128)));
+            painter->fillRect(rect_head,QBrush(rect_color));
         }
 
         painter->setPen(Qt::white);
         painter->setFont(date_font);
-        painter->drawText(rect_head,calendar_values.at(0),dateOption);
+        painter->drawText(rect_head_text,dayDate,dateOption);
 
         if(index.column() != 0)
         {
@@ -56,28 +64,34 @@ public:
 
             if(!calendar_values.isEmpty())
             {
-                int height = (option.rect.height()- 21) / calendar_values.count();
-                int y = option.rect.y()+ 21;
+                int height = (option.rect.height()- celloffset) / calendar_values.count();
+                int y = option.rect.y()+ celloffset;
 
                 for(int i = 0; i < calendar_values.count(); ++i)
                 {
                     QString workout = calendar_values.at(i);
 
                     QRect rect_work(option.rect.x(),y,option.rect.width(),height);
+                    QRect rect_work_text(option.rect.x()+ textMargin,y,option.rect.width(),height);
+
                     y += height+1;
 
-                    if(workout.contains("Swim",Qt::CaseSensitive)) painter->fillRect(rect_work,QBrush(QColor(0,154,231)));
-                    if(workout.contains("Bike",Qt::CaseSensitive)) painter->fillRect(rect_work,QBrush(QColor(255,170,0)));
-                    if(workout.contains("Run",Qt::CaseSensitive)) painter->fillRect(rect_work,QBrush(QColor(0,170,0)));
-                    if(workout.contains("Strength",Qt::CaseSensitive)) painter->fillRect(rect_work,QBrush(QColor(192,192,192)));
-                    if(workout.contains("Alternativ",Qt::CaseSensitive)) painter->fillRect(rect_work,QBrush(QColor(255,255,0)));
-                    if(workout.contains("Tria",Qt::CaseSensitive)) painter->fillRect(rect_work,QBrush(QColor(255,0,0)));
-                    if(workout.contains("Other",Qt::CaseSensitive)) painter->fillRect(rect_work,QBrush(QColor(170,255,255)));
+                    for(int pos = 0; pos < settings::get_sportList().count();++pos)
+                    {
+                        if(workout.contains(settings::get_sportList().at(pos)))
+                        {
+                            rect_color = settings::get_color(settings::get_sportColor().at(pos));
+                            break;
+                        }
+                    }
+
+                    painter->fillRect(rect_work,QBrush(rect_color));
+                    painter->fillRect(rect_work_text,QBrush(rect_color));
 
                     QTextOption workoption(Qt::AlignLeft);
                     painter->setPen(Qt::black);
                     painter->setFont(work_font);
-                    painter->drawText(rect_work,workout,workoption);
+                    painter->drawText(rect_work_text,workout,workoption);
                 }
 
             }
@@ -90,24 +104,30 @@ public:
             phase = phase.remove(0,phase.indexOf(delimiter)+1);
             if(!phase.isEmpty())
             {
-                if(phase.contains("OFF")) rect_color.setRgb(0,185,255);
-                if(phase.contains("PREP")) rect_color.setRgb(60,235,60);
-                if(phase.contains("BASE")) rect_color.setRgb(230,255,0);
-                if(phase.contains("BUILD")) rect_color.setRgb(255,150,100);
-                if(phase.contains("PEAK")) rect_color.setRgb(255,85,0);
-                if(phase.contains("WK")) rect_color.setRgb(255,50,0);
-                if(phase.contains("Phase")) rect_color.setRgb(125,125,200);
+                for(int pos = 0; pos < settings::get_phaseList().count();++pos)
+                {
+                    if(phase.contains(settings::get_phaseList().at(pos)))
+                    {
+                        rect_color = settings::get_color(settings::get_phaseColor().at(pos));
+                        break;
+                    }
+                    else
+                    {
+                        rect_color = settings::get_color(settings::get_emptyPhaseColor());
+                    }
+                }
 
-                QRect rect_phase(option.rect.x(),option.rect.y()+21, option.rect.width(),option.rect.height()-21);
+                QRect rect_phase(option.rect.x(),option.rect.y()+celloffset, option.rect.width(),option.rect.height()-celloffset);
+                QRect rect_phase_text(option.rect.x()+ textMargin,option.rect.y()+celloffset, option.rect.width(),option.rect.height()-celloffset);
                 painter->fillRect(rect_phase,QBrush(rect_color));
+                painter->fillRect(rect_phase_text,QBrush(rect_color));
 
                 QTextOption phaseOption(Qt::AlignVCenter);
-                painter->setPen(Qt::white);
+                painter->setPen(Qt::black);
                 painter->setFont(phase_font);
-                painter->drawText(rect_phase,phase,phaseOption);
+                painter->drawText(rect_phase_text,phase,phaseOption);
              }
         }
-
         painter->restore();
     }
 

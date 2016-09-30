@@ -1,14 +1,13 @@
 #include "day_popup.h"
 #include "ui_day_popup.h"
 
-day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched, settings *p_settings) :
+day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
     QDialog(parent),
     ui(new Ui::day_popup)
 {
     ui->setupUi(this);
     workout_date = &w_date;
     workSched = p_sched;
-    pop_settings = p_settings;
     weekPhase = workSched->get_weekPhase(w_date);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     this->show_workouts();
@@ -86,7 +85,7 @@ void day_popup::show_workouts()
             cellcursor = cell.firstCursorPosition();
             if(x == 7)
             {
-                cellcursor.insertText(pop_settings->get_workout_pace(workSched->workout_schedule->item(index.row(),7)->text().toDouble(),QTime::fromString(workSched->workout_schedule->item(index.row(),6)->text(),"hh:mm:ss"),workSched->workout_schedule->item(index.row(),3)->text(),true));
+                cellcursor.insertText(settings::get_workout_pace(workSched->workout_schedule->item(index.row(),7)->text().toDouble(),QTime::fromString(workSched->workout_schedule->item(index.row(),6)->text(),"hh:mm:ss"),workSched->workout_schedule->item(index.row(),3)->text(),true));
             }
             else
             {

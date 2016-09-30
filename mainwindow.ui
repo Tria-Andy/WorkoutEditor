@@ -1223,6 +1223,20 @@
                 </widget>
                </item>
                <item>
+                <widget class="QLabel" name="label_21">
+                 <property name="text">
+                  <string>Kal:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEdit_kal">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <widget class="QLabel" name="label_14">
                  <property name="text">
                   <string>KiloJoule:</string>

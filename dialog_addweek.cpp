@@ -1,15 +1,14 @@
 #include "dialog_addweek.h"
 #include "ui_dialog_addweek.h"
 
-Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sched,settings *p_settings) :
+Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sched) :
     QDialog(parent),
     ui(new Ui::Dialog_addweek)
 {
     ui->setupUi(this);
-    add_settings = p_settings;
     workSched = p_sched;
-    ui->comboBox_phase->addItems(add_settings->get_phaseList());
-    ui->comboBox_cycle->addItems(add_settings->get_cycleList());
+    ui->comboBox_phase->addItems(settings::get_phaseList());
+    ui->comboBox_cycle->addItems(settings::get_cycleList());
     ui->dateEdit_selectDate->setDate(QDate().currentDate());
     empty = "0-0-00:00-0";
     swimValues = bikeValues = runValues = stgValues = altValues = sumValues = empty;
@@ -205,12 +204,12 @@ void Dialog_addweek::sum_distance()
 void Dialog_addweek::sum_duration()
 {
     int duration;
-    duration = add_settings->get_timesec(ui->timeEdit_swim_dur->time().toString("hh:mm"));
-    duration = duration + add_settings->get_timesec(ui->timeEdit_bike_dur->time().toString("hh:mm"));
-    duration = duration + add_settings->get_timesec(ui->timeEdit_run_dur->time().toString("hh:mm"));
-    duration = duration + add_settings->get_timesec(ui->timeEdit_stg_dur->time().toString("hh:mm"));
-    duration = duration + add_settings->get_timesec(ui->timeEdit_alt_dur->time().toString("hh:mm"));
-    ui->lineEdit_sum_duration->setText(add_settings->set_time(duration));
+    duration = settings::get_timesec(ui->timeEdit_swim_dur->time().toString("hh:mm"));
+    duration = duration + settings::get_timesec(ui->timeEdit_bike_dur->time().toString("hh:mm"));
+    duration = duration + settings::get_timesec(ui->timeEdit_run_dur->time().toString("hh:mm"));
+    duration = duration + settings::get_timesec(ui->timeEdit_stg_dur->time().toString("hh:mm"));
+    duration = duration + settings::get_timesec(ui->timeEdit_alt_dur->time().toString("hh:mm"));
+    ui->lineEdit_sum_duration->setText(settings::set_time(duration));
 }
 
 void Dialog_addweek::sum_stress()
@@ -278,15 +277,16 @@ void Dialog_addweek::on_pushButton_ok_clicked()
 void Dialog_addweek::calc_percent()
 {
     double percent;
-    percent = (static_cast<double>(add_settings->get_timesec(ui->timeEdit_swim_dur->time().toString("hh:mm"))) / static_cast<double>(add_settings->get_timesec(ui->lineEdit_sum_duration->text())))*100.0;
+    QString sDuration = ui->lineEdit_sum_duration->text();
+    percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_swim_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
     ui->lineEdit_swim_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
-    percent = (static_cast<double>(add_settings->get_timesec(ui->timeEdit_bike_dur->time().toString("hh:mm"))) / static_cast<double>(add_settings->get_timesec(ui->lineEdit_sum_duration->text())))*100.0;
+    percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_bike_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
     ui->lineEdit_bike_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
-    percent = (static_cast<double>(add_settings->get_timesec(ui->timeEdit_run_dur->time().toString("hh:mm"))) / static_cast<double>(add_settings->get_timesec(ui->lineEdit_sum_duration->text())))*100.0;
+    percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_run_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
     ui->lineEdit_run_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
-    percent = (static_cast<double>(add_settings->get_timesec(ui->timeEdit_stg_dur->time().toString("hh:mm"))) / static_cast<double>(add_settings->get_timesec(ui->lineEdit_sum_duration->text())))*100.0;
+    percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_stg_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
     ui->lineEdit_stg_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
-    percent = (static_cast<double>(add_settings->get_timesec(ui->timeEdit_alt_dur->time().toString("hh:mm"))) / static_cast<double>(add_settings->get_timesec(ui->lineEdit_sum_duration->text())))*100.0;
+    percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_alt_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
     ui->lineEdit_alt_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
 
 }
@@ -328,38 +328,37 @@ void Dialog_addweek::on_spinBox_alt_work_valueChanged(int arg1)
 
 void Dialog_addweek::on_timeEdit_swim_dur_timeChanged(const QTime &time)
 {
-    Q_UNUSED(time)
     this->sum_duration();
     this->store_values(1);
     this->calc_percent();
-    ui->spinBox_swim_stress->setValue(round(add_settings->get_timesec(ui->timeEdit_swim_dur->time().toString("hh:mm"))*1.5));
+    ui->lineEdit_swim_pace->setText(settings::get_workout_pace(ui->doubleSpinBox_swim_dist->value(),time,settings::isSwim,false));
+    ui->spinBox_swim_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))*settings::get_factorList()->at(0)));
 }
 
 void Dialog_addweek::on_timeEdit_bike_dur_timeChanged(const QTime &time)
 {
-    Q_UNUSED(time)
     this->sum_duration();
     this->store_values(2);
     this->calc_percent();
-    ui->spinBox_bike_stress->setValue(round(add_settings->get_timesec(ui->timeEdit_bike_dur->time().toString("hh:mm"))*1.05));
+    ui->lineEdit_bike_pace->setText(settings::get_workout_pace(ui->doubleSpinBox_bike_dist->value(),time,settings::isBike,false));
+    ui->spinBox_bike_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))*settings::get_factorList()->at(1)));
 }
 
 void Dialog_addweek::on_timeEdit_run_dur_timeChanged(const QTime &time)
 {
-    Q_UNUSED(time)
     this->sum_duration();
     this->store_values(3);
     this->calc_percent();
-    ui->spinBox_run_stress->setValue(round(add_settings->get_timesec(ui->timeEdit_run_dur->time().toString("hh:mm"))*1.3));
+    ui->lineEdit_run_pace->setText(settings::get_workout_pace(ui->doubleSpinBox_run_dist->value(),time,settings::isRun,false));
+    ui->spinBox_run_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))*settings::get_factorList()->at(2)));
 }
 
 void Dialog_addweek::on_timeEdit_stg_dur_timeChanged(const QTime &time)
 {
-    Q_UNUSED(time)
     this->sum_duration();
     this->store_values(4);
     this->calc_percent();
-    ui->spinBox_stg_stress->setValue(round(add_settings->get_timesec(ui->timeEdit_stg_dur->time().toString("hh:mm"))));
+    ui->spinBox_stg_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))));
 }
 
 void Dialog_addweek::on_timeEdit_alt_dur_timeChanged(const QTime &time)
@@ -374,21 +373,21 @@ void Dialog_addweek::on_doubleSpinBox_swim_dist_valueChanged(double dist)
 {
     this->sum_distance();
     this->store_values(1);
-    ui->lineEdit_swim_pace->setText(add_settings->get_workout_pace(dist,ui->timeEdit_swim_dur->time(),add_settings->isSwim,false));
+    ui->lineEdit_swim_pace->setText(settings::get_workout_pace(dist,ui->timeEdit_swim_dur->time(),settings::isSwim,false));
 }
 
 void Dialog_addweek::on_doubleSpinBox_bike_dist_valueChanged(double dist)
 {
     this->sum_distance();
     this->store_values(2);
-    ui->lineEdit_bike_pace->setText(add_settings->get_workout_pace(dist,ui->timeEdit_bike_dur->time(),add_settings->isBike,false));
+    ui->lineEdit_bike_pace->setText(settings::get_workout_pace(dist,ui->timeEdit_bike_dur->time(),settings::isBike,false));
 }
 
 void Dialog_addweek::on_doubleSpinBox_run_dist_valueChanged(double dist)
 {
     this->sum_distance();
     this->store_values(3);
-    ui->lineEdit_run_pace->setText(add_settings->get_workout_pace(dist,ui->timeEdit_run_dur->time(),add_settings->isRun,false));
+    ui->lineEdit_run_pace->setText(settings::get_workout_pace(dist,ui->timeEdit_run_dur->time(),settings::isRun,false));
 }
 
 void Dialog_addweek::on_doubleSpinBox_alt_dist_valueChanged(double arg1)

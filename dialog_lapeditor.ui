@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>250</width>
-    <height>199</height>
+    <width>270</width>
+    <height>291</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>250</width>
+    <width>270</width>
     <height>0</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>250</width>
+    <width>270</width>
     <height>16777215</height>
    </size>
   </property>
@@ -53,31 +53,14 @@
       <string>Lap Infos</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="1">
-       <widget class="QRadioButton" name="radioButton_del">
-        <property name="text">
-         <string>Delete</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
          <string>Lap:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QRadioButton" name="radioButton_add">
-        <property name="text">
-         <string>Add</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="label_2">
         <property name="maximumSize">
          <size>
@@ -90,45 +73,144 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QSpinBox" name="spinBox_endtime">
-        <property name="maximum">
-         <number>10000</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
+      <item row="6" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>End-Time:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QSpinBox" name="spinBox_starttime">
-        <property name="maximum">
-         <number>10000</number>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_4">
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_distance">
         <property name="text">
          <string>Distance:</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="0" column="0" rowspan="2" colspan="4">
+       <widget class="QFrame" name="frame_2">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>10</height>
+         </size>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <property name="spacing">
+          <number>4</number>
+         </property>
+         <property name="leftMargin">
+          <number>5</number>
+         </property>
+         <property name="topMargin">
+          <number>5</number>
+         </property>
+         <property name="rightMargin">
+          <number>5</number>
+         </property>
+         <property name="bottomMargin">
+          <number>5</number>
+         </property>
+         <item>
+          <widget class="QRadioButton" name="radioButton_add">
+           <property name="text">
+            <string>Add</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButton_update">
+           <property name="text">
+            <string>Update</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButton_del">
+           <property name="text">
+            <string>Delete</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="7" column="1">
        <widget class="QDoubleSpinBox" name="doubleSpinBox_distance">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="decimals">
-         <number>3</number>
+         <number>4</number>
         </property>
         <property name="maximum">
          <double>199.990000000000009</double>
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
+      <item row="5" column="1">
+       <widget class="QSpinBox" name="spinBox_starttime">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximum">
+         <number>10000</number>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1" colspan="3">
+       <widget class="QLineEdit" name="lineEdit_newName"/>
+      </item>
+      <item row="6" column="1">
+       <widget class="QSpinBox" name="spinBox_endtime">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximum">
+         <number>10000</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_edit">
+        <property name="text">
+         <string>Edit:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="3">
+       <widget class="QComboBox" name="comboBox_edit">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>- </string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
        <widget class="QLabel" name="label_5">
         <property name="maximumSize">
          <size>
@@ -137,26 +219,55 @@
          </size>
         </property>
         <property name="text">
-         <string>Sec</string>
+         <string>- </string>
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Sec</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2">
-       <widget class="QLabel" name="label_7">
+      <item row="7" column="2">
+       <widget class="QLabel" name="label_km">
         <property name="text">
          <string>Km</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="3" column="1" colspan="3">
        <widget class="QComboBox" name="comboBox_lap"/>
+      </item>
+      <item row="5" column="3">
+       <widget class="QLabel" name="label_start">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>-</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="3">
+       <widget class="QLabel" name="label_end">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>-</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QSpinBox" name="spinBox_strokes"/>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_strokes">
+        <property name="text">
+         <string>Strokes:</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

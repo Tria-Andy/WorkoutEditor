@@ -13,6 +13,7 @@
 #include "del_spinbox_double.h"
 #include "del_spinbox_int.h"
 #include "del_swimlap.h"
+#include "del_intview.h"
 #include "schedule.h"
 #include "dialog_add.h"
 #include "dialog_addweek.h"
@@ -45,7 +46,7 @@ private:
 
     schedule *workSchedule;
     Activity *curr_activity;
-    settings *editorSettings;
+    settings editorSettings;
     standardWorkouts *stdWorkout;
     calendar_delegate calender_del;
     week_delegate week_del;
@@ -53,8 +54,9 @@ private:
     del_spinbox_double dist_del;
     del_spinbox_int time_del;
     del_swimlap swimlap_del;
+    del_intview intervall_del;
     QStandardItemModel *calendar_model,*sum_model;
-    QStringList modus_list,cal_header,work_list,sum_name,sum_list,year_header,schedMode,sum_header;
+    QStringList modus_list,cal_header,work_list,sum_name,year_header,schedMode,sum_header;
 
     //Intercall Chart
     QChart *intChart;

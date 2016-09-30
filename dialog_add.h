@@ -18,7 +18,6 @@ class Dialog_add : public QDialog
     Q_OBJECT
 
 private:
-    settings *add_settings;
     standardWorkouts *stdWorkouts;
     schedule *workSched;
     QDate workout_date;
@@ -32,7 +31,7 @@ private:
 
     QString get_weekPhase(QDate);
 public:
-    explicit Dialog_add(QWidget *parent = 0,schedule *p_sched = 0, settings *p_settings = 0, standardWorkouts *p_stdworkouts = 0);
+    explicit Dialog_add(QWidget *parent = 0,schedule *p_sched = 0, standardWorkouts *p_stdworkouts = 0);
     ~Dialog_add();
 
 private slots:

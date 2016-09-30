@@ -13,8 +13,8 @@ private:
     settings *act_settings;
     QString v_date,v_sport;
     QStringList ride_items;
-    double swim_track,avg_dist,avg_watt;
-    int dist_factor,avg_counter,avg_laptime,avg_pace;
+    double swim_track,avg_dist,avg_watt,avg_laptime;
+    int dist_factor,avg_counter,avg_pace;
 
     int pace_cv,zone_count;
     int move_time;
@@ -42,7 +42,8 @@ private:
     void set_edit_samp_model();
 
 public:
-    explicit Activity(settings *p_settings = 0);
+    //explicit Activity(settings *p_settings = 0);
+    explicit Activity();
     static const QString isSwim;
     static const QString isBike;
     static const QString isRun;
@@ -75,7 +76,7 @@ public:
     int get_dist_factor() {return dist_factor;}
     void set_avg_values(int,int,bool);
     void reset_avg();
-    int get_avg_laptime() {return avg_laptime/avg_counter;}
+    int get_avg_laptime() {return round(avg_laptime/avg_counter);}
     int get_avg_pace() {return avg_pace/avg_counter;}
     double get_avg_dist() {return avg_dist/avg_counter;}
     double get_avg_watts() {return avg_watt/avg_counter;}
