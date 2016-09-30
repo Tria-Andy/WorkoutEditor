@@ -96,6 +96,7 @@ private:
     void write_int_infos();
     void write_hf_infos();
     void write_samp_infos();
+    void set_selectInt(QColor,QModelIndex);
 
     void set_menuItems(bool,bool);
     void reset_jsontext();

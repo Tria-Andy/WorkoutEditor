@@ -1024,6 +1024,16 @@ void MainWindow::write_samp_infos()
     }
 }
 
+void MainWindow::set_selectInt(QColor color, QModelIndex index)
+{
+    QModelIndex col;
+    for(int x = 0; x < curr_activity->get_header_num(); ++x)
+    {
+        col = curr_activity->curr_act_model->index(index.row(),index.column()+x,QModelIndex());
+        curr_activity->curr_act_model->setData(col,QVariant(color),Qt::BackgroundColorRole);
+    }
+}
+
 void MainWindow::on_pushButton_week_minus_clicked()
 {
     if(isWeekMode)
@@ -1190,36 +1200,26 @@ void MainWindow::set_add_swim_values()
 
 void MainWindow::on_tableView_int_clicked(const QModelIndex &index)
 {
-    QModelIndex col;
-
     if(index.column() == 0)
     {
-        QVariant check_click = curr_activity->curr_act_model->data(index,(Qt::UserRole+1));
-        int check_value = check_click.toInt();
+        int check_value = curr_activity->curr_act_model->data(index,(Qt::UserRole+1)).toInt();
 
         if(check_value == 0)
         {
             sel_count++;
             curr_activity->curr_act_model->setData(index,1,Qt::UserRole+1);
-            for(int i = 0; i < curr_activity->get_header_num(); i++)
-            {
-                col = curr_activity->curr_act_model->index(index.row(),index.column()+i,QModelIndex());
-                curr_activity->curr_act_model->setData(col,QVariant(QColor(Qt::green)),Qt::BackgroundColorRole);
-            }
+            this->set_selectInt(QColor(Qt::green),index);
             curr_activity->set_avg_values(sel_count,index.row(),true);
         }
         else
         {
             sel_count--;
             curr_activity->curr_act_model->setData(index,0,Qt::UserRole+1);
-            for(int i = 0; i < curr_activity->get_header_num(); i++)
-            {
-                col = curr_activity->curr_act_model->index(index.row(),index.column()+i,QModelIndex());
-                curr_activity->curr_act_model->setData(col,QVariant(QColor(Qt::white)),Qt::BackgroundColorRole);
-            }
+            this->set_selectInt(QColor(Qt::white),index);
             curr_activity->set_avg_values(sel_count,index.row(),false);
         }
     }
+
     this->set_avg_fields();
 }
 
@@ -1292,13 +1292,14 @@ void MainWindow::on_actionUnselect_all_rows_triggered()
     {
         index = curr_activity->curr_act_model->index(i,0,QModelIndex());
         curr_activity->curr_act_model->setData(index,0,Qt::UserRole+1);
-
+        this->set_selectInt(QColor(Qt::white),index);
+        /*
         for(int x = 0; x < curr_activity->get_header_num(); ++x)
         {
             col = curr_activity->curr_act_model->index(index.row(),index.column()+x,QModelIndex());
             curr_activity->curr_act_model->setData(col,QVariant(QColor(Qt::white)),Qt::BackgroundColorRole);
         }
-
+        */
         curr_activity->reset_avg();
         sel_count = 0;
         this->set_avg_fields();
