@@ -859,6 +859,7 @@ void MainWindow::set_activty_intervalls()
 
     ui->tableView_int->setModel(curr_activity->curr_act_model);
     ui->tableView_int->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    //ui->tableView_int->setItemDelegate(&intervall_del);
     ui->tableView_int->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_int->verticalHeader()->setVisible(false);
 
