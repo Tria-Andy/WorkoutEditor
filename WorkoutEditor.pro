@@ -64,7 +64,8 @@ HEADERS  += mainwindow.h \
     dialog_version.h \
     dialog_lapeditor.h \
     del_swimlap.h \
-    del_intview.h
+    del_intview.h \
+    del_intselect.h
 
 FORMS    += mainwindow.ui \
     dialog_add.ui \
