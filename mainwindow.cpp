@@ -751,6 +751,8 @@ void MainWindow::loadfile(const QString &filename)
         curr_activity = new Activity();
         filecontent = file.readAll();
         curr_activity->read_jsonFile(filecontent);
+        jsonhandler = new jsonHandler(filecontent,curr_activity);
+
         file.close();
 
         settings::set_act_isload(true);
@@ -1198,6 +1200,16 @@ void MainWindow::set_add_swim_values()
     ui->lineEdit_kj->setText(QString::number(ceil(kj)));
 }
 
+void MainWindow::on_tableView_int_times_clicked(const QModelIndex &index)
+{
+    if(index.column() == 0)
+    {
+        Dialog_lapeditor lapEdit(this,curr_activity,index.row());
+        lapEdit.setModal(true);
+        lapEdit.exec();
+    }
+}
+
 void MainWindow::on_tableView_int_clicked(const QModelIndex &index)
 {
     if(index.column() == 0)
@@ -1286,20 +1298,14 @@ void MainWindow::reset_jsontext()
 
 void MainWindow::on_actionUnselect_all_rows_triggered()
 {
-    QModelIndex index,col;
+    QModelIndex index;
 
     for(int i = 0; i < curr_activity->int_model->rowCount(); ++i)
     {
         index = curr_activity->curr_act_model->index(i,0,QModelIndex());
         curr_activity->curr_act_model->setData(index,0,Qt::UserRole+1);
         this->set_selectInt(QColor(Qt::white),index);
-        /*
-        for(int x = 0; x < curr_activity->get_header_num(); ++x)
-        {
-            col = curr_activity->curr_act_model->index(index.row(),index.column()+x,QModelIndex());
-            curr_activity->curr_act_model->setData(col,QVariant(QColor(Qt::white)),Qt::BackgroundColorRole);
-        }
-        */
+
         curr_activity->reset_avg();
         sel_count = 0;
         this->set_avg_fields();

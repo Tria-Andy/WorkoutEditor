@@ -109,6 +109,11 @@ void settings::loadSettings()
         valueFilePath = workoutsPath + "/" + valueFile;
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
 
+        myvalues->beginGroup("JsonFile");
+            QString json_childs = myvalues->value("actinfo").toString();
+            jsoninfos << json_childs.split(splitter);
+        myvalues->endGroup();
+
         myvalues->beginGroup("Keylist");
             QString key_childs = myvalues->value("keys").toString();
             keyList << key_childs.split(splitter);
@@ -183,11 +188,6 @@ void settings::loadSettings()
         myvalues->beginGroup("WorkoutCode");
             QString work_childs = myvalues->value("codes").toString();
             codeList << work_childs.split(splitter);
-        myvalues->endGroup();
-
-        myvalues->beginGroup("JsonFile");
-            QString json_childs = myvalues->value("taginfo").toString();
-            jsoninfos << json_childs.split(splitter);
         myvalues->endGroup();
 
         myvalues->beginGroup("IntEditor");
@@ -323,7 +323,7 @@ void settings::saveSettings()
     myvalues->endGroup();
 
     myvalues->beginGroup("JsonFile");
-        myvalues->setValue("taginfo",settings::setSettingString(jsoninfos));
+        myvalues->setValue("actinfo",settings::setSettingString(jsoninfos));
     myvalues->endGroup();
 
     myvalues->beginGroup("IntEditor");

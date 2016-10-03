@@ -30,6 +30,7 @@
 #include "dialog_lapeditor.h"
 #include "dialog_week_copy.h"
 #include "settings.h"
+#include "jsonhandler.h"
 #include "activity.h"
 #include "standardworkouts.h"
 
@@ -46,6 +47,7 @@ private:
 
     schedule *workSchedule;
     Activity *curr_activity;
+    jsonHandler *jsonhandler;
     settings editorSettings;
     standardWorkouts *stdWorkout;
     calendar_delegate calender_del;
@@ -153,6 +155,7 @@ private slots:
     void on_comboBox_intervals_currentIndexChanged(int index);
     void on_actionLapEditor_triggered();
     void on_horizontalSlider_polish_valueChanged(int value);
+    void on_tableView_int_times_clicked(const QModelIndex &index);
 };
 
 #endif // MAINWINDOW_H

@@ -1382,6 +1382,16 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="tab_7">
+           <attribute name="title">
+            <string>JSON Save</string>
+           </attribute>
+           <layout class="QHBoxLayout" name="horizontalLayout_14">
+            <item>
+             <widget class="QPlainTextEdit" name="plainTextEdit_saveToGC"/>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>

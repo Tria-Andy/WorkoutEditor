@@ -10,7 +10,6 @@
 class Activity
 {
 private:
-    settings *act_settings;
     QString v_date,v_sport;
     QStringList ride_items;
     double swim_track,avg_dist,avg_watt,avg_laptime;
