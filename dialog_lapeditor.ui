@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>270</width>
-    <height>291</height>
+    <height>319</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -53,37 +53,16 @@
       <string>Lap Infos</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="3" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Lap:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="maximumSize">
+      <item row="6" column="1">
+       <widget class="QSpinBox" name="spinBox_endtime">
+        <property name="minimumSize">
          <size>
-          <width>65</width>
-          <height>16777215</height>
+          <width>100</width>
+          <height>0</height>
          </size>
         </property>
-        <property name="text">
-         <string>Start-Time:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>End-Time:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="label_distance">
-        <property name="text">
-         <string>Distance:</string>
+        <property name="maximum">
+         <number>10000</number>
         </property>
        </widget>
       </item>
@@ -144,7 +123,48 @@
         </layout>
        </widget>
       </item>
-      <item row="7" column="1">
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_edit">
+        <property name="text">
+         <string>Edit:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Lap:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="maximumSize">
+         <size>
+          <width>65</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Start-Time:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>End-Time:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_distance">
+        <property name="text">
+         <string>Distance:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
        <widget class="QDoubleSpinBox" name="doubleSpinBox_distance">
         <property name="minimumSize">
          <size>
@@ -153,7 +173,7 @@
          </size>
         </property>
         <property name="decimals">
-         <number>4</number>
+         <number>3</number>
         </property>
         <property name="maximum">
          <double>199.990000000000009</double>
@@ -175,26 +195,6 @@
       </item>
       <item row="4" column="1" colspan="3">
        <widget class="QLineEdit" name="lineEdit_newName"/>
-      </item>
-      <item row="6" column="1">
-       <widget class="QSpinBox" name="spinBox_endtime">
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximum">
-         <number>10000</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_edit">
-        <property name="text">
-         <string>Edit:</string>
-        </property>
-       </widget>
       </item>
       <item row="2" column="1" colspan="3">
        <widget class="QComboBox" name="comboBox_edit">
@@ -223,7 +223,7 @@
         </property>
        </widget>
       </item>
-      <item row="7" column="2">
+      <item row="8" column="2">
        <widget class="QLabel" name="label_km">
         <property name="text">
          <string>Km</string>
@@ -259,13 +259,30 @@
         </property>
        </widget>
       </item>
-      <item row="8" column="1">
+      <item row="10" column="1">
        <widget class="QSpinBox" name="spinBox_strokes"/>
       </item>
-      <item row="8" column="0">
+      <item row="10" column="0">
        <widget class="QLabel" name="label_strokes">
         <property name="text">
          <string>Strokes:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Duration:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QTimeEdit" name="timeEdit_duration">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="displayFormat">
+         <string>mm:ss</string>
         </property>
        </widget>
       </item>
@@ -275,23 +292,23 @@
    <item>
     <widget class="QFrame" name="frame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Box</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Sunken</enum>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
        <number>4</number>
       </property>
       <property name="leftMargin">
-       <number>0</number>
+       <number>4</number>
       </property>
       <property name="topMargin">
        <number>4</number>
       </property>
       <property name="rightMargin">
-       <number>0</number>
+       <number>4</number>
       </property>
       <property name="bottomMargin">
        <number>4</number>
@@ -328,6 +345,21 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>radioButton_add</tabstop>
+  <tabstop>radioButton_update</tabstop>
+  <tabstop>radioButton_del</tabstop>
+  <tabstop>comboBox_edit</tabstop>
+  <tabstop>comboBox_lap</tabstop>
+  <tabstop>lineEdit_newName</tabstop>
+  <tabstop>spinBox_starttime</tabstop>
+  <tabstop>spinBox_endtime</tabstop>
+  <tabstop>timeEdit_duration</tabstop>
+  <tabstop>doubleSpinBox_distance</tabstop>
+  <tabstop>spinBox_strokes</tabstop>
+  <tabstop>pushButton_ok</tabstop>
+  <tabstop>pushButton_close</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

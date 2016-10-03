@@ -1,14 +1,14 @@
 #include "dialog_lapeditor.h"
 #include "ui_dialog_lapeditor.h"
 
-Dialog_lapeditor::Dialog_lapeditor(QWidget *parent,Activity *p_act) :
+Dialog_lapeditor::Dialog_lapeditor(QWidget *parent,Activity *p_act,int p_index) :
     QDialog(parent),
     ui(new Ui::Dialog_lapeditor)
 {
     ui->setupUi(this);
     curr_act = p_act;
+    selIndex = p_index;
 
-    ui->lineEdit_newName->setEnabled(false);
     if(curr_act->get_sport() == curr_act->isSwim)
     {
         ui->comboBox_edit->addItem("Swim Laps");
@@ -16,7 +16,7 @@ Dialog_lapeditor::Dialog_lapeditor(QWidget *parent,Activity *p_act) :
         ui->comboBox_edit->setVisible(true);
         ui->label_edit->setVisible(true);
         this->set_visible(true,false);
-        this->setFixedHeight(265);
+        this->setFixedHeight(300);
     }
     else
     {
@@ -24,7 +24,7 @@ Dialog_lapeditor::Dialog_lapeditor(QWidget *parent,Activity *p_act) :
         ui->comboBox_edit->setVisible(false);
         ui->label_edit->setVisible(false);
         this->set_visible(false,true);
-        this->setFixedHeight(245);
+        this->setFixedHeight(280);
     }
 
     this->set_lapinfo();
@@ -48,6 +48,7 @@ void Dialog_lapeditor::set_lapinfo()
     {
         ui->comboBox_lap->addItem(editModel->data(editModel->index(i,0,QModelIndex())).toString());
     }
+    ui->comboBox_lap->setCurrentIndex(selIndex);
 }
 
 void Dialog_lapeditor::set_components(bool bSet)
@@ -65,6 +66,21 @@ void Dialog_lapeditor::set_visible(bool swimLap,bool intMode)
     ui->doubleSpinBox_distance->setVisible(intMode);
     ui->label_distance->setVisible(intMode);
     ui->label_km->setVisible(intMode);
+}
+
+void Dialog_lapeditor::set_duration()
+{
+    int duration = ui->spinBox_endtime->value() - ui->spinBox_starttime->value();
+    if(duration <= 3600)
+    {
+        ui->timeEdit_duration->setDisplayFormat("mm:ss");
+        ui->timeEdit_duration->setTime(QTime::fromString(settings::set_time(duration),"mm:ss"));
+    }
+    else
+    {
+        ui->timeEdit_duration->setDisplayFormat("hh:mm:ss");
+        ui->timeEdit_duration->setTime(QTime::fromString(settings::set_time(duration),"hh:mm:ss"));
+    }
 }
 
 int Dialog_lapeditor::calc_strokes(int duration)
@@ -104,8 +120,12 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
         if(curr_act->get_sport() == curr_act->isSwim)
         {
             editModel->insertRow(index,QModelIndex());
+            editModel->setData(editModel->index(index,0,QModelIndex()),ui->lineEdit_newName->text());
             editModel->setData(editModel->index(index,1,QModelIndex()),ui->spinBox_starttime->value());
             editModel->setData(editModel->index(index+1,1,QModelIndex()),ui->spinBox_endtime->value());
+            editModel->setData(editModel->index(index,2,QModelIndex()),duration);
+            editModel->setData(editModel->index(index,3,QModelIndex()),stroke);
+            editModel->setData(editModel->index(index,4,QModelIndex()),lapSpeed);
             if(ui->comboBox_edit->currentIndex() == 1)
             {
                 curr_act->edit_dist_model->insertRow(index,QModelIndex());
@@ -121,7 +141,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
             editModel->setData(editModel->index(index,2,QModelIndex()),ui->spinBox_endtime->value());
             editModel->setData(editModel->index(index+1,1,QModelIndex()),ui->spinBox_endtime->value());
         }
-
+        this->set_lapinfo();
     }
     if(editMode == 1)
     {
@@ -130,7 +150,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
             editModel->setData(editModel->index(index,0,QModelIndex()),ui->lineEdit_newName->text());
             editModel->setData(editModel->index(index,1,QModelIndex()),ui->spinBox_starttime->value());
             editModel->setData(editModel->index(index,2,QModelIndex()),duration);
-            editModel->setData(editModel->index(index,3,QModelIndex()),stroke);
+            editModel->setData(editModel->index(index,3,QModelIndex()),ui->spinBox_strokes->value());
             editModel->setData(editModel->index(index,4,QModelIndex()),lapSpeed);
             editModel->setData(editModel->index(index+1,1,QModelIndex()),ui->spinBox_starttime->value()+duration);
         }
@@ -154,8 +174,8 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
             curr_act->edit_dist_model->removeRow(index,QModelIndex());      
             curr_act->curr_act_model->removeRow(index,QModelIndex());
         }
+        this->set_lapinfo();
     }
-    this->set_lapinfo();
 }
 
 void Dialog_lapeditor::on_radioButton_add_clicked()
@@ -188,25 +208,39 @@ void Dialog_lapeditor::on_pushButton_ok_clicked()
 
 void Dialog_lapeditor::on_comboBox_lap_currentIndexChanged(int vLap)
 {
+    int duration,stroke;
+
     if(curr_act->get_sport() == curr_act->isSwim)
     {
-        int duration = editModel->data(editModel->index(vLap,2,QModelIndex())).toInt();;
-        int stroke = editModel->data(editModel->index(vLap,3,QModelIndex())).toInt();
-
         ui->spinBox_starttime->setValue(editModel->data(editModel->index(vLap,1,QModelIndex())).toInt());
-        ui->spinBox_endtime->setValue(ui->spinBox_starttime->value()+duration);
 
-        if(stroke == 0)
+        if(ui->comboBox_edit->currentIndex() == 0)
         {
-            stroke = this->calc_strokes(duration);
+            duration = editModel->data(editModel->index(vLap,2,QModelIndex())).toInt();
+            ui->spinBox_endtime->setValue(ui->spinBox_starttime->value()+duration);
+            stroke = editModel->data(editModel->index(vLap,3,QModelIndex())).toInt();
+            this->set_duration();
+
+            if(stroke == 0)
+            {
+                stroke = this->calc_strokes(duration);
+            }
+
+            ui->spinBox_strokes->setValue(stroke);
         }
-        ui->spinBox_strokes->setValue(stroke);
+        else
+        {
+            ui->spinBox_endtime->setValue(editModel->data(editModel->index(vLap,2,QModelIndex())).toInt());
+            ui->doubleSpinBox_distance->setValue(curr_act->edit_dist_model->data(curr_act->edit_dist_model->index(vLap,1,QModelIndex())).toDouble());
+            this->set_duration();
+        }
     }
     else
     {
         ui->spinBox_starttime->setValue(editModel->data(editModel->index(vLap,1,QModelIndex())).toInt());
         ui->spinBox_endtime->setValue(editModel->data(editModel->index(vLap,2,QModelIndex())).toInt());
         ui->doubleSpinBox_distance->setValue(curr_act->edit_dist_model->data(curr_act->edit_dist_model->index(vLap,1,QModelIndex())).toDouble());
+        this->set_duration();
     }
 
     if(ui->radioButton_update->isChecked())
@@ -236,9 +270,11 @@ void Dialog_lapeditor::on_comboBox_edit_currentIndexChanged(int index)
 void Dialog_lapeditor::on_spinBox_starttime_valueChanged(int value)
 {
     ui->label_start->setText(settings::set_time(value));
+    this->set_duration();
 }
 
 void Dialog_lapeditor::on_spinBox_endtime_valueChanged(int value)
 {
     ui->label_end->setText(settings::set_time(value));
+    this->set_duration();
 }
