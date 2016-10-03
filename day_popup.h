@@ -21,7 +21,7 @@ class day_popup : public QDialog
     Q_OBJECT
 
 public:
-    explicit day_popup(QWidget *parent = 0, const QDate w_date = QDate(), schedule *p_sched = 0,settings *p_settings = 0);
+    explicit day_popup(QWidget *parent = 0, const QDate w_date = QDate(), schedule *p_sched = 0);
     ~day_popup();
 
 private slots:
@@ -31,7 +31,6 @@ private slots:
 private:
     Ui::day_popup *ui;
     schedule *workSched;
-    settings *pop_settings;
     const QDate *workout_date;
     QString weekPhase;
     void show_workouts();

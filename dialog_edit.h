@@ -19,7 +19,6 @@ class Dialog_edit : public QDialog
 
 private:
     schedule *workSched;
-    settings *edit_settings;
     standardWorkouts *std_workouts;
     QStandardItemModel *workout_model;
     QModelIndex curr_index;
@@ -31,7 +30,7 @@ private:
     void set_workout_data();
 
 public:
-    explicit Dialog_edit(QWidget *parent = 0, const QDate edit_date = QDate(), schedule *p_sched = 0, settings *p_setting = 0, standardWorkouts *p_stdworkouts = 0);
+    explicit Dialog_edit(QWidget *parent = 0, const QDate edit_date = QDate(), schedule *p_sched = 0, standardWorkouts *p_stdworkouts = 0);
     ~Dialog_edit();
     bool delete_workout;
     void set_workout_info(const QDate &d);
@@ -50,9 +49,7 @@ private slots:
     void on_pushButton_delete_clicked();
     void on_doubleSpinBox_distance_valueChanged(double arg1);
     void on_timeEdit_duration_timeChanged(const QTime &time);
-
     void on_pushButton_clicked();
-
     void on_dateEdit_edit_date_dateChanged(const QDate &date);
 
 private:

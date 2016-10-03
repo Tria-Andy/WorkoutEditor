@@ -19,7 +19,7 @@ class Dialog_inteditor : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_inteditor(QWidget *parent = 0, settings *p_setting = 0,standardWorkouts *p_workouts = 0);
+    explicit Dialog_inteditor(QWidget *parent = 0,standardWorkouts *p_workouts = 0);
     ~Dialog_inteditor();
 
 private slots:
@@ -70,7 +70,6 @@ private slots:
 
 private:
     Ui::Dialog_inteditor *ui;
-    settings *pop_settings;
     standardWorkouts *stdWorkouts;
     QStandardItemModel *plot_model,*workout_model;
     QTreeWidgetItem *select_item;
@@ -78,7 +77,8 @@ private:
     QString current_sport,isSeries,isGroup,current_workID;
     int threshold_pace,current_pace;
     int threshold_power,current_power;
-    double *powerlist,*powerfactor;
+    QVector<double> *powerlist;
+    QVector<double> powerfactor;
     double time_sum,dist_sum,stress_sum,speedfactor;
     bool clearFlag;
 

@@ -10,7 +10,7 @@
 class standardWorkouts
 {
 public:
-    standardWorkouts(settings *p_settings = 0);
+    standardWorkouts();
     QStandardItemModel *standard_workouts;
     QStandardItemModel *workouts_meta, *workouts_steps;
     void set_saveFlag(bool isSave) {save_workouts = isSave;}
@@ -19,7 +19,6 @@ public:
     QStringList get_workoutIds() {return workoutIDs;}
 
 private:
-    settings *work_setting;
     QStringList meta_tags,step_tags,workoutIDs;
     bool save_workouts;
 

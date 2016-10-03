@@ -1,23 +1,47 @@
 #include "year_popup.h"
 #include "ui_year_popup.h"
 
-year_popup::year_popup(QWidget *parent, QString pInfo,int position,schedule *p_sched,QString pPhase, int pIndex,settings *p_setting) :
+year_popup::year_popup(QWidget *parent, QString pInfo,int position,schedule *p_sched,QString pPhase, int pIndex) :
     QDialog(parent),
     ui(new Ui::year_popup)
 {
     ui->setupUi(this);
-       pop_settings = p_setting;
        setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-
        partInfo = pInfo.split("-");
        workSched = p_sched;
        phase = pPhase;
        phaseindex = pIndex;
        phaseList << "Year";
 
-       for(int i = 0; i < pop_settings->get_phaseList().count(); ++i)
+       phasechart = new QChart();
+       chartview = new QChartView(phasechart);
+       chartview->setRenderHint(QPainter::Antialiasing);
+
+       stressLine = workSched->get_qLineSeries(true);
+       selectBar = new QBarSet("Duration");
+       selectBars = new QBarSeries();      
+       selectBars->append(selectBar);
+
+       axisX = new QBarCategoryAxis();
+       axisX->setTitleText("Week");
+       axisX->setTitleVisible(true);
+
+       phasechart->addSeries(selectBars);
+       phasechart->addSeries(stressLine);
+
+       yStress = workSched->get_qValueAxis("Stress",true,10,8);
+       phasechart->addAxis(yStress,Qt::AlignLeft);
+       stressLine->attachAxis(yStress);
+       phasechart->setAxisX(axisX,stressLine);
+
+       yBars = workSched->get_qValueAxis("Duration",true,10,8);
+       phasechart->addAxis(yBars,Qt::AlignRight);
+       selectBars->attachAxis(yBars);
+       phasechart->setAxisX(axisX,selectBars);
+
+       for(int i = 0; i < settings::get_phaseList().count(); ++i)
        {
-           phaseList << pop_settings->get_phaseList().at(i);
+           phaseList << settings::get_phaseList().at(i);
        }
 
        if(position == 0) col = 7;
@@ -27,7 +51,7 @@ year_popup::year_popup(QWidget *parent, QString pInfo,int position,schedule *p_s
        if(position == 4) col = 5;
        if(position == 5) col = 6;
 
-       if(phaseindex == 0) widthFactor = 18;   //All
+       if(phaseindex == 0) widthFactor = 25;   //All
        if(phaseindex == 1) widthFactor = 100;  //OFF
        if(phaseindex == 2) widthFactor = 80;   //PREP
        if(phaseindex == 3) widthFactor = 70;   //BASE
@@ -35,10 +59,13 @@ year_popup::year_popup(QWidget *parent, QString pInfo,int position,schedule *p_s
        if(phaseindex == 5) widthFactor = 200;  //PEAK
        if(phaseindex == 6) widthFactor = 80;   //WK
 
+       ui->verticalLayout_plot->addWidget(chartview);
+       ui->label_info->setText(phaseList.at(phaseindex) +": " + partInfo.at(0) + " Workouts: " + partInfo.at(1) + " - Hours: " + partInfo.at(2) + " - Distance: " + partInfo.at(4));
+
+       this->fill_values();
+
        selectList << "Duration" << "Distance" << "Workouts";
        ui->comboBox_select->addItems(selectList);
-
-       this->set_plot();
 }
 
 year_popup::~year_popup()
@@ -51,38 +78,34 @@ void year_popup::on_pushButton_close_clicked()
     reject();
 }
 
-void year_popup::set_plot()
+void year_popup::fill_values()
 {
-    ui->widget_plot->clearPlottables();
-
-    int size;
     QList<QStandardItem*> list;
     QModelIndex index;
     QString weekID;
 
     if(phaseindex == 0)
     {
-        size = pop_settings->get_saisonWeeks();
+        weekcount = settings::get_saisonWeeks();
     }
     else
     {
-        size = workSched->week_meta->findItems(phase,Qt::MatchContains,2).count();
+        weekcount = workSched->week_meta->findItems(phase,Qt::MatchContains,2).count();
         list = workSched->week_meta->findItems(phase,Qt::MatchContains,2);
     }
 
-    QVector<double> ticks(size);
-    for(int i = 0; i < size; ++i)
-    {
-        ticks[i] = i;
-    }
+    this->setFixedWidth(widthFactor*weekcount);
+    maxValues.resize(3);
+    maxValues.fill(0.0);
+    y_stress.resize(weekcount);
+    y_dura.resize(weekcount);
+    y_dist.resize(weekcount);
+    y_work.resize(weekcount);
 
-    this->setFixedWidth(widthFactor*size);
-    QVector<double> x(size),y_stress(size),y_dura(size);
-    QVector<QString> x_labels(size);
     QString sumValue,stress,duration,distance,workouts;
     QStringList sumValues;
-    double max_stress = 0.0, max_dura = 0.0;
     workSched->week_content->sort(0);
+    max_stress = 0.0;
 
     if(phaseindex == 0)
     {
@@ -95,16 +118,15 @@ void year_popup::set_plot()
             duration = sumValues.at(2);
             stress = sumValues.at(3);
 
-            x[week] = week;
             y_stress[week] = stress.toDouble();
             if(max_stress < y_stress[week]) max_stress = y_stress[week];
 
-            if(selectAxis == 0) y_dura[week] = static_cast<double>(pop_settings->get_timesec(duration) / 60.0);
-            if(selectAxis == 1) y_dura[week] = distance.toDouble();
-            if(selectAxis == 2) y_dura[week] = workouts.toDouble();
-            if(max_dura < y_dura[week]) max_dura = y_dura[week];
-
-            x_labels[week] = QString::number(week+1);
+            y_dura[week] = settings::set_doubleValue(static_cast<double>(settings::get_timesec(duration) / 60.0));
+            if(maxValues[0] < y_dura[week]) maxValues[0] = y_dura[week];
+            y_dist[week] = settings::set_doubleValue(distance.toDouble());
+            if(maxValues[1] < y_dist[week]) maxValues[1] = y_dist[week];
+            y_work[week] = workouts.toDouble();
+            if(maxValues[2] < y_work[week]) maxValues[2] = y_work[week];
         }
     }
     else
@@ -125,60 +147,80 @@ void year_popup::set_plot()
                     duration = sumValues.at(2);
                     stress = sumValues.at(3);
 
-                    x[week] = week;
                     y_stress[week] = stress.toDouble();
                     if(max_stress < y_stress[week]) max_stress = y_stress[week];
 
-                    if(selectAxis == 0) y_dura[week] = static_cast<double>(pop_settings->get_timesec(duration) / 60.0);
-                    if(selectAxis == 1) y_dura[week] = distance.toDouble();
-                    if(selectAxis == 2) y_dura[week] = workouts.toDouble();
-                    if(max_dura < y_dura[week]) max_dura = y_dura[week];
+                    y_dura[week] = settings::set_doubleValue(static_cast<double>(settings::get_timesec(duration) / 60.0));
+                    if(maxValues[0] < y_dura[week]) maxValues[0] = y_dura[week];
+                    y_dist[week] = settings::set_doubleValue(distance.toDouble());
+                    if(maxValues[1] < y_dist[week]) maxValues[1] = y_dist[week];
+                    y_work[week] = workouts.toDouble();
+                    if(maxValues[2] < y_work[week]) maxValues[2] = y_work[week];
                 }
             }
-            x_labels[week] = QString::number(week+1);
         }
     }
 
-    ui->label_info->setText(phaseList.at(phaseindex) +": " + partInfo.at(0) + " Workouts: " + partInfo.at(1) + " - Hours: " + partInfo.at(2) + " - Distance: " + partInfo.at(4));
+    selectBar->setPen(QPen(Qt::blue));
+    selectBar->setBrush(QColor(0, 0, 255, 120));
 
-    ui->widget_plot->xAxis->setAutoTicks(false);
-    ui->widget_plot->xAxis->setAutoTickLabels(false);
-    ui->widget_plot->xAxis->setTickVector(ticks);
-    ui->widget_plot->xAxis->setTickVectorLabels(x_labels);
-    ui->widget_plot->xAxis->setLabel("Weeks");
-    ui->widget_plot->xAxis->setRange(-1,size);
+    selectBars->setLabelsFormat("@value");
+    selectBars->setLabelsVisible(true);
 
-    ui->widget_plot->yAxis->setLabel("Stress Score");
-    ui->widget_plot->yAxis->setRange(0,max_stress + 100);
+    phasechart->setMargins(QMargins(QMargins(5,5,5,5)));
+    phasechart->setBackgroundRoundness(5);
+    phasechart->setDropShadowEnabled(true);
+    phasechart->legend()->hide();
+}
 
-    QCPGraph *stressline = ui->widget_plot->addGraph();
-    stressline->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssStar));
-    stressline->setData(x,y_stress);
-    stressline->setPen(QPen(Qt::red));
-    stressline->setBrush(QColor(255,0,0,60));
+void year_popup::set_plot(int index)
+{
+    QStringList axisValues;
 
-    QCPBars *duraBar = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis2);
-    ui->widget_plot->addPlottable(duraBar);
-    ui->widget_plot->yAxis2->setLabel(selectList.at(selectAxis));
-    ui->widget_plot->yAxis2->setRange(0,max_dura + 1);
-    ui->widget_plot->yAxis2->setVisible(true);
+    for(int i = 1; i <= weekcount; ++i)
+    {
+        axisValues << QString::number(i);
+    }
+
+    if(stressLine->count() > 0)
+    {
+        stressLine->clear();
+        selectBar->remove(0,weekcount);
+    }
+
+    for(int i = 0; i < weekcount; ++i)
+    {
+        stressLine->append(i,y_stress[i]);
+        if(index == 0)selectBar->append(y_dura[i]);
+        if(index == 1)selectBar->append(y_dist[i]);
+        if(index == 2)selectBar->append(y_work[i]);
+    }
+
+    axisX->append(axisValues);
+
     if(phaseindex == 0)
     {
-        duraBar->setWidth(25/static_cast<double>(x.size()));
+        stressLine->setPointLabelsVisible(false);
+        stressLine->setPointsVisible(false);
+        selectBars->setLabelsVisible(false);
+        selectBars->setBarWidth((25/static_cast<double>(weekcount)));
     }
     else
     {
-        duraBar->setWidth((size/2)/static_cast<double>(x.size()));
+        selectBars->setBarWidth((weekcount/2)/static_cast<double>(weekcount));
     }
-    duraBar->setData(x,y_dura);
-    duraBar->setPen(QPen(Qt::blue));
-    duraBar->setBrush(QColor(0, 0, 255, 120));
 
-    ui->widget_plot->replot(QCustomPlot::rpImmediate);
+    yStress->setMax(max_stress+20);
+    yStress->setTickCount(8);
+    yStress->applyNiceNumbers();
+    yBars->setMax(maxValues[index]+(maxValues[index]*0.05));
+    yBars->setTickCount(8);
+    yBars->applyNiceNumbers();
+    yBars->setTitleText(selectList.at(index));
+
 }
 
 void year_popup::on_comboBox_select_currentIndexChanged(int index)
 {
-    selectAxis = index;
-    this->set_plot();
+    this->set_plot(index);
 }

@@ -6,11 +6,14 @@
 #include <QAbstractItemModel>
 #include <QTextBrowser>
 #include <QtXml>
+#include <QtCharts>
 #include "calendar_delegate.h"
 #include "week_delegate.h"
 #include "summery_delegate.h"
 #include "del_spinbox_double.h"
 #include "del_spinbox_int.h"
+#include "del_swimlap.h"
+#include "del_intview.h"
 #include "schedule.h"
 #include "dialog_add.h"
 #include "dialog_addweek.h"
@@ -24,8 +27,10 @@
 #include "dialog_inteditor.h"
 #include "dialog_settings.h"
 #include "dialog_pacecalc.h"
+#include "dialog_lapeditor.h"
 #include "dialog_week_copy.h"
 #include "settings.h"
+#include "jsonhandler.h"
 #include "activity.h"
 #include "standardworkouts.h"
 
@@ -42,23 +47,34 @@ private:
 
     schedule *workSchedule;
     Activity *curr_activity;
-    settings *editorSettings;
+    jsonHandler *jsonhandler;
+    settings editorSettings;
     standardWorkouts *stdWorkout;
     calendar_delegate calender_del;
     week_delegate week_del;
     summery_delegate sum_del;
     del_spinbox_double dist_del;
     del_spinbox_int time_del;
+    del_swimlap swimlap_del;
+    del_intview intervall_del;
     QStandardItemModel *calendar_model,*sum_model;
-    QStringList modus_list,cal_header,work_list,sum_name,sum_list,year_header,schedMode,sum_header;
+    QStringList modus_list,cal_header,work_list,sum_name,year_header,schedMode,sum_header;
+
+    //Intercall Chart
+    QChart *intChart;
+    QChartView *intChartview;
+    QLineSeries *avgLine,*speedLine, *polishLine;
+    QValueAxis *ySpeed;
+    QCategoryAxis *axisX;
+    QVector<double> speedValues;
+    void set_intChartValues(int,double);
+    void set_polishValues(int,double);
 
     int fontSize,sel_count;
     QDate selectedDate,firstdayofweek;
     QString weeknumber,phaseFilter;
-    int *work_sum;
-    int *dur_sum;
-    double *dist_sum;
-    int *stress_sum;
+    QVector<int> work_sum,dur_sum,stress_sum;
+    QVector<double> dist_sum;
     int weekRange,weekpos;
     int weekDays;
     unsigned int weekCounter;
@@ -82,9 +98,12 @@ private:
     void write_int_infos();
     void write_hf_infos();
     void write_samp_infos();
+    void set_selectInt(QColor,QModelIndex);
 
     void set_menuItems(bool,bool);
     void reset_jsontext();
+
+    void copyIntoClipboard(QVector<double>*);
 
     void freeMem();
 
@@ -131,6 +150,12 @@ private slots:
     void on_actionSwitch_Year_triggered();
     void on_comboBox_phasefilter_currentIndexChanged(int index);
     void on_actionVersion_triggered();
+    void on_actionCopy_new_Speed_triggered();
+    void on_horizontalSlider_factor_valueChanged(int value);
+    void on_comboBox_intervals_currentIndexChanged(int index);
+    void on_actionLapEditor_triggered();
+    void on_horizontalSlider_polish_valueChanged(int value);
+    void on_tableView_int_times_clicked(const QModelIndex &index);
 };
 
 #endif // MAINWINDOW_H

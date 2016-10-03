@@ -3,14 +3,17 @@
 
 #include <QStandardItemModel>
 #include <QtXml>
+#include <QtCharts>
 #include <QMessageBox>
 #include "settings.h"
+
+QT_CHARTS_USE_NAMESPACE
 
 class schedule
 {
 
 public:
-    schedule(settings *p_settings = 0);
+    schedule();
     QStandardItemModel *workout_schedule,*week_meta,*week_content;
     void load_workouts_file();
     void save_workout_file();
@@ -44,8 +47,13 @@ public:
     void edit_workout(QModelIndex);
     void delete_workout(QModelIndex);
 
+//Charts Objects
+    QValueAxis* get_qValueAxis(QString,bool,double,int);
+    QLineSeries* get_qLineSeries(bool);
+    QBarSeries* get_qBarSeries();
+    QBarSet* get_qBarSet();
+
 private:
-    settings *sched_settings;
     QStringList workoutTags,metaTags,contentTags;
     QString copyFrom, copyTo;
     QDate firstdayofweek;

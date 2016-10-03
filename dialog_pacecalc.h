@@ -15,7 +15,7 @@ class Dialog_paceCalc : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_paceCalc(QWidget *parent = 0, settings *dia_settings = 0);
+    explicit Dialog_paceCalc(QWidget *parent = 0);
     ~Dialog_paceCalc();
 
 private slots:
@@ -40,7 +40,6 @@ private slots:
 private:
     Ui::Dialog_paceCalc *ui;
     QStringList sportList,model_header;
-    settings *psettings;
     QStandardItemModel *pace_model;
     QVector<double> dist;
     int distFactor;
