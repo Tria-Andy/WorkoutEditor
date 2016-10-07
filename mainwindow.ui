@@ -1386,7 +1386,7 @@
            <attribute name="title">
             <string>JSON Save</string>
            </attribute>
-           <layout class="QHBoxLayout" name="horizontalLayout_14">
+           <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
              <widget class="QPlainTextEdit" name="plainTextEdit_saveToGC"/>
             </item>
@@ -1491,10 +1491,12 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionExit"/>
+   <addaction name="separator"/>
    <addaction name="actionNew"/>
    <addaction name="actionSelect_File"/>
-   <addaction name="actionReset"/>
    <addaction name="actionSave_Workout_Schedule"/>
+   <addaction name="separator"/>
+   <addaction name="actionReset"/>
    <addaction name="actionUnselect_all_rows"/>
    <addaction name="actionEdit_Distance"/>
    <addaction name="actionEdit_Undo"/>

@@ -751,8 +751,9 @@ void MainWindow::loadfile(const QString &filename)
         curr_activity = new Activity();
         filecontent = file.readAll();
         curr_activity->read_jsonFile(filecontent);
-        jsonhandler = new jsonHandler(filecontent,curr_activity);
+        jsonhandler = new jsonHandler(filename.split("/").last(),filecontent,curr_activity);
 
+        ui->plainTextEdit_saveToGC->setPlainText(jsonhandler->get_jsonfile());
         file.close();
 
         settings::set_act_isload(true);

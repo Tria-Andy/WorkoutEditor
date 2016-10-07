@@ -11,6 +11,8 @@ settings::settings()
 QString settings::settingFile;
 QString settings::splitter = "/";
 
+QString settings::version;
+QString settings::builddate;
 QString settings::valueFile;
 QString settings::valueFilePath;
 QString settings::saisonFDW;
@@ -30,6 +32,9 @@ QString settings::isStrength;
 QString settings::isAlt;
 QString settings::isTria;
 QString settings::isOther;
+
+QMap<int,QString> settings::sampList;
+QMap<int,QString> settings::intList;
 
 QStringList settings::keyList;
 QStringList settings::gc_infos;
@@ -71,6 +76,17 @@ int settings::weekRange;
 int settings::weekOffSet;
 int settings::swimLaplen;
 
+
+void settings::fill_mapList(QMap<int,QString> *map, QString *values)
+{
+    QStringList list = values->split(splitter);
+
+    for(int i = 0; i < list.count(); ++i)
+    {
+        map->insert(i,list.at(i));
+    }
+}
+
 void settings::loadSettings()
 {
     header_int << "Interval" << "Duration" << "Distance" << "Distance (Int)" << "Pace";
@@ -109,9 +125,18 @@ void settings::loadSettings()
         valueFilePath = workoutsPath + "/" + valueFile;
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
 
+        myvalues->beginGroup("Version");
+            version = myvalues->value("version").toString();
+            builddate = myvalues->value("build").toString();
+        myvalues->endGroup();
+
         myvalues->beginGroup("JsonFile");
             QString json_childs = myvalues->value("actinfo").toString();
             jsoninfos << json_childs.split(splitter);
+            json_childs = myvalues->value("intInfo").toString();
+            fill_mapList(&intList,&json_childs);
+            json_childs = myvalues->value("sampinfo").toString();
+            fill_mapList(&sampList,&json_childs);
         myvalues->endGroup();
 
         myvalues->beginGroup("Keylist");
@@ -332,9 +357,6 @@ void settings::saveSettings()
 
     delete myvalues;
 }
-
-
-
 
 QStringList settings::get_int_header()
 {
