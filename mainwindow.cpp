@@ -96,6 +96,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     //Editor
     ui->menuAction->setEnabled(mEditor);
     ui->actionSave_Workout_File->setVisible(mEditor);
+    ui->actionSave_to_GoldenCheetah->setVisible(mEditor);
     ui->actionReset->setVisible(mEditor);
     ui->actionSelect_File->setVisible(mEditor);
     ui->actionUnselect_all_rows->setVisible(mEditor);
@@ -106,6 +107,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionLapEditor->setVisible(mEditor);
 
     ui->actionReset->setEnabled(settings::get_act_isload());
+    ui->actionSave_to_GoldenCheetah->setEnabled(settings::get_act_isload());
     ui->actionUnselect_all_rows->setEnabled(settings::get_act_isload());
     ui->actionEdit_Distance->setEnabled(settings::get_act_isload());
     ui->actionEdit_Undo->setEnabled(settings::get_act_isload());
@@ -540,6 +542,21 @@ void MainWindow::on_actionSave_Workout_Schedule_triggered()
     }
 }
 
+void MainWindow::on_actionSave_to_GoldenCheetah_triggered()
+{
+    QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this,
+                                      tr("Save File"),
+                                      "Save Changes to Golden Cheetah?",
+                                      QMessageBox::Yes|QMessageBox::No
+                                      );
+    if (reply == QMessageBox::Yes)
+    {
+        jsonhandler->write_json();
+    }
+}
+
+
 void MainWindow::on_calendarWidget_clicked(const QDate &date)
 {
    weeknumber = QString::number(date.weekNumber())+"_"+QString::number(date.year());
@@ -750,10 +767,7 @@ void MainWindow::loadfile(const QString &filename)
         }
         curr_activity = new Activity();
         filecontent = file.readAll();
-        curr_activity->read_jsonFile(filecontent);
         jsonhandler = new jsonHandler(filename.split("/").last(),filecontent,curr_activity);
-
-        ui->plainTextEdit_saveToGC->setPlainText(jsonhandler->get_jsonfile());
         file.close();
 
         settings::set_act_isload(true);
@@ -818,7 +832,7 @@ void MainWindow::set_activty_infos()
                     << QTextLength(QTextLength::PercentageLength, 60);
     tableFormat.setColumnWidthConstraints(constraints);
 
-    QTextTable *table = cursor.insertTable(curr_activity->ride_model->rowCount(),2,tableFormat);
+    QTextTable *table = cursor.insertTable(curr_activity->ride_info.count(),2,tableFormat);
 
         QTextFrame *frame = cursor.currentFrame();
         QTextFrameFormat frameFormat = frame->frameFormat();
@@ -833,19 +847,16 @@ void MainWindow::set_activty_infos()
 
         QTextCharFormat valueFormat = format;
 
-    for(int i = 0; i < curr_activity->ride_model->rowCount(); ++i)
+    int i = 0;
+    for(QMap<QString,QString>::const_iterator it =  curr_activity->ride_info.cbegin(), end = curr_activity->ride_info.cend(); it != end; ++it,++i)
     {
-        index = curr_activity->ride_model->index(i,0,QModelIndex());
         QTextTableCell cell = table->cellAt(i,0);
         QTextCursor cellCurser = cell.firstCursorPosition();
-        cellCurser.insertText(curr_activity->ride_model->data(index,Qt::DisplayRole).toString(),infoFormat);
-
-        index = curr_activity->ride_model->index(i,1,QModelIndex());
+        cellCurser.insertText(it.key(),infoFormat);
         cell = table->cellAt(i,1);
         cellCurser = cell.firstCursorPosition();
-        cellCurser.insertText(curr_activity->ride_model->data(index,Qt::DisplayRole).toString(),valueFormat);
+        cellCurser.insertText(it.value(),valueFormat);
     }
-
     table->insertRows(table->rows(),1);
 
     cursor.endEditBlock();
@@ -1241,7 +1252,6 @@ void MainWindow::on_actionReset_triggered()
     ui->textBrowser_Info->clear();
     curr_activity->reset_avg();
     curr_activity->curr_act_model->clear();
-    curr_activity->ride_model->clear();
     curr_activity->int_model->clear();
     curr_activity->samp_model->clear();
     curr_activity->edit_int_model->clear();

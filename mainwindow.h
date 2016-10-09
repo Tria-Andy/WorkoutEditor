@@ -156,6 +156,7 @@ private slots:
     void on_actionLapEditor_triggered();
     void on_horizontalSlider_polish_valueChanged(int value);
     void on_tableView_int_times_clicked(const QModelIndex &index);
+    void on_actionSave_to_GoldenCheetah_triggered();
 };
 
 #endif // MAINWINDOW_H

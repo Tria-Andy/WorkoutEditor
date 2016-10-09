@@ -9,19 +9,20 @@ class jsonHandler
 public:
     jsonHandler(QString filename = QString(),QString jsonfile = QString(), Activity *p_act = 0);
     QString get_jsonfile() {return jsonFile;}
+    void write_json();
 
 private:
     Activity *curr_act;
     QString jsonFile,fileName;
-    bool hasXdata;
-    QStandardItemModel *int_model,*samp_model,*xdata_model;
+    bool hasXdata,hasOverride;
+    QStandardItemModel *int_model,*samp_model;
     QStringList intList,sampList,xdataValues,xdataUnits;
     QMap<QString,QString> rideData;
     QMap<QString,QString> tagData;
     QMap<QString,QString> xData;
+    QMap<QString,QString> overrideData;
 
-    void read_json(QString);
-    void write_json();
+    void read_json(QString);   
     void write_file(QJsonDocument);
 
     void fill_qmap(QMap<QString,QString>*,QJsonObject*);

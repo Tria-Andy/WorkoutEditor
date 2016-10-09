@@ -47,13 +47,13 @@ public:
     static const QString isBike;
     static const QString isRun;
 
-    void read_jsonFile(QString fileContent);
+    void prepareData();
     void set_additional_ride_info();
     void set_curr_act_model(bool);
     void act_reset();
-    QStandardItemModel *ride_model,*int_model,*samp_model,*curr_act_model,*edit_int_model,*swim_xdata,*edit_samp_model,*edit_dist_model;
+    QStandardItemModel *int_model,*samp_model,*curr_act_model,*edit_int_model,*xdata_model,*swim_xdata,*edit_samp_model,*edit_dist_model;
     QStandardItemModel *swim_pace_model, *swim_hf_model;
-
+    QMap<QString,QString> ride_info;
     //Recalculation
     void recalculate_intervalls(bool);
     int get_int_duration(int,bool);
@@ -97,6 +97,7 @@ public:
     int get_hf_max() {return hf_threshold;}
     double get_swim_cv() {return swim_cv;}
     void set_hf_time_in_zone();
+    void set_swim_track(double trackLen) {swim_track = trackLen;}
     double get_swim_track() {return swim_track;}
     QVector<double> * get_new_dist()
     {

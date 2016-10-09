@@ -25,84 +25,52 @@ void Activity::act_reset()
     changeRowCount = false;
 }
 
-void Activity::read_jsonFile(QString fileContent)
+void Activity::prepareData()
 {
     int row;
-    QModelIndex data_index;
+    int sampCount = samp_model->rowCount();
+    int intCount = int_model->rowCount();
+    QModelIndex editIndex,intIndex;
 
-    QJsonDocument d = QJsonDocument::fromJson(fileContent.toUtf8());
-    QJsonObject jsonobj = d.object();
+    settings::set_swimLaplen(swim_track);
+    int_model->setData(int_model->index(intCount-1,2,QModelIndex()),sampCount-1);
+    edit_int_model = new QStandardItemModel(intCount,4);
 
-    QJsonValue ride = jsonobj.value(QString("RIDE"));
-    QJsonObject item_ride = ride.toObject();
-
-    QJsonValue v_tags = item_ride.value(QString("TAGS"));
-    QJsonObject item_tags = v_tags.toObject();
-
-    ride_model = new QStandardItemModel(settings::get_jsoninfos().count()+1,2);
-
-    //Get and Set RIDE and TAGS Entries
-    QJsonValue v_date = item_ride["STARTTIME"];
-    this->set_date(v_date.toString());
-    QJsonValue v_sport = item_tags["Sport"];
-    this->set_sport(v_sport.toString());
-    settings::set_act_sport(v_sport.toString());
-    QJsonValue v_bahn = item_tags["Pool Length"].toString().toDouble();
-    swim_track = v_bahn.toDouble();
-    settings::set_swimLaplen(v_bahn.toInt());
-
-    ride_model->setData(ride_model->index(0,0,QModelIndex()),"Date:");
-    ride_model->setData(ride_model->index(0,1,QModelIndex()),this->get_date());
-
-    for(int i = 0, row = 1; i < settings::get_jsoninfos().count();++i,++row)
+    for(int row = 0; row < intCount; ++row)
     {
-        QJsonValue value = item_tags[settings::get_jsoninfos().at(i)];
-        ride_model->setData(ride_model->index(row,0,QModelIndex()),settings::get_jsoninfos().at(i)+":");
-        ride_model->setData(ride_model->index(row,1,QModelIndex()),value.toString());
+       for(int col = 0; col < int_model->columnCount(); ++col)
+       {
+        intIndex = int_model->index(row,col,QModelIndex());
+        editIndex = edit_int_model->index(row,col,QModelIndex());
+        edit_int_model->setData(editIndex,int_model->data(intIndex,Qt::DisplayRole));
+       }
     }
 
-    QJsonArray arr_int = item_ride["INTERVALS"].toArray();
-    int_model = new QStandardItemModel(arr_int.count(),3);
-    edit_int_model = new QStandardItemModel(arr_int.count(),4);
-    row=0;
-
-    foreach(const QJsonValue & v_int, arr_int)
-    {
-        QJsonObject obj_int = v_int.toObject();
-        int_model->setData(int_model->index(row,0,QModelIndex()),obj_int["NAME"].toString());
-        edit_int_model->setData(edit_int_model->index(row,0,QModelIndex()),obj_int["NAME"].toString());
-        int_model->setData(int_model->index(row,1,QModelIndex()),obj_int["START"].toInt());
-        edit_int_model->setData(edit_int_model->index(row,1,QModelIndex()),obj_int["START"].toInt());
-        int_model->setData(int_model->index(row,2,QModelIndex()),obj_int["STOP"].toDouble());
-        edit_int_model->setData(edit_int_model->index(row,2,QModelIndex()),obj_int["STOP"].toDouble());
-        ++row;
-    }
+    edit_int_model->setData(edit_int_model->index(edit_int_model->rowCount()-1,2,QModelIndex()),sampCount-1);
+    edit_int_model->setHorizontalHeaderLabels(settings::get_time_header());
 
     if(this->get_sport() == this->isSwim)
     {
         edit_int_model->setData(edit_int_model->index(0,1,QModelIndex()),0);
-
-        QJsonArray arr_swimXdata = item_ride["XDATA"].toArray();
-        QJsonObject item_xdata = arr_swimXdata.at(0).toObject();
-        QJsonArray arr_lapData = item_xdata["SAMPLES"].toArray();
-        swim_xdata = new QStandardItemModel(arr_lapData.count(),5);
+        int rowCounter = xdata_model->rowCount();
+        swim_xdata = new QStandardItemModel(rowCounter,5);
         swim_xdata->setHorizontalHeaderLabels(settings::get_swimtime_header());
+
         int lapNr = 0;
         int intCount = 1;
         double lapStart,lapStartPrev = 0,lapPacePrev = 0;
         double lapSpeed,lapPace;
         row = 0;
 
-        foreach (const QJsonValue & v_xdata, arr_lapData)
+        for(int i = 0; i < rowCounter; ++i)
         {
-            QJsonObject obj_xdata = v_xdata.toObject();     
-            lapPace = round((obj_xdata["VALUES"].toArray().at(1).toDouble() - 0.1));
+            lapPace = round(xdata_model->data(xdata_model->index(i,3,QModelIndex())).toDouble() - 0.1);
             if(lapPace > 0)
             {
                 swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),QString::number(intCount)+"_"+QString::number(++lapNr*swim_track));
                 if(lapPacePrev == 0)
                 {
-                    lapStart = obj_xdata["SECS"].toDouble();
+                    lapStart = xdata_model->data(xdata_model->index(i,0,QModelIndex())).toDouble();
                     int breakTime = lapStart - lapStartPrev;
                     swim_xdata->setData(swim_xdata->index(row-1,2,QModelIndex()),breakTime);
 
@@ -125,51 +93,25 @@ void Activity::read_jsonFile(QString fileContent)
 
             swim_xdata->setData(swim_xdata->index(row,1,QModelIndex()),lapStart);
             swim_xdata->setData(swim_xdata->index(row,2,QModelIndex()),lapPace);
-            swim_xdata->setData(swim_xdata->index(row,3,QModelIndex()),obj_xdata["VALUES"].toArray().at(2).toDouble());
+            swim_xdata->setData(swim_xdata->index(row,3,QModelIndex()),xdata_model->data(xdata_model->index(i,4,QModelIndex())));
             swim_xdata->setData(swim_xdata->index(row,4,QModelIndex()),lapSpeed);
             lapPacePrev = lapPace;
             lapStartPrev = lapStart;
             ++row;
-        }    
+        }
     }
 
-    QJsonArray arr_samp = item_ride["SAMPLES"].toArray();
-    samp_model = new QStandardItemModel(arr_samp.count(),5);
-    row=0;
-
-    foreach (const QJsonValue & v_samp, arr_samp)
-    {
-        QJsonObject obj_samp = v_samp.toObject();
-        samp_model->setData(samp_model->index(row,0,QModelIndex()),obj_samp["SECS"].toInt());
-        samp_model->setData(samp_model->index(row,1,QModelIndex()),obj_samp["KM"].toDouble());
-        samp_model->setData(samp_model->index(row,2,QModelIndex()),obj_samp["KPH"].toDouble());
-        samp_model->setData(samp_model->index(row,3,QModelIndex()),obj_samp["CAD"].toInt());
-        samp_model->setData(samp_model->index(row,4,QModelIndex()),obj_samp["WATTS"].toDouble());
-        ++row;
-    }
-
-    int_model->setData(int_model->index(int_model->rowCount()-1,2,QModelIndex()),samp_model->rowCount()-1);
-    edit_int_model->setData(edit_int_model->index(edit_int_model->rowCount()-1,2,QModelIndex()),samp_model->rowCount()-1);
-    edit_int_model->setHorizontalHeaderLabels(settings::get_time_header());
-
-    edit_dist_model = new QStandardItemModel(int_model->rowCount(),2);
+    edit_dist_model = new QStandardItemModel(intCount,2);
     edit_dist_model->setHorizontalHeaderLabels(settings::get_km_header());
-    for(int i = 0; i < int_model->rowCount();++i)
+    for(int i = 0; i < intCount;++i)
     {
         edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),int_model->data(int_model->index(i,0,QModelIndex())).toString());
         edit_dist_model->setData(edit_dist_model->index(i,1,QModelIndex()),this->get_int_distance(i,false));
     }
 
-    row = ride_model->rowCount();
-    ride_model->insertRows(row,1,QModelIndex());
-    ride_model->setData(ride_model->index(row,0,QModelIndex()),"Distance:");
-    data_index = samp_model->index(samp_model->rowCount()-1,1,QModelIndex());
-    ride_model->setData(ride_model->index(row,1,QModelIndex()),QString::number(samp_model->data(data_index,Qt::DisplayRole).toDouble()));
+    ride_info.insert("Distance:",QString::number(samp_model->data(samp_model->index(sampCount-1,1,QModelIndex())).toDouble()));
+    ride_info.insert("Duration:",QDateTime::fromTime_t(sampCount).toUTC().toString("hh:mm:ss"));
 
-    row = ride_model->rowCount();
-    ride_model->insertRows(row,1,QModelIndex());
-    ride_model->setData(ride_model->index(row,0,QModelIndex()),"Duration:");
-    ride_model->setData(ride_model->index(row,1,QModelIndex()),QDateTime::fromTime_t(samp_model->rowCount()).toUTC().toString("hh:mm:ss"));
 
     this->set_curr_act_model(false);
     this->set_dist_factor();
@@ -191,13 +133,13 @@ void Activity::set_additional_ride_info()
 {
     if(settings::get_act_isrecalc())
     {
-        ride_model->setData(ride_model->index(6,1,QModelIndex()),QString::number(edit_samp_model->data(edit_samp_model->index(edit_samp_model->rowCount()-1,1,QModelIndex())).toDouble()));
-        ride_model->setData(ride_model->index(7,1,QModelIndex()),QDateTime::fromTime_t(edit_samp_model->rowCount()).toUTC().toString("hh:mm:ss"));
+        ride_info.insert("Distance:",QString::number(edit_samp_model->data(edit_samp_model->index(edit_samp_model->rowCount()-1,1,QModelIndex())).toDouble()));
+        ride_info.insert("Duration:",QDateTime::fromTime_t(edit_samp_model->rowCount()).toUTC().toString("hh:mm:ss"));
     }
     else
     {
-        ride_model->setData(ride_model->index(6,1,QModelIndex()),QString::number(samp_model->data(samp_model->index(samp_model->rowCount()-1,1,QModelIndex())).toDouble()));
-        ride_model->setData(ride_model->index(7,1,QModelIndex()),QDateTime::fromTime_t(samp_model->rowCount()).toUTC().toString("hh:mm:ss"));
+        ride_info.insert("Distance:",QString::number(samp_model->data(samp_model->index(samp_model->rowCount()-1,1,QModelIndex())).toDouble()));
+        ride_info.insert("Duration:",QDateTime::fromTime_t(samp_model->rowCount()).toUTC().toString("hh:mm:ss"));
     }
 }
 
