@@ -16,10 +16,6 @@ Activity::Activity()
     changeRowCount = false;
 }
 
-const QString Activity::isSwim = "Swim ";
-const QString Activity::isBike = "Bike ";
-const QString Activity::isRun = "Run ";
-
 void Activity::act_reset()
 {
     changeRowCount = false;
@@ -49,23 +45,25 @@ void Activity::prepareData()
     edit_int_model->setData(edit_int_model->index(edit_int_model->rowCount()-1,2,QModelIndex()),sampCount-1);
     edit_int_model->setHorizontalHeaderLabels(settings::get_time_header());
 
-    if(this->get_sport() == this->isSwim)
+    if(curr_sport == settings::isSwim)
     {
         edit_int_model->setData(edit_int_model->index(0,1,QModelIndex()),0);
         int rowCounter = xdata_model->rowCount();
-        swim_xdata = new QStandardItemModel(rowCounter,5);
+        swim_xdata = new QStandardItemModel(rowCounter,7);
         swim_xdata->setHorizontalHeaderLabels(settings::get_swimtime_header());
 
         int lapNr = 0;
         int intCount = 1;
+        int type;
         double lapStart,lapStartPrev = 0,lapPacePrev = 0;
-        double lapSpeed,lapPace;
+        double lapSpeed,lapPace,lapDist = 0;
         row = 0;
 
         for(int i = 0; i < rowCounter; ++i)
         {
             lapPace = round(xdata_model->data(xdata_model->index(i,3,QModelIndex())).toDouble() - 0.1);
-            if(lapPace > 0)
+            type = xdata_model->data(xdata_model->index(i,2,QModelIndex())).toInt();
+            if(lapPace > 0 && type != 0)
             {
                 swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),QString::number(intCount)+"_"+QString::number(++lapNr*swim_track));
                 if(lapPacePrev == 0)
@@ -73,20 +71,22 @@ void Activity::prepareData()
                     lapStart = xdata_model->data(xdata_model->index(i,0,QModelIndex())).toDouble();
                     int breakTime = lapStart - lapStartPrev;
                     swim_xdata->setData(swim_xdata->index(row-1,2,QModelIndex()),breakTime);
-
                 }
                 else
                 {
                     lapStart = lapStartPrev + lapPacePrev;
+                    lapDist = lapDist + (swim_track / 1000);
                 }
                 if(row == 1) lapStart = lapPacePrev-1;
                 lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(lapPace),"mm:ss"),swim_track,settings::isSwim,false).toDouble();
+
             }
             else
             {
                 lapNr = 0;
                 swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),settings::get_breakName());
                 lapStart = lapStartPrev + lapPacePrev;
+                lapDist = lapDist + (swim_track / 1000);
                 lapSpeed = 0;
                 ++intCount;
             }
@@ -95,8 +95,11 @@ void Activity::prepareData()
             swim_xdata->setData(swim_xdata->index(row,2,QModelIndex()),lapPace);
             swim_xdata->setData(swim_xdata->index(row,3,QModelIndex()),xdata_model->data(xdata_model->index(i,4,QModelIndex())));
             swim_xdata->setData(swim_xdata->index(row,4,QModelIndex()),lapSpeed);
+            swim_xdata->setData(swim_xdata->index(row,5,QModelIndex()),lapDist);
+            swim_xdata->setData(swim_xdata->index(row,6,QModelIndex()),type);
             lapPacePrev = lapPace;
             lapStartPrev = lapStart;
+
             ++row;
         }
     }
@@ -117,7 +120,7 @@ void Activity::prepareData()
     this->set_dist_factor();
     this->reset_avg();
 
-    if(this->get_sport() == this->isSwim)
+    if(curr_sport == settings::isSwim)
     {
         p_swim_timezone.resize(zone_count+1);
         p_swim_time.resize(zone_count+1);
@@ -371,7 +374,7 @@ int Activity::get_zone_values(double factor, int max, bool ispace)
 
 int Activity::get_header_num()
 {
-    if(this->get_sport() == this->isSwim || this->get_sport() == this->isBike)
+    if(curr_sport == settings::isSwim || curr_sport == settings::isBike)
     {
         return 6;
     }
@@ -383,7 +386,7 @@ int Activity::get_header_num()
 
 void Activity::set_dist_factor()
 {
-    if (this->get_sport() == isSwim)
+    if (curr_sport == settings::isSwim)
     {
         dist_factor = 1000;
     }
@@ -424,7 +427,7 @@ double Activity::get_int_distance(int row,bool recalc)
         dist_stop = p_samp_model->data(p_samp_model->index(int_stop,1,QModelIndex()),Qt::DisplayRole).toDouble();
         dist = dist_stop - dist_start;
     }
-    if(this->get_sport() == this->isSwim)
+    if(curr_sport == settings::isSwim)
     {
         tempdist = ceil(round(dist*100));
         return tempdist/100.0;
@@ -442,7 +445,7 @@ int Activity::get_int_pace(int row,bool recalc)
     }
     else
     {
-        if (this->get_sport() == this->isSwim)
+        if (curr_sport == settings::isSwim)
         {
             pace = this->get_int_duration(row,recalc) / (this->get_int_distance(row,recalc)*10);
         }
@@ -554,7 +557,7 @@ void Activity::recalculate_intervalls(bool recalc)
         }
     }
 
-    if(this->get_sport() == this->isSwim && recalc)
+    if(curr_sport == settings::isSwim && recalc)
     {
         p_swimlaps.resize(edit_dist_model->rowCount());
         this->adjust_intervalls();
@@ -750,15 +753,15 @@ void Activity::set_edit_samp_model()
     double overall = 0.0,lowLimit;
     double swimPace,swimSpeed,swimCycle;
     bool isBreak = true;
-    if(this->get_sport() != this->isSwim)
+    if(curr_sport != settings::isSwim)
     {
-        if(this->get_sport() == this->isBike) sportindex = 1;
-        if(this->get_sport() == this->isRun) sportindex = 2;
-        lowLimit = settings::get_speed(QTime::fromString(settings::get_paceList().at(sportindex),"mm:ss"),0,v_sport.trimmed(),true).toDouble();
+        if(curr_sport == settings::isBike) sportindex = 1;
+        if(curr_sport == settings::isRun) sportindex = 2;
+        lowLimit = settings::get_speed(QTime::fromString(settings::get_paceList().at(sportindex),"mm:ss"),0,curr_sport,true).toDouble();
         lowLimit = lowLimit - (lowLimit*0.20);
     }
 
-    if(this->get_sport() == this->isSwim)
+    if(curr_sport == settings::isSwim)
     {
         swimLaps = 0;
         for(int sLap = 0; sLap < swim_xdata->rowCount();++sLap)
@@ -833,7 +836,7 @@ void Activity::set_edit_samp_model()
             }
             else
             {
-                if(this->get_sport() == this->isRun)
+                if(curr_sport == settings::isRun)
                 {
                     calc_speed[c_dist] = this->interpolate_speed(c_int,c_dist,lowLimit);
                 }
@@ -921,11 +924,11 @@ void Activity::set_curr_act_model(bool recalc)
             curr_act_model->setData(curr_act_model->index(row,2,QModelIndex()),p_samp_model->data(data_index,Qt::DisplayRole).toDouble());
             curr_act_model->setData(curr_act_model->index(row,3,QModelIndex()),this->get_int_distance(row,recalc));
             curr_act_model->setData(curr_act_model->index(row,4,QModelIndex()),settings::set_time(this->get_int_pace(row,recalc)));
-            if(this->get_sport() == this->isSwim) curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),this->get_swim_laps(row,recalc));
-            if(this->get_sport() == this->isBike) curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),this->get_int_watts(row));
+            if(curr_sport == settings::isSwim) curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),this->get_swim_laps(row,recalc));
+            if(curr_sport == settings::isBike) curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),this->get_int_watts(row));
     }
 
-    curr_act_model->setHorizontalHeaderLabels(settings::get_int_header());
+    curr_act_model->setHorizontalHeaderLabels(settings::get_int_header(curr_sport));
 }
 
 void Activity::set_avg_values(int counter, int row, bool add)
@@ -935,7 +938,7 @@ void Activity::set_avg_values(int counter, int row, bool add)
     int t_pace = settings::get_timesec(curr_act_model->data(curr_act_model->index(row,4,QModelIndex())).toString());
     double t_dist = curr_act_model->data(curr_act_model->index(row,3,QModelIndex())).toDouble();
     double t_watt = 0.0;
-    if(this->get_sport() == this->isBike) t_watt = curr_act_model->data(curr_act_model->index(row,5,QModelIndex())).toDouble();
+    if(curr_sport == settings::isBike) t_watt = curr_act_model->data(curr_act_model->index(row,5,QModelIndex())).toDouble();
 
     if(counter != 0)
     {

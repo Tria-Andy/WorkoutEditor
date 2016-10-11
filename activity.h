@@ -10,7 +10,7 @@
 class Activity
 {
 private:
-    QString v_date,v_sport;
+    QString v_date,curr_sport;
     QStringList ride_items;
     double swim_track,avg_dist,avg_watt,avg_laptime;
     int dist_factor,avg_counter,avg_pace;
@@ -36,16 +36,11 @@ private:
     void set_time_in_zones();
 
     void adjust_intervalls();
-    QStandardItemModel * set_int_model_pointer(bool);
-    QStandardItemModel * set_samp_model_pointer(bool);
     void set_edit_samp_model();
 
 public:
     //explicit Activity(settings *p_settings = 0);
     explicit Activity();
-    static const QString isSwim;
-    static const QString isBike;
-    static const QString isRun;
 
     void prepareData();
     void set_additional_ride_info();
@@ -55,6 +50,8 @@ public:
     QStandardItemModel *swim_pace_model, *swim_hf_model;
     QMap<QString,QString> ride_info;
     //Recalculation
+    QStandardItemModel * set_int_model_pointer(bool);
+    QStandardItemModel * set_samp_model_pointer(bool);
     void recalculate_intervalls(bool);
     int get_int_duration(int,bool);
     int get_int_pace(int,bool);
@@ -64,8 +61,8 @@ public:
     //Value Getter and Setter
     void set_date(QString a_date) {v_date = a_date;}
     QString get_date() {return v_date;}
-    void set_sport(QString a_sport) {v_sport = a_sport;}
-    QString get_sport() {return v_sport;}
+    void set_sport(QString a_sport) {curr_sport = a_sport;}
+    QString get_sport() {return curr_sport;}
     int get_header_num();
     void set_changeRowCount(bool setCount) {changeRowCount = setCount;}
     void set_polishFactor(double vFactor) {polishFactor = vFactor;}

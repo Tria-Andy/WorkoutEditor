@@ -877,11 +877,13 @@ void MainWindow::set_activty_intervalls()
     ui->tableView_int->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_int->verticalHeader()->setVisible(false);
 
-    if(curr_activity->get_sport() == curr_activity->isSwim)
+    if(curr_activity->get_sport() == settings::isSwim)
     {
         ui->tableView_int_times->setModel(curr_activity->swim_xdata);
         ui->tableView_int_times->setItemDelegate(&swimlap_del);
         //ui->tableView_int_times->hideColumn(1);
+        ui->tableView_int_times->hideColumn(5);
+        ui->tableView_int_times->hideColumn(6);
         ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_int_times->verticalHeader()->setVisible(false);
 
@@ -907,7 +909,7 @@ void MainWindow::set_activty_intervalls()
         ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_int_times->verticalHeader()->setVisible(false);
     }
-    if(curr_activity->get_sport() == curr_activity->isRun)
+    if(curr_activity->get_sport() == settings::isRun)
     {
         ui->frame_polish->setVisible(true);
     }
@@ -1180,7 +1182,7 @@ void MainWindow::set_avg_fields()
     {
         ui->frame_avgValue->setVisible(false);
     }
-    if(curr_activity->get_sport() == curr_activity->isBike)
+    if(curr_activity->get_sport() == settings::isBike)
     {
         ui->lineEdit_watt->setVisible(true);
         ui->label_avgWatt->setVisible(true);
@@ -1261,7 +1263,7 @@ void MainWindow::on_actionReset_triggered()
         curr_activity->edit_samp_model->clear();
     }
     settings::set_act_recalc(false);
-    if(curr_activity->get_sport() == curr_activity->isSwim)
+    if(curr_activity->get_sport() == settings::isSwim)
     {
         curr_activity->swim_pace_model->clear();
         curr_activity->swim_hf_model->clear();
@@ -1341,7 +1343,7 @@ void MainWindow::on_actionEdit_Distance_triggered()
     curr_activity->set_additional_ride_info();
     this->set_activty_intervalls();
     this->write_int_infos();
-    if(curr_activity->get_sport() == curr_activity->isSwim) this->write_samp_infos();
+    if(curr_activity->get_sport() == settings::isSwim) this->write_samp_infos();
     this->set_activty_infos();
 }
 
@@ -1552,3 +1554,4 @@ void MainWindow::on_horizontalSlider_polish_valueChanged(int value)
     ui->label_WorkFactor->setText(QString::number(10-value) + "%");
     curr_activity->set_polishFactor(0.1-(static_cast<double>(value)/100));
 }
+
