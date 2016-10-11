@@ -23,13 +23,16 @@ void jsonHandler::fill_keyList(QStringList *targetList,QMap<int, QString> *map, 
 {
     for(int i = 0; i < map->count(); ++i)
     {
-       targetList->insert(i,map->value(i));
+        if(list->contains(map->value(i)))
+        {
+            targetList->insert(i,map->value(i));
+        }
     }
     for(int x = 0; x < list->count();++x)
     {
         if(!targetList->contains(list->at(x)))
         {
-            (*targetList) << list->at(x);
+            (*targetList) << list->at(x);        
         }
     }
 }
@@ -68,7 +71,7 @@ QJsonObject jsonHandler::mapToJson(QMap<QString,QString> *map)
         }
         else
         {
-            item.insert(it.key(),it.value());
+            item.insert(it.key(),it.value()+" ");
         }
     }
     return item;
@@ -82,7 +85,6 @@ QJsonArray jsonHandler::listToJson(QStringList *list)
     {
         jArray.insert(i,list->at(i));
     }
-
     return jArray;
 }
 
@@ -103,7 +105,6 @@ QJsonArray jsonHandler::modelToJson(QStandardItemModel *model, QStringList *list
         }
         jArray.insert(row,item_array);
     }
-
     return jArray;
 }
 
@@ -255,7 +256,7 @@ void jsonHandler::write_json()
             item_array.insert("KM",QJsonValue::fromVariant(curr_act->swim_xdata->data(curr_act->swim_xdata->index(i,5,QModelIndex()))));
             value_array.insert(0,QJsonValue::fromVariant(curr_act->swim_xdata->data(curr_act->swim_xdata->index(i,6,QModelIndex()))));
             value_array.insert(1,QJsonValue::fromVariant(curr_act->swim_xdata->data(curr_act->swim_xdata->index(i,2,QModelIndex()))));
-            value_array.insert(2,QJsonValue::fromVariant(curr_act->swim_xdata->data(curr_act->swim_xdata->index(i,4,QModelIndex()))));
+            value_array.insert(2,QJsonValue::fromVariant(curr_act->swim_xdata->data(curr_act->swim_xdata->index(i,3,QModelIndex()))));
             item_array["VALUES"] = value_array;
             intArray.insert(i,item_array);
         }
@@ -271,15 +272,15 @@ void jsonHandler::write_json()
 
 void jsonHandler::write_file(QJsonDocument jsondoc)
 {
-    //QFile file(settings::get_gcPath() + QDir::separator() + fileName);
-    QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName);
+    QFile file(settings::get_gcPath() + QDir::separator() + fileName);
+    //QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName);
     if(!file.open(QFile::WriteOnly))
     {
         qDebug() << "File not open!";
         return;
     }
 
-    file.write(jsondoc.toJson(QJsonDocument::Compact));
+    file.write(jsondoc.toJson());
     file.flush();
     file.close();
 }

@@ -33,7 +33,7 @@
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="schedule">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -1259,133 +1259,6 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_5">
-           <attribute name="title">
-            <string>JSON Text</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_8">
-            <item>
-             <widget class="QFrame" name="frame">
-              <property name="frameShape">
-               <enum>QFrame::StyledPanel</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_9">
-               <property name="spacing">
-                <number>4</number>
-               </property>
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>0</number>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QPlainTextEdit" name="plainTextEdit_hf">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPlainTextEdit" name="plainTextEdit_int_infos">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPlainTextEdit" name="plainTextEdit_samp_data">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-              <zorder>plainTextEdit_samp_data</zorder>
-              <zorder>plainTextEdit_hf</zorder>
-              <zorder>plainTextEdit_int_infos</zorder>
-             </widget>
-            </item>
-            <item>
-             <widget class="QFrame" name="frame_2">
-              <property name="frameShape">
-               <enum>QFrame::StyledPanel</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_10">
-               <property name="spacing">
-                <number>4</number>
-               </property>
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>0</number>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QPushButton" name="pushButton_clear_ovr">
-                 <property name="text">
-                  <string>Clear</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_copy_ovr">
-                 <property name="text">
-                  <string>Copy</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_clear_int">
-                 <property name="text">
-                  <string>Clear</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_copy_int">
-                 <property name="text">
-                  <string>Copy</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_clear_samp">
-                 <property name="text">
-                  <string>Clear</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_copy_samp">
-                 <property name="text">
-                  <string>Copy</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-           </layout>
-          </widget>
          </widget>
         </item>
        </layout>
@@ -1433,8 +1306,6 @@
     <addaction name="actionEdit_Distance"/>
     <addaction name="actionEdit_Undo"/>
     <addaction name="actionUnselect_all_rows"/>
-    <addaction name="actionCopy_new_Distance"/>
-    <addaction name="actionCopy_new_Speed"/>
    </widget>
    <widget class="QMenu" name="menuModus">
     <property name="title">
@@ -1499,8 +1370,7 @@
    <addaction name="actionUnselect_all_rows"/>
    <addaction name="actionEdit_Distance"/>
    <addaction name="actionEdit_Undo"/>
-   <addaction name="actionCopy_new_Distance"/>
-   <addaction name="actionCopy_new_Speed"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSelect_File">
@@ -1621,15 +1491,6 @@
     <string>Edit Undo </string>
    </property>
   </action>
-  <action name="actionCopy_new_Distance">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Copy.png</normaloff>:/images/icons/Copy.png</iconset>
-   </property>
-   <property name="text">
-    <string>Copy new Distance</string>
-   </property>
-  </action>
   <action name="actionIntervall_Editor">
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -1673,15 +1534,6 @@
    </property>
    <property name="text">
     <string>Edit Year Schedule</string>
-   </property>
-  </action>
-  <action name="actionCopy_new_Speed">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Clipboard.png</normaloff>:/images/icons/Clipboard.png</iconset>
-   </property>
-   <property name="text">
-    <string>Copy new Speed</string>
    </property>
   </action>
   <action name="actionLapEditor">

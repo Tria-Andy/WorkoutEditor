@@ -102,8 +102,6 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionUnselect_all_rows->setVisible(mEditor);
     ui->actionEdit_Distance->setVisible(mEditor);
     ui->actionEdit_Undo->setVisible(mEditor);
-    ui->actionCopy_new_Distance->setVisible(mEditor);
-    ui->actionCopy_new_Speed->setVisible(mEditor);
     ui->actionLapEditor->setVisible(mEditor);
 
     ui->actionReset->setEnabled(settings::get_act_isload());
@@ -111,8 +109,6 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionUnselect_all_rows->setEnabled(settings::get_act_isload());
     ui->actionEdit_Distance->setEnabled(settings::get_act_isload());
     ui->actionEdit_Undo->setEnabled(settings::get_act_isload());
-    ui->actionCopy_new_Distance->setEnabled(settings::get_act_isload());
-    ui->actionCopy_new_Speed->setEnabled(settings::get_act_isload());
     ui->actionLapEditor->setEnabled(settings::get_act_isload());
 
     //Schedule
@@ -556,7 +552,6 @@ void MainWindow::on_actionSave_to_GoldenCheetah_triggered()
     }
 }
 
-
 void MainWindow::on_calendarWidget_clicked(const QDate &date)
 {
    weeknumber = QString::number(date.weekNumber())+"_"+QString::number(date.year());
@@ -638,7 +633,6 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
             }
         }
     }
-
 }
 
 void MainWindow::on_actionExport_to_Golden_Cheetah_triggered()
@@ -745,7 +739,6 @@ void MainWindow::on_pushButton_current_week_clicked()
         this->set_buttons(false);
         this->workout_calendar();
     }
-
     ui->label_month->setText("Woche " + this->get_weekRange());
 }
 
@@ -958,7 +951,6 @@ void MainWindow::set_polishValues(int lap,double factor)
         }
         polishLine->append(i,value);
     }
-
 }
 
 void MainWindow::set_intChartValues(int lapindex,double avgSpeed)
@@ -999,44 +991,16 @@ void MainWindow::set_intChartValues(int lapindex,double avgSpeed)
     ySpeed->applyNiceNumbers();
 }
 
-void MainWindow::write_int_infos()
-{
-    QString lapname,int_start,int_stop;
-
-    for(int i = 0; i < curr_activity->edit_int_model->rowCount(); ++i)
-    {
-        lapname = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,0,QModelIndex())).toString();
-        ui->comboBox_intervals->setItemText(i,lapname);
-        int_start = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,1,QModelIndex())).toString();
-        int_stop = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,2,QModelIndex())).toString();
-        ui->plainTextEdit_int_infos->appendPlainText("{ \"NAME\":\" " + lapname + "\", \"START\": " + int_start + ", \"STOP\": " + int_stop +" },");
-    }
-}
-
 void MainWindow::write_hf_infos()
 {
     int hf_value;
-    ui->plainTextEdit_hf->appendPlainText("\"OVERRIDES\":[");
-    ui->plainTextEdit_hf->appendPlainText("{ \"average_hr\":{ \"value\":\""  + ui->lineEdit_hfavg->text() + "\" }},");
-
+    jsonhandler->set_overrideFlag(true);
+    jsonhandler->set_overrideData("average_hr",ui->lineEdit_hfavg->text());
+    jsonhandler->set_overrideData("total_work",ui->lineEdit_kj->text());
     for(int i = 0; i < 6; i++)
     {
         hf_value = settings::get_timesec(curr_activity->swim_hf_model->data(curr_activity->swim_hf_model->index(i,3,QModelIndex())).toString());
-        ui->plainTextEdit_hf->appendPlainText("{ \"time_in_zone_H" + QString::number(i+1) + "\":{ \"value\":\"" + QString::number(hf_value) + "\" }},");
-    }
-    ui->plainTextEdit_hf->appendPlainText("{ \"total_work\":{ \"value\":\""  + ui->lineEdit_kj->text() + "\" }} \n ],");
-}
-
-void MainWindow::write_samp_infos()
-{
-    QString sec,km,cad,kph;
-    for(int i = 0; i < curr_activity->edit_samp_model->rowCount(); ++i)
-    {
-        sec = curr_activity->edit_samp_model->data(curr_activity->edit_samp_model->index(i,0,QModelIndex())).toString();
-        km = curr_activity->edit_samp_model->data(curr_activity->edit_samp_model->index(i,1,QModelIndex())).toString();
-        kph = curr_activity->edit_samp_model->data(curr_activity->edit_samp_model->index(i,2,QModelIndex())).toString();
-        cad = curr_activity->edit_samp_model->data(curr_activity->edit_samp_model->index(i,3,QModelIndex())).toString();
-        ui->plainTextEdit_samp_data->appendPlainText("{ \"SECS\": " + sec + ", \"KM\": " + km + ", \"CAD\": " + cad + ", \"KPH\": " + kph +" },");
+        jsonhandler->set_overrideData("time_in_zone_H" + QString::number(i+1),QString::number(hf_value));
     }
 }
 
@@ -1076,7 +1040,6 @@ void MainWindow::on_pushButton_week_minus_clicked()
         }
         this->workout_calendar();
     }
-
     ui->label_month->setText("Woche " + this->get_weekRange());
 }
 
@@ -1104,7 +1067,6 @@ void MainWindow::on_pushButton_week_plus_clicked()
             this->workout_calendar();
         }
     }
-
     ui->label_month->setText("Woche " + this->get_weekRange());
 }
 
@@ -1133,7 +1095,6 @@ void MainWindow::on_pushButton_fourplus_clicked()
             this->workout_calendar();
         }
     }
-
     ui->label_month->setText("Woche " + this->get_weekRange());
 }
 
@@ -1245,7 +1206,6 @@ void MainWindow::on_tableView_int_clicked(const QModelIndex &index)
             curr_activity->set_avg_values(sel_count,index.row(),false);
         }
     }
-
     this->set_avg_fields();
 }
 
@@ -1280,7 +1240,6 @@ void MainWindow::on_actionReset_triggered()
 
     settings::set_act_isload(false);
     this->sel_count = 0;
-    this->reset_jsontext();
     this->set_avg_fields();
     this->set_menuItems(true,false);
 
@@ -1302,13 +1261,6 @@ void MainWindow::on_actionReset_triggered()
     delete curr_activity;
 }
 
-void MainWindow::reset_jsontext()
-{
-    ui->plainTextEdit_int_infos->clear();
-    ui->plainTextEdit_samp_data->clear();
-    ui->plainTextEdit_hf->clear();
-}
-
 void MainWindow::on_actionUnselect_all_rows_triggered()
 {
     QModelIndex index;
@@ -1328,7 +1280,6 @@ void MainWindow::on_actionUnselect_all_rows_triggered()
 
 void MainWindow::on_pushButton_calcHF_clicked()
 {
-    ui->plainTextEdit_hf->clear();
     curr_activity->set_hf_time_in_zone();
     ui->lineEdit_hfavg->setText(QString::number(curr_activity->get_hf_avg()));
     this->set_add_swim_values();
@@ -1337,93 +1288,21 @@ void MainWindow::on_pushButton_calcHF_clicked()
 
 void MainWindow::on_actionEdit_Distance_triggered()
 {
-    this->reset_jsontext();
     settings::set_act_recalc(true);
     curr_activity->recalculate_intervalls(settings::get_act_isrecalc());
     curr_activity->set_additional_ride_info();
     this->set_activty_intervalls();
-    this->write_int_infos();
-    if(curr_activity->get_sport() == settings::isSwim) this->write_samp_infos();
     this->set_activty_infos();
 }
 
 void MainWindow::on_actionEdit_Undo_triggered()
 {
     settings::set_act_recalc(false);
-    this->reset_jsontext();
     curr_activity->recalculate_intervalls(settings::get_act_isrecalc());
     curr_activity->set_additional_ride_info();
     this->set_activty_intervalls();
     this->set_activty_infos();
 }
-
-void MainWindow::copyIntoClipboard(QVector<double> *vect)
-{
-    QClipboard *clipboard = QApplication::clipboard();
-    QByteArray km_array;
-    QMimeData *mimeData = new QMimeData();
-
-    for (int i = 0; i < curr_activity->edit_samp_model->rowCount();i++)
-    {
-            km_array.append(QString::number((*vect)[i]));
-            km_array.append("\r\n");
-    }
-
-    mimeData->setData("text/plain",km_array);
-    clipboard->setMimeData(mimeData);
-}
-
-void MainWindow::on_actionCopy_new_Distance_triggered()
-{
-    QVector<double> *dist = curr_activity->get_new_dist();
-    this->copyIntoClipboard(dist);
-}
-
-void MainWindow::on_actionCopy_new_Speed_triggered()
-{
-    QVector<double> *speed = curr_activity->get_new_speed();
-    this->copyIntoClipboard(speed);
-}
-
-void MainWindow::on_pushButton_clear_ovr_clicked()
-{
-    ui->plainTextEdit_hf->clear();
-}
-
-void MainWindow::on_pushButton_copy_ovr_clicked()
-{
-    QClipboard *clipboard = QApplication::clipboard();
-    QMimeData *mimeData = new QMimeData();
-    mimeData->setText(ui->plainTextEdit_hf->toPlainText());
-    clipboard->setMimeData(mimeData);
-}
-
-void MainWindow::on_pushButton_clear_int_clicked()
-{
-    ui->plainTextEdit_int_infos->clear();
-}
-
-void MainWindow::on_pushButton_copy_int_clicked()
-{
-    QClipboard *clipboard = QApplication::clipboard();
-    QMimeData *mimeData = new QMimeData();
-    mimeData->setText(ui->plainTextEdit_int_infos->toPlainText());
-    clipboard->setMimeData(mimeData);
-}
-
-void MainWindow::on_pushButton_clear_samp_clicked()
-{
-    ui->plainTextEdit_samp_data->clear();
-}
-
-void MainWindow::on_pushButton_copy_samp_clicked()
-{
-    QClipboard *clipboard = QApplication::clipboard();
-    QMimeData *mimeData = new QMimeData();
-    mimeData->setText(ui->plainTextEdit_samp_data->toPlainText());
-    clipboard->setMimeData(mimeData);
-}
-
 
 void MainWindow::on_actionIntervall_Editor_triggered()
 {

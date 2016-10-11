@@ -95,16 +95,11 @@ private:
     void set_activty_intervalls();
     void set_avg_fields();
     void set_add_swim_values();
-    void write_int_infos();
     void write_hf_infos();
-    void write_samp_infos();
     void set_selectInt(QColor,QModelIndex);
 
     void set_menuItems(bool,bool);
     void reset_jsontext();
-
-    void copyIntoClipboard(QVector<double>*);
-
     void freeMem();
 
 public:
@@ -134,13 +129,6 @@ private slots:
     void on_pushButton_calcHF_clicked();
     void on_actionEdit_Distance_triggered();
     void on_actionEdit_Undo_triggered();
-    void on_actionCopy_new_Distance_triggered();
-    void on_pushButton_clear_ovr_clicked();
-    void on_pushButton_copy_ovr_clicked();
-    void on_pushButton_clear_int_clicked();
-    void on_pushButton_copy_int_clicked();
-    void on_pushButton_clear_samp_clicked();
-    void on_pushButton_copy_samp_clicked();
     void on_actionStress_Calculator_triggered();
     void on_actionIntervall_Editor_triggered();
     void on_actionPreferences_triggered();
@@ -150,7 +138,6 @@ private slots:
     void on_actionSwitch_Year_triggered();
     void on_comboBox_phasefilter_currentIndexChanged(int index);
     void on_actionVersion_triggered();
-    void on_actionCopy_new_Speed_triggered();
     void on_horizontalSlider_factor_valueChanged(int value);
     void on_comboBox_intervals_currentIndexChanged(int index);
     void on_actionLapEditor_triggered();
