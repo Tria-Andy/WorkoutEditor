@@ -15,7 +15,7 @@ private:
     Activity *curr_act;
     QString jsonFile,fileName;
     bool hasXdata,hasOverride;
-    QStandardItemModel *int_model,*samp_model;
+    QStandardItemModel *p_int,*p_samp;
     QStringList intList,sampList,xdataValues,xdataUnits;
     QMap<QString,QString> rideData;
     QMap<QString,QString> tagData;

@@ -14,7 +14,7 @@ void jsonHandler::fill_qmap(QMap<QString, QString> *qmap,QJsonObject *objItem)
     for(int i = 0; i < objItem->keys().count(); ++i)
     {
         keyValue = objItem->keys().at(i);
-        qmap->insert(keyValue,objItem->value(keyValue).toString());
+        qmap->insert(keyValue,objItem->value(keyValue).toString().trimmed());
         if(keyValue == "OVERRIDES") hasOverride = true;
     }
 }
@@ -139,6 +139,12 @@ void jsonHandler::read_json(QString jsonfile)
     curr_act->set_sport(tagData.value("Sport"));
     valueList = QStringList();
 
+    if(curr_act->get_sport() == settings::isRun)
+    {
+        overrideData.insert("total_work",tagData.value("Work"));
+        hasOverride = true;
+    }
+
     curr_act->ride_info.insert("Date:",rideData.value("STARTTIME"));
 
     for(int i = 0; i < settings::get_jsoninfos().count();++i)
@@ -167,7 +173,7 @@ void jsonHandler::read_json(QString jsonfile)
     if(item_ride.contains("XDATA"))
     {
         hasXdata = true;
-        if(curr_act->get_sport() == curr_act->isSwim)
+        if(curr_act->get_sport() == settings::isSwim)
         {
             QJsonObject item_xdata = item_ride["XDATA"].toArray().at(0).toObject();
             this->fill_qmap(&xData,&item_xdata);
@@ -209,11 +215,14 @@ void jsonHandler::write_json()
     QJsonDocument jsonDoc;
     QJsonObject rideFile,item_ride;
     QJsonArray intArray;
+    bool isrecalc = settings::get_act_isrecalc();
+    p_int = curr_act->set_int_model_pointer(isrecalc);
+    p_samp = curr_act->set_samp_model_pointer(isrecalc);
 
     item_ride = mapToJson(&rideData);
     item_ride["TAGS"] = mapToJson(&tagData);
-    item_ride["INTERVALS"] = modelToJson(int_model,&intList);
-    item_ride["SAMPLES"] = modelToJson(samp_model,&sampList);
+    item_ride["INTERVALS"] = modelToJson(p_int,&intList);
+    item_ride["SAMPLES"] = modelToJson(p_samp,&sampList);
 
     if(hasOverride)
     {
@@ -242,11 +251,11 @@ void jsonHandler::write_json()
         {
             QJsonObject item_array;
             QJsonArray value_array;
-            item_array.insert("SECS",QJsonValue::fromVariant(curr_act->xdata_model->data(curr_act->xdata_model->index(i,0,QModelIndex()))));
-            item_array.insert("KM",QJsonValue::fromVariant(curr_act->xdata_model->data(curr_act->xdata_model->index(i,1,QModelIndex()))));
-            value_array.insert(0,QJsonValue::fromVariant(curr_act->xdata_model->data(curr_act->xdata_model->index(i,2,QModelIndex()))));
-            value_array.insert(1,QJsonValue::fromVariant(curr_act->xdata_model->data(curr_act->xdata_model->index(i,3,QModelIndex()))));
-            value_array.insert(2,QJsonValue::fromVariant(curr_act->xdata_model->data(curr_act->xdata_model->index(i,4,QModelIndex()))));
+            item_array.insert("SECS",QJsonValue::fromVariant(curr_act->swim_xdata->data(curr_act->swim_xdata->index(i,1,QModelIndex()))));
+            item_array.insert("KM",QJsonValue::fromVariant(curr_act->swim_xdata->data(curr_act->swim_xdata->index(i,5,QModelIndex()))));
+            value_array.insert(0,QJsonValue::fromVariant(curr_act->swim_xdata->data(curr_act->swim_xdata->index(i,6,QModelIndex()))));
+            value_array.insert(1,QJsonValue::fromVariant(curr_act->swim_xdata->data(curr_act->swim_xdata->index(i,2,QModelIndex()))));
+            value_array.insert(2,QJsonValue::fromVariant(curr_act->swim_xdata->data(curr_act->swim_xdata->index(i,4,QModelIndex()))));
             item_array["VALUES"] = value_array;
             intArray.insert(i,item_array);
         }
@@ -270,7 +279,7 @@ void jsonHandler::write_file(QJsonDocument jsondoc)
         return;
     }
 
-    file.write(jsondoc.toJson());
+    file.write(jsondoc.toJson(QJsonDocument::Compact));
     file.flush();
     file.close();
 }

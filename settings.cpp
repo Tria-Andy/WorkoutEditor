@@ -67,8 +67,8 @@ QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
 QStringList settings::header_int_km;
 QStringList settings::table_header;
-QString settings::header_swim = "Swim Laps";
-QString settings::header_bike = "Watt";
+QString settings::header_swim;
+QString settings::header_bike;
 
 int settings::saison_weeks;
 int settings::saison_start;
@@ -93,6 +93,9 @@ void settings::loadSettings()
     header_int_time << "Interval" << "Start Sec" << "Stop Sec";
     header_swim_time << "Lap" << "Start" << "Time" << "Strokes" << "Speed";
     header_int_km << "Interval" << "Distance new";
+    header_swim = "Swim Laps";
+    header_bike = "Watt";
+
     powerList.resize(4);
     factorList.resize(3);
     fontSize.resize(3);
@@ -358,11 +361,11 @@ void settings::saveSettings()
     delete myvalues;
 }
 
-QStringList settings::get_int_header()
+QStringList settings::get_int_header(QString vSport)
 {
     table_header.clear();
-    if(act_sport == "Swim ") return table_header << header_int << header_swim;
-    if(act_sport == "Bike ") return table_header << header_int << header_bike;
+    if(vSport == isSwim) return table_header << header_int << header_swim;
+    if(vSport == isBike) return table_header << header_int << header_bike;
 
     return header_int;
 }

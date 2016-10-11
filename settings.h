@@ -98,7 +98,7 @@ public:
     static QColor get_color(QString);
     static QString get_colorValues(QColor);
 
-    static QStringList get_int_header();
+    static QStringList get_int_header(QString);
     static QStringList get_time_header() {return header_int_time;}
     static QStringList get_swimtime_header(){return header_swim_time;}
     static QStringList get_km_header() {return header_int_km;}

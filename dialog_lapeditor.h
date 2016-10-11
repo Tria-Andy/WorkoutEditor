@@ -41,6 +41,7 @@ private:
     void set_visible(bool,bool);
     void set_duration();
     void edit_laps(int,int);
+    void recalulateData(int);
     int calc_strokes(int);
 };
 

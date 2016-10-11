@@ -9,7 +9,7 @@ Dialog_lapeditor::Dialog_lapeditor(QWidget *parent,Activity *p_act,int p_index) 
     curr_act = p_act;
     selIndex = p_index;
 
-    if(curr_act->get_sport() == curr_act->isSwim)
+    if(curr_act->get_sport() == settings::isSwim)
     {
         ui->comboBox_edit->addItem("Swim Laps");
         ui->comboBox_edit->addItem("Intervalls");
@@ -100,7 +100,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
 
     duration = ui->spinBox_endtime->value()-ui->spinBox_starttime->value();
 
-    if(curr_act->get_sport() == curr_act->isSwim && ui->lineEdit_newName->text().contains(settings::get_breakName()))
+    if(curr_act->get_sport() == settings::isSwim && ui->lineEdit_newName->text().contains(settings::get_breakName()))
     {
         lapSpeed = 0;
         stroke = 0;
@@ -117,7 +117,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
 
     if(editMode == 0)
     {
-        if(curr_act->get_sport() == curr_act->isSwim)
+        if(curr_act->get_sport() == settings::isSwim)
         {
             editModel->insertRow(index,QModelIndex());
             editModel->setData(editModel->index(index,0,QModelIndex()),ui->lineEdit_newName->text());
@@ -131,6 +131,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
                 curr_act->edit_dist_model->insertRow(index,QModelIndex());
                 curr_act->edit_dist_model->setData(curr_act->edit_dist_model->index(index,0,QModelIndex()),ui->lineEdit_newName->text());
             }
+            this->recalulateData(index);
         }
         else
         {
@@ -145,7 +146,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
     }
     if(editMode == 1)
     {
-        if(curr_act->get_sport() == curr_act->isSwim)
+        if(curr_act->get_sport() == settings::isSwim)
         {
             editModel->setData(editModel->index(index,0,QModelIndex()),ui->lineEdit_newName->text());
             editModel->setData(editModel->index(index,1,QModelIndex()),ui->spinBox_starttime->value());
@@ -153,6 +154,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
             editModel->setData(editModel->index(index,3,QModelIndex()),ui->spinBox_strokes->value());
             editModel->setData(editModel->index(index,4,QModelIndex()),lapSpeed);
             editModel->setData(editModel->index(index+1,1,QModelIndex()),ui->spinBox_starttime->value()+duration);
+            this->recalulateData(index);
         }
         else
         {
@@ -164,9 +166,10 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
     }
     if(editMode == 2)
     {
-        if(curr_act->get_sport() == curr_act->isSwim)
+        if(curr_act->get_sport() == settings::isSwim)
         {
             editModel->removeRow(index,QModelIndex());
+            this->recalulateData(index);
         }
         else
         {
@@ -176,6 +179,36 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
         }
         this->set_lapinfo();
     }
+}
+
+void Dialog_lapeditor::recalulateData(int index)
+{
+    double swimLap = curr_act->get_swim_track()/1000;
+    double lapDist = 0;
+    bool isBreak = false;
+    qDebug() << index;
+    for(int i = 0; i < curr_act->swim_xdata->rowCount(); ++i)
+    {
+        QString lap = curr_act->swim_xdata->data(curr_act->swim_xdata->index(i,0,QModelIndex())).toString();
+        if(lap == settings::get_breakName())
+        {
+            lapDist = lapDist + swimLap;
+            isBreak = true;
+        }
+        else
+        {
+            if(!isBreak)
+            {
+                if(i != 0)lapDist = lapDist + swimLap;
+            }
+            else
+            {
+                isBreak = false;
+            }
+        }
+        curr_act->swim_xdata->setData(curr_act->swim_xdata->index(i,5,QModelIndex()),lapDist);
+    }
+
 }
 
 void Dialog_lapeditor::on_radioButton_add_clicked()
@@ -210,7 +243,7 @@ void Dialog_lapeditor::on_comboBox_lap_currentIndexChanged(int vLap)
 {
     int duration,stroke;
 
-    if(curr_act->get_sport() == curr_act->isSwim)
+    if(curr_act->get_sport() == settings::isSwim)
     {
         ui->spinBox_starttime->setValue(editModel->data(editModel->index(vLap,1,QModelIndex())).toInt());
 
