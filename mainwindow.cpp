@@ -1155,26 +1155,6 @@ void MainWindow::set_avg_fields()
     }
 }
 
-void MainWindow::set_add_swim_values()
-{
-    const int kal_100 = 25;
-    const int kal_100_p = kal_100 + (kal_100 / 10);
-    double kal,kj;
-
-    if(ui->checkBox_powerswim->isChecked())
-    {
-        kal = (kal_100_p * curr_activity->get_swim_sri())*(curr_activity->samp_model->data(curr_activity->samp_model->index(curr_activity->samp_model->rowCount()-1,1,QModelIndex())).toDouble()*10);
-    }
-    else
-    {
-        kal = (kal_100 * curr_activity->get_swim_sri())*(curr_activity->samp_model->data(curr_activity->samp_model->index(curr_activity->samp_model->rowCount()-1,1,QModelIndex())).toDouble()*10);
-    }
-    ui->lineEdit_kal->setText(QString::number(ceil(kal)));
-
-    kj = (kal*4.1867)/4;
-    ui->lineEdit_kj->setText(QString::number(ceil(kj)));
-}
-
 void MainWindow::on_tableView_int_times_clicked(const QModelIndex &index)
 {
     if(index.column() == 0)
@@ -1228,6 +1208,7 @@ void MainWindow::on_actionReset_triggered()
         curr_activity->swim_pace_model->clear();
         curr_activity->swim_hf_model->clear();
         curr_activity->swim_xdata->clear();
+        curr_activity->xdata_model->clear();
         curr_activity->act_reset();
         ui->lineEdit_swimcv->clear();
         ui->lineEdit_hf_threshold->clear();
@@ -1235,7 +1216,8 @@ void MainWindow::on_actionReset_triggered()
         ui->lineEdit_swimtime->clear();
         ui->lineEdit_swimpace->clear();
         ui->lineEdit_hfavg->clear();
-        ui->lineEdit_kj->clear();     
+        ui->lineEdit_kj->clear();
+        ui->lineEdit_kal->clear();
     }
 
     settings::set_act_isload(false);
@@ -1280,9 +1262,12 @@ void MainWindow::on_actionUnselect_all_rows_triggered()
 
 void MainWindow::on_pushButton_calcHF_clicked()
 {
+    double totalWork;
     curr_activity->set_hf_time_in_zone();
     ui->lineEdit_hfavg->setText(QString::number(curr_activity->get_hf_avg()));
-    this->set_add_swim_values();
+    totalWork = settings::calc_totalWork(curr_activity->get_sport(),0,curr_activity->samp_model->data(curr_activity->samp_model->index(curr_activity->samp_model->rowCount()-1,1,QModelIndex())).toDouble(),curr_activity->get_swim_sri());
+    ui->lineEdit_kal->setText(QString::number(ceil((totalWork/4)*4.184)));
+    ui->lineEdit_kj->setText(QString::number(totalWork));
     this->write_hf_infos();
 }
 

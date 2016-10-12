@@ -94,7 +94,6 @@ private:
     void set_activty_infos();
     void set_activty_intervalls();
     void set_avg_fields();
-    void set_add_swim_values();
     void write_hf_infos();
     void set_selectInt(QColor,QModelIndex);
 

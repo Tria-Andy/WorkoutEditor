@@ -622,17 +622,14 @@
                 </widget>
                </item>
                <item>
-                <spacer name="horizontalSpacer_7">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                <widget class="QLabel" name="label_24">
+                 <property name="text">
+                  <string>Workout Content:</string>
                  </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEdit_workContent"/>
                </item>
               </layout>
              </widget>

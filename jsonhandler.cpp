@@ -140,12 +140,6 @@ void jsonHandler::read_json(QString jsonfile)
     curr_act->set_sport(tagData.value("Sport"));
     valueList = QStringList();
 
-    if(curr_act->get_sport() == settings::isRun)
-    {
-        overrideData.insert("total_work",tagData.value("Work"));
-        hasOverride = true;
-    }
-
     curr_act->ride_info.insert("Date:",rideData.value("STARTTIME"));
 
     for(int i = 0; i < settings::get_jsoninfos().count();++i)
@@ -170,6 +164,12 @@ void jsonHandler::read_json(QString jsonfile)
     this->fill_keyList(&sampList,&mapValues,&valueList);
     curr_act->samp_model = new QStandardItemModel(itemArray.count(),sampList.count());
     this->fill_model(curr_act->samp_model,&itemArray,&sampList);
+
+    if(curr_act->get_sport() == settings::isRun)
+    {
+        overrideData.insert("total_work",QString::number(settings::calc_totalWork(curr_act->get_sport(),158,curr_act->samp_model->rowCount(),0.0)));
+        hasOverride = true;
+    }
 
     if(item_ride.contains("XDATA"))
     {
