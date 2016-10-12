@@ -14,6 +14,10 @@ public:
     {
         overrideData.insert(vKey,vValue);
     }
+    QString get_overrideDate(QString vKey)
+    {
+        return overrideData.value(vKey);
+    }
     void set_overrideFlag(bool oFlag)
     {
         hasOverride = oFlag;

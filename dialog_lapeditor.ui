@@ -97,9 +97,9 @@
           <number>5</number>
          </property>
          <item>
-          <widget class="QRadioButton" name="radioButton_add">
+          <widget class="QRadioButton" name="radioButton_update">
            <property name="text">
-            <string>Add</string>
+            <string>Update</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -107,9 +107,12 @@
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="radioButton_update">
+          <widget class="QRadioButton" name="radioButton_add">
            <property name="text">
-            <string>Update</string>
+            <string>Add</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -346,8 +349,8 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>radioButton_add</tabstop>
   <tabstop>radioButton_update</tabstop>
+  <tabstop>radioButton_add</tabstop>
   <tabstop>radioButton_del</tabstop>
   <tabstop>comboBox_edit</tabstop>
   <tabstop>comboBox_lap</tabstop>

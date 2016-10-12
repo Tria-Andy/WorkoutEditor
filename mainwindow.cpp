@@ -1265,7 +1265,7 @@ void MainWindow::on_pushButton_calcHF_clicked()
     double totalWork;
     curr_activity->set_hf_time_in_zone();
     ui->lineEdit_hfavg->setText(QString::number(curr_activity->get_hf_avg()));
-    totalWork = settings::calc_totalWork(curr_activity->get_sport(),0,curr_activity->samp_model->data(curr_activity->samp_model->index(curr_activity->samp_model->rowCount()-1,1,QModelIndex())).toDouble(),curr_activity->get_swim_sri());
+    totalWork = settings::calc_totalWork(curr_activity->get_sport(),0,0,curr_activity->samp_model->data(curr_activity->samp_model->index(curr_activity->samp_model->rowCount()-1,1,QModelIndex())).toDouble(),curr_activity->get_swim_sri());
     ui->lineEdit_kal->setText(QString::number(ceil((totalWork/4)*4.184)));
     ui->lineEdit_kj->setText(QString::number(totalWork));
     this->write_hf_infos();
