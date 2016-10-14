@@ -251,7 +251,6 @@ void MainWindow::summery_view()
                 sumValues << this->set_summeryString(i,isWeekMode);
             }
         }
-
     }
     else
     {
@@ -266,8 +265,6 @@ void MainWindow::summery_view()
                 }
             }
             sumValues << this->set_summeryString(0,isWeekMode);
-
-
         }
         else
         {
@@ -698,6 +695,40 @@ void MainWindow::set_calender()
     this->summery_view();
 }
 
+void MainWindow::set_comboIntervall()
+{
+    if(settings::get_act_isrecalc())
+    {
+        int rowCount = curr_activity->edit_int_model->rowCount();
+
+        for(int i = 0; i < rowCount; ++i)
+        {
+            ui->comboBox_intervals->setItemText(i,curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,0,QModelIndex())).toString());
+        }
+        if(ui->comboBox_intervals->count() > rowCount)
+        {
+            while(ui->comboBox_intervals->count() != rowCount)
+            {
+                ui->comboBox_intervals->removeItem(ui->comboBox_intervals->count()-1);
+            }
+        }
+        else
+        {
+            for(int i = ui->comboBox_intervals->count(); i < rowCount; ++i)
+            {
+                ui->comboBox_intervals->addItem(curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,0,QModelIndex())).toString());
+            }
+        }
+    }
+    else
+    {
+        for(int i = 0; i < curr_activity->edit_int_model->rowCount();++i)
+        {
+            ui->comboBox_intervals->addItem(curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,0,QModelIndex())).toString());
+        }
+    }
+}
+
 void MainWindow::select_activity_file()
 {
     QMessageBox::StandardButton reply;
@@ -764,6 +795,7 @@ void MainWindow::loadfile(const QString &filename)
         file.close();
 
         settings::set_act_isload(true);
+        ui->actionSelect_File->setEnabled(false);
         this->set_menuItems(true,false);
         this->set_activty_infos();
 
@@ -798,11 +830,7 @@ void MainWindow::loadfile(const QString &filename)
         intChart->setAxisX(axisX,speedLine);
         intChart->setAxisX(axisX,polishLine);
 
-        QStandardItemModel *intModel = curr_activity->edit_int_model;
-        for(int i = 0; i < intModel->rowCount();++i)
-        {
-            ui->comboBox_intervals->addItem(intModel->data(intModel->index(i,0,QModelIndex())).toString());
-        }
+        this->set_comboIntervall();
         this->set_activty_intervalls();
      }
 }
@@ -810,7 +838,6 @@ void MainWindow::loadfile(const QString &filename)
 void MainWindow::set_activty_infos()
 {
     ui->textBrowser_Info->clear();
-    QModelIndex index;
 
     QTextCursor cursor = ui->textBrowser_Info->textCursor();
     cursor.beginEditBlock();
@@ -939,6 +966,7 @@ void MainWindow::set_polishValues(int lap,double factor)
     {
         polishLine->clear();
     }
+
     for(int i = 0; i < speedValues.count(); ++i)
     {
         if(lap == 0 && i < 5)
@@ -947,6 +975,7 @@ void MainWindow::set_polishValues(int lap,double factor)
         }
         else
         {
+            //Ignored NaN, Inf, or -Inf value. Check speedValues fill!
             value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.10-factor,true);
         }
         polishLine->append(i,value);
@@ -960,7 +989,6 @@ void MainWindow::set_intChartValues(int lapindex,double avgSpeed)
     int start = intmodel->data(intmodel->index(lapindex,1,QModelIndex())).toInt();
     int stop = intmodel->data(intmodel->index(lapindex,2,QModelIndex())).toInt();
     double max = 0.0,min = 40.0,current;
-
     if(speedValues.count() > 0)
     {
         speedValues.clear();
@@ -1108,6 +1136,10 @@ void MainWindow::on_actionPlaner_triggered()
 {
     ui->stackedWidget->setCurrentIndex(0);
     this->set_menuItems(false,true);
+    if(settings::get_act_isload())
+    {
+        qDebug() << "delete Act Models";
+    }
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -1159,7 +1191,7 @@ void MainWindow::on_tableView_int_times_clicked(const QModelIndex &index)
 {
     if(index.column() == 0)
     {
-        Dialog_lapeditor lapEdit(this,curr_activity,index.row());
+        Dialog_lapeditor lapEdit(this,curr_activity,index);
         lapEdit.setModal(true);
         lapEdit.exec();
     }
@@ -1201,14 +1233,19 @@ void MainWindow::on_actionReset_triggered()
     if(settings::get_act_isrecalc())
     {
         curr_activity->edit_samp_model->clear();
+        delete curr_activity->edit_samp_model;
     }
     settings::set_act_recalc(false);
     if(curr_activity->get_sport() == settings::isSwim)
     {
         curr_activity->swim_pace_model->clear();
+        delete curr_activity->swim_pace_model;
         curr_activity->swim_hf_model->clear();
+        delete curr_activity->swim_hf_model;
         curr_activity->swim_xdata->clear();
+        delete curr_activity->swim_xdata;
         curr_activity->xdata_model->clear();
+        delete curr_activity->xdata_model;
         curr_activity->act_reset();
         ui->lineEdit_swimcv->clear();
         ui->lineEdit_hf_threshold->clear();
@@ -1224,7 +1261,7 @@ void MainWindow::on_actionReset_triggered()
     this->sel_count = 0;
     this->set_avg_fields();
     this->set_menuItems(true,false);
-
+    ui->actionSelect_File->setEnabled(true);
     ui->frame_polish->setVisible(false);
 
     ui->verticalLayout_interpol->removeWidget(intChartview);
@@ -1240,6 +1277,10 @@ void MainWindow::on_actionReset_triggered()
     delete axisX;
     delete intChartview;
 
+    delete curr_activity->int_model;
+    delete curr_activity->edit_int_model;
+    delete curr_activity->samp_model;
+    delete curr_activity->edit_dist_model;
     delete curr_activity;
 }
 
@@ -1278,6 +1319,7 @@ void MainWindow::on_actionEdit_Distance_triggered()
     curr_activity->set_additional_ride_info();
     this->set_activty_intervalls();
     this->set_activty_infos();
+    this->set_comboIntervall();
 }
 
 void MainWindow::on_actionEdit_Undo_triggered()
@@ -1287,6 +1329,7 @@ void MainWindow::on_actionEdit_Undo_triggered()
     curr_activity->set_additional_ride_info();
     this->set_activty_intervalls();
     this->set_activty_infos();
+    this->set_comboIntervall();
 }
 
 void MainWindow::on_actionIntervall_Editor_triggered()

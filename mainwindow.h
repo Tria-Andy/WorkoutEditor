@@ -87,7 +87,7 @@ private:
     QString get_weekRange();
     void set_buttons(bool);
     void set_calender();
-
+    void set_comboIntervall();
     //Editor
     void select_activity_file();
     void loadfile(const QString &filename);
