@@ -112,7 +112,7 @@ void Activity::prepareData()
     ride_info.insert("Distance:",QString::number(samp_model->data(samp_model->index(sampCount-1,1,QModelIndex())).toDouble()));
     ride_info.insert("Duration:",QDateTime::fromTime_t(sampCount).toUTC().toString("hh:mm:ss"));
 
-
+    curr_act_model = new QStandardItemModel(intCount,this->get_header_num());
     this->set_curr_act_model(false);
     this->set_dist_factor();
     this->reset_avg();
@@ -942,12 +942,10 @@ void Activity::set_curr_act_model(bool recalc)
 {
     QModelIndex data_index;
     QStandardItemModel *p_int_model,*p_samp_model;
-    curr_act_model = new QStandardItemModel(int_model->rowCount(),this->get_header_num());
-
     p_int_model = this->set_int_model_pointer(recalc);
     p_samp_model = this->set_samp_model_pointer(recalc);
 
-    for(int row = 0; row < int_model->rowCount();++row)
+    for(int row = 0; row < p_int_model->rowCount();++row)
     {
             data_index = p_int_model->index(row,0,QModelIndex());
             curr_act_model->setData(curr_act_model->index(row,0,QModelIndex()),p_int_model->data(data_index,Qt::DisplayRole).toString());
