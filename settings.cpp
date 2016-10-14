@@ -75,6 +75,7 @@ int settings::saison_start;
 int settings::weekRange;
 int settings::weekOffSet;
 int settings::swimLaplen;
+int settings::athleteYOB;
 
 
 void settings::fill_mapList(QMap<int,QString> *map, QString *values)
@@ -127,6 +128,9 @@ void settings::loadSettings()
         //Sport Value Settings
         valueFilePath = workoutsPath + "/" + valueFile;
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
+        myvalues->beginGroup("Athlete");
+            athleteYOB = myvalues->value("yob").toInt();
+        myvalues->endGroup();
 
         myvalues->beginGroup("Version");
             version = myvalues->value("version").toString();
@@ -459,7 +463,6 @@ QString settings::get_workout_pace(double dist, QTime duration,QString sport,boo
             if(nr == 2) return (QDateTime::fromTime_t(speed).toUTC().toString("mm:ss") + speedLabel.at(nr));
             if(nr == 3) return speedLabel.at(nr);
         }
-
     }
     else
     {
@@ -511,6 +514,7 @@ double settings::calc_totalWork(QString sport, int weight,int avgHF, double calc
 {
     double kjFactor = 4.184;
     int kal_100 = 25;
+    int age = QDate::currentDate().year() - athleteYOB;
 
     if(sport == settings::isSwim)
     {
@@ -519,7 +523,7 @@ double settings::calc_totalWork(QString sport, int weight,int avgHF, double calc
 
     if(sport == settings::isRun)
     {
-        return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * 42))/kjFactor) * calcBase/60);
+        return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/kjFactor) * calcBase/60);
     }
 
     return 0;

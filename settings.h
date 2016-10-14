@@ -18,7 +18,7 @@ private:
     static QVector<int> fontSize;
     static QString gcPath,schedulePath,workoutsPath,act_sport,saison_year,emptyPhase,emptyPhaseColor;
     static bool act_isloaded,act_isrecalc;
-    static int saison_weeks,saison_start;
+    static int saison_weeks,saison_start,athleteYOB;
     static int weekRange,weekOffSet,swimLaplen;
     static void saveSettings();
     int set_range_values(QString);
