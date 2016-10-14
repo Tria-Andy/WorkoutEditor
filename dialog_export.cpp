@@ -1,5 +1,6 @@
 #include "dialog_export.h"
 #include "ui_dialog_export.h"
+#include "jsonhandler.h"
 #include <QDebug>
 #include <math.h>
 #include <QDir>
@@ -29,8 +30,9 @@ Dialog_export::Dialog_export(QWidget *parent,QStandardItemModel *w_model) :
     ui->comboBox_week_export->setEnabled(false);
     this->set_comboBox_time();
     this->set_infolabel(workout_time.count());
-
 }
+
+enum{ALL,TIME,WEEK};
 
 Dialog_export::~Dialog_export()
 {
@@ -70,6 +72,15 @@ void Dialog_export::set_filecontent(QModelIndex index)
     if(sport == settings::isRun) stressType = "govss";
     if(sport == settings::isAlt || sport == settings::isStrength) stressType = "triscore";
 
+
+
+
+
+
+
+
+
+
     fileContent = "{ \n \"RIDE\":{\n";
     fileContent.append("\"STARTTIME\":\"" + workoutDateTime.toString("yyyy\\/MM\\/dd hh:mm:ss UTC ") +"\",\n");
     fileContent.append("\"RECINTSECS\":0,\n");
@@ -94,7 +105,9 @@ void Dialog_export::workout_export()
     QList<QStandardItem*> list;
     QModelIndex index;
 
-    if(export_mode == 2)
+    jsonHandler jsonhandler("","",nullptr,false);
+
+    if(export_mode == WEEK)
     {
         QString weeknumber = ui->comboBox_week_export->currentText();
         list = workout_model->findItems(weeknumber,Qt::MatchExactly,0);
@@ -111,7 +124,7 @@ void Dialog_export::workout_export()
         ui->progressBar->setValue(100);
 
     }
-    if(export_mode == 0 || export_mode == 1)
+    if(export_mode == ALL || export_mode == TIME)
     {
         QString workoutdate = ui->dateEdit_export->date().toString("dd.MM.yyyy");
         list = workout_model->findItems(workoutdate,Qt::MatchExactly,1);
@@ -121,12 +134,12 @@ void Dialog_export::workout_export()
             index = workout_model->indexFromItem(list.at(i));
             if(workout_model->data(workout_model->index(index.row(),3,QModelIndex())).toString() != settings::isOther)
             {
-                if(export_mode == 0)
+                if(export_mode == ALL)
                 {
                     this->set_filecontent(workout_model->indexFromItem(list.at(i)));
                     ui->progressBar->setValue((100/list.count())*i);
                 }
-                if(export_mode == 1)
+                if(export_mode == TIME)
                 {
                     QString time_value = workout_model->data(workout_model->index(workout_model->indexFromItem(list.at(i)).row(),2,QModelIndex()),Qt::DisplayRole).toString();
                     if(time_value == ui->comboBox_time_export->currentText())
@@ -187,7 +200,7 @@ void Dialog_export::get_exportinfo(QString v_week,QString v_date,bool week)
         list = workout_model->findItems(v_date,Qt::MatchExactly,1);
     }
 
-    if(export_mode == 0 || export_mode == 2)
+    if(export_mode == ALL || export_mode == WEEK)
     {
         for(int i = 0; i < list.count(); i++)
         {
@@ -207,7 +220,7 @@ void Dialog_export::get_exportinfo(QString v_week,QString v_date,bool week)
 
 void Dialog_export::on_radioButton_day_clicked()
 {
-    export_mode = 0;
+    export_mode = ALL;
     ui->progressBar->setValue(0);
     this->set_exportselection(true,false);
     this->get_exportinfo("NULL",ui->dateEdit_export->date().toString("dd.MM.yyyy"),false);
@@ -215,7 +228,7 @@ void Dialog_export::on_radioButton_day_clicked()
 
 void Dialog_export::on_radioButton_week_clicked()
 {
-    export_mode = 2;
+    export_mode = WEEK;
     ui->progressBar->setValue(0);
     this->set_exportselection(false,true);
     this->get_exportinfo(ui->comboBox_week_export->currentText(),"NULL",true);
@@ -240,16 +253,16 @@ void Dialog_export::on_dateEdit_export_dateChanged(const QDate &date)
     this->get_exportinfo("NULL",date.toString("dd.MM.yyyy"),false);
 }
 
-void Dialog_export::on_comboBox_time_export_currentIndexChanged(const QString &time)
+void Dialog_export::on_comboBox_time_export_currentIndexChanged(const QString &value)
 {
     ui->progressBar->setValue(0);
-    if(time == "all")
+    if(value == "all")
     {
-        export_mode = 0;
+        export_mode = ALL;
     }
     else
     {
-        export_mode = 1;
+        export_mode = TIME;
     }
     this->get_exportinfo("NULL",ui->dateEdit_export->date().toString("dd.MM.yyyy"),false);
 }

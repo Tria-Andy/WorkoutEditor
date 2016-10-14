@@ -7,7 +7,7 @@
 class jsonHandler
 {
 public:
-    jsonHandler(QString filename = QString(),QString jsonfile = QString(), Activity *p_act = 0);
+    jsonHandler(bool readFlag = false,QString filename = QString(),QString jsonfile = QString(), Activity *p_act = 0);
     QString get_jsonfile() {return jsonFile;}
     void write_json();
     void set_overrideData(QString vKey,QString vValue)

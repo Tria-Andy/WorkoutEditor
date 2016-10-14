@@ -1360,7 +1360,8 @@
    <addaction name="actionUnselect_all_rows"/>
    <addaction name="actionEdit_Distance"/>
    <addaction name="actionEdit_Undo"/>
-   <addaction name="separator"/>
+   <addaction name="actionLapEditor"/>
+   <addaction name="actionIntervall_Editor"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSelect_File">

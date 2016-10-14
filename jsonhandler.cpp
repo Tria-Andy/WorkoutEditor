@@ -1,11 +1,14 @@
 #include "jsonhandler.h"
 #include "settings.h"
 
-jsonHandler::jsonHandler(QString filename,QString jsonfile, Activity *p_act)
-{
-    fileName = filename;
-    curr_act = p_act;
-    this->read_json(jsonfile);
+jsonHandler::jsonHandler(bool readFlag,QString filename,QString jsonfile, Activity *p_act)
+{   
+    if(readFlag)
+    {
+        fileName = filename;
+        curr_act = p_act;
+        this->read_json(jsonfile);
+    }
 }
 
 void jsonHandler::fill_qmap(QMap<QString, QString> *qmap,QJsonObject *objItem)
