@@ -791,7 +791,7 @@ void MainWindow::loadfile(const QString &filename)
         }
         curr_activity = new Activity();
         filecontent = file.readAll();
-        jsonhandler = new jsonHandler(true,filename.split("/").last(),filecontent,curr_activity);
+        jsonhandler = new jsonHandler(true,filecontent,curr_activity);
         file.close();
 
         settings::set_act_isload(true);

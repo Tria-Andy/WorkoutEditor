@@ -7,8 +7,9 @@
 class jsonHandler
 {
 public:
-    jsonHandler(bool readFlag = false,QString filename = QString(),QString jsonfile = QString(), Activity *p_act = 0);
+    jsonHandler(bool readFlag = false,QString jsonfile = QString(), Activity *p_act = 0);
     QString get_jsonfile() {return jsonFile;}
+    void set_filename(QString fname) {fileName = fname;}
     void write_json();
     void set_overrideData(QString vKey,QString vValue)
     {
@@ -22,11 +23,25 @@ public:
     {
         hasOverride = oFlag;
     }
+    void set_rideData(QString vKey,QString vValue)
+    {
+        rideData.insert(vKey,vValue);
+    }
+    void set_tagData(QString vKey,QString vValue)
+    {
+        tagData.insert(vKey,vValue);
+    }
+    void reset_maps()
+    {
+        rideData.clear();
+        tagData.clear();
+        overrideData.clear();
+    }
 
 private:
     Activity *curr_act;
     QString jsonFile,fileName;
-    bool hasXdata,hasOverride;
+    bool hasXdata,hasOverride,hasFile;
     QStandardItemModel *p_int,*p_samp;
     QStringList intList,sampList,xdataValues,xdataUnits;
     QMap<QString,QString> rideData;

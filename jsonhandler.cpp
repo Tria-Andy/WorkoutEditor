@@ -1,11 +1,12 @@
 #include "jsonhandler.h"
 #include "settings.h"
 
-jsonHandler::jsonHandler(bool readFlag,QString filename,QString jsonfile, Activity *p_act)
+jsonHandler::jsonHandler(bool readFlag,QString jsonfile, Activity *p_act)
 {   
+    hasFile = readFlag;
+    hasXdata = false;
     if(readFlag)
     {
-        fileName = filename;
         curr_act = p_act;
         this->read_json(jsonfile);
     }
@@ -113,7 +114,6 @@ QJsonArray jsonHandler::modelToJson(QStandardItemModel *model, QStringList *list
 
 void jsonHandler::read_json(QString jsonfile)
 {
-    hasXdata = false;
     hasOverride = false;
     QJsonObject itemObject;
     QJsonArray itemArray;
@@ -144,6 +144,7 @@ void jsonHandler::read_json(QString jsonfile)
     valueList = QStringList();
 
     curr_act->ride_info.insert("Date:",rideData.value("STARTTIME"));
+    fileName = tagData.value("Filename").trimmed();
 
     for(int i = 0; i < settings::get_jsoninfos().count();++i)
     {
@@ -227,14 +228,18 @@ void jsonHandler::write_json()
     QJsonDocument jsonDoc;
     QJsonObject rideFile,item_ride;
     QJsonArray intArray;
-    bool isrecalc = settings::get_act_isrecalc();
-    p_int = curr_act->set_int_model_pointer(isrecalc);
-    p_samp = curr_act->set_samp_model_pointer(isrecalc);
 
     item_ride = mapToJson(&rideData);
     item_ride["TAGS"] = mapToJson(&tagData);
-    item_ride["INTERVALS"] = modelToJson(p_int,&intList);
-    item_ride["SAMPLES"] = modelToJson(p_samp,&sampList);
+
+    if(hasFile)
+    {
+        bool isrecalc = settings::get_act_isrecalc();
+        p_int = curr_act->set_int_model_pointer(isrecalc);
+        p_samp = curr_act->set_samp_model_pointer(isrecalc);
+        item_ride["INTERVALS"] = modelToJson(p_int,&intList);
+        item_ride["SAMPLES"] = modelToJson(p_samp,&sampList);
+    }
 
     if(hasOverride)
     {

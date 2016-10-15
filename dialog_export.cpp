@@ -1,6 +1,5 @@
 #include "dialog_export.h"
 #include "ui_dialog_export.h"
-#include "jsonhandler.h"
 #include <QDebug>
 #include <math.h>
 #include <QDir>
@@ -11,6 +10,7 @@ Dialog_export::Dialog_export(QWidget *parent,QStandardItemModel *w_model) :
 {
     ui->setupUi(this);
     QModelIndex index;
+    jsonhandler = new jsonHandler(false,"",nullptr);
     workout_model = w_model;
     ui->dateEdit_export->setDate(QDate().currentDate());
     workout_time = workout_model->findItems(QDate().currentDate().toString("dd.MM.yyyy"),Qt::MatchExactly,1);
@@ -36,6 +36,7 @@ enum{ALL,TIME,WEEK};
 
 Dialog_export::~Dialog_export()
 {
+    delete jsonhandler;
     delete ui;
 }
 
@@ -72,30 +73,24 @@ void Dialog_export::set_filecontent(QModelIndex index)
     if(sport == settings::isRun) stressType = "govss";
     if(sport == settings::isAlt || sport == settings::isStrength) stressType = "triscore";
 
+    jsonhandler->reset_maps();
+    jsonhandler->set_filename(fileName);
+    jsonhandler->set_rideData("STARTTIME",workoutDateTime.toString("yyyy/MM/dd hh:mm:ss UTC"));
+    jsonhandler->set_rideData("RECINTSECS","");
+    jsonhandler->set_rideData("DEVICETYPE","Manual");
+    jsonhandler->set_rideData("IDENTIFIER","");
+    jsonhandler->set_rideData("OVERRIDES","");
 
+    jsonhandler->set_tagData("Sport",sport);
+    jsonhandler->set_tagData("Workout Code",workout_model->item(index.row(),4)->text());
+    jsonhandler->set_tagData("Workout Title",workout_model->item(index.row(),5)->text());
 
+    jsonhandler->set_overrideFlag(true);
+    jsonhandler->set_overrideData("time_riding",QString::number(settings::get_timesec(workout_model->item(index.row(),6)->text())));
+    jsonhandler->set_overrideData("workout_time",QString::number(settings::get_timesec(workout_model->item(index.row(),6)->text())));
+    jsonhandler->set_overrideData(stressType,workout_model->item(index.row(),8)->text());
 
-
-
-
-
-
-
-    fileContent = "{ \n \"RIDE\":{\n";
-    fileContent.append("\"STARTTIME\":\"" + workoutDateTime.toString("yyyy\\/MM\\/dd hh:mm:ss UTC ") +"\",\n");
-    fileContent.append("\"RECINTSECS\":0,\n");
-    fileContent.append("\"DEVICETYPE\":\"Manual \",\n");
-    fileContent.append("\"IDENTIFIER\":\" \",\n");
-    fileContent.append("\"OVERRIDES\":[\n");
-    fileContent.append("{ \"time_riding\":{ \"value\":\""+QString::number(settings::get_timesec(workout_model->item(index.row(),6)->text()))+"\" }},\n");
-    fileContent.append("{ \"workout_time\":{ \"value\":\""+QString::number(settings::get_timesec(workout_model->item(index.row(),6)->text()))+"\" }},\n");
-    fileContent.append("{ \""+stressType+"\":{ \"value\":\""+workout_model->item(index.row(),8)->text()+"\" }}\n ],\n");
-    fileContent.append("\"TAGS\":{\n");
-    fileContent.append("\"Sport\":\""+workout_model->item(index.row(),3)->text()+" \",\n");
-    fileContent.append("\"Workout Code\":\""+workout_model->item(index.row(),4)->text()+" \",\n");
-    fileContent.append("\"Workout Title\":\""+workout_model->item(index.row(),5)->text()+" \"\n } \n } \n }");
-
-    this->write_file(fileName,fileContent);
+    jsonhandler->write_json();
 }
 
 void Dialog_export::workout_export()
@@ -104,8 +99,6 @@ void Dialog_export::workout_export()
     fileContent = QString();
     QList<QStandardItem*> list;
     QModelIndex index;
-
-    jsonHandler jsonhandler("","",nullptr,false);
 
     if(export_mode == WEEK)
     {
@@ -152,21 +145,6 @@ void Dialog_export::workout_export()
         }
         ui->progressBar->setValue(100);
     }
-}
-
-void Dialog_export::write_file(QString filename, QString filecontent)
-{
-    QFile file(settings::get_gcPath() + QDir::separator() + filename);
-    if(!file.open(QFile::WriteOnly | QFile::Text))
-    {
-        qDebug() << "File not open!";
-        return;
-    }
-
-    QTextStream stream(&file);
-    stream << filecontent;
-    file.flush();
-    file.close();
 }
 
 void Dialog_export::on_pushButton_close_clicked()
