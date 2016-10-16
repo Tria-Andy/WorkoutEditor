@@ -46,7 +46,7 @@ public:
     void set_additional_ride_info();
     void set_curr_act_model(bool);
     void act_reset();
-    QStandardItemModel *int_model,*samp_model,*curr_act_model,*edit_int_model,*xdata_model,*swim_xdata,*edit_samp_model,*edit_dist_model;
+    QStandardItemModel *int_model,*samp_model,*curr_act_model,*edit_int_model,*xdata_model,*swim_xdata,*edit_samp_model;
     QStandardItemModel *swim_pace_model, *swim_hf_model;
     QMap<QString,QString> ride_info;
     QMap<QString,int> swimlapIndex;

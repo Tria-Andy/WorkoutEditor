@@ -8,7 +8,7 @@ class settings
 {
 private:
     static QString version,builddate,splitter,header_swim,header_bike;
-    static QStringList table_header,header_int,header_int_time,header_swim_time,header_int_km;
+    static QStringList table_header,header_int,header_int_time,header_swim_time;
 
     static QString settingFile,valueFile,valueFilePath,saisonFDW,breakName;
     static QStringList keyList,gc_infos,sportList,paceList,phaseList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
@@ -101,7 +101,7 @@ public:
     static QStringList get_int_header(QString);
     static QStringList get_time_header() {return header_int_time;}
     static QStringList get_swimtime_header(){return header_swim_time;}
-    static QStringList get_km_header() {return header_int_km;}
+    //static QStringList get_km_header() {return header_int_km;}
     static void set_act_sport(QString sport) {act_sport = sport;}
     static void set_act_isload(bool isloaded) {act_isloaded = isloaded;}
     static bool get_act_isload() {return act_isloaded;}

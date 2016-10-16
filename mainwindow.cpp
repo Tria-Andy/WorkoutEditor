@@ -886,11 +886,6 @@ void MainWindow::set_activty_infos()
 
 void MainWindow::set_activty_intervalls()
 {
-    ui->tableView_int_dist->setModel(curr_activity->edit_dist_model);
-    ui->tableView_int_dist->setItemDelegate(&dist_del);
-    ui->tableView_int_dist->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_int_dist->verticalHeader()->setVisible(false);
-
     ui->tableView_int->setModel(curr_activity->curr_act_model);
     ui->tableView_int->setEditTriggers(QAbstractItemView::NoEditTriggers);
     //ui->tableView_int->setItemDelegate(&intervall_del);
@@ -924,8 +919,9 @@ void MainWindow::set_activty_intervalls()
     else
     {
         ui->tableView_int_times->setModel(curr_activity->edit_int_model);
-        ui->tableView_int_times->setItemDelegate(&time_del);
-        ui->tableView_int_times->hideColumn(3);
+        ui->tableView_int_times->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        //ui->tableView_int_times->setItemDelegate(&time_del);
+        ui->tableView_int_times->hideColumn(4);
         ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_int_times->verticalHeader()->setVisible(false);
     }
@@ -1229,7 +1225,6 @@ void MainWindow::on_actionReset_triggered()
     curr_activity->int_model->clear();
     curr_activity->samp_model->clear();
     curr_activity->edit_int_model->clear();
-    curr_activity->edit_dist_model->clear();
     if(settings::get_act_isrecalc())
     {
         curr_activity->edit_samp_model->clear();
@@ -1280,7 +1275,6 @@ void MainWindow::on_actionReset_triggered()
     delete curr_activity->int_model;
     delete curr_activity->edit_int_model;
     delete curr_activity->samp_model;
-    delete curr_activity->edit_dist_model;
     delete curr_activity;
 }
 

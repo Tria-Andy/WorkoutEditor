@@ -65,7 +65,6 @@ bool settings::act_isrecalc = false;
 QStringList settings::header_int;
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
-QStringList settings::header_int_km;
 QStringList settings::table_header;
 QString settings::header_swim;
 QString settings::header_bike;
@@ -91,9 +90,8 @@ void settings::fill_mapList(QMap<int,QString> *map, QString *values)
 void settings::loadSettings()
 {
     header_int << "Interval" << "Duration" << "Distance" << "Distance (Int)" << "Pace";
-    header_int_time << "Interval" << "Start Sec" << "Stop Sec";
+    header_int_time << "Interval" << "Start Sec" << "Stop Sec" << "Distance";
     header_swim_time << "Lap" << "Start" << "Time" << "Strokes" << "Speed";
-    header_int_km << "Interval" << "Distance new";
     header_swim = "Swim Laps";
     header_bike = "Watt";
 

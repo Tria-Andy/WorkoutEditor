@@ -444,6 +444,18 @@
               </property>
               <item>
                <widget class="QLabel" name="label">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>24</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
                   <pointsize>10</pointsize>
@@ -470,7 +482,7 @@
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                   <horstretch>0</horstretch>
-                  <verstretch>2</verstretch>
+                  <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
@@ -497,40 +509,25 @@
             </widget>
            </item>
            <item>
-            <widget class="QTabWidget" name="tabWidget_edit">
+            <widget class="QLineEdit" name="lineEdit_workContent"/>
+           </item>
+           <item>
+            <widget class="QTableView" name="tableView_int_times">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                <horstretch>0</horstretch>
-               <verstretch>3</verstretch>
+               <verstretch>2</verstretch>
               </sizepolicy>
              </property>
-             <property name="currentIndex">
-              <number>0</number>
+             <property name="mouseTracking">
+              <bool>true</bool>
              </property>
-             <widget class="QWidget" name="tab_3">
-              <attribute name="title">
-               <string>Edit Int Time</string>
-              </attribute>
-              <layout class="QHBoxLayout" name="horizontalLayout_5">
-               <item>
-                <widget class="QTableView" name="tableView_int_times">
-                 <property name="mouseTracking">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-             <widget class="QWidget" name="tab_4">
-              <attribute name="title">
-               <string>Edit Distance</string>
-              </attribute>
-              <layout class="QHBoxLayout" name="horizontalLayout_6">
-               <item>
-                <widget class="QTableView" name="tableView_int_dist"/>
-               </item>
-              </layout>
-             </widget>
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
             </widget>
            </item>
           </layout>
@@ -622,14 +619,17 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_24">
-                 <property name="text">
-                  <string>Workout Content:</string>
+                <spacer name="horizontalSpacer_7">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
                  </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="lineEdit_workContent"/>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
              </widget>
@@ -1360,8 +1360,11 @@
    <addaction name="actionUnselect_all_rows"/>
    <addaction name="actionEdit_Distance"/>
    <addaction name="actionEdit_Undo"/>
+   <addaction name="separator"/>
    <addaction name="actionLapEditor"/>
    <addaction name="actionIntervall_Editor"/>
+   <addaction name="actionPace_Calculator"/>
+   <addaction name="actionStress_Calculator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSelect_File">

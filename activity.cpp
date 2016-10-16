@@ -29,7 +29,7 @@ void Activity::prepareData()
 
     settings::set_swimLaplen(swim_track);
     int_model->setData(int_model->index(intCount-1,2,QModelIndex()),sampCount-1);
-    edit_int_model = new QStandardItemModel(intCount,4);
+    edit_int_model = new QStandardItemModel(intCount,5);
 
     for(int row = 0; row < intCount; ++row)
     {
@@ -39,6 +39,7 @@ void Activity::prepareData()
             editIndex = edit_int_model->index(row,col,QModelIndex());
             edit_int_model->setData(editIndex,int_model->data(intIndex,Qt::DisplayRole));
         }
+        edit_int_model->setData(edit_int_model->index(row,3,QModelIndex()),this->get_int_distance(row,false));
     }
 
     edit_int_model->setData(edit_int_model->index(edit_int_model->rowCount()-1,2,QModelIndex()),sampCount-1);
@@ -99,14 +100,6 @@ void Activity::prepareData()
             lapStartPrev = lapStart;
             typePrev = type;
         }
-    }
-
-    edit_dist_model = new QStandardItemModel(intCount,2);
-    edit_dist_model->setHorizontalHeaderLabels(settings::get_km_header());
-    for(int i = 0; i < intCount;++i)
-    {
-        edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),int_model->data(int_model->index(i,0,QModelIndex())).toString());
-        edit_dist_model->setData(edit_dist_model->index(i,1,QModelIndex()),this->get_int_distance(i,false));
     }
 
     ride_info.insert("Distance:",QString::number(samp_model->data(samp_model->index(sampCount-1,1,QModelIndex())).toDouble()));
@@ -486,11 +479,11 @@ int Activity::get_swim_laps(int row,bool recalc)
 
     if(lapcount == 0)
     {
-        edit_int_model->setData(edit_int_model->index(row,3,QModelIndex()),0);
+        edit_int_model->setData(edit_int_model->index(row,4,QModelIndex()),0);
     }
     else
     {
-        edit_int_model->setData(edit_int_model->index(row,3,QModelIndex()),1);
+        edit_int_model->setData(edit_int_model->index(row,4,QModelIndex()),1);
     }
 
     return lapcount;
@@ -550,47 +543,43 @@ void Activity::recalculate_intervalls(bool recalc)
         for(int i = 0; i < edit_int_model->rowCount(); ++i)
         {
             edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),i);
-            edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),i);
         }
     }
 
     if(curr_sport == settings::isSwim && recalc)
     {
-        p_swimlaps.resize(edit_dist_model->rowCount());
+        int rowCount = edit_int_model->rowCount();
+        p_swimlaps.resize(rowCount);
         this->adjust_intervalls();
-        for(int i = 0; i < edit_dist_model->rowCount();++i)
+        for(int i = 0; i < rowCount;++i)
         {
-            edit_int_model->setData(edit_int_model->index(i,3,QModelIndex()),this->check_is_intervall(i));
-            p_swimlaps[i] = round((edit_dist_model->data(edit_dist_model->index(i,1,QModelIndex())).toDouble()*1000)) / swim_track;
+            edit_int_model->setData(edit_int_model->index(i,4,QModelIndex()),this->check_is_intervall(i));
+            p_swimlaps[i] = round((edit_int_model->data(edit_int_model->index(i,3,QModelIndex())).toDouble()*1000)) / swim_track;
 
             if(i == 0)
             {
                 lapname = QString::number(lapcounter)+"_Warmup_"+QString::number(swim_track*p_swimlaps[i]);
                 edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
-                edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
                 ++lapcounter;
             }
-            if(i != 0 && i < edit_dist_model->rowCount()-1)
+            if(i != 0 && i < rowCount-1)
             {
                 if(this->check_is_intervall(i) == 1)
                 {
                     lapname = QString::number(lapcounter)+"_Int_"+QString::number(swim_track*p_swimlaps[i]);
                     edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
-                    edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
                     ++lapcounter;
                 }
                 else
                 {
                     lapname = settings::get_breakName();
                     edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
-                    edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
                 }
             }
-            if(i == edit_dist_model->rowCount()-1)
+            if(i == rowCount-1)
             {
                 lapname = QString::number(lapcounter)+"_Cooldown_"+QString::number(swim_track*p_swimlaps[i]);
                 edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
-                edit_dist_model->setData(edit_dist_model->index(i,0,QModelIndex()),lapname);
             }
             if(i == 0)
             {
@@ -636,7 +625,7 @@ double Activity::get_int_speed(int row,bool recalc)
 {
     double speed;
 
-    double pace = this->get_int_duration(row,recalc) / (edit_dist_model->data(edit_dist_model->index(row,1,QModelIndex())).toDouble() * 10.0);
+    double pace = this->get_int_duration(row,recalc) / (edit_int_model->data(edit_int_model->index(row,3,QModelIndex())).toDouble() * 10.0);
 
     speed = 360.0 / pace;
 
@@ -727,7 +716,7 @@ bool Activity::check_speed(int sec)
 int Activity::check_is_intervall(int row)
 {
     double isInt;
-    isInt = edit_dist_model->data(edit_dist_model->index(row,1,QModelIndex())).toDouble();
+    isInt = edit_int_model->data(edit_int_model->index(row,3,QModelIndex())).toDouble();
     if(isInt == 0)
     {
         return 0;
@@ -828,11 +817,11 @@ void Activity::set_edit_samp_model()
     }
     else
     {
-      for(int c_int = 0; c_int < edit_dist_model->rowCount(); ++c_int)
+      for(int c_int = 0; c_int < edit_int_model->rowCount(); ++c_int)
       {
          int_start = edit_int_model->data(edit_int_model->index(c_int,1,QModelIndex())).toInt();
          int_stop = edit_int_model->data(edit_int_model->index(c_int,2,QModelIndex())).toInt();
-         msec = edit_dist_model->data(edit_dist_model->index(c_int,1,QModelIndex())).toDouble() / this->get_int_duration(c_int,true);
+         msec = edit_int_model->data(edit_int_model->index(c_int,3,QModelIndex())).toDouble() / this->get_int_duration(c_int,true);
 
          for(int c_dist = int_start;c_dist <= int_stop; ++c_dist)
          {
