@@ -508,7 +508,7 @@ int settings::get_hfvalue(QString percent)
     return static_cast<int>(round(hfThres.toDouble() * (value / 100.0)));
 }
 
-double settings::calc_totalWork(QString sport, int weight,int avgHF, double calcBase,double swimFactor)
+double settings::calc_totalWork(QString sport, double weight,double avgHF, double calcBase,double swimFactor)
 {
     double kjFactor = 4.184;
     int kal_100 = 25;

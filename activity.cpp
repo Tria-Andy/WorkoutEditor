@@ -740,12 +740,16 @@ void Activity::set_edit_samp_model()
     double overall = 0.0,lowLimit;
     double swimPace,swimSpeed,swimCycle;
     bool isBreak = true;
-    if(curr_sport != settings::isSwim)
+    if(curr_sport != settings::isSwim && curr_sport != settings::isTria)
     {
         if(curr_sport == settings::isBike) sportindex = 1;
         if(curr_sport == settings::isRun) sportindex = 2;
         lowLimit = settings::get_speed(QTime::fromString(settings::get_paceList().at(sportindex),"mm:ss"),0,curr_sport,true).toDouble();
         lowLimit = lowLimit - (lowLimit*0.20);
+    }
+    if(curr_sport == settings::isTria)
+    {
+        lowLimit = 1.0;
     }
 
     if(curr_sport == settings::isSwim)
@@ -876,7 +880,17 @@ void Activity::set_edit_samp_model()
 
       if(curr_sport == settings::isTria)
       {
-            //not yet!!!
+          for(int row = 0; row < sampRowCount;++row)
+          {
+              edit_samp_model->setData(edit_samp_model->index(row,0,QModelIndex()),row);
+              edit_samp_model->setData(edit_samp_model->index(row,1,QModelIndex()),new_dist[row]);
+              edit_samp_model->setData(edit_samp_model->index(row,2,QModelIndex()),calc_speed[row]);
+              edit_samp_model->setData(edit_samp_model->index(row,3,QModelIndex()),calc_cadence[row]);
+              for(int col = 5; col < sampColCount; ++col)
+              {
+                  edit_samp_model->setData(edit_samp_model->index(row,col,QModelIndex()),samp_model->data(samp_model->index(row,col,QModelIndex())).toDouble());
+              }
+          }
       }
 
     }

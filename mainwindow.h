@@ -96,7 +96,7 @@ private:
     void set_avg_fields();
     void write_hf_infos();
     void set_selectInt(QColor,QModelIndex);
-
+    void fill_WorkoutContent();
     void set_menuItems(bool,bool);
     void reset_jsontext();
     void freeMem();
@@ -143,6 +143,7 @@ private slots:
     void on_horizontalSlider_polish_valueChanged(int value);
     void on_tableView_int_times_clicked(const QModelIndex &index);
     void on_actionSave_to_GoldenCheetah_triggered();
+    void on_pushButton_ClearWorkContent_clicked();
 };
 
 #endif // MAINWINDOW_H

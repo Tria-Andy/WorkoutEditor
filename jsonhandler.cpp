@@ -179,7 +179,7 @@ void jsonHandler::read_json(QString jsonfile)
             avgHF = avgHF + curr_act->samp_model->data(curr_act->samp_model->index(i,posHF,QModelIndex())).toInt();
         }
         avgHF = (avgHF / sampCount);
-        overrideData.insert("total_work",QString::number(settings::calc_totalWork(curr_act->get_sport(),tagData.value("Weight").toInt(),avgHF,sampCount,0.0)));
+        overrideData.insert("total_work",QString::number(settings::calc_totalWork(curr_act->get_sport(),tagData.value("Weight").toDouble(),avgHF,sampCount,0.0)));
         hasOverride = true;
     }
 
@@ -296,7 +296,7 @@ void jsonHandler::write_file(QJsonDocument jsondoc)
         return;
     }
 
-    file.write(jsondoc.toJson());
+    file.write(jsondoc.toJson(QJsonDocument::Compact));
     file.flush();
     file.close();
 }

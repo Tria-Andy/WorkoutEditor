@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->label_month->setText("Woche " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*7).weekNumber()-1));
     ui->pushButton_current_week->setEnabled(false);
     ui->pushButton_week_minus->setEnabled(false);
+    ui->pushButton_ClearWorkContent->setEnabled(false);
     fontSize = 10;
     cal_header << "Woche";
     for(int d = 1; d < 8; ++d)
@@ -1038,6 +1039,92 @@ void MainWindow::set_selectInt(QColor color, QModelIndex index)
     }
 }
 
+void MainWindow::fill_WorkoutContent()
+{
+    QString content,newEntry,label;
+    content = ui->lineEdit_workContent->text();
+    double value;
+
+    if(ui->radioButton_time->isChecked())
+    {
+        value = (ceil(curr_activity->get_avg_laptime()/10.0)*10);
+
+        if(value >= 60)
+        {
+            label = "Min";
+            value = value / 60;
+        }
+        else
+        {
+            label = "Sec";
+        }
+    }
+
+    if(ui->radioButton_distance->isChecked())
+    {
+        value = curr_activity->get_avg_dist();
+
+        if(value < 1)
+        {
+            label = "M";
+            value = round(value*1000.0);
+        }
+        else
+        {
+            label = "Km";
+            value = round(value);
+        }
+    }
+
+    if(ui->radioButton_both->isChecked())
+    {
+        //not yet!!
+    }
+
+    if(curr_activity->get_sport() == settings::isSwim)
+    {
+        newEntry = QString::number(sel_count)+"x"+QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor())+"/"+settings::set_time(curr_activity->get_avg_laptime());
+    }
+
+    if(curr_activity->get_sport() == settings::isBike)
+    {
+        value = (round(curr_activity->get_avg_laptime()/10.0)*10);
+        if(sel_count > 1)
+        {
+            newEntry = QString::number(sel_count)+"x"+QString::number(value)+label+":" +QString::number(round(curr_activity->get_avg_watts()))+"W";
+        }
+        else
+        {
+            newEntry = QString::number(value)+label+":" +QString::number(round(curr_activity->get_avg_watts()))+"W";
+        }
+    }
+
+    if(curr_activity->get_sport() == settings::isRun)
+    {
+        value = curr_activity->get_avg_laptime();
+        if(sel_count > 1)
+        {
+            newEntry = QString::number(sel_count)+"x"+QString::number(value)+label+":" +settings::set_time(curr_activity->get_avg_pace())+"/km";
+        }
+        else
+        {
+            newEntry = QString::number(value)+label+":" +settings::set_time(curr_activity->get_avg_pace())+"/km";
+        }
+    }
+
+    if(ui->lineEdit_workContent->text() == "")
+    {
+        ui->lineEdit_workContent->setText(content+newEntry);
+        ui->pushButton_ClearWorkContent->setEnabled(true);
+    }
+    else
+    {
+        ui->lineEdit_workContent->setText(content+" - "+newEntry);
+    }
+
+    jsonhandler->set_tagData("Workout Content",ui->lineEdit_workContent->text());
+}
+
 void MainWindow::on_pushButton_week_minus_clicked()
 {
     if(isWeekMode)
@@ -1264,6 +1351,8 @@ void MainWindow::on_actionReset_triggered()
     ui->lineEdit_lapTime->setText("-");
     ui->lineEdit_lapSpeed->setText("-");
     ui->comboBox_intervals->clear();
+    ui->lineEdit_workContent->clear();
+    ui->pushButton_ClearWorkContent->setEnabled(false);
 
     delete ySpeed;
     delete speedLine;
@@ -1280,6 +1369,7 @@ void MainWindow::on_actionReset_triggered()
 
 void MainWindow::on_actionUnselect_all_rows_triggered()
 {
+    this->fill_WorkoutContent();
     QModelIndex index;
 
     for(int i = 0; i < curr_activity->int_model->rowCount(); ++i)
@@ -1456,3 +1546,9 @@ void MainWindow::on_horizontalSlider_polish_valueChanged(int value)
     curr_activity->set_polishFactor(0.1-(static_cast<double>(value)/100));
 }
 
+
+void MainWindow::on_pushButton_ClearWorkContent_clicked()
+{
+    ui->lineEdit_workContent->clear();
+    ui->pushButton_ClearWorkContent->setEnabled(false);
+}
