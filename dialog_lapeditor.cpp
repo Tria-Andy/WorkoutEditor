@@ -12,12 +12,14 @@ Dialog_lapeditor::Dialog_lapeditor(QWidget *parent,Activity *p_act,QModelIndex p
 
     if(curr_act->get_sport() == settings::isSwim)
     {
+        typeList << "Break" << "Freestyle" << "Backstroke" << "Breaststroke" << "Butterfly" << "Drill" << "Mixed" << "IM";
         ui->comboBox_edit->addItem("Swim Laps");
         ui->comboBox_edit->addItem("Intervals");
+        ui->comboBox_type->addItems(typeList);
         ui->comboBox_edit->setVisible(true);
         ui->label_edit->setVisible(true);
         this->set_visible(true,false);
-        this->setFixedHeight(300);
+        this->setFixedHeight(320);
     }
     else
     {
@@ -25,7 +27,7 @@ Dialog_lapeditor::Dialog_lapeditor(QWidget *parent,Activity *p_act,QModelIndex p
         ui->comboBox_edit->setVisible(false);
         ui->label_edit->setVisible(false);
         this->set_visible(false,true);
-        this->setFixedHeight(280);
+        this->setFixedHeight(300);
     }
 
     this->set_lapinfo();
@@ -66,10 +68,13 @@ void Dialog_lapeditor::set_visible(bool swimLap,bool intMode)
 {
     ui->spinBox_strokes->setVisible(swimLap);
     ui->label_strokes->setVisible(swimLap);
+    ui->comboBox_type->setVisible(swimLap);
+    ui->label_type->setVisible(swimLap);
 
     ui->doubleSpinBox_distance->setVisible(intMode);
     ui->label_distance->setVisible(intMode);
     ui->label_km->setVisible(intMode);
+    ui->progressBar_updateInt->setVisible(intMode);
 }
 
 void Dialog_lapeditor::set_duration()
@@ -103,6 +108,7 @@ void Dialog_lapeditor::updateSwimModel(int index,int duration, double lapSpeed,i
     editModel->setData(editModel->index(index,2,QModelIndex()),duration);
     editModel->setData(editModel->index(index,3,QModelIndex()),stroke);
     editModel->setData(editModel->index(index,4,QModelIndex()),lapSpeed);
+    editModel->setData(editModel->index(index,6,QModelIndex()),ui->comboBox_type->currentIndex());
     editModel->setData(editModel->index(index+1,1,QModelIndex()),ui->spinBox_starttime->value()+duration);
 }
 
@@ -113,6 +119,7 @@ void Dialog_lapeditor::updateIntModel(int index)
     editModel->setData(editModel->index(index,2,QModelIndex()),ui->spinBox_endtime->value());
     editModel->setData(editModel->index(index,3,QModelIndex()),ui->doubleSpinBox_distance->value());
     editModel->setData(editModel->index(index+1,1,QModelIndex()),ui->spinBox_endtime->value()+1);
+    ui->progressBar_updateInt->setValue(1);
 }
 
 void Dialog_lapeditor::edit_laps(int editMode,int index)
@@ -145,13 +152,19 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
     {
         if(curr_act->get_sport() == settings::isSwim)
         {
-            this->updateSwimModel(index,duration,lapSpeed,stroke);
-            this->recalulateData(index);
+            if(ui->comboBox_edit->currentIndex() == SWIMLAPS)
+            {
+                this->updateSwimModel(index,duration,lapSpeed,stroke);
+                this->recalulateData(index);
+            }
+            if(ui->comboBox_edit->currentIndex() == INTERVALS)
+            {
+                this->updateIntModel(index);
+            }
         }
         else
         {
             this->updateIntModel(index);
-
         }
     }
     if(editMode == ADD)
@@ -277,6 +290,7 @@ void Dialog_lapeditor::on_comboBox_lap_currentIndexChanged(int vLap)
     if(curr_act->get_sport() == settings::isSwim)
     {
         ui->spinBox_starttime->setValue(editModel->data(editModel->index(vLap,1,QModelIndex())).toInt());
+        ui->comboBox_type->setCurrentIndex(editModel->data(editModel->index(vLap,6,QModelIndex())).toInt());
 
         if(ui->comboBox_edit->currentIndex() == SWIMLAPS)
         {
@@ -296,8 +310,8 @@ void Dialog_lapeditor::on_comboBox_lap_currentIndexChanged(int vLap)
         {
             ui->spinBox_endtime->setValue(editModel->data(editModel->index(vLap,2,QModelIndex())).toInt());
             ui->doubleSpinBox_distance->setValue(editModel->data(editModel->index(vLap,3,QModelIndex())).toDouble());
-            qDebug() << editModel->data(editModel->index(vLap,3,QModelIndex())).toDouble();
             this->set_duration();
+            ui->progressBar_updateInt->setValue(0);
         }
     }
     else
@@ -328,10 +342,7 @@ void Dialog_lapeditor::on_comboBox_edit_currentIndexChanged(int index)
     {
         editModel = curr_act->edit_int_model;
         this->set_visible(false,true);
-        for(int i = 0; i < editModel->rowCount();++i)
-        {
-            qDebug() << editModel->data(editModel->index(i,3,QModelIndex())).toDouble();
-        }
+        ui->progressBar_updateInt->setValue(0);
     }
     this->set_lapinfo();
 }

@@ -32,6 +32,7 @@ private:
     Activity *curr_act;
     QStandardItemModel *editModel;
     QModelIndex selIndex;
+    QStringList typeList;
     int selRow;
 
     void set_lapinfo();
