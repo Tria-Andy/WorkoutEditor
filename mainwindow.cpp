@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pushButton_current_week->setEnabled(false);
     ui->pushButton_week_minus->setEnabled(false);
     ui->pushButton_ClearWorkContent->setEnabled(false);
+    ui->pushButton_sync->setEnabled(false);
     fontSize = 10;
     cal_header << "Woche";
     for(int d = 1; d < 8; ++d)
@@ -1041,13 +1042,20 @@ void MainWindow::set_selectInt(QColor color, QModelIndex index)
 
 void MainWindow::fill_WorkoutContent()
 {
-    QString content,newEntry,label;
-    content = ui->lineEdit_workContent->text();
+    QString content,newEntry,contentValue,label;
     double value;
+    content = ui->lineEdit_workContent->text();
 
     if(ui->radioButton_time->isChecked())
     {
-        value = (ceil(curr_activity->get_avg_laptime()/10.0)*10);
+        if(ui->checkBox_exact->isChecked())
+        {
+            value = (ceil(curr_activity->get_avg_laptime()/10.0)*10);
+        }
+        else
+        {
+            value = curr_activity->get_avg_laptime();
+        }
 
         if(value >= 60)
         {
@@ -1058,27 +1066,32 @@ void MainWindow::fill_WorkoutContent()
         {
             label = "Sec";
         }
+
+        contentValue = QString::number(value)+label;
     }
 
     if(ui->radioButton_distance->isChecked())
     {
-        value = curr_activity->get_avg_dist();
+        if(ui->checkBox_exact->isChecked())
+        {
+            value = (ceil(curr_activity->get_avg_dist()*10)/10.0);
+        }
+        else
+        {
+            value = (round(curr_activity->get_avg_dist()*1000)/1000.0);
+        }
 
         if(value < 1)
         {
             label = "M";
-            value = round(value*1000.0);
+            value = value*1000.0;
         }
         else
         {
             label = "Km";
-            value = round(value);
         }
-    }
 
-    if(ui->radioButton_both->isChecked())
-    {
-        //not yet!!
+        contentValue = QString::number(value)+label;
     }
 
     if(curr_activity->get_sport() == settings::isSwim)
@@ -1088,27 +1101,25 @@ void MainWindow::fill_WorkoutContent()
 
     if(curr_activity->get_sport() == settings::isBike)
     {
-        value = (round(curr_activity->get_avg_laptime()/10.0)*10);
         if(sel_count > 1)
         {
-            newEntry = QString::number(sel_count)+"x"+QString::number(value)+label+":" +QString::number(round(curr_activity->get_avg_watts()))+"W";
+            newEntry = QString::number(sel_count)+"x"+contentValue+":" +QString::number(round(curr_activity->get_avg_watts()))+"W";
         }
         else
         {
-            newEntry = QString::number(value)+label+":" +QString::number(round(curr_activity->get_avg_watts()))+"W";
+            newEntry = contentValue+":" +QString::number(round(curr_activity->get_avg_watts()))+"W";
         }
     }
 
     if(curr_activity->get_sport() == settings::isRun)
     {
-        value = curr_activity->get_avg_laptime();
         if(sel_count > 1)
         {
-            newEntry = QString::number(sel_count)+"x"+QString::number(value)+label+":" +settings::set_time(curr_activity->get_avg_pace())+"/km";
+            newEntry = QString::number(sel_count)+"x"+contentValue+":" +settings::set_time(curr_activity->get_avg_pace())+"/km";
         }
         else
         {
-            newEntry = QString::number(value)+label+":" +settings::set_time(curr_activity->get_avg_pace())+"/km";
+            newEntry = contentValue+":" +settings::set_time(curr_activity->get_avg_pace())+"/km";
         }
     }
 
@@ -1219,10 +1230,6 @@ void MainWindow::on_actionPlaner_triggered()
 {
     ui->stackedWidget->setCurrentIndex(0);
     this->set_menuItems(false,true);
-    if(settings::get_act_isload())
-    {
-        qDebug() << "delete Act Models";
-    }
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -1353,6 +1360,8 @@ void MainWindow::on_actionReset_triggered()
     ui->comboBox_intervals->clear();
     ui->lineEdit_workContent->clear();
     ui->pushButton_ClearWorkContent->setEnabled(false);
+    ui->radioButton_time->setChecked(true);
+    ui->checkBox_exact->setChecked(true);
 
     delete ySpeed;
     delete speedLine;
@@ -1551,4 +1560,17 @@ void MainWindow::on_pushButton_ClearWorkContent_clicked()
 {
     ui->lineEdit_workContent->clear();
     ui->pushButton_ClearWorkContent->setEnabled(false);
+    ui->pushButton_sync->setEnabled(false);
+}
+
+void MainWindow::on_pushButton_sync_clicked()
+{
+    jsonhandler->set_tagData("Workout Content",ui->lineEdit_workContent->text());
+    ui->pushButton_sync->setEnabled(false);
+}
+
+void MainWindow::on_lineEdit_workContent_textChanged(const QString &value)
+{
+    Q_UNUSED(value)
+    ui->pushButton_sync->setEnabled(true);
 }

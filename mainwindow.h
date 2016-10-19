@@ -144,6 +144,8 @@ private slots:
     void on_tableView_int_times_clicked(const QModelIndex &index);
     void on_actionSave_to_GoldenCheetah_triggered();
     void on_pushButton_ClearWorkContent_clicked();
+    void on_pushButton_sync_clicked();
+    void on_lineEdit_workContent_textChanged(const QString &arg1);
 };
 
 #endif // MAINWINDOW_H
