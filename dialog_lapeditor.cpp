@@ -166,6 +166,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
         {
             this->updateIntModel(index);
         }
+        this->set_lapinfo();
     }
     if(editMode == ADD)
     {
@@ -276,11 +277,13 @@ void Dialog_lapeditor::on_radioButton_update_clicked()
 
 void Dialog_lapeditor::on_pushButton_ok_clicked()
 {
-    int editMode;
+    int editMode,index;
+    index = ui->comboBox_lap->currentIndex();
+    selRow = index;
     if(ui->radioButton_update->isChecked()) editMode = 0;
     if(ui->radioButton_add->isChecked()) editMode = 1;
     if(ui->radioButton_del->isChecked()) editMode = 2;
-    this->edit_laps(editMode,ui->comboBox_lap->currentIndex());
+    this->edit_laps(editMode,index);
 }
 
 void Dialog_lapeditor::on_comboBox_lap_currentIndexChanged(int vLap)
@@ -310,8 +313,8 @@ void Dialog_lapeditor::on_comboBox_lap_currentIndexChanged(int vLap)
         {
             ui->spinBox_endtime->setValue(editModel->data(editModel->index(vLap,2,QModelIndex())).toInt());
             ui->doubleSpinBox_distance->setValue(editModel->data(editModel->index(vLap,3,QModelIndex())).toDouble());
-            this->set_duration();
             ui->progressBar_updateInt->setValue(0);
+            this->set_duration();
         }
     }
     else
@@ -319,6 +322,7 @@ void Dialog_lapeditor::on_comboBox_lap_currentIndexChanged(int vLap)
         ui->spinBox_starttime->setValue(editModel->data(editModel->index(vLap,1,QModelIndex())).toInt());
         ui->spinBox_endtime->setValue(editModel->data(editModel->index(vLap,2,QModelIndex())).toInt());
         ui->doubleSpinBox_distance->setValue(editModel->data(editModel->index(vLap,3,QModelIndex())).toDouble());
+        ui->progressBar_updateInt->setValue(0);
         this->set_duration();
     }
 
