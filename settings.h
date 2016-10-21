@@ -90,7 +90,7 @@ public:
     static QString set_time(int);
     static QString get_workout_pace(double, QTime, QString,bool);
     static QString get_speed(QTime,int,QString,bool);
-    static double estimate_stress(QString,QString,QTime);
+    static double estimate_stress(QString,QString,int);
     static int get_hfvalue(QString);
     static int get_timesec(QString time);
     static double set_doubleValue(double);

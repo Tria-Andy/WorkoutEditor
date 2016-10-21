@@ -794,6 +794,7 @@ void MainWindow::loadfile(const QString &filename)
         curr_activity = new Activity();
         filecontent = file.readAll();
         jsonhandler = new jsonHandler(true,filecontent,curr_activity);
+        curr_activity->set_jsonhandler(jsonhandler);
         file.close();
 
         settings::set_act_isload(true);
@@ -1050,11 +1051,12 @@ void MainWindow::fill_WorkoutContent()
     {
         if(ui->checkBox_exact->isChecked())
         {
-            value = (ceil(curr_activity->get_avg_laptime()/10.0)*10);
+            value = curr_activity->get_avg_laptime();
         }
         else
         {
-            value = curr_activity->get_avg_laptime();
+            value = (ceil(curr_activity->get_avg_laptime()/10.0)*10);
+
         }
 
         if(value >= 60)
@@ -1074,11 +1076,12 @@ void MainWindow::fill_WorkoutContent()
     {
         if(ui->checkBox_exact->isChecked())
         {
-            value = (ceil(curr_activity->get_avg_dist()*10)/10.0);
+            value = (round(curr_activity->get_avg_dist()*1000)/1000.0);
         }
         else
         {
-            value = (round(curr_activity->get_avg_dist()*1000)/1000.0);
+            value = (ceil(curr_activity->get_avg_dist()*10)/10.0);
+
         }
 
         if(value < 1)
@@ -1096,18 +1099,26 @@ void MainWindow::fill_WorkoutContent()
 
     if(curr_activity->get_sport() == settings::isSwim)
     {
-        newEntry = QString::number(sel_count)+"x"+QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor())+"/"+settings::set_time(curr_activity->get_avg_laptime());
+        if(sel_count > 1)
+        {
+            newEntry = QString::number(sel_count)+"x"+QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor())+"/"+settings::set_time(curr_activity->get_avg_laptime());
+
+        }
+        else
+        {
+            newEntry = QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor())+"-"+settings::set_time(curr_activity->get_avg_laptime());
+        }
     }
 
     if(curr_activity->get_sport() == settings::isBike)
     {
         if(sel_count > 1)
         {
-            newEntry = QString::number(sel_count)+"x"+contentValue+":" +QString::number(round(curr_activity->get_avg_watts()))+"W";
+            newEntry = QString::number(sel_count)+"x"+contentValue+"/" +QString::number(round(curr_activity->get_avg_watts()))+"W";
         }
         else
         {
-            newEntry = contentValue+":" +QString::number(round(curr_activity->get_avg_watts()))+"W";
+            newEntry = contentValue+"-" +QString::number(round(curr_activity->get_avg_watts()))+"W";
         }
     }
 
@@ -1115,11 +1126,11 @@ void MainWindow::fill_WorkoutContent()
     {
         if(sel_count > 1)
         {
-            newEntry = QString::number(sel_count)+"x"+contentValue+":" +settings::set_time(curr_activity->get_avg_pace())+"/km";
+            newEntry = QString::number(sel_count)+"x"+contentValue+"-" +settings::set_time(curr_activity->get_avg_pace())+"/km";
         }
         else
         {
-            newEntry = contentValue+":" +settings::set_time(curr_activity->get_avg_pace())+"/km";
+            newEntry = contentValue+"-" +settings::set_time(curr_activity->get_avg_pace())+"/km";
         }
     }
 
@@ -1130,7 +1141,7 @@ void MainWindow::fill_WorkoutContent()
     }
     else
     {
-        ui->lineEdit_workContent->setText(content+" - "+newEntry);
+        ui->lineEdit_workContent->setText(content+" | "+newEntry);
     }
 
     jsonhandler->set_tagData("Workout Content",ui->lineEdit_workContent->text());
@@ -1360,8 +1371,9 @@ void MainWindow::on_actionReset_triggered()
     ui->comboBox_intervals->clear();
     ui->lineEdit_workContent->clear();
     ui->pushButton_ClearWorkContent->setEnabled(false);
+    ui->pushButton_sync->setEnabled(false);
     ui->radioButton_time->setChecked(true);
-    ui->checkBox_exact->setChecked(true);
+    ui->checkBox_exact->setChecked(false);
 
     delete ySpeed;
     delete speedLine;

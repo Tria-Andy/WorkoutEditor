@@ -527,7 +527,7 @@ double settings::calc_totalWork(QString sport, double weight,double avgHF, doubl
     return 0;
 }
 
-double settings::estimate_stress(QString sport, QString p_goal, QTime duration)
+double settings::estimate_stress(QString sport, QString p_goal, int duration)
 {
     int sport_index;
     double goal = 0;
@@ -561,21 +561,22 @@ double settings::estimate_stress(QString sport, QString p_goal, QTime duration)
     {
         if(sport == settings::isSwim)
         {
-            goal = sqrt(pow(goal,3.0))/10;
-            est_power = powerList[sport_index] * (settings::get_timesec(paceList.at(sport_index)) / goal);
-            raw_effort = (settings::get_timesec(duration.toString("mm:ss")) * est_power) * (est_power / powerList[sport_index]);
+            goal = settings::get_timesec(paceList.at(sport_index)) / goal;
+            goal = pow(goal,3.0);
+            est_power = powerList[sport_index] * goal;
+            raw_effort = (duration * est_power) * (est_power / powerList[sport_index]);
             cv_effort = powerList[sport_index] * 3600;
 
         }
         if(sport == settings::isBike || sport == settings::isStrength)
         {
-            raw_effort = (settings::get_timesec(duration.toString("mm:ss")) * goal) * (goal / powerList[sport_index]);
+            raw_effort = (duration * goal) * (goal / powerList[sport_index]);
             cv_effort = powerList[sport_index] * 3600;
         }
         if(sport == settings::isRun)
         {
-            est_power = powerList[sport_index] * (2 - (goal / settings::get_timesec(paceList.at(sport_index))));
-            raw_effort = (settings::get_timesec(duration.toString("mm:ss")) * est_power) * (est_power / powerList[sport_index]);
+            est_power = powerList[sport_index] * (settings::get_timesec(paceList.at(sport_index))/goal);
+            raw_effort = (duration * est_power) * (est_power / powerList[sport_index]);
             cv_effort = powerList[sport_index] * 3600;
 
         }

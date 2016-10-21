@@ -36,7 +36,7 @@ void jsonHandler::fill_keyList(QStringList *targetList,QMap<int, QString> *map, 
     {
         if(!targetList->contains(list->at(x)))
         {
-            (*targetList) << list->at(x);        
+            (*targetList) << list->at(x);                  
         }
     }
 }

@@ -4,6 +4,7 @@
 #include <QMap>
 #include <QStandardItemModel>
 
+class Activity;
 class jsonHandler
 {
 public:

@@ -880,19 +880,31 @@ void Activity::set_edit_samp_model()
 
       if(curr_sport == settings::isTria)
       {
+          double triValue = 0,sportValue = 0;
+
           for(int row = 0; row < sampRowCount;++row)
           {
               edit_samp_model->setData(edit_samp_model->index(row,0,QModelIndex()),row);
               edit_samp_model->setData(edit_samp_model->index(row,1,QModelIndex()),new_dist[row]);
               edit_samp_model->setData(edit_samp_model->index(row,2,QModelIndex()),calc_speed[row]);
               edit_samp_model->setData(edit_samp_model->index(row,3,QModelIndex()),calc_cadence[row]);
-              for(int col = 5; col < sampColCount; ++col)
+              for(int col = 4; col < sampColCount; ++col)
               {
                   edit_samp_model->setData(edit_samp_model->index(row,col,QModelIndex()),samp_model->data(samp_model->index(row,col,QModelIndex())).toDouble());
               }
           }
+          jsonhandler->set_overrideFlag(true);
+          sportValue = round(settings::estimate_stress(settings::isSwim,settings::set_time(this->get_int_pace(0,true)/10),this->get_int_duration(0,true)));
+          jsonhandler->set_overrideData("swimscore",QString::number(sportValue));
+          triValue = triValue + sportValue;
+          sportValue = round(settings::estimate_stress(settings::isBike,QString::number(this->get_int_watts(2)),this->get_int_duration(2,true)));
+          jsonhandler->set_overrideData("skiba_bike_score",QString::number(sportValue));
+          triValue = triValue + sportValue;
+          sportValue = round(settings::estimate_stress(settings::isRun,settings::set_time(this->get_int_pace(4,true)),this->get_int_duration(4,true)));
+          jsonhandler->set_overrideData("govss",QString::number(sportValue));
+          triValue = triValue + sportValue;
+          jsonhandler->set_overrideData("triscore",QString::number(triValue));
       }
-
     }
 }
 

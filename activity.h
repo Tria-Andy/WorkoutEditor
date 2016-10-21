@@ -1,15 +1,20 @@
 #ifndef ACTIVITY_H
 #define ACTIVITY_H
 
+
 #include <QFile>
 #include <QFileDialog>
 #include <QtXml>
 #include <QStandardItemModel>
 #include "settings.h"
+#include "jsonhandler.h"
+
+class jsonHandler;
 
 class Activity
 {
 private:
+    jsonHandler *jsonhandler;
     QString v_date,curr_sport;
     QStringList ride_items;
     double swim_track,avg_dist,avg_watt,avg_laptime;
@@ -39,9 +44,8 @@ private:
     void set_edit_samp_model();
 
 public:
-    //explicit Activity(settings *p_settings = 0);
     explicit Activity();
-
+    void set_jsonhandler(jsonHandler *p) {jsonhandler = p;}
     void prepareData();
     void set_additional_ride_info();
     void set_curr_act_model(bool);
