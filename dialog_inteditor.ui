@@ -629,7 +629,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="label__duration">
+          <widget class="QLabel" name="label_duration">
            <property name="text">
             <string>Duration and Distance</string>
            </property>

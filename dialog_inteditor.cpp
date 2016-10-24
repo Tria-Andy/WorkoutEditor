@@ -551,7 +551,7 @@ void Dialog_inteditor::set_plot_graphic(int c_ints)
     ui->widget_planerplot->yAxis->setTickLabels(true);
     ui->widget_planerplot->replot(QCustomPlot::rpImmediate);
 
-    ui->label__duration->setText("Time:" + settings::set_time((int)time_sum) + " - " + "Distance:" + QString::number(dist_sum) + " - " + "Stress:" + QString::number(round(stress_sum)));
+    ui->label_duration->setText("Time:" + settings::set_time(static_cast<int>(ceil(time_sum))) + " - " + "Distance:" + QString::number(dist_sum) + " - " + "Stress:" + QString::number(round(stress_sum)));
 }
 
 int Dialog_inteditor::get_x2axis_values()
@@ -859,7 +859,7 @@ void Dialog_inteditor::save_workout()
        }
    }
 
-   worktime = settings::set_time((int)time_sum*60);
+   worktime = settings::set_time(static_cast<int>(time_sum*60));
 
    //Update Workout -> delete first
    if(current_workID.isEmpty())
@@ -971,7 +971,7 @@ void Dialog_inteditor::save_workout()
 
 void Dialog_inteditor::on_spinBox_threshold_valueChanged(int value)
 {
-    this->calc_threshold((double)value);
+    this->calc_threshold(static_cast<double>(value));
     this->calc_distance(ui->comboBox_sport->currentText());
 }
 
