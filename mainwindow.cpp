@@ -605,6 +605,8 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
                 {
                     workSchedule->copyWeek();
                     this->workout_calendar();
+                    weekCounter = 0;
+                    this->set_calender();
                 }
             }
 
