@@ -35,32 +35,32 @@ void Dialog_stresscalc::read_threshold_values()
         pace = settings::get_paceList().at(i-1);
         t_pace[i] = settings::get_timesec(pace);
     }
-
 }
 
 void Dialog_stresscalc::estimate_stress()
 {
-    int current;
+    double stressScore,current;
 
-    if(sport == settings::isSwim || sport == settings::isRun)
+    if(sport == settings::isSwim)
     {
         current = settings::get_timesec(ui->lineEdit_goal_power->text());
-        est_power = t_power[sport_index] * (t_pace[sport_index] / (double)current);
-        ui->lineEdit_intensity->setText(QString::number(est_power / t_power[sport_index]));
-        raw_effort = (settings::get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")) * est_power) * ui->lineEdit_intensity->text().toDouble();
-        cv_effort = t_power[sport_index] * 3600;
-        est_stress = (raw_effort / cv_effort) * 100;
-        ui->lineEdit_stressScore->setText(QString::number(est_stress));
+        current = t_pace[sport_index] / current;
+        current = pow(current,3.0);
+        ui->lineEdit_intensity->setText(QString::number(current));
+
     }
     if(sport == settings::isBike)
     {   
         current = ui->lineEdit_goal_power->text().toDouble();
         ui->lineEdit_intensity->setText(QString::number(current / t_power[sport_index]));
-        raw_effort = (settings::get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")) * current) * ui->lineEdit_intensity->text().toDouble();
-        cv_effort = t_power[sport_index] * 3600;
-        est_stress = (raw_effort / cv_effort) * 100;
-        ui->lineEdit_stressScore->setText(QString::number(est_stress));
     }
+    if(sport == settings::isRun)
+    {
+        current = settings::get_timesec(ui->lineEdit_goal_power->text());
+        ui->lineEdit_intensity->setText(QString::number(t_pace[sport_index] / current));
+    }
+    stressScore = settings::estimate_stress(sport,ui->lineEdit_goal_power->text(),settings::get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")));
+    ui->lineEdit_stressScore->setText(QString::number(stressScore));
 }
 
 void Dialog_stresscalc::set_sport_threshold()

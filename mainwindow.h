@@ -10,7 +10,6 @@
 #include "calendar_delegate.h"
 #include "week_delegate.h"
 #include "summery_delegate.h"
-#include "del_spinbox_double.h"
 #include "del_spinbox_int.h"
 #include "del_swimlap.h"
 #include "del_intview.h"
@@ -53,7 +52,6 @@ private:
     calendar_delegate calender_del;
     week_delegate week_del;
     summery_delegate sum_del;
-    del_spinbox_double dist_del;
     del_spinbox_int time_del;
     del_swimlap swimlap_del;
     del_intview intervall_del;
@@ -87,24 +85,18 @@ private:
     QString get_weekRange();
     void set_buttons(bool);
     void set_calender();
-
+    void set_comboIntervall();
     //Editor
     void select_activity_file();
     void loadfile(const QString &filename);
     void set_activty_infos();
     void set_activty_intervalls();
     void set_avg_fields();
-    void set_add_swim_values();
-    void write_int_infos();
     void write_hf_infos();
-    void write_samp_infos();
     void set_selectInt(QColor,QModelIndex);
-
+    void fill_WorkoutContent();
     void set_menuItems(bool,bool);
     void reset_jsontext();
-
-    void copyIntoClipboard(QVector<double>*);
-
     void freeMem();
 
 public:
@@ -134,13 +126,6 @@ private slots:
     void on_pushButton_calcHF_clicked();
     void on_actionEdit_Distance_triggered();
     void on_actionEdit_Undo_triggered();
-    void on_actionCopy_new_Distance_triggered();
-    void on_pushButton_clear_ovr_clicked();
-    void on_pushButton_copy_ovr_clicked();
-    void on_pushButton_clear_int_clicked();
-    void on_pushButton_copy_int_clicked();
-    void on_pushButton_clear_samp_clicked();
-    void on_pushButton_copy_samp_clicked();
     void on_actionStress_Calculator_triggered();
     void on_actionIntervall_Editor_triggered();
     void on_actionPreferences_triggered();
@@ -150,12 +135,15 @@ private slots:
     void on_actionSwitch_Year_triggered();
     void on_comboBox_phasefilter_currentIndexChanged(int index);
     void on_actionVersion_triggered();
-    void on_actionCopy_new_Speed_triggered();
     void on_horizontalSlider_factor_valueChanged(int value);
     void on_comboBox_intervals_currentIndexChanged(int index);
     void on_actionLapEditor_triggered();
     void on_horizontalSlider_polish_valueChanged(int value);
     void on_tableView_int_times_clicked(const QModelIndex &index);
+    void on_actionSave_to_GoldenCheetah_triggered();
+    void on_pushButton_ClearWorkContent_clicked();
+    void on_pushButton_sync_clicked();
+    void on_lineEdit_workContent_textChanged(const QString &arg1);
 };
 
 #endif // MAINWINDOW_H

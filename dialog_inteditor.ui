@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Intervall Editor</string>
+   <string>Interval Editor</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_3">
    <property name="spacing">
@@ -629,7 +629,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="label__duration">
+          <widget class="QLabel" name="label_duration">
            <property name="text">
             <string>Duration and Distance</string>
            </property>

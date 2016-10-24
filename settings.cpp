@@ -11,6 +11,8 @@ settings::settings()
 QString settings::settingFile;
 QString settings::splitter = "/";
 
+QString settings::version;
+QString settings::builddate;
 QString settings::valueFile;
 QString settings::valueFilePath;
 QString settings::saisonFDW;
@@ -30,6 +32,9 @@ QString settings::isStrength;
 QString settings::isAlt;
 QString settings::isTria;
 QString settings::isOther;
+
+QMap<int,QString> settings::sampList;
+QMap<int,QString> settings::intList;
 
 QStringList settings::keyList;
 QStringList settings::gc_infos;
@@ -60,23 +65,36 @@ bool settings::act_isrecalc = false;
 QStringList settings::header_int;
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
-QStringList settings::header_int_km;
 QStringList settings::table_header;
-QString settings::header_swim = "Swim Laps";
-QString settings::header_bike = "Watt";
+QString settings::header_swim;
+QString settings::header_bike;
 
 int settings::saison_weeks;
 int settings::saison_start;
 int settings::weekRange;
 int settings::weekOffSet;
 int settings::swimLaplen;
+int settings::athleteYOB;
+
+
+void settings::fill_mapList(QMap<int,QString> *map, QString *values)
+{
+    QStringList list = values->split(splitter);
+
+    for(int i = 0; i < list.count(); ++i)
+    {
+        map->insert(i,list.at(i));
+    }
+}
 
 void settings::loadSettings()
 {
     header_int << "Interval" << "Duration" << "Distance" << "Distance (Int)" << "Pace";
-    header_int_time << "Interval" << "Start Sec" << "Stop Sec";
+    header_int_time << "Interval" << "Start Sec" << "Stop Sec" << "Distance";
     header_swim_time << "Lap" << "Start" << "Time" << "Strokes" << "Speed";
-    header_int_km << "Interval" << "Distance new";
+    header_swim = "Swim Laps";
+    header_bike = "Watt";
+
     powerList.resize(4);
     factorList.resize(3);
     fontSize.resize(3);
@@ -108,10 +126,22 @@ void settings::loadSettings()
         //Sport Value Settings
         valueFilePath = workoutsPath + "/" + valueFile;
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
+        myvalues->beginGroup("Athlete");
+            athleteYOB = myvalues->value("yob").toInt();
+        myvalues->endGroup();
+
+        myvalues->beginGroup("Version");
+            version = myvalues->value("version").toString();
+            builddate = myvalues->value("build").toString();
+        myvalues->endGroup();
 
         myvalues->beginGroup("JsonFile");
             QString json_childs = myvalues->value("actinfo").toString();
             jsoninfos << json_childs.split(splitter);
+            json_childs = myvalues->value("intInfo").toString();
+            fill_mapList(&intList,&json_childs);
+            json_childs = myvalues->value("sampinfo").toString();
+            fill_mapList(&sampList,&json_childs);
         myvalues->endGroup();
 
         myvalues->beginGroup("Keylist");
@@ -333,14 +363,11 @@ void settings::saveSettings()
     delete myvalues;
 }
 
-
-
-
-QStringList settings::get_int_header()
+QStringList settings::get_int_header(QString vSport)
 {
     table_header.clear();
-    if(act_sport == "Swim ") return table_header << header_int << header_swim;
-    if(act_sport == "Bike ") return table_header << header_int << header_bike;
+    if(vSport == isSwim) return table_header << header_int << header_swim;
+    if(vSport == isBike) return table_header << header_int << header_bike;
 
     return header_int;
 }
@@ -434,7 +461,6 @@ QString settings::get_workout_pace(double dist, QTime duration,QString sport,boo
             if(nr == 2) return (QDateTime::fromTime_t(speed).toUTC().toString("mm:ss") + speedLabel.at(nr));
             if(nr == 3) return speedLabel.at(nr);
         }
-
     }
     else
     {
@@ -482,7 +508,26 @@ int settings::get_hfvalue(QString percent)
     return static_cast<int>(round(hfThres.toDouble() * (value / 100.0)));
 }
 
-double settings::estimate_stress(QString sport, QString p_goal, QTime duration)
+double settings::calc_totalWork(QString sport, double weight,double avgHF, double calcBase,double swimFactor)
+{
+    double kjFactor = 4.184;
+    int kal_100 = 25;
+    int age = QDate::currentDate().year() - athleteYOB;
+
+    if(sport == settings::isSwim)
+    {
+        return ceil(((kal_100 * swimFactor *(calcBase*10))*kjFactor)/4);
+    }
+
+    if(sport == settings::isRun)
+    {
+        return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/kjFactor) * calcBase/60);
+    }
+
+    return 0;
+}
+
+double settings::estimate_stress(QString sport, QString p_goal, int duration)
 {
     int sport_index;
     double goal = 0;
@@ -516,21 +561,22 @@ double settings::estimate_stress(QString sport, QString p_goal, QTime duration)
     {
         if(sport == settings::isSwim)
         {
-            goal = sqrt(pow(goal,3.0))/10;
-            est_power = powerList[sport_index] * (settings::get_timesec(paceList.at(sport_index)) / goal);
-            raw_effort = (settings::get_timesec(duration.toString("mm:ss")) * est_power) * (est_power / powerList[sport_index]);
+            goal = settings::get_timesec(paceList.at(sport_index)) / goal;
+            goal = pow(goal,3.0);
+            est_power = powerList[sport_index] * goal;
+            raw_effort = (duration * est_power) * (est_power / powerList[sport_index]);
             cv_effort = powerList[sport_index] * 3600;
 
         }
         if(sport == settings::isBike || sport == settings::isStrength)
         {
-            raw_effort = (settings::get_timesec(duration.toString("mm:ss")) * goal) * (goal / powerList[sport_index]);
+            raw_effort = (duration * goal) * (goal / powerList[sport_index]);
             cv_effort = powerList[sport_index] * 3600;
         }
         if(sport == settings::isRun)
         {
-            est_power = powerList[sport_index] * (2 - (goal / settings::get_timesec(paceList.at(sport_index))));
-            raw_effort = (settings::get_timesec(duration.toString("mm:ss")) * est_power) * (est_power / powerList[sport_index]);
+            est_power = powerList[sport_index] * (settings::get_timesec(paceList.at(sport_index))/goal);
+            raw_effort = (duration * est_power) * (est_power / powerList[sport_index]);
             cv_effort = powerList[sport_index] * 3600;
 
         }

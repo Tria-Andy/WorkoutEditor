@@ -404,19 +404,19 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <property name="spacing">
-            <number>4</number>
+            <number>2</number>
            </property>
            <property name="leftMargin">
-            <number>8</number>
+            <number>4</number>
            </property>
            <property name="topMargin">
-            <number>8</number>
+            <number>4</number>
            </property>
            <property name="rightMargin">
-            <number>8</number>
+            <number>4</number>
            </property>
            <property name="bottomMargin">
-            <number>8</number>
+            <number>4</number>
            </property>
            <item>
             <widget class="QFrame" name="frame_info">
@@ -444,6 +444,18 @@
               </property>
               <item>
                <widget class="QLabel" name="label">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>24</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
                   <pointsize>10</pointsize>
@@ -470,7 +482,7 @@
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                   <horstretch>0</horstretch>
-                  <verstretch>2</verstretch>
+                  <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
@@ -497,36 +509,147 @@
             </widget>
            </item>
            <item>
-            <widget class="QTabWidget" name="tabWidget_edit">
+            <widget class="QFrame" name="frame">
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_8">
+              <property name="spacing">
+               <number>2</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QFrame" name="frame_2">
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_5">
+                 <property name="spacing">
+                  <number>4</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>1</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>1</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>1</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>1</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="label_24">
+                   <property name="text">
+                    <string>Content Base:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioButton_time">
+                   <property name="text">
+                    <string>Time</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioButton_distance">
+                   <property name="text">
+                    <string>Distance</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="checkBox_exact">
+                   <property name="text">
+                    <string>Exact</string>
+                   </property>
+                   <property name="checked">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="pushButton_sync">
+                   <property name="maximumSize">
+                    <size>
+                     <width>20</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="resources.qrc">
+                     <normaloff>:/images/icons/Sync.png</normaloff>:/images/icons/Sync.png</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="pushButton_ClearWorkContent">
+                   <property name="maximumSize">
+                    <size>
+                     <width>20</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="resources.qrc">
+                     <normaloff>:/images/icons/Erase.png</normaloff>:/images/icons/Erase.png</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_workContent"/>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTableView" name="tableView_int_times">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                <horstretch>0</horstretch>
-               <verstretch>3</verstretch>
+               <verstretch>2</verstretch>
               </sizepolicy>
              </property>
-             <property name="currentIndex">
-              <number>0</number>
+             <property name="mouseTracking">
+              <bool>true</bool>
              </property>
-             <widget class="QWidget" name="tab_3">
-              <attribute name="title">
-               <string>Edit Int Time</string>
-              </attribute>
-              <layout class="QHBoxLayout" name="horizontalLayout_5">
-               <item>
-                <widget class="QTableView" name="tableView_int_times"/>
-               </item>
-              </layout>
-             </widget>
-             <widget class="QWidget" name="tab_4">
-              <attribute name="title">
-               <string>Edit Distance</string>
-              </attribute>
-              <layout class="QHBoxLayout" name="horizontalLayout_6">
-               <item>
-                <widget class="QTableView" name="tableView_int_dist"/>
-               </item>
-              </layout>
-             </widget>
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
             </widget>
            </item>
           </layout>
@@ -1144,13 +1267,6 @@
                  </property>
                 </widget>
                </item>
-               <item>
-                <widget class="QCheckBox" name="checkBox_powerswim">
-                 <property name="text">
-                  <string>Power Swim</string>
-                 </property>
-                </widget>
-               </item>
               </layout>
              </widget>
             </item>
@@ -1255,143 +1371,6 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_5">
-           <attribute name="title">
-            <string>JSON Text</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_8">
-            <item>
-             <widget class="QFrame" name="frame">
-              <property name="frameShape">
-               <enum>QFrame::StyledPanel</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_9">
-               <property name="spacing">
-                <number>4</number>
-               </property>
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>0</number>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QPlainTextEdit" name="plainTextEdit_hf">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPlainTextEdit" name="plainTextEdit_int_infos">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPlainTextEdit" name="plainTextEdit_samp_data">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-              <zorder>plainTextEdit_samp_data</zorder>
-              <zorder>plainTextEdit_hf</zorder>
-              <zorder>plainTextEdit_int_infos</zorder>
-             </widget>
-            </item>
-            <item>
-             <widget class="QFrame" name="frame_2">
-              <property name="frameShape">
-               <enum>QFrame::StyledPanel</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_10">
-               <property name="spacing">
-                <number>4</number>
-               </property>
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>0</number>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QPushButton" name="pushButton_clear_ovr">
-                 <property name="text">
-                  <string>Clear</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_copy_ovr">
-                 <property name="text">
-                  <string>Copy</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_clear_int">
-                 <property name="text">
-                  <string>Clear</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_copy_int">
-                 <property name="text">
-                  <string>Copy</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_clear_samp">
-                 <property name="text">
-                  <string>Clear</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_copy_samp">
-                 <property name="text">
-                  <string>Copy</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="tab_7">
-           <attribute name="title">
-            <string>JSON Save</string>
-           </attribute>
-           <layout class="QHBoxLayout" name="horizontalLayout_14">
-            <item>
-             <widget class="QPlainTextEdit" name="plainTextEdit_saveToGC"/>
-            </item>
-           </layout>
-          </widget>
          </widget>
         </item>
        </layout>
@@ -1418,6 +1397,7 @@
     <addaction name="separator"/>
     <addaction name="actionSave_Workout_File"/>
     <addaction name="actionSave_Workout_Schedule"/>
+    <addaction name="actionSave_to_GoldenCheetah"/>
     <addaction name="separator"/>
     <addaction name="actionExit_and_Save"/>
     <addaction name="actionExit"/>
@@ -1438,8 +1418,6 @@
     <addaction name="actionEdit_Distance"/>
     <addaction name="actionEdit_Undo"/>
     <addaction name="actionUnselect_all_rows"/>
-    <addaction name="actionCopy_new_Distance"/>
-    <addaction name="actionCopy_new_Speed"/>
    </widget>
    <widget class="QMenu" name="menuModus">
     <property name="title">
@@ -1478,6 +1456,9 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="toolTip">
+    <string>Save to Golden Cheetah</string>
+   </property>
    <property name="iconSize">
     <size>
      <width>20</width>
@@ -1491,15 +1472,21 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionExit"/>
+   <addaction name="separator"/>
    <addaction name="actionNew"/>
    <addaction name="actionSelect_File"/>
-   <addaction name="actionReset"/>
    <addaction name="actionSave_Workout_Schedule"/>
+   <addaction name="actionSave_to_GoldenCheetah"/>
+   <addaction name="separator"/>
+   <addaction name="actionReset"/>
    <addaction name="actionUnselect_all_rows"/>
    <addaction name="actionEdit_Distance"/>
    <addaction name="actionEdit_Undo"/>
-   <addaction name="actionCopy_new_Distance"/>
-   <addaction name="actionCopy_new_Speed"/>
+   <addaction name="separator"/>
+   <addaction name="actionLapEditor"/>
+   <addaction name="actionIntervall_Editor"/>
+   <addaction name="actionPace_Calculator"/>
+   <addaction name="actionStress_Calculator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSelect_File">
@@ -1620,15 +1607,6 @@
     <string>Edit Undo </string>
    </property>
   </action>
-  <action name="actionCopy_new_Distance">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Copy.png</normaloff>:/images/icons/Copy.png</iconset>
-   </property>
-   <property name="text">
-    <string>Copy new Distance</string>
-   </property>
-  </action>
   <action name="actionIntervall_Editor">
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -1674,15 +1652,6 @@
     <string>Edit Year Schedule</string>
    </property>
   </action>
-  <action name="actionCopy_new_Speed">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Clipboard.png</normaloff>:/images/icons/Clipboard.png</iconset>
-   </property>
-   <property name="text">
-    <string>Copy new Speed</string>
-   </property>
-  </action>
   <action name="actionLapEditor">
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -1690,6 +1659,15 @@
    </property>
    <property name="text">
     <string>LapEditor</string>
+   </property>
+  </action>
+  <action name="actionSave_to_GoldenCheetah">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/images/icons/Save.png</normaloff>:/images/icons/Save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save to GoldenCheetah</string>
    </property>
   </action>
  </widget>

@@ -56,11 +56,5 @@ public:
     }
 
 };
-
-
-
-
-
-
 #endif // DEL_SPINBOX_DOUBLE
 

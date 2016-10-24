@@ -37,6 +37,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->label_month->setText("Woche " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*7).weekNumber()-1));
     ui->pushButton_current_week->setEnabled(false);
     ui->pushButton_week_minus->setEnabled(false);
+    ui->pushButton_ClearWorkContent->setEnabled(false);
+    ui->pushButton_sync->setEnabled(false);
     fontSize = 10;
     cal_header << "Woche";
     for(int d = 1; d < 8; ++d)
@@ -96,21 +98,19 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     //Editor
     ui->menuAction->setEnabled(mEditor);
     ui->actionSave_Workout_File->setVisible(mEditor);
+    ui->actionSave_to_GoldenCheetah->setVisible(mEditor);
     ui->actionReset->setVisible(mEditor);
     ui->actionSelect_File->setVisible(mEditor);
     ui->actionUnselect_all_rows->setVisible(mEditor);
     ui->actionEdit_Distance->setVisible(mEditor);
     ui->actionEdit_Undo->setVisible(mEditor);
-    ui->actionCopy_new_Distance->setVisible(mEditor);
-    ui->actionCopy_new_Speed->setVisible(mEditor);
     ui->actionLapEditor->setVisible(mEditor);
 
     ui->actionReset->setEnabled(settings::get_act_isload());
+    ui->actionSave_to_GoldenCheetah->setEnabled(settings::get_act_isload());
     ui->actionUnselect_all_rows->setEnabled(settings::get_act_isload());
     ui->actionEdit_Distance->setEnabled(settings::get_act_isload());
     ui->actionEdit_Undo->setEnabled(settings::get_act_isload());
-    ui->actionCopy_new_Distance->setEnabled(settings::get_act_isload());
-    ui->actionCopy_new_Speed->setEnabled(settings::get_act_isload());
     ui->actionLapEditor->setEnabled(settings::get_act_isload());
 
     //Schedule
@@ -253,7 +253,6 @@ void MainWindow::summery_view()
                 sumValues << this->set_summeryString(i,isWeekMode);
             }
         }
-
     }
     else
     {
@@ -268,8 +267,6 @@ void MainWindow::summery_view()
                 }
             }
             sumValues << this->set_summeryString(0,isWeekMode);
-
-
         }
         else
         {
@@ -540,6 +537,20 @@ void MainWindow::on_actionSave_Workout_Schedule_triggered()
     }
 }
 
+void MainWindow::on_actionSave_to_GoldenCheetah_triggered()
+{
+    QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this,
+                                      tr("Save File"),
+                                      "Save Changes to Golden Cheetah?",
+                                      QMessageBox::Yes|QMessageBox::No
+                                      );
+    if (reply == QMessageBox::Yes)
+    {
+        jsonhandler->write_json();
+    }
+}
+
 void MainWindow::on_calendarWidget_clicked(const QDate &date)
 {
    weeknumber = QString::number(date.weekNumber())+"_"+QString::number(date.year());
@@ -594,6 +605,8 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
                 {
                     workSchedule->copyWeek();
                     this->workout_calendar();
+                    weekCounter = 0;
+                    this->set_calender();
                 }
             }
 
@@ -621,7 +634,6 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
             }
         }
     }
-
 }
 
 void MainWindow::on_actionExport_to_Golden_Cheetah_triggered()
@@ -687,6 +699,40 @@ void MainWindow::set_calender()
     this->summery_view();
 }
 
+void MainWindow::set_comboIntervall()
+{
+    if(settings::get_act_isrecalc())
+    {
+        int rowCount = curr_activity->edit_int_model->rowCount();
+
+        for(int i = 0; i < rowCount; ++i)
+        {
+            ui->comboBox_intervals->setItemText(i,curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,0,QModelIndex())).toString());
+        }
+        if(ui->comboBox_intervals->count() > rowCount)
+        {
+            while(ui->comboBox_intervals->count() != rowCount)
+            {
+                ui->comboBox_intervals->removeItem(ui->comboBox_intervals->count()-1);
+            }
+        }
+        else
+        {
+            for(int i = ui->comboBox_intervals->count(); i < rowCount; ++i)
+            {
+                ui->comboBox_intervals->addItem(curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,0,QModelIndex())).toString());
+            }
+        }
+    }
+    else
+    {
+        for(int i = 0; i < curr_activity->edit_int_model->rowCount();++i)
+        {
+            ui->comboBox_intervals->addItem(curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,0,QModelIndex())).toString());
+        }
+    }
+}
+
 void MainWindow::select_activity_file()
 {
     QMessageBox::StandardButton reply;
@@ -728,7 +774,6 @@ void MainWindow::on_pushButton_current_week_clicked()
         this->set_buttons(false);
         this->workout_calendar();
     }
-
     ui->label_month->setText("Woche " + this->get_weekRange());
 }
 
@@ -750,12 +795,12 @@ void MainWindow::loadfile(const QString &filename)
         }
         curr_activity = new Activity();
         filecontent = file.readAll();
-        curr_activity->read_jsonFile(filecontent);
-        jsonhandler = new jsonHandler(filecontent,curr_activity);
-
+        jsonhandler = new jsonHandler(true,filecontent,curr_activity);
+        curr_activity->set_jsonhandler(jsonhandler);
         file.close();
 
         settings::set_act_isload(true);
+        ui->actionSelect_File->setEnabled(false);
         this->set_menuItems(true,false);
         this->set_activty_infos();
 
@@ -790,11 +835,7 @@ void MainWindow::loadfile(const QString &filename)
         intChart->setAxisX(axisX,speedLine);
         intChart->setAxisX(axisX,polishLine);
 
-        QStandardItemModel *intModel = curr_activity->edit_int_model;
-        for(int i = 0; i < intModel->rowCount();++i)
-        {
-            ui->comboBox_intervals->addItem(intModel->data(intModel->index(i,0,QModelIndex())).toString());
-        }
+        this->set_comboIntervall();
         this->set_activty_intervalls();
      }
 }
@@ -802,7 +843,6 @@ void MainWindow::loadfile(const QString &filename)
 void MainWindow::set_activty_infos()
 {
     ui->textBrowser_Info->clear();
-    QModelIndex index;
 
     QTextCursor cursor = ui->textBrowser_Info->textCursor();
     cursor.beginEditBlock();
@@ -817,7 +857,7 @@ void MainWindow::set_activty_infos()
                     << QTextLength(QTextLength::PercentageLength, 60);
     tableFormat.setColumnWidthConstraints(constraints);
 
-    QTextTable *table = cursor.insertTable(curr_activity->ride_model->rowCount(),2,tableFormat);
+    QTextTable *table = cursor.insertTable(curr_activity->ride_info.count(),2,tableFormat);
 
         QTextFrame *frame = cursor.currentFrame();
         QTextFrameFormat frameFormat = frame->frameFormat();
@@ -832,19 +872,16 @@ void MainWindow::set_activty_infos()
 
         QTextCharFormat valueFormat = format;
 
-    for(int i = 0; i < curr_activity->ride_model->rowCount(); ++i)
+    int i = 0;
+    for(QMap<QString,QString>::const_iterator it =  curr_activity->ride_info.cbegin(), end = curr_activity->ride_info.cend(); it != end; ++it,++i)
     {
-        index = curr_activity->ride_model->index(i,0,QModelIndex());
         QTextTableCell cell = table->cellAt(i,0);
         QTextCursor cellCurser = cell.firstCursorPosition();
-        cellCurser.insertText(curr_activity->ride_model->data(index,Qt::DisplayRole).toString(),infoFormat);
-
-        index = curr_activity->ride_model->index(i,1,QModelIndex());
+        cellCurser.insertText(it.key(),infoFormat);
         cell = table->cellAt(i,1);
         cellCurser = cell.firstCursorPosition();
-        cellCurser.insertText(curr_activity->ride_model->data(index,Qt::DisplayRole).toString(),valueFormat);
+        cellCurser.insertText(it.value(),valueFormat);
     }
-
     table->insertRows(table->rows(),1);
 
     cursor.endEditBlock();
@@ -854,22 +891,19 @@ void MainWindow::set_activty_infos()
 
 void MainWindow::set_activty_intervalls()
 {
-    ui->tableView_int_dist->setModel(curr_activity->edit_dist_model);
-    ui->tableView_int_dist->setItemDelegate(&dist_del);
-    ui->tableView_int_dist->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_int_dist->verticalHeader()->setVisible(false);
-
     ui->tableView_int->setModel(curr_activity->curr_act_model);
     ui->tableView_int->setEditTriggers(QAbstractItemView::NoEditTriggers);
     //ui->tableView_int->setItemDelegate(&intervall_del);
     ui->tableView_int->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_int->verticalHeader()->setVisible(false);
 
-    if(curr_activity->get_sport() == curr_activity->isSwim)
+    if(curr_activity->get_sport() == settings::isSwim)
     {
         ui->tableView_int_times->setModel(curr_activity->swim_xdata);
         ui->tableView_int_times->setItemDelegate(&swimlap_del);
         //ui->tableView_int_times->hideColumn(1);
+        ui->tableView_int_times->hideColumn(5);
+        ui->tableView_int_times->hideColumn(6);
         ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_int_times->verticalHeader()->setVisible(false);
 
@@ -890,12 +924,13 @@ void MainWindow::set_activty_intervalls()
     else
     {
         ui->tableView_int_times->setModel(curr_activity->edit_int_model);
-        ui->tableView_int_times->setItemDelegate(&time_del);
-        ui->tableView_int_times->hideColumn(3);
+        ui->tableView_int_times->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        //ui->tableView_int_times->setItemDelegate(&time_del);
+        ui->tableView_int_times->hideColumn(4);
         ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_int_times->verticalHeader()->setVisible(false);
     }
-    if(curr_activity->get_sport() == curr_activity->isRun)
+    if(curr_activity->get_sport() == settings::isRun)
     {
         ui->frame_polish->setVisible(true);
     }
@@ -932,6 +967,7 @@ void MainWindow::set_polishValues(int lap,double factor)
     {
         polishLine->clear();
     }
+
     for(int i = 0; i < speedValues.count(); ++i)
     {
         if(lap == 0 && i < 5)
@@ -940,11 +976,11 @@ void MainWindow::set_polishValues(int lap,double factor)
         }
         else
         {
+            //Ignored NaN, Inf, or -Inf value. Check speedValues fill!
             value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.10-factor,true);
         }
         polishLine->append(i,value);
     }
-
 }
 
 void MainWindow::set_intChartValues(int lapindex,double avgSpeed)
@@ -954,7 +990,6 @@ void MainWindow::set_intChartValues(int lapindex,double avgSpeed)
     int start = intmodel->data(intmodel->index(lapindex,1,QModelIndex())).toInt();
     int stop = intmodel->data(intmodel->index(lapindex,2,QModelIndex())).toInt();
     double max = 0.0,min = 40.0,current;
-
     if(speedValues.count() > 0)
     {
         speedValues.clear();
@@ -985,44 +1020,16 @@ void MainWindow::set_intChartValues(int lapindex,double avgSpeed)
     ySpeed->applyNiceNumbers();
 }
 
-void MainWindow::write_int_infos()
-{
-    QString lapname,int_start,int_stop;
-
-    for(int i = 0; i < curr_activity->edit_int_model->rowCount(); ++i)
-    {
-        lapname = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,0,QModelIndex())).toString();
-        ui->comboBox_intervals->setItemText(i,lapname);
-        int_start = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,1,QModelIndex())).toString();
-        int_stop = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,2,QModelIndex())).toString();
-        ui->plainTextEdit_int_infos->appendPlainText("{ \"NAME\":\" " + lapname + "\", \"START\": " + int_start + ", \"STOP\": " + int_stop +" },");
-    }
-}
-
 void MainWindow::write_hf_infos()
 {
     int hf_value;
-    ui->plainTextEdit_hf->appendPlainText("\"OVERRIDES\":[");
-    ui->plainTextEdit_hf->appendPlainText("{ \"average_hr\":{ \"value\":\""  + ui->lineEdit_hfavg->text() + "\" }},");
-
+    jsonhandler->set_overrideFlag(true);
+    jsonhandler->set_overrideData("average_hr",ui->lineEdit_hfavg->text());
+    jsonhandler->set_overrideData("total_work",ui->lineEdit_kj->text());
     for(int i = 0; i < 6; i++)
     {
         hf_value = settings::get_timesec(curr_activity->swim_hf_model->data(curr_activity->swim_hf_model->index(i,3,QModelIndex())).toString());
-        ui->plainTextEdit_hf->appendPlainText("{ \"time_in_zone_H" + QString::number(i+1) + "\":{ \"value\":\"" + QString::number(hf_value) + "\" }},");
-    }
-    ui->plainTextEdit_hf->appendPlainText("{ \"total_work\":{ \"value\":\""  + ui->lineEdit_kj->text() + "\" }} \n ],");
-}
-
-void MainWindow::write_samp_infos()
-{
-    QString sec,km,cad,kph;
-    for(int i = 0; i < curr_activity->edit_samp_model->rowCount(); ++i)
-    {
-        sec = curr_activity->edit_samp_model->data(curr_activity->edit_samp_model->index(i,0,QModelIndex())).toString();
-        km = curr_activity->edit_samp_model->data(curr_activity->edit_samp_model->index(i,1,QModelIndex())).toString();
-        kph = curr_activity->edit_samp_model->data(curr_activity->edit_samp_model->index(i,2,QModelIndex())).toString();
-        cad = curr_activity->edit_samp_model->data(curr_activity->edit_samp_model->index(i,3,QModelIndex())).toString();
-        ui->plainTextEdit_samp_data->appendPlainText("{ \"SECS\": " + sec + ", \"KM\": " + km + ", \"CAD\": " + cad + ", \"KPH\": " + kph +" },");
+        jsonhandler->set_overrideData("time_in_zone_H" + QString::number(i+1),QString::number(hf_value));
     }
 }
 
@@ -1034,6 +1041,112 @@ void MainWindow::set_selectInt(QColor color, QModelIndex index)
         col = curr_activity->curr_act_model->index(index.row(),index.column()+x,QModelIndex());
         curr_activity->curr_act_model->setData(col,QVariant(color),Qt::BackgroundColorRole);
     }
+}
+
+void MainWindow::fill_WorkoutContent()
+{
+    QString content,newEntry,contentValue,label;
+    double value;
+    content = ui->lineEdit_workContent->text();
+
+    if(ui->radioButton_time->isChecked())
+    {
+        if(ui->checkBox_exact->isChecked())
+        {
+            value = curr_activity->get_avg_laptime();
+        }
+        else
+        {
+            value = (ceil(curr_activity->get_avg_laptime()/10.0)*10);
+
+        }
+
+        if(value >= 60)
+        {
+            label = "Min";
+            value = value / 60;
+        }
+        else
+        {
+            label = "Sec";
+        }
+
+        contentValue = QString::number(value)+label;
+    }
+
+    if(ui->radioButton_distance->isChecked())
+    {
+        if(ui->checkBox_exact->isChecked())
+        {
+            value = (round(curr_activity->get_avg_dist()*1000)/1000.0);
+        }
+        else
+        {
+            value = (ceil(curr_activity->get_avg_dist()*10)/10.0);
+
+        }
+
+        if(value < 1)
+        {
+            label = "M";
+            value = value*1000.0;
+        }
+        else
+        {
+            label = "Km";
+        }
+
+        contentValue = QString::number(value)+label;
+    }
+
+    if(curr_activity->get_sport() == settings::isSwim)
+    {
+        if(sel_count > 1)
+        {
+            newEntry = QString::number(sel_count)+"x"+QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor())+"/"+settings::set_time(curr_activity->get_avg_laptime());
+
+        }
+        else
+        {
+            newEntry = QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor())+"-"+settings::set_time(curr_activity->get_avg_laptime());
+        }
+    }
+
+    if(curr_activity->get_sport() == settings::isBike)
+    {
+        if(sel_count > 1)
+        {
+            newEntry = QString::number(sel_count)+"x"+contentValue+"/" +QString::number(round(curr_activity->get_avg_watts()))+"W";
+        }
+        else
+        {
+            newEntry = contentValue+"-" +QString::number(round(curr_activity->get_avg_watts()))+"W";
+        }
+    }
+
+    if(curr_activity->get_sport() == settings::isRun)
+    {
+        if(sel_count > 1)
+        {
+            newEntry = QString::number(sel_count)+"x"+contentValue+"-" +settings::set_time(curr_activity->get_avg_pace())+"/km";
+        }
+        else
+        {
+            newEntry = contentValue+"-" +settings::set_time(curr_activity->get_avg_pace())+"/km";
+        }
+    }
+
+    if(ui->lineEdit_workContent->text() == "")
+    {
+        ui->lineEdit_workContent->setText(content+newEntry);
+        ui->pushButton_ClearWorkContent->setEnabled(true);
+    }
+    else
+    {
+        ui->lineEdit_workContent->setText(content+" | "+newEntry);
+    }
+
+    jsonhandler->set_tagData("Workout Content",ui->lineEdit_workContent->text());
 }
 
 void MainWindow::on_pushButton_week_minus_clicked()
@@ -1062,7 +1175,6 @@ void MainWindow::on_pushButton_week_minus_clicked()
         }
         this->workout_calendar();
     }
-
     ui->label_month->setText("Woche " + this->get_weekRange());
 }
 
@@ -1090,7 +1202,6 @@ void MainWindow::on_pushButton_week_plus_clicked()
             this->workout_calendar();
         }
     }
-
     ui->label_month->setText("Woche " + this->get_weekRange());
 }
 
@@ -1119,7 +1230,6 @@ void MainWindow::on_pushButton_fourplus_clicked()
             this->workout_calendar();
         }
     }
-
     ui->label_month->setText("Woche " + this->get_weekRange());
 }
 
@@ -1168,7 +1278,7 @@ void MainWindow::set_avg_fields()
     {
         ui->frame_avgValue->setVisible(false);
     }
-    if(curr_activity->get_sport() == curr_activity->isBike)
+    if(curr_activity->get_sport() == settings::isBike)
     {
         ui->lineEdit_watt->setVisible(true);
         ui->label_avgWatt->setVisible(true);
@@ -1180,31 +1290,11 @@ void MainWindow::set_avg_fields()
     }
 }
 
-void MainWindow::set_add_swim_values()
-{
-    const int kal_100 = 25;
-    const int kal_100_p = kal_100 + (kal_100 / 10);
-    double kal,kj;
-
-    if(ui->checkBox_powerswim->isChecked())
-    {
-        kal = (kal_100_p * curr_activity->get_swim_sri())*(curr_activity->samp_model->data(curr_activity->samp_model->index(curr_activity->samp_model->rowCount()-1,1,QModelIndex())).toDouble()*10);
-    }
-    else
-    {
-        kal = (kal_100 * curr_activity->get_swim_sri())*(curr_activity->samp_model->data(curr_activity->samp_model->index(curr_activity->samp_model->rowCount()-1,1,QModelIndex())).toDouble()*10);
-    }
-    ui->lineEdit_kal->setText(QString::number(ceil(kal)));
-
-    kj = (kal*4.1867)/4;
-    ui->lineEdit_kj->setText(QString::number(ceil(kj)));
-}
-
 void MainWindow::on_tableView_int_times_clicked(const QModelIndex &index)
 {
     if(index.column() == 0)
     {
-        Dialog_lapeditor lapEdit(this,curr_activity,index.row());
+        Dialog_lapeditor lapEdit(this,curr_activity,index);
         lapEdit.setModal(true);
         lapEdit.exec();
     }
@@ -1231,7 +1321,6 @@ void MainWindow::on_tableView_int_clicked(const QModelIndex &index)
             curr_activity->set_avg_values(sel_count,index.row(),false);
         }
     }
-
     this->set_avg_fields();
 }
 
@@ -1240,21 +1329,25 @@ void MainWindow::on_actionReset_triggered()
     ui->textBrowser_Info->clear();
     curr_activity->reset_avg();
     curr_activity->curr_act_model->clear();
-    curr_activity->ride_model->clear();
     curr_activity->int_model->clear();
     curr_activity->samp_model->clear();
     curr_activity->edit_int_model->clear();
-    curr_activity->edit_dist_model->clear();
     if(settings::get_act_isrecalc())
     {
         curr_activity->edit_samp_model->clear();
+        delete curr_activity->edit_samp_model;
     }
     settings::set_act_recalc(false);
-    if(curr_activity->get_sport() == curr_activity->isSwim)
+    if(curr_activity->get_sport() == settings::isSwim)
     {
         curr_activity->swim_pace_model->clear();
+        delete curr_activity->swim_pace_model;
         curr_activity->swim_hf_model->clear();
+        delete curr_activity->swim_hf_model;
         curr_activity->swim_xdata->clear();
+        delete curr_activity->swim_xdata;
+        curr_activity->xdata_model->clear();
+        delete curr_activity->xdata_model;
         curr_activity->act_reset();
         ui->lineEdit_swimcv->clear();
         ui->lineEdit_hf_threshold->clear();
@@ -1262,15 +1355,15 @@ void MainWindow::on_actionReset_triggered()
         ui->lineEdit_swimtime->clear();
         ui->lineEdit_swimpace->clear();
         ui->lineEdit_hfavg->clear();
-        ui->lineEdit_kj->clear();     
+        ui->lineEdit_kj->clear();
+        ui->lineEdit_kal->clear();
     }
 
     settings::set_act_isload(false);
     this->sel_count = 0;
-    this->reset_jsontext();
     this->set_avg_fields();
     this->set_menuItems(true,false);
-
+    ui->actionSelect_File->setEnabled(true);
     ui->frame_polish->setVisible(false);
 
     ui->verticalLayout_interpol->removeWidget(intChartview);
@@ -1278,6 +1371,11 @@ void MainWindow::on_actionReset_triggered()
     ui->lineEdit_lapTime->setText("-");
     ui->lineEdit_lapSpeed->setText("-");
     ui->comboBox_intervals->clear();
+    ui->lineEdit_workContent->clear();
+    ui->pushButton_ClearWorkContent->setEnabled(false);
+    ui->pushButton_sync->setEnabled(false);
+    ui->radioButton_time->setChecked(true);
+    ui->checkBox_exact->setChecked(false);
 
     delete ySpeed;
     delete speedLine;
@@ -1286,18 +1384,15 @@ void MainWindow::on_actionReset_triggered()
     delete axisX;
     delete intChartview;
 
+    delete curr_activity->int_model;
+    delete curr_activity->edit_int_model;
+    delete curr_activity->samp_model;
     delete curr_activity;
-}
-
-void MainWindow::reset_jsontext()
-{
-    ui->plainTextEdit_int_infos->clear();
-    ui->plainTextEdit_samp_data->clear();
-    ui->plainTextEdit_hf->clear();
 }
 
 void MainWindow::on_actionUnselect_all_rows_triggered()
 {
+    this->fill_WorkoutContent();
     QModelIndex index;
 
     for(int i = 0; i < curr_activity->int_model->rowCount(); ++i)
@@ -1315,102 +1410,34 @@ void MainWindow::on_actionUnselect_all_rows_triggered()
 
 void MainWindow::on_pushButton_calcHF_clicked()
 {
-    ui->plainTextEdit_hf->clear();
+    double totalWork;
     curr_activity->set_hf_time_in_zone();
     ui->lineEdit_hfavg->setText(QString::number(curr_activity->get_hf_avg()));
-    this->set_add_swim_values();
+    totalWork = settings::calc_totalWork(curr_activity->get_sport(),0,0,curr_activity->samp_model->data(curr_activity->samp_model->index(curr_activity->samp_model->rowCount()-1,1,QModelIndex())).toDouble(),curr_activity->get_swim_sri());
+    ui->lineEdit_kal->setText(QString::number(ceil((totalWork/4)*4.184)));
+    ui->lineEdit_kj->setText(QString::number(totalWork));
     this->write_hf_infos();
 }
 
 void MainWindow::on_actionEdit_Distance_triggered()
 {
-    this->reset_jsontext();
     settings::set_act_recalc(true);
     curr_activity->recalculate_intervalls(settings::get_act_isrecalc());
     curr_activity->set_additional_ride_info();
     this->set_activty_intervalls();
-    this->write_int_infos();
-    if(curr_activity->get_sport() == curr_activity->isSwim) this->write_samp_infos();
     this->set_activty_infos();
+    this->set_comboIntervall();
 }
 
 void MainWindow::on_actionEdit_Undo_triggered()
 {
     settings::set_act_recalc(false);
-    this->reset_jsontext();
     curr_activity->recalculate_intervalls(settings::get_act_isrecalc());
     curr_activity->set_additional_ride_info();
     this->set_activty_intervalls();
     this->set_activty_infos();
+    this->set_comboIntervall();
 }
-
-void MainWindow::copyIntoClipboard(QVector<double> *vect)
-{
-    QClipboard *clipboard = QApplication::clipboard();
-    QByteArray km_array;
-    QMimeData *mimeData = new QMimeData();
-
-    for (int i = 0; i < curr_activity->edit_samp_model->rowCount();i++)
-    {
-            km_array.append(QString::number((*vect)[i]));
-            km_array.append("\r\n");
-    }
-
-    mimeData->setData("text/plain",km_array);
-    clipboard->setMimeData(mimeData);
-}
-
-void MainWindow::on_actionCopy_new_Distance_triggered()
-{
-    QVector<double> *dist = curr_activity->get_new_dist();
-    this->copyIntoClipboard(dist);
-}
-
-void MainWindow::on_actionCopy_new_Speed_triggered()
-{
-    QVector<double> *speed = curr_activity->get_new_speed();
-    this->copyIntoClipboard(speed);
-}
-
-void MainWindow::on_pushButton_clear_ovr_clicked()
-{
-    ui->plainTextEdit_hf->clear();
-}
-
-void MainWindow::on_pushButton_copy_ovr_clicked()
-{
-    QClipboard *clipboard = QApplication::clipboard();
-    QMimeData *mimeData = new QMimeData();
-    mimeData->setText(ui->plainTextEdit_hf->toPlainText());
-    clipboard->setMimeData(mimeData);
-}
-
-void MainWindow::on_pushButton_clear_int_clicked()
-{
-    ui->plainTextEdit_int_infos->clear();
-}
-
-void MainWindow::on_pushButton_copy_int_clicked()
-{
-    QClipboard *clipboard = QApplication::clipboard();
-    QMimeData *mimeData = new QMimeData();
-    mimeData->setText(ui->plainTextEdit_int_infos->toPlainText());
-    clipboard->setMimeData(mimeData);
-}
-
-void MainWindow::on_pushButton_clear_samp_clicked()
-{
-    ui->plainTextEdit_samp_data->clear();
-}
-
-void MainWindow::on_pushButton_copy_samp_clicked()
-{
-    QClipboard *clipboard = QApplication::clipboard();
-    QMimeData *mimeData = new QMimeData();
-    mimeData->setText(ui->plainTextEdit_samp_data->toPlainText());
-    clipboard->setMimeData(mimeData);
-}
-
 
 void MainWindow::on_actionIntervall_Editor_triggered()
 {
@@ -1540,4 +1567,24 @@ void MainWindow::on_horizontalSlider_polish_valueChanged(int value)
 {
     ui->label_WorkFactor->setText(QString::number(10-value) + "%");
     curr_activity->set_polishFactor(0.1-(static_cast<double>(value)/100));
+}
+
+
+void MainWindow::on_pushButton_ClearWorkContent_clicked()
+{
+    ui->lineEdit_workContent->clear();
+    ui->pushButton_ClearWorkContent->setEnabled(false);
+    ui->pushButton_sync->setEnabled(false);
+}
+
+void MainWindow::on_pushButton_sync_clicked()
+{
+    jsonhandler->set_tagData("Workout Content",ui->lineEdit_workContent->text());
+    ui->pushButton_sync->setEnabled(false);
+}
+
+void MainWindow::on_lineEdit_workContent_textChanged(const QString &value)
+{
+    Q_UNUSED(value)
+    ui->pushButton_sync->setEnabled(true);
 }
