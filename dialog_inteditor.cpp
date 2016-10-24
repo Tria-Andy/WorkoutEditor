@@ -859,7 +859,7 @@ void Dialog_inteditor::save_workout()
        }
    }
 
-   worktime = settings::set_time(static_cast<int>(time_sum*60));
+   worktime = settings::set_time(static_cast<int>(ceil(time_sum)*60));
 
    //Update Workout -> delete first
    if(current_workID.isEmpty())
