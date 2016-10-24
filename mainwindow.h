@@ -10,7 +10,6 @@
 #include "calendar_delegate.h"
 #include "week_delegate.h"
 #include "summery_delegate.h"
-#include "del_spinbox_double.h"
 #include "del_spinbox_int.h"
 #include "del_swimlap.h"
 #include "del_intview.h"
@@ -53,7 +52,6 @@ private:
     calendar_delegate calender_del;
     week_delegate week_del;
     summery_delegate sum_del;
-    del_spinbox_double dist_del;
     del_spinbox_int time_del;
     del_swimlap swimlap_del;
     del_intview intervall_del;

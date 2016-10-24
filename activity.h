@@ -53,7 +53,6 @@ public:
     QStandardItemModel *int_model,*samp_model,*curr_act_model,*edit_int_model,*xdata_model,*swim_xdata,*edit_samp_model;
     QStandardItemModel *swim_pace_model, *swim_hf_model;
     QMap<QString,QString> ride_info;
-    QMap<QString,int> swimlapIndex;
 
     //Recalculation
     QStandardItemModel * set_int_model_pointer(bool);

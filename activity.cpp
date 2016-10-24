@@ -26,6 +26,7 @@ void Activity::prepareData()
     int sampCount = samp_model->rowCount();
     int intCount = int_model->rowCount();
     QModelIndex editIndex,intIndex;
+    QString swimLapName;
 
     settings::set_swimLaplen(swim_track);
     int_model->setData(int_model->index(intCount-1,2,QModelIndex()),sampCount-1);
@@ -66,7 +67,8 @@ void Activity::prepareData()
 
             if(lapPace > 0 && type != 0)
             {
-                swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),QString::number(intCount)+"_"+QString::number(++lapNr*swim_track));
+                swimLapName = QString::number(intCount)+"_"+QString::number(++lapNr*swim_track);
+                swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),swimLapName);
 
                 if(typePrev == 0)
                 {
