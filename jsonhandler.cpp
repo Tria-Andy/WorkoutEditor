@@ -179,7 +179,7 @@ void jsonHandler::read_json(QString jsonfile)
             avgHF = avgHF + curr_act->samp_model->data(curr_act->samp_model->index(i,posHF,QModelIndex())).toInt();
         }
         avgHF = (avgHF / sampCount);
-        overrideData.insert("total_work",QString::number(settings::calc_totalWork(curr_act->get_sport(),tagData.value("Weight").toDouble(),avgHF,sampCount,0.0)));
+        overrideData.insert("total_work",QString::number(settings::calc_totalWork(tagData.value("Weight").toDouble(),avgHF,sampCount)));
         hasOverride = true;
     }
 
@@ -288,16 +288,16 @@ void jsonHandler::write_json()
 
 void jsonHandler::write_file(QJsonDocument jsondoc)
 {
-    //QFile file(settings::get_gcPath() + QDir::separator() + fileName);
-    QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName);
+    QFile file(settings::get_gcPath() + QDir::separator() + fileName);
+    //QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName);
     if(!file.open(QFile::WriteOnly))
     {
         qDebug() << "File not open!";
         return;
     }
 
-    //file.write(jsondoc.toJson(QJsonDocument::Compact));
-    file.write(jsondoc.toJson());
+    file.write(jsondoc.toJson(QJsonDocument::Compact));
+    //file.write(jsondoc.toJson());
     file.flush();
     file.close();
 }

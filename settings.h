@@ -86,7 +86,7 @@ public:
     }
 
     static int get_swimLaplen() {return swimLaplen;}
-    static double calc_totalWork(QString,double,double,double,double);
+    static double calc_totalWork(double,double,double);
     static QString set_time(int);
     static QString get_workout_pace(double, QTime, QString,bool);
     static QString get_speed(QTime,int,QString,bool);

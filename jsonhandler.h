@@ -28,6 +28,10 @@ public:
     {
         rideData.insert(vKey,vValue);
     }
+    QString get_tagData(QString vKey)
+    {
+        return tagData.value(vKey);
+    }
     void set_tagData(QString vKey,QString vValue)
     {
         tagData.insert(vKey,vValue);

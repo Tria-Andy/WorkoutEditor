@@ -284,25 +284,25 @@ void Activity::set_hf_time_in_zone()
 {
      double hf_factor[] = {0.125,0.25,0.5,0.75};
 
-     //REKOM: Z1 + Z2*0,5 + Z0*0,125
-     p_hf_timezone[0] = ceil(p_swim_timezone[1] + (p_swim_timezone[2]*hf_factor[2]) + (p_swim_timezone[0]*hf_factor[0]));
+     //REKOM: Z0*0,125 + Z1 + Z2*0,5
+     p_hf_timezone[0] = ceil((p_swim_timezone[0]*hf_factor[0]) + p_swim_timezone[1] + (p_swim_timezone[2]*hf_factor[2]));
 
-     //END: Z2*0,5 + Z3*0,75 + Z4*0,25 + Z0*0,125
-     p_hf_timezone[1] = ceil((p_swim_timezone[2]*hf_factor[2]) + (p_swim_timezone[3]*hf_factor[3]) + (p_swim_timezone[4]*hf_factor[1]) + (p_swim_timezone[0]*hf_factor[0]));
+     //END: Z0*0,5 + Z2*0,5 + Z3*0,75 + Z4*0,25
+     p_hf_timezone[1] = ceil((p_swim_timezone[0]*hf_factor[2]) + (p_swim_timezone[2]*hf_factor[2]) + (p_swim_timezone[3]*hf_factor[3]) + (p_swim_timezone[4]*hf_factor[1]));
 
-     //TEMP: Z3*0,25 + Z4*0,5 + Z5*0,5 + Z0*0,5
-     p_hf_timezone[2] = ceil((p_swim_timezone[3]*hf_factor[1]) + (p_swim_timezone[4]*hf_factor[2]) + (p_swim_timezone[5]*hf_factor[2]) + (p_swim_timezone[0]*hf_factor[2]));
+     //TEMP: Z0*0,25 + Z3*0,25 + Z4*0,75 + Z5*0,5
+     p_hf_timezone[2] = ceil((p_swim_timezone[0]*hf_factor[1]) + (p_swim_timezone[3]*hf_factor[1]) + (p_swim_timezone[4]*hf_factor[3]) + (p_swim_timezone[5]*hf_factor[2]));
 
-     //LT: Z4*0,25 + Z5*0,25 + Z6*0,75 + Z7*0,5 + Z0*0,125
-     p_hf_timezone[3] = ceil((p_swim_timezone[4]*hf_factor[1]) + (p_swim_timezone[5]*hf_factor[1]) + (p_swim_timezone[6]*hf_factor[3]) + (p_swim_timezone[7]*hf_factor[2]) + (p_swim_timezone[0]*hf_factor[0]));
+     //LT: Z5*0,25 + Z6*0,75 + Z7*0,5
+     p_hf_timezone[3] = ceil((p_swim_timezone[5]*hf_factor[1]) + (p_swim_timezone[6]*hf_factor[3]) + (p_swim_timezone[7]*hf_factor[2]));
 
-     //VO2: Z5*0,25 + Z6*0,125 + Z7*0,25 + Z0*0,125
-     p_hf_timezone[4] = ceil((p_swim_timezone[5]*hf_factor[1]) + (p_swim_timezone[6]*hf_factor[0]) + (p_swim_timezone[7]*hf_factor[1]) + (p_swim_timezone[0]*hf_factor[0]));
+     //VO2: Z5*0,25 + Z6*0,125 + Z7*0,25
+     p_hf_timezone[4] = ceil((p_swim_timezone[5]*hf_factor[1]) + (p_swim_timezone[6]*hf_factor[0]) + (p_swim_timezone[7]*hf_factor[1]));
 
-     //AC: Z6*0,125 + Z7*0,25
+     //AC: Z6*0,125 + Z7*0,125
      p_hf_timezone[5] = ceil((p_swim_timezone[6]*hf_factor[0]) + (p_swim_timezone[7]*hf_factor[0]));
 
-     //NEURO: in swimming hardly reached
+     //NEURO: Z7*0,125
      p_hf_timezone[6] = ceil(p_swim_timezone[7]*hf_factor[0]);
 
      for(int i = 0; i < zone_count; i++)
