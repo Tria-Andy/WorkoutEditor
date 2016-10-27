@@ -296,14 +296,14 @@ void Activity::set_hf_time_in_zone()
      //LT: Z4*0,25 + Z5*0,25 + Z6*0,75 + Z7*0,5 + Z0*0,125
      p_hf_timezone[3] = ceil((p_swim_timezone[4]*hf_factor[1]) + (p_swim_timezone[5]*hf_factor[1]) + (p_swim_timezone[6]*hf_factor[3]) + (p_swim_timezone[7]*hf_factor[2]) + (p_swim_timezone[0]*hf_factor[0]));
 
-     //VO2: Z5*0,25 + Z6*0,125 + Z7*0,25 + Z0*0,25
+     //VO2: Z5*0,25 + Z6*0,125 + Z7*0,25 + Z0*0,125
      p_hf_timezone[4] = ceil((p_swim_timezone[5]*hf_factor[1]) + (p_swim_timezone[6]*hf_factor[0]) + (p_swim_timezone[7]*hf_factor[1]) + (p_swim_timezone[0]*hf_factor[0]));
 
      //AC: Z6*0,125 + Z7*0,25
-     p_hf_timezone[5] = ceil((p_swim_timezone[6]*hf_factor[0]) + (p_swim_timezone[7]*hf_factor[1]));
+     p_hf_timezone[5] = ceil((p_swim_timezone[6]*hf_factor[0]) + (p_swim_timezone[7]*hf_factor[0]));
 
      //NEURO: in swimming hardly reached
-     p_hf_timezone[6] = 0.0;
+     p_hf_timezone[6] = ceil(p_swim_timezone[7]*hf_factor[0]);
 
      for(int i = 0; i < zone_count; i++)
      {

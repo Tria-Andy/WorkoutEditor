@@ -513,7 +513,7 @@ double settings::calc_totalWork(QString sport, double weight,double avgHF, doubl
     double kjFactor = 4.184;
     int kal_100 = 25;
     int age = QDate::currentDate().year() - athleteYOB;
-
+    qDebug() << swimFactor;
     if(sport == settings::isSwim)
     {
         return ceil(((kal_100 * swimFactor *(calcBase*10))*kjFactor)/4);

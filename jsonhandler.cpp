@@ -264,7 +264,7 @@ void jsonHandler::write_json()
         xdataObj.insert("VALUES",listToJson(&xdataValues));
 
         intArray = QJsonArray();
-        for(int i = 0; i < curr_act->xdata_model->rowCount(); ++i)
+        for(int i = 0; i < curr_act->swim_xdata->rowCount(); ++i)
         {
             QJsonObject item_array;
             QJsonArray value_array;
@@ -288,15 +288,16 @@ void jsonHandler::write_json()
 
 void jsonHandler::write_file(QJsonDocument jsondoc)
 {
-    QFile file(settings::get_gcPath() + QDir::separator() + fileName);
-    //QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName);
+    //QFile file(settings::get_gcPath() + QDir::separator() + fileName);
+    QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName);
     if(!file.open(QFile::WriteOnly))
     {
         qDebug() << "File not open!";
         return;
     }
 
-    file.write(jsondoc.toJson(QJsonDocument::Compact));
+    //file.write(jsondoc.toJson(QJsonDocument::Compact));
+    file.write(jsondoc.toJson());
     file.flush();
     file.close();
 }
