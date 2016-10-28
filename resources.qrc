@@ -40,5 +40,6 @@
         <file>icons/Diagram.png</file>
         <file>icons/3d bar chart.png</file>
         <file>icons/Load.png</file>
+        <file>icons/workouteditor.png</file>
     </qresource>
 </RCC>
