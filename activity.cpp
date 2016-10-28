@@ -102,6 +102,8 @@ void Activity::prepareData()
             lapStartPrev = lapStart;
             typePrev = type;
         }
+        xdata_model->clear();
+        delete xdata_model;
     }
 
     ride_info.insert("Distance:",QString::number(samp_model->data(samp_model->index(sampCount-1,1,QModelIndex())).toDouble()));
@@ -287,11 +289,11 @@ void Activity::set_hf_time_in_zone()
      //REKOM: Z0*0,125 + Z1 + Z2*0,5
      p_hf_timezone[0] = ceil((p_swim_timezone[0]*hf_factor[0]) + p_swim_timezone[1] + (p_swim_timezone[2]*hf_factor[2]));
 
-     //END: Z0*0,5 + Z2*0,5 + Z3*0,75 + Z4*0,25
-     p_hf_timezone[1] = ceil((p_swim_timezone[0]*hf_factor[2]) + (p_swim_timezone[2]*hf_factor[2]) + (p_swim_timezone[3]*hf_factor[3]) + (p_swim_timezone[4]*hf_factor[1]));
+     //END: Z0*0,5 + Z2*0,5 + Z3*0,75
+     p_hf_timezone[1] = ceil((p_swim_timezone[0]*hf_factor[2]) + (p_swim_timezone[2]*hf_factor[2]) + (p_swim_timezone[3]*hf_factor[3]));
 
      //TEMP: Z0*0,25 + Z3*0,25 + Z4*0,75 + Z5*0,5
-     p_hf_timezone[2] = ceil((p_swim_timezone[0]*hf_factor[1]) + (p_swim_timezone[3]*hf_factor[1]) + (p_swim_timezone[4]*hf_factor[3]) + (p_swim_timezone[5]*hf_factor[2]));
+     p_hf_timezone[2] = ceil((p_swim_timezone[0]*hf_factor[1]) + (p_swim_timezone[3]*hf_factor[1]) + p_swim_timezone[4] + (p_swim_timezone[5]*hf_factor[2]));
 
      //LT: Z5*0,25 + Z6*0,75 + Z7*0,5
      p_hf_timezone[3] = ceil((p_swim_timezone[5]*hf_factor[1]) + (p_swim_timezone[6]*hf_factor[3]) + (p_swim_timezone[7]*hf_factor[2]));

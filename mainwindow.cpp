@@ -1026,7 +1026,7 @@ void MainWindow::write_hf_infos()
     jsonhandler->set_overrideFlag(true);
     jsonhandler->set_overrideData("average_hr",ui->lineEdit_hfavg->text());
     jsonhandler->set_overrideData("total_work",ui->lineEdit_kj->text());
-    for(int i = 0; i < 6; i++)
+    for(int i = 0; i < 7; i++)
     {
         hf_value = settings::get_timesec(curr_activity->swim_hf_model->data(curr_activity->swim_hf_model->index(i,3,QModelIndex())).toString());
         jsonhandler->set_overrideData("time_in_zone_H" + QString::number(i+1),QString::number(hf_value));
@@ -1346,8 +1346,6 @@ void MainWindow::on_actionReset_triggered()
         delete curr_activity->swim_hf_model;
         curr_activity->swim_xdata->clear();
         delete curr_activity->swim_xdata;
-        curr_activity->xdata_model->clear();
-        delete curr_activity->xdata_model;
         curr_activity->act_reset();
         ui->lineEdit_swimcv->clear();
         ui->lineEdit_hf_threshold->clear();
