@@ -508,23 +508,11 @@ int settings::get_hfvalue(QString percent)
     return static_cast<int>(round(hfThres.toDouble() * (value / 100.0)));
 }
 
-double settings::calc_totalWork(QString sport, double weight,double avgHF, double calcBase,double swimFactor)
+double settings::calc_totalWork(double weight,double avgHF, double moveTime)
 {
-    double kjFactor = 4.184;
-    int kal_100 = 25;
     int age = QDate::currentDate().year() - athleteYOB;
 
-    if(sport == settings::isSwim)
-    {
-        return ceil(((kal_100 * swimFactor *(calcBase*10))*kjFactor)/4);
-    }
-
-    if(sport == settings::isRun)
-    {
-        return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/kjFactor) * calcBase/60);
-    }
-
-    return 0;
+    return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
 }
 
 double settings::estimate_stress(QString sport, QString p_goal, int duration)

@@ -1,7 +1,6 @@
 #ifndef ACTIVITY_H
 #define ACTIVITY_H
 
-
 #include <QFile>
 #include <QFileDialog>
 #include <QtXml>
@@ -17,31 +16,26 @@ private:
     jsonHandler *jsonhandler;
     QString v_date,curr_sport;
     QStringList ride_items;
-    double swim_track,avg_dist,avg_watt,avg_laptime;
-    int dist_factor,avg_counter,avg_pace;
-
-    int pace_cv,zone_count;
-    int move_time;
-    int swim_pace;
-    int hf_threshold,hf_avg;
-    double swim_cv,swim_sri,polishFactor;
     QVector<double> calc_speed,calc_cadence,p_swim_time,new_dist;
     QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg,p_swimlaps,vect_lapstart;
+    double swim_track,avg_dist,avg_watt,avg_laptime,swim_cv,swim_sri,polishFactor;
+    int dist_factor,avg_counter,avg_pace,pace_cv,zone_count,move_time,swim_pace,hf_threshold,hf_avg;
     bool changeRowCount;
+
+
+    void set_time_in_zones(bool);
+    void adjust_intervalls();
+    void set_edit_samp_model();
 
     double get_int_distance(int,bool);
     double get_int_watts(int);
-    int get_swim_laps(int,bool);
-    bool check_speed(int);
     double interpolate_speed(int,int,double);
+
+    int get_swim_laps(int,bool);
     int check_is_intervall(int);
-
-    void read_swim_data();
     int get_zone_values(double,int,bool);
-    void set_time_in_zones();
 
-    void adjust_intervalls();
-    void set_edit_samp_model();
+    bool check_speed(int);
 
 public:
     explicit Activity();
@@ -64,25 +58,27 @@ public:
     double polish_SpeedValues(double,double,double,bool);
 
     //Value Getter and Setter
+    void set_changeRowCount(bool setCount) {changeRowCount = setCount;}
+    void set_polishFactor(double vFactor) {polishFactor = vFactor;}
+    int get_header_num();
     void set_date(QString a_date) {v_date = a_date;}
     QString get_date() {return v_date;}
     void set_sport(QString a_sport) {curr_sport = a_sport;}
     QString get_sport() {return curr_sport;}
-    int get_header_num();
-    void set_changeRowCount(bool setCount) {changeRowCount = setCount;}
-    void set_polishFactor(double vFactor) {polishFactor = vFactor;}
+
 
     //Averages
-    void set_dist_factor();
-    int get_dist_factor() {return dist_factor;}
-    void set_avg_values(int,int,bool);
     void reset_avg();
+    void set_dist_factor();
+    void set_avg_values(int,int,bool);
+    int get_dist_factor() {return dist_factor;}
     int get_avg_laptime() {return round(avg_laptime/avg_counter);}
     int get_avg_pace() {return avg_pace/avg_counter;}
     double get_avg_dist() {return avg_dist/avg_counter;}
     double get_avg_watts() {return avg_watt/avg_counter;}
 
     //Swim Calculations
+    void set_swim_data();
     int get_swim_cv_pace(double);
     QString get_swim_pace_time(int);
 
@@ -100,7 +96,7 @@ public:
     double get_swim_cv() {return swim_cv;}
     void set_hf_time_in_zone();
     void set_swim_track(double trackLen) {swim_track = trackLen;}
-    double get_swim_track() {return swim_track;}
+    double get_swim_track() {return swim_track;}   
     QVector<double> * get_new_dist()
     {
         QVector<double> *dist = &new_dist;
@@ -112,9 +108,6 @@ public:
         return speed;
     }
 
-signals:
-
-public slots:
 };
 
 #endif // ACTIVITY_H

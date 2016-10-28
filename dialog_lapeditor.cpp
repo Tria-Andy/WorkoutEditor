@@ -194,7 +194,15 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
     {
         if(curr_act->get_sport() == settings::isSwim)
         {
-            editModel->removeRow(index,QModelIndex());
+            if(ui->comboBox_edit->currentIndex() == SWIMLAPS)
+            {
+                editModel->removeRow(index,QModelIndex());
+            }
+            else
+            {
+                editModel->removeRow(index,QModelIndex());
+                curr_act->curr_act_model->removeRow(index,QModelIndex());
+            }
             this->recalulateData(index-1);
         }
         else

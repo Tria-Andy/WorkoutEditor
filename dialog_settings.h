@@ -20,38 +20,21 @@ public:
     ~Dialog_settings();
 
 private slots:
-
-
     void on_pushButton_cancel_clicked();
-
     void on_comboBox_selInfo_currentTextChanged(const QString &arg1);
-
     void on_listWidget_selection_itemDoubleClicked(QListWidgetItem *item);
-
     void on_pushButton_up_clicked();
-
     void on_pushButton_down_clicked();
-
     void on_pushButton_add_clicked();
-
     void on_pushButton_delete_clicked();
-
     void on_pushButton_edit_clicked();
-
     void on_comboBox_thresSport_currentTextChanged(const QString &arg1);
-
     void on_pushButton_save_clicked();
-
     void on_lineEdit_thresPace_textEdited(const QString &arg1);
-
     void on_lineEdit_thresPower_textEdited(const QString &arg1);
-
     void on_lineEdit_hfThres_textEdited(const QString &arg1);
-
     void on_lineEdit_hfmax_textEdited(const QString &arg1);
-
     void on_dateEdit_saisonStart_dateChanged(const QDate &date);
-
     void on_pushButton_color_clicked();
 
 private:

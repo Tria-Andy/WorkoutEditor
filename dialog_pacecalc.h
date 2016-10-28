@@ -20,21 +20,13 @@ public:
 
 private slots:
     void on_pushButton_close_clicked();
-
     void on_comboBox_sport_currentTextChanged(const QString &arg1);
-
     void on_timeEdit_pace_timeChanged(const QTime &time);
-
     void on_lineEdit_dist_textChanged(const QString &arg1);
-
     void on_spinBox_factor_valueChanged(int arg1);
-
     void on_timeEdit_intTime_timeChanged(const QTime &time);
-
     void on_spinBox_IntDist_valueChanged(int arg1);
-
     void on_pushButton_clicked();
-
     void on_pushButton_copy_clicked();
 
 private:

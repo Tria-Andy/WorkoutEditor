@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dist_sum.resize(7);
     stress_sum.resize(7);
     isWeekMode = true;
+    safeFlag = false;
     sel_count = 0;
     ui->label_month->setText("Woche " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*7).weekNumber()-1));
     ui->pushButton_current_week->setEnabled(false);
@@ -50,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
     sum_model = new QStandardItemModel();
     connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
 
+    ui->actionSave_Workout_Schedule->setEnabled(false);
     ui->actionEditor->setEnabled(true);
     ui->actionPlaner->setIcon(QIcon(":/images/icons/Yes.png"));
     ui->actionPlaner->setEnabled(false);
@@ -495,6 +497,8 @@ void MainWindow::on_actionNew_triggered()
         if(dialog_code == QDialog::Accepted)
         {
             workSchedule->add_workout();
+            safeFlag = true;
+            ui->actionSave_Workout_Schedule->setEnabled(true);
             this->refresh_model();
         }
     }
@@ -513,26 +517,28 @@ void MainWindow::on_actionSave_Workout_Schedule_triggered()
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this,
-                                      tr("Save File"),
-                                      "Save Workouts to XML File?",
+                                      tr("Save Workouts"),
+                                      "Save Week Workout Schedule?",
                                       QMessageBox::Yes|QMessageBox::No
                                       );
         if (reply == QMessageBox::Yes)
         {
             workSchedule->save_workout_file();
+            ui->actionSave_Workout_Schedule->setEnabled(false);
         }
     }
     else
     {
         QMessageBox::StandardButton reply;
             reply = QMessageBox::question(this,
-                                          tr("Save File"),
-                                          "Save Year Schedule to File?",
+                                          tr("Save Schedule"),
+                                          "Save Current Year Schedule?",
                                           QMessageBox::Yes|QMessageBox::No
                                           );
         if (reply == QMessageBox::Yes)
         {
             workSchedule->save_week_files();
+            ui->actionSave_Workout_Schedule->setEnabled(false);
         }
     }
 }
@@ -581,6 +587,8 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
                   if(edit_workout.get_result() == 1) workSchedule->edit_workout(edit_workout.get_edit_index());
                   if(edit_workout.get_result() == 2) workSchedule->add_workout();
                   if(edit_workout.get_result() == 3) workSchedule->delete_workout(edit_workout.get_edit_index());
+                  safeFlag = true;
+                  ui->actionSave_Workout_Schedule->setEnabled(true);
                   this->refresh_model();
               }
             }
@@ -920,6 +928,7 @@ void MainWindow::set_activty_intervalls()
         ui->lineEdit_laplen->setText(QString::number(curr_activity->get_swim_track()));
         ui->lineEdit_swimtime->setText(QDateTime::fromTime_t(curr_activity->get_move_time()).toUTC().toString("hh:mm:ss"));
         ui->lineEdit_swimpace->setText(settings::set_time(curr_activity->get_swim_pace()));
+        this->write_hf_infos();
     }
     else
     {
@@ -1023,10 +1032,18 @@ void MainWindow::set_intChartValues(int lapindex,double avgSpeed)
 void MainWindow::write_hf_infos()
 {
     int hf_value;
+    double totalWork;
+
+    ui->lineEdit_hfavg->setText(QString::number(curr_activity->get_hf_avg()));
+    totalWork = settings::calc_totalWork(jsonhandler->get_tagData("Weight").toDouble(),curr_activity->get_hf_avg(),curr_activity->get_move_time());
+    totalWork = totalWork * curr_activity->get_swim_sri();
+    ui->lineEdit_kal->setText(QString::number(ceil((totalWork/4)*4.184)));
+    ui->lineEdit_kj->setText(QString::number(ceil(totalWork)));
+
     jsonhandler->set_overrideFlag(true);
     jsonhandler->set_overrideData("average_hr",ui->lineEdit_hfavg->text());
     jsonhandler->set_overrideData("total_work",ui->lineEdit_kj->text());
-    for(int i = 0; i < 6; i++)
+    for(int i = 0; i < 7; i++)
     {
         hf_value = settings::get_timesec(curr_activity->swim_hf_model->data(curr_activity->swim_hf_model->index(i,3,QModelIndex())).toString());
         jsonhandler->set_overrideData("time_in_zone_H" + QString::number(i+1),QString::number(hf_value));
@@ -1247,8 +1264,31 @@ void MainWindow::on_actionPlaner_triggered()
 
 void MainWindow::on_actionExit_triggered()
 {
-    this->freeMem();
-    close();
+    if(safeFlag)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this,
+                                      tr("Save and Exit"),
+                                      "Save Changes on Workouts?",
+                                      QMessageBox::Yes|QMessageBox::No
+                                      );
+        if (reply == QMessageBox::Yes)
+        {
+            workSchedule->save_workout_file();
+            this->freeMem();
+            close();
+        }
+        else
+        {
+            this->freeMem();
+            close();
+        }
+    }
+    else
+    {
+        this->freeMem();
+        close();
+    }
 }
 
 void MainWindow::on_actionExit_and_Save_triggered()
@@ -1346,8 +1386,6 @@ void MainWindow::on_actionReset_triggered()
         delete curr_activity->swim_hf_model;
         curr_activity->swim_xdata->clear();
         delete curr_activity->swim_xdata;
-        curr_activity->xdata_model->clear();
-        delete curr_activity->xdata_model;
         curr_activity->act_reset();
         ui->lineEdit_swimcv->clear();
         ui->lineEdit_hf_threshold->clear();
@@ -1406,17 +1444,6 @@ void MainWindow::on_actionUnselect_all_rows_triggered()
         this->set_avg_fields();
         ui->tableView_int->setCurrentIndex(curr_activity->curr_act_model->index(0,0,QModelIndex()));
     }
-}
-
-void MainWindow::on_pushButton_calcHF_clicked()
-{
-    double totalWork;
-    curr_activity->set_hf_time_in_zone();
-    ui->lineEdit_hfavg->setText(QString::number(curr_activity->get_hf_avg()));
-    totalWork = settings::calc_totalWork(curr_activity->get_sport(),0,0,curr_activity->samp_model->data(curr_activity->samp_model->index(curr_activity->samp_model->rowCount()-1,1,QModelIndex())).toDouble(),curr_activity->get_swim_sri());
-    ui->lineEdit_kal->setText(QString::number(ceil((totalWork/4)*4.184)));
-    ui->lineEdit_kj->setText(QString::number(totalWork));
-    this->write_hf_infos();
 }
 
 void MainWindow::on_actionEdit_Distance_triggered()
