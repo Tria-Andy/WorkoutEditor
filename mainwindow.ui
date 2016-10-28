@@ -1260,13 +1260,6 @@
                  </property>
                 </spacer>
                </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_calcHF">
-                 <property name="text">
-                  <string>Estimate Swim HF</string>
-                 </property>
-                </widget>
-               </item>
               </layout>
              </widget>
             </item>

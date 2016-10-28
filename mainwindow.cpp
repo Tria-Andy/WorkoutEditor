@@ -920,6 +920,7 @@ void MainWindow::set_activty_intervalls()
         ui->lineEdit_laplen->setText(QString::number(curr_activity->get_swim_track()));
         ui->lineEdit_swimtime->setText(QDateTime::fromTime_t(curr_activity->get_move_time()).toUTC().toString("hh:mm:ss"));
         ui->lineEdit_swimpace->setText(settings::set_time(curr_activity->get_swim_pace()));
+        this->write_hf_infos();
     }
     else
     {
@@ -1023,6 +1024,14 @@ void MainWindow::set_intChartValues(int lapindex,double avgSpeed)
 void MainWindow::write_hf_infos()
 {
     int hf_value;
+    double totalWork;
+
+    ui->lineEdit_hfavg->setText(QString::number(curr_activity->get_hf_avg()));
+    totalWork = settings::calc_totalWork(jsonhandler->get_tagData("Weight").toDouble(),curr_activity->get_hf_avg(),curr_activity->get_move_time());
+    totalWork = totalWork * curr_activity->get_swim_sri();
+    ui->lineEdit_kal->setText(QString::number(ceil((totalWork/4)*4.184)));
+    ui->lineEdit_kj->setText(QString::number(ceil(totalWork)));
+
     jsonhandler->set_overrideFlag(true);
     jsonhandler->set_overrideData("average_hr",ui->lineEdit_hfavg->text());
     jsonhandler->set_overrideData("total_work",ui->lineEdit_kj->text());
@@ -1404,18 +1413,6 @@ void MainWindow::on_actionUnselect_all_rows_triggered()
         this->set_avg_fields();
         ui->tableView_int->setCurrentIndex(curr_activity->curr_act_model->index(0,0,QModelIndex()));
     }
-}
-
-void MainWindow::on_pushButton_calcHF_clicked()
-{
-    double totalWork;
-    curr_activity->set_hf_time_in_zone();
-    ui->lineEdit_hfavg->setText(QString::number(curr_activity->get_hf_avg()));
-    totalWork = settings::calc_totalWork(jsonhandler->get_tagData("Weight").toDouble(),curr_activity->get_hf_avg(),curr_activity->get_move_time());
-    totalWork = totalWork * curr_activity->get_swim_sri();
-    ui->lineEdit_kal->setText(QString::number(ceil((totalWork/4)*4.184)));
-    ui->lineEdit_kj->setText(QString::number(ceil(totalWork)));
-    this->write_hf_infos();
 }
 
 void MainWindow::on_actionEdit_Distance_triggered()

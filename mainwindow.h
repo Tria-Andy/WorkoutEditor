@@ -123,7 +123,6 @@ private slots:
     void on_tableView_int_clicked(const QModelIndex &index);
     void on_actionReset_triggered();
     void on_actionUnselect_all_rows_triggered();
-    void on_pushButton_calcHF_clicked();
     void on_actionEdit_Distance_triggered();
     void on_actionEdit_Undo_triggered();
     void on_actionStress_Calculator_triggered();

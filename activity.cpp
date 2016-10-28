@@ -122,7 +122,25 @@ void Activity::prepareData()
         hf_zone_avg.resize(zone_count);
         hf_avg = 0;
         move_time = 0.0;
-        this->read_swim_data();
+
+        QStringList pace_header,hf_header;
+        pace_header << "Zone" << "Low (min/100m)" << "High (min/100m)" << "Time in Zone";
+        hf_header << "Zone" << "Low (1/Min)" << "High (1/min)" << "Time in Zone";
+
+
+        //Set Tableinfos
+        swim_pace_model = new QStandardItemModel(zone_count,4);
+        swim_pace_model->setHorizontalHeaderLabels(pace_header);
+
+        swim_hf_model = new QStandardItemModel(zone_count,4);
+        swim_hf_model->setHorizontalHeaderLabels(hf_header);
+
+        //Read current CV and HF Threshold
+        QString temp_cv = settings::get_paceList().at(0);
+        swim_cv = (3600.0 / settings::get_timesec(temp_cv)) / 10.0;
+        pace_cv = settings::get_timesec(temp_cv);
+
+        this->set_swim_data();
     }
 }
 
@@ -140,26 +158,11 @@ void Activity::set_additional_ride_info()
     }
 }
 
-void Activity::read_swim_data()
+void Activity::set_swim_data()
 {
-    QStringList pace_header,hf_header;
-    pace_header << "Zone" << "Low (min/100m)" << "High (min/100m)" << "Time in Zone";
-    hf_header << "Zone" << "Low (1/Min)" << "High (1/min)" << "Time in Zone";
-
+    bool recalc = settings::get_act_isrecalc();
     QStringList swimZone, hfZone,levels;
-    QString temp,zone_low,zone_high,hfThres,hfMax;
-
-    //Set Tableinfos
-    swim_pace_model = new QStandardItemModel(zone_count,4);
-    swim_pace_model->setHorizontalHeaderLabels(pace_header);
-
-    swim_hf_model = new QStandardItemModel(zone_count,4);
-    swim_hf_model->setHorizontalHeaderLabels(hf_header);
-
-    //Read current CV and HF Threshold
-    QString temp_cv = settings::get_paceList().at(0);
-    swim_cv = (3600.0 / settings::get_timesec(temp_cv)) / 10.0;
-    pace_cv = settings::get_timesec(temp_cv);
+    QString temp,zone_low,zone_high,hfThres,hfMax;;
 
     swimZone = settings::get_swimRange();
     hfZone = settings::get_hfRange();
@@ -168,8 +171,8 @@ void Activity::read_swim_data()
     hfMax = settings::get_hfList().at(1);
     levels = settings::get_levelList();
 
-    //Set Swim zone low and high
 
+    //Set Swim zone low and high
         for(int i = 0; i < zone_count; i++)
         {
             temp = swimZone.at(i);
@@ -191,7 +194,8 @@ void Activity::read_swim_data()
             }
             p_swim_timezone[i] = 0;
         }
-        this->set_time_in_zones();
+
+        this->set_time_in_zones(recalc);
 
         for (int x = 1; x <= zone_count;x++)
         {
@@ -199,7 +203,6 @@ void Activity::read_swim_data()
         }
 
     //Set HF zone low and high
-
         for(int i = 0; i < zone_count; i++)
         {
             temp = hfZone.at(i);
@@ -221,16 +224,19 @@ void Activity::read_swim_data()
                 this->set_hf_zone_avg(this->get_zone_values(zone_low.toDouble(),hf_threshold,false),hfMax.toDouble(),i);
             }
         }
+        this->set_hf_time_in_zone();
 }
 
-void Activity::set_time_in_zones()
+void Activity::set_time_in_zones(bool recalc)
 {
+    QStandardItemModel *model = this->set_samp_model_pointer(recalc);
+
     int z0=0,z1=0,z2=0,z3=0,z4=0,z5=0,z6=0,z7=0;
     double paceSec;
 
-    for(int i = 0; i < samp_model->rowCount(); i++)
+    for(int i = 0; i < model->rowCount(); i++)
     {
-        paceSec = samp_model->data(samp_model->index(i,2,QModelIndex())).toDouble();
+        paceSec = model->data(model->index(i,2,QModelIndex())).toDouble();
 
         if(paceSec <= p_swim_time[0])
         {
@@ -327,6 +333,7 @@ void Activity::set_hf_avg()
 
 void Activity::set_move_time()
 {
+    move_time = 0;
     for(int i = 1; i <= 7;i++)
     {
         move_time = move_time + p_swim_timezone[i];
@@ -822,6 +829,7 @@ void Activity::set_edit_samp_model()
             edit_samp_model->setData(edit_samp_model->index(row,2,QModelIndex()),calc_speed[row]);
             edit_samp_model->setData(edit_samp_model->index(row,3,QModelIndex()),calc_cadence[row]);
         }
+        this->set_swim_data();
     }
     else
     {

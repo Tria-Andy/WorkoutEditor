@@ -22,8 +22,8 @@ private:
     int dist_factor,avg_counter,avg_pace,pace_cv,zone_count,move_time,swim_pace,hf_threshold,hf_avg;
     bool changeRowCount;
 
-    void read_swim_data();
-    void set_time_in_zones();
+
+    void set_time_in_zones(bool);
     void adjust_intervalls();
     void set_edit_samp_model();
 
@@ -78,6 +78,7 @@ public:
     double get_avg_watts() {return avg_watt/avg_counter;}
 
     //Swim Calculations
+    void set_swim_data();
     int get_swim_cv_pace(double);
     QString get_swim_pace_time(int);
 
