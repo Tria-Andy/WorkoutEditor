@@ -76,7 +76,7 @@ private:
     int weekRange,weekpos;
     int weekDays;
     unsigned int weekCounter;
-    bool isWeekMode;
+    bool isWeekMode,safeFlag;
 
     void summery_view();
     void summery_calc(int,QModelIndex,bool);

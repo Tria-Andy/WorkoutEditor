@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dist_sum.resize(7);
     stress_sum.resize(7);
     isWeekMode = true;
+    safeFlag = false;
     sel_count = 0;
     ui->label_month->setText("Woche " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*7).weekNumber()-1));
     ui->pushButton_current_week->setEnabled(false);
@@ -50,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
     sum_model = new QStandardItemModel();
     connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
 
+    ui->actionSave_Workout_Schedule->setEnabled(false);
     ui->actionEditor->setEnabled(true);
     ui->actionPlaner->setIcon(QIcon(":/images/icons/Yes.png"));
     ui->actionPlaner->setEnabled(false);
@@ -495,6 +497,8 @@ void MainWindow::on_actionNew_triggered()
         if(dialog_code == QDialog::Accepted)
         {
             workSchedule->add_workout();
+            safeFlag = true;
+            ui->actionSave_Workout_Schedule->setEnabled(true);
             this->refresh_model();
         }
     }
@@ -513,26 +517,28 @@ void MainWindow::on_actionSave_Workout_Schedule_triggered()
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this,
-                                      tr("Save File"),
-                                      "Save Workouts to XML File?",
+                                      tr("Save Workouts"),
+                                      "Save Week Workout Schedule?",
                                       QMessageBox::Yes|QMessageBox::No
                                       );
         if (reply == QMessageBox::Yes)
         {
             workSchedule->save_workout_file();
+            ui->actionSave_Workout_Schedule->setEnabled(false);
         }
     }
     else
     {
         QMessageBox::StandardButton reply;
             reply = QMessageBox::question(this,
-                                          tr("Save File"),
-                                          "Save Year Schedule to File?",
+                                          tr("Save Schedule"),
+                                          "Save Current Year Schedule?",
                                           QMessageBox::Yes|QMessageBox::No
                                           );
         if (reply == QMessageBox::Yes)
         {
             workSchedule->save_week_files();
+            ui->actionSave_Workout_Schedule->setEnabled(false);
         }
     }
 }
@@ -581,6 +587,8 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
                   if(edit_workout.get_result() == 1) workSchedule->edit_workout(edit_workout.get_edit_index());
                   if(edit_workout.get_result() == 2) workSchedule->add_workout();
                   if(edit_workout.get_result() == 3) workSchedule->delete_workout(edit_workout.get_edit_index());
+                  safeFlag = true;
+                  ui->actionSave_Workout_Schedule->setEnabled(true);
                   this->refresh_model();
               }
             }
@@ -1256,8 +1264,31 @@ void MainWindow::on_actionPlaner_triggered()
 
 void MainWindow::on_actionExit_triggered()
 {
-    this->freeMem();
-    close();
+    if(safeFlag)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this,
+                                      tr("Save and Exit"),
+                                      "Save Changes on Workouts?",
+                                      QMessageBox::Yes|QMessageBox::No
+                                      );
+        if (reply == QMessageBox::Yes)
+        {
+            workSchedule->save_workout_file();
+            this->freeMem();
+            close();
+        }
+        else
+        {
+            this->freeMem();
+            close();
+        }
+    }
+    else
+    {
+        this->freeMem();
+        close();
+    }
 }
 
 void MainWindow::on_actionExit_and_Save_triggered()
