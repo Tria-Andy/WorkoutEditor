@@ -26,6 +26,7 @@ private slots:
     void on_comboBox_edit_currentIndexChanged(int index);
     void on_spinBox_starttime_valueChanged(int arg1);
     void on_spinBox_endtime_valueChanged(int arg1);
+    void on_comboBox_lap_activated(int index);
 
 private:
     Ui::Dialog_lapeditor *ui;

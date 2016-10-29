@@ -1,5 +1,6 @@
 #include "dialog_lapeditor.h"
 #include "ui_dialog_lapeditor.h"
+#include <QMouseEvent>
 
 Dialog_lapeditor::Dialog_lapeditor(QWidget *parent,Activity *p_act,QModelIndex p_index) :
     QDialog(parent),
@@ -31,6 +32,7 @@ Dialog_lapeditor::Dialog_lapeditor(QWidget *parent,Activity *p_act,QModelIndex p
     }
 
     this->set_lapinfo();
+
 }
 
 enum {UPDATE,ADD,DELETE};
@@ -288,9 +290,9 @@ void Dialog_lapeditor::on_pushButton_ok_clicked()
     int editMode,index;
     index = ui->comboBox_lap->currentIndex();
     selRow = index;
-    if(ui->radioButton_update->isChecked()) editMode = 0;
-    if(ui->radioButton_add->isChecked()) editMode = 1;
-    if(ui->radioButton_del->isChecked()) editMode = 2;
+    if(ui->radioButton_update->isChecked()) editMode = UPDATE;
+    if(ui->radioButton_add->isChecked()) editMode = ADD;
+    if(ui->radioButton_del->isChecked()) editMode = DELETE;
     this->edit_laps(editMode,index);
 }
 
@@ -321,7 +323,6 @@ void Dialog_lapeditor::on_comboBox_lap_currentIndexChanged(int vLap)
         {
             ui->spinBox_endtime->setValue(editModel->data(editModel->index(vLap,2,QModelIndex())).toInt());
             ui->doubleSpinBox_distance->setValue(editModel->data(editModel->index(vLap,3,QModelIndex())).toDouble());
-            ui->progressBar_updateInt->setValue(0);
             this->set_duration();
         }
     }
@@ -329,8 +330,7 @@ void Dialog_lapeditor::on_comboBox_lap_currentIndexChanged(int vLap)
     {
         ui->spinBox_starttime->setValue(editModel->data(editModel->index(vLap,1,QModelIndex())).toInt());
         ui->spinBox_endtime->setValue(editModel->data(editModel->index(vLap,2,QModelIndex())).toInt());
-        ui->doubleSpinBox_distance->setValue(editModel->data(editModel->index(vLap,3,QModelIndex())).toDouble());
-        ui->progressBar_updateInt->setValue(0);
+        ui->doubleSpinBox_distance->setValue(editModel->data(editModel->index(vLap,3,QModelIndex())).toDouble());       
         this->set_duration();
     }
 
@@ -369,4 +369,10 @@ void Dialog_lapeditor::on_spinBox_endtime_valueChanged(int value)
 {
     ui->label_end->setText(settings::set_time(value));
     this->set_duration();
+}
+
+void Dialog_lapeditor::on_comboBox_lap_activated(int index)
+{
+    Q_UNUSED(index)
+    ui->progressBar_updateInt->setValue(0);
 }

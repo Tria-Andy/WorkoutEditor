@@ -525,6 +525,7 @@ void MainWindow::on_actionSave_Workout_Schedule_triggered()
         {
             workSchedule->save_workout_file();
             ui->actionSave_Workout_Schedule->setEnabled(false);
+            safeFlag = false;
         }
     }
     else
@@ -539,6 +540,7 @@ void MainWindow::on_actionSave_Workout_Schedule_triggered()
         {
             workSchedule->save_week_files();
             ui->actionSave_Workout_Schedule->setEnabled(false);
+            safeFlag = false;
         }
     }
 }
