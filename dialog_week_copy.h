@@ -19,7 +19,6 @@ public:
 
 private slots:
     void on_pushButton_cancel_clicked();
-
     void on_pushButton_copy_clicked();
 
 private:

@@ -20,47 +20,26 @@ public:
 
 private slots:
     void on_pushButton_cancel_clicked();
-
     void on_spinBox_swim_work_valueChanged(int arg1);
-
     void on_spinBox_bike_work_valueChanged(int arg1);
-
     void on_spinBox_run_work_valueChanged(int arg1);
-
     void on_spinBox_stg_work_valueChanged(int arg1);
-
     void on_spinBox_alt_work_valueChanged(int arg1);
-
     void on_timeEdit_swim_dur_timeChanged(const QTime &time);
-
     void on_timeEdit_bike_dur_timeChanged(const QTime &time);
-
     void on_timeEdit_run_dur_timeChanged(const QTime &time);
-
     void on_timeEdit_stg_dur_timeChanged(const QTime &time);
-
     void on_timeEdit_alt_dur_timeChanged(const QTime &time);
-
     void on_doubleSpinBox_swim_dist_valueChanged(double arg1);
-
     void on_doubleSpinBox_bike_dist_valueChanged(double arg1);
-
     void on_doubleSpinBox_run_dist_valueChanged(double arg1);
-
     void on_doubleSpinBox_alt_dist_valueChanged(double arg1);
-
     void on_spinBox_swim_stress_valueChanged(int arg1);
-
     void on_spinBox_bike_stress_valueChanged(int arg1);
-
     void on_spinBox_run_stress_valueChanged(int arg1);
-
     void on_spinBox_stg_stress_valueChanged(int arg1);
-
     void on_spinBox_alt_stress_valueChanged(int arg1);
-
     void on_dateEdit_selectDate_dateChanged(const QDate &date);
-
     void on_pushButton_ok_clicked();
 
 private:

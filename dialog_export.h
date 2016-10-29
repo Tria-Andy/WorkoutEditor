@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QStandardItemModel>
 #include <QFile>
+#include "jsonhandler.h"
 #include "settings.h"
 
 namespace Ui {
@@ -20,17 +21,11 @@ public:
 
 private slots:
     void on_pushButton_close_clicked();
-
     void on_pushButton_export_clicked();
-
     void on_radioButton_day_clicked();
-
     void on_radioButton_week_clicked();
-
     void on_comboBox_week_export_currentIndexChanged(const QString &arg1);
-
     void on_dateEdit_export_dateChanged(const QDate &date);
-
     void on_comboBox_time_export_currentIndexChanged(const QString &time);
 
 private:
@@ -39,11 +34,10 @@ private:
     QList<QStandardItem*> workout_time;
     QStringList weeks;
     QString fileName, fileContent;
-
+    jsonHandler *jsonhandler;
     int export_mode;
 
     void workout_export();
-    void write_file(QString,QString);
     void set_filecontent(QModelIndex);
     void set_exportselection(bool,bool);
     void set_infolabel(int);

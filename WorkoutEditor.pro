@@ -88,3 +88,8 @@ FORMS    += mainwindow.ui \
 
 RESOURCES += \
     resources.qrc
+
+#Add Icon
+win32 {
+    RC_FILE = WorkoutEditor.rc
+}
