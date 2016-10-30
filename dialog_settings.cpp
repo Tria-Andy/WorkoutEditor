@@ -200,6 +200,7 @@ void Dialog_settings::set_thresholdModel(QStringList levelList)
     ui->tableView_level->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_level->verticalHeader()->hide();
     double threshold_value = ui->lineEdit_thresPower->text().toDouble();
+    double percLow = 0,percHigh = 0;
     int threshold_pace = settings::get_timesec(ui->lineEdit_thresPace->text());
     QString range;
 
@@ -211,15 +212,21 @@ void Dialog_settings::set_thresholdModel(QStringList levelList)
         level_model->setData(level_model->index(i,1,QModelIndex()),range.split("-").first());
         level_model->setData(level_model->index(i,3,QModelIndex()),range.split("-").last());
 
+        percLow = level_model->data(level_model->index(i,1,QModelIndex())).toDouble()/100;
+        percHigh = level_model->data(level_model->index(i,3,QModelIndex())).toDouble()/100;
+
         if(ui->comboBox_thresSport->currentText() == settings::isBike)
         {
-            level_model->setData(level_model->index(i,2,QModelIndex()),threshold_value * (level_model->data(level_model->index(i,1,QModelIndex())).toDouble()/100));
-            level_model->setData(level_model->index(i,4,QModelIndex()),threshold_value * (level_model->data(level_model->index(i,3,QModelIndex())).toDouble()/100));
+            level_model->setData(level_model->index(i,2,QModelIndex()),threshold_value * percLow);
+            level_model->setData(level_model->index(i,4,QModelIndex()),threshold_value * percHigh);
         }
         else
         {
-            level_model->setData(level_model->index(i,2,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace + ((threshold_pace/100)*(100-level_model->data(level_model->index(i,1,QModelIndex())).toDouble()))))));
-            level_model->setData(level_model->index(i,4,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace + ((threshold_pace/100)*(100-level_model->data(level_model->index(i,3,QModelIndex())).toDouble()))))));
+            level_model->setData(level_model->index(i,2,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace / percLow))));
+            level_model->setData(level_model->index(i,4,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace / percHigh))));
+
+            //level_model->setData(level_model->index(i,2,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace + ((threshold_pace/100)*(100-level_model->data(level_model->index(i,1,QModelIndex())).toDouble()))))));
+            //level_model->setData(level_model->index(i,4,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace + ((threshold_pace/100)*(100-level_model->data(level_model->index(i,3,QModelIndex())).toDouble()))))));
         }
     }
 }
