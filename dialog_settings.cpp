@@ -224,9 +224,6 @@ void Dialog_settings::set_thresholdModel(QStringList levelList)
         {
             level_model->setData(level_model->index(i,2,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace / percLow))));
             level_model->setData(level_model->index(i,4,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace / percHigh))));
-
-            //level_model->setData(level_model->index(i,2,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace + ((threshold_pace/100)*(100-level_model->data(level_model->index(i,1,QModelIndex())).toDouble()))))));
-            //level_model->setData(level_model->index(i,4,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace + ((threshold_pace/100)*(100-level_model->data(level_model->index(i,3,QModelIndex())).toDouble()))))));
         }
     }
 }
