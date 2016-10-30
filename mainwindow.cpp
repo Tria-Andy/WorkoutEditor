@@ -641,6 +641,8 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
             {
                 this->workout_calendar();
                 this->summery_view();
+                safeFlag = true;
+                ui->actionSave_Workout_Schedule->setEnabled(true);
             }
         }
     }
