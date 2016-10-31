@@ -615,8 +615,10 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
                 {
                     workSchedule->copyWeek();
                     this->workout_calendar();
-                    weekCounter = 0;
+                    //weekCounter = 0;
                     this->set_calender();
+                    safeFlag = true;
+                    ui->actionSave_Workout_Schedule->setEnabled(true);
                 }
             }
 
