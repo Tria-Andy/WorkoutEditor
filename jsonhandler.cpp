@@ -180,6 +180,7 @@ void jsonHandler::read_json(QString jsonfile)
         }
         avgHF = (avgHF / sampCount);
         overrideData.insert("total_work",QString::number(settings::calc_totalWork(tagData.value("Weight").toDouble(),avgHF,sampCount)));
+        curr_act->ride_info.insert("Total Work:",overrideData.value("total_work"));
         hasOverride = true;
     }
 

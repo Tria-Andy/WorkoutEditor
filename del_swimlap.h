@@ -20,9 +20,9 @@ public:
         QString lapName;
         const QAbstractItemModel *model = index.model();
         cFont.setPixelSize(12);
-        QColor lapColor,breakColor;
-        lapColor.setRgb(192,192,192);
-        breakColor.setRgb(128,128,128);
+        QColor lapColor(Qt::lightGray);
+        QColor breakColor(Qt::darkGray);
+
         QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
 
         lapName = model->data(model->index(index.row(),0,QModelIndex())).toString();
@@ -39,7 +39,6 @@ public:
             painter->fillRect(option.rect,QBrush(lapColor));
             painter->fillRect(rect_text,QBrush(lapColor));
         }
-
 
         painter->setFont(cFont);
         painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));

@@ -59,6 +59,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->frame_avgValue->setVisible(false);
     ui->frame_polish->setVisible(false);
     this->summery_view();
+    ui->textBrowser_Info->setStyleSheet("background-color: lightgrey");
+    ui->tableView_int_times->setStyleSheet("background-color: lightgrey");
+    ui->tableView_int->setStyleSheet("background-color: lightgrey");
     ui->comboBox_schedMode->addItems(schedMode);
     ui->comboBox_phasefilter->addItem("All");
     ui->comboBox_phasefilter->addItems(settings::get_phaseList());
@@ -896,7 +899,7 @@ void MainWindow::set_activty_infos()
         cellCurser = cell.firstCursorPosition();
         cellCurser.insertText(it.value(),valueFormat);
     }
-    table->insertRows(table->rows(),1);
+    //table->insertRows(table->rows(),1);
 
     cursor.endEditBlock();
     cursor.setPosition(0);
@@ -907,7 +910,7 @@ void MainWindow::set_activty_intervalls()
 {
     ui->tableView_int->setModel(curr_activity->curr_act_model);
     ui->tableView_int->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    //ui->tableView_int->setItemDelegate(&intervall_del);
+    ui->tableView_int->setItemDelegate(&intervall_del);
     ui->tableView_int->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_int->verticalHeader()->setVisible(false);
 
@@ -1053,16 +1056,6 @@ void MainWindow::write_hf_infos()
     {
         hf_value = settings::get_timesec(curr_activity->swim_hf_model->data(curr_activity->swim_hf_model->index(i,3,QModelIndex())).toString());
         jsonhandler->set_overrideData("time_in_zone_H" + QString::number(i+1),QString::number(hf_value));
-    }
-}
-
-void MainWindow::set_selectInt(QColor color, QModelIndex index)
-{
-    QModelIndex col;
-    for(int x = 0; x < curr_activity->get_header_num(); ++x)
-    {
-        col = curr_activity->curr_act_model->index(index.row(),index.column()+x,QModelIndex());
-        curr_activity->curr_act_model->setData(col,QVariant(color),Qt::BackgroundColorRole);
     }
 }
 
@@ -1351,21 +1344,19 @@ void MainWindow::on_tableView_int_clicked(const QModelIndex &index)
     if(index.column() == 0)
     {
         int check_value = curr_activity->curr_act_model->data(index,(Qt::UserRole+1)).toInt();
-
         if(check_value == 0)
         {
             sel_count++;
             curr_activity->curr_act_model->setData(index,1,Qt::UserRole+1);
-            this->set_selectInt(QColor(Qt::green),index);
             curr_activity->set_avg_values(sel_count,index.row(),true);
         }
         else
         {
             sel_count--;
             curr_activity->curr_act_model->setData(index,0,Qt::UserRole+1);
-            this->set_selectInt(QColor(Qt::white),index);
             curr_activity->set_avg_values(sel_count,index.row(),false);
         }
+        ui->tableView_int->setItemDelegateForRow(index.row(),&intSelect_del);
     }
     this->set_avg_fields();
 }
@@ -1443,13 +1434,12 @@ void MainWindow::on_actionUnselect_all_rows_triggered()
     {
         index = curr_activity->curr_act_model->index(i,0,QModelIndex());
         curr_activity->curr_act_model->setData(index,0,Qt::UserRole+1);
-        this->set_selectInt(QColor(Qt::white),index);
-
         curr_activity->reset_avg();
         sel_count = 0;
         this->set_avg_fields();
         ui->tableView_int->setCurrentIndex(curr_activity->curr_act_model->index(0,0,QModelIndex()));
     }
+
 }
 
 void MainWindow::on_actionEdit_Distance_triggered()
