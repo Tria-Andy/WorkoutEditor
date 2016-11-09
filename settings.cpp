@@ -445,7 +445,7 @@ QString settings::get_workout_pace(double dist, QTime duration,QString sport,boo
         if(sport == isRun)  speed = sec/dist, nr=2;
         if(sport == isAlt || sport == isStrength) speed = 0.0, nr=3;
 
-        speed = settings::set_doubleValue(speed);
+        speed = settings::set_doubleValue(speed,false);
 
         if(full_label)
         {
@@ -569,14 +569,22 @@ double settings::estimate_stress(QString sport, QString p_goal, int duration)
 
         }
         est_stress = (raw_effort / cv_effort) * 100;
-        return settings::set_doubleValue(est_stress);
+        return settings::set_doubleValue(est_stress,false);
     }
     return 0;
 }
 
-double settings::set_doubleValue(double value)
+double settings::set_doubleValue(double value, bool isthree)
 {
-    return ((static_cast<int>(value *100 +.5)) / 100.0);
+    if(isthree)
+    {
+        return value = round( value * 1000.0 ) / 1000.0;
+    }
+    else
+    {
+        return ((static_cast<int>(value *100 +.5)) / 100.0);
+    }
+    return 0;
 }
 
 QColor settings::get_color(QString colorValue)

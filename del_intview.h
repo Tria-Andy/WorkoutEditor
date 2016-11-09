@@ -28,11 +28,6 @@ public:
         indexData = index.data().toString();
         painter->setPen(Qt::black);
 
-        if(index.column() == 2 || index.column() == 3)
-        {
-            indexData.truncate(7);
-        }
-
         if(lapName == settings::get_breakName())
         {
             painter->fillRect(option.rect,QBrush(breakColor));

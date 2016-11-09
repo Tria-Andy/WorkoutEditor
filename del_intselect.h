@@ -56,6 +56,7 @@ public:
         painter->save();
         bool isSelected = del_intselect::get_isSelected(index);
         QString lapName = del_intselect::get_lapName(index);
+
         QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
         painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->fillRect(option.rect,del_intselect::get_backcolor(isSelected,lapName));

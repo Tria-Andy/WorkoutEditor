@@ -40,7 +40,7 @@ void Activity::prepareData()
             editIndex = edit_int_model->index(row,col,QModelIndex());
             edit_int_model->setData(editIndex,int_model->data(intIndex,Qt::DisplayRole));
         }
-        edit_int_model->setData(edit_int_model->index(row,3,QModelIndex()),this->get_int_distance(row,false));
+        edit_int_model->setData(edit_int_model->index(row,3,QModelIndex()),settings::set_doubleValue(this->get_int_distance(row,false),true));
     }
 
     edit_int_model->setData(edit_int_model->index(edit_int_model->rowCount()-1,2,QModelIndex()),sampCount-1);
@@ -978,11 +978,11 @@ void Activity::set_curr_act_model(bool recalc)
             curr_act_model->setData(curr_act_model->index(row,0,QModelIndex()),p_int_model->data(data_index,Qt::DisplayRole).toString());
             curr_act_model->setData(curr_act_model->index(row,1,QModelIndex()),settings::set_time(this->get_int_duration(row,recalc)));
             data_index = p_samp_model->index(p_int_model->data(p_int_model->index(row,2,QModelIndex()),Qt::DisplayRole).toInt()-1,1,QModelIndex());
-            curr_act_model->setData(curr_act_model->index(row,2,QModelIndex()),p_samp_model->data(data_index,Qt::DisplayRole).toDouble());
-            curr_act_model->setData(curr_act_model->index(row,3,QModelIndex()),this->get_int_distance(row,recalc));
+            curr_act_model->setData(curr_act_model->index(row,2,QModelIndex()),settings::set_doubleValue(p_samp_model->data(data_index,Qt::DisplayRole).toDouble(),true));
+            curr_act_model->setData(curr_act_model->index(row,3,QModelIndex()),settings::set_doubleValue(this->get_int_distance(row,recalc),true));
             curr_act_model->setData(curr_act_model->index(row,4,QModelIndex()),settings::set_time(this->get_int_pace(row,recalc)));
             if(curr_sport == settings::isSwim) curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),this->get_swim_laps(row,recalc));
-            if(curr_sport == settings::isBike) curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),this->get_int_watts(row));
+            if(curr_sport == settings::isBike) curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),settings::set_doubleValue(this->get_int_watts(row),false));
     }
 
     curr_act_model->setHorizontalHeaderLabels(settings::get_int_header(curr_sport));

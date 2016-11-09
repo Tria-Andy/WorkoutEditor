@@ -89,7 +89,7 @@ void week_popup::set_weekInfos()
         v_date1 = plotmodel->data(plotmodel->index(i,0,QModelIndex())).toDateTime().toString("dd.MM.yyyy");
         v_stress = plotmodel->data(plotmodel->index(i,1,QModelIndex())).toDouble();
         v_dura = plotmodel->data(plotmodel->index(i,2,QModelIndex())).toDouble() / 60.0;
-        v_dura = settings::set_doubleValue(v_dura);
+        v_dura = settings::set_doubleValue(v_dura,false);
 
         workDate = QDateTime::fromString(v_date1,"dd.MM.yyyy");
         if(i != 0)

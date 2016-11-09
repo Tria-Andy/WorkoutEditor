@@ -136,12 +136,12 @@ QString MainWindow::set_summeryString(int pos,bool week)
         if(pos == 0)
         {
             percent = (static_cast<double>(dur_sum[pos]) / static_cast<double>(dur_sum[0]))*100;
-            sumString = sum_name +"-"+ QString::number(work_sum[pos]) +"-"+ settings::set_time(dur_sum[pos]) +"-"+ QString::number(settings::set_doubleValue(percent)) +"-"+ QString::number(dist_sum[pos]) +"-"+ QString::number(stress_sum[pos]);
+            sumString = sum_name +"-"+ QString::number(work_sum[pos]) +"-"+ settings::set_time(dur_sum[pos]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos]) +"-"+ QString::number(stress_sum[pos]);
         }
         else
         {
             percent = static_cast<double>(dur_sum[pos]) / (static_cast<double>(dur_sum[0]))*100;
-            sumString = settings::get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos]) +"-"+ settings::set_time(dur_sum[pos]) +"-"+ QString::number(settings::set_doubleValue(percent)) +"-"+ QString::number(dist_sum[pos]) +"-"+QString::number(stress_sum[pos]);
+            sumString = settings::get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos]) +"-"+ settings::set_time(dur_sum[pos]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos]) +"-"+QString::number(stress_sum[pos]);
         }
     }
     else
@@ -149,12 +149,12 @@ QString MainWindow::set_summeryString(int pos,bool week)
         if(pos == 0)
         {
             percent = (static_cast<double>(dur_sum[5]) / static_cast<double>(dur_sum[5]))*100;
-            sumString = sum_name +"-"+ QString::number(work_sum[5]) +"-"+ settings::set_time(dur_sum[5]) +"-"+ QString::number(settings::set_doubleValue(percent)) +"-"+ QString::number(dist_sum[5]) +"-"+ QString::number(stress_sum[5]);
+            sumString = sum_name +"-"+ QString::number(work_sum[5]) +"-"+ settings::set_time(dur_sum[5]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[5]) +"-"+ QString::number(stress_sum[5]);
         }
         else
         {
             percent = (static_cast<double>(dur_sum[pos-1]) / static_cast<double>(dur_sum[5]))*100;
-            sumString = settings::get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos-1]) +"-"+ settings::set_time(dur_sum[pos-1]) +"-"+ QString::number(settings::set_doubleValue(percent)) +"-"+ QString::number(dist_sum[pos-1]) +"-"+QString::number(stress_sum[pos-1]);
+            sumString = settings::get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos-1]) +"-"+ settings::set_time(dur_sum[pos-1]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos-1]) +"-"+QString::number(stress_sum[pos-1]);
         }
     }
     return sumString;

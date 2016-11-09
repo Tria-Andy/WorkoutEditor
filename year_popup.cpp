@@ -121,9 +121,9 @@ void year_popup::fill_values()
             y_stress[week] = stress.toDouble();
             if(max_stress < y_stress[week]) max_stress = y_stress[week];
 
-            y_dura[week] = settings::set_doubleValue(static_cast<double>(settings::get_timesec(duration) / 60.0));
+            y_dura[week] = settings::set_doubleValue(static_cast<double>(settings::get_timesec(duration) / 60.0),false);
             if(maxValues[0] < y_dura[week]) maxValues[0] = y_dura[week];
-            y_dist[week] = settings::set_doubleValue(distance.toDouble());
+            y_dist[week] = settings::set_doubleValue(distance.toDouble(),false);
             if(maxValues[1] < y_dist[week]) maxValues[1] = y_dist[week];
             y_work[week] = workouts.toDouble();
             if(maxValues[2] < y_work[week]) maxValues[2] = y_work[week];
@@ -150,9 +150,9 @@ void year_popup::fill_values()
                     y_stress[week] = stress.toDouble();
                     if(max_stress < y_stress[week]) max_stress = y_stress[week];
 
-                    y_dura[week] = settings::set_doubleValue(static_cast<double>(settings::get_timesec(duration) / 60.0));
+                    y_dura[week] = settings::set_doubleValue(static_cast<double>(settings::get_timesec(duration) / 60.0),false);
                     if(maxValues[0] < y_dura[week]) maxValues[0] = y_dura[week];
-                    y_dist[week] = settings::set_doubleValue(distance.toDouble());
+                    y_dist[week] = settings::set_doubleValue(distance.toDouble(),false);
                     if(maxValues[1] < y_dist[week]) maxValues[1] = y_dist[week];
                     y_work[week] = workouts.toDouble();
                     if(maxValues[2] < y_work[week]) maxValues[2] = y_work[week];
