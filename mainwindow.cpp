@@ -1053,6 +1053,7 @@ void MainWindow::write_hf_infos()
     jsonhandler->set_overrideFlag(true);
     jsonhandler->set_overrideData("average_hr",ui->lineEdit_hfavg->text());
     jsonhandler->set_overrideData("total_work",ui->lineEdit_kj->text());
+    jsonhandler->set_overrideData("total_kcalories",ui->lineEdit_kal->text());
     for(int i = 0; i < 7; i++)
     {
         hf_value = settings::get_timesec(curr_activity->swim_hf_model->data(curr_activity->swim_hf_model->index(i,3,QModelIndex())).toString());
