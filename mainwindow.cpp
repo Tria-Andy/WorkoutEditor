@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pushButton_week_minus->setEnabled(false);
     ui->pushButton_ClearWorkContent->setEnabled(false);
     ui->pushButton_sync->setEnabled(false);
+    ui->pushButton_putInt->setEnabled(false);
     fontSize = 10;
     cal_header << "Woche";
     for(int d = 1; d < 8; ++d)
@@ -1165,6 +1166,22 @@ void MainWindow::fill_WorkoutContent()
     jsonhandler->set_tagData("Workout Content",ui->lineEdit_workContent->text());
 }
 
+void MainWindow::unselect_intRow()
+{
+    QModelIndex index;
+
+    for(int i = 0; i < curr_activity->int_model->rowCount(); ++i)
+    {
+        index = curr_activity->curr_act_model->index(i,0,QModelIndex());
+        curr_activity->curr_act_model->setData(index,0,Qt::UserRole+1);
+        curr_activity->reset_avg();
+        sel_count = 0;
+        this->set_avg_fields();
+        ui->tableView_int->setCurrentIndex(curr_activity->curr_act_model->index(0,0,QModelIndex()));
+    }
+    ui->pushButton_putInt->setEnabled(false);
+}
+
 void MainWindow::on_pushButton_week_minus_clicked()
 {
     if(isWeekMode)
@@ -1358,6 +1375,14 @@ void MainWindow::on_tableView_int_clicked(const QModelIndex &index)
         }
         ui->tableView_int->setItemDelegateForRow(index.row(),&intSelect_del);
     }
+    if(sel_count > 0)
+    {
+        ui->pushButton_putInt->setEnabled(true);
+    }
+    else
+    {
+        ui->pushButton_putInt->setEnabled(false);
+    }
     this->set_avg_fields();
 }
 
@@ -1409,6 +1434,7 @@ void MainWindow::on_actionReset_triggered()
     ui->lineEdit_workContent->clear();
     ui->pushButton_ClearWorkContent->setEnabled(false);
     ui->pushButton_sync->setEnabled(false);
+    ui->pushButton_putInt->setEnabled(false);
     ui->radioButton_time->setChecked(true);
     ui->checkBox_exact->setChecked(false);
 
@@ -1427,19 +1453,7 @@ void MainWindow::on_actionReset_triggered()
 
 void MainWindow::on_actionUnselect_all_rows_triggered()
 {
-    this->fill_WorkoutContent();
-    QModelIndex index;
-
-    for(int i = 0; i < curr_activity->int_model->rowCount(); ++i)
-    {
-        index = curr_activity->curr_act_model->index(i,0,QModelIndex());
-        curr_activity->curr_act_model->setData(index,0,Qt::UserRole+1);
-        curr_activity->reset_avg();
-        sel_count = 0;
-        this->set_avg_fields();
-        ui->tableView_int->setCurrentIndex(curr_activity->curr_act_model->index(0,0,QModelIndex()));
-    }
-
+    this->unselect_intRow();
 }
 
 void MainWindow::on_actionEdit_Distance_triggered()
@@ -1610,4 +1624,10 @@ void MainWindow::on_lineEdit_workContent_textChanged(const QString &value)
 {
     Q_UNUSED(value)
     ui->pushButton_sync->setEnabled(true);
+}
+
+void MainWindow::on_pushButton_putInt_clicked()
+{
+    this->fill_WorkoutContent();
+    this->unselect_intRow();
 }

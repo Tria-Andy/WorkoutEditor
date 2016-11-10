@@ -96,6 +96,7 @@ private:
     void set_avg_fields();
     void write_hf_infos();
     void fill_WorkoutContent();
+    void unselect_intRow();
     void set_menuItems(bool,bool);
     void reset_jsontext();
     void freeMem();
@@ -144,6 +145,7 @@ private slots:
     void on_pushButton_ClearWorkContent_clicked();
     void on_pushButton_sync_clicked();
     void on_lineEdit_workContent_textChanged(const QString &arg1);
+    void on_pushButton_putInt_clicked();
 };
 
 #endif // MAINWINDOW_H
