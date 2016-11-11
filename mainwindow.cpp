@@ -262,6 +262,7 @@ void MainWindow::summery_view()
                 sumValues << this->set_summeryString(i,isWeekMode);
             }
         }
+
         phase = workSchedule->get_weekPhase(firstdayofweek.addDays(weekDays*weekCounter));
         ui->label_selWeek->setText("Week: "+weeknumber +" - " +phase);
     }
