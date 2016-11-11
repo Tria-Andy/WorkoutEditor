@@ -67,6 +67,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboBox_phasefilter->addItem("All");
     ui->comboBox_phasefilter->addItems(settings::get_phaseList());
     ui->comboBox_phasefilter->setEnabled(false);
+    ui->horizontalSlider_polish->setEnabled(false);
+    ui->horizontalSlider_factor->setEnabled(false);
+    ui->horizontalSlider_factor->setVisible(false);
     this->set_menuItems(false,true);
 }
 
@@ -204,7 +207,7 @@ void MainWindow::summery_view()
     QList<QStandardItem*> list;
 
     QModelIndex index;
-    QString sport,weekID;
+    QString sport,weekID,phase;
     QStringList sumValues;
     int rowcount;
 
@@ -259,6 +262,8 @@ void MainWindow::summery_view()
                 sumValues << this->set_summeryString(i,isWeekMode);
             }
         }
+        phase = workSchedule->get_weekPhase(firstdayofweek.addDays(weekDays*weekCounter));
+        ui->label_selWeek->setText("Week: "+weeknumber +" - " +phase);
     }
     else
     {
@@ -670,14 +675,15 @@ QString MainWindow::get_weekRange()
     {
         if(weekCounter != 0)
         {
-            display_weeks = QString::number(selectedDate.addDays(weekDays*weekCounter).weekNumber()) + " - " +
-                            QString::number(selectedDate.addDays((weekRange*weekDays)+(weekDays*weekCounter)).weekNumber()-1);
+            display_weeks = QString::number(firstdayofweek.addDays(weekDays*weekCounter).weekNumber()) + " - " +
+                            QString::number(firstdayofweek.addDays(((weekRange-1)*weekDays)+(weekDays*weekCounter)).weekNumber());
         }
         else
         {
-            display_weeks = QString::number(selectedDate.addDays(weekDays*weekCounter).weekNumber()) + " - " +
-                            QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1);
+            display_weeks = QString::number(firstdayofweek.addDays(weekDays*weekCounter).weekNumber()) + " - " +
+                            QString::number(firstdayofweek.addDays((weekRange-1)*weekDays).weekNumber());
         }
+
     }
     else
     {
@@ -704,6 +710,7 @@ void MainWindow::set_buttons(bool set_value)
 
 void MainWindow::set_calender()
 {
+
     if(weekCounter == 0)
     {
         ui->calendarWidget->setSelectedDate(QDate::currentDate());
@@ -833,25 +840,39 @@ void MainWindow::loadfile(const QString &filename)
         speedLine = workSchedule->get_qLineSeries(false);
         speedLine->setColor(QColor(Qt::green));
         speedLine->setName("Speed");
-        polishLine = workSchedule->get_qLineSeries(false);
-        polishLine->setColor(QColor(Qt::red));
-        polishLine->setName("Polished Speed");
+
 
         axisX = new QCategoryAxis();
         axisX->setVisible(false);
 
         intChart->addSeries(avgLine);
         intChart->addSeries(speedLine);
-        intChart->addSeries(polishLine);
 
         ySpeed = workSchedule->get_qValueAxis("Speed",true,20,5);
         intChart->addAxis(ySpeed,Qt::AlignLeft);
         avgLine->attachAxis(ySpeed);
         speedLine->attachAxis(ySpeed);
-        polishLine->attachAxis(ySpeed);
+
         intChart->setAxisX(axisX,avgLine);
         intChart->setAxisX(axisX,speedLine);
-        intChart->setAxisX(axisX,polishLine);
+
+
+        if(curr_activity->get_sport() == settings::isRun)
+        {
+            polishLine = workSchedule->get_qLineSeries(false);
+            polishLine->setColor(QColor(Qt::red));
+            polishLine->setName("Polished Speed");
+            intChart->addSeries(polishLine);
+            polishLine->attachAxis(ySpeed);
+            intChart->setAxisX(axisX,polishLine);
+            ui->horizontalSlider_polish->setEnabled(true);
+            ui->horizontalSlider_factor->setEnabled(true);
+            ui->horizontalSlider_factor->setVisible(true);
+        }
+        else
+        {
+            ui->horizontalSlider_factor->setVisible(false);
+        }
 
         this->set_comboIntervall();
         this->set_activty_intervalls();
@@ -974,7 +995,7 @@ void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
         ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,settings::get_act_isrecalc())));
         double avg = curr_activity->get_int_speed(index,settings::get_act_isrecalc());
         this->set_intChartValues(index,avg);
-        this->set_polishValues(index,0.0);
+        if(curr_activity->get_sport() == settings::isRun) this->set_polishValues(index,0.0);
     }
 }
 
@@ -1441,7 +1462,7 @@ void MainWindow::on_actionReset_triggered()
 
     delete ySpeed;
     delete speedLine;
-    delete polishLine;
+    if(curr_activity->get_sport() == settings::isRun) delete polishLine;
     delete avgLine;
     delete axisX;
     delete intChartview;
