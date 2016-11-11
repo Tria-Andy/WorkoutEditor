@@ -191,6 +191,11 @@ void MainWindow::summery_calc(int pos, QModelIndex index,bool week)
     }
 }
 
+void MainWindow::set_summerInfo()
+{
+    ui->label_selWeek->setText("Week: "+weeknumber);
+}
+
 void MainWindow::summery_view()
 {
     delete sum_model;
@@ -207,7 +212,7 @@ void MainWindow::summery_view()
     QList<QStandardItem*> list;
 
     QModelIndex index;
-    QString sport,weekID,phase;
+    QString sport,weekID;
     QStringList sumValues;
     int rowcount;
 
@@ -262,9 +267,7 @@ void MainWindow::summery_view()
                 sumValues << this->set_summeryString(i,isWeekMode);
             }
         }
-
-        phase = workSchedule->get_weekPhase(firstdayofweek.addDays(weekDays*weekCounter));
-        ui->label_selWeek->setText("Week: "+weeknumber+" - " +phase);
+        this->set_summerInfo();
     }
     else
     {
@@ -609,6 +612,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
         {
             QString selected_week =  calendar_model->data(index,Qt::DisplayRole).toString();
             weeknumber = selected_week.split("#").at(0);
+
             this->summery_view();
 
             week_popup week_pop(this,selected_week,workSchedule);

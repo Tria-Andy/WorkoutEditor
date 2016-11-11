@@ -80,6 +80,7 @@ private:
     unsigned int weekCounter;
     bool isWeekMode,safeFlag;
 
+    void set_summerInfo();
     void summery_view();
     void summery_calc(int,QModelIndex,bool);
     QString set_summeryString(int,bool);
