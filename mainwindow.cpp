@@ -264,7 +264,7 @@ void MainWindow::summery_view()
         }
 
         phase = workSchedule->get_weekPhase(firstdayofweek.addDays(weekDays*weekCounter));
-        ui->label_selWeek->setText("Week: "+weeknumber +" - " +phase);
+        ui->label_selWeek->setText("Week: "+weeknumber+" - " +phase);
     }
     else
     {
