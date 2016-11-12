@@ -193,7 +193,27 @@ void MainWindow::summery_calc(int pos, QModelIndex index,bool week)
 
 void MainWindow::set_summerInfo()
 {
-    ui->label_selWeek->setText("Week: "+weeknumber);
+    if(isWeekMode)
+    {
+        QStringList weekInfo = weeknumber.split("_");
+        QString year = weekInfo.at(1);
+        QString week = weekInfo.at(0);
+        QDate firstday,calcDay;
+        calcDay.setDate(year.toInt(),1,1);
+        firstday = calcDay.addDays(week.toInt()*7).addDays(1 - calcDay.dayOfWeek());
+        ui->label_selWeek->setText("Week: "+weeknumber+" - Phase: " +workSchedule->get_weekPhase(firstday));
+    }
+    else
+    {
+        if(ui->comboBox_phasefilter->currentIndex() == 0)
+        {
+            ui->label_selWeek->setText("All Phases " +settings::get_saisonYear());
+        }
+        else
+        {
+            ui->label_selWeek->setText("Phase: "+ ui->comboBox_phasefilter->currentText());
+        }
+    }
 }
 
 void MainWindow::summery_view()
@@ -267,7 +287,6 @@ void MainWindow::summery_view()
                 sumValues << this->set_summeryString(i,isWeekMode);
             }
         }
-        this->set_summerInfo();
     }
     else
     {
@@ -319,6 +338,7 @@ void MainWindow::summery_view()
         sum_model->insertRow(rowcount,QModelIndex());
         sum_model->setData(sum_model->index(i,0,QModelIndex()),sumValues.at(i));
     }
+    this->set_summerInfo();
 }
 
 void MainWindow::workout_calendar()
