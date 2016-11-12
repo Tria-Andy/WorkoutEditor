@@ -93,7 +93,8 @@ public:
     static double estimate_stress(QString,QString,int);
     static int get_hfvalue(QString);
     static int get_timesec(QString time);
-    static double set_doubleValue(double);
+    static double set_doubleValue(double,bool);
+
 
     static QColor get_color(QString);
     static QString get_colorValues(QColor);

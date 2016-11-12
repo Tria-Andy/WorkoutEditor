@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pushButton_week_minus->setEnabled(false);
     ui->pushButton_ClearWorkContent->setEnabled(false);
     ui->pushButton_sync->setEnabled(false);
+    ui->pushButton_putInt->setEnabled(false);
     fontSize = 10;
     cal_header << "Woche";
     for(int d = 1; d < 8; ++d)
@@ -59,10 +60,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->frame_avgValue->setVisible(false);
     ui->frame_polish->setVisible(false);
     this->summery_view();
+    ui->textBrowser_Info->setStyleSheet("background-color: lightgrey");
+    ui->tableView_int_times->setStyleSheet("background-color: lightgrey");
+    ui->tableView_int->setStyleSheet("background-color: lightgrey");
     ui->comboBox_schedMode->addItems(schedMode);
     ui->comboBox_phasefilter->addItem("All");
     ui->comboBox_phasefilter->addItems(settings::get_phaseList());
     ui->comboBox_phasefilter->setEnabled(false);
+    ui->horizontalSlider_polish->setEnabled(false);
+    ui->horizontalSlider_factor->setEnabled(false);
+    ui->horizontalSlider_factor->setVisible(false);
     this->set_menuItems(false,true);
 }
 
@@ -133,12 +140,12 @@ QString MainWindow::set_summeryString(int pos,bool week)
         if(pos == 0)
         {
             percent = (static_cast<double>(dur_sum[pos]) / static_cast<double>(dur_sum[0]))*100;
-            sumString = sum_name +"-"+ QString::number(work_sum[pos]) +"-"+ settings::set_time(dur_sum[pos]) +"-"+ QString::number(settings::set_doubleValue(percent)) +"-"+ QString::number(dist_sum[pos]) +"-"+ QString::number(stress_sum[pos]);
+            sumString = sum_name +"-"+ QString::number(work_sum[pos]) +"-"+ settings::set_time(dur_sum[pos]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos]) +"-"+ QString::number(stress_sum[pos]);
         }
         else
         {
             percent = static_cast<double>(dur_sum[pos]) / (static_cast<double>(dur_sum[0]))*100;
-            sumString = settings::get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos]) +"-"+ settings::set_time(dur_sum[pos]) +"-"+ QString::number(settings::set_doubleValue(percent)) +"-"+ QString::number(dist_sum[pos]) +"-"+QString::number(stress_sum[pos]);
+            sumString = settings::get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos]) +"-"+ settings::set_time(dur_sum[pos]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos]) +"-"+QString::number(stress_sum[pos]);
         }
     }
     else
@@ -146,12 +153,12 @@ QString MainWindow::set_summeryString(int pos,bool week)
         if(pos == 0)
         {
             percent = (static_cast<double>(dur_sum[5]) / static_cast<double>(dur_sum[5]))*100;
-            sumString = sum_name +"-"+ QString::number(work_sum[5]) +"-"+ settings::set_time(dur_sum[5]) +"-"+ QString::number(settings::set_doubleValue(percent)) +"-"+ QString::number(dist_sum[5]) +"-"+ QString::number(stress_sum[5]);
+            sumString = sum_name +"-"+ QString::number(work_sum[5]) +"-"+ settings::set_time(dur_sum[5]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[5]) +"-"+ QString::number(stress_sum[5]);
         }
         else
         {
             percent = (static_cast<double>(dur_sum[pos-1]) / static_cast<double>(dur_sum[5]))*100;
-            sumString = settings::get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos-1]) +"-"+ settings::set_time(dur_sum[pos-1]) +"-"+ QString::number(settings::set_doubleValue(percent)) +"-"+ QString::number(dist_sum[pos-1]) +"-"+QString::number(stress_sum[pos-1]);
+            sumString = settings::get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos-1]) +"-"+ settings::set_time(dur_sum[pos-1]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos-1]) +"-"+QString::number(stress_sum[pos-1]);
         }
     }
     return sumString;
@@ -181,6 +188,31 @@ void MainWindow::summery_calc(int pos, QModelIndex index,bool week)
         dur_sum[pos] = dur_sum[pos] + (settings::get_timesec(dura)*60);
         dist_sum[pos] = dist_sum[pos] + dist.toDouble();
         stress_sum[pos] = stress_sum[pos] + stress.toInt();
+    }
+}
+
+void MainWindow::set_summerInfo()
+{
+    if(isWeekMode)
+    {
+        QStringList weekInfo = weeknumber.split("_");
+        QString year = weekInfo.at(1);
+        QString week = weekInfo.at(0);
+        QDate firstday,calcDay;
+        calcDay.setDate(year.toInt(),1,1);
+        firstday = calcDay.addDays(week.toInt()*7).addDays(1 - calcDay.dayOfWeek());
+        ui->label_selWeek->setText("Week: "+weeknumber+" - Phase: " +workSchedule->get_weekPhase(firstday));
+    }
+    else
+    {
+        if(ui->comboBox_phasefilter->currentIndex() == 0)
+        {
+            ui->label_selWeek->setText("All Phases " +settings::get_saisonYear());
+        }
+        else
+        {
+            ui->label_selWeek->setText("Phase: "+ ui->comboBox_phasefilter->currentText());
+        }
     }
 }
 
@@ -306,6 +338,7 @@ void MainWindow::summery_view()
         sum_model->insertRow(rowcount,QModelIndex());
         sum_model->setData(sum_model->index(i,0,QModelIndex()),sumValues.at(i));
     }
+    this->set_summerInfo();
 }
 
 void MainWindow::workout_calendar()
@@ -599,6 +632,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
         {
             QString selected_week =  calendar_model->data(index,Qt::DisplayRole).toString();
             weeknumber = selected_week.split("#").at(0);
+
             this->summery_view();
 
             week_popup week_pop(this,selected_week,workSchedule);
@@ -666,14 +700,15 @@ QString MainWindow::get_weekRange()
     {
         if(weekCounter != 0)
         {
-            display_weeks = QString::number(selectedDate.addDays(weekDays*weekCounter).weekNumber()) + " - " +
-                            QString::number(selectedDate.addDays((weekRange*weekDays)+(weekDays*weekCounter)).weekNumber()-1);
+            display_weeks = QString::number(firstdayofweek.addDays(weekDays*weekCounter).weekNumber()) + " - " +
+                            QString::number(firstdayofweek.addDays(((weekRange-1)*weekDays)+(weekDays*weekCounter)).weekNumber());
         }
         else
         {
-            display_weeks = QString::number(selectedDate.addDays(weekDays*weekCounter).weekNumber()) + " - " +
-                            QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1);
+            display_weeks = QString::number(firstdayofweek.addDays(weekDays*weekCounter).weekNumber()) + " - " +
+                            QString::number(firstdayofweek.addDays((weekRange-1)*weekDays).weekNumber());
         }
+
     }
     else
     {
@@ -700,6 +735,7 @@ void MainWindow::set_buttons(bool set_value)
 
 void MainWindow::set_calender()
 {
+
     if(weekCounter == 0)
     {
         ui->calendarWidget->setSelectedDate(QDate::currentDate());
@@ -829,25 +865,39 @@ void MainWindow::loadfile(const QString &filename)
         speedLine = workSchedule->get_qLineSeries(false);
         speedLine->setColor(QColor(Qt::green));
         speedLine->setName("Speed");
-        polishLine = workSchedule->get_qLineSeries(false);
-        polishLine->setColor(QColor(Qt::red));
-        polishLine->setName("Polished Speed");
+
 
         axisX = new QCategoryAxis();
         axisX->setVisible(false);
 
         intChart->addSeries(avgLine);
         intChart->addSeries(speedLine);
-        intChart->addSeries(polishLine);
 
         ySpeed = workSchedule->get_qValueAxis("Speed",true,20,5);
         intChart->addAxis(ySpeed,Qt::AlignLeft);
         avgLine->attachAxis(ySpeed);
         speedLine->attachAxis(ySpeed);
-        polishLine->attachAxis(ySpeed);
+
         intChart->setAxisX(axisX,avgLine);
         intChart->setAxisX(axisX,speedLine);
-        intChart->setAxisX(axisX,polishLine);
+
+
+        if(curr_activity->get_sport() == settings::isRun)
+        {
+            polishLine = workSchedule->get_qLineSeries(false);
+            polishLine->setColor(QColor(Qt::red));
+            polishLine->setName("Polished Speed");
+            intChart->addSeries(polishLine);
+            polishLine->attachAxis(ySpeed);
+            intChart->setAxisX(axisX,polishLine);
+            ui->horizontalSlider_polish->setEnabled(true);
+            ui->horizontalSlider_factor->setEnabled(true);
+            ui->horizontalSlider_factor->setVisible(true);
+        }
+        else
+        {
+            ui->horizontalSlider_factor->setVisible(false);
+        }
 
         this->set_comboIntervall();
         this->set_activty_intervalls();
@@ -896,7 +946,7 @@ void MainWindow::set_activty_infos()
         cellCurser = cell.firstCursorPosition();
         cellCurser.insertText(it.value(),valueFormat);
     }
-    table->insertRows(table->rows(),1);
+    //table->insertRows(table->rows(),1);
 
     cursor.endEditBlock();
     cursor.setPosition(0);
@@ -907,7 +957,7 @@ void MainWindow::set_activty_intervalls()
 {
     ui->tableView_int->setModel(curr_activity->curr_act_model);
     ui->tableView_int->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    //ui->tableView_int->setItemDelegate(&intervall_del);
+    ui->tableView_int->setItemDelegate(&intervall_del);
     ui->tableView_int->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_int->verticalHeader()->setVisible(false);
 
@@ -970,7 +1020,7 @@ void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
         ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,settings::get_act_isrecalc())));
         double avg = curr_activity->get_int_speed(index,settings::get_act_isrecalc());
         this->set_intChartValues(index,avg);
-        this->set_polishValues(index,0.0);
+        if(curr_activity->get_sport() == settings::isRun) this->set_polishValues(index,0.0);
     }
 }
 
@@ -1049,20 +1099,11 @@ void MainWindow::write_hf_infos()
     jsonhandler->set_overrideFlag(true);
     jsonhandler->set_overrideData("average_hr",ui->lineEdit_hfavg->text());
     jsonhandler->set_overrideData("total_work",ui->lineEdit_kj->text());
+    jsonhandler->set_overrideData("total_kcalories",ui->lineEdit_kal->text());
     for(int i = 0; i < 7; i++)
     {
         hf_value = settings::get_timesec(curr_activity->swim_hf_model->data(curr_activity->swim_hf_model->index(i,3,QModelIndex())).toString());
         jsonhandler->set_overrideData("time_in_zone_H" + QString::number(i+1),QString::number(hf_value));
-    }
-}
-
-void MainWindow::set_selectInt(QColor color, QModelIndex index)
-{
-    QModelIndex col;
-    for(int x = 0; x < curr_activity->get_header_num(); ++x)
-    {
-        col = curr_activity->curr_act_model->index(index.row(),index.column()+x,QModelIndex());
-        curr_activity->curr_act_model->setData(col,QVariant(color),Qt::BackgroundColorRole);
     }
 }
 
@@ -1170,6 +1211,22 @@ void MainWindow::fill_WorkoutContent()
     }
 
     jsonhandler->set_tagData("Workout Content",ui->lineEdit_workContent->text());
+}
+
+void MainWindow::unselect_intRow()
+{
+    QModelIndex index;
+
+    for(int i = 0; i < curr_activity->int_model->rowCount(); ++i)
+    {
+        index = curr_activity->curr_act_model->index(i,0,QModelIndex());
+        curr_activity->curr_act_model->setData(index,0,Qt::UserRole+1);
+        curr_activity->reset_avg();
+        sel_count = 0;
+        this->set_avg_fields();
+        ui->tableView_int->setCurrentIndex(curr_activity->curr_act_model->index(0,0,QModelIndex()));
+    }
+    ui->pushButton_putInt->setEnabled(false);
 }
 
 void MainWindow::on_pushButton_week_minus_clicked()
@@ -1351,21 +1408,27 @@ void MainWindow::on_tableView_int_clicked(const QModelIndex &index)
     if(index.column() == 0)
     {
         int check_value = curr_activity->curr_act_model->data(index,(Qt::UserRole+1)).toInt();
-
         if(check_value == 0)
         {
             sel_count++;
             curr_activity->curr_act_model->setData(index,1,Qt::UserRole+1);
-            this->set_selectInt(QColor(Qt::green),index);
             curr_activity->set_avg_values(sel_count,index.row(),true);
         }
         else
         {
             sel_count--;
             curr_activity->curr_act_model->setData(index,0,Qt::UserRole+1);
-            this->set_selectInt(QColor(Qt::white),index);
             curr_activity->set_avg_values(sel_count,index.row(),false);
         }
+        ui->tableView_int->setItemDelegateForRow(index.row(),&intSelect_del);
+    }
+    if(sel_count > 0)
+    {
+        ui->pushButton_putInt->setEnabled(true);
+    }
+    else
+    {
+        ui->pushButton_putInt->setEnabled(false);
     }
     this->set_avg_fields();
 }
@@ -1418,12 +1481,13 @@ void MainWindow::on_actionReset_triggered()
     ui->lineEdit_workContent->clear();
     ui->pushButton_ClearWorkContent->setEnabled(false);
     ui->pushButton_sync->setEnabled(false);
+    ui->pushButton_putInt->setEnabled(false);
     ui->radioButton_time->setChecked(true);
     ui->checkBox_exact->setChecked(false);
 
     delete ySpeed;
     delete speedLine;
-    delete polishLine;
+    if(curr_activity->get_sport() == settings::isRun) delete polishLine;
     delete avgLine;
     delete axisX;
     delete intChartview;
@@ -1436,20 +1500,7 @@ void MainWindow::on_actionReset_triggered()
 
 void MainWindow::on_actionUnselect_all_rows_triggered()
 {
-    this->fill_WorkoutContent();
-    QModelIndex index;
-
-    for(int i = 0; i < curr_activity->int_model->rowCount(); ++i)
-    {
-        index = curr_activity->curr_act_model->index(i,0,QModelIndex());
-        curr_activity->curr_act_model->setData(index,0,Qt::UserRole+1);
-        this->set_selectInt(QColor(Qt::white),index);
-
-        curr_activity->reset_avg();
-        sel_count = 0;
-        this->set_avg_fields();
-        ui->tableView_int->setCurrentIndex(curr_activity->curr_act_model->index(0,0,QModelIndex()));
-    }
+    this->unselect_intRow();
 }
 
 void MainWindow::on_actionEdit_Distance_triggered()
@@ -1620,4 +1671,10 @@ void MainWindow::on_lineEdit_workContent_textChanged(const QString &value)
 {
     Q_UNUSED(value)
     ui->pushButton_sync->setEnabled(true);
+}
+
+void MainWindow::on_pushButton_putInt_clicked()
+{
+    this->fill_WorkoutContent();
+    this->unselect_intRow();
 }

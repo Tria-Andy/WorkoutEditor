@@ -11,6 +11,36 @@ class del_intselect : public QItemDelegate
 {
     Q_OBJECT
 
+private:
+    QColor get_backcolor(bool isSel,QString name) const
+    {
+        if(isSel)
+        {
+            return QColor(Qt::green);
+        }
+        else
+        {
+            if(name == settings::get_breakName())
+            {
+                return QColor(Qt::darkGray);
+            }
+            else
+            {
+                return QColor(Qt::lightGray);
+            }
+        }
+    }
+
+    bool get_isSelected(const QModelIndex &index) const
+    {
+        return index.model()->data(index.model()->index(index.row(),0,QModelIndex()),(Qt::UserRole+1)).toBool();
+    }
+
+    QString get_lapName(const QModelIndex &index) const
+    {
+        return index.model()->data(index.model()->index(index.row(),0,QModelIndex())).toString().trimmed();
+    }
+
 public:
     explicit del_intselect(QObject *parent = 0) : QItemDelegate(parent) {}
 
@@ -23,26 +53,15 @@ public:
     protected:
     virtual void drawBackground(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
-        int checkValue;
-        QColor selectColor;
+        painter->save();
+        bool isSelected = del_intselect::get_isSelected(index);
+        QString lapName = del_intselect::get_lapName(index);
 
-        checkValue = index.model()->data(index.model()->index(index.row(),0,QModelIndex())).toInt();
-        qDebug() << checkValue;
-        if(checkValue == 0)
-        {
-            qDebug() << checkValue << index.column() << "Green";
-            selectColor.setNamedColor(QColor(Qt::green).name());
-
-        }
-        else
-        {
-            qDebug() << checkValue << index.column() << "White";
-            selectColor.setNamedColor(QColor(Qt::white).name());
-        }
-        painter->fillRect(option.rect,selectColor);
+        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
+        painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+        painter->fillRect(option.rect,del_intselect::get_backcolor(isSelected,lapName));
+        painter->restore();
     }
-
-
 };
 
 #endif // DEL_INTSELECT_H
