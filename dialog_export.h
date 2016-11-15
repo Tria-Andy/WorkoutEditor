@@ -5,6 +5,7 @@
 #include <QStandardItemModel>
 #include <QFile>
 #include "jsonhandler.h"
+#include "schedule.h"
 #include "settings.h"
 
 namespace Ui {
@@ -16,7 +17,7 @@ class Dialog_export : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_export(QWidget *parent = 0,QStandardItemModel *w_model = 0);
+    explicit Dialog_export(QWidget *parent = 0,schedule *p_schedule = 0);
     ~Dialog_export();
 
 private slots:
@@ -30,8 +31,9 @@ private slots:
 
 private:
     Ui::Dialog_export *ui;
-    QStandardItemModel *workout_model;
-    QList<QStandardItem*> workout_time;
+    QStandardItemModel *modelMeta,*modelSchedule;
+    schedule *workoutschedule;
+    QList<QStandardItem*> workoutWeek,workoutCount;
     QStringList weeks;
     QString fileName, fileContent;
     jsonHandler *jsonhandler;

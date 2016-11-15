@@ -686,7 +686,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
 
 void MainWindow::on_actionExport_to_Golden_Cheetah_triggered()
 {
-    Dialog_export export_workout(this,workSchedule->workout_schedule);
+    Dialog_export export_workout(this,workSchedule);
     export_workout.setModal(true);
     export_workout.exec();
 }
