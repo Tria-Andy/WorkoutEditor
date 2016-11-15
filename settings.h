@@ -10,16 +10,16 @@ private:
     static QString version,builddate,splitter,header_swim,header_bike;
     static QStringList table_header,header_int,header_int_time,header_swim_time;
 
-    static QString settingFile,valueFile,valueFilePath,saisonFDW,saisonEnd,breakName;
+    static QString settingFile,valueFile,valueFilePath,breakName;
     static QStringList keyList,gc_infos,sportList,paceList,phaseList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
     static QStringList sportColor,phaseColor;
     static QMap<int,QString> sampList,intList;
     static QMap<QString,QString> saisonInfo;
     static QVector<double> powerList,factorList;
     static QVector<int> fontSize;
-    static QString gcPath,schedulePath,workoutsPath,act_sport,saison_year,emptyPhase,emptyPhaseColor;
+    static QString gcPath,schedulePath,workoutsPath,act_sport,emptyPhase,emptyPhaseColor;
     static bool act_isloaded,act_isrecalc;
-    static int saison_weeks,saison_start,athleteYOB;
+    static int athleteYOB;
     static int weekRange,weekOffSet,swimLaplen;
     static void saveSettings();
     int set_range_values(QString);
@@ -30,16 +30,12 @@ public:
     static void loadSettings();
 
     //QMap Getter
-    static QString get_saisonInfo(QString key)
-    {
-        return saisonInfo.value(key);
-    }
+    static QString get_saisonInfo(QString key) {return saisonInfo.value(key);}
+    static QMap<int,QString> get_sampList() {return sampList;}
+    static QMap<int,QString> get_intList() {return intList;}
 
     //QMap Setter
-    static void set_saisonInfos(QString key, QString value)
-    {
-        saisonInfo.insert(key,value);
-    }
+    static void set_saisonInfos(QString key, QString value){saisonInfo.insert(key,value);}
 
     static QString isAlt,isSwim,isBike,isRun,isTria,isStrength,isOther;
     static QString get_version() {return version;}
@@ -51,8 +47,7 @@ public:
     static QString get_emptyPhase() {return emptyPhase;}
     static QString get_breakName() {return breakName;}
 
-    static QMap<int,QString> get_sampList() {return sampList;}
-    static QMap<int,QString> get_intList() {return intList;}
+
 
     static QStringList get_keyList() {return keyList;}
     static QStringList get_gcInfo() {return gc_infos;}

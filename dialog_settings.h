@@ -37,6 +37,8 @@ private slots:
     void on_dateEdit_saisonStart_dateChanged(const QDate &date);
     void on_pushButton_color_clicked();
 
+    void on_dateEdit_saisonEnd_dateChanged(const QDate &date);
+
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;
