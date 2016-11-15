@@ -28,10 +28,11 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     ui->lineEdit_hfThres->setText(hfList.at(0));
     ui->lineEdit_hfmax->setText(hfList.at(1));
     ui->comboBox_selInfo->addItems(settings::get_keyList());
-    ui->lineEdit_saison->setText(settings::get_saisonYear());
-    ui->lineEdit_saisonWeeks->setText(QString::number(settings::get_saisonWeeks()));
-    ui->dateEdit_saisonStart->setDate(QDate::fromString(settings::get_saisonFDW(),"dd.MM.yyyy"));
-    ui->lineEdit_startWeek->setText(QString::number(settings::get_saisonStart()));
+    ui->lineEdit_saison->setText(settings::get_saisonInfo("saison"));
+    ui->lineEdit_saisonWeeks->setText(settings::get_saisonInfo("weeks"));
+    ui->dateEdit_saisonStart->setDate(QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy"));
+    ui->lineEdit_startWeek->setText(settings::get_saisonInfo("startkw"));
+    ui->dateEdit_saisonEnd->setDate(QDate::fromString(settings::get_saisonInfo("endDate"),"dd.MM.yyyy"));
     ui->comboBox_thresSport->addItems(sportList);
     ui->pushButton_save->setEnabled(false);
     ui->pushButton_color->setEnabled(false);
@@ -83,7 +84,11 @@ void Dialog_settings::writeChangedValues()
     hfList.replace(0,ui->lineEdit_hfThres->text());
     hfList.replace(1,ui->lineEdit_hfmax->text());
 
-    settings::set_saisonInfos(ui->lineEdit_saison->text(),ui->dateEdit_saisonStart->date(),ui->lineEdit_saisonWeeks->text().toInt(),ui->lineEdit_startWeek->text().toInt());
+    settings::set_saisonInfos("saison",ui->lineEdit_saison->text());
+    settings::set_saisonInfos("startDate",ui->dateEdit_saisonStart->date().toString());
+    settings::set_saisonInfos("startkw",ui->lineEdit_startWeek->text());
+    settings::set_saisonInfos("endDate",ui->dateEdit_saisonEnd->date().toString());
+    settings::set_saisonInfos("weeks",ui->lineEdit_saisonWeeks->text());
 
     settings::writeSettings(selection,updateList,paceList,hfList);
     this->set_thresholdView(ui->comboBox_thresSport->currentText());

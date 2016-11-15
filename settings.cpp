@@ -11,6 +11,8 @@ settings::settings()
 QString settings::settingFile;
 QString settings::splitter = "/";
 
+QMap<QString,QString> settings::saisonInfo;
+
 QString settings::version;
 QString settings::builddate;
 QString settings::valueFile;
@@ -150,10 +152,11 @@ void settings::loadSettings()
         myvalues->endGroup();
 
         myvalues->beginGroup("Saisoninfo");
-            saison_year = myvalues->value("saison").toString();
-            saison_weeks = myvalues->value("weeks").toInt();
-            saison_start = myvalues->value("startkw").toInt();
-            saisonFDW = myvalues->value("fdw").toString();
+            saisonInfo.insert("saison",myvalues->value("saison").toString());
+            saisonInfo.insert("startDate",myvalues->value("startDate").toString());
+            saisonInfo.insert("startkw",myvalues->value("startkw").toString());
+            saisonInfo.insert("endDate",myvalues->value("endDate").toString());
+            saisonInfo.insert("weeks",myvalues->value("weeks").toString());
         myvalues->endGroup();
 
         myvalues->beginGroup("Sport");
@@ -321,10 +324,11 @@ void settings::saveSettings()
     myvalues->endGroup();
 
     myvalues->beginGroup("Saisoninfo");
-        myvalues->setValue("saison",saison_year);
-        myvalues->setValue("weeks",QString::number(saison_weeks));
-        myvalues->setValue("startkw",QString::number(saison_start));
-        myvalues->setValue("fdw",saisonFDW);
+        myvalues->setValue("saison",saisonInfo.value("saison"));
+        myvalues->setValue("weeks",saisonInfo.value("weeks"));
+        myvalues->setValue("startkw",saisonInfo.value("startkw"));
+        myvalues->setValue("startDate",saisonInfo.value("startDate"));
+        myvalues->setValue("endDate",saisonInfo.value("endDate"));
     myvalues->endGroup();
 
     myvalues->beginGroup("Sport");

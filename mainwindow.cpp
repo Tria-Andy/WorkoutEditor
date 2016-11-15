@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     settings::loadSettings();
+    saisonWeeks = settings::get_saisonInfo("weeks").toInt();
     workSchedule = new schedule();
     work_list << "Phase:" << "Week:" << "Date:" << "Time:" << "Sport:" << "Code:" << "Title:" << "Duration:" << "Distance:" << "Stress:";
     sum_name << "Workouts:" << "Duration:" << "Distance:" << "StressScore:";
@@ -207,7 +208,7 @@ void MainWindow::set_summerInfo()
     {
         if(ui->comboBox_phasefilter->currentIndex() == 0)
         {
-            ui->label_selWeek->setText("All Phases " +settings::get_saisonYear());
+            ui->label_selWeek->setText("All Phases " +settings::get_saisonInfo("saison"));
         }
         else
         {
@@ -1270,7 +1271,7 @@ void MainWindow::on_pushButton_week_plus_clicked()
     else
     {
         ++weekpos;
-        if(weekpos + 12 == settings::get_saisonWeeks())
+        if(weekpos + 12 == saisonWeeks)
         {
             ui->pushButton_fourplus->setEnabled(false);
             ui->pushButton_week_plus->setEnabled(false);
@@ -1297,9 +1298,9 @@ void MainWindow::on_pushButton_fourplus_clicked()
     else
     {
         weekpos = weekpos+4;
-        if(weekpos + 12 >= settings::get_saisonWeeks())
+        if(weekpos + 12 >= saisonWeeks)
         {
-            weekpos = settings::get_saisonWeeks()-12;
+            weekpos = saisonWeeks-12;
             ui->pushButton_fourplus->setEnabled(false);
             ui->pushButton_week_plus->setEnabled(false);
             this->workout_calendar();
@@ -1601,7 +1602,7 @@ void MainWindow::on_actionSwitch_Year_triggered()
                                   );
     if (reply == QMessageBox::Yes)
     {
-        if(QDate::currentDate() >= QDate::fromString(settings::get_saisonFDW(),"dd.MM.yyyy"))
+        if(QDate::currentDate() >= QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy"))
         {
             workSchedule->changeYear();
             this->workout_calendar();

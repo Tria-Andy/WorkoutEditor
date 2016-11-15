@@ -76,7 +76,7 @@ private:
     QVector<int> work_sum,dur_sum,stress_sum;
     QVector<double> dist_sum;
     int weekRange,weekpos;
-    int weekDays;
+    int saisonWeeks,weekDays;
     unsigned int weekCounter;
     bool isWeekMode,safeFlag;
 

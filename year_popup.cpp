@@ -86,7 +86,7 @@ void year_popup::fill_values()
 
     if(phaseindex == 0)
     {
-        weekcount = settings::get_saisonWeeks();
+        weekcount = settings::get_saisonInfo("weeks").toInt();
     }
     else
     {

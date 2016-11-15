@@ -305,14 +305,15 @@ QString schedule::get_weekPhase(QDate currDate)
 
 void schedule::changeYear()
 {
-    QDate startDate = QDate::fromString(settings::get_saisonFDW(),"dd.MM.yyyy");
+    QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
     QString weekid;
     int id;
+    int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
 
     week_meta->sort(0);
     week_content->sort(0);
 
-    for(int week = 0; week < settings::get_saisonWeeks(); ++week)
+    for(int week = 0; week < saisonWeeks; ++week)
     {
         id = week_meta->data(week_meta->index(week,0,QModelIndex())).toInt();
         if(id == week+1)
@@ -323,7 +324,7 @@ void schedule::changeYear()
             week_content->setData(week_content->index(week,1,QModelIndex()),weekid);
         }
     }
-    if(week_meta->rowCount() > settings::get_saisonWeeks())
+    if(week_meta->rowCount() > saisonWeeks)
     {
         week_meta->removeRow(week_meta->rowCount()-1,QModelIndex());
         week_content->removeRow(week_content->rowCount()-1,QModelIndex());
