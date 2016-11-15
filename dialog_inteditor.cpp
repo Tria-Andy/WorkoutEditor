@@ -910,7 +910,7 @@ void Dialog_inteditor::save_workout()
         phase = get_treeValue(c_item,0,0,0,0);
 
         workmodel = stdWorkouts->workouts_steps;
-        workoutValues = QStringList();
+        workoutValues.clear();
 
         workoutValues << workID
                  << QString::number(counter)
@@ -928,7 +928,7 @@ void Dialog_inteditor::save_workout()
             for(int c_child = 0; c_child < currentItem->childCount(); ++c_child)
             {
                 ++counter;
-                workoutValues = QStringList();
+                workoutValues.clear();
                 workoutValues << workID
                          << QString::number(counter)
                          << get_treeValue(c_item,c_child,0,0,1)
@@ -947,7 +947,7 @@ void Dialog_inteditor::save_workout()
                     {
                         ++counter;
                         subphase = get_treeValue(c_item,c_child,0,0,1);
-                        workoutValues = QStringList();
+                        workoutValues.clear();
                         workoutValues << workID
                                  << QString::number(counter)
                                  << get_treeValue(c_item,c_child,subchild,0,2)
