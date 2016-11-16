@@ -70,8 +70,6 @@ QString settings::header_bike;
 int settings::weekRange;
 int settings::weekOffSet;
 int settings::swimLaplen;
-int settings::athleteYOB;
-
 
 void settings::fill_mapList(QMap<int,QString> *map, QString *values)
 {
