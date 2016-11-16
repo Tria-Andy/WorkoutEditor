@@ -124,7 +124,7 @@ void settings::loadSettings()
         valueFilePath = gcInfo.value("workouts") + "/" + valueFile;
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
         myvalues->beginGroup("Athlete");
-            athleteYOB = myvalues->value("yob").toInt();
+            gcInfo.insert("yob",myvalues->value("yob").toString());
         myvalues->endGroup();
 
         myvalues->beginGroup("Version");
@@ -339,6 +339,10 @@ void settings::saveSettings()
         myvalues->setValue("endDate",saisonInfo.value("endDate"));
     myvalues->endGroup();
 
+    myvalues->beginGroup("Athlete");
+        myvalues->setValue("yob",gcInfo.value("yob"));
+    myvalues->endGroup();
+
     myvalues->beginGroup("Sport");
         myvalues->setValue("sports",settings::setSettingString(sportList));
     myvalues->endGroup();
@@ -522,7 +526,7 @@ int settings::get_hfvalue(QString percent)
 
 double settings::calc_totalWork(double weight,double avgHF, double moveTime)
 {
-    int age = QDate::currentDate().year() - athleteYOB;
+    int age = QDate::currentDate().year() - gcInfo.value("yob").toInt();
 
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
 }

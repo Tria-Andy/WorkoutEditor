@@ -22,6 +22,7 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     ui->lineEdit_regpath->setText(settings::get_gcInfo("regPath"));
     ui->lineEdit_workdir->setText(settings::get_gcInfo("dir"));
     ui->lineEdit_athlete->setText(settings::get_gcInfo("athlete"));
+    ui->lineEdit_yob->setText(settings::get_gcInfo("yob"));
     ui->lineEdit_activity->setText(settings::get_gcInfo("folder"));
     ui->lineEdit_schedule->setText(settings::get_gcInfo("schedule"));
     ui->lineEdit_standard->setText(settings::get_gcInfo("workouts"));
@@ -91,6 +92,7 @@ void Dialog_settings::writeChangedValues()
 
     settings::set_gcInfo("dir",ui->lineEdit_workdir->text());
     settings::set_gcInfo("athlete",ui->lineEdit_athlete->text());
+    settings::set_gcInfo("yob",ui->lineEdit_yob->text());
     settings::set_gcInfo("folder",ui->lineEdit_activity->text());
     settings::set_gcInfo("schedule",ui->lineEdit_schedule->text());
     settings::set_gcInfo("workouts",ui->lineEdit_standard->text());
