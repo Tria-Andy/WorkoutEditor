@@ -17,6 +17,7 @@ public:
 
 private:
     Ui::Dialog_version *ui;
+    QString appVersion;
 };
 
 #endif // DIALOG_VERSION_H
