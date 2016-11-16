@@ -7,7 +7,7 @@
 class settings
 {
 private:
-    static QString version,builddate,splitter,header_swim,header_bike;
+    static QString splitter,header_swim,header_bike;
     static QStringList table_header,header_int,header_int_time,header_swim_time;
 
     static QString settingFile,gcPath,valueFile,valueFilePath,breakName;
@@ -39,8 +39,6 @@ public:
     static void set_gcInfo(QString key, QString value){gcInfo.insert(key,value);}
 
     static QString isAlt,isSwim,isBike,isRun,isTria,isStrength,isOther;
-    static QString get_version() {return version;}
-    static QString get_builddate() {return builddate;}
     static QString get_emptyPhaseColor() {return emptyPhaseColor;}
     static QString get_emptyPhase() {return emptyPhase;}
     static QString get_breakName() {return breakName;}

@@ -15,8 +15,6 @@ QMap<QString,QString> settings::gcInfo;
 QMap<QString,QString> settings::saisonInfo;
 
 QString settings::gcPath;
-QString settings::version;
-QString settings::builddate;
 QString settings::valueFile;
 QString settings::valueFilePath;
 QString settings::act_sport;
@@ -123,11 +121,6 @@ void settings::loadSettings()
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
         myvalues->beginGroup("Athlete");
             gcInfo.insert("yob",myvalues->value("yob").toString());
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Version");
-            version = myvalues->value("version").toString();
-            builddate = myvalues->value("build").toString();
         myvalues->endGroup();
 
         myvalues->beginGroup("JsonFile");
