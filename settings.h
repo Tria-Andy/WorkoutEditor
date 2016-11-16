@@ -10,14 +10,14 @@ private:
     static QString version,builddate,splitter,header_swim,header_bike;
     static QStringList table_header,header_int,header_int_time,header_swim_time;
 
-    static QString settingFile,valueFile,valueFilePath,breakName;
+    static QString settingFile,gcPath,valueFile,valueFilePath,breakName;
     static QStringList keyList,gc_infos,sportList,paceList,phaseList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
     static QStringList sportColor,phaseColor;
     static QMap<int,QString> sampList,intList;
-    static QMap<QString,QString> saisonInfo;
+    static QMap<QString,QString> gcInfo,saisonInfo;
     static QVector<double> powerList,factorList;
     static QVector<int> fontSize;
-    static QString gcPath,schedulePath,workoutsPath,act_sport,emptyPhase,emptyPhaseColor;
+    static QString act_sport,emptyPhase,emptyPhaseColor;
     static bool act_isloaded,act_isrecalc;
     static int athleteYOB;
     static int weekRange,weekOffSet,swimLaplen;
@@ -31,18 +31,17 @@ public:
 
     //QMap Getter
     static QString get_saisonInfo(QString key) {return saisonInfo.value(key);}
+    static QString get_gcInfo(QString key) {return gcInfo.value(key);}
     static QMap<int,QString> get_sampList() {return sampList;}
     static QMap<int,QString> get_intList() {return intList;}
 
     //QMap Setter
     static void set_saisonInfos(QString key, QString value){saisonInfo.insert(key,value);}
+    static void set_gcInfo(QString key, QString value){gcInfo.insert(key,value);}
 
     static QString isAlt,isSwim,isBike,isRun,isTria,isStrength,isOther;
     static QString get_version() {return version;}
     static QString get_builddate() {return builddate;}
-    static QString get_gcPath() {return gcPath;}
-    static QString get_schedulePath() {return schedulePath;}
-    static QString get_workoutsPath() {return workoutsPath;}
     static QString get_emptyPhaseColor() {return emptyPhaseColor;}
     static QString get_emptyPhase() {return emptyPhase;}
     static QString get_breakName() {return breakName;}
@@ -50,7 +49,6 @@ public:
 
 
     static QStringList get_keyList() {return keyList;}
-    static QStringList get_gcInfo() {return gc_infos;}
     static QStringList get_phaseList() {return phaseList;}
     static QStringList get_phaseColor() {return phaseColor;}
     static QStringList get_sportList() {return sportList;}

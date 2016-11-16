@@ -78,8 +78,9 @@ private:
     int weekRange,weekpos;
     int saisonWeeks,weekDays;
     unsigned int weekCounter;
-    bool isWeekMode,safeFlag;
+    bool userSetup,isWeekMode,safeFlag;
 
+    void openPreferences();
     void set_summerInfo();
     void summery_view();
     void summery_calc(int,QModelIndex,bool);

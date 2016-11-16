@@ -19,12 +19,12 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
     level_model = new QStandardItemModel();
     hf_model = new QStandardItemModel();
-    ui->lineEdit_regpath->setText(settings::get_gcInfo().at(0));
-    ui->lineEdit_workdir->setText(settings::get_gcInfo().at(1));
-    ui->lineEdit_athlete->setText(settings::get_gcInfo().at(2));
-    ui->lineEdit_activity->setText(settings::get_gcInfo().at(3));
-    ui->lineEdit_schedule->setText(settings::get_schedulePath());
-    ui->lineEdit_standard->setText(settings::get_workoutsPath());
+    ui->lineEdit_regpath->setText(settings::get_gcInfo("regPath"));
+    ui->lineEdit_workdir->setText(settings::get_gcInfo("dir"));
+    ui->lineEdit_athlete->setText(settings::get_gcInfo("athlete"));
+    ui->lineEdit_activity->setText(settings::get_gcInfo("folder"));
+    ui->lineEdit_schedule->setText(settings::get_gcInfo("schedule"));
+    ui->lineEdit_standard->setText(settings::get_gcInfo("workouts"));
     ui->lineEdit_hfThres->setText(hfList.at(0));
     ui->lineEdit_hfmax->setText(hfList.at(1));
     ui->comboBox_selInfo->addItems(settings::get_keyList());
@@ -36,7 +36,7 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     ui->comboBox_thresSport->addItems(sportList);
     ui->pushButton_save->setEnabled(false);
     ui->pushButton_color->setEnabled(false);
-    this->set_hfmodel();
+    this->checkSetup();
 }
 
 Dialog_settings::~Dialog_settings()
@@ -49,6 +49,12 @@ void Dialog_settings::on_pushButton_cancel_clicked()
     delete level_model;
     delete hf_model;
     reject();
+}
+
+void Dialog_settings::checkSetup()
+{
+    if(ui->lineEdit_athlete->text().isEmpty()) ui->pushButton_save->setEnabled(true);
+    this->set_hfmodel();
 }
 
 void Dialog_settings::writeChangedValues()
@@ -83,10 +89,16 @@ void Dialog_settings::writeChangedValues()
     hfList.replace(0,ui->lineEdit_hfThres->text());
     hfList.replace(1,ui->lineEdit_hfmax->text());
 
+    settings::set_gcInfo("dir",ui->lineEdit_workdir->text());
+    settings::set_gcInfo("athlete",ui->lineEdit_athlete->text());
+    settings::set_gcInfo("folder",ui->lineEdit_activity->text());
+    settings::set_gcInfo("schedule",ui->lineEdit_schedule->text());
+    settings::set_gcInfo("workouts",ui->lineEdit_standard->text());
+
     settings::set_saisonInfos("saison",ui->lineEdit_saison->text());
-    settings::set_saisonInfos("startDate",ui->dateEdit_saisonStart->date().toString());
+    settings::set_saisonInfos("startDate",ui->dateEdit_saisonStart->date().toString("dd.MM.yyyy"));
     settings::set_saisonInfos("startkw",ui->lineEdit_startWeek->text());
-    settings::set_saisonInfos("endDate",ui->dateEdit_saisonEnd->date().toString());
+    settings::set_saisonInfos("endDate",ui->dateEdit_saisonEnd->date().toString("dd.MM.yyyy"));
     settings::set_saisonInfos("weeks",ui->lineEdit_saisonWeeks->text());
 
     settings::writeSettings(selection,updateList,paceList,hfList);

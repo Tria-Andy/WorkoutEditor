@@ -9,6 +9,19 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     settings::loadSettings();
+    if(settings::get_gcInfo("athlete").isEmpty())
+    {
+        userSetup = false;
+        QMessageBox::information(this,"No User Information.",
+                                 "Please open Preferences and fill:\n"
+                                 "Athlete Folder\n"
+                                 "Workout-Schedule\n"
+                                 "Standard-Workouts",
+                                 QMessageBox::Ok);
+    }
+    else
+    {
+    userSetup = true;
     saisonWeeks = settings::get_saisonInfo("weeks").toInt();
     workSchedule = new schedule();
     work_list << "Phase:" << "Week:" << "Date:" << "Time:" << "Sport:" << "Code:" << "Title:" << "Duration:" << "Distance:" << "Stress:";
@@ -72,6 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->horizontalSlider_factor->setEnabled(false);
     ui->horizontalSlider_factor->setVisible(false);
     this->set_menuItems(false,true);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -81,11 +95,21 @@ MainWindow::~MainWindow()
 
 void MainWindow::freeMem()
 {
-    calendar_model->clear();
-    delete stdWorkout;
-    delete workSchedule;
-    delete sum_model;
-    delete calendar_model;
+    if(userSetup)
+    {
+        calendar_model->clear();
+        delete stdWorkout;
+        delete workSchedule;
+        delete sum_model;
+        delete calendar_model;
+    }
+}
+
+void MainWindow::openPreferences()
+{
+    Dialog_settings dia_settings(this);
+    dia_settings.setModal(true);
+    dia_settings.exec();
 }
 
 void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
@@ -1533,9 +1557,7 @@ void MainWindow::on_actionIntervall_Editor_triggered()
 
 void MainWindow::on_actionPreferences_triggered()
 {
-    Dialog_settings dia_settings(this);
-    dia_settings.setModal(true);
-    dia_settings.exec();
+    this->openPreferences();
 }
 
 void MainWindow::on_actionPace_Calculator_triggered()

@@ -4,9 +4,30 @@ standardWorkouts::standardWorkouts()
 {
     meta_tags << "sport" << "id" << "code" << "title" << "duration" << "distance" << "stress";
     step_tags << "sport-id" << "id" << "part" << "level" << "threshold" << "int-time" << "int-dist" << "repeats" << "parent";
+    workoutPath = settings::get_gcInfo("workouts");
+    if(!workoutPath.isEmpty()) this->check_workoutFiles();
+}
+
+void standardWorkouts::check_workoutFiles()
+{    //Check standard_workouts_meta.xml exist
+    QFile metaWork(workoutPath + QDir::separator() + "standard_workouts_meta.xml");
+    if(!metaWork.exists())
+    {
+        metaWork.open(QIODevice::WriteOnly | QIODevice::Text);
+        metaWork.close();
+    }
+
+    //Check standard_workouts_steps.xml exist
+    QFile stepWork(workoutPath + QDir::separator() + "standard_workouts_steps.xml");
+    if(!stepWork.exists())
+    {
+        stepWork.open(QIODevice::WriteOnly | QIODevice::Text);
+        stepWork.close();
+    }
 
     this->read_standard_workouts();
 }
+
 
 void standardWorkouts::read_standard_workouts()
 {
@@ -17,7 +38,7 @@ void standardWorkouts::read_standard_workouts()
     QDomNodeList meta_list,step_list;
     QDomElement work_ele,step_ele;
 
-    QFile metaWork(settings::get_workoutsPath() + QDir::separator() + "standard_workouts_meta.xml");
+    QFile metaWork(workoutPath + QDir::separator() + "standard_workouts_meta.xml");
 
     if(!metaWork.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -46,7 +67,7 @@ void standardWorkouts::read_standard_workouts()
         }
     }
 
-    QFile stepWork(settings::get_workoutsPath() + QDir::separator() + "standard_workouts_steps.xml");
+    QFile stepWork(workoutPath + QDir::separator() + "standard_workouts_steps.xml");
 
     if(!stepWork.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -104,7 +125,7 @@ void standardWorkouts::write_standard_workouts()
             xmlroot.appendChild(std_workout);
         }
 
-        QFile metaFile(settings::get_workoutsPath() + QDir::separator() + "standard_workouts_meta.xml");
+        QFile metaFile(workoutPath + QDir::separator() + "standard_workouts_meta.xml");
 
         if(!metaFile.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -133,7 +154,7 @@ void standardWorkouts::write_standard_workouts()
             xmlroot.appendChild(std_workout);
         }
 
-        QFile stepFile(settings::get_workoutsPath() + QDir::separator() + "standard_workouts_steps.xml");
+        QFile stepFile(workoutPath + QDir::separator() + "standard_workouts_steps.xml");
 
         if(!stepFile.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -170,4 +191,3 @@ void standardWorkouts::delete_stdWorkout(QString workID,bool isdelete)
     if(isdelete) this->set_workoutIds();
     this->write_standard_workouts();
 }
-

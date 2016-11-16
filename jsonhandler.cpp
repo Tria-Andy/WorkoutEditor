@@ -289,7 +289,7 @@ void jsonHandler::write_json()
 
 void jsonHandler::write_file(QJsonDocument jsondoc)
 {
-    QFile file(settings::get_gcPath() + QDir::separator() + fileName);
+    QFile file(settings::get_gcInfo("gcpath") + QDir::separator() + fileName);
     //QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName);
     if(!file.open(QFile::WriteOnly))
     {

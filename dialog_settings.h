@@ -45,6 +45,7 @@ private:
     QStringList sportList,model_header,paceList,hfList,sportColor,phaseColor;
     QStringList *currColorList;
     QVector<double> *powerlist,*factorList;
+    void checkSetup();
     void set_listEntries(QString);
     void set_color(QColor,bool,int);
     void save_settingsChanges();

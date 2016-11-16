@@ -15,6 +15,7 @@ class schedule
 public:
     schedule();
     QStandardItemModel *workout_schedule,*week_meta,*week_content;
+    void check_workoutFiles();
     void load_workouts_file();
     void save_workout_file();
     void read_workout_values(QDomDocument);
@@ -55,7 +56,7 @@ public:
 
 private:
     QStringList workoutTags,metaTags,contentTags;
-    QString copyFrom, copyTo;
+    QString schedulePath,copyFrom, copyTo;
     QDate firstdayofweek;
 
     //Workout Var
