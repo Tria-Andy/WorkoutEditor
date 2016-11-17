@@ -6,12 +6,40 @@ schedule::schedule()
     metaTags << "id" << "week" << "name" << "fdw";
     contentTags << "id" << "week" << "swim" << "bike" << "run" << "strength" << "alternativ" << "summery";
     firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
-    load_workouts_file();
+    schedulePath = settings::get_gcInfo("schedule");
+    if(!schedulePath.isEmpty()) this->check_workoutFiles();
+}
+
+void schedule::check_workoutFiles()
+{
+    //Check workout_schedule.xml exist
+    QFile workouts(schedulePath + QDir::separator() + "workout_schedule.xml");
+    if(!workouts.exists())
+    {
+        workouts.open(QIODevice::WriteOnly | QIODevice::Text);
+        workouts.close();
+    }
+    //Check workout_phase_meta.xml exist
+    QFile weekMeta(schedulePath + QDir::separator() + "workout_phase_meta.xml");
+    if(!weekMeta.exists())
+    {
+        weekMeta.open(QIODevice::WriteOnly | QIODevice::Text);
+        weekMeta.close();
+    }
+    //Check workout_phase_content.xml exist
+    QFile weekContent(schedulePath + QDir::separator() + "workout_phase_content.xml");
+    if(!weekContent.exists())
+    {
+        weekContent.open(QIODevice::WriteOnly | QIODevice::Text);
+        weekContent.close();
+    }
+
+    this->load_workouts_file();
 }
 
 void schedule::load_workouts_file()
 {
-    QFile workouts(settings::get_schedulePath() + QDir::separator() + "workout_schedule.xml");
+    QFile workouts(schedulePath + QDir::separator() + "workout_schedule.xml");
     QDomDocument doc_workouts;
 
     if(!workouts.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -27,7 +55,7 @@ void schedule::load_workouts_file()
         workouts.close();
     }
 
-    QFile weekMeta(settings::get_schedulePath() + QDir::separator() + "workout_phase_meta.xml");
+    QFile weekMeta(schedulePath + QDir::separator() + "workout_phase_meta.xml");
     QDomDocument doc_week_meta;
     if(!weekMeta.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -42,7 +70,7 @@ void schedule::load_workouts_file()
         weekMeta.close();
     }
 
-    QFile weekContent(settings::get_schedulePath() + QDir::separator() + "workout_phase_content.xml");
+    QFile weekContent(schedulePath + QDir::separator() + "workout_phase_content.xml");
     QDomDocument doc_week_content;
     if(!weekContent.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -84,7 +112,7 @@ void schedule::save_workout_file()
             xmlroot.appendChild(xml_workout);
         }
 
-        QFile file(settings::get_schedulePath() + QDir::separator() + "workout_schedule.xml");
+        QFile file(schedulePath + QDir::separator() + "workout_schedule.xml");
 
         if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -165,7 +193,7 @@ void schedule::save_week_files()
             xmlroot.appendChild(xml_phase);
         }
 
-        QFile meta_file(settings::get_schedulePath() + QDir::separator() + "workout_phase_meta.xml");
+        QFile meta_file(schedulePath + QDir::separator() + "workout_phase_meta.xml");
 
         if(!meta_file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -191,7 +219,7 @@ void schedule::save_week_files()
             xmlroot.appendChild(xml_phase);
         }
 
-        QFile content_file(settings::get_schedulePath() + QDir::separator() + "workout_phase_content.xml");
+        QFile content_file(schedulePath + QDir::separator() + "workout_phase_content.xml");
 
         if(!content_file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -305,14 +333,15 @@ QString schedule::get_weekPhase(QDate currDate)
 
 void schedule::changeYear()
 {
-    QDate startDate = QDate::fromString(settings::get_saisonFDW(),"dd.MM.yyyy");
+    QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
     QString weekid;
     int id;
+    int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
 
     week_meta->sort(0);
     week_content->sort(0);
 
-    for(int week = 0; week < settings::get_saisonWeeks(); ++week)
+    for(int week = 0; week < saisonWeeks; ++week)
     {
         id = week_meta->data(week_meta->index(week,0,QModelIndex())).toInt();
         if(id == week+1)
@@ -323,7 +352,7 @@ void schedule::changeYear()
             week_content->setData(week_content->index(week,1,QModelIndex()),weekid);
         }
     }
-    if(week_meta->rowCount() > settings::get_saisonWeeks())
+    if(week_meta->rowCount() > saisonWeeks)
     {
         week_meta->removeRow(week_meta->rowCount()-1,QModelIndex());
         week_content->removeRow(week_content->rowCount()-1,QModelIndex());

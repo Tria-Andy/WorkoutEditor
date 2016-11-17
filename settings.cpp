@@ -11,16 +11,13 @@ settings::settings()
 QString settings::settingFile;
 QString settings::splitter = "/";
 
-QString settings::version;
-QString settings::builddate;
+QMap<QString,QString> settings::gcInfo;
+QMap<QString,QString> settings::saisonInfo;
+
+QString settings::gcPath;
 QString settings::valueFile;
 QString settings::valueFilePath;
-QString settings::saisonFDW;
-QString settings::gcPath;
-QString settings::schedulePath;
-QString settings::workoutsPath;
 QString settings::act_sport;
-QString settings::saison_year;
 QString settings::emptyPhase;
 QString settings::emptyPhaseColor;
 QString settings::breakName;
@@ -37,7 +34,6 @@ QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
 
 QStringList settings::keyList;
-QStringList settings::gc_infos;
 QStringList settings::sportList;
 QStringList settings::paceList;
 QStringList settings::phaseList;
@@ -69,13 +65,9 @@ QStringList settings::table_header;
 QString settings::header_swim;
 QString settings::header_bike;
 
-int settings::saison_weeks;
-int settings::saison_start;
 int settings::weekRange;
 int settings::weekOffSet;
 int settings::swimLaplen;
-int settings::athleteYOB;
-
 
 void settings::fill_mapList(QMap<int,QString> *map, QString *values)
 {
@@ -107,32 +99,28 @@ void settings::loadSettings()
         QSettings *mysettings = new QSettings(settingFile,QSettings::IniFormat);
 
         mysettings->beginGroup("GoldenCheetah");
-            gc_infos << mysettings->value("regPath").toString();
-            gc_infos << mysettings->value("dir").toString();
-            gc_infos << mysettings->value("athlete").toString();
-            gc_infos << mysettings->value("folder").toString();
+            gcInfo.insert("regPath",mysettings->value("regPath").toString());
+            gcInfo.insert("dir",mysettings->value("dir").toString());
+            gcInfo.insert("athlete",mysettings->value("athlete").toString());
+            gcInfo.insert("folder",mysettings->value("folder").toString());
         mysettings->endGroup();
 
-        QSettings gc_reg(gc_infos.at(0),QSettings::NativeFormat);
-        QString gc_dir = gc_reg.value(gc_infos.at(1)).toString();
-        gcPath = gc_dir + gc_infos.at(2) + gc_infos.at(3);
+        QSettings gc_reg(gcInfo.value("regPath"),QSettings::NativeFormat);
+        QString gc_dir = gc_reg.value(gcInfo.value("dir")).toString();
+        gcPath = gc_dir + gcInfo.value("athlete") + gcInfo.value("folder");
 
         mysettings->beginGroup("Filepath");
-            schedulePath = mysettings->value("schedule").toString();
-            workoutsPath = mysettings->value("workouts").toString();
+            gcInfo.insert("schedule",mysettings->value("schedule").toString());
+            gcInfo.insert("workouts",mysettings->value("workouts").toString());
+            gcInfo.insert("gcpath",gcPath);
             valueFile = mysettings->value("valuefile").toString();
         mysettings->endGroup();
 
         //Sport Value Settings
-        valueFilePath = workoutsPath + "/" + valueFile;
+        valueFilePath = gcInfo.value("workouts") + "/" + valueFile;
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
         myvalues->beginGroup("Athlete");
-            athleteYOB = myvalues->value("yob").toInt();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Version");
-            version = myvalues->value("version").toString();
-            builddate = myvalues->value("build").toString();
+            gcInfo.insert("yob",myvalues->value("yob").toString());
         myvalues->endGroup();
 
         myvalues->beginGroup("JsonFile");
@@ -150,10 +138,11 @@ void settings::loadSettings()
         myvalues->endGroup();
 
         myvalues->beginGroup("Saisoninfo");
-            saison_year = myvalues->value("saison").toString();
-            saison_weeks = myvalues->value("weeks").toInt();
-            saison_start = myvalues->value("startkw").toInt();
-            saisonFDW = myvalues->value("fdw").toString();
+            saisonInfo.insert("saison",myvalues->value("saison").toString());
+            saisonInfo.insert("startDate",myvalues->value("startDate").toString());
+            saisonInfo.insert("startkw",myvalues->value("startkw").toString());
+            saisonInfo.insert("endDate",myvalues->value("endDate").toString());
+            saisonInfo.insert("weeks",myvalues->value("weeks").toString());
         myvalues->endGroup();
 
         myvalues->beginGroup("Sport");
@@ -309,6 +298,19 @@ QString settings::setSettingString(QStringList list)
 
 void settings::saveSettings()
 {
+    QSettings *mysettings = new QSettings(settingFile,QSettings::IniFormat);
+
+    mysettings->beginGroup("GoldenCheetah");
+        mysettings->setValue("dir",gcInfo.value("dir"));
+        mysettings->setValue("athlete",gcInfo.value("athlete"));
+        mysettings->setValue("folder",gcInfo.value("folder"));
+    mysettings->endGroup();
+
+    mysettings->beginGroup("Filepath");
+        mysettings->setValue("schedule",gcInfo.value("schedule"));
+        mysettings->setValue("workouts",gcInfo.value("workouts"));
+    mysettings->endGroup();
+
     QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
 
     myvalues->beginGroup("Threshold");
@@ -321,10 +323,15 @@ void settings::saveSettings()
     myvalues->endGroup();
 
     myvalues->beginGroup("Saisoninfo");
-        myvalues->setValue("saison",saison_year);
-        myvalues->setValue("weeks",QString::number(saison_weeks));
-        myvalues->setValue("startkw",QString::number(saison_start));
-        myvalues->setValue("fdw",saisonFDW);
+        myvalues->setValue("saison",saisonInfo.value("saison"));
+        myvalues->setValue("weeks",saisonInfo.value("weeks"));
+        myvalues->setValue("startkw",saisonInfo.value("startkw"));
+        myvalues->setValue("startDate",saisonInfo.value("startDate"));
+        myvalues->setValue("endDate",saisonInfo.value("endDate"));
+    myvalues->endGroup();
+
+    myvalues->beginGroup("Athlete");
+        myvalues->setValue("yob",gcInfo.value("yob"));
     myvalues->endGroup();
 
     myvalues->beginGroup("Sport");
@@ -510,7 +517,7 @@ int settings::get_hfvalue(QString percent)
 
 double settings::calc_totalWork(double weight,double avgHF, double moveTime)
 {
-    int age = QDate::currentDate().year() - athleteYOB;
+    int age = QDate::currentDate().year() - gcInfo.value("yob").toInt();
 
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
 }

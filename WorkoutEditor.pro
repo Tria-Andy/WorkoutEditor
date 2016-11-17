@@ -13,6 +13,17 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 TARGET = WorkoutEditor
 TEMPLATE = app
 
+#Application version
+VERSION_MAJOR = 1
+VERSION_MINOR = 1
+VERSION_BUILD = 3
+DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
+       "VERSION_MINOR=$$VERSION_MINOR"\
+       "VERSION_BUILD=$$VERSION_BUILD"
+
+#Target version
+VERSION = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
+VERSION_PE_HEADER = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
 
 SOURCES += main.cpp\
         mainwindow.cpp \

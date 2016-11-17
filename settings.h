@@ -7,18 +7,18 @@
 class settings
 {
 private:
-    static QString version,builddate,splitter,header_swim,header_bike;
+    static QString splitter,header_swim,header_bike;
     static QStringList table_header,header_int,header_int_time,header_swim_time;
 
-    static QString settingFile,valueFile,valueFilePath,saisonFDW,breakName;
+    static QString settingFile,gcPath,valueFile,valueFilePath,breakName;
     static QStringList keyList,gc_infos,sportList,paceList,phaseList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
     static QStringList sportColor,phaseColor;
     static QMap<int,QString> sampList,intList;
+    static QMap<QString,QString> gcInfo,saisonInfo;
     static QVector<double> powerList,factorList;
     static QVector<int> fontSize;
-    static QString gcPath,schedulePath,workoutsPath,act_sport,saison_year,emptyPhase,emptyPhaseColor;
+    static QString act_sport,emptyPhase,emptyPhaseColor;
     static bool act_isloaded,act_isrecalc;
-    static int saison_weeks,saison_start,athleteYOB;
     static int weekRange,weekOffSet,swimLaplen;
     static void saveSettings();
     int set_range_values(QString);
@@ -28,23 +28,24 @@ public:
     settings();
     static void loadSettings();
 
+    //QMap Getter
+    static QString get_saisonInfo(QString key) {return saisonInfo.value(key);}
+    static QString get_gcInfo(QString key) {return gcInfo.value(key);}
+    static QMap<int,QString> get_sampList() {return sampList;}
+    static QMap<int,QString> get_intList() {return intList;}
+
+    //QMap Setter
+    static void set_saisonInfos(QString key, QString value){saisonInfo.insert(key,value);}
+    static void set_gcInfo(QString key, QString value){gcInfo.insert(key,value);}
+
     static QString isAlt,isSwim,isBike,isRun,isTria,isStrength,isOther;
-    static QString get_version() {return version;}
-    static QString get_builddate() {return builddate;}
-    static QString get_gcPath() {return gcPath;}
-    static QString get_schedulePath() {return schedulePath;}
-    static QString get_workoutsPath() {return workoutsPath;}
-    static QString get_saisonYear() {return saison_year;}
-    static QString get_saisonFDW() {return saisonFDW;}
     static QString get_emptyPhaseColor() {return emptyPhaseColor;}
     static QString get_emptyPhase() {return emptyPhase;}
     static QString get_breakName() {return breakName;}
 
-    static QMap<int,QString> get_sampList() {return sampList;}
-    static QMap<int,QString> get_intList() {return intList;}
+
 
     static QStringList get_keyList() {return keyList;}
-    static QStringList get_gcInfo() {return gc_infos;}
     static QStringList get_phaseList() {return phaseList;}
     static QStringList get_phaseColor() {return phaseColor;}
     static QStringList get_sportList() {return sportList;}
@@ -61,8 +62,6 @@ public:
     static QStringList get_runRange() {return runRangeList;}
     static QStringList get_stgRange() {return stgRangeList;}
     static QStringList get_hfRange() {return hfRangeList;}
-    static int get_saisonWeeks() {return saison_weeks;}
-    static int get_saisonStart() {return saison_start;}
     static int get_weekRange() {return weekRange;}
     static int get_weekOffSet() {return weekOffSet;}
     static QVector<double> *get_powerList()
@@ -76,14 +75,6 @@ public:
         return p;
     }
     static QVector<int> get_fontSize() {return fontSize;}
-
-    static void set_saisonInfos(QString v_saison,QDate v_fdw ,int v_weeks,int v_start)
-    {
-        saison_year = v_saison;
-        saison_weeks = v_weeks;
-        saisonFDW = v_fdw.toString("dd.MM.yyyy");
-        saison_start = v_start;
-    }
 
     static int get_swimLaplen() {return swimLaplen;}
     static double calc_totalWork(double,double,double);

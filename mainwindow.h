@@ -76,10 +76,11 @@ private:
     QVector<int> work_sum,dur_sum,stress_sum;
     QVector<double> dist_sum;
     int weekRange,weekpos;
-    int weekDays;
+    int saisonWeeks,weekDays;
     unsigned int weekCounter;
-    bool isWeekMode,safeFlag;
+    bool userSetup,isWeekMode,safeFlag;
 
+    void openPreferences();
     void set_summerInfo();
     void summery_view();
     void summery_calc(int,QModelIndex,bool);

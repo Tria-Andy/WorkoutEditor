@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
+    <width>458</width>
     <height>365</height>
    </rect>
   </property>
@@ -65,11 +65,11 @@
             <x>10</x>
             <y>10</y>
             <width>401</width>
-            <height>131</height>
+            <height>161</height>
            </rect>
           </property>
           <property name="title">
-           <string>GoldenCheetah Registry</string>
+           <string>General</string>
           </property>
           <layout class="QFormLayout" name="formLayout">
            <item row="0" column="0">
@@ -93,7 +93,7 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
+           <item row="4" column="0">
             <widget class="QLabel" name="label_4">
              <property name="text">
               <string>Activity Folder:</string>
@@ -107,10 +107,28 @@
             <widget class="QLineEdit" name="lineEdit_workdir"/>
            </item>
            <item row="2" column="1">
-            <widget class="QLineEdit" name="lineEdit_athlete"/>
+            <widget class="QLineEdit" name="lineEdit_athlete">
+             <property name="toolTip">
+              <string>Insert your Athlete Name how it is definied in GC with a /</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QLineEdit" name="lineEdit_activity"/>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_19">
+             <property name="text">
+              <string>Athlete YoB:</string>
+             </property>
+            </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QLineEdit" name="lineEdit_activity"/>
+            <widget class="QLineEdit" name="lineEdit_yob">
+             <property name="toolTip">
+              <string>Athlete Year of Birth</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -118,9 +136,9 @@
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>170</y>
+            <y>180</y>
             <width>401</width>
-            <height>91</height>
+            <height>81</height>
            </rect>
           </property>
           <property name="title">
@@ -135,7 +153,11 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEdit_schedule"/>
+            <widget class="QLineEdit" name="lineEdit_schedule">
+             <property name="toolTip">
+              <string>Insert where the schedule files should be stored. Please insert the complete Path.</string>
+             </property>
+            </widget>
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_6">
@@ -145,7 +167,11 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_standard"/>
+            <widget class="QLineEdit" name="lineEdit_standard">
+             <property name="toolTip">
+              <string>Insert where the Standard Workout files should be stored. Please insert the complete Path.</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -656,7 +682,7 @@
          <widget class="QGroupBox" name="groupBox_5">
           <property name="geometry">
            <rect>
-            <x>0</x>
+            <x>10</x>
             <y>10</y>
             <width>181</width>
             <height>251</height>
@@ -716,7 +742,7 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QDateEdit" name="dateEdit">
+            <widget class="QDateEdit" name="dateEdit_saisonEnd">
              <property name="calendarPopup">
               <bool>true</bool>
              </property>

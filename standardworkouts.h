@@ -20,8 +20,9 @@ public:
 
 private:
     QStringList meta_tags,step_tags,workoutIDs;
+    QString workoutPath;
     bool save_workouts;
-
+    void check_workoutFiles();
     void read_standard_workouts();
     void write_standard_workouts();
     void set_workoutIds();

@@ -9,6 +9,20 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     settings::loadSettings();
+    if(settings::get_gcInfo("athlete").isEmpty())
+    {
+        userSetup = false;
+        QMessageBox::information(this,"No User Information.",
+                                 "Please open Preferences and fill:\n"
+                                 "Athlete Folder\n"
+                                 "Workout-Schedule\n"
+                                 "Standard-Workouts",
+                                 QMessageBox::Ok);
+    }
+    else
+    {
+    userSetup = true;
+    saisonWeeks = settings::get_saisonInfo("weeks").toInt();
     workSchedule = new schedule();
     work_list << "Phase:" << "Week:" << "Date:" << "Time:" << "Sport:" << "Code:" << "Title:" << "Duration:" << "Distance:" << "Stress:";
     sum_name << "Workouts:" << "Duration:" << "Distance:" << "StressScore:";
@@ -71,6 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->horizontalSlider_factor->setEnabled(false);
     ui->horizontalSlider_factor->setVisible(false);
     this->set_menuItems(false,true);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -80,11 +95,21 @@ MainWindow::~MainWindow()
 
 void MainWindow::freeMem()
 {
-    calendar_model->clear();
-    delete stdWorkout;
-    delete workSchedule;
-    delete sum_model;
-    delete calendar_model;
+    if(userSetup)
+    {
+        calendar_model->clear();
+        delete stdWorkout;
+        delete workSchedule;
+        delete sum_model;
+        delete calendar_model;
+    }
+}
+
+void MainWindow::openPreferences()
+{
+    Dialog_settings dia_settings(this);
+    dia_settings.setModal(true);
+    dia_settings.exec();
 }
 
 void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
@@ -207,7 +232,7 @@ void MainWindow::set_summerInfo()
     {
         if(ui->comboBox_phasefilter->currentIndex() == 0)
         {
-            ui->label_selWeek->setText("All Phases " +settings::get_saisonYear());
+            ui->label_selWeek->setText("All Phases " +settings::get_saisonInfo("saison"));
         }
         else
         {
@@ -686,7 +711,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
 
 void MainWindow::on_actionExport_to_Golden_Cheetah_triggered()
 {
-    Dialog_export export_workout(this,workSchedule->workout_schedule);
+    Dialog_export export_workout(this,workSchedule);
     export_workout.setModal(true);
     export_workout.exec();
 }
@@ -1270,7 +1295,7 @@ void MainWindow::on_pushButton_week_plus_clicked()
     else
     {
         ++weekpos;
-        if(weekpos + 12 == settings::get_saisonWeeks())
+        if(weekpos + 12 == saisonWeeks)
         {
             ui->pushButton_fourplus->setEnabled(false);
             ui->pushButton_week_plus->setEnabled(false);
@@ -1297,9 +1322,9 @@ void MainWindow::on_pushButton_fourplus_clicked()
     else
     {
         weekpos = weekpos+4;
-        if(weekpos + 12 >= settings::get_saisonWeeks())
+        if(weekpos + 12 >= saisonWeeks)
         {
-            weekpos = settings::get_saisonWeeks()-12;
+            weekpos = saisonWeeks-12;
             ui->pushButton_fourplus->setEnabled(false);
             ui->pushButton_week_plus->setEnabled(false);
             this->workout_calendar();
@@ -1532,9 +1557,7 @@ void MainWindow::on_actionIntervall_Editor_triggered()
 
 void MainWindow::on_actionPreferences_triggered()
 {
-    Dialog_settings dia_settings(this);
-    dia_settings.setModal(true);
-    dia_settings.exec();
+    this->openPreferences();
 }
 
 void MainWindow::on_actionPace_Calculator_triggered()
@@ -1601,7 +1624,7 @@ void MainWindow::on_actionSwitch_Year_triggered()
                                   );
     if (reply == QMessageBox::Yes)
     {
-        if(QDate::currentDate() >= QDate::fromString(settings::get_saisonFDW(),"dd.MM.yyyy"))
+        if(QDate::currentDate() >= QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy"))
         {
             workSchedule->changeYear();
             this->workout_calendar();
