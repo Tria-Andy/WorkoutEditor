@@ -25,7 +25,7 @@ private:
 
     void set_time_in_zones(bool);
     void adjust_intervalls();
-    void set_edit_samp_model();
+    void set_edit_samp_model(int);
 
     double get_int_distance(int,bool);
     double get_int_watts(int);

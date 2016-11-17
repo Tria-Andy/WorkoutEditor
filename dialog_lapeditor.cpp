@@ -224,7 +224,8 @@ void Dialog_lapeditor::recalulateData(int row)
     double swimLap = curr_act->get_swim_track()/1000;
     double lapDist = 0;
     bool isBreak = false;
-    int lapTime,startTime;
+    int lapCount,lapTime,startTime;
+    lapCount = model->rowCount()-1;
 
     for(int i = 0; i < curr_act->swim_xdata->rowCount(); ++i)
     {
@@ -248,22 +249,37 @@ void Dialog_lapeditor::recalulateData(int row)
         model->setData(model->index(i,5,QModelIndex()),lapDist);
     }
 
-    do
+    if(row != lapCount)
     {
-        curr_index = model->index(row,1,QModelIndex());
-        startTime = model->data(model->index(row,1,QModelIndex())).toInt();
+        do
+        {
+            curr_index = model->index(row,1,QModelIndex());
+            startTime = model->data(model->index(row,1,QModelIndex())).toInt();
+            lapTime = model->data(model->index(row,2,QModelIndex())).toInt();
+
+            new_index = model->index(row+1,1,QModelIndex());
+            model->setData(new_index,startTime+lapTime,Qt::EditRole);
+            ++row;
+            currLap = model->data(model->index(row,0,QModelIndex())).toString();
+        } while (currLap != settings::get_breakName() && row < lapCount-1);
+
+        startTime = model->data(new_index).toInt();
+        if(row == lapCount)
+        {
+            lapTime = model->data(model->index(row,2,QModelIndex())).toInt();
+            model->setData(model->index(row,2,QModelIndex()),lapTime);
+        }
+        else
+        {
+            lapTime = model->data(model->index(row+1,1,QModelIndex())).toInt() - startTime;
+            model->setData(model->index(row,2,QModelIndex()),lapTime);
+        }
+    }
+    else
+    {
         lapTime = model->data(model->index(row,2,QModelIndex())).toInt();
-
-        new_index = model->index(row+1,1,QModelIndex());
-        model->setData(new_index,startTime+lapTime,Qt::EditRole);
-        ++row;
-        currLap = model->data(model->index(row,0,QModelIndex())).toString();
-
-    } while (currLap != settings::get_breakName());
-
-    startTime = model->data(new_index).toInt();
-    lapTime = model->data(model->index(row+1,1,QModelIndex())).toInt() - startTime;
-    model->setData(model->index(row,2,QModelIndex()),lapTime);
+        model->setData(model->index(row,2,QModelIndex()),lapTime);
+    }
 }
 
 void Dialog_lapeditor::on_radioButton_add_clicked()
