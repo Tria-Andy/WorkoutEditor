@@ -136,44 +136,87 @@ void schedule::read_week_values(QDomDocument weekMeta, QDomDocument weekContent)
     week_meta = new QStandardItemModel(meta_list.count(),4);
     week_content = new QStandardItemModel(content_list.count(),8);
 
-    for(int i = 0; i < meta_list.count(); ++i)
+    //fill week_meta
+    if(meta_list.count() == 0)
     {
-        QDomElement meta_element;
-        QDomNode meta_node = meta_list.at(i);
-        meta_element = meta_node.toElement();
-        for(int col = 0; col < week_meta->columnCount(); ++col)
+        QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
+        QString weekid;
+        QString noPhase = settings::get_emptyPhase();
+        int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
+
+        week_meta->setRowCount(saisonWeeks);
+        for(int week = 0,id = 1; week < saisonWeeks; ++week,++id)
         {
-            if(col == 0)
+            weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
+            week_meta->setData(week_meta->index(week,0,QModelIndex()),id);
+            week_meta->setData(week_meta->index(week,1,QModelIndex()),weekid);
+            week_meta->setData(week_meta->index(week,2,QModelIndex()),noPhase);
+            week_meta->setData(week_meta->index(week,3,QModelIndex()),startDate.addDays(week*7).toString("dd.MM.yyyy"));
+        }
+        this->save_week_files();
+    }
+    else
+    {
+        for(int i = 0; i < meta_list.count(); ++i)
+        {
+            QDomElement meta_element;
+            QDomNode meta_node = meta_list.at(i);
+            meta_element = meta_node.toElement();
+            for(int col = 0; col < week_meta->columnCount(); ++col)
             {
-                week_meta->setData(week_meta->index(i,col,QModelIndex()),meta_element.attribute(metaTags.at(col)).toInt());
-            }
-            else
-            {
-                week_meta->setData(week_meta->index(i,col,QModelIndex()),meta_element.attribute(metaTags.at(col)));
+                if(col == 0)
+                {
+                    week_meta->setData(week_meta->index(i,col,QModelIndex()),meta_element.attribute(metaTags.at(col)).toInt());
+                }
+                else
+                {
+                    week_meta->setData(week_meta->index(i,col,QModelIndex()),meta_element.attribute(metaTags.at(col)));
+                }
             }
         }
-
     }
     week_meta->sort(0);
 
-    for(int i = 0; i < content_list.count(); ++i)
+    //fill week_content
+    if(content_list.count() == 0)
     {
-        QDomElement content_element;
-        QDomNode content_node = content_list.at(i);
-        content_element = content_node.toElement();
-        for(int col = 0; col < week_content->columnCount(); ++col)
+        QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
+        QString weekid;
+        int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
+
+        week_content->setRowCount(saisonWeeks);
+        for(int week = 0,id = 1; week < saisonWeeks; ++week,++id)
         {
-            if(col == 0)
+            weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
+            week_content->setData(week_content->index(week,0,QModelIndex()),id);
+            week_content->setData(week_content->index(week,1,QModelIndex()),weekid);
+            for(int col = 2; col < contentTags.count(); ++col)
             {
-                week_content->setData(week_content->index(i,col,QModelIndex()),content_element.attribute(contentTags.at(col)).toInt());
+                week_content->setData(week_content->index(week,col,QModelIndex()),"0-0-00:00-0");
             }
-            else
+        }
+        this->save_week_files();
+    }
+    else
+    {
+        for(int i = 0; i < content_list.count(); ++i)
+        {
+            QDomElement content_element;
+            QDomNode content_node = content_list.at(i);
+            content_element = content_node.toElement();
+            for(int col = 0; col < week_content->columnCount(); ++col)
             {
-                week_content->setData(week_content->index(i,col,QModelIndex()),content_element.attribute(contentTags.at(col)));
+                if(col == 0)
+                {
+                    week_content->setData(week_content->index(i,col,QModelIndex()),content_element.attribute(contentTags.at(col)).toInt());
+                }
+                else
+                {
+                    week_content->setData(week_content->index(i,col,QModelIndex()),content_element.attribute(contentTags.at(col)));
+                }
             }
         }
     }
-
 }
 
 void schedule::save_week_files()
@@ -335,7 +378,7 @@ void schedule::changeYear()
 {
     QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
     QString weekid;
-    int id;
+    int id = 0;
     int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
 
     week_meta->sort(0);
@@ -344,6 +387,7 @@ void schedule::changeYear()
     for(int week = 0; week < saisonWeeks; ++week)
     {
         id = week_meta->data(week_meta->index(week,0,QModelIndex())).toInt();
+
         if(id == week+1)
         {
             weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());

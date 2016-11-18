@@ -14,6 +14,7 @@ private:
     static QStringList keyList,gc_infos,sportList,paceList,phaseList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
     static QStringList sportColor,phaseColor;
     static QMap<int,QString> sampList,intList;
+    static QMap<QString,double> powerMap;
     static QMap<QString,QString> gcInfo,saisonInfo;
     static QVector<double> powerList,factorList;
     static QVector<int> fontSize;

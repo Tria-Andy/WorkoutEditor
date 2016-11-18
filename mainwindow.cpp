@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QMessageBox::information(this,"No User Information.",
                                  "Please open Preferences and fill:\n"
                                  "Athlete Folder\n"
+                                 "Athlete YoB\n"
                                  "Workout-Schedule\n"
                                  "Standard-Workouts",
                                  QMessageBox::Ok);
@@ -49,14 +50,14 @@ MainWindow::MainWindow(QWidget *parent) :
     isWeekMode = true;
     safeFlag = false;
     sel_count = 0;
-    ui->label_month->setText("Woche " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*7).weekNumber()-1));
+    ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*7).weekNumber()-1));
     ui->pushButton_current_week->setEnabled(false);
     ui->pushButton_week_minus->setEnabled(false);
     ui->pushButton_ClearWorkContent->setEnabled(false);
     ui->pushButton_sync->setEnabled(false);
     ui->pushButton_putInt->setEnabled(false);
     fontSize = 10;
-    cal_header << "Woche";
+    cal_header << "Week";
     for(int d = 1; d < 8; ++d)
     {
         cal_header << QDate::longDayName(d);
@@ -158,18 +159,18 @@ QString MainWindow::set_summeryString(int pos,bool week)
 {
     QString sumString;
     QString sum_name = "Summery";
-    double percent;
+    double percent = 0.0;
 
     if(week)
     {
         if(pos == 0)
         {
-            percent = (static_cast<double>(dur_sum[pos]) / static_cast<double>(dur_sum[0]))*100;
+            if(dur_sum[pos] != 0) percent = (static_cast<double>(dur_sum[pos]) / static_cast<double>(dur_sum[0]))*100;
             sumString = sum_name +"-"+ QString::number(work_sum[pos]) +"-"+ settings::set_time(dur_sum[pos]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos]) +"-"+ QString::number(stress_sum[pos]);
         }
         else
         {
-            percent = static_cast<double>(dur_sum[pos]) / (static_cast<double>(dur_sum[0]))*100;
+            if(dur_sum[pos] != 0) percent = static_cast<double>(dur_sum[pos]) / (static_cast<double>(dur_sum[0]))*100;
             sumString = settings::get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos]) +"-"+ settings::set_time(dur_sum[pos]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos]) +"-"+QString::number(stress_sum[pos]);
         }
     }
@@ -177,12 +178,12 @@ QString MainWindow::set_summeryString(int pos,bool week)
     {
         if(pos == 0)
         {
-            percent = (static_cast<double>(dur_sum[5]) / static_cast<double>(dur_sum[5]))*100;
+            if(dur_sum[5] != 0) percent = (static_cast<double>(dur_sum[5]) / static_cast<double>(dur_sum[5]))*100;
             sumString = sum_name +"-"+ QString::number(work_sum[5]) +"-"+ settings::set_time(dur_sum[5]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[5]) +"-"+ QString::number(stress_sum[5]);
         }
         else
         {
-            percent = (static_cast<double>(dur_sum[pos-1]) / static_cast<double>(dur_sum[5]))*100;
+            if(dur_sum[pos-1] != 0) percent = (static_cast<double>(dur_sum[pos-1]) / static_cast<double>(dur_sum[5]))*100;
             sumString = settings::get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos-1]) +"-"+ settings::set_time(dur_sum[pos-1]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos-1]) +"-"+QString::number(stress_sum[pos-1]);
         }
     }
@@ -263,7 +264,7 @@ void MainWindow::summery_view()
 
     work_sum.fill(0);
     dur_sum.fill(0);
-    dist_sum.fill(0);
+    dist_sum.fill(0.0);
     stress_sum.fill(0);
 
     if(isWeekMode)
@@ -849,7 +850,7 @@ void MainWindow::on_pushButton_current_week_clicked()
         this->set_buttons(false);
         this->workout_calendar();
     }
-    ui->label_month->setText("Woche " + this->get_weekRange());
+    ui->label_month->setText("Week " + this->get_weekRange());
 }
 
 void MainWindow::loadfile(const QString &filename)
@@ -1280,7 +1281,7 @@ void MainWindow::on_pushButton_week_minus_clicked()
         }
         this->workout_calendar();
     }
-    ui->label_month->setText("Woche " + this->get_weekRange());
+    ui->label_month->setText("Week " + this->get_weekRange());
 }
 
 void MainWindow::on_pushButton_week_plus_clicked()
@@ -1307,7 +1308,7 @@ void MainWindow::on_pushButton_week_plus_clicked()
             this->workout_calendar();
         }
     }
-    ui->label_month->setText("Woche " + this->get_weekRange());
+    ui->label_month->setText("Week " + this->get_weekRange());
 }
 
 void MainWindow::on_pushButton_fourplus_clicked()
@@ -1335,7 +1336,7 @@ void MainWindow::on_pushButton_fourplus_clicked()
             this->workout_calendar();
         }
     }
-    ui->label_month->setText("Woche " + this->get_weekRange());
+    ui->label_month->setText("Week " + this->get_weekRange());
 }
 
 void MainWindow::on_actionEditor_triggered()
@@ -1592,7 +1593,7 @@ void MainWindow::on_comboBox_schedMode_currentIndexChanged(int index)
        }
    }
    ui->comboBox_phasefilter->setEnabled(!isWeekMode);
-   ui->label_month->setText("Woche " + this->get_weekRange());
+   ui->label_month->setText("Week " + this->get_weekRange());
    this->workout_calendar();
    this->summery_view();
 }
@@ -1653,7 +1654,7 @@ void MainWindow::on_comboBox_phasefilter_currentIndexChanged(int index)
     phaseFilter = ui->comboBox_phasefilter->currentText();
     this->workout_calendar();
     this->summery_view();
-    ui->label_month->setText("Woche " + this->get_weekRange());
+    ui->label_month->setText("Week " + this->get_weekRange());
 }
 
 void MainWindow::on_actionVersion_triggered()

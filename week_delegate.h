@@ -57,6 +57,10 @@ public:
                     rect_color = settings::get_color(settings::get_phaseColor().at(pos));
                     break;
                 }
+                else
+                {
+                    rect_color = settings::get_color(settings::get_emptyPhaseColor());
+                }
             }
 
             QRect rect_phase(option.rect.x(),option.rect.y()+21, option.rect.width(),option.rect.height()-21);
