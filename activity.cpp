@@ -615,7 +615,10 @@ void Activity::recalculate_intervalls(bool recalc)
                 edit_int_model->setData(edit_int_model->index(i,2,QModelIndex()),swimStop);
             }
         }
+        lastSec = swim_xdata->data(swim_xdata->index(swim_xdata->rowCount()-1,1,QModelIndex())).toInt()
+                + swim_xdata->data(swim_xdata->index(swim_xdata->rowCount()-1,2,QModelIndex())).toInt();
         edit_int_model->setData(edit_int_model->index(edit_int_model->rowCount()-1,2,QModelIndex()),lastSec);
+        ++lastSec;
     }
 
     if(!recalc)
@@ -628,7 +631,7 @@ void Activity::recalculate_intervalls(bool recalc)
         }
     }
 
-    this->set_edit_samp_model();
+    this->set_edit_samp_model(lastSec);
     this->set_curr_act_model(recalc);
 }
 
@@ -738,9 +741,9 @@ int Activity::check_is_intervall(int row)
     }
 }
 
-void Activity::set_edit_samp_model()
+void Activity::set_edit_samp_model(int rowcount)
 {
-    int sampRowCount = samp_model->rowCount();
+    int sampRowCount = rowcount;
     int sampColCount = samp_model->columnCount();
     edit_samp_model = new QStandardItemModel(sampRowCount,sampColCount);
     new_dist.resize(sampRowCount);

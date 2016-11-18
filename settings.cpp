@@ -117,7 +117,14 @@ void settings::loadSettings()
         mysettings->endGroup();
 
         //Sport Value Settings
-        valueFilePath = gcInfo.value("workouts") + "/" + valueFile;
+        if(gcInfo.value("schedule").isEmpty())
+        {
+            valueFilePath = QApplication::applicationDirPath() + "/" + valueFile;
+        }
+        else
+        {
+            valueFilePath = gcInfo.value("workouts") + "/" + valueFile;
+        }
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
         myvalues->beginGroup("Athlete");
             gcInfo.insert("yob",myvalues->value("yob").toString());
@@ -167,7 +174,6 @@ void settings::loadSettings()
             factorList[2] = myvalues->value("runfactor").toDouble();
             thres_childs = myvalues->value("hf").toString();
             hfList << thres_childs.split(splitter);
-
         myvalues->endGroup();
 
         myvalues->beginGroup("Level");

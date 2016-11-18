@@ -79,8 +79,8 @@ public:
         QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
         spinBox->interpretText();
         QString currLap;
-        int lapTime,startTime;
-
+        int lapCount,lapTime,startTime;
+        lapCount = model->rowCount()-1;
         int value = spinBox->value();
         double lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(value),"mm:ss"),settings::get_swimLaplen(),settings::isSwim,false).toDouble();
 
@@ -89,22 +89,38 @@ public:
 
         int laprow = index.row();
 
-        do
+        if(laprow != lapCount)
         {
-            curr_index = model->index(laprow,1,QModelIndex());
-            startTime = model->data(model->index(laprow,1,QModelIndex())).toInt();
+            do
+            {
+                curr_index = model->index(laprow,1,QModelIndex());
+                startTime = model->data(model->index(laprow,1,QModelIndex())).toInt();
+                lapTime = model->data(model->index(laprow,2,QModelIndex())).toInt();
+
+                new_index = model->index(laprow+1,1,QModelIndex());
+                model->setData(new_index,startTime+lapTime,Qt::EditRole);
+                ++laprow;
+                currLap = model->data(model->index(laprow,0,QModelIndex())).toString();
+            } while ((currLap != settings::get_breakName()) && (laprow < lapCount-1));
+
+            startTime = model->data(new_index).toInt();
+            if(laprow == lapCount)
+            {
+                lapTime = model->data(model->index(laprow,2,QModelIndex())).toInt();
+                model->setData(model->index(laprow,2,QModelIndex()),lapTime);
+
+            }
+            else
+            {
+                lapTime = model->data(model->index(laprow+1,1,QModelIndex())).toInt() - startTime;
+                model->setData(model->index(laprow,2,QModelIndex()),lapTime);
+            }
+        }
+        else
+        {
             lapTime = model->data(model->index(laprow,2,QModelIndex())).toInt();
-
-            new_index = model->index(laprow+1,1,QModelIndex());
-            model->setData(new_index,startTime+lapTime,Qt::EditRole);
-            ++laprow;
-            currLap = model->data(model->index(laprow,0,QModelIndex())).toString();
-
-        } while (currLap != settings::get_breakName());
-
-        startTime = model->data(new_index).toInt();
-        lapTime = model->data(model->index(laprow+1,1,QModelIndex())).toInt() - startTime;
-        model->setData(model->index(laprow,2,QModelIndex()),lapTime);
+            model->setData(model->index(laprow,2,QModelIndex()),lapTime);
+        }
     }
 
 
