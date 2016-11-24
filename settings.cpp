@@ -59,11 +59,12 @@ bool settings::act_isloaded = false;
 bool settings::act_isrecalc = false;
 
 QStringList settings::header_int;
+QStringList settings::header_bike;
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
 QStringList settings::table_header;
 QString settings::header_swim;
-QString settings::header_bike;
+
 
 int settings::weekRange;
 int settings::weekOffSet;
@@ -85,7 +86,7 @@ void settings::loadSettings()
     header_int_time << "Interval" << "Start Sec" << "Stop Sec" << "Distance";
     header_swim_time << "Lap" << "Start" << "Time" << "Strokes" << "Speed";
     header_swim = "Swim Laps";
-    header_bike = "Watt";
+    header_bike << "Watt" << "CAD";
 
     powerList.resize(4);
     factorList.resize(3);

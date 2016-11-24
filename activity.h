@@ -18,7 +18,7 @@ private:
     QStringList ride_items;
     QVector<double> calc_speed,calc_cadence,p_swim_time,new_dist;
     QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg,p_swimlaps,vect_lapstart;
-    double swim_track,avg_dist,avg_watt,avg_laptime,swim_cv,swim_sri,polishFactor;
+    double swim_track,avg_dist,avg_watt,avg_cad,avg_laptime,swim_cv,swim_sri,polishFactor;
     int dist_factor,avg_counter,avg_pace,pace_cv,zone_count,move_time,swim_pace,hf_threshold,hf_avg;
     bool changeRowCount;
 
@@ -28,7 +28,7 @@ private:
     void set_edit_samp_model(int);
 
     double get_int_distance(int,bool);
-    double get_int_watts(int);
+    double get_int_value(int,int,bool);
     double interpolate_speed(int,int,double);
 
     int get_swim_laps(int,bool);
@@ -76,6 +76,7 @@ public:
     int get_avg_pace() {return avg_pace/avg_counter;}
     double get_avg_dist() {return avg_dist/avg_counter;}
     double get_avg_watts() {return avg_watt/avg_counter;}
+    double get_avg_cad() {return avg_cad/avg_counter;}
 
     //Swim Calculations
     void set_swim_data();

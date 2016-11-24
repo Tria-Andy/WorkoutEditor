@@ -1397,7 +1397,8 @@ void MainWindow::set_avg_fields()
     ui->lineEdit_lap->setText(settings::set_time(curr_activity->get_avg_laptime()));
     ui->lineEdit_pace->setText(settings::set_time(curr_activity->get_avg_pace()));
     ui->lineEdit_dist->setText(QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor()));
-    ui->lineEdit_watt->setText(QString::number(curr_activity->get_avg_watts()));
+    ui->lineEdit_watt->setText(QString::number(round(curr_activity->get_avg_watts())));
+    ui->lineEdit_cad->setText(QString::number(round(curr_activity->get_avg_cad())));
 
     if(sel_count > 0)
     {
@@ -1407,15 +1408,20 @@ void MainWindow::set_avg_fields()
     {
         ui->frame_avgValue->setVisible(false);
     }
+
     if(curr_activity->get_sport() == settings::isBike)
     {
         ui->lineEdit_watt->setVisible(true);
         ui->label_avgWatt->setVisible(true);
+        ui->lineEdit_cad->setVisible(true);
+        ui->label_cad->setVisible(true);
     }
     else
     {
         ui->lineEdit_watt->setVisible(false);
         ui->label_avgWatt->setVisible(false);
+        ui->lineEdit_cad->setVisible(false);
+        ui->label_cad->setVisible(false);
     }
 }
 

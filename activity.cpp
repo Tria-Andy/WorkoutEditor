@@ -375,11 +375,19 @@ int Activity::get_zone_values(double factor, int max, bool ispace)
 
 int Activity::get_header_num()
 {
-    if(curr_sport == settings::isSwim || curr_sport == settings::isBike)
+    if(curr_sport == settings::isSwim)
     {
         return 6;
     }
-    else
+    if(curr_sport == settings::isBike)
+    {
+        return 7;
+    }
+    if(curr_sport == settings::isRun)
+    {
+        return 5;
+    }
+    if(curr_sport == settings::isTria)
     {
         return 5;
     }
@@ -500,20 +508,21 @@ int Activity::get_swim_laps(int row,bool recalc)
     return lapcount;
 }
 
-double Activity::get_int_watts(int row)
+double Activity::get_int_value(int row,int col, bool recalc)
 {
-    double watts = 0.0;
+    QStandardItemModel *model = this->set_samp_model_pointer(recalc);
+    double value = 0.0;
     int int_start,int_stop;
     int_start = int_model->data(int_model->index(row,1,QModelIndex())).toInt();
     int_stop = int_model->data(int_model->index(row,2,QModelIndex())).toInt();
 
     for(int i = int_start; i < int_stop; ++i)
     {
-        watts = watts + samp_model->data(samp_model->index(i,4,QModelIndex())).toDouble();
+        value = value + model->data(model->index(i,col,QModelIndex())).toDouble();
     }
-    watts = watts / (int_stop - int_start);
+    value = value / (int_stop - int_start);
 
-    return watts;
+    return value;
 }
 
 QStandardItemModel * Activity::set_int_model_pointer(bool recalc)
@@ -912,7 +921,7 @@ void Activity::set_edit_samp_model(int rowcount)
           sportValue = round(settings::estimate_stress(settings::isSwim,settings::set_time(this->get_int_pace(0,true)/10),this->get_int_duration(0,true)));
           jsonhandler->set_overrideData("swimscore",QString::number(sportValue));
           triValue = triValue + sportValue;
-          sportValue = round(settings::estimate_stress(settings::isBike,QString::number(this->get_int_watts(2)),this->get_int_duration(2,true)));
+          sportValue = round(settings::estimate_stress(settings::isBike,QString::number(this->get_int_value(2,4,true)),this->get_int_duration(2,true)));
           jsonhandler->set_overrideData("skiba_bike_score",QString::number(sportValue));
           triValue = triValue + sportValue;
           sportValue = round(settings::estimate_stress(settings::isRun,settings::set_time(this->get_int_pace(4,true)),this->get_int_duration(4,true)));
@@ -985,7 +994,11 @@ void Activity::set_curr_act_model(bool recalc)
             curr_act_model->setData(curr_act_model->index(row,3,QModelIndex()),settings::set_doubleValue(this->get_int_distance(row,recalc),true));
             curr_act_model->setData(curr_act_model->index(row,4,QModelIndex()),settings::set_time(this->get_int_pace(row,recalc)));
             if(curr_sport == settings::isSwim) curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),this->get_swim_laps(row,recalc));
-            if(curr_sport == settings::isBike) curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),settings::set_doubleValue(this->get_int_watts(row),false));
+            if(curr_sport == settings::isBike)
+            {
+                curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),settings::set_doubleValue(this->get_int_value(row,4,recalc),false));
+                curr_act_model->setData(curr_act_model->index(row,6,QModelIndex()),round(this->get_int_value(row,3,recalc)));
+            }
     }
 
     curr_act_model->setHorizontalHeaderLabels(settings::get_int_header(curr_sport));
@@ -997,9 +1010,12 @@ void Activity::set_avg_values(int counter, int row, bool add)
     double t_laptime = static_cast<double>(settings::get_timesec(curr_act_model->data(curr_act_model->index(row,1,QModelIndex())).toString()));
     int t_pace = settings::get_timesec(curr_act_model->data(curr_act_model->index(row,4,QModelIndex())).toString());
     double t_dist = curr_act_model->data(curr_act_model->index(row,3,QModelIndex())).toDouble();
-    double t_watt = 0.0;
-    if(curr_sport == settings::isBike) t_watt = curr_act_model->data(curr_act_model->index(row,5,QModelIndex())).toDouble();
-
+    double t_watt = 0.0,t_cad = 0.0;
+    if(curr_sport == settings::isBike)
+    {
+        t_watt = curr_act_model->data(curr_act_model->index(row,5,QModelIndex())).toDouble();
+        t_cad = curr_act_model->data(curr_act_model->index(row,6,QModelIndex())).toDouble();
+    }
     if(counter != 0)
     {
         if(add)
@@ -1008,6 +1024,7 @@ void Activity::set_avg_values(int counter, int row, bool add)
             avg_pace = avg_pace + t_pace;
             avg_dist = avg_dist + t_dist;
             avg_watt = avg_watt + t_watt;
+            avg_cad = avg_cad + t_cad;
         }
         else
         {
@@ -1015,6 +1032,7 @@ void Activity::set_avg_values(int counter, int row, bool add)
             avg_pace = avg_pace - t_pace;
             avg_dist = avg_dist - t_dist;
             avg_watt = avg_watt - t_watt;
+            avg_cad = avg_cad + t_cad;
         }
     }
     else
@@ -1031,4 +1049,5 @@ void Activity::reset_avg()
     avg_laptime = 0;
     avg_pace = 0;
     avg_watt = 0.0;
+    avg_cad = 0.0;
 }

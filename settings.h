@@ -7,8 +7,8 @@
 class settings
 {
 private:
-    static QString splitter,header_swim,header_bike;
-    static QStringList table_header,header_int,header_int_time,header_swim_time;
+    static QString splitter,header_swim;
+    static QStringList table_header,header_int,header_bike,header_int_time,header_swim_time;
 
     static QString settingFile,gcPath,valueFile,valueFilePath,breakName;
     static QStringList keyList,gc_infos,sportList,paceList,phaseList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
