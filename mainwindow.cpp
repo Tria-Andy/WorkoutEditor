@@ -1148,7 +1148,6 @@ void MainWindow::fill_WorkoutContent()
         else
         {
             value = (ceil(curr_activity->get_avg_laptime()/10.0)*10);
-
         }
 
         if(value >= 60)
