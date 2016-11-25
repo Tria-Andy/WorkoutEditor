@@ -47,14 +47,19 @@ public:
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
+        Q_UNUSED(option)
+        Q_UNUSED(index)
+
         const QAbstractItemModel *model = index.model();
         QString lapName = model->data(model->index(index.row(),0,QModelIndex())).toString();
 
         if(index.column() == 2 && lapName != settings::get_breakName())
         {
-            Q_UNUSED(option)
-            Q_UNUSED(index)
+            QFont eFont;
+            eFont.setPixelSize(12);
+
             QSpinBox *editor = new QSpinBox(parent);
+            editor->setFont(eFont);
             editor->setFrame(false);
             editor->setMinimum(0);
             editor->setMaximum(10800);
