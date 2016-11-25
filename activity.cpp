@@ -627,11 +627,6 @@ void Activity::recalculate_intervalls(bool recalc)
         lastSec = swim_xdata->data(swim_xdata->index(swim_xdata->rowCount()-1,1,QModelIndex())).toInt()
                 + swim_xdata->data(swim_xdata->index(swim_xdata->rowCount()-1,2,QModelIndex())).toInt();
         edit_int_model->setData(edit_int_model->index(edit_int_model->rowCount()-1,2,QModelIndex()),lastSec);
-        ++lastSec;
-    }
-    else
-    {
-        ++lastSec;
     }
     if(!recalc)
     {
@@ -642,7 +637,7 @@ void Activity::recalculate_intervalls(bool recalc)
             edit_int_model->setData(edit_int_model->index(i,2,QModelIndex()),int_model->data(int_model->index(i,2,QModelIndex())).toInt());
         }
     }
-    this->set_edit_samp_model(lastSec);
+    this->set_edit_samp_model(++lastSec);
     this->set_curr_act_model(recalc);
 }
 
@@ -903,7 +898,6 @@ void Activity::set_edit_samp_model(int rowcount)
                   edit_samp_model->setData(edit_samp_model->index(row,col,QModelIndex()),samp_model->data(samp_model->index(row,col,QModelIndex())).toDouble());
               }
           }
-          qDebug() << "Edit Samp Run";
       }
 
       if(curr_sport == settings::isTria)
