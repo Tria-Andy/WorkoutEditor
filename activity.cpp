@@ -391,6 +391,8 @@ int Activity::get_header_num()
     {
         return 5;
     }
+
+    return 0;
 }
 
 void Activity::set_dist_factor()

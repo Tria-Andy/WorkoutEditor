@@ -158,7 +158,7 @@ void week_popup::set_weekInfos()
     weekchart->legend()->hide();
 }
 
-void week_popup::on_pushButton_clicked()
+void week_popup::on_pushButton_close_clicked()
 {
     if(filledWeek)
     {
@@ -167,14 +167,8 @@ void week_popup::on_pushButton_clicked()
     reject();
 }
 
-
-void week_popup::on_pushButton_copy_clicked()
+void week_popup::on_pushButton_edit_clicked()
 {
     this->freeMem();
     accept();
-}
-
-void week_popup::on_pushButton_save_clicked()
-{
-
 }

@@ -19,12 +19,20 @@ public:
 
 private slots:
     void on_pushButton_cancel_clicked();
-    void on_pushButton_copy_clicked();
+    void on_pushButton_ok_clicked();
+
+    void on_radioButton_copy_clicked();
+
+    void on_radioButton_save_clicked();
+
+    void on_radioButton_clear_clicked();
 
 private:
     Ui::Dialog_week_copy *ui;
     schedule *workSched;
     QStringList weekList;
+    int editMode;
+    void editWeek();
 };
 
 #endif // DIALOG_WEEK_COPY_H

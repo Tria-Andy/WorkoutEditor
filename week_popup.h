@@ -22,12 +22,8 @@ public:
     ~week_popup();
 
 private slots:
-    void on_pushButton_clicked();
-
-
-    void on_pushButton_copy_clicked();
-
-    void on_pushButton_save_clicked();
+    void on_pushButton_close_clicked();
+    void on_pushButton_edit_clicked();
 
 private:
     Ui::week_popup *ui;
@@ -43,10 +39,8 @@ private:
     QBarSet *duraBar;
     QBarSeries *duraBars;
 
-
     void set_plotModel();
     void set_weekInfos();
-
     void freeMem();
 };
 
