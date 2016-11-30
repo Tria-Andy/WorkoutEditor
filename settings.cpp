@@ -65,7 +65,6 @@ QStringList settings::header_swim_time;
 QStringList settings::table_header;
 QString settings::header_swim;
 
-
 int settings::weekRange;
 int settings::weekOffSet;
 int settings::swimLaplen;

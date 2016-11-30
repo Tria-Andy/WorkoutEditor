@@ -6,6 +6,7 @@
 #include <QtCharts>
 #include <QMessageBox>
 #include "settings.h"
+#include "logger.h"
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -55,6 +56,7 @@ public:
     QBarSet* get_qBarSet();
 
 private:
+    logger *logFile;
     QStringList workoutTags,metaTags,contentTags;
     QString schedulePath,copyFrom, copyTo;
     QDate firstdayofweek;

@@ -33,6 +33,7 @@
 #include "jsonhandler.h"
 #include "activity.h"
 #include "standardworkouts.h"
+#include "logger.h"
 
 namespace Ui {
 class MainWindow;

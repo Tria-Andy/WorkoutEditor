@@ -47,7 +47,8 @@ SOURCES += main.cpp\
     dialog_week_copy.cpp \
     dialog_version.cpp \
     dialog_lapeditor.cpp \
-    jsonhandler.cpp
+    jsonhandler.cpp \
+    logger.cpp
 
 HEADERS  += mainwindow.h \
     calendar_delegate.h \
@@ -78,7 +79,8 @@ HEADERS  += mainwindow.h \
     del_swimlap.h \
     del_intview.h \
     del_intselect.h \
-    jsonhandler.h
+    jsonhandler.h \
+    logger.h
 
 FORMS    += mainwindow.ui \
     dialog_add.ui \

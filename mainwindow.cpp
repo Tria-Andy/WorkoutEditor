@@ -3,6 +3,8 @@
 #include <QMessageBox>
 #include <QTableWidget>
 
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -244,8 +246,7 @@ void MainWindow::set_summerInfo()
 
 void MainWindow::summery_view()
 {
-    delete sum_model;
-    sum_model = new QStandardItemModel();
+    sum_model->clear();
     sum_model->setHorizontalHeaderLabels(sum_header);
     ui->tableView_summery->setModel(sum_model);
     ui->tableView_summery->verticalHeader()->resetDefaultSectionSize();
@@ -1136,56 +1137,56 @@ void MainWindow::write_hf_infos()
 void MainWindow::fill_WorkoutContent()
 {
     QString content,newEntry,contentValue,label;
-    double value;
+    double dist;
+    int time;
     content = ui->lineEdit_workContent->text();
 
     if(ui->radioButton_time->isChecked())
     {
         if(ui->checkBox_exact->isChecked())
         {
-            value = curr_activity->get_avg_laptime();
+            time = curr_activity->get_avg_laptime();
         }
         else
         {
-            value = (ceil(curr_activity->get_avg_laptime()/10.0)*10);
+            time = (ceil(curr_activity->get_avg_laptime()/10.0)*10);
         }
 
-        if(value >= 60)
+        if(time >= 60)
         {
             label = "Min";
-            value = value / 60;
         }
         else
         {
             label = "Sec";
         }
 
-        contentValue = QString::number(value)+label;
+        contentValue = settings::set_time(time)+label;
     }
 
     if(ui->radioButton_distance->isChecked())
     {
         if(ui->checkBox_exact->isChecked())
         {
-            value = (round(curr_activity->get_avg_dist()*1000)/1000.0);
+            dist = (round(curr_activity->get_avg_dist()*1000)/1000.0);
         }
         else
         {
-            value = (ceil(curr_activity->get_avg_dist()*10)/10.0);
+            dist = (ceil(curr_activity->get_avg_dist()*10)/10.0);
 
         }
 
-        if(value < 1)
+        if(dist < 1)
         {
             label = "M";
-            value = value*1000.0;
+            dist = dist*1000.0;
         }
         else
         {
             label = "Km";
         }
 
-        contentValue = QString::number(value)+label;
+        contentValue = QString::number(dist)+label;
     }
 
     if(curr_activity->get_sport() == settings::isSwim)
@@ -1193,7 +1194,6 @@ void MainWindow::fill_WorkoutContent()
         if(sel_count > 1)
         {
             newEntry = QString::number(sel_count)+"x"+QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor())+"/"+settings::set_time(curr_activity->get_avg_laptime());
-
         }
         else
         {

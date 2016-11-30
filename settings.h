@@ -44,8 +44,6 @@ public:
     static QString get_emptyPhase() {return emptyPhase;}
     static QString get_breakName() {return breakName;}
 
-
-
     static QStringList get_keyList() {return keyList;}
     static QStringList get_phaseList() {return phaseList;}
     static QStringList get_phaseColor() {return phaseColor;}

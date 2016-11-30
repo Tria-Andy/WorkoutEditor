@@ -44,13 +44,13 @@ void schedule::load_workouts_file()
 
     if(!workouts.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "File not open!";
+        //logFile->logoutput("File not open: workout_schedule.xml");
     }
     else
     {
         if(!doc_workouts.setContent(&workouts))
         {
-            qDebug() << "Workouts not loaded!";
+            //logFile->logoutput("Workouts not loaded!");
         }
         workouts.close();
     }
@@ -59,13 +59,13 @@ void schedule::load_workouts_file()
     QDomDocument doc_week_meta;
     if(!weekMeta.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "File not open!";
+        //logFile->logoutput("File not open: workout_phase_meta.xml");
     }
     else
     {
         if(!doc_week_meta.setContent(&weekMeta))
         {
-            qDebug() << "Workouts not loaded!";
+            //logFile->logoutput("Meta not loaded!");
         }
         weekMeta.close();
     }
@@ -74,13 +74,13 @@ void schedule::load_workouts_file()
     QDomDocument doc_week_content;
     if(!weekContent.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "File not open!";
+        //logFile->logoutput("File not open: workout_phase_content.xml");
     }
     else
     {
         if(!doc_week_content.setContent(&weekContent))
         {
-            qDebug() << "Workouts not loaded!";
+            //logFile->logoutput("Content not loaded!");
         }
         weekContent.close();
     }
