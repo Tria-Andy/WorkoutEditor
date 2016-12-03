@@ -13,6 +13,7 @@ QString settings::splitter = "/";
 
 QMap<QString,QString> settings::gcInfo;
 QMap<QString,QString> settings::saisonInfo;
+QMap<QString,QString> settings::colorMap;
 
 QString settings::gcPath;
 QString settings::valueFile;
@@ -91,7 +92,7 @@ void settings::loadSettings()
     factorList.resize(3);
     fontSize.resize(3);
 
-    settingFile = QApplication::applicationDirPath() + "/WorkoutEditor.ini";
+    settingFile = QApplication::applicationDirPath() + QDir::separator() +"WorkoutEditor.ini";
 
     //General Settings
     if(QFile(settingFile).exists())
@@ -119,11 +120,11 @@ void settings::loadSettings()
         //Sport Value Settings
         if(gcInfo.value("schedule").isEmpty())
         {
-            valueFilePath = QApplication::applicationDirPath() + "/" + valueFile;
+            valueFilePath = QApplication::applicationDirPath() + QDir::separator() + valueFile;
         }
         else
         {
-            valueFilePath = gcInfo.value("workouts") + "/" + valueFile;
+            valueFilePath = gcInfo.value("workouts") + QDir::separator() + valueFile;
         }
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
         myvalues->beginGroup("Athlete");

@@ -11,19 +11,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     settings::loadSettings();
-    if(settings::get_gcInfo("athlete").isEmpty())
-    {
-        userSetup = false;
-        QMessageBox::information(this,"No User Information.",
-                                 "Please open Preferences and fill:\n"
-                                 "Athlete Folder\n"
-                                 "Athlete YoB\n"
-                                 "Workout-Schedule\n"
-                                 "Standard-Workouts",
-                                 QMessageBox::Ok);
-    }
-    else
-    {
     userSetup = true;
     saisonWeeks = settings::get_saisonInfo("weeks").toInt();
     workSchedule = new schedule();
@@ -88,7 +75,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->horizontalSlider_factor->setEnabled(false);
     ui->horizontalSlider_factor->setVisible(false);
     this->set_menuItems(false,true);
-    }
 }
 
 MainWindow::~MainWindow()

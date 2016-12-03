@@ -15,7 +15,7 @@ private:
     static QStringList sportColor,phaseColor;
     static QMap<int,QString> sampList,intList;
     static QMap<QString,double> powerMap;
-    static QMap<QString,QString> gcInfo,saisonInfo;
+    static QMap<QString,QString> gcInfo,saisonInfo,colorMap;
     static QVector<double> powerList,factorList;
     static QVector<int> fontSize;
     static QString act_sport,emptyPhase,emptyPhaseColor;

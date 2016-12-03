@@ -826,6 +826,41 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>lineEdit_regpath</tabstop>
+  <tabstop>lineEdit_workdir</tabstop>
+  <tabstop>lineEdit_athlete</tabstop>
+  <tabstop>lineEdit_yob</tabstop>
+  <tabstop>lineEdit_activity</tabstop>
+  <tabstop>lineEdit_schedule</tabstop>
+  <tabstop>lineEdit_standard</tabstop>
+  <tabstop>pushButton_save</tabstop>
+  <tabstop>pushButton_cancel</tabstop>
+  <tabstop>lineEdit_addedit</tabstop>
+  <tabstop>pushButton_color</tabstop>
+  <tabstop>pushButton_add</tabstop>
+  <tabstop>pushButton_edit</tabstop>
+  <tabstop>comboBox_selInfo</tabstop>
+  <tabstop>pushButton_down</tabstop>
+  <tabstop>pushButton_up</tabstop>
+  <tabstop>tableView_level</tabstop>
+  <tabstop>comboBox_thresSport</tabstop>
+  <tabstop>lineEdit_thresPower</tabstop>
+  <tabstop>lineEdit_speed</tabstop>
+  <tabstop>listWidget_selection</tabstop>
+  <tabstop>doubleSpinBox_factor</tabstop>
+  <tabstop>pushButton_delete</tabstop>
+  <tabstop>lineEdit_hfThres</tabstop>
+  <tabstop>lineEdit_hfmax</tabstop>
+  <tabstop>tableView_hf</tabstop>
+  <tabstop>lineEdit_saisonWeeks</tabstop>
+  <tabstop>lineEdit_saison</tabstop>
+  <tabstop>dateEdit_saisonStart</tabstop>
+  <tabstop>dateEdit_saisonEnd</tabstop>
+  <tabstop>lineEdit_thresPace</tabstop>
+  <tabstop>lineEdit_startWeek</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>
