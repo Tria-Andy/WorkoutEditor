@@ -346,6 +346,10 @@ void Dialog_inteditor::open_stdWorkout(QString workID)
 {
     clearFlag = true;
     ui->treeWidget_planer->clearFocus();
+
+    ui->pushButton_down->setEnabled(false);
+    ui->pushButton_up->setEnabled(false);
+
     if(ui->treeWidget_planer->topLevelItemCount() > 0) ui->treeWidget_planer->clear();
 
     QStandardItemModel *step_model = stdWorkouts->workouts_steps;
