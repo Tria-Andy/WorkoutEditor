@@ -242,6 +242,7 @@ void MainWindow::summery_view()
     ui->tableView_summery->horizontalHeader()->setVisible(false);
     ui->tableView_summery->verticalHeader()->setVisible(false);
     ui->tableView_summery->setItemDelegate(&sum_del);
+    ui->tableView_summery->setEditTriggers(QAbstractItemView::NoEditTriggers);
     QList<QStandardItem*> list;
 
     QModelIndex index;

@@ -129,7 +129,6 @@ void Dialog_inteditor::get_workouts(QString sport)
         index = workout_model->index(i,0,QModelIndex());
         listString = std_model->item(model_index.row(),2)->text() + " - " + std_model->item(model_index.row(),3)->text();
         workout_model->setData(index,listString);
-
         workout_model->setData(workout_model->index(i,1,QModelIndex()),std_model->item(model_index.row(),0)->text());
         workout_model->setData(workout_model->index(i,2,QModelIndex()),std_model->item(model_index.row(),1)->text());
         workout_model->setData(workout_model->index(i,3,QModelIndex()),std_model->item(model_index.row(),4)->text());
@@ -138,6 +137,7 @@ void Dialog_inteditor::get_workouts(QString sport)
     }
     workout_model->sort(0);
     ui->listView_workouts->setModel(workout_model);
+    ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 void Dialog_inteditor::set_sport_threshold(QString sport)

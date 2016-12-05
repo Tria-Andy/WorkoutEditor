@@ -103,6 +103,7 @@ void settings::loadSettings()
             gcInfo.insert("regPath",mysettings->value("regPath").toString());
             gcInfo.insert("dir",mysettings->value("dir").toString());
             gcInfo.insert("athlete",mysettings->value("athlete").toString());
+            gcInfo.insert("yob",mysettings->value("yob").toString());
             gcInfo.insert("folder",mysettings->value("folder").toString());
         mysettings->endGroup();
 
@@ -127,10 +128,6 @@ void settings::loadSettings()
             valueFilePath = gcInfo.value("workouts") + QDir::separator() + valueFile;
         }
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
-        myvalues->beginGroup("Athlete");
-            gcInfo.insert("yob",myvalues->value("yob").toString());
-        myvalues->endGroup();
-
         myvalues->beginGroup("JsonFile");
             QString json_childs = myvalues->value("actinfo").toString();
             jsoninfos << json_childs.split(splitter);

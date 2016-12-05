@@ -53,7 +53,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -101,10 +101,18 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEdit_regpath"/>
+            <widget class="QLineEdit" name="lineEdit_regpath">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_workdir"/>
+            <widget class="QLineEdit" name="lineEdit_workdir">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
            <item row="2" column="1">
             <widget class="QLineEdit" name="lineEdit_athlete">
@@ -138,24 +146,20 @@
             <x>10</x>
             <y>180</y>
             <width>401</width>
-            <height>81</height>
+            <height>79</height>
            </rect>
           </property>
           <property name="title">
            <string>FilePath</string>
           </property>
-          <layout class="QFormLayout" name="formLayout_2">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Workout-Schedule:</string>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="lineEdit_standard">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEdit_schedule">
              <property name="toolTip">
-              <string>Insert where the schedule files should be stored. Please insert the complete Path.</string>
+              <string>Insert where the Standard Workout files should be stored. Please insert the complete Path.</string>
              </property>
             </widget>
            </item>
@@ -166,10 +170,46 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_standard">
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="lineEdit_schedule">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="toolTip">
-              <string>Insert where the Standard Workout files should be stored. Please insert the complete Path.</string>
+              <string>Insert where the schedule files should be stored. Please insert the complete Path.</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Workout-Schedule:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="pushButton_schedulePath">
+             <property name="maximumSize">
+              <size>
+               <width>25</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="pushButton_workoutsPath">
+             <property name="maximumSize">
+              <size>
+               <width>25</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>...</string>
              </property>
             </widget>
            </item>

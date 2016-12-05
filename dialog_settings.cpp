@@ -2,6 +2,7 @@
 #include "ui_dialog_settings.h"
 #include <QMessageBox>
 #include <QColorDialog>
+#include <QFileDialog>
 
 Dialog_settings::Dialog_settings(QWidget *parent) :
     QDialog(parent),
@@ -20,7 +21,9 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     level_model = new QStandardItemModel();
     hf_model = new QStandardItemModel();
     ui->lineEdit_regpath->setText(settings::get_gcInfo("regPath"));
+    ui->lineEdit_regpath->setEnabled(false);
     ui->lineEdit_workdir->setText(settings::get_gcInfo("dir"));
+    ui->lineEdit_workdir->setEnabled(false);
     ui->lineEdit_athlete->setText(settings::get_gcInfo("athlete"));
     ui->lineEdit_yob->setText(settings::get_gcInfo("yob"));
     ui->lineEdit_activity->setText(settings::get_gcInfo("folder"));
@@ -37,6 +40,9 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     ui->comboBox_thresSport->addItems(sportList);
     ui->pushButton_save->setEnabled(false);
     ui->pushButton_color->setEnabled(false);
+    ui->pushButton_add->setEnabled(false);
+    ui->pushButton_edit->setEnabled(false);
+    ui->pushButton_delete->setEnabled(false);
     this->checkSetup();
 }
 
@@ -112,6 +118,10 @@ void Dialog_settings::writeChangedValues()
 void Dialog_settings::on_comboBox_selInfo_currentTextChanged(const QString &value)
 {
     this->set_listEntries(value);
+    ui->lineEdit_addedit->clear();
+    ui->pushButton_add->setEnabled(false);
+    ui->pushButton_delete->setEnabled(false);
+    ui->pushButton_edit->setEnabled(false);
 }
 
 void Dialog_settings::set_listEntries(QString selection)
@@ -268,6 +278,8 @@ void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem 
     int pos;
     bool useColor = false;
     ui->lineEdit_addedit->setText(listValue);
+    ui->pushButton_edit->setEnabled(true);
+    ui->pushButton_delete->setEnabled(true);
 
     if(comboValue == settings::get_keyList().at(0))
     {
@@ -324,6 +336,8 @@ void Dialog_settings::on_pushButton_delete_clicked()
     QListWidgetItem *item = ui->listWidget_selection->takeItem(ui->listWidget_selection->currentRow());
     delete item;
     this->enableSavebutton();
+    ui->pushButton_delete->setEnabled(false);
+    ui->pushButton_add->setEnabled(true);
 }
 
 void Dialog_settings::on_pushButton_edit_clicked()
@@ -427,4 +441,54 @@ void Dialog_settings::on_dateEdit_saisonEnd_dateChanged(const QDate &enddate)
     lastweek.setDate(enddate.year(),12,31);
     int weeksStartYear = (lastweek.weekNumber() - (ui->dateEdit_saisonStart->date().weekNumber()-2));
     ui->lineEdit_saisonWeeks->setText(QString::number(weeksStartYear + enddate.weekNumber()));
+}
+
+void Dialog_settings::on_pushButton_schedulePath_clicked()
+{
+    QFileDialog dialogSched;
+    QString directory = dialogSched.getExistingDirectory(0,"Caption",QString(),QFileDialog::ShowDirsOnly);
+    ui->lineEdit_schedule->setText(QDir::toNativeSeparators(directory));
+}
+
+void Dialog_settings::on_pushButton_workoutsPath_clicked()
+{
+    QFileDialog dialogWork;
+    QString directory = dialogWork.getExistingDirectory(0,"Caption",QString(),QFileDialog::ShowDirsOnly);
+    ui->lineEdit_standard->setText(QDir::toNativeSeparators(directory));
+}
+
+void Dialog_settings::on_lineEdit_schedule_textChanged(const QString &value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_lineEdit_standard_textChanged(const QString &value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_lineEdit_athlete_textChanged(const QString &value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_lineEdit_yob_textChanged(const QString &value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_lineEdit_addedit_textChanged(const QString &value)
+{
+    if(!value.isEmpty())
+    {
+        ui->pushButton_add->setEnabled(true);
+    }
+    else
+    {
+        ui->pushButton_add->setEnabled(false);
+    }
 }
