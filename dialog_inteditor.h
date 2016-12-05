@@ -52,6 +52,7 @@ private:
     QStandardItemModel *plot_model,*workout_model;
     QTreeWidgetItem *select_item;
     QStringList model_header;
+    QMap<QString,QString> workoutMap;
     QString current_sport,isSeries,isGroup,current_workID;
     int threshold_pace,current_pace,threshold_power,current_power;
     QVector<double> *powerlist;

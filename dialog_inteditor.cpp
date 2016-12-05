@@ -115,8 +115,10 @@ void Dialog_inteditor::set_pushbutton(bool boolValue)
 
 void Dialog_inteditor::get_workouts(QString sport)
 {
+    QString workID,workTitle;
     QStandardItemModel *std_model;
     std_model = stdWorkouts->workouts_meta;
+    workoutMap.clear();
 
     QModelIndex model_index,index;
     QList<QStandardItem*> list = std_model->findItems(sport,Qt::MatchExactly,0);
@@ -127,13 +129,16 @@ void Dialog_inteditor::get_workouts(QString sport)
         QString listString;
         model_index = std_model->indexFromItem(list.at(i));
         index = workout_model->index(i,0,QModelIndex());
-        listString = std_model->item(model_index.row(),2)->text() + " - " + std_model->item(model_index.row(),3)->text();
+        workID = std_model->item(model_index.row(),1)->text();
+        workTitle = std_model->item(model_index.row(),3)->text();
+        listString = std_model->item(model_index.row(),2)->text() + " - " + workTitle;
         workout_model->setData(index,listString);
         workout_model->setData(workout_model->index(i,1,QModelIndex()),std_model->item(model_index.row(),0)->text());
-        workout_model->setData(workout_model->index(i,2,QModelIndex()),std_model->item(model_index.row(),1)->text());
+        workout_model->setData(workout_model->index(i,2,QModelIndex()),workID);
         workout_model->setData(workout_model->index(i,3,QModelIndex()),std_model->item(model_index.row(),4)->text());
         workout_model->setData(workout_model->index(i,4,QModelIndex()),std_model->item(model_index.row(),5)->text());
         workout_model->setData(workout_model->index(i,5,QModelIndex()),std_model->item(model_index.row(),6)->text());
+        workoutMap.insert(workID,workTitle);
     }
     workout_model->sort(0);
     ui->listView_workouts->setModel(workout_model);
@@ -383,7 +388,6 @@ void Dialog_inteditor::open_stdWorkout(QString workID)
     }
     this->set_plot_model();
     ui->pushButton_save_std->setEnabled(true);
-    ui->pushButton_copy_std->setEnabled(true);
     ui->pushButton_delete_std->setEnabled(true);
     clearFlag = false;
 }
@@ -1052,6 +1056,18 @@ void Dialog_inteditor::on_lineEdit_workoutname_textChanged(const QString &value)
     {
         ui->pushButton_save_std->setEnabled(true);
     }
+    for(QMap<QString,QString>::const_iterator it =  workoutMap.cbegin(), end = workoutMap.cend(); it != end; ++it)
+    {
+        if(it.value() == value)
+        {
+            ui->pushButton_copy_std->setEnabled(false);
+            break;
+        }
+        else
+        {
+            ui->pushButton_copy_std->setEnabled(true);
+        }
+    }
 }
 
 void Dialog_inteditor::on_treeWidget_planer_itemSelectionChanged()
@@ -1093,4 +1109,3 @@ void Dialog_inteditor::on_treeWidget_planer_itemSelectionChanged()
         }
     }
 }
-
