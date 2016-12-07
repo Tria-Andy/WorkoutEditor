@@ -912,7 +912,7 @@ void MainWindow::loadfile(const QString &filename)
         intChart->setAxisX(axisX,speedLine);
 
 
-        if(curr_activity->get_sport() == settings::isRun)
+        if(curr_activity->get_sport() == settings::isRun || curr_activity->get_sport() == settings::isBike)
         {
             polishLine = workSchedule->get_qLineSeries(false);
             polishLine->setColor(QColor(Qt::red));
@@ -1025,7 +1025,7 @@ void MainWindow::set_activty_intervalls()
         ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_int_times->verticalHeader()->setVisible(false);
     }
-    if(curr_activity->get_sport() == settings::isRun)
+    if(curr_activity->get_sport() != settings::isSwim)
     {
         ui->frame_polish->setVisible(true);
     }
@@ -1036,7 +1036,7 @@ void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
     ui->label_factorValue->setText(QString::number(10-value) + "%");
     double factor = static_cast<double>(value)/100;
     this->set_polishValues(ui->comboBox_intervals->currentIndex(),factor);
-    ui->lineEdit_polMax->setText(QString::number(curr_activity->polish_SpeedValues(40.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),settings::get_act_isrecalc()),0.1-factor,false)));
+    ui->lineEdit_polMax->setText(QString::number(curr_activity->polish_SpeedValues(50.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),settings::get_act_isrecalc()),0.1-factor,false)));
     ui->lineEdit_polMin->setText(QString::number(curr_activity->polish_SpeedValues(1.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),settings::get_act_isrecalc()),0.1-factor,false)));
 }
 
@@ -1050,7 +1050,7 @@ void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
         ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,settings::get_act_isrecalc())));
         double avg = curr_activity->get_int_speed(index,settings::get_act_isrecalc());
         this->set_intChartValues(index,avg);
-        if(curr_activity->get_sport() == settings::isRun) this->set_polishValues(index,0.0);
+        if(curr_activity->get_sport() != settings::isSwim) this->set_polishValues(index,0.0);
     }
 }
 

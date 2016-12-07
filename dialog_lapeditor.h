@@ -46,6 +46,8 @@ private slots:
     void on_spinBox_endtime_valueChanged(int arg1);
     void on_comboBox_lap_activated(int index);
 
+    void on_doubleSpinBox_distance_valueChanged(double arg1);
+
 private:
     Ui::Dialog_lapeditor *ui;
     Activity *curr_act;
@@ -58,6 +60,7 @@ private:
     void set_components(bool);
     void set_visible(bool,bool);
     void set_duration();
+    void set_lapSpeed(double);
     void edit_laps(int,int);
     void updateSwimModel(int,int,double,int);
     void updateIntModel(int);

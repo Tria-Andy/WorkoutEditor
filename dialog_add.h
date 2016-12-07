@@ -31,7 +31,7 @@ namespace Ui {
 class Dialog_add;
 }
 
-class Dialog_add : public QDialog
+class Dialog_add : public QDialog //, public schedule
 {
     Q_OBJECT
 

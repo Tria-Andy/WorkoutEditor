@@ -674,7 +674,16 @@ double Activity::get_int_speed(int row,bool recalc)
 
 double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double factor,bool setrand)
 {
-    double randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) / (currSpeed/((factor*100)+1.0)));
+    double randfact;
+    if(curr_sport == settings::isRun)
+    {
+        randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) / (currSpeed/((factor*100)+1.0)));
+    }
+    if(curr_sport == settings::isBike)
+    {
+        randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) / (currSpeed/((factor*1000)+1.0)));
+    }
+
     double avgLow = avgSpeed-(avgSpeed*factor);
     double avgHigh = avgSpeed+(avgSpeed*factor);
 
@@ -716,6 +725,7 @@ double Activity::interpolate_speed(int row,int sec,double limit)
 {
     double curr_speed = samp_model->data(samp_model->index(sec,2,QModelIndex())).toDouble();
     double avg_speed = this->get_int_speed(row,settings::get_act_isrecalc());
+
     if(curr_speed == 0)
     {
         curr_speed = limit;
@@ -777,15 +787,23 @@ void Activity::set_edit_samp_model(int rowcount)
     calc_cadence.resize(sampRowCount);
     double msec = 0.0;
     int int_start,int_stop,sportindex,swimLaps;
-    double overall = 0.0,lowLimit;
+    double overall = 0.0,lowLimit,limitFactor;
     double swimPace,swimSpeed,swimCycle;
     bool isBreak = true;
     if(curr_sport != settings::isSwim && curr_sport != settings::isTria)
     {
-        if(curr_sport == settings::isBike) sportindex = 1;
-        if(curr_sport == settings::isRun) sportindex = 2;
+        if(curr_sport == settings::isBike)
+        {
+            sportindex = 1 ;
+            limitFactor = 0.35;
+        }
+        if(curr_sport == settings::isRun)
+        {
+            sportindex = 2;
+            limitFactor = 0.20;
+        }
         lowLimit = settings::get_speed(QTime::fromString(settings::get_paceList().at(sportindex),"mm:ss"),0,curr_sport,true).toDouble();
-        lowLimit = lowLimit - (lowLimit*0.20);
+        lowLimit = lowLimit - (lowLimit*limitFactor);
     }
     if(curr_sport == settings::isTria)
     {
@@ -868,26 +886,41 @@ void Activity::set_edit_samp_model(int rowcount)
          int_stop = edit_int_model->data(edit_int_model->index(c_int,2,QModelIndex())).toInt();
          msec = edit_int_model->data(edit_int_model->index(c_int,3,QModelIndex())).toDouble() / this->get_int_duration(c_int,true);
 
-         for(int c_dist = int_start;c_dist <= int_stop; ++c_dist)
+         if(curr_sport == settings::isRun)
          {
-            if(c_dist == 0)
-            {
-                new_dist[0] = 0.0000;
-            }
-            else
-            {
-                if(curr_sport == settings::isRun)
+             for(int c_dist = int_start;c_dist <= int_stop; ++c_dist)
+             {
+                if(c_dist == 0)
                 {
-                    calc_speed[c_dist] = this->interpolate_speed(c_int,c_dist,lowLimit);
+                    new_dist[0] = 0.0000;
                 }
                 else
                 {
-                    calc_speed[c_dist] = samp_model->data(samp_model->index(c_dist,2,QModelIndex())).toDouble();
-                    calc_cadence[c_dist] = samp_model->data(samp_model->index(c_dist,3,QModelIndex())).toDouble();
+                    calc_speed[c_dist] = this->interpolate_speed(c_int,c_dist,lowLimit);
+                    new_dist[c_dist] = new_dist[c_dist-1] + msec;
                 }
-                new_dist[c_dist] = new_dist[c_dist-1] + msec;
-            }
+             }
          }
+
+         if(curr_sport == settings::isBike)
+         {
+             qDebug() << c_int << int_start << int_stop;
+             for(int c_dist = int_start;c_dist <= int_stop; ++c_dist)
+             {
+                if(c_dist == 0)
+                {
+
+                    new_dist[0] = 0.0000;
+                }
+                else
+                {
+                    calc_speed[c_dist] = this->interpolate_speed(c_int,c_dist,lowLimit);
+                    calc_cadence[c_dist] = samp_model->data(samp_model->index(c_dist,3,QModelIndex())).toDouble();
+                    new_dist[c_dist] = new_dist[c_dist-1] + msec;
+                }
+             }
+          }
+        }
       }
 
       if(curr_sport == settings::isBike)
@@ -947,7 +980,6 @@ void Activity::set_edit_samp_model(int rowcount)
           triValue = triValue + sportValue;
           jsonhandler->set_overrideData("triscore",QString::number(triValue));
       }
-    }
 }
 
 void Activity::adjust_intervalls()
