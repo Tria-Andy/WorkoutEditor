@@ -51,7 +51,15 @@ Dialog_inteditor::Dialog_inteditor(QWidget *parent,standardWorkouts *p_workouts)
     ui->comboBox_topitem->addItem(isGroup);
     ui->comboBox_topitem->addItem(isSeries);
     ui->comboBox_level->addItems(settings::get_levelList());
+    for(int i = 0; i < settings::get_levelList().count(); ++i)
+    {
+        ui->comboBox_level->setItemData(i,settings::get_itemColor(settings::get_levelList().at(i)),Qt::TextColorRole);
+    }
     ui->comboBox_sport->addItems(settings::get_sportList());
+    for(int i = 0; i < settings::get_sportList().count(); ++i)
+    {
+        ui->comboBox_sport->setItemData(i,settings::get_itemColor(settings::get_sportList().at(i)),Qt::TextColorRole);
+    }
     ui->comboBox_part->addItems(settings::get_intPlanerList());
     ui->comboBox_code->addItems(settings::get_codeList());
     ui->comboBox_reps->addItem("-");
@@ -354,7 +362,12 @@ QStringList Dialog_inteditor::add_int_values()
 
 void Dialog_inteditor::add_interval()
 {
+    QColor itemColor;
     QTreeWidgetItem *item = new QTreeWidgetItem(this->add_int_values());
+    itemColor = settings::get_itemColor(item->data(1,Qt::DisplayRole).toString());
+    item->setBackground(0,QBrush(itemColor));
+    item->setBackground(1,QBrush(itemColor));
+    item->setBackground(2,QBrush(itemColor));
     ui->treeWidget_planer->insertTopLevelItem(ui->treeWidget_planer->topLevelItemCount(),item);
     ui->treeWidget_planer->expandAll();
     this->set_plot_model();
@@ -375,6 +388,7 @@ void Dialog_inteditor::open_stdWorkout(QString workID)
     QStringList valueList;
     QString parentItem,thresValue;
     QList<QStandardItem*> workout = step_model->findItems(workID,Qt::MatchExactly,0);
+    QColor itemColor;
 
     for(int i = 0; i < workout.count();++i)
     {
@@ -392,8 +406,14 @@ void Dialog_inteditor::open_stdWorkout(QString workID)
                   << step_model->item(index.row(),6)->text()
                   << step_model->item(index.row(),7)->text();
 
-        QTreeWidgetItem *item = new QTreeWidgetItem(valueList);
-
+        QTreeWidgetItem *item = new QTreeWidgetItem(valueList);      
+        if(!item->data(1,Qt::DisplayRole).toString().isEmpty())
+        {
+            itemColor = settings::get_itemColor(item->data(1,Qt::DisplayRole).toString());
+            item->setBackground(0,QBrush(itemColor));
+            item->setBackground(1,QBrush(itemColor));
+            item->setBackground(2,QBrush(itemColor));
+        }
         parentItem = step_model->item(index.row(),8)->text();
 
         if(parentItem.contains("Group") || parentItem.contains("Series"))

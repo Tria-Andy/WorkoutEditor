@@ -76,6 +76,7 @@ private:
     QStandardItemModel *level_model,*hf_model;
     QStringList sportList,model_header,paceList,hfList;
     QVector<double> *powerlist,*factorList;
+    bool useColor;
     void checkSetup();
     void set_listEntries(QString);
     void set_color(QColor,bool,QString);

@@ -96,6 +96,24 @@ void settings::fill_mapList(QMap<int,QString> *map, QString *values)
     }
 }
 
+void settings::fill_mapColor(QStringList *stringList, QString *colorString)
+{
+    for(int i = 0; i < stringList->count(); ++i)
+    {
+        colorMap.insert(stringList->at(i),settings::get_colorRGB(colorString->split(splitter).at(i)));
+    }
+}
+
+QStringList settings::get_colorStringList(QStringList *stringList)
+{
+    QStringList colorList;
+    for(int i = 0; i < stringList->count(); ++i)
+    {
+        colorList << settings::set_colorString(colorMap.value(stringList->at(i)));
+    }
+    return colorList;
+}
+
 void settings::loadSettings()
 {
     header_int << "Interval" << "Duration" << "Distance" << "Distance (Int)" << "Pace";
@@ -170,10 +188,7 @@ void settings::loadSettings()
             QString sport_childs = myvalues->value("sports").toString();
             sportList << sport_childs.split(splitter);
             sport_childs = myvalues->value("color").toString();
-            for(int i = 0; i < sportList.count(); ++i)
-            {
-                colorMap.insert(sportList.at(i),settings::get_colorRGB(sport_childs.split(splitter).at(i)));
-            }
+            settings::fill_mapColor(&sportList,&sport_childs);
         myvalues->endGroup();
 
         myvalues->beginGroup("Threshold");
@@ -196,6 +211,8 @@ void settings::loadSettings()
         myvalues->beginGroup("Level");
             QString level_childs = myvalues->value("levels").toString();
             levelList << level_childs.split(splitter);
+            level_childs = myvalues->value("color").toString();
+            settings::fill_mapColor(&levelList,&level_childs);
             level_childs = myvalues->value("breakname").toString();
             breakName = level_childs;
         myvalues->endGroup();
@@ -217,10 +234,7 @@ void settings::loadSettings()
             QString phase_childs = myvalues->value("phases").toString();
             phaseList << phase_childs.split(splitter);
             phase_childs = myvalues->value("color").toString();
-            for(int i = 0; i < phaseList.count(); ++i)
-            {
-                colorMap.insert(phaseList.at(i),settings::get_colorRGB(phase_childs.split(splitter).at(i)));
-            }
+            settings::fill_mapColor(&phaseList,&phase_childs);
             emptyPhase = myvalues->value("empty").toString();
             colorMap.insert(emptyPhase,settings::get_colorRGB(myvalues->value("emptycolor").toString()));
         myvalues->endGroup();
@@ -324,11 +338,13 @@ QString settings::setSettingString(QStringList list)
 
 void settings::saveSettings()
 {
+    QStringList tempColor;
     QSettings *mysettings = new QSettings(settingFile,QSettings::IniFormat);
 
     mysettings->beginGroup("GoldenCheetah");
         mysettings->setValue("dir",gcInfo.value("dir"));
         mysettings->setValue("athlete",gcInfo.value("athlete"));
+        mysettings->setValue("yob",gcInfo.value("yob"));
         mysettings->setValue("folder",gcInfo.value("folder"));
     mysettings->endGroup();
 
@@ -356,12 +372,11 @@ void settings::saveSettings()
         myvalues->setValue("endDate",saisonInfo.value("endDate"));
     myvalues->endGroup();
 
-    myvalues->beginGroup("Athlete");
-        myvalues->setValue("yob",gcInfo.value("yob"));
-    myvalues->endGroup();
-
     myvalues->beginGroup("Sport");
         myvalues->setValue("sports",settings::setSettingString(sportList));
+        tempColor = settings::get_colorStringList(&sportList);
+        myvalues->setValue("color",settings::setSettingString(tempColor));
+        tempColor.clear();
     myvalues->endGroup();
 
     myvalues->beginGroup("Threshold");
@@ -371,10 +386,15 @@ void settings::saveSettings()
 
     myvalues->beginGroup("Phase");
         myvalues->setValue("phases",settings::setSettingString(phaseList));
+        tempColor = settings::get_colorStringList(&phaseList);
+        myvalues->setValue("color",settings::setSettingString(tempColor));
+        tempColor.clear();
     myvalues->endGroup();
 
     myvalues->beginGroup("Level");
         myvalues->setValue("levels",settings::setSettingString(levelList));
+        tempColor = settings::get_colorStringList(&levelList);
+        myvalues->setValue("color",settings::setSettingString(tempColor));
     myvalues->endGroup();
 
     myvalues->beginGroup("Cycle");

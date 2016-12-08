@@ -32,7 +32,7 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     paceList = settings::get_paceList();
     hfList = settings::get_hfList();
     sportList << settings::isSwim << settings::isBike << settings::isRun;
-
+    useColor = false;
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
     level_model = new QStandardItemModel();
     hf_model = new QStandardItemModel();
@@ -147,30 +147,37 @@ void Dialog_settings::set_listEntries(QString selection)
     if(selection == settings::get_keyList().at(0))
     {
         ui->listWidget_selection->addItems(settings::get_sportList());
+        useColor = true;
     }
     if(selection == settings::get_keyList().at(1))
     {
         ui->listWidget_selection->addItems(settings::get_levelList());
+        useColor = true;
     }
     if(selection == settings::get_keyList().at(2))
     {
         ui->listWidget_selection->addItems(settings::get_phaseList());
+        useColor = true;
     }
     if(selection == settings::get_keyList().at(3))
     {
         ui->listWidget_selection->addItems(settings::get_cycleList());
+        useColor = false;
     }
     if(selection == settings::get_keyList().at(4))
     {
         ui->listWidget_selection->addItems(settings::get_codeList());
+        useColor = false;
     }
     if(selection == settings::get_keyList().at(5))
     {
         ui->listWidget_selection->addItems(settings::get_jsoninfos());
+        useColor = false;
     }
     if(selection == settings::get_keyList().at(6))
     {
         ui->listWidget_selection->addItems(settings::get_intPlanerList());
+        useColor = false;
     }
 
     QColor color;
@@ -215,6 +222,7 @@ void Dialog_settings::set_hfmodel()
 
     hf_model->setHorizontalHeaderLabels(model_header);
     ui->tableView_hf->setModel(hf_model);
+    ui->tableView_hf->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView_hf->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_hf->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_hf->verticalHeader()->hide();
@@ -238,6 +246,7 @@ void Dialog_settings::set_thresholdModel(QStringList levelList)
     if(level_model->rowCount() > 0) level_model->clear();
     level_model->setHorizontalHeaderLabels(model_header);
     ui->tableView_level->setModel(level_model);
+    ui->tableView_level->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView_level->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_level->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_level->verticalHeader()->hide();
@@ -285,19 +294,13 @@ void Dialog_settings::set_color(QColor color,bool write,QString key)
 
 void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem *item)
 {
-    QString comboValue = ui->comboBox_selInfo->currentText();
     QString listValue = item->data(Qt::DisplayRole).toString();
     QColor color;
-    bool useColor = false;
     ui->lineEdit_addedit->setText(listValue);
     ui->pushButton_edit->setEnabled(true);
     ui->pushButton_delete->setEnabled(true);
 
-    if(comboValue == settings::get_keyList().at(0) || comboValue == settings::get_keyList().at(2))
-    {
-        color = settings::get_itemColor(listValue);
-        useColor = true;
-    }
+    color = settings::get_itemColor(listValue);
 
     if(useColor)
     {
@@ -338,6 +341,8 @@ void Dialog_settings::on_pushButton_add_clicked()
 void Dialog_settings::on_pushButton_delete_clicked()
 {
     QListWidgetItem *item = ui->listWidget_selection->takeItem(ui->listWidget_selection->currentRow());
+    ui->lineEdit_addedit->clear();
+    this->set_color(QColor(255,255,255,0),false,"");
     delete item;
     this->enableSavebutton();
     ui->pushButton_delete->setEnabled(false);

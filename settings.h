@@ -43,6 +43,8 @@ private:
     static void saveSettings();
     int set_range_values(QString);
     static void fill_mapList(QMap<int,QString>*,QString*);
+    static void fill_mapColor(QStringList*,QString*);
+    static QStringList get_colorStringList(QStringList*);
 
     static QColor get_colorRGB(QString);
     static QString set_colorString(QColor);
