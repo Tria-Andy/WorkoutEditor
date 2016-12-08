@@ -37,12 +37,13 @@ public:
         painter->save();
         QVector<int> fontsize = settings::get_fontSize();
         QFont phase_font,date_font, work_font;
-        QString temp_value;
-        QString headInfo;
+        QString temp_value,headInfo;
+        QString emptyPhase = settings::get_emptyPhase();
         QStringList calendar_values;
+        QStringList phaseList = settings::get_phaseList();
+        QStringList sportList = settings::get_sportList();
         QString delimiter = "-";
         QColor rect_color;
-        QString cRed,cGreen,cBlue;
         int textMargin = 2;
         QString phase;
         phase_font.setBold(true);
@@ -68,16 +69,16 @@ public:
             painter->drawText(rect_head_text,headInfo,dateOption);
             phase = calendar_values.at(3);
 
-            for(int pos = 0; pos < settings::get_phaseList().count();++pos)
+            for(int pos = 0; pos < phaseList.count();++pos)
             {
-                if(phase.contains(settings::get_phaseList().at(pos)))
+                if(phase.contains(phaseList.at(pos)))
                 {
-                    rect_color = settings::get_color(settings::get_phaseColor().at(pos));
+                    rect_color = settings::get_itemColor(phaseList.at(pos));
                     break;
                 }
                 else
                 {
-                    rect_color = settings::get_color(settings::get_emptyPhaseColor());
+                    rect_color = settings::get_itemColor(emptyPhase);
                 }
             }
 
@@ -92,13 +93,13 @@ public:
         }
         else
         {
-            for(int pos = 0; pos < settings::get_sportList().count();++pos)
+            for(int pos = 0; pos < sportList.count();++pos)
             {
                 if(index.column() == pos+1)
                 {
                     if(index.column() != 6)
                     {
-                        rect_color = settings::get_color(settings::get_sportColor().at(pos));
+                        rect_color = settings::get_itemColor(sportList.at(pos));
                     }
                     else
                     {

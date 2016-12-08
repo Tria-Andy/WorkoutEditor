@@ -674,7 +674,7 @@ double Activity::get_int_speed(int row,bool recalc)
 
 double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double factor,bool setrand)
 {
-    double randfact;
+    double randfact = 0;
     if(curr_sport == settings::isRun)
     {
         randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) / (currSpeed/((factor*100)+1.0)));
@@ -787,7 +787,7 @@ void Activity::set_edit_samp_model(int rowcount)
     calc_cadence.resize(sampRowCount);
     double msec = 0.0;
     int int_start,int_stop,sportindex,swimLaps;
-    double overall = 0.0,lowLimit,limitFactor;
+    double overall = 0.0,lowLimit = 0.0,limitFactor = 0.0;
     double swimPace,swimSpeed,swimCycle;
     bool isBreak = true;
     if(curr_sport != settings::isSwim && curr_sport != settings::isTria)

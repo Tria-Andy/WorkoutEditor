@@ -21,6 +21,7 @@
 
 #include <QtCore>
 #include <QSettings>
+#include <QColor>
 
 class settings
 {
@@ -30,10 +31,10 @@ private:
 
     static QString settingFile,gcPath,valueFile,valueFilePath,breakName;
     static QStringList keyList,gc_infos,sportList,paceList,phaseList,hfList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
-    static QStringList sportColor,phaseColor;
     static QMap<int,QString> sampList,intList;
     static QMap<QString,double> powerMap;
-    static QMap<QString,QString> gcInfo,saisonInfo,colorMap;
+    static QMap<QString,QString> gcInfo,saisonInfo;
+    static QHash<QString,QColor> colorMap;
     static QVector<double> powerList,factorList;
     static QVector<int> fontSize;
     static QString act_sport,emptyPhase,emptyPhaseColor;
@@ -42,6 +43,9 @@ private:
     static void saveSettings();
     int set_range_values(QString);
     static void fill_mapList(QMap<int,QString>*,QString*);
+
+    static QColor get_colorRGB(QString);
+    static QString set_colorString(QColor);
 
 public:
     settings();
@@ -52,21 +56,20 @@ public:
     static QString get_gcInfo(QString key) {return gcInfo.value(key);}
     static QMap<int,QString> get_sampList() {return sampList;}
     static QMap<int,QString> get_intList() {return intList;}
+    static QColor get_itemColor(QString key) {return colorMap.value(key);}
 
     //QMap Setter
     static void set_saisonInfos(QString key, QString value){saisonInfo.insert(key,value);}
     static void set_gcInfo(QString key, QString value){gcInfo.insert(key,value);}
+    static void set_itemColor(QString key,QColor value) {colorMap.insert(key,value);}
 
     static QString isAlt,isSwim,isBike,isRun,isTria,isStrength,isOther;
-    static QString get_emptyPhaseColor() {return emptyPhaseColor;}
     static QString get_emptyPhase() {return emptyPhase;}
     static QString get_breakName() {return breakName;}
 
     static QStringList get_keyList() {return keyList;}
     static QStringList get_phaseList() {return phaseList;}
-    static QStringList get_phaseColor() {return phaseColor;}
     static QStringList get_sportList() {return sportList;}
-    static QStringList get_sportColor() {return sportColor;}
     static QStringList get_paceList() {return paceList;}
     static QStringList get_hfList() {return hfList;}
     static QStringList get_cycleList() {return cycleList;}
@@ -104,8 +107,7 @@ public:
     static double set_doubleValue(double,bool);
 
 
-    static QColor get_color(QString);
-    static QString get_colorValues(QColor);
+
 
     static QStringList get_int_header(QString);
     static QStringList get_time_header() {return header_int_time;}

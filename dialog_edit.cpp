@@ -104,7 +104,7 @@ void Dialog_edit::set_workout_data()
 
 void Dialog_edit::set_result(QString result_text,int result_code)
 {
-    QMessageBox::StandardButton reply;
+    QMessageBox::StandardButton reply = QMessageBox::No;
 
     if(result_code == 1)reply = QMessageBox::warning(this,result_text + " Workout",result_text + " Workout?",QMessageBox::Yes|QMessageBox::No);
     if(result_code == 2)reply = QMessageBox::question(this,result_text + " Workout",result_text + " Workout?",QMessageBox::Yes|QMessageBox::No);

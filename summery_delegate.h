@@ -38,6 +38,7 @@ public:
         QFont phase_font,date_font, work_font;
         QString temp_value;
         QStringList sum_values;
+        QStringList sportList = settings::get_sportList();
         QString delimiter = "-";
         QColor rect_color;
         int textMargin = 2;
@@ -51,11 +52,11 @@ public:
         temp_value = index.data(Qt::DisplayRole).toString();
         sum_values = temp_value.split(delimiter);
 
-        for(int i = 0; i < settings::get_sportList().count(); ++i)
+        for(int i = 0; i < sportList.count(); ++i)
         {
-            if(sum_values.at(0) == settings::get_sportList().at(i))
+            if(sum_values.at(0) == sportList.at(i))
             {
-                rect_color = settings::get_color(settings::get_sportColor().at(i));
+                rect_color = settings::get_itemColor(sportList.at(i));
                 break;
             }
             else

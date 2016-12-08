@@ -31,7 +31,7 @@ QString settings::splitter = "/";
 
 QMap<QString,QString> settings::gcInfo;
 QMap<QString,QString> settings::saisonInfo;
-QMap<QString,QString> settings::colorMap;
+QHash<QString,QColor> settings::colorMap;
 
 QString settings::gcPath;
 QString settings::valueFile;
@@ -67,8 +67,6 @@ QStringList settings::bikeRangeList;
 QStringList settings::runRangeList;
 QStringList settings::stgRangeList;
 QStringList settings::hfRangeList;
-QStringList settings::sportColor;
-QStringList settings::phaseColor;
 
 QVector<double>  settings::powerList;
 QVector<double>  settings::factorList;
@@ -172,7 +170,10 @@ void settings::loadSettings()
             QString sport_childs = myvalues->value("sports").toString();
             sportList << sport_childs.split(splitter);
             sport_childs = myvalues->value("color").toString();
-            sportColor << sport_childs.split(splitter);
+            for(int i = 0; i < sportList.count(); ++i)
+            {
+                colorMap.insert(sportList.at(i),settings::get_colorRGB(sport_childs.split(splitter).at(i)));
+            }
         myvalues->endGroup();
 
         myvalues->beginGroup("Threshold");
@@ -216,9 +217,12 @@ void settings::loadSettings()
             QString phase_childs = myvalues->value("phases").toString();
             phaseList << phase_childs.split(splitter);
             phase_childs = myvalues->value("color").toString();
-            phaseColor << phase_childs.split(splitter);
+            for(int i = 0; i < phaseList.count(); ++i)
+            {
+                colorMap.insert(phaseList.at(i),settings::get_colorRGB(phase_childs.split(splitter).at(i)));
+            }
             emptyPhase = myvalues->value("empty").toString();
-            emptyPhaseColor = myvalues->value("emptycolor").toString();
+            colorMap.insert(emptyPhase,settings::get_colorRGB(myvalues->value("emptycolor").toString()));
         myvalues->endGroup();
 
         myvalues->beginGroup("Cycle");
@@ -616,7 +620,7 @@ double settings::set_doubleValue(double value, bool isthree)
     return 0;
 }
 
-QColor settings::get_color(QString colorValue)
+QColor settings::get_colorRGB(QString colorValue)
 {
     QColor color;
     QString cRed,cGreen,cBlue;
@@ -628,7 +632,7 @@ QColor settings::get_color(QString colorValue)
     return color;
 }
 
-QString settings::get_colorValues(QColor color)
+QString settings::set_colorString(QColor color)
 {
     return QString::number(color.red())+"-"+QString::number(color.green())+"-"+QString::number(color.blue());;
 }

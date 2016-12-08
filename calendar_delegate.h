@@ -38,6 +38,9 @@ public:
         QVector<int> fontsize = settings::get_fontSize();
         QFont phase_font,date_font, work_font;
         QString temp_value,dayDate;
+        QString emptyPhase = settings::get_emptyPhase();
+        QStringList phaseList = settings::get_phaseList();
+        QStringList sportList = settings::get_sportList();
         QStringList calendar_values;
         QString delimiter = "#";
         QColor rect_color;
@@ -94,11 +97,11 @@ public:
 
                     y += height+1;
 
-                    for(int pos = 0; pos < settings::get_sportList().count();++pos)
+                    for(int pos = 0; pos < sportList.count();++pos)
                     {
-                        if(workout.contains(settings::get_sportList().at(pos)))
+                        if(workout.contains(sportList.at(pos)))
                         {
-                            rect_color = settings::get_color(settings::get_sportColor().at(pos));
+                            rect_color = settings::get_itemColor(sportList.at(pos));
                             break;
                         }
                     }
@@ -122,16 +125,16 @@ public:
             phase = phase.remove(0,phase.indexOf(delimiter)+1);
             if(!phase.isEmpty())
             {
-                for(int pos = 0; pos < settings::get_phaseList().count();++pos)
+                for(int pos = 0; pos < phaseList.count();++pos)
                 {
-                    if(phase.contains(settings::get_phaseList().at(pos)))
+                    if(phase.contains(phaseList.at(pos)))
                     {
-                        rect_color = settings::get_color(settings::get_phaseColor().at(pos));
+                        rect_color = settings::get_itemColor(phaseList.at(pos));
                         break;
                     }
                     else
                     {
-                        rect_color = settings::get_color(settings::get_emptyPhaseColor());
+                        rect_color = settings::get_itemColor(emptyPhase);
                     }
                 }
 

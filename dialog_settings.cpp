@@ -30,8 +30,6 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     powerlist = settings::get_powerList();
     factorList = settings::get_factorList();
     paceList = settings::get_paceList();
-    sportColor = settings::get_sportColor();
-    phaseColor = settings::get_phaseColor();
     hfList = settings::get_hfList();
     sportList << settings::isSwim << settings::isBike << settings::isRun;
 
@@ -149,7 +147,6 @@ void Dialog_settings::set_listEntries(QString selection)
     if(selection == settings::get_keyList().at(0))
     {
         ui->listWidget_selection->addItems(settings::get_sportList());
-        currColorList = &sportColor;
     }
     if(selection == settings::get_keyList().at(1))
     {
@@ -158,7 +155,6 @@ void Dialog_settings::set_listEntries(QString selection)
     if(selection == settings::get_keyList().at(2))
     {
         ui->listWidget_selection->addItems(settings::get_phaseList());
-        currColorList = &phaseColor;
     }
     if(selection == settings::get_keyList().at(3))
     {
@@ -179,7 +175,7 @@ void Dialog_settings::set_listEntries(QString selection)
 
     QColor color;
     color.setRgb(255,255,255,0);
-    this->set_color(color,false,0);
+    this->set_color(color,false,"");
 }
 
 void Dialog_settings::set_thresholdView(QString sport)
@@ -274,7 +270,7 @@ void Dialog_settings::set_thresholdModel(QStringList levelList)
     }
 }
 
-void Dialog_settings::set_color(QColor color,bool write,int pos)
+void Dialog_settings::set_color(QColor color,bool write,QString key)
 {
     QPalette palette = ui->pushButton_color->palette();
     palette.setColor(ui->pushButton_color->backgroundRole(),color);
@@ -283,7 +279,7 @@ void Dialog_settings::set_color(QColor color,bool write,int pos)
 
     if(write)
     {
-        currColorList->replace(pos,settings::get_colorValues(color));
+        settings::set_itemColor(key,color);
     }
 }
 
@@ -291,37 +287,27 @@ void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem 
 {
     QString comboValue = ui->comboBox_selInfo->currentText();
     QString listValue = item->data(Qt::DisplayRole).toString();
-    QString sColor;
     QColor color;
-    int pos;
     bool useColor = false;
     ui->lineEdit_addedit->setText(listValue);
     ui->pushButton_edit->setEnabled(true);
     ui->pushButton_delete->setEnabled(true);
 
-    if(comboValue == settings::get_keyList().at(0))
+    if(comboValue == settings::get_keyList().at(0) || comboValue == settings::get_keyList().at(2))
     {
-        pos = settings::get_sportList().indexOf(listValue,0);
-        sColor = sportColor.at(pos);
-        useColor = true;
-    }
-    if(comboValue == settings::get_keyList().at(2))
-    {
-        pos = settings::get_phaseList().indexOf(listValue,0);
-        sColor = phaseColor.at(pos);
+        color = settings::get_itemColor(listValue);
         useColor = true;
     }
 
     if(useColor)
     {
-        color = settings::get_color(sColor);
-        this->set_color(color,false,pos);
+        this->set_color(color,false,listValue);
         ui->pushButton_color->setEnabled(true);
     }
     else
     {
         color.setRgb(255,255,255,0);
-        this->set_color(color,false,pos);
+        this->set_color(color,false,listValue);
         ui->pushButton_color->setEnabled(false);
     }
 }
@@ -448,7 +434,7 @@ void Dialog_settings::on_pushButton_color_clicked()
     QColor color = QColorDialog::getColor(ui->pushButton_color->palette().color(ui->pushButton_color->backgroundRole()),this);
     if(color.isValid())
     {
-        this->set_color(color,true,ui->listWidget_selection->currentRow());
+        this->set_color(color,true,ui->lineEdit_addedit->text());
         this->enableSavebutton();
     }
 }
