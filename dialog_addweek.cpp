@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2016 Andreas Hunner (andy-atech@gmx.net)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include "dialog_addweek.h"
 #include "ui_dialog_addweek.h"
 
@@ -332,7 +350,7 @@ void Dialog_addweek::on_timeEdit_swim_dur_timeChanged(const QTime &time)
     this->store_values(1);
     this->calc_percent();
     ui->lineEdit_swim_pace->setText(settings::get_workout_pace(ui->doubleSpinBox_swim_dist->value(),time,settings::isSwim,false));
-    ui->spinBox_swim_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))*settings::get_factorList()->at(0)));
+    ui->spinBox_swim_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))*settings::get_thresValue("swimfactor")));
 }
 
 void Dialog_addweek::on_timeEdit_bike_dur_timeChanged(const QTime &time)
@@ -341,7 +359,7 @@ void Dialog_addweek::on_timeEdit_bike_dur_timeChanged(const QTime &time)
     this->store_values(2);
     this->calc_percent();
     ui->lineEdit_bike_pace->setText(settings::get_workout_pace(ui->doubleSpinBox_bike_dist->value(),time,settings::isBike,false));
-    ui->spinBox_bike_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))*settings::get_factorList()->at(1)));
+    ui->spinBox_bike_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))*settings::get_thresValue("bikefactor")));
 }
 
 void Dialog_addweek::on_timeEdit_run_dur_timeChanged(const QTime &time)
@@ -350,7 +368,7 @@ void Dialog_addweek::on_timeEdit_run_dur_timeChanged(const QTime &time)
     this->store_values(3);
     this->calc_percent();
     ui->lineEdit_run_pace->setText(settings::get_workout_pace(ui->doubleSpinBox_run_dist->value(),time,settings::isRun,false));
-    ui->spinBox_run_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))*settings::get_factorList()->at(2)));
+    ui->spinBox_run_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))*settings::get_thresValue("runfactor")));
 }
 
 void Dialog_addweek::on_timeEdit_stg_dur_timeChanged(const QTime &time)

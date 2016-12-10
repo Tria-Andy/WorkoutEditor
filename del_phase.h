@@ -16,20 +16,20 @@
  * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef DEL_INTVIEW_H
-#define DEL_INTVIEW_H
+#ifndef DEL_PHASE_H
+#define DEL_PHASE_H
 #include <QtGui>
 #include <QItemDelegate>
 #include <QLabel>
 #include <QDebug>
 #include "settings.h"
 
-class del_intview : public QItemDelegate
+class del_phase : public QItemDelegate
 {
     Q_OBJECT
 
 public:
-    explicit del_intview(QObject *parent = 0) : QItemDelegate(parent) {}
+    explicit del_phase(QObject *parent = 0) : QItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -60,8 +60,7 @@ public:
         painter->drawText(rect_text,indexData,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->restore();
     }
-
 };
 
 
-#endif // DEL_INTVIEW_H
+#endif // DEL_PHASE_H

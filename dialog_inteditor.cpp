@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2016 Andreas Hunner (andy-atech@gmx.net)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include <QDebug>
 #include "dialog_inteditor.h"
 #include "ui_dialog_inteditor.h"
@@ -11,7 +29,6 @@ Dialog_inteditor::Dialog_inteditor(QWidget *parent,standardWorkouts *p_workouts)
     ui->treeWidget_planer->setDragEnabled(true);
     ui->treeWidget_planer->setDragDropMode(QAbstractItemView::InternalMove);
     stdWorkouts = p_workouts;
-    powerlist = settings::get_powerList();
     model_header << "Phase" << "Level" << "Threshold %" << "Value" << "Time" << "TSS" << "Distance" << "Repeats";
     current_workID = QString();
     ui->treeWidget_planer->setColumnCount(7);
@@ -33,7 +50,15 @@ Dialog_inteditor::Dialog_inteditor(QWidget *parent,standardWorkouts *p_workouts)
     ui->comboBox_topitem->addItem(isGroup);
     ui->comboBox_topitem->addItem(isSeries);
     ui->comboBox_level->addItems(settings::get_levelList());
+    for(int i = 0; i < settings::get_levelList().count(); ++i)
+    {
+        ui->comboBox_level->setItemData(i,settings::get_itemColor(settings::get_levelList().at(i)),Qt::TextColorRole);
+    }
     ui->comboBox_sport->addItems(settings::get_sportList());
+    for(int i = 0; i < settings::get_sportList().count(); ++i)
+    {
+        ui->comboBox_sport->setItemData(i,settings::get_itemColor(settings::get_sportList().at(i)),Qt::TextColorRole);
+    }
     ui->comboBox_part->addItems(settings::get_intPlanerList());
     ui->comboBox_code->addItems(settings::get_codeList());
     ui->comboBox_reps->addItem("-");
@@ -115,8 +140,10 @@ void Dialog_inteditor::set_pushbutton(bool boolValue)
 
 void Dialog_inteditor::get_workouts(QString sport)
 {
+    QString workID,workTitle;
     QStandardItemModel *std_model;
     std_model = stdWorkouts->workouts_meta;
+    workoutMap.clear();
 
     QModelIndex model_index,index;
     QList<QStandardItem*> list = std_model->findItems(sport,Qt::MatchExactly,0);
@@ -127,17 +154,20 @@ void Dialog_inteditor::get_workouts(QString sport)
         QString listString;
         model_index = std_model->indexFromItem(list.at(i));
         index = workout_model->index(i,0,QModelIndex());
-        listString = std_model->item(model_index.row(),2)->text() + " - " + std_model->item(model_index.row(),3)->text();
+        workID = std_model->item(model_index.row(),1)->text();
+        workTitle = std_model->item(model_index.row(),3)->text();
+        listString = std_model->item(model_index.row(),2)->text() + " - " + workTitle;
         workout_model->setData(index,listString);
-
         workout_model->setData(workout_model->index(i,1,QModelIndex()),std_model->item(model_index.row(),0)->text());
-        workout_model->setData(workout_model->index(i,2,QModelIndex()),std_model->item(model_index.row(),1)->text());
+        workout_model->setData(workout_model->index(i,2,QModelIndex()),workID);
         workout_model->setData(workout_model->index(i,3,QModelIndex()),std_model->item(model_index.row(),4)->text());
         workout_model->setData(workout_model->index(i,4,QModelIndex()),std_model->item(model_index.row(),5)->text());
         workout_model->setData(workout_model->index(i,5,QModelIndex()),std_model->item(model_index.row(),6)->text());
+        workoutMap.insert(workID,workTitle);
     }
     workout_model->sort(0);
     ui->listView_workouts->setModel(workout_model);
+    ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 void Dialog_inteditor::set_sport_threshold(QString sport)
@@ -150,25 +180,25 @@ void Dialog_inteditor::set_sport_threshold(QString sport)
     }
     if(sport == settings::isSwim)
     {
-       threshold_power = (*powerlist)[0];
-       threshold_pace = settings::get_timesec(settings::get_paceList().at(0));
+       threshold_power = settings::get_thresValue("swimpower");
+       threshold_pace = settings::get_thresValue("swimpace");
        ui->label_sportThreshold->setText(settings::set_time(threshold_pace) + " /100m");
     }
     if(sport == settings::isBike)
     {
-       threshold_power = (*powerlist)[1];
-       threshold_pace = settings::get_timesec(settings::get_paceList().at(1));
+       threshold_power = settings::get_thresValue("bikepower");
+       threshold_pace = settings::get_thresValue("bikepace");
        ui->label_sportThreshold->setText(QString::number(threshold_power) + " Watt");
     }
     if(sport == settings::isRun)
     {
-       threshold_power = (*powerlist)[2];
-       threshold_pace = settings::get_timesec(settings::get_paceList().at(2));
+       threshold_power = settings::get_thresValue("runpower");
+       threshold_pace = settings::get_thresValue("runpace");
        ui->label_sportThreshold->setText(settings::set_time(threshold_pace) + " /km");
     }
     if(sport == settings::isStrength)
     {
-       threshold_power = (*powerlist)[3];
+       threshold_power = settings::get_thresValue("stgpower");
        threshold_pace = 0;
        ui->label_sportThreshold->setText(QString::number(threshold_power) + " Watt");
     }
@@ -297,19 +327,26 @@ void Dialog_inteditor::edit_item(QTreeWidgetItem *item)
 
 void Dialog_inteditor::add_topItem(QString label)
 {
+    QColor itemColor;
     int counter = 0;
     if(label == isSeries)
     {
         counter = this->get_series_count();
+        itemColor = QColor(Qt::lightGray);
     }
     else
     {
         counter = this->get_group_count();
+        itemColor = QColor(Qt::darkGray);
     }
 
     QTreeWidgetItem *item = new QTreeWidgetItem();
     item->setText(0,label+"-"+QString::number(counter));
     item->setText(7,ui->comboBox_reps->currentText());
+    for(int i = 0; i < item->columnCount(); ++i)
+    {
+        item->setBackground(i,QBrush(itemColor));
+    }
     ui->treeWidget_planer->addTopLevelItem(item);
 }
 
@@ -331,7 +368,13 @@ QStringList Dialog_inteditor::add_int_values()
 
 void Dialog_inteditor::add_interval()
 {
+    QColor itemColor;
     QTreeWidgetItem *item = new QTreeWidgetItem(this->add_int_values());
+    itemColor = settings::get_itemColor(item->data(1,Qt::DisplayRole).toString());
+    for(int i = 0; i < item->columnCount(); ++i)
+    {
+        item->setBackground(i,QBrush(itemColor));
+    }
     ui->treeWidget_planer->insertTopLevelItem(ui->treeWidget_planer->topLevelItemCount(),item);
     ui->treeWidget_planer->expandAll();
     this->set_plot_model();
@@ -341,13 +384,18 @@ void Dialog_inteditor::open_stdWorkout(QString workID)
 {
     clearFlag = true;
     ui->treeWidget_planer->clearFocus();
+
+    ui->pushButton_down->setEnabled(false);
+    ui->pushButton_up->setEnabled(false);
+
     if(ui->treeWidget_planer->topLevelItemCount() > 0) ui->treeWidget_planer->clear();
 
     QStandardItemModel *step_model = stdWorkouts->workouts_steps;
     QModelIndex index;
     QStringList valueList;
-    QString parentItem,thresValue;
+    QString parentItem,thresValue,itemName;
     QList<QStandardItem*> workout = step_model->findItems(workID,Qt::MatchExactly,0);
+    QColor itemColor;
 
     for(int i = 0; i < workout.count();++i)
     {
@@ -366,10 +414,30 @@ void Dialog_inteditor::open_stdWorkout(QString workID)
                   << step_model->item(index.row(),7)->text();
 
         QTreeWidgetItem *item = new QTreeWidgetItem(valueList);
+        itemName = item->data(1,Qt::DisplayRole).toString();
+        if(!itemName.isEmpty())
+        {
+            itemColor = settings::get_itemColor(itemName);
+        }
+        else
+        {
+            if(item->data(0,Qt::DisplayRole).toString().contains(isSeries))
+            {
+                itemColor = QColor(Qt::lightGray);
+            }
+            else
+            {
+                itemColor = QColor(Qt::darkGray);
+            }
+        }
+        for(int i = 0; i < item->columnCount(); ++i)
+        {
+            item->setBackground(i,QBrush(itemColor));
+        }
 
         parentItem = step_model->item(index.row(),8)->text();
 
-        if(parentItem.contains("Group") || parentItem.contains("Series"))
+        if(parentItem.contains(isGroup) || parentItem.contains(isSeries))
         { 
             QList<QTreeWidgetItem*>   pItem = ui->treeWidget_planer->findItems(parentItem,Qt::MatchExactly | Qt::MatchRecursive,0);
             pItem.at(0)->addChild(item);
@@ -383,7 +451,6 @@ void Dialog_inteditor::open_stdWorkout(QString workID)
     }
     this->set_plot_model();
     ui->pushButton_save_std->setEnabled(true);
-    ui->pushButton_copy_std->setEnabled(true);
     ui->pushButton_delete_std->setEnabled(true);
     clearFlag = false;
 }
@@ -1052,6 +1119,18 @@ void Dialog_inteditor::on_lineEdit_workoutname_textChanged(const QString &value)
     {
         ui->pushButton_save_std->setEnabled(true);
     }
+    for(QMap<QString,QString>::const_iterator it =  workoutMap.cbegin(), end = workoutMap.cend(); it != end; ++it)
+    {
+        if(it.value() == value)
+        {
+            ui->pushButton_copy_std->setEnabled(false);
+            break;
+        }
+        else
+        {
+            ui->pushButton_copy_std->setEnabled(true);
+        }
+    }
 }
 
 void Dialog_inteditor::on_treeWidget_planer_itemSelectionChanged()
@@ -1093,4 +1172,3 @@ void Dialog_inteditor::on_treeWidget_planer_itemSelectionChanged()
         }
     }
 }
-

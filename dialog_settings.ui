@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>458</width>
+    <width>500</width>
     <height>365</height>
    </rect>
   </property>
@@ -64,8 +64,8 @@
            <rect>
             <x>10</x>
             <y>10</y>
-            <width>401</width>
-            <height>161</height>
+            <width>441</width>
+            <height>131</height>
            </rect>
           </property>
           <property name="title">
@@ -75,60 +75,54 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label">
              <property name="text">
-              <string>RegPath:</string>
+              <string>GCPath:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="lineEdit_gcpath">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Working Dir:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
             <widget class="QLabel" name="label_3">
              <property name="text">
               <string>Athlete Folder:</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>Activity Folder:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEdit_regpath"/>
-           </item>
            <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_workdir"/>
-           </item>
-           <item row="2" column="1">
             <widget class="QLineEdit" name="lineEdit_athlete">
              <property name="toolTip">
               <string>Insert your Athlete Name how it is definied in GC with a /</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="1">
-            <widget class="QLineEdit" name="lineEdit_activity"/>
-           </item>
-           <item row="3" column="0">
+           <item row="2" column="0">
             <widget class="QLabel" name="label_19">
              <property name="text">
               <string>Athlete YoB:</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
+           <item row="2" column="1">
             <widget class="QLineEdit" name="lineEdit_yob">
              <property name="toolTip">
               <string>Athlete Year of Birth</string>
              </property>
             </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Activity Folder:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLineEdit" name="lineEdit_activity"/>
            </item>
           </layout>
          </widget>
@@ -136,24 +130,20 @@
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>180</y>
-            <width>401</width>
-            <height>81</height>
+            <y>148</y>
+            <width>441</width>
+            <height>111</height>
            </rect>
           </property>
           <property name="title">
            <string>FilePath</string>
           </property>
-          <layout class="QFormLayout" name="formLayout_2">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Workout-Schedule:</string>
-             </property>
-            </widget>
-           </item>
+          <layout class="QGridLayout" name="gridLayout">
            <item row="0" column="1">
             <widget class="QLineEdit" name="lineEdit_schedule">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="toolTip">
               <string>Insert where the schedule files should be stored. Please insert the complete Path.</string>
              </property>
@@ -168,10 +158,56 @@
            </item>
            <item row="1" column="1">
             <widget class="QLineEdit" name="lineEdit_standard">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="toolTip">
               <string>Insert where the Standard Workout files should be stored. Please insert the complete Path.</string>
              </property>
             </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Workout-Schedule:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="pushButton_schedulePath">
+             <property name="maximumSize">
+              <size>
+               <width>25</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="pushButton_workoutsPath">
+             <property name="maximumSize">
+              <size>
+               <width>25</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Config File:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="lineEdit_configfile"/>
            </item>
           </layout>
          </widget>
@@ -684,7 +720,7 @@
            <rect>
             <x>10</x>
             <y>10</y>
-            <width>181</width>
+            <width>211</width>
             <height>251</height>
            </rect>
           </property>
@@ -826,6 +862,40 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>lineEdit_gcpath</tabstop>
+  <tabstop>lineEdit_athlete</tabstop>
+  <tabstop>lineEdit_yob</tabstop>
+  <tabstop>lineEdit_activity</tabstop>
+  <tabstop>lineEdit_schedule</tabstop>
+  <tabstop>lineEdit_standard</tabstop>
+  <tabstop>pushButton_save</tabstop>
+  <tabstop>pushButton_cancel</tabstop>
+  <tabstop>lineEdit_addedit</tabstop>
+  <tabstop>pushButton_color</tabstop>
+  <tabstop>pushButton_add</tabstop>
+  <tabstop>pushButton_edit</tabstop>
+  <tabstop>comboBox_selInfo</tabstop>
+  <tabstop>pushButton_down</tabstop>
+  <tabstop>pushButton_up</tabstop>
+  <tabstop>tableView_level</tabstop>
+  <tabstop>comboBox_thresSport</tabstop>
+  <tabstop>lineEdit_thresPower</tabstop>
+  <tabstop>lineEdit_speed</tabstop>
+  <tabstop>listWidget_selection</tabstop>
+  <tabstop>doubleSpinBox_factor</tabstop>
+  <tabstop>pushButton_delete</tabstop>
+  <tabstop>lineEdit_hfThres</tabstop>
+  <tabstop>lineEdit_hfmax</tabstop>
+  <tabstop>tableView_hf</tabstop>
+  <tabstop>lineEdit_saisonWeeks</tabstop>
+  <tabstop>lineEdit_saison</tabstop>
+  <tabstop>dateEdit_saisonStart</tabstop>
+  <tabstop>dateEdit_saisonEnd</tabstop>
+  <tabstop>lineEdit_thresPace</tabstop>
+  <tabstop>lineEdit_startWeek</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

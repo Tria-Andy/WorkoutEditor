@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2016 Andreas Hunner (andy-atech@gmx.net)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #ifndef SUMMERY_DELEGATE
 #define SUMMERY_DELEGATE
 
@@ -20,6 +38,7 @@ public:
         QFont phase_font,date_font, work_font;
         QString temp_value;
         QStringList sum_values;
+        QStringList sportList = settings::get_sportList();
         QString delimiter = "-";
         QColor rect_color;
         int textMargin = 2;
@@ -33,11 +52,11 @@ public:
         temp_value = index.data(Qt::DisplayRole).toString();
         sum_values = temp_value.split(delimiter);
 
-        for(int i = 0; i < settings::get_sportList().count(); ++i)
+        for(int i = 0; i < sportList.count(); ++i)
         {
-            if(sum_values.at(0) == settings::get_sportList().at(i))
+            if(sum_values.at(0) == sportList.at(i))
             {
-                rect_color = settings::get_color(settings::get_sportColor().at(i));
+                rect_color = settings::get_itemColor(sportList.at(i));
                 break;
             }
             else

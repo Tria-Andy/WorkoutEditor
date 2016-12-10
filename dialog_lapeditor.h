@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2016 Andreas Hunner (andy-atech@gmx.net)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #ifndef DIALOG_LAPEDITOR_H
 #define DIALOG_LAPEDITOR_H
 
@@ -28,6 +46,8 @@ private slots:
     void on_spinBox_endtime_valueChanged(int arg1);
     void on_comboBox_lap_activated(int index);
 
+    void on_doubleSpinBox_distance_valueChanged(double arg1);
+
 private:
     Ui::Dialog_lapeditor *ui;
     Activity *curr_act;
@@ -40,6 +60,7 @@ private:
     void set_components(bool);
     void set_visible(bool,bool);
     void set_duration();
+    void set_lapSpeed(double);
     void edit_laps(int,int);
     void updateSwimModel(int,int,double,int);
     void updateIntModel(int);

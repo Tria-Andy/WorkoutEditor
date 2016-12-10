@@ -16,43 +16,18 @@
  * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef DAY_POPUP_H
-#define DAY_POPUP_H
+#ifndef LOGGER_H
+#define LOGGER_H
+#include <QFile>
 
-#include <QtGui>
-#include <QDialog>
-#include <QTimeEdit>
-#include <QTextBrowser>
-#include <QStandardItemModel>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include "dialog_edit.h"
-#include "schedule.h"
-#include "settings.h"
-
-namespace Ui {
-class day_popup;
-}
-
-class day_popup : public QDialog
+class logger
 {
-    Q_OBJECT
-
 public:
-    explicit day_popup(QWidget *parent = 0, const QDate w_date = QDate(), schedule *p_sched = 0);
-    ~day_popup();
-
-private slots:
-    void on_pushButton_edit_clicked();
-    void on_pushButton_close_clicked();
+    logger(bool logging = 0);
 
 private:
-    Ui::day_popup *ui;
-    schedule *workSched;
-    const QDate *workout_date;
-    QString weekPhase;
-    void show_workouts();
+    bool enableLog;
 
 };
 
-#endif // DAY_POPUP_H
+#endif // LOGGER_H

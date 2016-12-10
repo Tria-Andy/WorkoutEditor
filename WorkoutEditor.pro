@@ -16,7 +16,7 @@ TEMPLATE = app
 #Application version
 VERSION_MAJOR = 1
 VERSION_MINOR = 1
-VERSION_BUILD = 3
+VERSION_BUILD = 6
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
        "VERSION_BUILD=$$VERSION_BUILD"
@@ -47,7 +47,8 @@ SOURCES += main.cpp\
     dialog_week_copy.cpp \
     dialog_version.cpp \
     dialog_lapeditor.cpp \
-    jsonhandler.cpp
+    jsonhandler.cpp \
+    logger.cpp
 
 HEADERS  += mainwindow.h \
     calendar_delegate.h \
@@ -76,9 +77,11 @@ HEADERS  += mainwindow.h \
     dialog_version.h \
     dialog_lapeditor.h \
     del_swimlap.h \
-    del_intview.h \
     del_intselect.h \
-    jsonhandler.h
+    jsonhandler.h \
+    logger.h \
+    del_intview.h \
+    del_level.h
 
 FORMS    += mainwindow.ui \
     dialog_add.ui \

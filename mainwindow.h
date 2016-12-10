@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2016 Andreas Hunner (andy-atech@gmx.net)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -14,6 +32,7 @@
 #include "del_swimlap.h"
 #include "del_intview.h"
 #include "del_intselect.h"
+#include "del_level.h"
 #include "schedule.h"
 #include "dialog_add.h"
 #include "dialog_addweek.h"
@@ -33,6 +52,7 @@
 #include "jsonhandler.h"
 #include "activity.h"
 #include "standardworkouts.h"
+#include "logger.h"
 
 namespace Ui {
 class MainWindow;
@@ -57,6 +77,7 @@ private:
     del_swimlap swimlap_del;
     del_intview intervall_del;
     del_intselect intSelect_del;
+    del_level level_del;
     QStandardItemModel *calendar_model,*sum_model;
     QStringList modus_list,cal_header,work_list,sum_name,year_header,schedMode,sum_header;
 

@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2016 Andreas Hunner (andy-atech@gmx.net)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include "settings.h"
 #include <QApplication>
 #include <QDebug>
@@ -13,8 +31,8 @@ QString settings::splitter = "/";
 
 QMap<QString,QString> settings::gcInfo;
 QMap<QString,QString> settings::saisonInfo;
+QHash<QString,QColor> settings::colorMap;
 
-QString settings::gcPath;
 QString settings::valueFile;
 QString settings::valueFilePath;
 QString settings::act_sport;
@@ -32,12 +50,11 @@ QString settings::isOther;
 
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
+QHash<QString,double> settings::thresholdMap;
 
 QStringList settings::keyList;
 QStringList settings::sportList;
-QStringList settings::paceList;
 QStringList settings::phaseList;
-QStringList settings::hfList;
 QStringList settings::cycleList;
 QStringList settings::codeList;
 QStringList settings::levelList;
@@ -48,22 +65,18 @@ QStringList settings::bikeRangeList;
 QStringList settings::runRangeList;
 QStringList settings::stgRangeList;
 QStringList settings::hfRangeList;
-QStringList settings::sportColor;
-QStringList settings::phaseColor;
 
-QVector<double>  settings::powerList;
-QVector<double>  settings::factorList;
 QVector<int> settings::fontSize;
 
 bool settings::act_isloaded = false;
 bool settings::act_isrecalc = false;
 
 QStringList settings::header_int;
+QStringList settings::header_bike;
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
 QStringList settings::table_header;
 QString settings::header_swim;
-QString settings::header_bike;
 
 int settings::weekRange;
 int settings::weekOffSet;
@@ -79,56 +92,110 @@ void settings::fill_mapList(QMap<int,QString> *map, QString *values)
     }
 }
 
+void settings::fill_mapColor(QStringList *stringList, QString *colorString,bool trans)
+{
+    for(int i = 0; i < stringList->count(); ++i)
+    {
+        colorMap.insert(stringList->at(i),settings::get_colorRGB(colorString->split(splitter).at(i),trans));
+    }
+}
+
+QStringList settings::get_colorStringList(QStringList *stringList)
+{
+    QStringList colorList;
+    for(int i = 0; i < stringList->count(); ++i)
+    {
+        colorList << settings::set_colorString(colorMap.value(stringList->at(i)));
+    }
+    return colorList;
+}
+
 void settings::loadSettings()
 {
     header_int << "Interval" << "Duration" << "Distance" << "Distance (Int)" << "Pace";
     header_int_time << "Interval" << "Start Sec" << "Stop Sec" << "Distance";
     header_swim_time << "Lap" << "Start" << "Time" << "Strokes" << "Speed";
     header_swim = "Swim Laps";
-    header_bike = "Watt";
+    header_bike << "Watt" << "CAD";
 
-    powerList.resize(4);
-    factorList.resize(3);
     fontSize.resize(3);
 
-    settingFile = QApplication::applicationDirPath() + "/WorkoutEditor.ini";
+    settingFile = QApplication::applicationDirPath() + QDir::separator() +"WorkoutEditor.ini";
 
     //General Settings
     if(QFile(settingFile).exists())
     {
         QSettings *mysettings = new QSettings(settingFile,QSettings::IniFormat);
-
+        QString gcPath;
         mysettings->beginGroup("GoldenCheetah");
             gcInfo.insert("regPath",mysettings->value("regPath").toString());
             gcInfo.insert("dir",mysettings->value("dir").toString());
             gcInfo.insert("athlete",mysettings->value("athlete").toString());
+            gcInfo.insert("yob",mysettings->value("yob").toString());
             gcInfo.insert("folder",mysettings->value("folder").toString());
         mysettings->endGroup();
 
         QSettings gc_reg(gcInfo.value("regPath"),QSettings::NativeFormat);
         QString gc_dir = gc_reg.value(gcInfo.value("dir")).toString();
-        gcPath = gc_dir + gcInfo.value("athlete") + gcInfo.value("folder");
+        gcPath = gc_dir + gcInfo.value("athlete") + QDir::separator() + gcInfo.value("folder");
 
         mysettings->beginGroup("Filepath");
             gcInfo.insert("schedule",mysettings->value("schedule").toString());
             gcInfo.insert("workouts",mysettings->value("workouts").toString());
-            gcInfo.insert("gcpath",gcPath);
+            gcInfo.insert("gcpath",QDir::toNativeSeparators(gcPath));
+            gcInfo.insert("valuefile",mysettings->value("valuefile").toString());
             valueFile = mysettings->value("valuefile").toString();
         mysettings->endGroup();
 
         //Sport Value Settings
         if(gcInfo.value("schedule").isEmpty())
         {
-            valueFilePath = QApplication::applicationDirPath() + "/" + valueFile;
+            valueFilePath = QApplication::applicationDirPath() + QDir::separator() + valueFile;
         }
         else
         {
-            valueFilePath = gcInfo.value("workouts") + "/" + valueFile;
+            valueFilePath = gcInfo.value("workouts") + QDir::separator() + valueFile;
         }
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
-        myvalues->beginGroup("Athlete");
-            gcInfo.insert("yob",myvalues->value("yob").toString());
+
+        //Upgrade ini
+        myvalues->beginGroup("Level");
+        QStringList levColor,levList;
+            QString lev_childs = myvalues->value("levels").toString();
+            levList << lev_childs.split(splitter);
+            lev_childs = myvalues->value("color").toString();
+            if(levList.count() > 0 && lev_childs.isEmpty())
+            {
+                for(int i = 0; i < levList.count();++i)
+                {
+                    levColor.insert(i,"230-230-230");
+                }
+                myvalues->setValue("color",settings::setSettingString(levColor));
+            }
         myvalues->endGroup();
+
+        myvalues->beginGroup("Threshold");
+            QStringList thresList;
+            QString thres_childs = myvalues->value("pace").toString();
+            if(!thres_childs.isEmpty())
+            {
+                thresList << thres_childs.split(splitter);
+                myvalues->setValue("swimpace",QString::number(settings::get_timesec(thresList.at(0))));
+                myvalues->setValue("bikepace",QString::number(settings::get_timesec(thresList.at(1))));
+                myvalues->setValue("runpace",QString::number(settings::get_timesec(thresList.at(2))));
+                myvalues->remove("pace");
+            }
+            thresList.clear();
+            thres_childs = myvalues->value("hf").toString();
+            if(!thres_childs.isEmpty())
+            {
+                thresList << thres_childs.split(splitter);
+                myvalues->setValue("hfthres",thresList.at(0));
+                myvalues->setValue("hfmax",thresList.at(1));
+                myvalues->remove("hf");
+            }
+        myvalues->endGroup();
+        //Upgrade ini done
 
         myvalues->beginGroup("JsonFile");
             QString json_childs = myvalues->value("actinfo").toString();
@@ -156,29 +223,29 @@ void settings::loadSettings()
             QString sport_childs = myvalues->value("sports").toString();
             sportList << sport_childs.split(splitter);
             sport_childs = myvalues->value("color").toString();
-            sportColor << sport_childs.split(splitter);
+            settings::fill_mapColor(&sportList,&sport_childs,false);
         myvalues->endGroup();
 
         myvalues->beginGroup("Threshold");
-            powerList[0] = myvalues->value("swimpower").toDouble();
-            powerList[1] = myvalues->value("bikepower").toDouble();
-            powerList[2] = myvalues->value("runpower").toDouble();
-            powerList[3] = myvalues->value("stgpower").toDouble();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Threshold");
-            QString thres_childs = myvalues->value("pace").toString();
-            paceList << thres_childs.split(splitter);
-            factorList[0] = myvalues->value("swimfactor").toDouble();
-            factorList[1] = myvalues->value("bikefactor").toDouble();
-            factorList[2] = myvalues->value("runfactor").toDouble();
-            thres_childs = myvalues->value("hf").toString();
-            hfList << thres_childs.split(splitter);
+            thresholdMap.insert("swimpower",myvalues->value("swimpower").toDouble());
+            thresholdMap.insert("bikepower",myvalues->value("bikepower").toDouble());
+            thresholdMap.insert("runpower",myvalues->value("runpower").toDouble());
+            thresholdMap.insert("stgpower",myvalues->value("stgpower").toDouble());
+            thresholdMap.insert("swimfactor",myvalues->value("swimfactor").toDouble());
+            thresholdMap.insert("bikefactor",myvalues->value("bikefactor").toDouble());
+            thresholdMap.insert("runfactor",myvalues->value("runfactor").toDouble());
+            thresholdMap.insert("swimpace",myvalues->value("swimpace").toDouble());
+            thresholdMap.insert("bikepace",myvalues->value("bikepace").toDouble());
+            thresholdMap.insert("runpace",myvalues->value("runpace").toDouble());
+            thresholdMap.insert("hfthres",myvalues->value("hfthres").toDouble());
+            thresholdMap.insert("hfmax",myvalues->value("hfmax").toDouble());
         myvalues->endGroup();
 
         myvalues->beginGroup("Level");
             QString level_childs = myvalues->value("levels").toString();
             levelList << level_childs.split(splitter);
+            level_childs = myvalues->value("color").toString();
+            settings::fill_mapColor(&levelList,&level_childs,true);
             level_childs = myvalues->value("breakname").toString();
             breakName = level_childs;
         myvalues->endGroup();
@@ -200,9 +267,9 @@ void settings::loadSettings()
             QString phase_childs = myvalues->value("phases").toString();
             phaseList << phase_childs.split(splitter);
             phase_childs = myvalues->value("color").toString();
-            phaseColor << phase_childs.split(splitter);
+            settings::fill_mapColor(&phaseList,&phase_childs,false);
             emptyPhase = myvalues->value("empty").toString();
-            emptyPhaseColor = myvalues->value("emptycolor").toString();
+            colorMap.insert(emptyPhase,settings::get_colorRGB(myvalues->value("emptycolor").toString(),false));
         myvalues->endGroup();
 
         myvalues->beginGroup("Cycle");
@@ -254,7 +321,7 @@ void settings::loadSettings()
     }
 }
 
-void settings::writeSettings(QString selection, QStringList plist, QStringList p_paceList,QStringList p_hfList)
+void settings::writeSettings(QString selection, QStringList plist)
 {
     if(selection == keyList.at(0))
     {
@@ -285,8 +352,6 @@ void settings::writeSettings(QString selection, QStringList plist, QStringList p
         intPlanList = plist;
     }
 
-    paceList = p_paceList;
-    hfList = p_hfList;
     settings::saveSettings();
 }
 
@@ -304,11 +369,13 @@ QString settings::setSettingString(QStringList list)
 
 void settings::saveSettings()
 {
+    QStringList tempColor;
     QSettings *mysettings = new QSettings(settingFile,QSettings::IniFormat);
 
     mysettings->beginGroup("GoldenCheetah");
         mysettings->setValue("dir",gcInfo.value("dir"));
         mysettings->setValue("athlete",gcInfo.value("athlete"));
+        mysettings->setValue("yob",gcInfo.value("yob"));
         mysettings->setValue("folder",gcInfo.value("folder"));
     mysettings->endGroup();
 
@@ -320,12 +387,18 @@ void settings::saveSettings()
     QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
 
     myvalues->beginGroup("Threshold");
-        myvalues->setValue("swimpower",QString::number(powerList[0]));
-        myvalues->setValue("bikepower",QString::number(powerList[1]));
-        myvalues->setValue("runpower",QString::number(powerList[2]));
-        myvalues->setValue("swimfactor",QString::number(factorList[0]));
-        myvalues->setValue("bikefactor",QString::number(factorList[1]));
-        myvalues->setValue("runfactor",QString::number(factorList[2]));
+        myvalues->setValue("swimpower",QString::number(thresholdMap.value("swimpower")));
+        myvalues->setValue("swimpace",QString::number(thresholdMap.value("swimpace")));
+        myvalues->setValue("swimfactor",QString::number(thresholdMap.value("swimfactor")));
+        myvalues->setValue("bikepower",QString::number(thresholdMap.value("bikepower")));
+        myvalues->setValue("bikepace",QString::number(thresholdMap.value("bikepace")));
+        myvalues->setValue("bikefactor",QString::number(thresholdMap.value("bikefactor")));
+        myvalues->setValue("runpower",QString::number(thresholdMap.value("runpower")));
+        myvalues->setValue("runpace",QString::number(thresholdMap.value("runpace")));
+        myvalues->setValue("runfactor",QString::number(thresholdMap.value("runfactor")));
+        myvalues->setValue("stgpower",QString::number(thresholdMap.value("stgpower")));
+        myvalues->setValue("hfthres",QString::number(thresholdMap.value("hfthres")));
+        myvalues->setValue("hfmax",QString::number(thresholdMap.value("hfmax")));
     myvalues->endGroup();
 
     myvalues->beginGroup("Saisoninfo");
@@ -336,25 +409,24 @@ void settings::saveSettings()
         myvalues->setValue("endDate",saisonInfo.value("endDate"));
     myvalues->endGroup();
 
-    myvalues->beginGroup("Athlete");
-        myvalues->setValue("yob",gcInfo.value("yob"));
-    myvalues->endGroup();
-
     myvalues->beginGroup("Sport");
         myvalues->setValue("sports",settings::setSettingString(sportList));
-    myvalues->endGroup();
-
-    myvalues->beginGroup("Threshold");
-        myvalues->setValue("pace",settings::setSettingString(paceList));
-        myvalues->setValue("hf",settings::setSettingString(hfList));
+        tempColor = settings::get_colorStringList(&sportList);
+        myvalues->setValue("color",settings::setSettingString(tempColor));
+        tempColor.clear();
     myvalues->endGroup();
 
     myvalues->beginGroup("Phase");
         myvalues->setValue("phases",settings::setSettingString(phaseList));
+        tempColor = settings::get_colorStringList(&phaseList);
+        myvalues->setValue("color",settings::setSettingString(tempColor));
+        tempColor.clear();
     myvalues->endGroup();
 
     myvalues->beginGroup("Level");
         myvalues->setValue("levels",settings::setSettingString(levelList));
+        tempColor = settings::get_colorStringList(&levelList);
+        myvalues->setValue("color",settings::setSettingString(tempColor));
     myvalues->endGroup();
 
     myvalues->beginGroup("Cycle");
@@ -516,9 +588,8 @@ QString settings::get_speed(QTime pace,int dist,QString sport,bool fixdist)
 int settings::get_hfvalue(QString percent)
 {
     double value = percent.toDouble();
-    QString hfThres = hfList.at(0);
 
-    return static_cast<int>(round(hfThres.toDouble() * (value / 100.0)));
+    return static_cast<int>(round(thresholdMap.value("hfthres") * (value / 100.0)));
 }
 
 double settings::calc_totalWork(double weight,double avgHF, double moveTime)
@@ -530,31 +601,27 @@ double settings::calc_totalWork(double weight,double avgHF, double moveTime)
 
 double settings::estimate_stress(QString sport, QString p_goal, int duration)
 {
-    int sport_index;
     double goal = 0;
     double est_stress = 0;
     double est_power = 0;
     double raw_effort = 0;
     double cv_effort = 0;
+    double thresPower = 0;
     if(sport == settings::isSwim)
     {
         goal = settings::get_timesec(p_goal);
-        sport_index = 0;
     }
     if(sport == settings::isBike)
     {
         goal = p_goal.toDouble();
-        sport_index = 1;
     }
     if(sport == settings::isRun)
     {
         goal = settings::get_timesec(p_goal);
-        sport_index = 2;
     }
     if(sport == settings::isStrength)
     {
         goal = p_goal.toDouble();
-        sport_index = 3;
     }
 
 
@@ -562,24 +629,33 @@ double settings::estimate_stress(QString sport, QString p_goal, int duration)
     {
         if(sport == settings::isSwim)
         {
-            goal = settings::get_timesec(paceList.at(sport_index)) / goal;
+            thresPower = thresholdMap.value("swimpower");
+            goal = thresholdMap.value("swimpace") / goal;
             goal = pow(goal,3.0);
-            est_power = powerList[sport_index] * goal;
-            raw_effort = (duration * est_power) * (est_power / powerList[sport_index]);
-            cv_effort = powerList[sport_index] * 3600;
+            est_power = thresPower * goal;
+            raw_effort = (duration * est_power) * (est_power / thresPower);
+            cv_effort = thresPower * 3600;
 
         }
-        if(sport == settings::isBike || sport == settings::isStrength)
+        if(sport == settings::isBike)
         {
-            raw_effort = (duration * goal) * (goal / powerList[sport_index]);
-            cv_effort = powerList[sport_index] * 3600;
+            thresPower = thresholdMap.value("bikepower");
+            raw_effort = (duration * goal) * (goal / thresPower);
+            cv_effort = thresPower * 3600;
         }
         if(sport == settings::isRun)
         {
-            est_power = powerList[sport_index] * (settings::get_timesec(paceList.at(sport_index))/goal);
-            raw_effort = (duration * est_power) * (est_power / powerList[sport_index]);
-            cv_effort = powerList[sport_index] * 3600;
+            thresPower = thresholdMap.value("runpower");
+            est_power = thresPower * (thresholdMap.value("runpace")/goal);
+            raw_effort = (duration * est_power) * (est_power / thresPower);
+            cv_effort = thresPower * 3600;
 
+        }
+        if(sport == settings::isStrength)
+        {
+            thresPower = thresholdMap.value("stgpower");
+            raw_effort = (duration * goal) * (goal / thresPower);
+            cv_effort = thresPower * 3600;
         }
         est_stress = (raw_effort / cv_effort) * 100;
         return settings::set_doubleValue(est_stress,false);
@@ -600,19 +676,29 @@ double settings::set_doubleValue(double value, bool isthree)
     return 0;
 }
 
-QColor settings::get_color(QString colorValue)
+QColor settings::get_colorRGB(QString colorValue,bool trans)
 {
     QColor color;
     QString cRed,cGreen,cBlue;
+    int aValue = 0;
     cRed = colorValue.split("-").at(0);
     cGreen = colorValue.split("-").at(1);
     cBlue = colorValue.split("-").at(2);
-    color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt());
+    if(trans)
+    {
+        aValue = 125;
+    }
+    else
+    {
+        aValue = 255;
+    }
+
+    color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt(),aValue);
 
     return color;
 }
 
-QString settings::get_colorValues(QColor color)
+QString settings::set_colorString(QColor color)
 {
     return QString::number(color.red())+"-"+QString::number(color.green())+"-"+QString::number(color.blue());;
 }

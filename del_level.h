@@ -16,52 +16,46 @@
  * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef DEL_INTVIEW_H
-#define DEL_INTVIEW_H
+#ifndef DEL_LEVEL_H
+#define DEL_LEVEL_H
 #include <QtGui>
 #include <QItemDelegate>
 #include <QLabel>
 #include <QDebug>
 #include "settings.h"
 
-class del_intview : public QItemDelegate
+class del_level : public QItemDelegate
 {
     Q_OBJECT
 
 public:
-    explicit del_intview(QObject *parent = 0) : QItemDelegate(parent) {}
+    explicit del_level(QObject *parent = 0) : QItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
         QFont cFont;
-        QString lapName,indexData;
+        QString levelName,indexData;
+        QStringList levels = settings::get_levelList();
         const QAbstractItemModel *model = index.model();
         cFont.setPixelSize(12);
-        QColor lapColor(Qt::lightGray);
-        QColor breakColor(Qt::darkGray);
 
         QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
-        lapName = model->data(model->index(index.row(),0,QModelIndex())).toString().trimmed();
+        levelName = model->data(model->index(index.row(),0,QModelIndex())).toString().trimmed();
         indexData = index.data().toString();
         painter->setPen(Qt::black);
 
-        if(lapName == settings::get_breakName())
+        for(int i = 0; i < levels.count(); ++i)
         {
-            painter->fillRect(option.rect,QBrush(breakColor));
-        }
-        else
-        {
-
-            painter->fillRect(option.rect,QBrush(lapColor));
+            if(levelName == levels.at(i))
+            {
+                painter->fillRect(option.rect,QBrush(settings::get_itemColor(levelName)));
+            }
         }
 
         painter->setFont(cFont);
         painter->drawText(rect_text,indexData,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->restore();
     }
-
 };
-
-
-#endif // DEL_INTVIEW_H
+#endif // DEL_LEVEL_H

@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2016 Andreas Hunner (andy-atech@gmx.net)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #ifndef CALENDAR_DELEGATE
 #define CALENDAR_DELEGATE
 #include <QtGui>
@@ -20,6 +38,9 @@ public:
         QVector<int> fontsize = settings::get_fontSize();
         QFont phase_font,date_font, work_font;
         QString temp_value,dayDate;
+        QString emptyPhase = settings::get_emptyPhase();
+        QStringList phaseList = settings::get_phaseList();
+        QStringList sportList = settings::get_sportList();
         QStringList calendar_values;
         QString delimiter = "#";
         QColor rect_color;
@@ -76,11 +97,11 @@ public:
 
                     y += height+1;
 
-                    for(int pos = 0; pos < settings::get_sportList().count();++pos)
+                    for(int pos = 0; pos < sportList.count();++pos)
                     {
-                        if(workout.contains(settings::get_sportList().at(pos)))
+                        if(workout.contains(sportList.at(pos)))
                         {
-                            rect_color = settings::get_color(settings::get_sportColor().at(pos));
+                            rect_color = settings::get_itemColor(sportList.at(pos));
                             break;
                         }
                     }
@@ -104,16 +125,16 @@ public:
             phase = phase.remove(0,phase.indexOf(delimiter)+1);
             if(!phase.isEmpty())
             {
-                for(int pos = 0; pos < settings::get_phaseList().count();++pos)
+                for(int pos = 0; pos < phaseList.count();++pos)
                 {
-                    if(phase.contains(settings::get_phaseList().at(pos)))
+                    if(phase.contains(phaseList.at(pos)))
                     {
-                        rect_color = settings::get_color(settings::get_phaseColor().at(pos));
+                        rect_color = settings::get_itemColor(phaseList.at(pos));
                         break;
                     }
                     else
                     {
-                        rect_color = settings::get_color(settings::get_emptyPhaseColor());
+                        rect_color = settings::get_itemColor(emptyPhase);
                     }
                 }
 

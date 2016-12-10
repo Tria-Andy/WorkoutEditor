@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2016 Andreas Hunner (andy-atech@gmx.net)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #ifndef SCHEDULE_H
 #define SCHEDULE_H
 
@@ -6,6 +24,7 @@
 #include <QtCharts>
 #include <QMessageBox>
 #include "settings.h"
+#include "logger.h"
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -55,6 +74,7 @@ public:
     QBarSet* get_qBarSet();
 
 private:
+    logger *logFile;
     QStringList workoutTags,metaTags,contentTags;
     QString schedulePath,copyFrom, copyTo;
     QDate firstdayofweek;

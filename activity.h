@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2016 Andreas Hunner (andy-atech@gmx.net)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #ifndef ACTIVITY_H
 #define ACTIVITY_H
 
@@ -18,8 +36,8 @@ private:
     QStringList ride_items;
     QVector<double> calc_speed,calc_cadence,p_swim_time,new_dist;
     QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg,p_swimlaps,vect_lapstart;
-    double swim_track,avg_dist,avg_watt,avg_laptime,swim_cv,swim_sri,polishFactor;
-    int dist_factor,avg_counter,avg_pace,pace_cv,zone_count,move_time,swim_pace,hf_threshold,hf_avg;
+    double swim_track,avg_dist,avg_watt,avg_cad,avg_laptime,swim_cv,swim_sri,polishFactor,hf_threshold,hf_max;
+    int dist_factor,avg_counter,avg_pace,pace_cv,zone_count,move_time,swim_pace,hf_avg;
     bool changeRowCount;
 
 
@@ -28,7 +46,7 @@ private:
     void set_edit_samp_model(int);
 
     double get_int_distance(int,bool);
-    double get_int_watts(int);
+    double get_int_value(int,int,bool);
     double interpolate_speed(int,int,double);
 
     int get_swim_laps(int,bool);
@@ -76,6 +94,7 @@ public:
     int get_avg_pace() {return avg_pace/avg_counter;}
     double get_avg_dist() {return avg_dist/avg_counter;}
     double get_avg_watts() {return avg_watt/avg_counter;}
+    double get_avg_cad() {return avg_cad/avg_counter;}
 
     //Swim Calculations
     void set_swim_data();
@@ -92,7 +111,6 @@ public:
     double get_hf_zone_avg();
     void set_hf_avg();
     int get_hf_avg() {return hf_avg;}
-    int get_hf_max() {return hf_threshold;}
     double get_swim_cv() {return swim_cv;}
     void set_hf_time_in_zone();
     void set_swim_track(double trackLen) {swim_track = trackLen;}
