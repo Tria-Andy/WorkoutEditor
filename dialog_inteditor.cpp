@@ -182,21 +182,18 @@ void Dialog_inteditor::set_sport_threshold(QString sport)
     {
        threshold_power = settings::get_thresValue("swimpower");
        threshold_pace = settings::get_thresValue("swimpace");
-       //threshold_pace = settings::get_timesec(settings::get_paceList().at(0));
        ui->label_sportThreshold->setText(settings::set_time(threshold_pace) + " /100m");
     }
     if(sport == settings::isBike)
     {
        threshold_power = settings::get_thresValue("bikepower");
        threshold_pace = settings::get_thresValue("bikepace");
-       //threshold_pace = settings::get_timesec(settings::get_paceList().at(1));
        ui->label_sportThreshold->setText(QString::number(threshold_power) + " Watt");
     }
     if(sport == settings::isRun)
     {
        threshold_power = settings::get_thresValue("runpower");
        threshold_pace = settings::get_thresValue("runpace");
-       //threshold_pace = settings::get_timesec(settings::get_paceList().at(2));
        ui->label_sportThreshold->setText(settings::set_time(threshold_pace) + " /km");
     }
     if(sport == settings::isStrength)
@@ -330,19 +327,26 @@ void Dialog_inteditor::edit_item(QTreeWidgetItem *item)
 
 void Dialog_inteditor::add_topItem(QString label)
 {
+    QColor itemColor;
     int counter = 0;
     if(label == isSeries)
     {
         counter = this->get_series_count();
+        itemColor = QColor(Qt::lightGray);
     }
     else
     {
         counter = this->get_group_count();
+        itemColor = QColor(Qt::darkGray);
     }
 
     QTreeWidgetItem *item = new QTreeWidgetItem();
     item->setText(0,label+"-"+QString::number(counter));
     item->setText(7,ui->comboBox_reps->currentText());
+    for(int i = 0; i < item->columnCount(); ++i)
+    {
+        item->setBackground(i,QBrush(itemColor));
+    }
     ui->treeWidget_planer->addTopLevelItem(item);
 }
 
@@ -367,9 +371,10 @@ void Dialog_inteditor::add_interval()
     QColor itemColor;
     QTreeWidgetItem *item = new QTreeWidgetItem(this->add_int_values());
     itemColor = settings::get_itemColor(item->data(1,Qt::DisplayRole).toString());
-    item->setBackground(0,QBrush(itemColor));
-    item->setBackground(1,QBrush(itemColor));
-    item->setBackground(2,QBrush(itemColor));
+    for(int i = 0; i < item->columnCount(); ++i)
+    {
+        item->setBackground(i,QBrush(itemColor));
+    }
     ui->treeWidget_planer->insertTopLevelItem(ui->treeWidget_planer->topLevelItemCount(),item);
     ui->treeWidget_planer->expandAll();
     this->set_plot_model();
@@ -388,7 +393,7 @@ void Dialog_inteditor::open_stdWorkout(QString workID)
     QStandardItemModel *step_model = stdWorkouts->workouts_steps;
     QModelIndex index;
     QStringList valueList;
-    QString parentItem,thresValue;
+    QString parentItem,thresValue,itemName;
     QList<QStandardItem*> workout = step_model->findItems(workID,Qt::MatchExactly,0);
     QColor itemColor;
 
@@ -408,17 +413,31 @@ void Dialog_inteditor::open_stdWorkout(QString workID)
                   << step_model->item(index.row(),6)->text()
                   << step_model->item(index.row(),7)->text();
 
-        QTreeWidgetItem *item = new QTreeWidgetItem(valueList);      
-        if(!item->data(1,Qt::DisplayRole).toString().isEmpty())
+        QTreeWidgetItem *item = new QTreeWidgetItem(valueList);
+        itemName = item->data(1,Qt::DisplayRole).toString();
+        if(!itemName.isEmpty())
         {
-            itemColor = settings::get_itemColor(item->data(1,Qt::DisplayRole).toString());
-            item->setBackground(0,QBrush(itemColor));
-            item->setBackground(1,QBrush(itemColor));
-            item->setBackground(2,QBrush(itemColor));
+            itemColor = settings::get_itemColor(itemName);
         }
+        else
+        {
+            if(item->data(0,Qt::DisplayRole).toString().contains(isSeries))
+            {
+                itemColor = QColor(Qt::lightGray);
+            }
+            else
+            {
+                itemColor = QColor(Qt::darkGray);
+            }
+        }
+        for(int i = 0; i < item->columnCount(); ++i)
+        {
+            item->setBackground(i,QBrush(itemColor));
+        }
+
         parentItem = step_model->item(index.row(),8)->text();
 
-        if(parentItem.contains("Group") || parentItem.contains("Series"))
+        if(parentItem.contains(isGroup) || parentItem.contains(isSeries))
         { 
             QList<QTreeWidgetItem*>   pItem = ui->treeWidget_planer->findItems(parentItem,Qt::MatchExactly | Qt::MatchRecursive,0);
             pItem.at(0)->addChild(item);
