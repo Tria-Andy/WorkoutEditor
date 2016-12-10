@@ -157,6 +157,46 @@ void settings::loadSettings()
             valueFilePath = gcInfo.value("workouts") + QDir::separator() + valueFile;
         }
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
+
+        //Upgrade ini
+        myvalues->beginGroup("Level");
+        QStringList levColor,levList;
+            QString lev_childs = myvalues->value("levels").toString();
+            levList << lev_childs.split(splitter);
+            lev_childs = myvalues->value("color").toString();
+            if(levList.count() > 0 && lev_childs.isEmpty())
+            {
+                for(int i = 0; i < levList.count();++i)
+                {
+                    levColor.insert(i,"230-230-230");
+                }
+                myvalues->setValue("color",settings::setSettingString(levColor));
+            }
+        myvalues->endGroup();
+
+        myvalues->beginGroup("Threshold");
+            QStringList thresList;
+            QString thres_childs = myvalues->value("pace").toString();
+            if(!thres_childs.isEmpty())
+            {
+                thresList << thres_childs.split(splitter);
+                myvalues->setValue("swimpace",QString::number(settings::get_timesec(thresList.at(0))));
+                myvalues->setValue("bikepace",QString::number(settings::get_timesec(thresList.at(1))));
+                myvalues->setValue("runpace",QString::number(settings::get_timesec(thresList.at(2))));
+                myvalues->remove("pace");
+            }
+            thresList.clear();
+            thres_childs = myvalues->value("hf").toString();
+            if(!thres_childs.isEmpty())
+            {
+                thresList << thres_childs.split(splitter);
+                myvalues->setValue("hfthres",thresList.at(0));
+                myvalues->setValue("hfmax",thresList.at(1));
+                myvalues->remove("hf");
+            }
+        myvalues->endGroup();
+        //Upgrade ini done
+
         myvalues->beginGroup("JsonFile");
             QString json_childs = myvalues->value("actinfo").toString();
             jsoninfos << json_childs.split(splitter);
