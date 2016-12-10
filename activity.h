@@ -36,8 +36,8 @@ private:
     QStringList ride_items;
     QVector<double> calc_speed,calc_cadence,p_swim_time,new_dist;
     QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg,p_swimlaps,vect_lapstart;
-    double swim_track,avg_dist,avg_watt,avg_cad,avg_laptime,swim_cv,swim_sri,polishFactor;
-    int dist_factor,avg_counter,avg_pace,pace_cv,zone_count,move_time,swim_pace,hf_threshold,hf_avg;
+    double swim_track,avg_dist,avg_watt,avg_cad,avg_laptime,swim_cv,swim_sri,polishFactor,hf_threshold,hf_max;
+    int dist_factor,avg_counter,avg_pace,pace_cv,zone_count,move_time,swim_pace,hf_avg;
     bool changeRowCount;
 
 
@@ -111,7 +111,6 @@ public:
     double get_hf_zone_avg();
     void set_hf_avg();
     int get_hf_avg() {return hf_avg;}
-    int get_hf_max() {return hf_threshold;}
     double get_swim_cv() {return swim_cv;}
     void set_hf_time_in_zone();
     void set_swim_track(double trackLen) {swim_track = trackLen;}

@@ -32,6 +32,7 @@
 #include "del_swimlap.h"
 #include "del_intview.h"
 #include "del_intselect.h"
+#include "del_level.h"
 #include "schedule.h"
 #include "dialog_add.h"
 #include "dialog_addweek.h"
@@ -76,6 +77,7 @@ private:
     del_swimlap swimlap_del;
     del_intview intervall_del;
     del_intselect intSelect_del;
+    del_level level_del;
     QStandardItemModel *calendar_model,*sum_model;
     QStringList modus_list,cal_header,work_list,sum_name,year_header,schedMode,sum_header;
 

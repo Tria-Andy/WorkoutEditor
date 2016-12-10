@@ -23,6 +23,7 @@
 #include <QDialog>
 #include <QListWidget>
 #include <QStandardItemModel>
+#include "del_level.h"
 #include "settings.h"
 
 namespace Ui {
@@ -74,8 +75,9 @@ private slots:
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;
-    QStringList sportList,model_header,paceList,hfList;
-    QVector<double> *powerlist,*factorList;
+    QStringList sportList,model_header;
+    del_level level_del;
+    double thresPower,thresPace,sportFactor;
     bool useColor;
     void checkSetup();
     void set_listEntries(QString);

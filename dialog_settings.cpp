@@ -27,26 +27,21 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     ui(new Ui::Dialog_settings)
 {
     ui->setupUi(this);
-    powerlist = settings::get_powerList();
-    factorList = settings::get_factorList();
-    paceList = settings::get_paceList();
-    hfList = settings::get_hfList();
     sportList << settings::isSwim << settings::isBike << settings::isRun;
     useColor = false;
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
     level_model = new QStandardItemModel();
     hf_model = new QStandardItemModel();
-    ui->lineEdit_regpath->setText(settings::get_gcInfo("regPath"));
-    ui->lineEdit_regpath->setEnabled(false);
-    ui->lineEdit_workdir->setText(settings::get_gcInfo("dir"));
-    ui->lineEdit_workdir->setEnabled(false);
+    ui->lineEdit_gcpath->setText(settings::get_gcInfo("gcpath"));
+    ui->lineEdit_gcpath->setEnabled(false);
     ui->lineEdit_athlete->setText(settings::get_gcInfo("athlete"));
     ui->lineEdit_yob->setText(settings::get_gcInfo("yob"));
     ui->lineEdit_activity->setText(settings::get_gcInfo("folder"));
     ui->lineEdit_schedule->setText(settings::get_gcInfo("schedule"));
     ui->lineEdit_standard->setText(settings::get_gcInfo("workouts"));
-    ui->lineEdit_hfThres->setText(hfList.at(0));
-    ui->lineEdit_hfmax->setText(hfList.at(1));
+    ui->lineEdit_configfile->setText(settings::get_gcInfo("valuefile"));
+    ui->lineEdit_hfThres->setText(QString::number(settings::get_thresValue("hfthres")));
+    ui->lineEdit_hfmax->setText(QString::number(settings::get_thresValue("hfmax")));
     ui->comboBox_selInfo->addItems(settings::get_keyList());
     ui->lineEdit_saison->setText(settings::get_saisonInfo("saison"));
     ui->lineEdit_saisonWeeks->setText(settings::get_saisonInfo("weeks"));
@@ -92,32 +87,32 @@ void Dialog_settings::writeChangedValues()
 
     if(ui->comboBox_thresSport->currentText() == settings::isSwim)
     {
-        (*powerlist)[0] = ui->lineEdit_thresPower->text().toDouble();
-        (*factorList)[0] = ui->doubleSpinBox_factor->value();
-        paceList.replace(0,ui->lineEdit_thresPace->text());
+        settings::set_thresValue("swimpower",ui->lineEdit_thresPower->text().toDouble());
+        settings::set_thresValue("swimpace",settings::get_timesec(ui->lineEdit_thresPace->text()));
+        settings::set_thresValue("swimfactor",ui->doubleSpinBox_factor->value());
     }
     if(ui->comboBox_thresSport->currentText() == settings::isBike)
     {
-        (*powerlist)[1] = ui->lineEdit_thresPower->text().toDouble();
-        (*factorList)[1] = ui->doubleSpinBox_factor->value();
-        paceList.replace(1,ui->lineEdit_thresPace->text());
+        settings::set_thresValue("bikepower",ui->lineEdit_thresPower->text().toDouble());
+        settings::set_thresValue("bikepace",settings::get_timesec(ui->lineEdit_thresPace->text()));
+        settings::set_thresValue("bikefactor",ui->doubleSpinBox_factor->value());
     }
     if(ui->comboBox_thresSport->currentText() == settings::isRun)
     {
-        (*powerlist)[2] = ui->lineEdit_thresPower->text().toDouble();
-        (*factorList)[2] = ui->doubleSpinBox_factor->value();
-        paceList.replace(2,ui->lineEdit_thresPace->text());
+        settings::set_thresValue("runpower",ui->lineEdit_thresPower->text().toDouble());
+        settings::set_thresValue("runpace",settings::get_timesec(ui->lineEdit_thresPace->text()));
+        settings::set_thresValue("runfactor",ui->doubleSpinBox_factor->value());
     }
 
-    hfList.replace(0,ui->lineEdit_hfThres->text());
-    hfList.replace(1,ui->lineEdit_hfmax->text());
+    settings::set_thresValue("hfthres",ui->lineEdit_hfThres->text().toDouble());
+    settings::set_thresValue("hfmax",ui->lineEdit_hfmax->text().toDouble());
 
-    settings::set_gcInfo("dir",ui->lineEdit_workdir->text());
     settings::set_gcInfo("athlete",ui->lineEdit_athlete->text());
     settings::set_gcInfo("yob",ui->lineEdit_yob->text());
     settings::set_gcInfo("folder",ui->lineEdit_activity->text());
     settings::set_gcInfo("schedule",ui->lineEdit_schedule->text());
     settings::set_gcInfo("workouts",ui->lineEdit_standard->text());
+    settings::set_gcInfo("valuefile",ui->lineEdit_configfile->text());
 
     settings::set_saisonInfos("saison",ui->lineEdit_saison->text());
     settings::set_saisonInfos("startDate",ui->dateEdit_saisonStart->date().toString("dd.MM.yyyy"));
@@ -125,7 +120,7 @@ void Dialog_settings::writeChangedValues()
     settings::set_saisonInfos("endDate",ui->dateEdit_saisonEnd->date().toString("dd.MM.yyyy"));
     settings::set_saisonInfos("weeks",ui->lineEdit_saisonWeeks->text());
 
-    settings::writeSettings(selection,updateList,paceList,hfList);
+    settings::writeSettings(selection,updateList);
     this->set_thresholdView(ui->comboBox_thresSport->currentText());
     this->set_hfmodel();
 }
@@ -187,28 +182,23 @@ void Dialog_settings::set_listEntries(QString selection)
 
 void Dialog_settings::set_thresholdView(QString sport)
 {
+    ui->lineEdit_thresPower->setText(QString::number(thresPower));
+    ui->lineEdit_thresPace->setText(settings::set_time(thresPace));
+    ui->doubleSpinBox_factor->setValue(sportFactor);
+
     if(sport == settings::isSwim)
     {
-        ui->lineEdit_thresPower->setText(QString::number((*powerlist)[0]));
-        ui->lineEdit_thresPace->setText(paceList.at(0));
         ui->lineEdit_speed->setText(settings::get_speed(QTime::fromString(ui->lineEdit_thresPace->text(),"mm:ss"),100,ui->comboBox_thresSport->currentText(),true));
-        ui->doubleSpinBox_factor->setValue((*factorList)[0]);
         this->set_thresholdModel(settings::get_swimRange());
     }
     if(sport == settings::isBike)
     {
-        ui->lineEdit_thresPower->setText(QString::number((*powerlist)[1]));
-        ui->lineEdit_thresPace->setText(paceList.at(1));
         ui->lineEdit_speed->setText(settings::get_speed(QTime::fromString(ui->lineEdit_thresPace->text(),"mm:ss"),1000,ui->comboBox_thresSport->currentText(),true));
-        ui->doubleSpinBox_factor->setValue((*factorList)[1]);
         this->set_thresholdModel(settings::get_bikeRange());
     }
     if(sport == settings::isRun)
     {
-        ui->lineEdit_thresPower->setText(QString::number((*powerlist)[2]));
-        ui->lineEdit_thresPace->setText(paceList.at(2));
         ui->lineEdit_speed->setText(settings::get_speed(QTime::fromString(ui->lineEdit_thresPace->text(),"mm:ss"),1000,ui->comboBox_thresSport->currentText(),true));
-        ui->doubleSpinBox_factor->setValue((*factorList)[2]);
         this->set_thresholdModel(settings::get_runRange());
     }
 }
@@ -222,6 +212,7 @@ void Dialog_settings::set_hfmodel()
 
     hf_model->setHorizontalHeaderLabels(model_header);
     ui->tableView_hf->setModel(hf_model);
+    ui->tableView_hf->setItemDelegate(&level_del);
     ui->tableView_hf->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView_hf->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_hf->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -246,6 +237,7 @@ void Dialog_settings::set_thresholdModel(QStringList levelList)
     if(level_model->rowCount() > 0) level_model->clear();
     level_model->setHorizontalHeaderLabels(model_header);
     ui->tableView_level->setModel(level_model);
+    ui->tableView_level->setItemDelegate(&level_del);
     ui->tableView_level->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView_level->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_level->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -268,8 +260,8 @@ void Dialog_settings::set_thresholdModel(QStringList levelList)
 
         if(ui->comboBox_thresSport->currentText() == settings::isBike)
         {
-            level_model->setData(level_model->index(i,2,QModelIndex()),threshold_value * percLow);
-            level_model->setData(level_model->index(i,4,QModelIndex()),threshold_value * percHigh);
+            level_model->setData(level_model->index(i,2,QModelIndex()),round(threshold_value * percLow));
+            level_model->setData(level_model->index(i,4,QModelIndex()),round(threshold_value * percHigh));
         }
         else
         {
@@ -357,26 +349,35 @@ void Dialog_settings::on_pushButton_edit_clicked()
 
 void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &value)
 {
-    this->set_thresholdView(value);
     QPalette gback,wback;
     gback.setColor(QPalette::Base,Qt::green);
     wback.setColor(QPalette::Base,Qt::white);;
 
     if(value == settings::isSwim)
     {
+        thresPower = settings::get_thresValue("swimpower");
+        thresPace = settings::get_thresValue("swimpace");
+        sportFactor = settings::get_thresValue("swimfactor");
         ui->lineEdit_thresPower->setPalette(wback);
         ui->lineEdit_thresPace->setPalette(gback);
     }
     if(value == settings::isBike)
     {
+        thresPower = settings::get_thresValue("bikepower");
+        thresPace = settings::get_thresValue("bikepace");
+        sportFactor = settings::get_thresValue("bikefactor");
         ui->lineEdit_thresPower->setPalette(gback);
         ui->lineEdit_thresPace->setPalette(wback);
     }
     if(value == settings::isRun)
     {
+        thresPower = settings::get_thresValue("runpower");
+        thresPace = settings::get_thresValue("runpace");
+        sportFactor = settings::get_thresValue("runfactor");
         ui->lineEdit_thresPower->setPalette(wback);
         ui->lineEdit_thresPace->setPalette(gback);
     }
+    this->set_thresholdView(value);
 }
 
 void Dialog_settings::enableSavebutton()

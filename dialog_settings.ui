@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>458</width>
+    <width>500</width>
     <height>365</height>
    </rect>
   </property>
@@ -64,8 +64,8 @@
            <rect>
             <x>10</x>
             <y>10</y>
-            <width>401</width>
-            <height>161</height>
+            <width>441</width>
+            <height>131</height>
            </rect>
           </property>
           <property name="title">
@@ -75,68 +75,54 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label">
              <property name="text">
-              <string>RegPath:</string>
+              <string>GCPath:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="lineEdit_gcpath">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Working Dir:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
             <widget class="QLabel" name="label_3">
              <property name="text">
               <string>Athlete Folder:</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>Activity Folder:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEdit_regpath">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
            <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_workdir">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
             <widget class="QLineEdit" name="lineEdit_athlete">
              <property name="toolTip">
               <string>Insert your Athlete Name how it is definied in GC with a /</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="1">
-            <widget class="QLineEdit" name="lineEdit_activity"/>
-           </item>
-           <item row="3" column="0">
+           <item row="2" column="0">
             <widget class="QLabel" name="label_19">
              <property name="text">
               <string>Athlete YoB:</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
+           <item row="2" column="1">
             <widget class="QLineEdit" name="lineEdit_yob">
              <property name="toolTip">
               <string>Athlete Year of Birth</string>
              </property>
             </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Activity Folder:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLineEdit" name="lineEdit_activity"/>
            </item>
           </layout>
          </widget>
@@ -144,22 +130,22 @@
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>180</y>
-            <width>401</width>
-            <height>79</height>
+            <y>148</y>
+            <width>441</width>
+            <height>111</height>
            </rect>
           </property>
           <property name="title">
            <string>FilePath</string>
           </property>
           <layout class="QGridLayout" name="gridLayout">
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_standard">
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="lineEdit_schedule">
              <property name="enabled">
               <bool>false</bool>
              </property>
              <property name="toolTip">
-              <string>Insert where the Standard Workout files should be stored. Please insert the complete Path.</string>
+              <string>Insert where the schedule files should be stored. Please insert the complete Path.</string>
              </property>
             </widget>
            </item>
@@ -170,13 +156,13 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEdit_schedule">
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="lineEdit_standard">
              <property name="enabled">
               <bool>false</bool>
              </property>
              <property name="toolTip">
-              <string>Insert where the schedule files should be stored. Please insert the complete Path.</string>
+              <string>Insert where the Standard Workout files should be stored. Please insert the complete Path.</string>
              </property>
             </widget>
            </item>
@@ -212,6 +198,16 @@
               <string>...</string>
              </property>
             </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Config File:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="lineEdit_configfile"/>
            </item>
           </layout>
          </widget>
@@ -724,7 +720,7 @@
            <rect>
             <x>10</x>
             <y>10</y>
-            <width>181</width>
+            <width>211</width>
             <height>251</height>
            </rect>
           </property>
@@ -868,8 +864,7 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>lineEdit_regpath</tabstop>
-  <tabstop>lineEdit_workdir</tabstop>
+  <tabstop>lineEdit_gcpath</tabstop>
   <tabstop>lineEdit_athlete</tabstop>
   <tabstop>lineEdit_yob</tabstop>
   <tabstop>lineEdit_activity</tabstop>

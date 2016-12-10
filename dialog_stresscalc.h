@@ -45,9 +45,10 @@ private:
     QStringList combo_sport;
     QString sport;
     QString lab_power,lab_workout;
+    double thresPower,thresPace;
 
     int sport_index,est_stress;
-    double *t_power, *t_pace;
+    double *t_pace;
     double est_power,raw_effort,cv_effort;
 
     void read_threshold_values();

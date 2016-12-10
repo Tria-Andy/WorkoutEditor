@@ -154,9 +154,9 @@ void Activity::prepareData()
         swim_hf_model->setHorizontalHeaderLabels(hf_header);
 
         //Read current CV and HF Threshold
-        QString temp_cv = settings::get_paceList().at(0);
-        swim_cv = (3600.0 / settings::get_timesec(temp_cv)) / 10.0;
-        pace_cv = settings::get_timesec(temp_cv);
+        double temp_cv = settings::get_thresValue("swimpace");
+        swim_cv = (3600.0 / temp_cv) / 10.0;
+        pace_cv = temp_cv;
 
         this->set_swim_data();
     }
@@ -180,13 +180,11 @@ void Activity::set_swim_data()
 {
     bool recalc = settings::get_act_isrecalc();
     QStringList swimZone, hfZone,levels;
-    QString temp,zone_low,zone_high,hfThres,hfMax;;
-
+    QString temp,zone_low,zone_high;
     swimZone = settings::get_swimRange();
     hfZone = settings::get_hfRange();
-    hfThres = settings::get_hfList().at(0);
-    hf_threshold = hfThres.toInt();
-    hfMax = settings::get_hfList().at(1);
+    hf_threshold = settings::get_thresValue("hfthres");
+    hf_max = settings::get_thresValue("hfmax");
     levels = settings::get_levelList();
 
 
@@ -238,8 +236,8 @@ void Activity::set_swim_data()
             }
             else
             {
-                swim_hf_model->setData(swim_hf_model->index(i,2,QModelIndex()),hfMax);
-                this->set_hf_zone_avg(this->get_zone_values(zone_low.toDouble(),hf_threshold,false),hfMax.toDouble(),i);
+                swim_hf_model->setData(swim_hf_model->index(i,2,QModelIndex()),hf_max);
+                this->set_hf_zone_avg(this->get_zone_values(zone_low.toDouble(),hf_threshold,false),hf_max,i);
             }
         }
         this->set_hf_time_in_zone();
@@ -786,7 +784,7 @@ void Activity::set_edit_samp_model(int rowcount)
     calc_speed.resize(sampRowCount);
     calc_cadence.resize(sampRowCount);
     double msec = 0.0;
-    int int_start,int_stop,sportindex,swimLaps;
+    int int_start,int_stop,sportpace,swimLaps;
     double overall = 0.0,lowLimit = 0.0,limitFactor = 0.0;
     double swimPace,swimSpeed,swimCycle;
     bool isBreak = true;
@@ -794,15 +792,15 @@ void Activity::set_edit_samp_model(int rowcount)
     {
         if(curr_sport == settings::isBike)
         {
-            sportindex = 1 ;
+            sportpace = settings::get_thresValue("bikepace");
             limitFactor = 0.35;
         }
         if(curr_sport == settings::isRun)
         {
-            sportindex = 2;
+            sportpace = settings::get_thresValue("runpace");
             limitFactor = 0.20;
         }
-        lowLimit = settings::get_speed(QTime::fromString(settings::get_paceList().at(sportindex),"mm:ss"),0,curr_sport,true).toDouble();
+        lowLimit = settings::get_speed(QTime::fromString(settings::set_time(sportpace),"mm:ss"),0,curr_sport,true).toDouble();
         lowLimit = lowLimit - (lowLimit*limitFactor);
     }
     if(curr_sport == settings::isTria)
