@@ -88,10 +88,15 @@ public:
 
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
     {
+        QModelIndex max_index;
         QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
         spinBox->interpretText();
         int value = spinBox->value();
-
+        if(index.row() != 0)
+        {
+            max_index = model->index(index.row()-1,3,QModelIndex());
+            model->setData(max_index,value,Qt::EditRole);
+        }
         model->setData(index, value, Qt::EditRole);
     }
 

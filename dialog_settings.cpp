@@ -79,33 +79,37 @@ void Dialog_settings::writeChangedValues()
 {
     QString selection = ui->comboBox_selInfo->currentText();
     QStringList updateList;
-
+    QString sport = ui->comboBox_thresSport->currentText();
     for(int i = 0; i < ui->listWidget_selection->count();++i)
     {
         updateList << ui->listWidget_selection->item(i)->data(Qt::DisplayRole).toString();
     }
 
-    if(ui->comboBox_thresSport->currentText() == settings::isSwim)
+    if(sport == settings::isSwim)
     {
         settings::set_thresValue("swimpower",ui->lineEdit_thresPower->text().toDouble());
         settings::set_thresValue("swimpace",settings::get_timesec(ui->lineEdit_thresPace->text()));
         settings::set_thresValue("swimfactor",ui->doubleSpinBox_factor->value());
+        this->writeRangeValues(sport);
     }
-    if(ui->comboBox_thresSport->currentText() == settings::isBike)
+    if(sport == settings::isBike)
     {
         settings::set_thresValue("bikepower",ui->lineEdit_thresPower->text().toDouble());
         settings::set_thresValue("bikepace",settings::get_timesec(ui->lineEdit_thresPace->text()));
         settings::set_thresValue("bikefactor",ui->doubleSpinBox_factor->value());
+        this->writeRangeValues(sport);
     }
-    if(ui->comboBox_thresSport->currentText() == settings::isRun)
+    if(sport == settings::isRun)
     {
         settings::set_thresValue("runpower",ui->lineEdit_thresPower->text().toDouble());
         settings::set_thresValue("runpace",settings::get_timesec(ui->lineEdit_thresPace->text()));
         settings::set_thresValue("runfactor",ui->doubleSpinBox_factor->value());
+        this->writeRangeValues(sport);
     }
 
     settings::set_thresValue("hfthres",ui->lineEdit_hfThres->text().toDouble());
     settings::set_thresValue("hfmax",ui->lineEdit_hfmax->text().toDouble());
+    this->writeRangeValues("HF");
 
     settings::set_gcInfo("athlete",ui->lineEdit_athlete->text());
     settings::set_gcInfo("yob",ui->lineEdit_yob->text());
@@ -123,13 +127,34 @@ void Dialog_settings::writeChangedValues()
     settings::writeSettings(selection,updateList);
 
     thresPower = ui->lineEdit_thresPower->text().toDouble();
-    thresPace = ui->lineEdit_thresPace->text().toDouble();
+    thresPace = settings::get_timesec(ui->lineEdit_thresPace->text());
     sportFactor = ui->doubleSpinBox_factor->value();
 
     this->set_thresholdView(ui->comboBox_thresSport->currentText());
     this->set_hfmodel();
 }
 
+void Dialog_settings::writeRangeValues(QString sport)
+{
+    QStringList levels = settings::get_levelList();
+    QString min,max;
+    QStandardItemModel *model;
+    if(sport == "HF")
+    {
+        model = hf_model;
+    }
+    else
+    {
+        model = level_model;
+    }
+
+    for(int i = 0; i < levels.count();++i)
+    {
+        min = model->data(model->index(i,1,QModelIndex())).toString();
+        max = model->data(model->index(i,3,QModelIndex())).toString();
+        settings::set_rangeValue(sport,levels.at(i),min+"-"+max);
+    }
+}
 
 void Dialog_settings::on_comboBox_selInfo_currentTextChanged(const QString &value)
 {
@@ -508,6 +533,14 @@ void Dialog_settings::on_lineEdit_addedit_textChanged(const QString &value)
 }
 
 void Dialog_settings::on_tableView_level_doubleClicked(const QModelIndex &index)
+{
+    if(index.column() == 1)
+    {
+        this->enableSavebutton();
+    }
+}
+
+void Dialog_settings::on_tableView_hf_doubleClicked(const QModelIndex &index)
 {
     if(index.column() == 1)
     {
