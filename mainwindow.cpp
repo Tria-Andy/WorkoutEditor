@@ -1003,10 +1003,12 @@ void MainWindow::set_activty_intervalls()
 
 
         ui->tableView_swimzone->setModel(curr_activity->swim_pace_model);
+        ui->tableView_swimzone->setEditTriggers(QAbstractItemView::NoEditTriggers);
         ui->tableView_swimzone->setItemDelegate(&level_del);
         ui->tableView_swimzone->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
         ui->tableView_hfzone->setModel(curr_activity->swim_hf_model);
+        ui->tableView_hfzone->setEditTriggers(QAbstractItemView::NoEditTriggers);
         ui->tableView_hfzone->setItemDelegate(&level_del);
         ui->tableView_hfzone->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 

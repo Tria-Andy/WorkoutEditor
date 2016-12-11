@@ -1324,7 +1324,7 @@
             <item>
              <widget class="QGroupBox" name="groupBox_swim_data">
               <property name="title">
-               <string>Current Swim Infos</string>
+               <string>Current Swim Values</string>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_7">
                <item>
@@ -1399,7 +1399,57 @@
              </widget>
             </item>
             <item>
+             <widget class="QLabel" name="label_25">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::Panel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <property name="text">
+               <string>Swim Pace Time in Zone</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QTableView" name="tableView_swimzone"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_26">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::Panel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <property name="text">
+               <string>Swim Estimate HF Time in Zone</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QTableView" name="tableView_hfzone"/>
