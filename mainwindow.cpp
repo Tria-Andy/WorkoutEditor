@@ -677,7 +677,6 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
 
                 if(dialog_code == QDialog::Accepted)
                 {
-                    workSchedule->copyWeek();
                     this->workout_calendar();
                     //weekCounter = 0;
                     this->set_calender();

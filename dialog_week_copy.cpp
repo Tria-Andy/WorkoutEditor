@@ -43,22 +43,23 @@ Dialog_week_copy::~Dialog_week_copy()
     delete ui;
 }
 
-void Dialog_week_copy::editWeek()
+void Dialog_week_copy::processWeek()
 {
+    QString sourceWeek = ui->lineEdit_currweek->text();
+
     if(editMode == COPY)
     {
-        QString wFrom = ui->lineEdit_currweek->text();
-        QString wTo = ui->comboBox_copyto->currentText();
+        QString targetWeek = ui->comboBox_copyto->currentText();
 
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this,
                                       "Copy Week",
-                                      "Copy Week "+wFrom+" to Week "+wTo+"?",
+                                      "Copy Week "+sourceWeek+" to Week "+targetWeek+"?",
                                       QMessageBox::Yes|QMessageBox::No
                                       );
         if (reply == QMessageBox::Yes)
         {
-            workSched->set_copyWeeks(wFrom,wTo);
+            workSched->copyWeek(sourceWeek,targetWeek);
             accept();
         }
     }
@@ -68,7 +69,17 @@ void Dialog_week_copy::editWeek()
     }
     if(editMode == CLEAR)
     {
-
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this,
+                                      "Clear Week",
+                                      "Clear all Workouts of Week "+sourceWeek+"?",
+                                      QMessageBox::Yes|QMessageBox::No
+                                      );
+        if (reply == QMessageBox::Yes)
+        {
+            workSched->deleteWeek(sourceWeek);
+            accept();
+        }
     }
 }
 
@@ -78,13 +89,10 @@ void Dialog_week_copy::on_pushButton_cancel_clicked()
     reject();
 }
 
-
 void Dialog_week_copy::on_pushButton_ok_clicked()
 {
-    this->editWeek();
+    this->processWeek();
 }
-
-
 
 void Dialog_week_copy::on_radioButton_copy_clicked()
 {

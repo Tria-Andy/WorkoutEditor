@@ -320,7 +320,7 @@ void schedule::read_workout_values(QDomDocument workouts)
     workout_schedule->sort(2);
 }
 
-void schedule::copyWeek()
+void schedule::copyWeek(QString copyFrom,QString copyTo)
 {
     QModelIndex index;
     QList<QStandardItem*> fromList,toList;
@@ -375,6 +375,17 @@ void schedule::copyWeek()
         workout_stress_score = workout_schedule->item(index.row(),8)->text().toInt();
 
         this->add_workout();
+    }
+}
+
+void schedule::deleteWeek(QString deleteWeek)
+{
+    QList<QStandardItem*> deleteList;
+    deleteList = workout_schedule->findItems(deleteWeek,Qt::MatchExactly,0);
+
+    for(int i = 0; i < deleteList.count(); ++i)
+    {
+        this->delete_workout(workout_schedule->indexFromItem(deleteList.at(i)));
     }
 }
 
