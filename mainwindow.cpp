@@ -1010,7 +1010,7 @@ void MainWindow::set_activty_intervalls()
         ui->tableView_hfzone->setItemDelegate(&level_del);
         ui->tableView_hfzone->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-        ui->lineEdit_swimcv->setText(curr_activity->get_swim_pace_time(curr_activity->get_swim_cv_pace(curr_activity->get_swim_cv())));
+        ui->lineEdit_swimcv->setText(settings::set_time(settings::get_thresValue("swimpace")));
         ui->lineEdit_hf_threshold->setText(QString::number(settings::get_thresValue("hfthres")));
 
         ui->lineEdit_laplen->setText(QString::number(curr_activity->get_swim_track()));
