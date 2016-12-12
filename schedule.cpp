@@ -381,7 +381,7 @@ void schedule::copyWeek()
 
 QString schedule::get_weekPhase(QDate currDate)
 {
-    QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.year());
+    QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.addDays(1 - currDate.dayOfWeek()).year());
     QList<QStandardItem*> metaPhase = week_meta->findItems(weekID,Qt::MatchExactly,1);
     QModelIndex index;
     if(!metaPhase.isEmpty())

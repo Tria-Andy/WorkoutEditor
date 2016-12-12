@@ -90,9 +90,10 @@ void Dialog_edit::set_edit_calweek()
 
 void Dialog_edit::set_workout_data()
 {
+    QDate newDate = ui->dateEdit_edit_date->date();
     workSched->set_workout_date(ui->dateEdit_edit_date->date().toString("dd.MM.yyyy"));
     workSched->set_workout_time(ui->timeEdit_edit_time->time().toString("hh:mm"));
-    workSched->set_workout_calweek(ui->lineEdit_cweek->text()+"_"+QString::number(ui->dateEdit_edit_date->date().year()));
+    workSched->set_workout_calweek(ui->lineEdit_cweek->text()+"_"+QString::number(newDate.addDays(1 - ui->dateEdit_edit_date->date().dayOfWeek()).year()));
     workSched->set_workout_sport(ui->lineEdit_sport->text());
     workSched->set_workout_code(ui->comboBox_wcode->currentText());
     workSched->set_workout_title(ui->lineEdit_wtitle->text());
