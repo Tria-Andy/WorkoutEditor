@@ -59,7 +59,15 @@ void Activity::prepareData()
             edit_int_model->setData(editIndex,int_model->data(intIndex,Qt::DisplayRole));
         }
         edit_int_model->setData(edit_int_model->index(row,3,QModelIndex()),settings::set_doubleValue(this->get_int_distance(row,false),true));
-        edit_int_model->setData(edit_int_model->index(row,5,QModelIndex()),this->get_swim_laps(row,false));
+
+        if(curr_sport == settings::isSwim)
+        {
+            edit_int_model->setData(edit_int_model->index(row,5,QModelIndex()),this->get_swim_laps(row,false));
+        }
+        else
+        {
+            edit_int_model->setData(edit_int_model->index(row,5,QModelIndex()),1);
+        }
     }
 
     edit_int_model->setData(edit_int_model->index(edit_int_model->rowCount()-1,2,QModelIndex()),sampCount-1);
@@ -155,7 +163,6 @@ void Activity::prepareData()
         pace_header << "Zone" << "Low (min/100m)" << "High (min/100m)" << "Time in Zone";
         hf_header << "Zone" << "Low (1/Min)" << "High (1/min)" << "Time in Zone";
 
-
         //Set Tableinfos
         swim_pace_model = new QStandardItemModel(zone_count,4);
         swim_pace_model->setHorizontalHeaderLabels(pace_header);
@@ -196,7 +203,6 @@ void Activity::set_swim_data()
     hf_threshold = settings::get_thresValue("hfthres");
     hf_max = settings::get_thresValue("hfmax");
     levels = settings::get_levelList();
-
 
     //Set Swim zone low and high
         for(int i = 0; i < zone_count; i++)
@@ -481,7 +487,7 @@ int Activity::get_swim_laps(int row,bool recalc)
 {
     int lapcount;
 
-    lapcount = round((this->get_int_distance(row,recalc)*1000)/swim_track);
+    lapcount = round((this->get_int_distance(row,recalc)*dist_factor)/swim_track);
 
     if(lapcount == 0)
     {
@@ -561,7 +567,7 @@ void Activity::recalculate_intervalls(bool recalc)
         for(int i = 0; i < rowCount;++i)
         {
             edit_int_model->setData(edit_int_model->index(i,4,QModelIndex()),this->check_is_intervall(i));
-            swimLaps = round((edit_int_model->data(edit_int_model->index(i,3,QModelIndex())).toDouble()*1000) / swim_track);
+            swimLaps = round((edit_int_model->data(edit_int_model->index(i,3,QModelIndex())).toDouble()*dist_factor) / swim_track);
 
             if(i == 0)
             {
@@ -786,8 +792,8 @@ void Activity::set_edit_samp_model(int rowcount)
             if(swimSpeed > 0)
             {
                 ++swimLaps;
-                msec = (swim_track / swimPace) / 1000;
-                overall = (swim_track * swimLaps) / 1000;
+                msec = (swim_track / swimPace) / dist_factor;
+                overall = (swim_track * swimLaps) / dist_factor;
                 isBreak = false;
             }
             else
