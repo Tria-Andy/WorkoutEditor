@@ -1128,9 +1128,17 @@ void Dialog_inteditor::on_lineEdit_workoutname_textChanged(const QString &value)
         }
         else
         {
-            ui->pushButton_copy_std->setEnabled(true);
+            if(value.isEmpty())
+            {
+                ui->pushButton_copy_std->setEnabled(false);
+            }
+            else
+            {
+                ui->pushButton_copy_std->setEnabled(true);
+            }
         }
     }
+
 }
 
 void Dialog_inteditor::on_treeWidget_planer_itemSelectionChanged()
