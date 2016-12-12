@@ -202,6 +202,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
     {
         if(curr_act->get_sport() == settings::isSwim)
         {
+            ++index;
             editModel->insertRow(index,QModelIndex());
             this->updateSwimModel(index,duration,lapSpeed,stroke);
             if(ui->comboBox_edit->currentIndex() == INTERVALS)
