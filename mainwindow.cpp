@@ -1265,7 +1265,6 @@ void MainWindow::on_pushButton_week_minus_clicked()
     if(isWeekMode)
     {
         --weekCounter;
-        qDebug() << weekCounter;
         if(weekCounter == 0)
         {
            this->set_buttons(false);
@@ -1295,7 +1294,6 @@ void MainWindow::on_pushButton_week_plus_clicked()
     if(isWeekMode)
     {
         ++weekCounter;
-        qDebug() << weekCounter;
         this->set_calender();
         this->set_buttons(true);
         this->refresh_model();
@@ -1303,7 +1301,7 @@ void MainWindow::on_pushButton_week_plus_clicked()
     else
     {
         ++weekpos;
-        if(weekpos + 12 == saisonWeeks)
+        if(weekpos + settings::get_generalValue("weekOffSet") == saisonWeeks)
         {
             ui->pushButton_fourplus->setEnabled(false);
             ui->pushButton_week_plus->setEnabled(false);
@@ -1329,10 +1327,11 @@ void MainWindow::on_pushButton_fourplus_clicked()
     }
     else
     {
+        int offSet = settings::get_generalValue("weekOffSet");
         weekpos = weekpos+4;
-        if(weekpos + 12 >= saisonWeeks)
+        if(weekpos + offSet >= saisonWeeks)
         {
-            weekpos = saisonWeeks-12;
+            weekpos = saisonWeeks-offSet;
             ui->pushButton_fourplus->setEnabled(false);
             ui->pushButton_week_plus->setEnabled(false);
             this->workout_calendar();
