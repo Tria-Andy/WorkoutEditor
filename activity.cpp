@@ -62,10 +62,12 @@ void Activity::prepareData()
 
         if(curr_sport == settings::isSwim)
         {
+            dist_factor = 1000;
             edit_int_model->setData(edit_int_model->index(row,5,QModelIndex()),this->get_swim_laps(row,false));
         }
         else
         {
+            dist_factor = 1;
             edit_int_model->setData(edit_int_model->index(row,5,QModelIndex()),1);
         }
     }
@@ -138,15 +140,6 @@ void Activity::prepareData()
 
     curr_act_model = new QStandardItemModel(intCount,this->get_header_num());
     this->set_curr_act_model(false);
-
-    if (curr_sport == settings::isSwim)
-    {
-        dist_factor = 1000;
-    }
-    else
-    {
-        dist_factor = 1;
-    }
 
     this->reset_avg();
 
