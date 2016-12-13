@@ -30,7 +30,7 @@
 
 Activity::Activity()
 {
-    zone_count = 7;
+    zone_count = settings::get_levelList().count();
     changeRowCount = false;
 }
 
@@ -189,67 +189,65 @@ void Activity::set_additional_ride_info()
 void Activity::set_swim_data()
 {
     bool recalc = settings::get_act_isrecalc();
-    QStringList swimZone, hfZone,levels;
+    QStringList levels = settings::get_levelList();
     QString temp,zone_low,zone_high;
-    swimZone = settings::get_swimRange();
-    hfZone = settings::get_hfRange();
+
     hf_threshold = settings::get_thresValue("hfthres");
     hf_max = settings::get_thresValue("hfmax");
-    levels = settings::get_levelList();
 
     //Set Swim zone low and high
-        for(int i = 0; i < zone_count; i++)
+    for(int i = 0; i < levels.count(); i++)
+    {
+        temp = settings::get_rangeValue(curr_sport,levels.at(i));
+        zone_low = temp.split("-").first();
+        zone_high = temp.split("-").last();
+
+        swim_pace_model->setData(swim_pace_model->index(i,0,QModelIndex()),levels.at(i));
+        swim_pace_model->setData(swim_pace_model->index(i,1,QModelIndex()),settings::set_time(this->get_zone_values(zone_low.toDouble(),pace_cv,true)));
+
+        p_swim_time[i] = swim_cv*(zone_low.toDouble()/100);
+
+        if(i < zone_count-1)
         {
-            temp = swimZone.at(i);
-            zone_low = temp.split("-").first();
-            zone_high = temp.split("-").last();
-
-            swim_pace_model->setData(swim_pace_model->index(i,0,QModelIndex()),levels.at(i));
-            swim_pace_model->setData(swim_pace_model->index(i,1,QModelIndex()),settings::set_time(this->get_zone_values(zone_low.toDouble(),pace_cv,true)));
-
-            p_swim_time[i] = swim_cv*(zone_low.toDouble()/100);
-
-            if(i < zone_count-1)
-            {
-                swim_pace_model->setData(swim_pace_model->index(i,2,QModelIndex()),settings::set_time(this->get_zone_values(zone_high.toDouble(),pace_cv,true)));
-            }
-            else
-            {
-                swim_pace_model->setData(swim_pace_model->index(i,2,QModelIndex()),"MAX");
-            }
-            p_swim_timezone[i] = 0;
+            swim_pace_model->setData(swim_pace_model->index(i,2,QModelIndex()),settings::set_time(this->get_zone_values(zone_high.toDouble(),pace_cv,true)));
         }
-
-        this->set_time_in_zones(recalc);
-
-        for (int x = 1; x <= zone_count;x++)
+        else
         {
-            swim_pace_model->setData(swim_pace_model->index(x-1,3,QModelIndex()),settings::set_time(p_swim_timezone[x]));
+            swim_pace_model->setData(swim_pace_model->index(i,2,QModelIndex()),"MAX");
         }
+        p_swim_timezone[i] = 0;
+    }
+
+    this->set_time_in_zones(recalc);
+
+    for (int x = 1; x <= zone_count;x++)
+    {
+        swim_pace_model->setData(swim_pace_model->index(x-1,3,QModelIndex()),settings::set_time(p_swim_timezone[x]));
+    }
 
     //Set HF zone low and high
-        for(int i = 0; i < zone_count; i++)
+    for(int i = 0; i < levels.count(); i++)
+    {
+        temp = settings::get_rangeValue("HF",levels.at(i));
+        zone_low = temp.split("-").first();
+        zone_high = temp.split("-").last();
+
+        swim_hf_model->setData(swim_hf_model->index(i,0,QModelIndex()),levels.at(i));
+        swim_hf_model->setData(swim_hf_model->index(i,1,QModelIndex()),this->get_zone_values(zone_low.toDouble(),hf_threshold,false));
+
+        if(i < zone_count-1)
         {
-            temp = hfZone.at(i);
-            zone_low = temp.split("-").first();
-            zone_high = temp.split("-").last();
+            swim_hf_model->setData(swim_hf_model->index(i,2,QModelIndex()),this->get_zone_values(zone_high.toDouble(),hf_threshold,false));
 
-            swim_hf_model->setData(swim_hf_model->index(i,0,QModelIndex()),levels.at(i));
-            swim_hf_model->setData(swim_hf_model->index(i,1,QModelIndex()),this->get_zone_values(zone_low.toDouble(),hf_threshold,false));
-
-            if(i < zone_count-1)
-            {
-                swim_hf_model->setData(swim_hf_model->index(i,2,QModelIndex()),this->get_zone_values(zone_high.toDouble(),hf_threshold,false));
-
-                this->set_hf_zone_avg(this->get_zone_values(zone_low.toDouble(),hf_threshold,false),this->get_zone_values(zone_high.toDouble(),hf_threshold,false),i);
-            }
-            else
-            {
-                swim_hf_model->setData(swim_hf_model->index(i,2,QModelIndex()),hf_max);
-                this->set_hf_zone_avg(this->get_zone_values(zone_low.toDouble(),hf_threshold,false),hf_max,i);
-            }
+            this->set_hf_zone_avg(this->get_zone_values(zone_low.toDouble(),hf_threshold,false),this->get_zone_values(zone_high.toDouble(),hf_threshold,false),i);
         }
-        this->set_hf_time_in_zone();
+        else
+        {
+            swim_hf_model->setData(swim_hf_model->index(i,2,QModelIndex()),hf_max);
+            this->set_hf_zone_avg(this->get_zone_values(zone_low.toDouble(),hf_threshold,false),hf_max,i);
+        }
+    }
+    this->set_hf_time_in_zone();
 }
 
 void Activity::set_time_in_zones(bool recalc)
