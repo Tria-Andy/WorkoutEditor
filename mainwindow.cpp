@@ -817,8 +817,8 @@ void MainWindow::select_activity_file()
     QMessageBox::StandardButton reply;
     QString filename = QFileDialog::getOpenFileName(
                 this,
-                tr("Select File"),
-                "C://",
+                tr("Select GC JSON File"),
+                settings::get_gcInfo("gcpath"),
                 "JSON Files (*.json)"
                 );
 
