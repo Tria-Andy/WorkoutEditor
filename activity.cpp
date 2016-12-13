@@ -737,7 +737,7 @@ void Activity::set_edit_samp_model(int rowcount)
     calc_speed.resize(sampRowCount);
     calc_cadence.resize(sampRowCount);
     double msec = 0.0;
-    int int_start,int_stop,sportpace,swimLaps;
+    int int_start,int_stop,sportpace = 0,swimLaps;
     double overall = 0.0,lowLimit = 0.0,limitFactor = 0.0;
     double swimPace,swimSpeed,swimCycle;
     bool isBreak = true;
