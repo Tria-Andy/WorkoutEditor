@@ -287,13 +287,16 @@ void settings::loadSettings()
             intPlanList << intPlaner_childs.split(splitter);
         myvalues->endGroup();
 
-        isSwim = sportList.at(0);
-        isBike = sportList.at(1);
-        isRun = sportList.at(2);
-        isStrength = sportList.at(3);
-        isAlt = sportList.at(4);
-        isTria = sportList.at(5);
-        isOther = sportList.at(6);
+        for(int i = 0; i < sportList.count(); ++i)
+        {
+            if(sportList.at(i) == "Swim") isSwim = sportList.at(i);
+            else if(sportList.at(i) == "Bike") isBike = sportList.at(i);
+            else if(sportList.at(i) == "Run") isRun = sportList.at(i);
+            else if(sportList.at(i) == "Strength" || sportList.at(i) == "Power") isStrength = sportList.at(i);
+            else if(sportList.at(i) == "Alt" || sportList.at(i) == "Alternativ") isAlt = sportList.at(i);
+            else if(sportList.at(i) == "Tria" || sportList.at(i) == "Triathlon") isTria = sportList.at(i);
+            else if(sportList.at(i) == "Other") isOther = sportList.at(i);
+        }
 
         QDesktopWidget desk;
         int screenHeight = desk.screenGeometry(0).height();
