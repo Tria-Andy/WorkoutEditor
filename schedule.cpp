@@ -159,7 +159,7 @@ void schedule::read_week_values(QDomDocument weekMeta, QDomDocument weekContent)
     {
         QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
         QString weekid;
-        QString noPhase = settings::get_emptyPhase();
+        QString noPhase = settings::get_gcInfo("emptyPhase");
         int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
 
         week_meta->setRowCount(saisonWeeks);

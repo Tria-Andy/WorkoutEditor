@@ -37,7 +37,7 @@ public:
         painter->save();
         QFont phase_font,date_font, work_font;
         QString temp_value,headInfo;
-        QString emptyPhase = settings::get_emptyPhase();
+        QString emptyPhase = settings::get_gcInfo("emptyPhase");
         QStringList calendar_values;
         QStringList phaseList = settings::get_phaseList();
         QStringList sportList = settings::get_sportList();
@@ -77,7 +77,7 @@ public:
                 }
                 else
                 {
-                    rect_color = settings::get_itemColor(emptyPhase);
+                    rect_color = settings::get_itemColor("emptycolor");
                 }
             }
 

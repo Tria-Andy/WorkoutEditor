@@ -42,7 +42,6 @@ private:
     static QHash<QString,double> thresholdMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
     static QHash<QString,int> generalMap;
-    static QString act_sport,emptyPhase;
     static bool act_isloaded,act_isrecalc;
     static int swimLaplen;
 
@@ -61,13 +60,13 @@ public:
     static QString isAlt,isSwim,isBike,isRun,isTria,isStrength,isOther;
 
     //QMap/QHash Getter
-    static QString get_saisonInfo(QString key) {return saisonInfo.value(key);}
-    static QString get_gcInfo(QString key) {return gcInfo.value(key);}
     static QMap<int,QString> get_sampList() {return sampList;}
     static QMap<int,QString> get_intList() {return intList;}
+    static QString get_saisonInfo(QString key) {return saisonInfo.value(key);}
+    static QString get_gcInfo(QString key) {return gcInfo.value(key);}
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
-    static double get_thresValue(QString key) {return thresholdMap.value(key);}
     static QString get_rangeValue(QString,QString);
+    static double get_thresValue(QString key) {return thresholdMap.value(key);}
     static int get_generalValue(QString key) {return generalMap.value(key);}
 
     //QMap/QHash Setter
@@ -77,8 +76,7 @@ public:
     static void set_thresValue(QString key,double value) {thresholdMap.insert(key,value);}
     static void set_rangeValue(QString,QString,QString);
 
-    //Settings Getter
-    static QString get_emptyPhase() {return emptyPhase;}
+    //Lists Getter
     static QStringList get_keyList() {return keyList;}
     static QStringList get_phaseList() {return phaseList;}
     static QStringList get_sportList() {return sportList;}
@@ -102,7 +100,6 @@ public:
     static QStringList get_int_header(QString);
     static QStringList get_time_header() {return header_int_time;}
     static QStringList get_swimtime_header(){return header_swim_time;}
-    static void set_act_sport(QString sport) {act_sport = sport;}
     static void set_act_isload(bool isloaded) {act_isloaded = isloaded;}
     static bool get_act_isload() {return act_isloaded;}
     static void set_act_recalc(bool isrecalc) {act_isrecalc = isrecalc;}

@@ -36,8 +36,6 @@ QHash<QString,QString> settings::saisonInfo;
 
 QString settings::valueFile;
 QString settings::valueFilePath;
-QString settings::act_sport;
-QString settings::emptyPhase;
 
 QString settings::isSwim;
 QString settings::isBike;
@@ -271,7 +269,7 @@ void settings::loadSettings()
             phase_childs = myvalues->value("color").toString();
             settings::fill_mapColor(&phaseList,&phase_childs,false);
             gcInfo.insert("emptyPhase",myvalues->value("empty").toString());
-            colorMap.insert(emptyPhase,settings::get_colorRGB(myvalues->value("emptycolor").toString(),false));
+            colorMap.insert("emptycolor",settings::get_colorRGB(myvalues->value("emptycolor").toString(),false));
         myvalues->endGroup();
 
         myvalues->beginGroup("Cycle");
