@@ -34,18 +34,17 @@ private:
     static QString splitter,header_swim;
     static QStringList table_header,header_int,header_bike,header_int_time,header_swim_time;
 
-    static QString settingFile,valueFile,valueFilePath,breakName;
+    static QString settingFile,valueFile,valueFilePath;
     static QStringList keyList,sportList,phaseList,cycleList,codeList,levelList,intPlanList,jsoninfos;
     static QMap<int,QString> sampList,intList;
-    static QMap<QString,QString> gcInfo,saisonInfo;
+    static QHash<QString,QString> gcInfo,saisonInfo;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,double> thresholdMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
     static QHash<QString,int> generalMap;
-    static QVector<int> fontSize;
     static QString act_sport,emptyPhase;
     static bool act_isloaded,act_isrecalc;
-    static int weekRange,weekOffSet,swimLaplen;
+    static int swimLaplen;
 
     //Getter
     static QColor get_colorRGB(QString,bool);
@@ -69,6 +68,7 @@ public:
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
     static double get_thresValue(QString key) {return thresholdMap.value(key);}
     static QString get_rangeValue(QString,QString);
+    static int get_generalValue(QString key) {return generalMap.value(key);}
 
     //QMap/QHash Setter
     static void set_saisonInfos(QString key, QString value){saisonInfo.insert(key,value);}
@@ -79,7 +79,6 @@ public:
 
     //Settings Getter
     static QString get_emptyPhase() {return emptyPhase;}
-    static QString get_breakName() {return breakName;}
     static QStringList get_keyList() {return keyList;}
     static QStringList get_phaseList() {return phaseList;}
     static QStringList get_sportList() {return sportList;}
@@ -88,9 +87,6 @@ public:
     static QStringList get_levelList() {return levelList;}
     static QStringList get_intPlanerList() {return intPlanList;}
     static QStringList get_jsoninfos() {return jsoninfos;}
-    static int get_weekRange() {return weekRange;}
-    static int get_weekOffSet() {return weekOffSet;}
-    static QVector<int> get_fontSize() {return fontSize;}
 
     //common functions
     static int get_swimLaplen() {return swimLaplen;}

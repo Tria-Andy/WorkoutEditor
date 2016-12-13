@@ -44,9 +44,7 @@ void Activity::prepareData()
     int sampCount = samp_model->rowCount();
     int intCount = int_model->rowCount();
     QModelIndex editIndex,intIndex;
-    QString swimLapName;
 
-    settings::set_swimLaplen(swim_track);
     int_model->setData(int_model->index(intCount-1,2,QModelIndex()),sampCount-1);
     edit_int_model = new QStandardItemModel(intCount,6);
 
@@ -62,6 +60,7 @@ void Activity::prepareData()
 
         if(curr_sport == settings::isSwim)
         {
+            settings::set_swimLaplen(swim_track);
             dist_factor = 1000;
             edit_int_model->setData(edit_int_model->index(row,5,QModelIndex()),this->get_swim_laps(row,false));
         }
@@ -77,6 +76,7 @@ void Activity::prepareData()
 
     if(curr_sport == settings::isSwim)
     {
+        QString swimLapName;
         edit_int_model->setData(edit_int_model->index(0,1,QModelIndex()),0);
         int rowCounter = xdata_model->rowCount();
         swim_xdata = new QStandardItemModel(rowCounter,7);
@@ -115,7 +115,7 @@ void Activity::prepareData()
             else
             {
                 lapNr = 0;
-                swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),settings::get_breakName());
+                swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),settings::get_gcInfo("breakName"));
                 lapStart = lapStartPrev + lapPacePrev;          
                 lapSpeed = 0;
                 ++intCount;
@@ -576,7 +576,7 @@ void Activity::recalculate_intervalls(bool recalc)
                 }
                 else
                 {
-                    lapname = settings::get_breakName();
+                    lapname = settings::get_gcInfo("breakName");
                     edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
                 }
             }

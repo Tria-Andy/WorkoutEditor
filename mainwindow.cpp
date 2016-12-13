@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
     selectedDate = QDate::currentDate();
     firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
     weeknumber = QString::number(selectedDate.weekNumber()) +"_"+QString::number(selectedDate.year());
-    weekRange = settings::get_weekRange();
+    weekRange = settings::get_generalValue("weekRange");
     weekpos = 0;
     weekDays = 7;
     weekCounter = 0;
@@ -467,7 +467,7 @@ void MainWindow::workout_calendar()
           {
             ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
             showAll = true;
-            weekoffset = settings::get_weekOffSet();
+            weekoffset = settings::get_generalValue("weekOffSet");
           }
           else
           {
@@ -743,7 +743,7 @@ QString MainWindow::get_weekRange()
     {
         if(ui->comboBox_phasefilter->currentIndex() == 0)
         {
-            display_weeks = QString::number(weekpos+1) + " - " + QString::number(weekpos + settings::get_weekOffSet());
+            display_weeks = QString::number(weekpos+1) + " - " + QString::number(weekpos + settings::get_generalValue("weekOffSet"));
         }
         else
         {

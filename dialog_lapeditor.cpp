@@ -28,6 +28,8 @@ Dialog_lapeditor::Dialog_lapeditor(QWidget *parent,Activity *p_act,QModelIndex p
     curr_act = p_act;
     selIndex = p_index;
     selRow = selIndex.row();
+    swimLapLen = curr_act->get_swim_track();
+    breakName = settings::get_gcInfo("breakName");
 
     if(curr_act->get_sport() == settings::isSwim)
     {
@@ -125,7 +127,7 @@ void Dialog_lapeditor::set_lapSpeed(double dist)
 int Dialog_lapeditor::calc_strokes(int duration)
 {
     int strokes;
-    double val = ((curr_act->get_swim_track() / 2) / (curr_act->get_swim_track() / duration));
+    double val = ((swimLapLen / 2) / (swimLapLen / duration));
     strokes = ceil(val + (val*0.125));
 
     return strokes;
@@ -159,7 +161,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
 
     duration = ui->spinBox_endtime->value()-ui->spinBox_starttime->value();
 
-    if(curr_act->get_sport() == settings::isSwim && ui->lineEdit_newName->text().contains(settings::get_breakName()))
+    if(curr_act->get_sport() == settings::isSwim && ui->lineEdit_newName->text().contains(breakName))
     {
         lapSpeed = 0;
         stroke = 0;
@@ -175,7 +177,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
         {
             stroke = ui->spinBox_strokes->value();
         }
-        lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(duration),"mm:ss"),curr_act->get_swim_track(),settings::isSwim,false).toDouble();
+        lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(duration),"mm:ss"),swimLapLen,settings::isSwim,false).toDouble();
     }
 
     if(editMode == UPDATE)
@@ -250,7 +252,7 @@ void Dialog_lapeditor::recalulateData(int row)
     QString currLap;
     QModelIndex new_index,curr_index;
     QStandardItemModel *model = curr_act->swim_xdata;
-    double swimLap = curr_act->get_swim_track()/1000;
+    double swimLap = swimLapLen/1000;
     double lapDist = 0;
     bool isBreak = false;
     int lapCount,lapTime,startTime;
@@ -259,7 +261,7 @@ void Dialog_lapeditor::recalulateData(int row)
     for(int i = 0; i < curr_act->swim_xdata->rowCount(); ++i)
     {
         QString lap = model->data(model->index(i,0,QModelIndex())).toString();
-        if(lap == settings::get_breakName())
+        if(lap == breakName)
         {
             lapDist = lapDist + swimLap;
             isBreak = true;
@@ -290,7 +292,7 @@ void Dialog_lapeditor::recalulateData(int row)
             model->setData(new_index,startTime+lapTime,Qt::EditRole);
             ++row;
             currLap = model->data(model->index(row,0,QModelIndex())).toString();
-        } while (currLap != settings::get_breakName() && row < lapCount-1);
+        } while (currLap != breakName && row < lapCount-1);
 
         startTime = model->data(new_index).toInt();
         if(row == lapCount)

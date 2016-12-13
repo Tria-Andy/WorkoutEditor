@@ -38,7 +38,7 @@ private:
         }
         else
         {
-            if(name == settings::get_breakName())
+            if(name == settings::get_gcInfo("breakName"))
             {
                 return QColor(Qt::darkGray);
             }
