@@ -436,7 +436,7 @@ void MainWindow::workout_calendar()
                     }
                     else
                     {
-                        phase_value = settings::get_emptyPhase();
+                        phase_value = settings::get_gcInfo("emptyPhase");
                     }
                     calendar_model->setData(cal_index,weekValue + delimiter + phase_value);
                 }
@@ -687,7 +687,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
 
             if(dialog_code == QDialog::Rejected)
             {
-                weekCounter = 0;
+                //weekCounter = 0;
                 this->set_calender();
             }
         }
@@ -1265,6 +1265,7 @@ void MainWindow::on_pushButton_week_minus_clicked()
     if(isWeekMode)
     {
         --weekCounter;
+        qDebug() << weekCounter;
         if(weekCounter == 0)
         {
            this->set_buttons(false);
@@ -1294,6 +1295,7 @@ void MainWindow::on_pushButton_week_plus_clicked()
     if(isWeekMode)
     {
         ++weekCounter;
+        qDebug() << weekCounter;
         this->set_calender();
         this->set_buttons(true);
         this->refresh_model();
