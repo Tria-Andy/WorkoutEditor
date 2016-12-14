@@ -1,21 +1,3 @@
-/*
- * Copyright (c) 2016 Andreas Hunner (andy-atech@gmx.net)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc., 51
- * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
@@ -27,6 +9,19 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     settings::loadSettings();
+    if(settings::get_gcInfo("athlete").isEmpty())
+    {
+        userSetup = false;
+        QMessageBox::information(this,"No User Information.",
+                                 "Please open Preferences and fill:\n"
+                                 "Athlete Folder\n"
+                                 "Athlete YoB\n"
+                                 "Workout-Schedule\n"
+                                 "Standard-Workouts",
+                                 QMessageBox::Ok);
+    }
+    else
+    {
     userSetup = true;
     saisonWeeks = settings::get_saisonInfo("weeks").toInt();
     workSchedule = new schedule();
@@ -91,6 +86,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->horizontalSlider_factor->setEnabled(false);
     ui->horizontalSlider_factor->setVisible(false);
     this->set_menuItems(false,true);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -248,7 +244,8 @@ void MainWindow::set_summerInfo()
 
 void MainWindow::summery_view()
 {
-    sum_model->clear();
+    delete sum_model;
+    sum_model = new QStandardItemModel();
     sum_model->setHorizontalHeaderLabels(sum_header);
     ui->tableView_summery->setModel(sum_model);
     ui->tableView_summery->verticalHeader()->resetDefaultSectionSize();
@@ -258,7 +255,6 @@ void MainWindow::summery_view()
     ui->tableView_summery->horizontalHeader()->setVisible(false);
     ui->tableView_summery->verticalHeader()->setVisible(false);
     ui->tableView_summery->setItemDelegate(&sum_del);
-    ui->tableView_summery->setEditTriggers(QAbstractItemView::NoEditTriggers);
     QList<QStandardItem*> list;
 
     QModelIndex index;
@@ -912,7 +908,7 @@ void MainWindow::loadfile(const QString &filename)
         intChart->setAxisX(axisX,speedLine);
 
 
-        if(curr_activity->get_sport() == settings::isRun || curr_activity->get_sport() == settings::isBike)
+        if(curr_activity->get_sport() == settings::isRun)
         {
             polishLine = workSchedule->get_qLineSeries(false);
             polishLine->setColor(QColor(Qt::red));
@@ -1003,15 +999,13 @@ void MainWindow::set_activty_intervalls()
 
 
         ui->tableView_swimzone->setModel(curr_activity->swim_pace_model);
-        ui->tableView_swimzone->setItemDelegate(&level_del);
         ui->tableView_swimzone->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
         ui->tableView_hfzone->setModel(curr_activity->swim_hf_model);
-        ui->tableView_hfzone->setItemDelegate(&level_del);
         ui->tableView_hfzone->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
         ui->lineEdit_swimcv->setText(curr_activity->get_swim_pace_time(curr_activity->get_swim_cv_pace(curr_activity->get_swim_cv())));
-        ui->lineEdit_hf_threshold->setText(QString::number(settings::get_thresValue("hfthres")));
+        ui->lineEdit_hf_threshold->setText(QString::number(curr_activity->get_hf_max()));
 
         ui->lineEdit_laplen->setText(QString::number(curr_activity->get_swim_track()));
         ui->lineEdit_swimtime->setText(QDateTime::fromTime_t(curr_activity->get_move_time()).toUTC().toString("hh:mm:ss"));
@@ -1027,7 +1021,7 @@ void MainWindow::set_activty_intervalls()
         ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_int_times->verticalHeader()->setVisible(false);
     }
-    if(curr_activity->get_sport() != settings::isSwim)
+    if(curr_activity->get_sport() == settings::isRun)
     {
         ui->frame_polish->setVisible(true);
     }
@@ -1038,7 +1032,7 @@ void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
     ui->label_factorValue->setText(QString::number(10-value) + "%");
     double factor = static_cast<double>(value)/100;
     this->set_polishValues(ui->comboBox_intervals->currentIndex(),factor);
-    ui->lineEdit_polMax->setText(QString::number(curr_activity->polish_SpeedValues(50.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),settings::get_act_isrecalc()),0.1-factor,false)));
+    ui->lineEdit_polMax->setText(QString::number(curr_activity->polish_SpeedValues(40.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),settings::get_act_isrecalc()),0.1-factor,false)));
     ui->lineEdit_polMin->setText(QString::number(curr_activity->polish_SpeedValues(1.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),settings::get_act_isrecalc()),0.1-factor,false)));
 }
 
@@ -1052,7 +1046,7 @@ void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
         ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,settings::get_act_isrecalc())));
         double avg = curr_activity->get_int_speed(index,settings::get_act_isrecalc());
         this->set_intChartValues(index,avg);
-        if(curr_activity->get_sport() != settings::isSwim) this->set_polishValues(index,0.0);
+        if(curr_activity->get_sport() == settings::isRun) this->set_polishValues(index,0.0);
     }
 }
 
@@ -1142,56 +1136,57 @@ void MainWindow::write_hf_infos()
 void MainWindow::fill_WorkoutContent()
 {
     QString content,newEntry,contentValue,label;
-    double dist;
-    int time;
+    double value;
     content = ui->lineEdit_workContent->text();
 
     if(ui->radioButton_time->isChecked())
     {
         if(ui->checkBox_exact->isChecked())
         {
-            time = curr_activity->get_avg_laptime();
+            value = curr_activity->get_avg_laptime();
         }
         else
         {
-            time = (ceil(curr_activity->get_avg_laptime()/10.0)*10);
+            value = (ceil(curr_activity->get_avg_laptime()/10.0)*10);
+
         }
 
-        if(time >= 60)
+        if(value >= 60)
         {
             label = "Min";
+            value = value / 60;
         }
         else
         {
             label = "Sec";
         }
 
-        contentValue = settings::set_time(time)+label;
+        contentValue = QString::number(value)+label;
     }
 
     if(ui->radioButton_distance->isChecked())
     {
         if(ui->checkBox_exact->isChecked())
         {
-            dist = (round(curr_activity->get_avg_dist()*1000)/1000.0);
+            value = (round(curr_activity->get_avg_dist()*1000)/1000.0);
         }
         else
         {
-            dist = (ceil(curr_activity->get_avg_dist()*10)/10.0);
+            value = (ceil(curr_activity->get_avg_dist()*10)/10.0);
 
         }
 
-        if(dist < 1)
+        if(value < 1)
         {
             label = "M";
-            dist = dist*1000.0;
+            value = value*1000.0;
         }
         else
         {
             label = "Km";
         }
 
-        contentValue = QString::number(dist)+label;
+        contentValue = QString::number(value)+label;
     }
 
     if(curr_activity->get_sport() == settings::isSwim)
@@ -1199,6 +1194,7 @@ void MainWindow::fill_WorkoutContent()
         if(sel_count > 1)
         {
             newEntry = QString::number(sel_count)+"x"+QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor())+"/"+settings::set_time(curr_activity->get_avg_laptime());
+
         }
         else
         {
@@ -1401,8 +1397,7 @@ void MainWindow::set_avg_fields()
     ui->lineEdit_lap->setText(settings::set_time(curr_activity->get_avg_laptime()));
     ui->lineEdit_pace->setText(settings::set_time(curr_activity->get_avg_pace()));
     ui->lineEdit_dist->setText(QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor()));
-    ui->lineEdit_watt->setText(QString::number(round(curr_activity->get_avg_watts())));
-    ui->lineEdit_cad->setText(QString::number(round(curr_activity->get_avg_cad())));
+    ui->lineEdit_watt->setText(QString::number(curr_activity->get_avg_watts()));
 
     if(sel_count > 0)
     {
@@ -1412,20 +1407,15 @@ void MainWindow::set_avg_fields()
     {
         ui->frame_avgValue->setVisible(false);
     }
-
     if(curr_activity->get_sport() == settings::isBike)
     {
         ui->lineEdit_watt->setVisible(true);
         ui->label_avgWatt->setVisible(true);
-        ui->lineEdit_cad->setVisible(true);
-        ui->label_cad->setVisible(true);
     }
     else
     {
         ui->lineEdit_watt->setVisible(false);
         ui->label_avgWatt->setVisible(false);
-        ui->lineEdit_cad->setVisible(false);
-        ui->label_cad->setVisible(false);
     }
 }
 

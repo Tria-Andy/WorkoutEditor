@@ -1,21 +1,3 @@
-/*
- * Copyright (c) 2016 Andreas Hunner (andy-atech@gmx.net)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc., 51
- * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
 #ifndef WEEK_DELEGATE
 #define WEEK_DELEGATE
 #include <QtGui>
@@ -37,13 +19,12 @@ public:
         painter->save();
         QVector<int> fontsize = settings::get_fontSize();
         QFont phase_font,date_font, work_font;
-        QString temp_value,headInfo;
-        QString emptyPhase = settings::get_emptyPhase();
+        QString temp_value;
+        QString headInfo;
         QStringList calendar_values;
-        QStringList phaseList = settings::get_phaseList();
-        QStringList sportList = settings::get_sportList();
         QString delimiter = "-";
         QColor rect_color;
+        QString cRed,cGreen,cBlue;
         int textMargin = 2;
         QString phase;
         phase_font.setBold(true);
@@ -69,16 +50,16 @@ public:
             painter->drawText(rect_head_text,headInfo,dateOption);
             phase = calendar_values.at(3);
 
-            for(int pos = 0; pos < phaseList.count();++pos)
+            for(int pos = 0; pos < settings::get_phaseList().count();++pos)
             {
-                if(phase.contains(phaseList.at(pos)))
+                if(phase.contains(settings::get_phaseList().at(pos)))
                 {
-                    rect_color = settings::get_itemColor(phaseList.at(pos));
+                    rect_color = settings::get_color(settings::get_phaseColor().at(pos));
                     break;
                 }
                 else
                 {
-                    rect_color = settings::get_itemColor(emptyPhase);
+                    rect_color = settings::get_color(settings::get_emptyPhaseColor());
                 }
             }
 
@@ -93,13 +74,13 @@ public:
         }
         else
         {
-            for(int pos = 0; pos < sportList.count();++pos)
+            for(int pos = 0; pos < settings::get_sportList().count();++pos)
             {
                 if(index.column() == pos+1)
                 {
                     if(index.column() != 6)
                     {
-                        rect_color = settings::get_itemColor(sportList.at(pos));
+                        rect_color = settings::get_color(settings::get_sportColor().at(pos));
                     }
                     else
                     {

@@ -1,21 +1,3 @@
-/*
- * Copyright (c) 2016 Andreas Hunner (andy-atech@gmx.net)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc., 51
- * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
 #include "dialog_lapeditor.h"
 #include "ui_dialog_lapeditor.h"
 #include <QMouseEvent>
@@ -110,16 +92,6 @@ void Dialog_lapeditor::set_duration()
         ui->timeEdit_duration->setDisplayFormat("hh:mm:ss");
         ui->timeEdit_duration->setTime(QTime::fromString(settings::set_time(duration),"hh:mm:ss"));
     }
-}
-void Dialog_lapeditor::set_lapSpeed(double dist)
-{
-    double lapSpeed,pace;
-    int duration = ui->spinBox_endtime->value()-ui->spinBox_starttime->value();
-
-    pace = duration / (dist*10.0);
-    lapSpeed = 360.0 / pace;
-
-    ui->label_speed->setText(QString::number(settings::set_doubleValue(lapSpeed,false))+" km/h");
 }
 
 int Dialog_lapeditor::calc_strokes(int duration)
@@ -385,7 +357,6 @@ void Dialog_lapeditor::on_comboBox_lap_currentIndexChanged(int vLap)
 
     ui->label_start->setText(settings::set_time(ui->spinBox_starttime->value()));
     ui->label_end->setText(settings::set_time(ui->spinBox_endtime->value()));
-    this->set_lapSpeed(ui->doubleSpinBox_distance->value());
 }
 
 void Dialog_lapeditor::on_comboBox_edit_currentIndexChanged(int index)
@@ -420,9 +391,4 @@ void Dialog_lapeditor::on_comboBox_lap_activated(int index)
 {
     Q_UNUSED(index)
     ui->progressBar_updateInt->setValue(0);
-}
-
-void Dialog_lapeditor::on_doubleSpinBox_distance_valueChanged(double value)
-{
-    this->set_lapSpeed(value);
 }

@@ -990,20 +990,6 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_cad">
-                 <property name="text">
-                  <string>CAD:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="lineEdit_cad">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
                 <spacer name="horizontalSpacer_6">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -1302,7 +1288,7 @@
              </widget>
             </item>
             <item>
-             <spacer name="verticalSpacer_bikeSpacer">
+             <spacer name="verticalSpacer">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
