@@ -21,7 +21,6 @@
 
 #include <QDialog>
 #include <QStandardItemModel>
-#include <QtCharts>
 #include "schedule.h"
 #include "settings.h"
 
@@ -43,22 +42,22 @@ private slots:
     void on_pushButton_close_clicked();
     void on_pushButton_edit_clicked();
 
+    void on_comboBox_yValue_currentIndexChanged(int index);
+
 private:
     Ui::week_popup *ui;
     QStringList week_info;
     QStandardItemModel *plotmodel;
     schedule *workSched;
-    bool filledWeek;
-    QChart *weekchart;
-    QChartView *chartview;
-    QValueAxis *yStress,*yDura;
-    QBarCategoryAxis *axisX;
-    QLineSeries *stressLine;
-    QBarSet *duraBar;
-    QBarSeries *duraBars;
-
+    QDate firstDay;
+    bool filledWeek,isLoad;
+    QList<QDateTime> weekDates;
+    QVector<double> xStress,xBar,xWorks,maxValues;
+    QVector<double> yStress,yDura,yDist,yWorks,yValues;
+    int dayCount;
     void set_plotModel();
-    void set_weekInfos();
+    void set_graph();
+    void set_weekPlot(int);
     void freeMem();
 };
 
