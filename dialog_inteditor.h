@@ -55,7 +55,7 @@ private slots:
     void refresh_model();
     void on_pushButton_save_std_clicked();
     void on_spinBox_threshold_valueChanged(int arg1);
-    void on_comboBox_level_currentIndexChanged(const QString &arg1);
+    void on_comboBox_level_currentIndexChanged(int index);
     void on_pushButton_up_clicked();
     void on_pushButton_down_clicked();
     void on_listView_workouts_clicked(const QModelIndex &index);
@@ -101,7 +101,7 @@ private:
     void clearIntTree();
     void reset_values();
     void reset_workoutInfo();
-    void set_min_max(QString,QString);
+    void set_min_max(int,QString);
     void init_model();
     void set_plot_model();
     void add_to_plot(QTreeWidgetItem *item);

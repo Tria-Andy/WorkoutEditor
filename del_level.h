@@ -21,7 +21,6 @@
 #include <QtGui>
 #include <QItemDelegate>
 #include <QLabel>
-#include <QSpinBox>
 #include <QDebug>
 #include "settings.h"
 
@@ -58,48 +57,5 @@ public:
         painter->drawText(rect_text,indexData,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->restore();
     }
-
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
-    {
-        Q_UNUSED(option)
-
-        if(index.column() == 1)
-        {
-            QFont eFont;
-            eFont.setPixelSize(12);
-
-            QSpinBox *editor = new QSpinBox(parent);
-            editor->setFont(eFont);
-            editor->setFrame(false);
-            editor->setMinimum(0);
-            editor->setMaximum(200);
-
-            return editor;
-        }
-        return 0;
-    }
-
-    void setEditorData(QWidget *editor, const QModelIndex &index) const
-    {
-        int value = index.model()->data(index, Qt::EditRole).toInt();
-        QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-        spinBox->setValue(value);
-    }
-
-    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
-    {
-        QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-        spinBox->interpretText();
-        int value = spinBox->value();
-
-        model->setData(index, value, Qt::EditRole);
-    }
-
-    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
-    {
-        Q_UNUSED(index)
-        editor->setGeometry(option.rect);
-    }
-
 };
 #endif // DEL_LEVEL_H

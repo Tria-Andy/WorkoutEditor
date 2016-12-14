@@ -30,7 +30,7 @@
 
 Activity::Activity()
 {
-    zone_count = settings::get_levelList().count();
+    zone_count = 7;
     changeRowCount = false;
 }
 
@@ -179,15 +179,19 @@ void Activity::set_additional_ride_info()
 void Activity::set_swim_data()
 {
     bool recalc = settings::get_act_isrecalc();
-    QStringList levels = settings::get_levelList();
+    QStringList swimZone, hfZone,levels;
     QString temp,zone_low,zone_high;
+    swimZone = settings::get_swimRange();
+    hfZone = settings::get_hfRange();
     hf_threshold = settings::get_thresValue("hfthres");
     hf_max = settings::get_thresValue("hfmax");
+    levels = settings::get_levelList();
+
 
     //Set Swim zone low and high
-        for(int i = 0; i < levels.count(); i++)
+        for(int i = 0; i < zone_count; i++)
         {
-            temp = settings::get_rangeValue(curr_sport,levels.at(i));
+            temp = swimZone.at(i);
             zone_low = temp.split("-").first();
             zone_high = temp.split("-").last();
 
@@ -215,9 +219,9 @@ void Activity::set_swim_data()
         }
 
     //Set HF zone low and high
-        for(int i = 0; i < levels.count(); i++)
+        for(int i = 0; i < zone_count; i++)
         {
-            temp = settings::get_rangeValue("HF",levels.at(i));
+            temp = hfZone.at(i);
             zone_low = temp.split("-").first();
             zone_high = temp.split("-").last();
 

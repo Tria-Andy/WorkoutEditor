@@ -121,11 +121,6 @@ void Dialog_settings::writeChangedValues()
     settings::set_saisonInfos("weeks",ui->lineEdit_saisonWeeks->text());
 
     settings::writeSettings(selection,updateList);
-
-    thresPower = ui->lineEdit_thresPower->text().toDouble();
-    thresPace = ui->lineEdit_thresPace->text().toDouble();
-    sportFactor = ui->doubleSpinBox_factor->value();
-
     this->set_thresholdView(ui->comboBox_thresSport->currentText());
     this->set_hfmodel();
 }
@@ -187,43 +182,49 @@ void Dialog_settings::set_listEntries(QString selection)
 
 void Dialog_settings::set_thresholdView(QString sport)
 {
+    ui->lineEdit_thresPower->setText(QString::number(thresPower));
+    ui->lineEdit_thresPace->setText(settings::set_time(thresPace));
+    ui->doubleSpinBox_factor->setValue(sportFactor);
+
     if(sport == settings::isSwim)
     {
         ui->lineEdit_speed->setText(settings::get_speed(QTime::fromString(ui->lineEdit_thresPace->text(),"mm:ss"),100,ui->comboBox_thresSport->currentText(),true));
-        this->set_thresholdModel(sport);
+        this->set_thresholdModel(settings::get_swimRange());
     }
     if(sport == settings::isBike)
     {
         ui->lineEdit_speed->setText(settings::get_speed(QTime::fromString(ui->lineEdit_thresPace->text(),"mm:ss"),1000,ui->comboBox_thresSport->currentText(),true));
-        this->set_thresholdModel(sport);
+        this->set_thresholdModel(settings::get_bikeRange());
     }
     if(sport == settings::isRun)
     {
         ui->lineEdit_speed->setText(settings::get_speed(QTime::fromString(ui->lineEdit_thresPace->text(),"mm:ss"),1000,ui->comboBox_thresSport->currentText(),true));
-        this->set_thresholdModel(sport);
+        this->set_thresholdModel(settings::get_runRange());
     }
 }
 
 void Dialog_settings::set_hfmodel()
 {
-    QStringList levels = settings::get_levelList();
     if(hf_model->rowCount() > 0) hf_model->clear();
+
+    QStringList hflevel = settings::get_hfRange();
     QString range,zone_low,zone_high;
 
     hf_model->setHorizontalHeaderLabels(model_header);
     ui->tableView_hf->setModel(hf_model);
     ui->tableView_hf->setItemDelegate(&level_del);
+    ui->tableView_hf->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView_hf->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_hf->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_hf->verticalHeader()->hide();
 
-    for(int i = 0; i < levels.count(); ++i)
+    for(int i = 0; i < hflevel.count(); ++i)
     {
-        range = settings::get_rangeValue("HF",levels.at(i));
+        range = hflevel.at(i);
         zone_low = range.split("-").first();
         zone_high = range.split("-").last();
         hf_model->insertRows(i,1,QModelIndex());
-        hf_model->setData(hf_model->index(i,0,QModelIndex()),levels.at(i));
+        hf_model->setData(hf_model->index(i,0,QModelIndex()),settings::get_levelList().at(i));
         hf_model->setData(hf_model->index(i,1,QModelIndex()),zone_low);
         hf_model->setData(hf_model->index(i,2,QModelIndex()),settings::get_hfvalue(zone_low));
         hf_model->setData(hf_model->index(i,3,QModelIndex()),zone_high);
@@ -231,26 +232,26 @@ void Dialog_settings::set_hfmodel()
     }
 }
 
-void Dialog_settings::set_thresholdModel(QString sport)
+void Dialog_settings::set_thresholdModel(QStringList levelList)
 {
-    QStringList levels = settings::get_levelList();
-
     if(level_model->rowCount() > 0) level_model->clear();
     level_model->setHorizontalHeaderLabels(model_header);
     ui->tableView_level->setModel(level_model);
     ui->tableView_level->setItemDelegate(&level_del);
+    ui->tableView_level->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView_level->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_level->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_level->verticalHeader()->hide();
-
+    double threshold_value = ui->lineEdit_thresPower->text().toDouble();
     double percLow = 0,percHigh = 0;
+    int threshold_pace = settings::get_timesec(ui->lineEdit_thresPace->text());
     QString range;
 
-    for(int i = 0; i < levels.count(); ++i)
+    for(int i = 0; i < levelList.count(); ++i)
     {
-        range = settings::get_rangeValue(sport,levels.at(i));
+        range = levelList.at(i);
         level_model->insertRows(i,1,QModelIndex());
-        level_model->setData(level_model->index(i,0,QModelIndex()),levels.at(i));
+        level_model->setData(level_model->index(i,0,QModelIndex()),settings::get_levelList().at(i));
         level_model->setData(level_model->index(i,1,QModelIndex()),range.split("-").first());
         level_model->setData(level_model->index(i,3,QModelIndex()),range.split("-").last());
 
@@ -259,13 +260,13 @@ void Dialog_settings::set_thresholdModel(QString sport)
 
         if(ui->comboBox_thresSport->currentText() == settings::isBike)
         {
-            level_model->setData(level_model->index(i,2,QModelIndex()),round(thresPower * percLow));
-            level_model->setData(level_model->index(i,4,QModelIndex()),round(thresPower * percHigh));
+            level_model->setData(level_model->index(i,2,QModelIndex()),round(threshold_value * percLow));
+            level_model->setData(level_model->index(i,4,QModelIndex()),round(threshold_value * percHigh));
         }
         else
         {
-            level_model->setData(level_model->index(i,2,QModelIndex()),settings::set_time(static_cast<int>(round(thresPace / percLow))));
-            level_model->setData(level_model->index(i,4,QModelIndex()),settings::set_time(static_cast<int>(round(thresPace / percHigh))));
+            level_model->setData(level_model->index(i,2,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace / percLow))));
+            level_model->setData(level_model->index(i,4,QModelIndex()),settings::set_time(static_cast<int>(round(threshold_pace / percHigh))));
         }
     }
 }
@@ -376,11 +377,6 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         ui->lineEdit_thresPower->setPalette(wback);
         ui->lineEdit_thresPace->setPalette(gback);
     }
-
-    ui->lineEdit_thresPower->setText(QString::number(thresPower));
-    ui->lineEdit_thresPace->setText(settings::set_time(thresPace));
-    ui->doubleSpinBox_factor->setValue(sportFactor);
-
     this->set_thresholdView(value);
 }
 
@@ -504,13 +500,5 @@ void Dialog_settings::on_lineEdit_addedit_textChanged(const QString &value)
     else
     {
         ui->pushButton_add->setEnabled(false);
-    }
-}
-
-void Dialog_settings::on_tableView_level_doubleClicked(const QModelIndex &index)
-{
-    if(index.column() == 1)
-    {
-        this->enableSavebutton();
     }
 }

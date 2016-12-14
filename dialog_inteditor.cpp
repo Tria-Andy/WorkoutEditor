@@ -699,10 +699,27 @@ int Dialog_inteditor::get_yaxis_values(bool max_value)
     return 0;
 }
 
-void Dialog_inteditor::set_min_max(QString level, QString sport)
+void Dialog_inteditor::set_min_max(int index, QString sport)
 {
     QString range,min,max;
-    range = settings::get_rangeValue(sport,level);
+
+    if(sport == settings::isSwim)
+    {
+        range = settings::get_swimRange().at(index);
+    }
+    if(sport == settings::isBike)
+    {
+        range = settings::get_bikeRange().at(index);
+        speedfactor = powerfactor[index];
+    }
+    if(sport == settings::isRun)
+    {
+        range = settings::get_runRange().at(index);
+    }
+    if(sport == settings::isStrength)
+    {
+        range = settings::get_stgRange().at(index);
+    }
     min = range.split("-").first();
     max = range.split("-").last();
     ui->spinBox_threshold->setMinimum(min.toInt());
@@ -766,7 +783,7 @@ void Dialog_inteditor::on_comboBox_sport_currentIndexChanged(const QString &sel_
     current_sport = sel_sport;
     this->get_workouts(current_sport);
     this->set_sport_threshold(current_sport);
-    this->set_min_max(ui->comboBox_level->currentText(),sel_sport);
+    this->set_min_max(ui->comboBox_level->currentIndex(),sel_sport);
     ui->label_est_speed->setText(settings::get_workout_pace(ui->doubleSpinBox_int_dist->value(),ui->timeEdit_int_time->time(),sel_sport,false));
     this->reset_values();
     this->reset_workoutInfo();
@@ -1025,10 +1042,10 @@ void Dialog_inteditor::on_spinBox_threshold_valueChanged(int value)
     this->calc_distance(ui->comboBox_sport->currentText());
 }
 
-void Dialog_inteditor::on_comboBox_level_currentIndexChanged(const QString &value)
+void Dialog_inteditor::on_comboBox_level_currentIndexChanged(int index)
 {
-    this->set_min_max(value,ui->comboBox_sport->currentText());
-    if(value == settings::get_levelList().at(0) && ui->comboBox_sport->currentText() == settings::isSwim)
+    this->set_min_max(index,ui->comboBox_sport->currentText());
+    if(index == 0 && ui->comboBox_sport->currentText() == settings::isSwim)
     {
         ui->doubleSpinBox_int_dist->setValue(0.0);
     }

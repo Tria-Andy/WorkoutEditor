@@ -72,8 +72,6 @@ private slots:
 
     void on_lineEdit_addedit_textChanged(const QString &arg1);
 
-    void on_tableView_level_doubleClicked(const QModelIndex &index);
-
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;
@@ -86,7 +84,7 @@ private:
     void set_color(QColor,bool,QString);
     void save_settingsChanges();
     void set_thresholdView(QString);
-    void set_thresholdModel(QString);
+    void set_thresholdModel(QStringList);
     void set_hfmodel();
     void enableSavebutton();
     void writeChangedValues();

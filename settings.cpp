@@ -37,6 +37,7 @@ QString settings::valueFile;
 QString settings::valueFilePath;
 QString settings::act_sport;
 QString settings::emptyPhase;
+QString settings::emptyPhaseColor;
 QString settings::breakName;
 
 QString settings::isSwim;
@@ -50,11 +51,6 @@ QString settings::isOther;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
 QHash<QString,double> settings::thresholdMap;
-QHash<QString,QString> settings::swimRange;
-QHash<QString,QString> settings::bikeRange;
-QHash<QString,QString> settings::runRange;
-QHash<QString,QString> settings::stgRange;
-QHash<QString,QString> settings::hfRange;
 
 QStringList settings::keyList;
 QStringList settings::sportList;
@@ -64,6 +60,11 @@ QStringList settings::codeList;
 QStringList settings::levelList;
 QStringList settings::intPlanList;
 QStringList settings::jsoninfos;
+QStringList settings::swimRangeList;
+QStringList settings::bikeRangeList;
+QStringList settings::runRangeList;
+QStringList settings::stgRangeList;
+QStringList settings::hfRangeList;
 
 QVector<int> settings::fontSize;
 
@@ -96,15 +97,6 @@ void settings::fill_mapColor(QStringList *stringList, QString *colorString,bool 
     for(int i = 0; i < stringList->count(); ++i)
     {
         colorMap.insert(stringList->at(i),settings::get_colorRGB(colorString->split(splitter).at(i),trans));
-    }
-}
-
-void settings::fill_mapRange(QHash<QString, QString> *map, QString *values)
-{
-    QStringList list = values->split(splitter);
-    for(int i = 0; i < levelList.count(); ++i)
-    {
-        map->insert(levelList.at(i),list.at(i));
     }
 }
 
@@ -145,7 +137,7 @@ void settings::loadSettings()
 
         QSettings gc_reg(gcInfo.value("regPath"),QSettings::NativeFormat);
         QString gc_dir = gc_reg.value(gcInfo.value("dir")).toString();
-        gcPath = gc_dir + QDir::separator() + gcInfo.value("athlete") + QDir::separator() + gcInfo.value("folder");
+        gcPath = gc_dir + gcInfo.value("athlete") + QDir::separator() + gcInfo.value("folder");
 
         mysettings->beginGroup("Filepath");
             gcInfo.insert("schedule",mysettings->value("schedule").toString());
@@ -166,7 +158,7 @@ void settings::loadSettings()
         }
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
 
-        //Upgrade values ini
+        //Upgrade ini
         myvalues->beginGroup("Level");
         QStringList levColor,levList;
             QString lev_childs = myvalues->value("levels").toString();
@@ -203,7 +195,7 @@ void settings::loadSettings()
                 myvalues->remove("hf");
             }
         myvalues->endGroup();
-        //Upgrade values ini done
+        //Upgrade ini done
 
         myvalues->beginGroup("JsonFile");
             QString json_childs = myvalues->value("actinfo").toString();
@@ -260,15 +252,15 @@ void settings::loadSettings()
 
         myvalues->beginGroup("Range");
             QString range_childs = myvalues->value("swim").toString();
-            settings::fill_mapRange(&swimRange,&range_childs);
+            swimRangeList << range_childs.split(splitter);
             range_childs = myvalues->value("bike").toString();
-            settings::fill_mapRange(&bikeRange,&range_childs);
+            bikeRangeList << range_childs.split(splitter);
             range_childs = myvalues->value("run").toString();
-            settings::fill_mapRange(&runRange,&range_childs);
+            runRangeList << range_childs.split(splitter);
             range_childs = myvalues->value("strength").toString();
-            settings::fill_mapRange(&stgRange,&range_childs);
+            stgRangeList << range_childs.split(splitter);
             range_childs = myvalues->value("hf").toString();
-            settings::fill_mapRange(&hfRange,&range_childs);
+            hfRangeList << range_childs.split(splitter);
         myvalues->endGroup();
 
         myvalues->beginGroup("Phase");
@@ -327,17 +319,6 @@ void settings::loadSettings()
         delete mysettings;
         delete myvalues;
     }
-}
-
-QString settings::get_rangeValue(QString map, QString key)
-{
-    if(map == settings::isSwim) return swimRange.value(key);
-    if(map == settings::isBike) return bikeRange.value(key);
-    if(map == settings::isRun) return runRange.value(key);
-    if(map == settings::isStrength) return stgRange.value(key);
-    if(map == "HF") return hfRange.value(key);
-
-    return 0;
 }
 
 void settings::writeSettings(QString selection, QStringList plist)

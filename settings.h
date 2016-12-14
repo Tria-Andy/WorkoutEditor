@@ -32,14 +32,13 @@ private:
     static QStringList table_header,header_int,header_bike,header_int_time,header_swim_time;
 
     static QString settingFile,valueFile,valueFilePath,breakName;
-    static QStringList keyList,sportList,phaseList,cycleList,codeList,levelList,intPlanList,jsoninfos;
+    static QStringList keyList,sportList,phaseList,cycleList,codeList,levelList,intPlanList,jsoninfos,swimRangeList,bikeRangeList,runRangeList,stgRangeList,hfRangeList;
     static QMap<int,QString> sampList,intList;
     static QMap<QString,QString> gcInfo,saisonInfo;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,double> thresholdMap;
-    static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
     static QVector<int> fontSize;
-    static QString act_sport,emptyPhase;
+    static QString act_sport,emptyPhase,emptyPhaseColor;
     static bool act_isloaded,act_isrecalc;
     static int weekRange,weekOffSet,swimLaplen;
 
@@ -52,7 +51,6 @@ private:
     //Setter
     static void fill_mapList(QMap<int,QString>*,QString*);
     static void fill_mapColor(QStringList*,QString*,bool);
-    static void fill_mapRange(QHash<QString,QString>*,QString*);
 
 public:
     settings();
@@ -66,7 +64,6 @@ public:
     static QMap<int,QString> get_intList() {return intList;}
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
     static double get_thresValue(QString key) {return thresholdMap.value(key);}
-    static QString get_rangeValue(QString,QString);
 
     //QMap/QHash Setter
     static void set_saisonInfos(QString key, QString value){saisonInfo.insert(key,value);}
@@ -85,6 +82,11 @@ public:
     static QStringList get_levelList() {return levelList;}
     static QStringList get_intPlanerList() {return intPlanList;}
     static QStringList get_jsoninfos() {return jsoninfos;}
+    static QStringList get_swimRange() {return swimRangeList;}
+    static QStringList get_bikeRange() {return bikeRangeList;}
+    static QStringList get_runRange() {return runRangeList;}
+    static QStringList get_stgRange() {return stgRangeList;}
+    static QStringList get_hfRange() {return hfRangeList;}
     static int get_weekRange() {return weekRange;}
     static int get_weekOffSet() {return weekOffSet;}
     static QVector<int> get_fontSize() {return fontSize;}
@@ -99,6 +101,9 @@ public:
     static int get_hfvalue(QString);
     static int get_timesec(QString time);
     static double set_doubleValue(double,bool);
+
+
+
 
     static QStringList get_int_header(QString);
     static QStringList get_time_header() {return header_int_time;}
