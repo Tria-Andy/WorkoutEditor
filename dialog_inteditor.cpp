@@ -616,7 +616,7 @@ void Dialog_inteditor::set_plot_graphic(int c_ints)
     ui->widget_planerplot->yAxis->setLabel("Threshold %");
     ui->widget_planerplot->xAxis->setTickLabels(true);
     ui->widget_planerplot->yAxis->setTickLabels(true);
-    ui->widget_planerplot->replot(QCustomPlot::rpImmediate);
+    ui->widget_planerplot->replot();
 
     ui->label_duration->setText("Time:" + settings::set_time(static_cast<int>(ceil(time_sum))) + " - " + "Distance:" + QString::number(dist_sum) + " - " + "Stress:" + QString::number(round(stress_sum)));
 }
