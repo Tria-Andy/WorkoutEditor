@@ -477,9 +477,10 @@ void Dialog_settings::on_pushButton_color_clicked()
 void Dialog_settings::on_dateEdit_saisonEnd_dateChanged(const QDate &enddate)
 {
     QDate lastweek;
-    lastweek.setDate(enddate.year(),12,31);
-    int weeksStartYear = (lastweek.weekNumber() - (ui->dateEdit_saisonStart->date().weekNumber()-2));
+    lastweek.setDate(ui->dateEdit_saisonStart->date().year(),12,31);
+    int weeksStartYear = (lastweek.weekNumber() - (ui->dateEdit_saisonStart->date().weekNumber()-1));
     ui->lineEdit_saisonWeeks->setText(QString::number(weeksStartYear + enddate.weekNumber()));
+    this->enableSavebutton();
 }
 
 void Dialog_settings::on_pushButton_schedulePath_clicked()
