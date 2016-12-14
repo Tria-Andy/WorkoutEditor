@@ -29,15 +29,19 @@ settings::settings()
 QString settings::settingFile;
 QString settings::splitter = "/";
 
-QMap<QString,QString> settings::gcInfo;
-QMap<QString,QString> settings::saisonInfo;
+QHash<QString,QString> settings::gcInfo;
 QHash<QString,QColor> settings::colorMap;
+QHash<QString,int> settings::generalMap;
+QHash<QString,QString> settings::saisonInfo;
 
 QString settings::valueFile;
 QString settings::valueFilePath;
+<<<<<<< HEAD
 QString settings::act_sport;
 QString settings::emptyPhase;
 QString settings::breakName;
+=======
+>>>>>>> refs/remotes/origin/develop
 
 QString settings::isSwim;
 QString settings::isBike;
@@ -64,8 +68,11 @@ QStringList settings::codeList;
 QStringList settings::levelList;
 QStringList settings::intPlanList;
 QStringList settings::jsoninfos;
+<<<<<<< HEAD
 
 QVector<int> settings::fontSize;
+=======
+>>>>>>> refs/remotes/origin/develop
 
 bool settings::act_isloaded = false;
 bool settings::act_isrecalc = false;
@@ -77,8 +84,6 @@ QStringList settings::header_swim_time;
 QStringList settings::table_header;
 QString settings::header_swim;
 
-int settings::weekRange;
-int settings::weekOffSet;
 int settings::swimLaplen;
 
 void settings::fill_mapList(QMap<int,QString> *map, QString *values)
@@ -108,6 +113,10 @@ void settings::fill_mapRange(QHash<QString, QString> *map, QString *values)
     }
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> refs/remotes/origin/develop
 QStringList settings::get_colorStringList(QStringList *stringList)
 {
     QStringList colorList;
@@ -125,8 +134,6 @@ void settings::loadSettings()
     header_swim_time << "Lap" << "Start" << "Time" << "Strokes" << "Speed";
     header_swim = "Swim Laps";
     header_bike << "Watt" << "CAD";
-
-    fontSize.resize(3);
 
     settingFile = QApplication::applicationDirPath() + QDir::separator() +"WorkoutEditor.ini";
 
@@ -254,8 +261,7 @@ void settings::loadSettings()
             levelList << level_childs.split(splitter);
             level_childs = myvalues->value("color").toString();
             settings::fill_mapColor(&levelList,&level_childs,true);
-            level_childs = myvalues->value("breakname").toString();
-            breakName = level_childs;
+            gcInfo.insert("breakName",myvalues->value("breakname").toString());
         myvalues->endGroup();
 
         myvalues->beginGroup("Range");
@@ -276,8 +282,8 @@ void settings::loadSettings()
             phaseList << phase_childs.split(splitter);
             phase_childs = myvalues->value("color").toString();
             settings::fill_mapColor(&phaseList,&phase_childs,false);
-            emptyPhase = myvalues->value("empty").toString();
-            colorMap.insert(emptyPhase,settings::get_colorRGB(myvalues->value("emptycolor").toString(),false));
+            gcInfo.insert("emptyPhase",myvalues->value("empty").toString());
+            colorMap.insert("emptycolor",settings::get_colorRGB(myvalues->value("emptycolor").toString(),false));
         myvalues->endGroup();
 
         myvalues->beginGroup("Cycle");
@@ -295,33 +301,35 @@ void settings::loadSettings()
             intPlanList << intPlaner_childs.split(splitter);
         myvalues->endGroup();
 
-        isSwim = sportList.at(0);
-        isBike = sportList.at(1);
-        isRun = sportList.at(2);
-        isStrength = sportList.at(3);
-        isAlt = sportList.at(4);
-        isTria = sportList.at(5);
-        isOther = sportList.at(6);
+        for(int i = 0; i < sportList.count(); ++i)
+        {
+            if(sportList.at(i) == "Swim") isSwim = sportList.at(i);
+            else if(sportList.at(i) == "Bike") isBike = sportList.at(i);
+            else if(sportList.at(i) == "Run") isRun = sportList.at(i);
+            else if(sportList.at(i) == "Strength" || sportList.at(i) == "Power") isStrength = sportList.at(i);
+            else if(sportList.at(i) == "Alt" || sportList.at(i) == "Alternativ") isAlt = sportList.at(i);
+            else if(sportList.at(i) == "Tria" || sportList.at(i) == "Triathlon") isTria = sportList.at(i);
+            else if(sportList.at(i) == "Other") isOther = sportList.at(i);
+        }
 
         QDesktopWidget desk;
-        //int screenWight = desk.screenGeometry(0).width();
         int screenHeight = desk.screenGeometry(0).height();
 
         if(screenHeight > 1000)
         {
-            fontSize[0] = 16;
-            fontSize[1] = 14;
-            fontSize[2] = 12;
-            weekRange = 8;
-            weekOffSet = 12;
+            generalMap.insert("weekRange",8);
+            generalMap.insert("weekOffSet",12);
+            generalMap.insert("fontBig",16);
+            generalMap.insert("fontMedium",14);
+            generalMap.insert("fontSmall",12);
         }
         else
         {
-            fontSize[0] = 14;
-            fontSize[1] = 12;
-            fontSize[2] = 10;
-            weekRange = 6;
-            weekOffSet = 8;
+            generalMap.insert("weekRange",6);
+            generalMap.insert("weekOffSet",8);
+            generalMap.insert("fontBig",14);
+            generalMap.insert("fontMedium",12);
+            generalMap.insert("fontSmall",10);
         }
 
         delete mysettings;
@@ -469,7 +477,10 @@ void settings::saveSettings()
         myvalues->setValue("color",settings::setSettingString(tempColor));
     myvalues->endGroup();
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> refs/remotes/origin/develop
     myvalues->beginGroup("Range");
         myvalues->setValue("swim",settings::setSettingString(settings::setRangeString(&swimRange)));
         myvalues->setValue("bike",settings::setSettingString(settings::setRangeString(&bikeRange)));

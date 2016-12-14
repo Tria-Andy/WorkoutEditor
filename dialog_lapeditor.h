@@ -54,7 +54,9 @@ private:
     QStandardItemModel *editModel;
     QModelIndex selIndex;
     QStringList typeList;
+    QString breakName;
     int selRow;
+    double swimLapLen;
 
     void set_lapinfo();
     void set_components(bool);

@@ -35,10 +35,9 @@ public:
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
-        QVector<int> fontsize = settings::get_fontSize();
         QFont phase_font,date_font, work_font;
         QString temp_value,headInfo;
-        QString emptyPhase = settings::get_emptyPhase();
+        QString emptyPhase = settings::get_gcInfo("emptyPhase");
         QStringList calendar_values;
         QStringList phaseList = settings::get_phaseList();
         QStringList sportList = settings::get_sportList();
@@ -47,11 +46,11 @@ public:
         int textMargin = 2;
         QString phase;
         phase_font.setBold(true);
-        phase_font.setPixelSize(fontsize[0]);
+        phase_font.setPixelSize(settings::get_generalValue("fontBig"));
         date_font.setBold(true);
-        date_font.setPixelSize(fontsize[1]);
+        date_font.setPixelSize(settings::get_generalValue("fontMedium"));
         work_font.setBold(false);
-        work_font.setPixelSize(fontsize[2]);
+        work_font.setPixelSize(settings::get_generalValue("fontSmall"));
 
         temp_value = index.data(Qt::DisplayRole).toString();
         calendar_values = temp_value.split(delimiter);
@@ -78,7 +77,7 @@ public:
                 }
                 else
                 {
-                    rect_color = settings::get_itemColor(emptyPhase);
+                    rect_color = settings::get_itemColor("emptycolor");
                 }
             }
 

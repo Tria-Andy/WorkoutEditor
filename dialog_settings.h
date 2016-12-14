@@ -55,22 +55,16 @@ private slots:
     void on_lineEdit_hfmax_textEdited(const QString &arg1);
     void on_dateEdit_saisonStart_dateChanged(const QDate &date);
     void on_pushButton_color_clicked();
-
     void on_dateEdit_saisonEnd_dateChanged(const QDate &date);
-
     void on_pushButton_schedulePath_clicked();
-
     void on_pushButton_workoutsPath_clicked();
-
     void on_lineEdit_schedule_textChanged(const QString &arg1);
-
     void on_lineEdit_standard_textChanged(const QString &arg1);
-
     void on_lineEdit_athlete_textChanged(const QString &arg1);
-
     void on_lineEdit_yob_textChanged(const QString &arg1);
-
     void on_lineEdit_addedit_textChanged(const QString &arg1);
+    void on_tableView_level_doubleClicked(const QModelIndex &index);
+    void on_tableView_hf_doubleClicked(const QModelIndex &index);
 
     void on_tableView_level_doubleClicked(const QModelIndex &index);
 
