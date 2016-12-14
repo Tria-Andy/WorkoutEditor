@@ -27,9 +27,6 @@ class settings
 {
 private:
     static void saveSettings();
-    static QString setSettingString(QStringList);
-    static QStringList setRangeString(QHash<QString,QString>*);
-    static QString set_colorString(QColor);
 
     static QString splitter,header_swim;
     static QStringList table_header,header_int,header_bike,header_int_time,header_swim_time;
@@ -45,6 +42,8 @@ private:
     static QString act_sport,emptyPhase;
     static bool act_isloaded,act_isrecalc;
     static int weekRange,weekOffSet,swimLaplen;
+
+    static QString set_colorString(QColor);
 
     //Getter
     static QColor get_colorRGB(QString,bool);
@@ -74,7 +73,6 @@ public:
     static void set_gcInfo(QString key, QString value){gcInfo.insert(key,value);}
     static void set_itemColor(QString key,QColor value) {colorMap.insert(key,value);}
     static void set_thresValue(QString key,double value) {thresholdMap.insert(key,value);}
-    static void set_rangeValue(QString,QString,QString);
 
     //Settings Getter
     static QString get_emptyPhase() {return emptyPhase;}
@@ -112,6 +110,7 @@ public:
     static bool get_act_isrecalc() {return act_isrecalc;}
     static void set_swimLaplen(int lapLen) {swimLaplen = lapLen;}
     static void writeSettings(QString,QStringList);
+    static QString setSettingString(QStringList);
 };
 
 #endif // SETTINGS_H

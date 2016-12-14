@@ -53,7 +53,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -207,11 +207,7 @@
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QLineEdit" name="lineEdit_configfile">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-            </widget>
+            <widget class="QLineEdit" name="lineEdit_configfile"/>
            </item>
           </layout>
          </widget>

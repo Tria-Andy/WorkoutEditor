@@ -74,8 +74,6 @@ private slots:
 
     void on_tableView_level_doubleClicked(const QModelIndex &index);
 
-    void on_tableView_hf_doubleClicked(const QModelIndex &index);
-
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;
@@ -92,7 +90,6 @@ private:
     void set_hfmodel();
     void enableSavebutton();
     void writeChangedValues();
-    void writeRangeValues(QString);
 };
 
 #endif // DIALOG_SETTINGS_H

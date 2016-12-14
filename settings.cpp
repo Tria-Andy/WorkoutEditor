@@ -340,15 +340,6 @@ QString settings::get_rangeValue(QString map, QString key)
     return 0;
 }
 
-void settings::set_rangeValue(QString map, QString key,QString value)
-{
-    if(map == settings::isSwim) swimRange.insert(key,value);
-    if(map == settings::isBike) bikeRange.insert(key,value);
-    if(map == settings::isRun)  runRange.insert(key,value);
-    if(map == settings::isStrength) stgRange.insert(key,value);
-    if(map == "HF") hfRange.insert(key,value);
-}
-
 void settings::writeSettings(QString selection, QStringList plist)
 {
     if(selection == keyList.at(0))
@@ -395,17 +386,6 @@ QString settings::setSettingString(QStringList list)
     return setValue;
 }
 
-QStringList settings::setRangeString(QHash<QString, QString> *hash)
-{
-    QStringList rangeList;
-
-    for(int i = 0; i < levelList.count(); ++i)
-    {
-        rangeList.insert(i,hash->value(levelList.at(i)));
-    }
-    return rangeList;
-}
-
 void settings::saveSettings()
 {
     QStringList tempColor;
@@ -421,7 +401,6 @@ void settings::saveSettings()
     mysettings->beginGroup("Filepath");
         mysettings->setValue("schedule",gcInfo.value("schedule"));
         mysettings->setValue("workouts",gcInfo.value("workouts"));
-        mysettings->setValue("valuefile",gcInfo.value("valuefile"));
     mysettings->endGroup();
 
     QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
@@ -467,15 +446,6 @@ void settings::saveSettings()
         myvalues->setValue("levels",settings::setSettingString(levelList));
         tempColor = settings::get_colorStringList(&levelList);
         myvalues->setValue("color",settings::setSettingString(tempColor));
-    myvalues->endGroup();
-
-
-    myvalues->beginGroup("Range");
-        myvalues->setValue("swim",settings::setSettingString(settings::setRangeString(&swimRange)));
-        myvalues->setValue("bike",settings::setSettingString(settings::setRangeString(&bikeRange)));
-        myvalues->setValue("run",settings::setSettingString(settings::setRangeString(&runRange)));
-        myvalues->setValue("strength",settings::setSettingString(settings::setRangeString(&stgRange)));
-        myvalues->setValue("hf",settings::setSettingString(settings::setRangeString(&hfRange)));
     myvalues->endGroup();
 
     myvalues->beginGroup("Cycle");
