@@ -702,10 +702,6 @@ int Dialog_inteditor::get_yaxis_values(bool max_value)
 void Dialog_inteditor::set_min_max(QString level, QString sport)
 {
     QString range,min,max;
-<<<<<<< HEAD
-=======
-
->>>>>>> refs/remotes/origin/develop
     range = settings::get_rangeValue(sport,level);
     min = range.split("-").first();
     max = range.split("-").last();
@@ -1115,17 +1111,9 @@ void Dialog_inteditor::on_lineEdit_workoutname_textChanged(const QString &value)
         }
         else
         {
-            if(value.isEmpty())
-            {
-                ui->pushButton_copy_std->setEnabled(false);
-            }
-            else
-            {
-                ui->pushButton_copy_std->setEnabled(true);
-            }
+            ui->pushButton_copy_std->setEnabled(true);
         }
     }
-
 }
 
 void Dialog_inteditor::on_treeWidget_planer_itemSelectionChanged()

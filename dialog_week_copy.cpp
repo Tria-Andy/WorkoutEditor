@@ -26,16 +26,13 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
     ui->setupUi(this);
     ui->lineEdit_currweek->setText(selected_week.split("#").first());
     workSched = p_sched;
-    this->setFixedHeight(200);
+
     for(int i = 0; i < workSched->week_meta->rowCount(); ++i)
     {
         weekList << workSched->week_meta->data(workSched->week_meta->index(i,1,QModelIndex())).toString();
     }
     ui->comboBox_copyto->addItems(weekList);
-    ui->frame_copy->setVisible(true);
-    ui->frame_save->setVisible(false);
-    ui->frame_delete->setVisible(false);
-
+    ui->lineEdit_saveas->setEnabled(false);
     editMode = 0;
 }
 
@@ -46,23 +43,22 @@ Dialog_week_copy::~Dialog_week_copy()
     delete ui;
 }
 
-void Dialog_week_copy::processWeek()
+void Dialog_week_copy::editWeek()
 {
-    QString sourceWeek = ui->lineEdit_currweek->text();
-
     if(editMode == COPY)
     {
-        QString targetWeek = ui->comboBox_copyto->currentText();
+        QString wFrom = ui->lineEdit_currweek->text();
+        QString wTo = ui->comboBox_copyto->currentText();
 
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this,
                                       "Copy Week",
-                                      "Copy Week "+sourceWeek+" to Week "+targetWeek+"?",
+                                      "Copy Week "+wFrom+" to Week "+wTo+"?",
                                       QMessageBox::Yes|QMessageBox::No
                                       );
         if (reply == QMessageBox::Yes)
         {
-            workSched->copyWeek(sourceWeek,targetWeek);
+            workSched->set_copyWeeks(wFrom,wTo);
             accept();
         }
     }
@@ -72,17 +68,7 @@ void Dialog_week_copy::processWeek()
     }
     if(editMode == CLEAR)
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this,
-                                      "Clear Week",
-                                      "Clear all Workouts of Week "+sourceWeek+"?",
-                                      QMessageBox::Yes|QMessageBox::No
-                                      );
-        if (reply == QMessageBox::Yes)
-        {
-            workSched->deleteWeek(sourceWeek);
-            accept();
-        }
+
     }
 }
 
@@ -92,31 +78,31 @@ void Dialog_week_copy::on_pushButton_cancel_clicked()
     reject();
 }
 
+
 void Dialog_week_copy::on_pushButton_ok_clicked()
 {
-    this->processWeek();
+    this->editWeek();
 }
+
+
 
 void Dialog_week_copy::on_radioButton_copy_clicked()
 {
     editMode = COPY;
-    ui->frame_copy->setVisible(true);
-    ui->frame_save->setVisible(false);
-    ui->frame_delete->setVisible(false);
+    ui->lineEdit_saveas->setEnabled(false);
+    ui->comboBox_copyto->setEnabled(true);
 }
 
 void Dialog_week_copy::on_radioButton_save_clicked()
 {
     editMode = SAVE;
-    ui->frame_copy->setVisible(false);
-    ui->frame_save->setVisible(true);
-    ui->frame_delete->setVisible(false);
+    ui->lineEdit_saveas->setEnabled(true);
+    ui->comboBox_copyto->setEnabled(false);
 }
 
 void Dialog_week_copy::on_radioButton_clear_clicked()
 {
     editMode = CLEAR;
-    ui->frame_copy->setVisible(false);
-    ui->frame_save->setVisible(false);
-    ui->frame_delete->setVisible(true);
+    ui->lineEdit_saveas->setEnabled(false);
+    ui->comboBox_copyto->setEnabled(false);
 }

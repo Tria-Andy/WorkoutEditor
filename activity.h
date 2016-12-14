@@ -35,12 +35,12 @@ private:
     QString v_date,curr_sport;
     QStringList ride_items;
     QVector<double> calc_speed,calc_cadence,p_swim_time,new_dist;
-    QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg;
+    QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg,p_swimlaps,vect_lapstart;
     double swim_track,avg_dist,avg_watt,avg_cad,avg_laptime,swim_cv,swim_sri,polishFactor,hf_threshold,hf_max;
     int dist_factor,avg_counter,avg_pace,pace_cv,zone_count,move_time,swim_pace,hf_avg;
     bool changeRowCount;
 
-    //Functions
+
     void set_time_in_zones(bool);
     void adjust_intervalls();
     void set_edit_samp_model(int);
@@ -52,6 +52,8 @@ private:
     int get_swim_laps(int,bool);
     int check_is_intervall(int);
     int get_zone_values(double,int,bool);
+
+    bool check_speed(int);
 
 public:
     explicit Activity();
@@ -85,6 +87,7 @@ public:
 
     //Averages
     void reset_avg();
+    void set_dist_factor();
     void set_avg_values(int,int,bool);
     int get_dist_factor() {return dist_factor;}
     int get_avg_laptime() {return round(avg_laptime/avg_counter);}
@@ -95,15 +98,34 @@ public:
 
     //Swim Calculations
     void set_swim_data();
-    int get_move_time() {return move_time;}
+    int get_swim_cv_pace(double);
+    QString get_swim_pace_time(int);
+
+    void set_swim_pace();
     int get_swim_pace() {return swim_pace;}
+    void set_move_time();
+    int get_move_time() {return move_time;}
+    void set_swim_sri();
     double get_swim_sri() { return swim_sri;}
     void set_hf_zone_avg(double,double,int);
     double get_hf_zone_avg();
+    void set_hf_avg();
     int get_hf_avg() {return hf_avg;}
+    double get_swim_cv() {return swim_cv;}
     void set_hf_time_in_zone();
     void set_swim_track(double trackLen) {swim_track = trackLen;}
     double get_swim_track() {return swim_track;}   
+    QVector<double> * get_new_dist()
+    {
+        QVector<double> *dist = &new_dist;
+        return dist;
+    }
+    QVector<double> * get_new_speed()
+    {
+        QVector<double> *speed = &calc_speed;
+        return speed;
+    }
+
 };
 
 #endif // ACTIVITY_H

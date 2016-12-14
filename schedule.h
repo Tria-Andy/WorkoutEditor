@@ -42,8 +42,13 @@ public:
     void save_week_files();
     void changeYear();
     QString get_weekPhase(QDate);
-    void copyWeek(QString,QString);
-    void deleteWeek(QString);
+    void copyWeek();
+
+    void set_copyWeeks(QString p_from,QString p_to)
+    {
+        copyFrom = p_from;
+        copyTo = p_to;
+    }
 
 //Workout
     //Setter
@@ -71,7 +76,7 @@ public:
 private:
     logger *logFile;
     QStringList workoutTags,metaTags,contentTags;
-    QString schedulePath;
+    QString schedulePath,copyFrom, copyTo;
     QDate firstdayofweek;
 
     //Workout Var

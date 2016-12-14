@@ -80,10 +80,6 @@ void Dialog_settings::writeChangedValues()
     QString selection = ui->comboBox_selInfo->currentText();
     QStringList updateList;
     QString sport = ui->comboBox_thresSport->currentText();
-<<<<<<< HEAD
-=======
-
->>>>>>> refs/remotes/origin/develop
     for(int i = 0; i < ui->listWidget_selection->count();++i)
     {
         updateList << ui->listWidget_selection->item(i)->data(Qt::DisplayRole).toString();
@@ -263,10 +259,7 @@ void Dialog_settings::set_hfmodel()
 void Dialog_settings::set_thresholdModel(QString sport)
 {
     QStringList levels = settings::get_levelList();
-<<<<<<< HEAD
 
-=======
->>>>>>> refs/remotes/origin/develop
     if(level_model->rowCount() > 0) level_model->clear();
     level_model->setHorizontalHeaderLabels(model_header);
     ui->tableView_level->setModel(level_model);
@@ -484,10 +477,9 @@ void Dialog_settings::on_pushButton_color_clicked()
 void Dialog_settings::on_dateEdit_saisonEnd_dateChanged(const QDate &enddate)
 {
     QDate lastweek;
-    lastweek.setDate(ui->dateEdit_saisonStart->date().year(),12,31);
-    int weeksStartYear = (lastweek.weekNumber() - (ui->dateEdit_saisonStart->date().weekNumber()-1));
+    lastweek.setDate(enddate.year(),12,31);
+    int weeksStartYear = (lastweek.weekNumber() - (ui->dateEdit_saisonStart->date().weekNumber()-2));
     ui->lineEdit_saisonWeeks->setText(QString::number(weeksStartYear + enddate.weekNumber()));
-    this->enableSavebutton();
 }
 
 void Dialog_settings::on_pushButton_schedulePath_clicked()

@@ -32,54 +32,6 @@ class del_level : public QItemDelegate
 public:
     explicit del_level(QObject *parent = 0) : QItemDelegate(parent) {}
 
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
-    {
-        Q_UNUSED(option)
-
-        if(index.column() == 1)
-        {
-            QFont eFont;
-            eFont.setPixelSize(12);
-
-            QSpinBox *editor = new QSpinBox(parent);
-            editor->setFont(eFont);
-            editor->setFrame(false);
-            editor->setMinimum(0);
-            editor->setMaximum(200);
-
-            return editor;
-        }
-        return 0;
-    }
-
-    void setEditorData(QWidget *editor, const QModelIndex &index) const
-    {
-        int value = index.model()->data(index, Qt::EditRole).toInt();
-        QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-        spinBox->setValue(value);
-    }
-
-    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
-    {
-        QModelIndex max_index;
-        QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-        spinBox->interpretText();
-        int value = spinBox->value();
-
-        if(index.row() != 0)
-        {
-            max_index = model->index(index.row()-1,3,QModelIndex());
-            model->setData(max_index,value,Qt::EditRole);
-        }
-        model->setData(index, value, Qt::EditRole);
-    }
-
-    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
-    {
-        Q_UNUSED(index)
-        editor->setGeometry(option.rect);
-    }
-
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();

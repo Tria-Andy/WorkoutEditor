@@ -159,7 +159,7 @@ void schedule::read_week_values(QDomDocument weekMeta, QDomDocument weekContent)
     {
         QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
         QString weekid;
-        QString noPhase = settings::get_gcInfo("emptyPhase");
+        QString noPhase = settings::get_emptyPhase();
         int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
 
         week_meta->setRowCount(saisonWeeks);
@@ -320,7 +320,7 @@ void schedule::read_workout_values(QDomDocument workouts)
     workout_schedule->sort(2);
 }
 
-void schedule::copyWeek(QString copyFrom,QString copyTo)
+void schedule::copyWeek()
 {
     QModelIndex index;
     QList<QStandardItem*> fromList,toList;
@@ -378,21 +378,10 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
     }
 }
 
-void schedule::deleteWeek(QString deleteWeek)
-{
-    QList<QStandardItem*> deleteList;
-    deleteList = workout_schedule->findItems(deleteWeek,Qt::MatchExactly,0);
-
-    for(int i = 0; i < deleteList.count(); ++i)
-    {
-        this->delete_workout(workout_schedule->indexFromItem(deleteList.at(i)));
-    }
-}
-
 
 QString schedule::get_weekPhase(QDate currDate)
 {
-    QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.addDays(1 - currDate.dayOfWeek()).year());
+    QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.year());
     QList<QStandardItem*> metaPhase = week_meta->findItems(weekID,Qt::MatchExactly,1);
     QModelIndex index;
     if(!metaPhase.isEmpty())

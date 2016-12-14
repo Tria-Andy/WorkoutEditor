@@ -873,12 +873,12 @@
   <tabstop>lineEdit_yob</tabstop>
   <tabstop>lineEdit_activity</tabstop>
   <tabstop>lineEdit_schedule</tabstop>
-  <tabstop>pushButton_schedulePath</tabstop>
   <tabstop>lineEdit_standard</tabstop>
-  <tabstop>pushButton_workoutsPath</tabstop>
-  <tabstop>lineEdit_configfile</tabstop>
   <tabstop>pushButton_save</tabstop>
   <tabstop>pushButton_cancel</tabstop>
+  <tabstop>lineEdit_addedit</tabstop>
+  <tabstop>pushButton_color</tabstop>
+  <tabstop>pushButton_add</tabstop>
   <tabstop>pushButton_edit</tabstop>
   <tabstop>comboBox_selInfo</tabstop>
   <tabstop>pushButton_down</tabstop>
@@ -899,9 +899,6 @@
   <tabstop>dateEdit_saisonEnd</tabstop>
   <tabstop>lineEdit_thresPace</tabstop>
   <tabstop>lineEdit_startWeek</tabstop>
-  <tabstop>pushButton_color</tabstop>
-  <tabstop>pushButton_add</tabstop>
-  <tabstop>lineEdit_addedit</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

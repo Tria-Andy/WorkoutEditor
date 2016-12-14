@@ -46,7 +46,7 @@ public:
         indexData = index.data().toString();
         painter->setPen(Qt::black);
 
-        if(lapName == settings::get_gcInfo("breakName"))
+        if(lapName == settings::get_breakName())
         {
             painter->fillRect(option.rect,QBrush(breakColor));
         }

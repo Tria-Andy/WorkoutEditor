@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
     selectedDate = QDate::currentDate();
     firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
     weeknumber = QString::number(selectedDate.weekNumber()) +"_"+QString::number(selectedDate.year());
-    weekRange = settings::get_generalValue("weekRange");
+    weekRange = settings::get_weekRange();
     weekpos = 0;
     weekDays = 7;
     weekCounter = 0;
@@ -436,7 +436,7 @@ void MainWindow::workout_calendar()
                     }
                     else
                     {
-                        phase_value = settings::get_gcInfo("emptyPhase");
+                        phase_value = settings::get_emptyPhase();
                     }
                     calendar_model->setData(cal_index,weekValue + delimiter + phase_value);
                 }
@@ -467,7 +467,7 @@ void MainWindow::workout_calendar()
           {
             ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
             showAll = true;
-            weekoffset = settings::get_generalValue("weekOffSet");
+            weekoffset = settings::get_weekOffSet();
           }
           else
           {
@@ -677,6 +677,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
 
                 if(dialog_code == QDialog::Accepted)
                 {
+                    workSchedule->copyWeek();
                     this->workout_calendar();
                     //weekCounter = 0;
                     this->set_calender();
@@ -687,7 +688,7 @@ void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
 
             if(dialog_code == QDialog::Rejected)
             {
-                //weekCounter = 0;
+                weekCounter = 0;
                 this->set_calender();
             }
         }
@@ -743,7 +744,7 @@ QString MainWindow::get_weekRange()
     {
         if(ui->comboBox_phasefilter->currentIndex() == 0)
         {
-            display_weeks = QString::number(weekpos+1) + " - " + QString::number(weekpos + settings::get_generalValue("weekOffSet"));
+            display_weeks = QString::number(weekpos+1) + " - " + QString::number(weekpos + settings::get_weekOffSet());
         }
         else
         {
@@ -817,8 +818,8 @@ void MainWindow::select_activity_file()
     QMessageBox::StandardButton reply;
     QString filename = QFileDialog::getOpenFileName(
                 this,
-                tr("Select GC JSON File"),
-                settings::get_gcInfo("gcpath"),
+                tr("Select File"),
+                "C://",
                 "JSON Files (*.json)"
                 );
 
@@ -994,6 +995,7 @@ void MainWindow::set_activty_intervalls()
     {
         ui->tableView_int_times->setModel(curr_activity->swim_xdata);
         ui->tableView_int_times->setItemDelegate(&swimlap_del);
+        //ui->tableView_int_times->hideColumn(1);
         ui->tableView_int_times->hideColumn(5);
         ui->tableView_int_times->hideColumn(6);
         ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -1010,7 +1012,7 @@ void MainWindow::set_activty_intervalls()
         ui->tableView_hfzone->setItemDelegate(&level_del);
         ui->tableView_hfzone->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-        ui->lineEdit_swimcv->setText(settings::set_time(settings::get_thresValue("swimpace")));
+        ui->lineEdit_swimcv->setText(curr_activity->get_swim_pace_time(curr_activity->get_swim_cv_pace(curr_activity->get_swim_cv())));
         ui->lineEdit_hf_threshold->setText(QString::number(settings::get_thresValue("hfthres")));
 
         ui->lineEdit_laplen->setText(QString::number(curr_activity->get_swim_track()));
@@ -1024,7 +1026,6 @@ void MainWindow::set_activty_intervalls()
         ui->tableView_int_times->setEditTriggers(QAbstractItemView::NoEditTriggers);
         //ui->tableView_int_times->setItemDelegate(&time_del);
         ui->tableView_int_times->hideColumn(4);
-        ui->tableView_int_times->hideColumn(5);
         ui->tableView_int_times->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_int_times->verticalHeader()->setVisible(false);
     }
@@ -1301,7 +1302,7 @@ void MainWindow::on_pushButton_week_plus_clicked()
     else
     {
         ++weekpos;
-        if(weekpos + settings::get_generalValue("weekOffSet") == saisonWeeks)
+        if(weekpos + 12 == saisonWeeks)
         {
             ui->pushButton_fourplus->setEnabled(false);
             ui->pushButton_week_plus->setEnabled(false);
@@ -1327,11 +1328,10 @@ void MainWindow::on_pushButton_fourplus_clicked()
     }
     else
     {
-        int offSet = settings::get_generalValue("weekOffSet");
         weekpos = weekpos+4;
-        if(weekpos + offSet >= saisonWeeks)
+        if(weekpos + 12 >= saisonWeeks)
         {
-            weekpos = saisonWeeks-offSet;
+            weekpos = saisonWeeks-12;
             ui->pushButton_fourplus->setEnabled(false);
             ui->pushButton_week_plus->setEnabled(false);
             this->workout_calendar();

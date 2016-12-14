@@ -50,7 +50,7 @@ private:
     schedule *workSched;
     QStringList weekList;
     int editMode;
-    void processWeek();
+    void editWeek();
 };
 
 #endif // DIALOG_WEEK_COPY_H
