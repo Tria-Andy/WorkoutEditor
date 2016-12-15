@@ -68,7 +68,7 @@
        <widget class="QComboBox" name="comboBox_yValue">
         <property name="maximumSize">
          <size>
-          <width>150</width>
+          <width>100</width>
           <height>16777215</height>
          </size>
         </property>

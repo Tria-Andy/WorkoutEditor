@@ -41,24 +41,22 @@ public:
 private slots:
     void on_pushButton_close_clicked();
     void on_pushButton_edit_clicked();
-
     void on_comboBox_yValue_currentIndexChanged(int index);
 
 private:
     Ui::week_popup *ui;
-    QStringList week_info;
+    QStringList week_info,barSelection;
     QStandardItemModel *plotmodel;
     schedule *workSched;
     QDate firstDay;
-    bool filledWeek,isLoad;
+    bool isLoad;
     QList<QDateTime> weekDates;
     QVector<double> xStress,xBar,xWorks,maxValues;
-    QVector<double> yStress,yDura,yDist,yWorks,yValues;
+    QVector<double> yStress,yDura,yDist,yWorks,yWorkCount,yValues;
     int dayCount;
     void set_plotModel();
     void set_graph();
     void set_weekPlot(int);
-    void freeMem();
 };
 
 #endif // WEEK_POPUP_H
