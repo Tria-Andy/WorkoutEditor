@@ -77,7 +77,6 @@ void week_popup::set_plotModel()
 
         plotmodel = new QStandardItemModel(list.count(),4);
 
-
         double stress,dura,dist;
 
         for(int i = 0; i < list.count(); ++i)
@@ -106,7 +105,6 @@ void week_popup::set_plotModel()
         }
 
         workoutDate.setTimeSpec(Qt::UTC);
-        int workCounter = 0;
 
         for(int i = 0,day = 0; i < plotmodel->rowCount(); ++i)
         {
@@ -115,26 +113,20 @@ void week_popup::set_plotModel()
             dura = plotmodel->data(plotmodel->index(i,2,QModelIndex())).toDouble() / 60;
             dist = plotmodel->data(plotmodel->index(i,3,QModelIndex())).toDouble();
 
-            if(workoutDate == weekDates.at(day))
+            for( ; day < weekDates.count(); ++day)
             {
-                yStress[day] = yStress[day] + stress;
-                yDura[day] = yDura[day] + settings::set_doubleValue(dura,false);
-                yDist[day] = yDist[day] + dist;
-                yWorkCount[day] = ++workCounter;
+                if(workoutDate == weekDates.at(day))
+                {
+                    yStress[day] = yStress[day] + stress;
+                    yDura[day] = yDura[day] + settings::set_doubleValue(dura,false);
+                    yDist[day] = yDist[day] + dist;
+                    yWorkCount[day] = yWorkCount[day]+1;
+                }
+                if(maxValues[0] < yStress[day]) maxValues[0] = yStress[day];
+                if(maxValues[1] < yDura[day]) maxValues[1] = yDura[day];
+                if(maxValues[2] < yDist[day]) maxValues[2] = yDist[day];
             }
-            else
-            {
-                ++day;
-                workCounter = 0;
-                yStress[day] = stress;
-                yDura[day] = settings::set_doubleValue(dura,false);
-                yDist[day] = dist;
-                yWorkCount[day] = ++workCounter;
-
-            }
-            if(maxValues[0] < yStress[day]) maxValues[0] = yStress[day];
-            if(maxValues[1] < yDura[day]) maxValues[1] = yDura[day];
-            if(maxValues[2] < yDist[day]) maxValues[2] = yDist[day];
+            day = 0;
         }
 
         delete plotmodel;
