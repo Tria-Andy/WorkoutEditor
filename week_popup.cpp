@@ -28,10 +28,9 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
     dayCount = 7;
     week_info << weekinfo.split("#");
     workSched = p_sched;
-    filledWeek = true;
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    ui->comboBox_yValue->addItem("Duration");
-    ui->comboBox_yValue->addItem("Distance");
+    barSelection << "Duration" << "Distance";
+    ui->comboBox_yValue->addItems(barSelection);
     xStress.resize(dayCount);
     yStress.resize(dayCount);
     xBar.resize(dayCount);
@@ -39,6 +38,7 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
     yDist.resize(dayCount);
     xWorks.resize(dayCount);
     yWorks.resize(dayCount);
+    yWorkCount.resize(dayCount);
     yValues.resize(dayCount);
     maxValues.resize(3);
     maxValues.fill(0);
@@ -52,35 +52,32 @@ week_popup::~week_popup()
     delete ui;
 }
 
-void week_popup::freeMem()
-{
-
-}
-
 void week_popup::set_plotModel()
 {
     QModelIndex index;
     QDate tempDate;
     QList<QStandardItem*> list = workSched->workout_schedule->findItems(week_info.at(0),Qt::MatchExactly,0);
-    index = workSched->workout_schedule->indexFromItem(list.at(0));
-    QDateTime weekStart,workoutDate;
-    QTime wTime;
-    wTime.fromString("00:00:00","hh:mm:ss");
-    tempDate = QDate::fromString(workSched->workout_schedule->item(index.row(),1)->text(),"dd.MM.yyyy");
-    weekStart.setDate(tempDate.addDays(1 - tempDate.dayOfWeek()));
-    weekStart.setTime(wTime);
-    weekStart.setTimeSpec(Qt::UTC);
-    firstDay = weekStart.date();
-
-    for(int i = 0; i < 7; ++i)
-    {
-        weekDates.insert(i,weekStart.addDays(i));
-    }
-
-    plotmodel = new QStandardItemModel(list.count(),4);
 
     if(!list.isEmpty())
     {
+        index = workSched->workout_schedule->indexFromItem(list.at(0));
+        QDateTime weekStart,workoutDate;
+        QTime wTime;
+        wTime.fromString("00:00:00","hh:mm:ss");
+        tempDate = QDate::fromString(workSched->workout_schedule->item(index.row(),1)->text(),"dd.MM.yyyy");
+        weekStart.setDate(tempDate.addDays(1 - tempDate.dayOfWeek()));
+        weekStart.setTime(wTime);
+        weekStart.setTimeSpec(Qt::UTC);
+        firstDay = weekStart.date();
+
+        for(int i = 0; i < 7; ++i)
+        {
+            weekDates.insert(i,weekStart.addDays(i));
+        }
+
+        plotmodel = new QStandardItemModel(list.count(),4);
+
+
         double stress,dura,dist;
 
         for(int i = 0; i < list.count(); ++i)
@@ -105,8 +102,11 @@ void week_popup::set_plotModel()
             dateValue = weekDates.at(i).toTime_t();
             xStress[i] = dateValue;
             xBar[i] = dateValue;
+            xWorks[i] = dateValue;
         }
+
         workoutDate.setTimeSpec(Qt::UTC);
+        int workCounter = 0;
 
         for(int i = 0,day = 0; i < plotmodel->rowCount(); ++i)
         {
@@ -120,13 +120,17 @@ void week_popup::set_plotModel()
                 yStress[day] = yStress[day] + stress;
                 yDura[day] = yDura[day] + settings::set_doubleValue(dura,false);
                 yDist[day] = yDist[day] + dist;
+                yWorkCount[day] = ++workCounter;
             }
             else
             {
                 ++day;
+                workCounter = 0;
                 yStress[day] = stress;
                 yDura[day] = settings::set_doubleValue(dura,false);
                 yDist[day] = dist;
+                yWorkCount[day] = ++workCounter;
+
             }
             if(maxValues[0] < yStress[day]) maxValues[0] = yStress[day];
             if(maxValues[1] < yDura[day]) maxValues[1] = yDura[day];
@@ -134,12 +138,20 @@ void week_popup::set_plotModel()
         }
 
         delete plotmodel;
+
+        for(int i = 0; i < yWorkCount.count(); ++i)
+        {
+            yWorks[i] = yWorkCount[i]*10;
+        }
+
+        this->set_graph();
+        this->set_weekPlot(0);
     }
     else
     {
         ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(list.count()));
+        this->set_graph();
     }
-    this->set_graph();
 }
 
 void week_popup::set_graph()
@@ -148,59 +160,68 @@ void week_popup::set_graph()
     ui->widget_plot->xAxis->setLabel("Day of Week");
     ui->widget_plot->xAxis2->setVisible(true);
     ui->widget_plot->xAxis2->setTickLabels(false);
-    ui->widget_plot->xAxis2->setLabel("Workouts");
     ui->widget_plot->yAxis2->setVisible(true);
-    this->set_weekPlot(0);
+    ui->widget_plot->addLayer("abovemain", ui->widget_plot->layer("main"), QCustomPlot::limAbove);
+    ui->widget_plot->addLayer("belowmain", ui->widget_plot->layer("main"), QCustomPlot::limBelow);
 }
 
 void week_popup::set_weekPlot(int yValue)
 {
     ui->widget_plot->clearPlottables();
     ui->widget_plot->clearItems();
+    ui->widget_plot->legend->setVisible(true);
+    ui->widget_plot->axisRect()->insetLayout()->setInsetAlignment(0,Qt::AlignLeft | Qt::AlignTop);
+
     QCPRange xRange(QCPAxisTickerDateTime::dateTimeToKey(firstDay.addDays(-1)),QCPAxisTickerDateTime::dateTimeToKey(firstDay.addDays(dayCount)));
-
-    QCPGraph *stressLine = ui->widget_plot->addGraph();
-    QCPGraph *workLine = ui->widget_plot->addGraph();
-
     QFont lineFont,barFont;
     lineFont.setPointSize(10);
     barFont.setPointSize(10);
 
+    QCPGraph *stressLine = ui->widget_plot->addGraph();
+    stressLine->setName("StressScore");
     stressLine->setLineStyle(QCPGraph::lsLine);
-    stressLine->setAntialiased(true);
-    stressLine->setPen(QPen(QColor(255,0,0),2));
-    stressLine->setBrush(QBrush(QColor(255,0,0,70)));
     stressLine->setData(xStress,yStress);
+    stressLine->setAntialiased(true);
+    stressLine->setBrush(QBrush(QColor(255,0,0,50)));
+    stressLine->setPen(QPen(QColor(255,0,0),2));
 
-    ui->widget_plot->yAxis->setRange(0,maxValues[0]+10);
+    QCPBars *workbars = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis);
+    workbars->setName("Workouts");
+    workbars->setWidth(dayCount*3000);
+    workbars->setData(xWorks,yWorks);
+    workbars->setAntialiased(true);
+    workbars->setBrush(QBrush(QColor(255,255,100,80)));
+    workbars->setPen(QPen(QColor(225,225,100)));
+
+    QCPBars *bars = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis2);
+    bars->setWidth(dayCount*6000);
+    bars->setAntialiased(true);
+    bars->setBrush(QBrush(QColor(0,85,255,70)));
+    bars->setPen(QPen(Qt::darkBlue));
+
+    stressLine->setLayer("abovemain");
+    workbars->setLayer("abovemain");
+    bars->setLayer("belowmain");
+    ui->widget_plot->xAxis->grid()->setLayer("belowmain");
+    ui->widget_plot->yAxis->grid()->setLayer("belowmain");
+
+    ui->widget_plot->yAxis->setRange(0,maxValues[0]+20);
 
     if(yValue == DURATION)
     {
         qCopy(yDura.begin(),yDura.end(),yValues.begin());
-
-        QCPBars *bars = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis2);
-        bars->setWidth(dayCount*6000);
+        bars->setName(barSelection.at(0));
         bars->setData(xBar,yValues);
-        bars->setBrush(QBrush(QColor(0,85,255,80)));
-        bars->setPen(QPen(Qt::darkBlue));
-
-
         ui->widget_plot->yAxis2->setRange(0,maxValues[1]+0.5);
-        ui->widget_plot->yAxis2->setLabel("Duration");
+        ui->widget_plot->yAxis2->setLabel(barSelection.at(0));
     }
     if(yValue == DISTANCE)
     {
         qCopy(yDist.begin(),yDist.end(),yValues.begin());
-
-        QCPBars *barDist = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis2);
-        barDist->setWidth(dayCount*6000);
-        barDist->setData(xBar,yValues);
-        barDist->setBrush(QBrush(QColor(0,85,255,80)));
-        barDist->setPen(QPen(Qt::darkBlue));
-
+        bars->setName(barSelection.at(1));
+        bars->setData(xBar,yValues);
         ui->widget_plot->yAxis2->setRange(0,maxValues[2]+5);
-        ui->widget_plot->yAxis2->setLabel("Distance");
-
+        ui->widget_plot->yAxis2->setLabel(barSelection.at(1));
     }
 
     for(int i = 0; i < dayCount; ++i)
@@ -210,7 +231,6 @@ void week_popup::set_weekPlot(int yValue)
         itemTracer->setGraphKey(xStress[i]);
         itemTracer->setStyle(QCPItemTracer::tsCircle);
         itemTracer->setBrush(Qt::red);
-
 
             QCPItemText *lineText = new QCPItemText(ui->widget_plot);
             lineText->position->setType(QCPItemPosition::ptPlotCoords);
@@ -228,6 +248,13 @@ void week_popup::set_weekPlot(int yValue)
             barText->setText(QString::number(yValues[i]));
             barText->setFont(barFont);
             barText->setColor(Qt::white);
+
+            QCPItemText *workText = new QCPItemText(ui->widget_plot);
+            workText->position->setType(QCPItemPosition::ptPlotCoords);
+            workText->position->setCoords(xWorks[i],yWorks[i]/2);
+            workText->setText(QString::number(yWorkCount[i]));
+            workText->setFont(barFont);
+            workText->setColor(Qt::red);
     }
 
 
@@ -246,14 +273,11 @@ void week_popup::set_weekPlot(int yValue)
 
 void week_popup::on_pushButton_close_clicked()
 {
-
-    this->freeMem();
     reject();
 }
 
 void week_popup::on_pushButton_edit_clicked()
 {
-    this->freeMem();
     accept();
 }
 
