@@ -466,31 +466,3 @@ void schedule::delete_workout(QModelIndex index)
 {
     workout_schedule->removeRow(index.row(),QModelIndex());
 }
-
-QLineSeries* schedule::get_qLineSeries(bool p_Visible)
-{
-    QPen linePen;
-    linePen.setColor(QColor(255,0,0,120));
-    linePen.setWidth(2);
-
-    QLineSeries *line = new QLineSeries();
-    line->setPointLabelsVisible(p_Visible);
-    line->setPointLabelsClipping(false);
-    line->setPointLabelsFormat("@yPoint");
-    line->setPointLabelsColor(QColor(Qt::darkRed));
-    line->setPointsVisible(p_Visible);
-    line->setPen(linePen);
-
-    return line;
-}
-
-QValueAxis* schedule::get_qValueAxis(QString title,bool p_visible,double max,int tickcount)
-{
-    QValueAxis *axis = new QValueAxis;
-    axis->setTitleText(title);
-    axis->setTitleVisible(p_visible);
-    axis->setRange(0,max);
-    axis->setTickCount(tickcount);
-
-    return axis;
-}

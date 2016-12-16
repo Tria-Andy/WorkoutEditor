@@ -24,7 +24,6 @@
 #include <QAbstractItemModel>
 #include <QTextBrowser>
 #include <QtXml>
-#include <QtCharts>
 #include "calendar_delegate.h"
 #include "week_delegate.h"
 #include "summery_delegate.h"
@@ -81,13 +80,8 @@ private:
     QStandardItemModel *calendar_model,*sum_model;
     QStringList modus_list,cal_header,work_list,sum_name,year_header,schedMode,sum_header;
 
-    //Intercall Chart
-    QChart *intChart;
-    QChartView *intChartview;
-    QLineSeries *avgLine,*speedLine, *polishLine;
-    QValueAxis *ySpeed;
-    QCategoryAxis *axisX;
-    QVector<double> speedValues;
+    //Intervall Chart
+    QVector<double> xValues,sampValues,speedValues;
     void set_intChartValues(int,double);
     void set_polishValues(int,double);
 

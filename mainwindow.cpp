@@ -883,42 +883,9 @@ void MainWindow::loadfile(const QString &filename)
         this->set_menuItems(true,false);
         this->set_activty_infos();
 
-        intChart = new QChart();
-        intChartview = new QChartView(intChart);
-        intChartview->setRenderHint(QPainter::Antialiasing);
-        ui->verticalLayout_interpol->addWidget(intChartview);
-
-        avgLine = workSchedule->get_qLineSeries(false);
-        avgLine->setColor(QColor(Qt::yellow));
-        avgLine->setName("Avg Speed");
-        speedLine = workSchedule->get_qLineSeries(false);
-        speedLine->setColor(QColor(Qt::green));
-        speedLine->setName("Speed");
-
-
-        axisX = new QCategoryAxis();
-        axisX->setVisible(false);
-
-        intChart->addSeries(avgLine);
-        intChart->addSeries(speedLine);
-
-        ySpeed = workSchedule->get_qValueAxis("Speed",true,20,5);
-        intChart->addAxis(ySpeed,Qt::AlignLeft);
-        avgLine->attachAxis(ySpeed);
-        speedLine->attachAxis(ySpeed);
-
-        intChart->setAxisX(axisX,avgLine);
-        intChart->setAxisX(axisX,speedLine);
-
 
         if(curr_activity->get_sport() == settings::isRun || curr_activity->get_sport() == settings::isBike)
         {
-            polishLine = workSchedule->get_qLineSeries(false);
-            polishLine->setColor(QColor(Qt::red));
-            polishLine->setName("Polished Speed");
-            intChart->addSeries(polishLine);
-            polishLine->attachAxis(ySpeed);
-            intChart->setAxisX(axisX,polishLine);
             ui->horizontalSlider_polish->setEnabled(true);
             ui->horizontalSlider_factor->setEnabled(true);
             ui->horizontalSlider_factor->setVisible(true);

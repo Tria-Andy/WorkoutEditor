@@ -62,12 +62,6 @@ public:
     void edit_workout(QModelIndex);
     void delete_workout(QModelIndex);
 
-//Charts Objects
-    QValueAxis* get_qValueAxis(QString,bool,double,int);
-    QLineSeries* get_qLineSeries(bool);
-    QBarSeries* get_qBarSeries();
-    QBarSet* get_qBarSet();
-
 private:
     logger *logFile;
     QStringList workoutTags,metaTags,contentTags;
