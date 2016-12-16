@@ -21,7 +21,6 @@
 
 #include <QDialog>
 #include <QStandardItemModel>
-#include <QtCharts>
 #include "schedule.h"
 #include "settings.h"
 
@@ -41,28 +40,21 @@ public:
 
 private slots:
     void on_pushButton_close_clicked();
-
     void on_comboBox_select_currentIndexChanged(int index);
 
 private:
     Ui::year_popup *ui;
 
-    QStringList partInfo,phaseList,selectList;
+    QStringList partInfo,phaseList,selectList,weekList;
     QString phase;
-    int col,phaseindex,widthFactor,selectAxis,weekcount;
+    int col,phaseindex,widthFactor,heightFactor,weekcount;
+    bool isLoad;
     double max_stress;
     schedule *workSched;
-    QVector<double> y_stress,y_dura,y_dist,y_work,maxValues;
+    QVector<double> xWeeks,yStress,yDura,yDist,yWorks,yValues,maxValues;
 
-    QChart *phasechart;
-    QChartView *chartview;
-    QValueAxis *yStress,*yBars;
-    QBarCategoryAxis *axisX;
-    QLineSeries *stressLine;
-    QBarSet *selectBar;
-    QBarSeries *selectBars;
-
-    void fill_values();
+    void set_plotValues();
+    void set_graph();
     void set_plot(int);
 };
 
