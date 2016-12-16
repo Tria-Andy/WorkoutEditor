@@ -256,7 +256,6 @@ void week_popup::set_weekPlot(int yValue)
             workText->setColor(Qt::red);
     }
 
-
     QSharedPointer<QCPAxisTickerDateTime> dateTimeTicker(new QCPAxisTickerDateTime);
     dateTimeTicker->setDateTimeSpec(Qt::UTC);
     dateTimeTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
