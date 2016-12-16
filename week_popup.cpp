@@ -153,6 +153,13 @@ void week_popup::set_graph()
     ui->widget_plot->xAxis2->setVisible(true);
     ui->widget_plot->xAxis2->setTickLabels(false);
     ui->widget_plot->yAxis2->setVisible(true);
+    ui->widget_plot->legend->setVisible(true);
+
+    QCPLayoutGrid *subLayout = new QCPLayoutGrid;
+    ui->widget_plot->plotLayout()->addElement(1,0,subLayout);
+    subLayout->setMargins(QMargins(dayCount*10,0,dayCount*10,5));
+    subLayout->addElement(0,0,ui->widget_plot->legend);
+
     ui->widget_plot->addLayer("abovemain", ui->widget_plot->layer("main"), QCustomPlot::limAbove);
     ui->widget_plot->addLayer("belowmain", ui->widget_plot->layer("main"), QCustomPlot::limBelow);
 }
@@ -161,8 +168,8 @@ void week_popup::set_weekPlot(int yValue)
 {
     ui->widget_plot->clearPlottables();
     ui->widget_plot->clearItems();
-    ui->widget_plot->legend->setVisible(true);
-    ui->widget_plot->axisRect()->insetLayout()->setInsetAlignment(0,Qt::AlignLeft | Qt::AlignTop);
+    ui->widget_plot->legend->setFillOrder(QCPLegend::foColumnsFirst);
+    ui->widget_plot->plotLayout()->setRowStretchFactor(1,0.0001);
 
     QCPRange xRange(QCPAxisTickerDateTime::dateTimeToKey(firstDay.addDays(-1)),QCPAxisTickerDateTime::dateTimeToKey(firstDay.addDays(dayCount)));
     QFont lineFont,barFont;
