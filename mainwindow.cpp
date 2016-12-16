@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     settings::loadSettings();
     userSetup = true;
     saisonWeeks = settings::get_saisonInfo("weeks").toInt();
+    graphLoaded = false;
     workSchedule = new schedule();
     work_list << "Phase:" << "Week:" << "Date:" << "Time:" << "Sport:" << "Code:" << "Title:" << "Duration:" << "Distance:" << "Stress:";
     sum_name << "Workouts:" << "Duration:" << "Distance:" << "StressScore:";
@@ -780,6 +781,7 @@ void MainWindow::set_calender()
 
 void MainWindow::set_comboIntervall()
 {
+    graphLoaded = false;
     if(settings::get_act_isrecalc())
     {
         int rowCount = curr_activity->edit_int_model->rowCount();
@@ -810,6 +812,8 @@ void MainWindow::set_comboIntervall()
             ui->comboBox_intervals->addItem(curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(i,0,QModelIndex())).toString());
         }
     }
+    graphLoaded = true;
+    this->set_speedValues(0);
 }
 
 void MainWindow::select_activity_file()
@@ -1001,8 +1005,27 @@ void MainWindow::set_activty_intervalls()
     }
 }
 
+void MainWindow::set_polishValues(int lap,double factor)
+{
+    double avg = curr_activity->get_int_speed(lap,settings::get_act_isrecalc());
+
+    for(int i = 0; i < speedValues.count(); ++i)
+    {
+        if(lap == 0 && i < 5)
+        {
+            polishValues[i] = speedValues[i];
+        }
+        else
+        {
+            polishValues[i] = curr_activity->polish_SpeedValues(speedValues[i],avg,0.10-factor,true);
+        }
+    }
+    this->set_speedPlot(avg);
+}
+
 void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
 {
+    ui->horizontalSlider_polish->setValue(value);
     ui->label_factorValue->setText(QString::number(10-value) + "%");
     double factor = static_cast<double>(value)/100;
     this->set_polishValues(ui->comboBox_intervals->currentIndex(),factor);
@@ -1013,76 +1036,72 @@ void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
 void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
 {
     ui->horizontalSlider_factor->setValue(0);
-    if(settings::get_act_isload())
+
+    if(settings::get_act_isload() && graphLoaded)
     {
-        ui->lineEdit_lapTime->setText(settings::set_time(curr_activity->get_int_duration(index,settings::get_act_isrecalc())));
-        ui->lineEdit_lapPace->setText(settings::set_time(curr_activity->get_int_pace(index,settings::get_act_isrecalc())));
-        ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,settings::get_act_isrecalc())));
-        double avg = curr_activity->get_int_speed(index,settings::get_act_isrecalc());
-        this->set_intChartValues(index,avg);
-        if(curr_activity->get_sport() != settings::isSwim) this->set_polishValues(index,0.0);
+        this->set_speedValues(index);
     }
 }
 
-void MainWindow::set_polishValues(int lap,double factor)
+void MainWindow::set_speedValues(int index)
 {
-    double value;
-    double avg = curr_activity->get_int_speed(lap,settings::get_act_isrecalc());
-    if(polishLine->count() > 0)
-    {
-        polishLine->clear();
-    }
+    int lapLen;
+    ui->lineEdit_lapTime->setText(settings::set_time(curr_activity->get_int_duration(index,settings::get_act_isrecalc())));
+    ui->lineEdit_lapPace->setText(settings::set_time(curr_activity->get_int_pace(index,settings::get_act_isrecalc())));
+    ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,settings::get_act_isrecalc())));
+    double avg = curr_activity->get_int_speed(index,settings::get_act_isrecalc());
+    double current = 0;
 
-    for(int i = 0; i < speedValues.count(); ++i)
-    {
-        if(lap == 0 && i < 5)
-        {
-            value = speedValues[i];
-        }
-        else
-        {
-            //Ignored NaN, Inf, or -Inf value. Check speedValues fill!
-            value = curr_activity->polish_SpeedValues(speedValues[i],avg,0.10-factor,true);
-        }
-        polishLine->append(i,value);
-    }
-}
+    int start = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(index,1,QModelIndex())).toInt();
+    int stop = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(index,2,QModelIndex())).toInt();
+    speedMinMax.resize(2);
+    speedMinMax[0] = 40.0;
+    speedMinMax[1] = 0.0;
+    lapLen = stop-start;
 
-void MainWindow::set_intChartValues(int lapindex,double avgSpeed)
-{
-    QStandardItemModel *intmodel = curr_activity->edit_int_model;
-    QStandardItemModel *sampmodel = curr_activity->samp_model;
-    int start = intmodel->data(intmodel->index(lapindex,1,QModelIndex())).toInt();
-    int stop = intmodel->data(intmodel->index(lapindex,2,QModelIndex())).toInt();
-    double max = 0.0,min = 40.0,current;
-    if(speedValues.count() > 0)
-    {
-        speedValues.clear();
-        avgLine->clear();
-    }
-    speedValues.resize((stop-start)+1);
-
-    if(speedLine->count() > 0)
-    {
-        speedLine->clear();
-    }
+    speedValues.resize(lapLen+1);
+    polishValues.resize(lapLen+1);
+    xTicker.resize(lapLen+1);
 
     for(int i = start, pos=0; i <= stop; ++i,++pos)
     {
-        current = sampmodel->data(sampmodel->index(i,2,QModelIndex())).toDouble();
-        speedLine->append(pos,current);
-        avgLine->append(pos,avgSpeed);
+        current = curr_activity->sampSpeed[i];
+        xTicker[pos] = pos;
         speedValues[pos] = current;
-        //axisValues << QString::number(pos);
-        if(max < current) max = current;
-        if(min > current) min = current;
+        if(speedMinMax[0] > current) speedMinMax[0] = current;
+        if(speedMinMax[1] < current) speedMinMax[1] = current;
     }
 
-    axisX->setMin(0);
-    axisX->setMax(stop-start);
-    ySpeed->setMax(max);
-    ySpeed->setMin(min);
-    ySpeed->applyNiceNumbers();
+    if(curr_activity->get_sport() != settings::isSwim) this->set_polishValues(index,0.0);
+    this->set_speedPlot(avg);
+}
+
+void MainWindow::set_speedPlot(double avgSpeed)
+{
+    int minValue = 5;
+    ui->widget_plot->clearPlottables();
+    ui->widget_plot->clearItems();
+
+    QCPGraph *speedLine = ui->widget_plot->addGraph();
+    speedLine->setName("Speed");
+    speedLine->setLineStyle(QCPGraph::lsLine);
+    speedLine->setData(xTicker,speedValues);
+    speedLine->setPen(QPen(QColor(0,255,0),2));
+
+    QCPGraph *polishLine = ui->widget_plot->addGraph();
+    polishLine->setName("Polished Speed");
+    polishLine->setLineStyle(QCPGraph::lsLine);
+    polishLine->setData(xTicker,polishValues);
+    polishLine->setPen(QPen(QColor(255,0,0),2));
+
+    if(speedMinMax[0] == 0)
+    {
+        minValue = 0;
+    }
+
+    ui->widget_plot->yAxis->setRange(speedMinMax[0]-minValue,speedMinMax[1]+5);
+    ui->widget_plot->xAxis->setRange(0,speedValues.count());
+    ui->widget_plot->replot();
 }
 
 void MainWindow::write_hf_infos()
@@ -1478,7 +1497,6 @@ void MainWindow::on_actionReset_triggered()
     ui->actionSelect_File->setEnabled(true);
     ui->frame_polish->setVisible(false);
 
-    ui->verticalLayout_interpol->removeWidget(intChartview);
     ui->lineEdit_lapPace->setText("-");
     ui->lineEdit_lapTime->setText("-");
     ui->lineEdit_lapSpeed->setText("-");
@@ -1490,12 +1508,9 @@ void MainWindow::on_actionReset_triggered()
     ui->radioButton_time->setChecked(true);
     ui->checkBox_exact->setChecked(false);
 
-    delete ySpeed;
-    delete speedLine;
-    if(curr_activity->get_sport() == settings::isRun) delete polishLine;
-    delete avgLine;
-    delete axisX;
-    delete intChartview;
+    ui->widget_plot->clearPlottables();
+    ui->widget_plot->clearItems();
+    ui->widget_plot->replot();
 
     delete curr_activity->int_model;
     delete curr_activity->edit_int_model;

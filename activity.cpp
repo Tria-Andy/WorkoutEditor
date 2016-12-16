@@ -44,9 +44,14 @@ void Activity::prepareData()
     int sampCount = samp_model->rowCount();
     int intCount = int_model->rowCount();
     QModelIndex editIndex,intIndex;
-
+    sampSpeed.resize(sampCount);
     int_model->setData(int_model->index(intCount-1,2,QModelIndex()),sampCount-1);
     edit_int_model = new QStandardItemModel(intCount,6);
+
+    for(int i = 0; i < sampCount; ++i)
+    {
+        sampSpeed[i] = samp_model->data(samp_model->index(i,2,QModelIndex())).toDouble();
+    }
 
     for(int row = 0; row < intCount; ++row)
     {
@@ -688,7 +693,7 @@ double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double fact
 
 double Activity::interpolate_speed(int row,int sec,double limit)
 {
-    double curr_speed = samp_model->data(samp_model->index(sec,2,QModelIndex())).toDouble();
+    double curr_speed = sampSpeed[sec];
     double avg_speed = this->get_int_speed(row,settings::get_act_isrecalc());
 
     if(curr_speed == 0)

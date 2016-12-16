@@ -81,8 +81,9 @@ private:
     QStringList modus_list,cal_header,work_list,sum_name,year_header,schedMode,sum_header;
 
     //Intervall Chart
-    QVector<double> xValues,sampValues,speedValues;
-    void set_intChartValues(int,double);
+    QVector<double> xTicker,speedValues,polishValues,speedMinMax;
+    void set_speedValues(int);
+    void set_speedPlot(double);
     void set_polishValues(int,double);
 
     int fontSize,sel_count;
@@ -93,7 +94,7 @@ private:
     int weekRange,weekpos;
     int saisonWeeks,weekDays;
     unsigned int weekCounter;
-    bool userSetup,isWeekMode,safeFlag;
+    bool userSetup,isWeekMode,safeFlag,graphLoaded;
 
     void openPreferences();
     void set_summerInfo();
