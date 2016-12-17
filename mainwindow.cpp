@@ -91,6 +91,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->horizontalSlider_polish->setEnabled(false);
     ui->horizontalSlider_factor->setEnabled(false);
     ui->horizontalSlider_factor->setVisible(false);
+
+    QCPLayoutGrid *subLayout = new QCPLayoutGrid;
+    ui->widget_plot->plotLayout()->addElement(1,0,subLayout);
+    subLayout->setMargins(QMargins(400,0,400,5));
+    subLayout->addElement(0,0,ui->widget_plot->legend);
+
     this->set_menuItems(false,true);
 }
 
@@ -813,6 +819,7 @@ void MainWindow::set_comboIntervall()
         }
     }
     graphLoaded = true;
+
     this->set_speedValues(0);
 }
 
@@ -1029,8 +1036,10 @@ void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
     ui->label_factorValue->setText(QString::number(10-value) + "%");
     double factor = static_cast<double>(value)/100;
     this->set_polishValues(ui->comboBox_intervals->currentIndex(),factor);
-    ui->lineEdit_polMax->setText(QString::number(curr_activity->polish_SpeedValues(50.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),settings::get_act_isrecalc()),0.1-factor,false)));
-    ui->lineEdit_polMin->setText(QString::number(curr_activity->polish_SpeedValues(1.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),settings::get_act_isrecalc()),0.1-factor,false)));
+    rangeMinMax[0] = curr_activity->polish_SpeedValues(1.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),settings::get_act_isrecalc()),0.1-factor,false);
+    rangeMinMax[1] = curr_activity->polish_SpeedValues(50.0,curr_activity->get_int_speed(ui->comboBox_intervals->currentIndex(),settings::get_act_isrecalc()),0.1-factor,false);
+    ui->lineEdit_polMin->setText(QString::number(rangeMinMax[0]));
+    ui->lineEdit_polMax->setText(QString::number(rangeMinMax[1]));
 }
 
 void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
@@ -1055,6 +1064,7 @@ void MainWindow::set_speedValues(int index)
     int start = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(index,1,QModelIndex())).toInt();
     int stop = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(index,2,QModelIndex())).toInt();
     speedMinMax.resize(2);
+    rangeMinMax.resize(2);
     speedMinMax[0] = 40.0;
     speedMinMax[1] = 0.0;
     lapLen = stop-start;
@@ -1068,11 +1078,23 @@ void MainWindow::set_speedValues(int index)
         current = curr_activity->sampSpeed[i];
         xTicker[pos] = pos;
         speedValues[pos] = current;
-        if(speedMinMax[0] > current) speedMinMax[0] = current;
-        if(speedMinMax[1] < current) speedMinMax[1] = current;
+        if(speedMinMax[0] > current) rangeMinMax[0] = speedMinMax[0] = current;
+        if(speedMinMax[1] < current) rangeMinMax[1] = speedMinMax[1] = current;
     }
 
     if(curr_activity->get_sport() != settings::isSwim) this->set_polishValues(index,0.0);
+    this->set_speedgraph(avg);
+}
+
+void MainWindow::set_speedgraph(double avg)
+{
+    ui->widget_plot->yAxis->setLabel("Speed");
+    ui->widget_plot->xAxis->setLabel("Seconds");
+    ui->widget_plot->yAxis2->setVisible(true);
+    ui->widget_plot->xAxis2->setVisible(true);
+    ui->widget_plot->xAxis2->setTickLabels(false);
+    ui->widget_plot->legend->setVisible(true);
+
     this->set_speedPlot(avg);
 }
 
@@ -1081,6 +1103,8 @@ void MainWindow::set_speedPlot(double avgSpeed)
     int minValue = 5;
     ui->widget_plot->clearPlottables();
     ui->widget_plot->clearItems();
+    ui->widget_plot->legend->setFillOrder(QCPLegend::foColumnsFirst);
+    ui->widget_plot->plotLayout()->setRowStretchFactor(1,0.0001);
 
     QCPGraph *speedLine = ui->widget_plot->addGraph();
     speedLine->setName("Speed");
@@ -1088,18 +1112,41 @@ void MainWindow::set_speedPlot(double avgSpeed)
     speedLine->setData(xTicker,speedValues);
     speedLine->setPen(QPen(QColor(0,255,0),2));
 
-    QCPGraph *polishLine = ui->widget_plot->addGraph();
-    polishLine->setName("Polished Speed");
-    polishLine->setLineStyle(QCPGraph::lsLine);
-    polishLine->setData(xTicker,polishValues);
-    polishLine->setPen(QPen(QColor(255,0,0),2));
+    QCPItemLine *avgLine = new QCPItemLine(ui->widget_plot);
+    avgLine->start->setCoords(0,avgSpeed);
+    avgLine->end->setCoords(speedValues.count(),avgSpeed);
+    avgLine->setPen(QPen(QColor(0,0,255),2));
+
+    QCPGraph *avgLineP = ui->widget_plot->addGraph();
+    avgLineP->setName("Avg Speed");
+    avgLineP->setPen(QPen(QColor(0,0,255),2));
+
+    if(curr_activity->get_sport() != settings::isSwim)
+    {
+        QCPGraph *polishLine = ui->widget_plot->addGraph();
+        polishLine->setName("Polished Speed");
+        polishLine->setLineStyle(QCPGraph::lsLine);
+        polishLine->setData(xTicker,polishValues);
+        polishLine->setPen(QPen(QColor(255,0,0),2));
+
+        QCPGraph *polishRangeP = ui->widget_plot->addGraph();
+        polishRangeP->setName("Polish Range");
+        polishRangeP->setPen(QPen(QColor(225,225,0),2));
+
+        QCPItemRect *polishRange = new QCPItemRect(ui->widget_plot);
+        polishRange->topLeft->setCoords(0,rangeMinMax[1]);
+        polishRange->bottomRight->setCoords(speedValues.count(),rangeMinMax[0]);
+        polishRange->setPen(QPen(QColor(225,225,0),2));
+        polishRange->setBrush(QBrush(QColor(255,255,0,50)));
+    }
 
     if(speedMinMax[0] == 0)
     {
         minValue = 0;
     }
 
-    ui->widget_plot->yAxis->setRange(speedMinMax[0]-minValue,speedMinMax[1]+5);
+    ui->widget_plot->yAxis->setRange(speedMinMax[0]-minValue,speedMinMax[1]+2);
+    ui->widget_plot->yAxis2->setRange(speedMinMax[0]-minValue,speedMinMax[1]+2);
     ui->widget_plot->xAxis->setRange(0,speedValues.count());
     ui->widget_plot->replot();
 }

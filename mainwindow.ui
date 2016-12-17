@@ -33,7 +33,7 @@
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="schedule">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -53,7 +53,7 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QFrame" name="frame_info_2">
+         <widget class="QFrame" name="frame_weekinfo">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>1</horstretch>
@@ -478,7 +478,7 @@
             <number>4</number>
            </property>
            <item>
-            <widget class="QFrame" name="frame_info">
+            <widget class="QFrame" name="frame_actinfo">
              <property name="frameShape">
               <enum>QFrame::Panel</enum>
              </property>
@@ -568,7 +568,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QFrame" name="frame">
+            <widget class="QFrame" name="frame_content">
              <property name="frameShape">
               <enum>QFrame::Box</enum>
              </property>
@@ -592,7 +592,7 @@
                <number>0</number>
               </property>
               <item>
-               <widget class="QFrame" name="frame_2">
+               <widget class="QFrame" name="frame_contentvalues">
                 <property name="frameShape">
                  <enum>QFrame::StyledPanel</enum>
                 </property>
@@ -774,16 +774,25 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="currentIndex">
-           <number>1</number>
+          <property name="autoFillBackground">
+           <bool>true</bool>
           </property>
-          <widget class="QWidget" name="tab">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="tab_intervalls">
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
            <attribute name="title">
             <string>Intervalls</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
              <widget class="QFrame" name="frame_polish">
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
               <property name="frameShape">
                <enum>QFrame::Panel</enum>
               </property>
@@ -882,6 +891,9 @@
             </item>
             <item>
              <widget class="QFrame" name="frame_avgValue">
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
               <property name="frameShape">
                <enum>QFrame::Panel</enum>
               </property>
@@ -1021,7 +1033,10 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_6">
+          <widget class="QWidget" name="tab_interplol">
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
            <attribute name="title">
             <string>Interpolation</string>
            </attribute>
@@ -1039,6 +1054,9 @@
                 <width>0</width>
                 <height>25</height>
                </size>
+              </property>
+              <property name="autoFillBackground">
+               <bool>true</bool>
               </property>
               <property name="frameShape">
                <enum>QFrame::Panel</enum>
@@ -1141,6 +1159,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="autoFillBackground">
+               <bool>true</bool>
               </property>
               <property name="title">
                <string>Interval Info</string>
@@ -1293,13 +1314,17 @@
                 <number>0</number>
                </property>
                <item>
-                <widget class="QCustomPlot" name="widget_plot" native="true"/>
+                <widget class="QCustomPlot" name="widget_plot" native="true">
+                 <property name="autoFillBackground">
+                  <bool>true</bool>
+                 </property>
+                </widget>
                </item>
               </layout>
              </widget>
             </item>
             <item>
-             <widget class="QFrame" name="frame_4">
+             <widget class="QFrame" name="frame_space">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -1316,7 +1341,10 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_2">
+          <widget class="QWidget" name="tab_swimcalc">
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
            <attribute name="title">
             <string>Calculations</string>
            </attribute>

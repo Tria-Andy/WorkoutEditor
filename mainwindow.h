@@ -81,8 +81,9 @@ private:
     QStringList modus_list,cal_header,work_list,sum_name,year_header,schedMode,sum_header;
 
     //Intervall Chart
-    QVector<double> xTicker,speedValues,polishValues,speedMinMax;
+    QVector<double> xTicker,speedValues,polishValues,speedMinMax,rangeMinMax;
     void set_speedValues(int);
+    void set_speedgraph(double);
     void set_speedPlot(double);
     void set_polishValues(int,double);
 
