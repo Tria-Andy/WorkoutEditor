@@ -148,17 +148,27 @@ void week_popup::set_plotModel()
 
 void week_popup::set_graph()
 {
-    ui->widget_plot->yAxis->setLabel("Stress");
+    QFont plotFont;
+    plotFont.setBold(true);
+    plotFont.setPointSize(8);
+
     ui->widget_plot->xAxis->setLabel("Day of Week");
+    ui->widget_plot->xAxis->setLabelFont(plotFont);
     ui->widget_plot->xAxis2->setVisible(true);
+    ui->widget_plot->xAxis2->setLabelFont(plotFont);
     ui->widget_plot->xAxis2->setTickLabels(false);
+    ui->widget_plot->yAxis->setLabel("Stress");
+    ui->widget_plot->yAxis->setLabelFont(plotFont);
     ui->widget_plot->yAxis2->setVisible(true);
+    ui->widget_plot->yAxis2->setLabelFont(plotFont);
     ui->widget_plot->legend->setVisible(true);
+    ui->widget_plot->legend->setFont(plotFont);
 
     QCPLayoutGrid *subLayout = new QCPLayoutGrid;
     ui->widget_plot->plotLayout()->addElement(1,0,subLayout);
     subLayout->setMargins(QMargins(dayCount*10,0,dayCount*10,5));
     subLayout->addElement(0,0,ui->widget_plot->legend);
+
 
     ui->widget_plot->addLayer("abovemain", ui->widget_plot->layer("main"), QCustomPlot::limAbove);
     ui->widget_plot->addLayer("belowmain", ui->widget_plot->layer("main"), QCustomPlot::limBelow);

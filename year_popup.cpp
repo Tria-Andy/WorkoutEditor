@@ -190,12 +190,21 @@ void year_popup::set_plotValues()
 
 void year_popup::set_graph()
 {
-    ui->widget_plot->yAxis->setLabel("Stress");
+    QFont plotFont;
+    plotFont.setBold(true);
+    plotFont.setPointSize(8);
+
     ui->widget_plot->xAxis->setLabel("Weeks");
+    ui->widget_plot->xAxis->setLabelFont(plotFont);
     ui->widget_plot->xAxis2->setVisible(true);
+    ui->widget_plot->xAxis2->setLabelFont(plotFont);
     ui->widget_plot->xAxis2->setTickLabels(false);
+    ui->widget_plot->yAxis->setLabel("Stress");
+    ui->widget_plot->yAxis->setLabelFont(plotFont);
     ui->widget_plot->yAxis2->setVisible(true);
+    ui->widget_plot->yAxis2->setLabelFont(plotFont);
     ui->widget_plot->legend->setVisible(true);
+    ui->widget_plot->legend->setFont(plotFont);
 
     QCPLayoutGrid *subLayout = new QCPLayoutGrid;
     ui->widget_plot->plotLayout()->addElement(1,0,subLayout);

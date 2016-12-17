@@ -1088,12 +1088,21 @@ void MainWindow::set_speedValues(int index)
 
 void MainWindow::set_speedgraph(double avg)
 {
-    ui->widget_plot->yAxis->setLabel("Speed");
+    QFont plotFont;
+    plotFont.setBold(true);
+    plotFont.setPointSize(8);
+
     ui->widget_plot->xAxis->setLabel("Seconds");
-    ui->widget_plot->yAxis2->setVisible(true);
+    ui->widget_plot->xAxis->setLabelFont(plotFont);
     ui->widget_plot->xAxis2->setVisible(true);
+    ui->widget_plot->xAxis2->setLabelFont(plotFont);
     ui->widget_plot->xAxis2->setTickLabels(false);
+    ui->widget_plot->yAxis->setLabel("Speed");
+    ui->widget_plot->yAxis->setLabelFont(plotFont);
+    ui->widget_plot->yAxis2->setVisible(true);
+    ui->widget_plot->yAxis2->setLabelFont(plotFont);
     ui->widget_plot->legend->setVisible(true);
+    ui->widget_plot->legend->setFont(plotFont);
 
     this->set_speedPlot(avg);
 }
