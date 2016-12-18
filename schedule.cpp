@@ -22,7 +22,14 @@ schedule::schedule()
 {
     workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress";
     metaTags << "id" << "week" << "name" << "fdw";
-    contentTags << "id" << "week" << "swim" << "bike" << "run" << "strength" << "alternativ" << "summery";
+    contentTags << "id" << "week";
+    for(int i = 0; i < settings::get_sportUseList().count();++i)
+    {
+        workout_sport = settings::get_sportUseList().at(i);
+        contentTags << workout_sport.toLower();
+    }
+    contentTags << "summery";
+    workout_sport.clear();
     firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
     schedulePath = settings::get_gcInfo("schedule");
     if(!schedulePath.isEmpty()) this->check_workoutFiles();
@@ -152,7 +159,7 @@ void schedule::read_week_values(QDomDocument weekMeta, QDomDocument weekContent)
     content_list = root_content.elementsByTagName("content");
 
     week_meta = new QStandardItemModel(meta_list.count(),4);
-    week_content = new QStandardItemModel(content_list.count(),8);
+    week_content = new QStandardItemModel(content_list.count(),contentTags.count());
 
     //fill week_meta
     if(meta_list.count() == 0)

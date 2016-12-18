@@ -29,19 +29,14 @@ MainWindow::MainWindow(QWidget *parent) :
     settings::loadSettings();
     userSetup = true;
     saisonWeeks = settings::get_saisonInfo("weeks").toInt();
+    sportCounter = settings::get_sportList().count();
     graphLoaded = false;
     workSchedule = new schedule();
     work_list << "Phase:" << "Week:" << "Date:" << "Time:" << "Sport:" << "Code:" << "Title:" << "Duration:" << "Distance:" << "Stress:";
     sum_name << "Workouts:" << "Duration:" << "Distance:" << "StressScore:";
     schedMode << "Week" << "Year";
-    sum_header << "Summery:";
-    year_header << "Week"
-                << settings::isSwim
-                << settings::isBike
-                << settings::isRun
-                << settings::isStrength
-                << settings::isAlt
-                << "Summery";
+    sum_header << "Summery:";    
+    sportUse = settings::get_sportUseList().count();
     selectedDate = QDate::currentDate();
     firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
     weeknumber = QString::number(selectedDate.weekNumber()) +"_"+QString::number(selectedDate.year());
@@ -49,14 +44,14 @@ MainWindow::MainWindow(QWidget *parent) :
     weekpos = 0;
     weekDays = 7;
     weekCounter = 0;
-    work_sum.resize(7);
-    dur_sum.resize(7);
-    dist_sum.resize(7);
-    stress_sum.resize(7);
+    work_sum.resize(sportCounter);
+    dur_sum.resize(sportCounter);
+    dist_sum.resize(sportCounter);
+    stress_sum.resize(sportCounter);
     isWeekMode = true;
     safeFlag = false;
     sel_count = 0;
-    ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*7).weekNumber()-1));
+    ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
     ui->pushButton_current_week->setEnabled(false);
     ui->pushButton_week_minus->setEnabled(false);
     ui->pushButton_ClearWorkContent->setEnabled(false);
@@ -363,7 +358,7 @@ void MainWindow::summery_view()
             sumValues << this->set_summeryString(0,isWeekMode);
         }
 
-        for(int i = 1; i < 6; ++i)
+        for(int i = 1; i < sportUse+1; ++i)
         {
             sumValues << this->set_summeryString(i,isWeekMode);
         }
@@ -390,12 +385,11 @@ void MainWindow::workout_calendar()
     int rowcount;
     QList<QStandardItem*> worklist,meta;
 
-    delete calendar_model;
+    calendar_model->clear();
     workSchedule->workout_schedule->sort(2);
 
     if(isWeekMode)
     {
-        calendar_model = new QStandardItemModel();
         calendar_model->setHorizontalHeaderLabels(cal_header);
         ui->tableView_cal->setModel(calendar_model);
         ui->tableView_cal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -458,7 +452,19 @@ void MainWindow::workout_calendar()
     }
     else
     {
-          calendar_model = new QStandardItemModel();
+        if(year_header.count() != settings::get_sportUseList().count()+2)
+        {
+            year_header.clear();
+            QString temp;
+            year_header << "Week";
+            for(int i = 0; i < sportUse;++i)
+            {
+                temp = settings::get_sportUseList().at(i);
+                year_header << temp.toUpper();
+            }
+            year_header << "Summery";
+        }
+
           calendar_model->setHorizontalHeaderLabels(year_header);
           ui->tableView_cal->setModel(calendar_model);
           ui->tableView_cal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -505,7 +511,7 @@ void MainWindow::workout_calendar()
                   worklist << workSchedule->week_content->findItems(weekID,Qt::MatchExactly,1);
               }
 
-              for(int col = 0; col < 7;++col)
+              for(int col = 0; col < sportUse+2;++col)
               {
                   cal_index = calendar_model->index(i,col,QModelIndex());
                   if(!worklist.isEmpty())

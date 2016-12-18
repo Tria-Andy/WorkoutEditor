@@ -40,7 +40,8 @@ public:
         QString emptyPhase = settings::get_gcInfo("emptyPhase");
         QStringList calendar_values;
         QStringList phaseList = settings::get_phaseList();
-        QStringList sportList = settings::get_sportList();
+        //QStringList sportList = settings::get_sportList();
+        QStringList sportList = settings::get_sportUseList();
         QString delimiter = "-";
         QColor rect_color;
         int textMargin = 2;
@@ -92,11 +93,11 @@ public:
         }
         else
         {
-            for(int pos = 0; pos < sportList.count();++pos)
+            for(int pos = 0; pos < sportList.count()+1;++pos)
             {
                 if(index.column() == pos+1)
                 {
-                    if(index.column() != 6)
+                    if(index.column() != sportList.count()+1)
                     {
                         rect_color = settings::get_itemColor(sportList.at(pos));
                     }

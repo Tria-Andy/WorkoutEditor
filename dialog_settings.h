@@ -65,11 +65,14 @@ private slots:
     void on_lineEdit_addedit_textChanged(const QString &arg1);
     void on_tableView_level_doubleClicked(const QModelIndex &index);
     void on_tableView_hf_doubleClicked(const QModelIndex &index);
+    void on_listWidget_useIn_doubleClicked(const QModelIndex &index);
+    void on_listWidget_useIn_itemChanged(QListWidgetItem *item);
 
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;
-    QStringList sportList,model_header;
+    QHash<QString,QStringList> listMap;
+    QStringList keyList,extkeyList,sportList,model_header;
     del_level level_del;
     double thresPower,thresPace,sportFactor;
     bool useColor;
@@ -80,9 +83,12 @@ private:
     void set_thresholdView(QString);
     void set_thresholdModel(QString);
     void set_hfmodel();
+    void checkSportUse();
     void enableSavebutton();
+    void updateListMap(int,bool);
     void writeChangedValues();
     void writeRangeValues(QString);
 };
+
 
 #endif // DIALOG_SETTINGS_H

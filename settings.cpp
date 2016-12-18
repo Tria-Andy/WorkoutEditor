@@ -55,7 +55,9 @@ QHash<QString,QString> settings::stgRange;
 QHash<QString,QString> settings::hfRange;
 
 QStringList settings::keyList;
+QStringList settings::extkeyList;
 QStringList settings::sportList;
+QStringList settings::sportUseList;
 QStringList settings::phaseList;
 QStringList settings::cycleList;
 QStringList settings::codeList;
@@ -74,6 +76,9 @@ QStringList settings::table_header;
 QString settings::header_swim;
 
 int settings::swimLaplen;
+
+enum {SPORT,LEVEL,PHASE,CYCLE,WCODE,JFILE,EDITOR};
+enum {SPORTUSE};
 
 void settings::fill_mapList(QMap<int,QString> *map, QString *values)
 {
@@ -159,7 +164,7 @@ void settings::loadSettings()
         }
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
 
-        //Upgrade values ini
+//###########################Upgrade values ini####################################
         myvalues->beginGroup("Level");
         QStringList levColor,levList;
             QString lev_childs = myvalues->value("levels").toString();
@@ -172,6 +177,23 @@ void settings::loadSettings()
                     levColor.insert(i,"230-230-230");
                 }
                 myvalues->setValue("color",settings::setSettingString(levColor));
+            }
+        myvalues->endGroup();
+
+        myvalues->beginGroup("Keylist");
+            QString kList_childs = myvalues->value("extkeys").toString();
+            if(kList_childs.isEmpty())
+            {
+                myvalues->setValue("extkeys","Sportuse");
+            }
+        myvalues->endGroup();
+
+        myvalues->beginGroup("Sport");
+            QString sportuse_childs = myvalues->value("sportuse").toString();
+            if(sportuse_childs.isEmpty())
+            {
+                sportuse_childs = myvalues->value("sports").toString();
+                myvalues->setValue("sportuse",sportuse_childs);
             }
         myvalues->endGroup();
 
@@ -196,7 +218,7 @@ void settings::loadSettings()
                 myvalues->remove("hf");
             }
         myvalues->endGroup();
-        //Upgrade values ini done
+//###########################Upgrade values ini done####################################
 
         myvalues->beginGroup("JsonFile");
             QString json_childs = myvalues->value("actinfo").toString();
@@ -210,6 +232,8 @@ void settings::loadSettings()
         myvalues->beginGroup("Keylist");
             QString key_childs = myvalues->value("keys").toString();
             keyList << key_childs.split(splitter);
+            key_childs = myvalues->value("extkeys").toString();
+            extkeyList << key_childs.split(splitter);
         myvalues->endGroup();
 
         myvalues->beginGroup("Saisoninfo");
@@ -223,6 +247,8 @@ void settings::loadSettings()
         myvalues->beginGroup("Sport");
             QString sport_childs = myvalues->value("sports").toString();
             sportList << sport_childs.split(splitter);
+            sport_childs = myvalues->value("sportuse").toString();
+            sportUseList << sport_childs.split(splitter);
             sport_childs = myvalues->value("color").toString();
             settings::fill_mapColor(&sportList,&sport_childs,false);
         myvalues->endGroup();
@@ -343,36 +369,16 @@ void settings::set_rangeValue(QString map, QString key,QString value)
     if(map == "HF") hfRange.insert(key,value);
 }
 
-void settings::writeSettings(QString selection, QStringList plist)
+void settings::writeListValues(QHash<QString,QStringList> *plist)
 {
-    if(selection == keyList.at(0))
-    {
-        sportList = plist;
-    }
-    if(selection == keyList.at(1))
-    {
-        levelList = plist;
-    }
-    if(selection == keyList.at(2))
-    {
-        phaseList = plist;
-    }
-    if(selection == keyList.at(3))
-    {
-        cycleList = plist;
-    }
-    if(selection == keyList.at(4))
-    {
-        codeList = plist;
-    }
-    if(selection == keyList.at(5))
-    {
-        jsoninfos = plist;
-    }
-    if(selection == keyList.at(6))
-    {
-        intPlanList = plist;
-    }
+    sportList = plist->value(keyList.at(SPORT));
+    levelList = plist->value(keyList.at(LEVEL));
+    phaseList = plist->value(keyList.at(PHASE));
+    cycleList = plist->value(keyList.at(CYCLE));
+    codeList = plist->value(keyList.at(WCODE));
+    jsoninfos = plist->value(keyList.at(JFILE));
+    intPlanList = plist->value(keyList.at(EDITOR));
+    sportUseList = plist->value(extkeyList.at(SPORTUSE));
 
     settings::saveSettings();
 }
@@ -444,6 +450,7 @@ void settings::saveSettings()
 
     myvalues->beginGroup("Sport");
         myvalues->setValue("sports",settings::setSettingString(sportList));
+        myvalues->setValue("sportuse",settings::setSettingString(sportUseList));
         tempColor = settings::get_colorStringList(&sportList);
         myvalues->setValue("color",settings::setSettingString(tempColor));
         tempColor.clear();

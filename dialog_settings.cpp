@@ -28,6 +28,8 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
 {
     ui->setupUi(this);
     sportList << settings::isSwim << settings::isBike << settings::isRun;
+    keyList = settings::get_keyList();
+    extkeyList = settings::get_extkeyList();
     useColor = false;
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
     level_model = new QStandardItemModel();
@@ -42,7 +44,6 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     ui->lineEdit_configfile->setText(settings::get_gcInfo("valuefile"));
     ui->lineEdit_hfThres->setText(QString::number(settings::get_thresValue("hfthres")));
     ui->lineEdit_hfmax->setText(QString::number(settings::get_thresValue("hfmax")));
-    ui->comboBox_selInfo->addItems(settings::get_keyList());
     ui->lineEdit_saison->setText(settings::get_saisonInfo("saison"));
     ui->lineEdit_saisonWeeks->setText(settings::get_saisonInfo("weeks"));
     ui->dateEdit_saisonStart->setDate(QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy"));
@@ -56,6 +57,9 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     ui->pushButton_delete->setEnabled(false);
     this->checkSetup();
 }
+
+enum {SPORT,LEVEL,PHASE,CYCLE,WCODE,JFILE,EDITOR};
+enum {SPORTUSE};
 
 Dialog_settings::~Dialog_settings()
 {
@@ -72,19 +76,42 @@ void Dialog_settings::on_pushButton_cancel_clicked()
 void Dialog_settings::checkSetup()
 {
     if(ui->lineEdit_athlete->text().isEmpty()) ui->pushButton_save->setEnabled(true);
+    listMap.insert(keyList.at(SPORT),settings::get_sportList());
+    listMap.insert(keyList.at(LEVEL),settings::get_levelList());
+    listMap.insert(keyList.at(PHASE),settings::get_phaseList());
+    listMap.insert(keyList.at(CYCLE),settings::get_cycleList());
+    listMap.insert(keyList.at(WCODE),settings::get_codeList());
+    listMap.insert(keyList.at(JFILE),settings::get_jsoninfos());
+    listMap.insert(keyList.at(EDITOR),settings::get_intPlanerList());
+    listMap.insert(extkeyList.at(SPORTUSE),settings::get_sportUseList());
+    ui->comboBox_selInfo->addItems(keyList);
     this->set_hfmodel();
+}
+
+void Dialog_settings::updateListMap(int index,bool isKey)
+{
+    QStringList updateList;
+    if(isKey)
+    {
+        for(int i = 0; i < ui->listWidget_selection->count();++i)
+        {
+            updateList << ui->listWidget_selection->item(i)->data(Qt::DisplayRole).toString();
+        }
+        listMap.insert(keyList.at(index),updateList);
+    }
+    else
+    {
+        for(int i = 0; i < ui->listWidget_useIn->count();++i)
+        {
+            updateList << ui->listWidget_useIn->item(i)->data(Qt::DisplayRole).toString();
+        }
+        listMap.insert(extkeyList.at(index),updateList);
+    }
 }
 
 void Dialog_settings::writeChangedValues()
 {
-    QString selection = ui->comboBox_selInfo->currentText();
-    QStringList updateList;
     QString sport = ui->comboBox_thresSport->currentText();
-
-    for(int i = 0; i < ui->listWidget_selection->count();++i)
-    {
-        updateList << ui->listWidget_selection->item(i)->data(Qt::DisplayRole).toString();
-    }
 
     if(sport == settings::isSwim)
     {
@@ -125,7 +152,7 @@ void Dialog_settings::writeChangedValues()
     settings::set_saisonInfos("endDate",ui->dateEdit_saisonEnd->date().toString("dd.MM.yyyy"));
     settings::set_saisonInfos("weeks",ui->lineEdit_saisonWeeks->text());
 
-    settings::writeSettings(selection,updateList);
+    settings::writeListValues(&listMap);
 
     thresPower = ui->lineEdit_thresPower->text().toDouble();
     thresPace = settings::get_timesec(ui->lineEdit_thresPace->text());
@@ -170,39 +197,25 @@ void Dialog_settings::set_listEntries(QString selection)
 {
     ui->listWidget_selection->clear();
 
-    if(selection == settings::get_keyList().at(0))
+    ui->listWidget_selection->addItems(listMap.value(selection));
+
+
+    if(selection == keyList.at(SPORT))
     {
-        ui->listWidget_selection->addItems(settings::get_sportList());
+        ui->listWidget_useIn->addItems(listMap.value(extkeyList.at(SPORTUSE)));
+        ui->listWidget_useIn->setEnabled(true);
         useColor = true;
     }
-    if(selection == settings::get_keyList().at(1))
+    else if(selection == keyList.at(LEVEL) || selection == keyList.at(PHASE))
     {
-        ui->listWidget_selection->addItems(settings::get_levelList());
+        ui->listWidget_useIn->clear();
+        ui->listWidget_useIn->setEnabled(false);
         useColor = true;
     }
-    if(selection == settings::get_keyList().at(2))
+    else
     {
-        ui->listWidget_selection->addItems(settings::get_phaseList());
-        useColor = true;
-    }
-    if(selection == settings::get_keyList().at(3))
-    {
-        ui->listWidget_selection->addItems(settings::get_cycleList());
-        useColor = false;
-    }
-    if(selection == settings::get_keyList().at(4))
-    {
-        ui->listWidget_selection->addItems(settings::get_codeList());
-        useColor = false;
-    }
-    if(selection == settings::get_keyList().at(5))
-    {
-        ui->listWidget_selection->addItems(settings::get_jsoninfos());
-        useColor = false;
-    }
-    if(selection == settings::get_keyList().at(6))
-    {
-        ui->listWidget_selection->addItems(settings::get_intPlanerList());
+        ui->listWidget_useIn->clear();
+        ui->listWidget_useIn->setEnabled(false);
         useColor = false;
     }
 
@@ -254,6 +267,18 @@ void Dialog_settings::set_hfmodel()
         hf_model->setData(hf_model->index(i,2,QModelIndex()),settings::get_hfvalue(zone_low));
         hf_model->setData(hf_model->index(i,3,QModelIndex()),zone_high);
         hf_model->setData(hf_model->index(i,4,QModelIndex()),settings::get_hfvalue(zone_high));
+    }
+}
+
+void Dialog_settings::checkSportUse()
+{
+    if(ui->listWidget_useIn->count() >=5)
+    {
+        ui->listWidget_useIn->setDragDropMode(QAbstractItemView::NoDragDrop);
+    }
+    else
+    {
+        ui->listWidget_useIn->setDragDropMode(QAbstractItemView::DropOnly);
     }
 }
 
@@ -337,6 +362,8 @@ void Dialog_settings::on_pushButton_up_clicked()
     QListWidgetItem *currentItem = ui->listWidget_selection->takeItem(currentindex);
     ui->listWidget_selection->insertItem(currentindex-1,currentItem);
     ui->listWidget_selection->setCurrentRow(currentindex-1);
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
+    this->enableSavebutton();
 }
 
 void Dialog_settings::on_pushButton_down_clicked()
@@ -345,12 +372,14 @@ void Dialog_settings::on_pushButton_down_clicked()
     QListWidgetItem *currentItem = ui->listWidget_selection->takeItem(currentindex);
     ui->listWidget_selection->insertItem(currentindex+1,currentItem);
     ui->listWidget_selection->setCurrentRow(currentindex+1);
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
+    this->enableSavebutton();
 }
 
 void Dialog_settings::on_pushButton_add_clicked()
 {
-    int index = ui->listWidget_selection->count();
-    ui->listWidget_selection->insertItem(index,ui->lineEdit_addedit->text());
+    ui->listWidget_selection->insertItem(ui->listWidget_selection->currentRow(),ui->lineEdit_addedit->text());
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
     this->enableSavebutton();
 }
 
@@ -360,6 +389,7 @@ void Dialog_settings::on_pushButton_delete_clicked()
     ui->lineEdit_addedit->clear();
     this->set_color(QColor(255,255,255,0),false,"");
     delete item;
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
     this->enableSavebutton();
     ui->pushButton_delete->setEnabled(false);
     ui->pushButton_add->setEnabled(true);
@@ -368,6 +398,7 @@ void Dialog_settings::on_pushButton_delete_clicked()
 void Dialog_settings::on_pushButton_edit_clicked()
 {
     ui->listWidget_selection->item(ui->listWidget_selection->currentRow())->setData(Qt::EditRole,ui->lineEdit_addedit->text());
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
     this->enableSavebutton();
 }
 
@@ -547,4 +578,21 @@ void Dialog_settings::on_tableView_hf_doubleClicked(const QModelIndex &index)
     {
         this->enableSavebutton();
     }
+}
+
+void Dialog_settings::on_listWidget_useIn_doubleClicked(const QModelIndex &index)
+{
+    QListWidgetItem *item = ui->listWidget_useIn->takeItem(index.row());
+    delete item;
+    this->updateListMap(SPORTUSE,false);
+    this->checkSportUse();
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_listWidget_useIn_itemChanged(QListWidgetItem *item)
+{
+    Q_UNUSED(item)
+    this->checkSportUse();
+    this->updateListMap(SPORTUSE,false);
+    this->enableSavebutton();
 }

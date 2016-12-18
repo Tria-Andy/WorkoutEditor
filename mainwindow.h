@@ -87,14 +87,14 @@ private:
     void set_speedPlot(double);
     void set_polishValues(int,double);
 
-    int fontSize,sel_count;
+    int fontSize,sel_count,sportUse;
     QDate selectedDate,firstdayofweek;
     QString weeknumber,phaseFilter;
     QVector<int> work_sum,dur_sum,stress_sum;
     QVector<double> dist_sum;
     int weekRange,weekpos;
     int saisonWeeks,weekDays;
-    unsigned int weekCounter;
+    unsigned int weekCounter,sportCounter;
     bool userSetup,isWeekMode,safeFlag,graphLoaded;
 
     void openPreferences();
