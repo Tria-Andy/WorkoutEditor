@@ -81,7 +81,8 @@ HEADERS  += mainwindow.h \
     jsonhandler.h \
     logger.h \
     del_intview.h \
-    del_level.h
+    del_level.h \
+    del_addweek.h
 
 FORMS    += mainwindow.ui \
     dialog_add.ui \

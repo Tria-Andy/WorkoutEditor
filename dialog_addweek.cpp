@@ -29,14 +29,18 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
     ui->comboBox_cycle->addItems(settings::get_cycleList());
     ui->dateEdit_selectDate->setDate(QDate().currentDate());
     empty = "0-0-00:00-0";
+    weekHeader << "Sport" << "Workouts" << "Duration" << "%" << "Distance" << "Pace" << "Stress";
     swimValues = bikeValues = runValues = stgValues = altValues = sumValues = empty;
-
+    sportuseList = settings::get_sportUseList();
     this->fill_values(sel_week);
 }
+
+enum{SUMMERY,SWIM,BIKE,RUN};
 
 Dialog_addweek::~Dialog_addweek()
 {
     delete ui;
+    delete weekModel;
 }
 
 void Dialog_addweek::on_pushButton_cancel_clicked()
@@ -50,8 +54,17 @@ void Dialog_addweek::fill_values(QString selWeek)
     QList<QStandardItem*> content = workSched->week_content->findItems(weekInfo.at(1),Qt::MatchExactly,1);
     QList<QStandardItem*> meta = workSched->week_meta->findItems(weekInfo.at(1),Qt::MatchExactly,1);
     QModelIndex index;
+    QTime duration;
     QString value,work,dura,dist,stress;
     QStringList values;
+    weekModel = new QStandardItemModel(sportuseList.count(),7);
+    weekModel->setHorizontalHeaderLabels(weekHeader);
+    ui->tableView_sportValues->setModel(weekModel);
+    ui->tableView_sportValues->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_sportValues->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_sportValues->verticalHeader()->hide();
+    ui->tableView_sportValues->setItemDelegate(&week_del);
+
 
     if(!meta.isEmpty())
     {
@@ -72,14 +85,24 @@ void Dialog_addweek::fill_values(QString selWeek)
     if(!content.isEmpty())
     {
         index = workSched->week_content->indexFromItem(content.at(0));
-        for(int i = 2; i < 7; ++i)
-        {
+        for(int i = 2,row = 0; i < sportuseList.count()+2; ++i,++row)
+        {            
             value = workSched->week_content->item(index.row(),i)->text();
             values = value.split("-");
             work = values.at(0);
             dist = values.at(1);
             dura = values.at(2);
             stress = values.at(3);
+            duration = QTime::fromString(dura,"hh:mm");
+
+            weekModel->setData(weekModel->index(row,0,QModelIndex()),sportuseList.at(row));
+            weekModel->setData(weekModel->index(row,1,QModelIndex()),work.toInt());
+            weekModel->setData(weekModel->index(row,2,QModelIndex()),duration);
+            weekModel->setData(weekModel->index(row,3,QModelIndex()),0.0);
+            weekModel->setData(weekModel->index(row,4,QModelIndex()),dist.toDouble());
+            weekModel->setData(weekModel->index(row,5,QModelIndex()),settings::get_workout_pace(dist.toDouble(),duration,sportuseList.at(row),false));
+            weekModel->setData(weekModel->index(row,6,QModelIndex()),stress.toInt());
+
 
             if(i == 2)
             {
@@ -298,6 +321,7 @@ void Dialog_addweek::calc_percent()
     QString sDuration = ui->lineEdit_sum_duration->text();
     percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_swim_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
     ui->lineEdit_swim_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
+
     percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_bike_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
     ui->lineEdit_bike_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
     percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_run_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
@@ -308,6 +332,14 @@ void Dialog_addweek::calc_percent()
     ui->lineEdit_alt_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
 
 }
+
+void Dialog_addweek::on_tableView_sportValues_clicked(const QModelIndex &index)
+{
+    qDebug() << "Edit" << index.row() << index.column();
+    //this->sum_workouts();
+    //this->store_values(index.row());
+}
+
 
 void Dialog_addweek::on_spinBox_swim_work_valueChanged(int arg1)
 {
@@ -449,6 +481,8 @@ void Dialog_addweek::on_spinBox_alt_stress_valueChanged(int arg1)
     this->sum_stress();
     this->store_values(5);
 }
+
+
 
 
 

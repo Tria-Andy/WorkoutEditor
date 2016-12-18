@@ -22,6 +22,7 @@
 #include <QDialog>
 #include <QStandardItemModel>
 #include "schedule.h"
+#include "del_addweek.h"
 #include "settings.h"
 
 namespace Ui {
@@ -60,11 +61,15 @@ private slots:
     void on_dateEdit_selectDate_dateChanged(const QDate &date);
     void on_pushButton_ok_clicked();
 
+    void on_tableView_sportValues_clicked(const QModelIndex &index);
+
 private:
     Ui::Dialog_addweek *ui;
     schedule *workSched;
+    del_addweek week_del;
+    QStandardItemModel *weekModel;
     QString openID,selYear,weekID,swimValues,bikeValues,runValues,stgValues,altValues,sumValues,empty;
-    QStringList weekMeta,weekContent;
+    QStringList sportuseList,weekHeader,weekMeta,weekContent;
     bool update;
 
     void fill_values(QString);
