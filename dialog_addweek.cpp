@@ -28,10 +28,12 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
     ui->comboBox_phase->addItems(settings::get_phaseList());
     ui->comboBox_cycle->addItems(settings::get_cycleList());
     ui->dateEdit_selectDate->setDate(QDate().currentDate());
+    timeFormat = "hh:mm:ss";
     empty = "0-0-00:00-0";
     weekHeader << "Sport" << "Workouts" << "Duration" << "%" << "Distance" << "Pace" << "Stress";
-    swimValues = bikeValues = runValues = stgValues = altValues = sumValues = empty;
     sportuseList = settings::get_sportUseList();
+    this->setFixedHeight(100+(35*(sportuseList.count()+1)));
+    this->setFixedWidth(650);
     this->fill_values(sel_week);
 }
 
@@ -57,14 +59,16 @@ void Dialog_addweek::fill_values(QString selWeek)
     QTime duration;
     QString value,work,dura,dist,stress;
     QStringList values;
-    weekModel = new QStandardItemModel(sportuseList.count(),7);
+    int timeSum,timePart;
+    int listCount = sportuseList.count();
+
+    weekModel = new QStandardItemModel(sportuseList.count()+1,7);
     weekModel->setHorizontalHeaderLabels(weekHeader);
     ui->tableView_sportValues->setModel(weekModel);
     ui->tableView_sportValues->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_sportValues->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_sportValues->verticalHeader()->hide();
     ui->tableView_sportValues->setItemDelegate(&week_del);
-
 
     if(!meta.isEmpty())
     {
@@ -85,7 +89,7 @@ void Dialog_addweek::fill_values(QString selWeek)
     if(!content.isEmpty())
     {
         index = workSched->week_content->indexFromItem(content.at(0));
-        for(int i = 2,row = 0; i < sportuseList.count()+2; ++i,++row)
+        for(int i = 2,row = 0; i < listCount+2; ++i,++row)
         {            
             value = workSched->week_content->item(index.row(),i)->text();
             values = value.split("-");
@@ -99,51 +103,43 @@ void Dialog_addweek::fill_values(QString selWeek)
             weekModel->setData(weekModel->index(row,1,QModelIndex()),work.toInt());
             weekModel->setData(weekModel->index(row,2,QModelIndex()),duration);
             weekModel->setData(weekModel->index(row,3,QModelIndex()),0.0);
-            weekModel->setData(weekModel->index(row,4,QModelIndex()),dist.toDouble());
+            weekModel->setData(weekModel->index(row,4,QModelIndex()),settings::set_doubleValue(dist.toDouble(),false));
             weekModel->setData(weekModel->index(row,5,QModelIndex()),settings::get_workout_pace(dist.toDouble(),duration,sportuseList.at(row),false));
-            weekModel->setData(weekModel->index(row,6,QModelIndex()),stress.toInt());
-
-
-            if(i == 2)
-            {
-                ui->spinBox_swim_work->setValue(work.toInt());
-                ui->timeEdit_swim_dur->setTime(QTime::fromString(dura,"hh:mm"));
-                ui->doubleSpinBox_swim_dist->setValue(dist.toDouble());
-                ui->spinBox_swim_stress->setValue(stress.toInt());
-            }
-            if(i == 3)
-            {
-                ui->spinBox_bike_work->setValue(work.toInt());
-                ui->timeEdit_bike_dur->setTime(QTime::fromString(dura,"hh:mm"));
-                ui->doubleSpinBox_bike_dist->setValue(dist.toDouble());
-                ui->spinBox_bike_stress->setValue(stress.toInt());
-            }
-            if(i == 4)
-            {
-                ui->spinBox_run_work->setValue(work.toInt());
-                ui->timeEdit_run_dur->setTime(QTime::fromString(dura,"hh:mm"));
-                ui->doubleSpinBox_run_dist->setValue(dist.toDouble());
-                ui->spinBox_run_stress->setValue(stress.toInt());
-            }
-            if(i == 5)
-            {
-                ui->spinBox_stg_work->setValue(work.toInt());
-                ui->timeEdit_stg_dur->setTime(QTime::fromString(dura,"hh:mm"));
-                ui->spinBox_stg_stress->setValue(stress.toInt());
-            }
-            if(i == 6)
-            {
-                ui->spinBox_alt_work->setValue(work.toInt());
-                ui->timeEdit_alt_dur->setTime(QTime::fromString(dura,"hh:mm"));
-                ui->doubleSpinBox_alt_dist->setValue(dist.toDouble());
-                ui->spinBox_alt_stress->setValue(stress.toInt());
-            }
+            weekModel->setData(weekModel->index(row,6,QModelIndex()),stress.toInt());        
         }
+        weekModel->setData(weekModel->index(listCount,0,QModelIndex()),"Summery");
+        weekModel->setData(weekModel->index(listCount,1,QModelIndex()),this->sum_int(weekModel,&sportuseList,1));
+        weekModel->setData(weekModel->index(listCount,2,QModelIndex()),this->sum_time(weekModel,&sportuseList,2));
+        weekModel->setData(weekModel->index(listCount,3,QModelIndex()),100);
+        weekModel->setData(weekModel->index(listCount,4,QModelIndex()),settings::set_doubleValue(this->sum_double(weekModel,&sportuseList,4),false));
+        weekModel->setData(weekModel->index(listCount,5,QModelIndex()),"--");
+        weekModel->setData(weekModel->index(listCount,6,QModelIndex()),this->sum_int(weekModel,&sportuseList,6));
+    }
+    else
+    {
+        for(int row = 0; row < listCount; ++row)
+        {
+            weekModel->setData(weekModel->index(row,0,QModelIndex()),sportuseList.at(row));
+            weekModel->setData(weekModel->index(row,1,QModelIndex()),0);
+            weekModel->setData(weekModel->index(row,2,QModelIndex()),QTime::fromString("00:00:00"));
+            weekModel->setData(weekModel->index(row,3,QModelIndex()),0.0);
+            weekModel->setData(weekModel->index(row,4,QModelIndex()),0.0);
+            weekModel->setData(weekModel->index(row,5,QModelIndex()),"--");
+            weekModel->setData(weekModel->index(row,6,QModelIndex()),0);
+        }
+        weekModel->setData(weekModel->index(listCount,0,QModelIndex()),"Summery");
     }
 
+    timeSum = settings::get_timesec(weekModel->data(weekModel->index(listCount,2,QModelIndex())).toTime().toString(timeFormat));
+    timePart = 0;
+    for(int i = 0; i < listCount; ++i)
+    {
+        timePart = settings::get_timesec(weekModel->data(weekModel->index(i,2,QModelIndex())).toTime().toString(timeFormat));
+        weekModel->setData(weekModel->index(i,3,QModelIndex()),week_del.calc_percent(timeSum,timePart));
+    }
 }
 
-void Dialog_addweek::store_meta()
+void Dialog_addweek::store_values()
 {
     weekMeta = QStringList();
     weekID = ui->lineEdit_week->text()+"_"+selYear;
@@ -155,12 +151,7 @@ void Dialog_addweek::store_meta()
                  << ui->dateEdit_selectDate->date().toString("dd.MM.yyyy");
 
         weekContent << weekID
-                    << swimValues
-                    << bikeValues
-                    << runValues
-                    << stgValues
-                    << altValues
-                    << sumValues;
+                    << this->create_values();
     }
     else
     {
@@ -171,93 +162,25 @@ void Dialog_addweek::store_meta()
 
         weekContent << QString::number(currID)
                     << weekID
-                    << swimValues
-                    << bikeValues
-                    << runValues
-                    << stgValues
-                    << altValues
-                    << sumValues;
+                    << this->create_values();
     }
 
 }
 
-void Dialog_addweek::store_values(int pos)
+QStringList Dialog_addweek::create_values()
 {
-    weekContent = QStringList();
+    QString splitter = "-",vString;
+    QStringList list;
 
-    if(pos == 1)
+    for(int i = 0; i < sportuseList.count()+1; ++i)
     {
-        swimValues = QString::number(ui->spinBox_swim_work->value()) +"-";
-        swimValues = swimValues + QString::number(ui->doubleSpinBox_swim_dist->value()) +"-";
-        swimValues = swimValues + ui->timeEdit_swim_dur->time().toString("hh:mm") +"-";
-        swimValues = swimValues + QString::number(ui->spinBox_swim_stress->value());
+        vString = weekModel->data(weekModel->index(i,1,QModelIndex())).toString()+splitter;
+        vString = vString+weekModel->data(weekModel->index(i,4,QModelIndex())).toString()+splitter;
+        vString = vString+weekModel->data(weekModel->index(i,2,QModelIndex())).toTime().toString("hh:mm")+splitter;
+        vString = vString+weekModel->data(weekModel->index(i,6,QModelIndex())).toString();
+        list << vString;
     }
-    if(pos == 2)
-    {
-        bikeValues = QString::number(ui->spinBox_bike_work->value()) +"-";
-        bikeValues = bikeValues + QString::number(ui->doubleSpinBox_bike_dist->value()) +"-";
-        bikeValues = bikeValues + ui->timeEdit_bike_dur->time().toString("hh:mm") +"-";
-        bikeValues = bikeValues + QString::number(ui->spinBox_bike_stress->value());
-    }
-    if(pos == 3)
-    {
-        runValues = QString::number(ui->spinBox_run_work->value()) +"-";
-        runValues = runValues + QString::number(ui->doubleSpinBox_run_dist->value()) +"-";
-        runValues = runValues + ui->timeEdit_run_dur->time().toString("hh:mm") +"-";
-        runValues = runValues + QString::number(ui->spinBox_run_stress->value());
-    }
-    if(pos == 4)
-    {
-        stgValues = QString::number(ui->spinBox_stg_work->value()) +"-";
-        stgValues = stgValues + "0" +"-";
-        stgValues = stgValues + ui->timeEdit_stg_dur->time().toString("hh:mm") +"-";
-        stgValues = stgValues + QString::number(ui->spinBox_stg_stress->value());
-    }
-    if(pos == 5)
-    {
-        altValues = QString::number(ui->spinBox_alt_work->value()) +"-";
-        altValues = altValues + QString::number(ui->doubleSpinBox_alt_dist->value()) +"-";
-        altValues = altValues + ui->timeEdit_alt_dur->time().toString("hh:mm") +"-";
-        altValues = altValues + QString::number(ui->spinBox_alt_stress->value());
-    }
-
-    sumValues = ui->lineEdit_sum_work->text() +"-";
-    sumValues = sumValues + ui->lineEdit_sum_distance->text() +"-";
-    sumValues = sumValues + ui->lineEdit_sum_duration->text() +"-";
-    sumValues = sumValues + ui->lineEdit_sum_stress->text();
-
-}
-
-void Dialog_addweek::sum_workouts()
-{
-    int work;
-    work = ui->spinBox_swim_work->value() + ui->spinBox_bike_work->value() + ui->spinBox_run_work->value() + ui->spinBox_stg_work->value() + ui->spinBox_alt_work->value();
-    ui->lineEdit_sum_work->setText(QString::number(work));
-}
-
-void Dialog_addweek::sum_distance()
-{
-    double dist;
-    dist = ui->doubleSpinBox_swim_dist->value() + ui->doubleSpinBox_bike_dist->value() + ui->doubleSpinBox_run_dist->value() + ui->doubleSpinBox_alt_dist->value();
-    ui->lineEdit_sum_distance->setText(QString::number(dist));
-}
-
-void Dialog_addweek::sum_duration()
-{
-    int duration;
-    duration = settings::get_timesec(ui->timeEdit_swim_dur->time().toString("hh:mm"));
-    duration = duration + settings::get_timesec(ui->timeEdit_bike_dur->time().toString("hh:mm"));
-    duration = duration + settings::get_timesec(ui->timeEdit_run_dur->time().toString("hh:mm"));
-    duration = duration + settings::get_timesec(ui->timeEdit_stg_dur->time().toString("hh:mm"));
-    duration = duration + settings::get_timesec(ui->timeEdit_alt_dur->time().toString("hh:mm"));
-    ui->lineEdit_sum_duration->setText(settings::set_time(duration));
-}
-
-void Dialog_addweek::sum_stress()
-{
-    int stress;
-    stress = ui->spinBox_swim_stress->value() + ui->spinBox_bike_stress->value() + ui->spinBox_run_stress->value() + ui->spinBox_stg_stress->value() + ui->spinBox_alt_stress->value();
-    ui->lineEdit_sum_stress->setText(QString::number(stress));
+    return list;
 }
 
 void Dialog_addweek::on_dateEdit_selectDate_dateChanged(const QDate &date)
@@ -268,7 +191,8 @@ void Dialog_addweek::on_dateEdit_selectDate_dateChanged(const QDate &date)
 
 void Dialog_addweek::on_pushButton_ok_clicked()
 {
-    this->store_meta();
+    this->store_values();
+
     if(update)
     {
         QList<QStandardItem*> openItem = workSched->week_meta->findItems(openID,Qt::MatchExactly,1);
@@ -314,175 +238,34 @@ void Dialog_addweek::on_pushButton_ok_clicked()
     }
     accept();
 }
-
-void Dialog_addweek::calc_percent()
+int Dialog_addweek::sum_int(QStandardItemModel *model,QStringList *list, int col)
 {
-    double percent;
-    QString sDuration = ui->lineEdit_sum_duration->text();
-    percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_swim_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
-    ui->lineEdit_swim_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
-
-    percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_bike_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
-    ui->lineEdit_bike_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
-    percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_run_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
-    ui->lineEdit_run_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
-    percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_stg_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
-    ui->lineEdit_stg_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
-    percent = (static_cast<double>(settings::get_timesec(ui->timeEdit_alt_dur->time().toString("hh:mm"))) / static_cast<double>(settings::get_timesec(sDuration)))*100.0;
-    ui->lineEdit_alt_perc->setText(QString::number(static_cast<int>((percent *100+.5)/100.0)));
-
+    int sum = 0;
+    for(int i = 0; i < list->count(); ++i)
+    {
+       sum = sum + model->data(model->index(i,col,QModelIndex())).toInt();
+    }
+    return sum;
 }
 
-void Dialog_addweek::on_tableView_sportValues_clicked(const QModelIndex &index)
+double Dialog_addweek::sum_double(QStandardItemModel *model,QStringList *list, int col)
 {
-    qDebug() << "Edit" << index.row() << index.column();
-    //this->sum_workouts();
-    //this->store_values(index.row());
+    double sum = 0;
+    for(int i = 0; i < list->count(); ++i)
+    {
+       sum = sum + model->data(model->index(i,col,QModelIndex())).toDouble();
+    }
+    return sum;
 }
 
-
-void Dialog_addweek::on_spinBox_swim_work_valueChanged(int arg1)
+QTime Dialog_addweek::sum_time(QStandardItemModel *model,QStringList *list, int col)
 {
-    Q_UNUSED(arg1)
-    this->sum_workouts();
-    this->store_values(1);
+    QTime sum(0,0,0);
+    QString sportTime;
+    for(int i = 0; i < list->count(); ++i)
+    {
+       sportTime =  model->data(model->index(i,col,QModelIndex())).toTime().toString(timeFormat);
+       sum = sum.addSecs(settings::get_timesec(sportTime));
+    }
+    return sum;
 }
-
-void Dialog_addweek::on_spinBox_bike_work_valueChanged(int arg1)
-{
-    Q_UNUSED(arg1)
-    this->sum_workouts();
-    this->store_values(2);
-}
-
-void Dialog_addweek::on_spinBox_run_work_valueChanged(int arg1)
-{
-    Q_UNUSED(arg1)
-    this->sum_workouts();
-    this->store_values(3);
-}
-
-void Dialog_addweek::on_spinBox_stg_work_valueChanged(int arg1)
-{
-    Q_UNUSED(arg1)
-    this->sum_workouts();
-    this->store_values(4);
-}
-
-void Dialog_addweek::on_spinBox_alt_work_valueChanged(int arg1)
-{
-    Q_UNUSED(arg1)
-    this->sum_workouts();
-    this->store_values(5);
-}
-
-void Dialog_addweek::on_timeEdit_swim_dur_timeChanged(const QTime &time)
-{
-    this->sum_duration();
-    this->store_values(1);
-    this->calc_percent();
-    ui->lineEdit_swim_pace->setText(settings::get_workout_pace(ui->doubleSpinBox_swim_dist->value(),time,settings::isSwim,false));
-    ui->spinBox_swim_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))*settings::get_thresValue("swimfactor")));
-}
-
-void Dialog_addweek::on_timeEdit_bike_dur_timeChanged(const QTime &time)
-{
-    this->sum_duration();
-    this->store_values(2);
-    this->calc_percent();
-    ui->lineEdit_bike_pace->setText(settings::get_workout_pace(ui->doubleSpinBox_bike_dist->value(),time,settings::isBike,false));
-    ui->spinBox_bike_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))*settings::get_thresValue("bikefactor")));
-}
-
-void Dialog_addweek::on_timeEdit_run_dur_timeChanged(const QTime &time)
-{
-    this->sum_duration();
-    this->store_values(3);
-    this->calc_percent();
-    ui->lineEdit_run_pace->setText(settings::get_workout_pace(ui->doubleSpinBox_run_dist->value(),time,settings::isRun,false));
-    ui->spinBox_run_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))*settings::get_thresValue("runfactor")));
-}
-
-void Dialog_addweek::on_timeEdit_stg_dur_timeChanged(const QTime &time)
-{
-    this->sum_duration();
-    this->store_values(4);
-    this->calc_percent();
-    ui->spinBox_stg_stress->setValue(round(settings::get_timesec(time.toString("hh:mm"))));
-}
-
-void Dialog_addweek::on_timeEdit_alt_dur_timeChanged(const QTime &time)
-{
-    Q_UNUSED(time)
-    this->sum_duration();
-    this->store_values(5);
-    this->calc_percent();
-}
-
-void Dialog_addweek::on_doubleSpinBox_swim_dist_valueChanged(double dist)
-{
-    this->sum_distance();
-    this->store_values(1);
-    ui->lineEdit_swim_pace->setText(settings::get_workout_pace(dist,ui->timeEdit_swim_dur->time(),settings::isSwim,false));
-}
-
-void Dialog_addweek::on_doubleSpinBox_bike_dist_valueChanged(double dist)
-{
-    this->sum_distance();
-    this->store_values(2);
-    ui->lineEdit_bike_pace->setText(settings::get_workout_pace(dist,ui->timeEdit_bike_dur->time(),settings::isBike,false));
-}
-
-void Dialog_addweek::on_doubleSpinBox_run_dist_valueChanged(double dist)
-{
-    this->sum_distance();
-    this->store_values(3);
-    ui->lineEdit_run_pace->setText(settings::get_workout_pace(dist,ui->timeEdit_run_dur->time(),settings::isRun,false));
-}
-
-void Dialog_addweek::on_doubleSpinBox_alt_dist_valueChanged(double arg1)
-{
-    Q_UNUSED(arg1)
-    this->sum_distance();
-    this->store_values(5);
-}
-
-void Dialog_addweek::on_spinBox_swim_stress_valueChanged(int arg1)
-{
-    Q_UNUSED(arg1)
-    this->sum_stress();
-    this->store_values(1);
-}
-
-void Dialog_addweek::on_spinBox_bike_stress_valueChanged(int arg1)
-{
-    Q_UNUSED(arg1)
-    this->sum_stress();
-    this->store_values(2);
-}
-
-void Dialog_addweek::on_spinBox_run_stress_valueChanged(int arg1)
-{
-    Q_UNUSED(arg1)
-    this->sum_stress();
-    this->store_values(3);
-}
-
-void Dialog_addweek::on_spinBox_stg_stress_valueChanged(int arg1)
-{
-    Q_UNUSED(arg1)
-    this->sum_stress();
-    this->store_values(4);
-}
-
-void Dialog_addweek::on_spinBox_alt_stress_valueChanged(int arg1)
-{
-    Q_UNUSED(arg1)
-    this->sum_stress();
-    this->store_values(5);
-}
-
-
-
-
-
