@@ -85,23 +85,15 @@ public:
         painter->save();
         QFont cFont;
         QString levelName,indexData;
-        QStringList levels = settings::get_levelList();
         const QAbstractItemModel *model = index.model();
         cFont.setPixelSize(12);
 
         QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
         levelName = model->data(model->index(index.row(),0,QModelIndex())).toString().trimmed();
         indexData = index.data().toString();
+
         painter->setPen(Qt::black);
-
-        for(int i = 0; i < levels.count(); ++i)
-        {
-            if(levelName == levels.at(i))
-            {
-                painter->fillRect(option.rect,QBrush(settings::get_itemColor(levelName)));
-            }
-        }
-
+        painter->fillRect(option.rect,QBrush(settings::get_itemColor(levelName)));
         painter->setFont(cFont);
         painter->drawText(rect_text,indexData,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->restore();
