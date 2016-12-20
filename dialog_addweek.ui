@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>645</width>
+    <width>657</width>
     <height>311</height>
    </rect>
   </property>
@@ -42,7 +42,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <property name="spacing">
-       <number>15</number>
+       <number>10</number>
       </property>
       <property name="leftMargin">
        <number>5</number>
@@ -155,7 +155,7 @@
    <item>
     <widget class="QFrame" name="frame_values">
      <property name="frameShape">
-      <enum>QFrame::Panel</enum>
+      <enum>QFrame::Box</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
@@ -183,6 +183,12 @@
           <width>0</width>
           <height>60</height>
          </size>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
         </property>
        </widget>
       </item>
