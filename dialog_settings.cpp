@@ -139,6 +139,7 @@ void Dialog_settings::writeChangedValues()
     settings::set_thresValue("hfmax",ui->lineEdit_hfmax->text().toDouble());
     this->writeRangeValues("HF");
 
+    settings::set_gcInfo("gcpath",ui->lineEdit_gcpath->text());
     settings::set_gcInfo("athlete",ui->lineEdit_athlete->text());
     settings::set_gcInfo("yob",ui->lineEdit_yob->text());
     settings::set_gcInfo("folder",ui->lineEdit_activity->text());
@@ -514,6 +515,13 @@ void Dialog_settings::on_dateEdit_saisonEnd_dateChanged(const QDate &enddate)
     this->enableSavebutton();
 }
 
+void Dialog_settings::on_pushButton_gcPath_clicked()
+{
+    QFileDialog dialogGCPath;
+    QString directory = dialogGCPath.getExistingDirectory(0,"Caption",QString(),QFileDialog::ShowDirsOnly);
+    ui->lineEdit_gcpath->setText(QDir::toNativeSeparators(directory));
+}
+
 void Dialog_settings::on_pushButton_schedulePath_clicked()
 {
     QFileDialog dialogSched;
@@ -526,6 +534,12 @@ void Dialog_settings::on_pushButton_workoutsPath_clicked()
     QFileDialog dialogWork;
     QString directory = dialogWork.getExistingDirectory(0,"Caption",QString(),QFileDialog::ShowDirsOnly);
     ui->lineEdit_standard->setText(QDir::toNativeSeparators(directory));
+}
+
+void Dialog_settings::on_lineEdit_gcpath_textChanged(const QString &value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
 }
 
 void Dialog_settings::on_lineEdit_schedule_textChanged(const QString &value)

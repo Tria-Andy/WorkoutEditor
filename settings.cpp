@@ -132,23 +132,25 @@ void settings::loadSettings()
     if(QFile(settingFile).exists())
     {
         QSettings *mysettings = new QSettings(settingFile,QSettings::IniFormat);
-        QString gcPath;
         mysettings->beginGroup("GoldenCheetah");
             gcInfo.insert("regPath",mysettings->value("regPath").toString());
             gcInfo.insert("dir",mysettings->value("dir").toString());
             gcInfo.insert("athlete",mysettings->value("athlete").toString());
             gcInfo.insert("yob",mysettings->value("yob").toString());
             gcInfo.insert("folder",mysettings->value("folder").toString());
+            gcInfo.insert("gcpath",mysettings->value("gcpath").toString());
         mysettings->endGroup();
 
-        QSettings gc_reg(gcInfo.value("regPath"),QSettings::NativeFormat);
-        QString gc_dir = gc_reg.value(gcInfo.value("dir")).toString();
-        gcPath = gc_dir + QDir::separator() + gcInfo.value("athlete") + QDir::separator() + gcInfo.value("folder");
-
+        if(gcInfo.value("gcpath").isEmpty())
+        {
+            QSettings gc_reg(gcInfo.value("regPath"),QSettings::NativeFormat);
+            QString gc_dir = gc_reg.value(gcInfo.value("dir")).toString();
+            QString gcPath = gc_dir + QDir::separator() + gcInfo.value("athlete") + QDir::separator() + gcInfo.value("folder");
+            gcInfo.insert("gcpath",QDir::toNativeSeparators(gcPath));
+        }
         mysettings->beginGroup("Filepath");
             gcInfo.insert("schedule",mysettings->value("schedule").toString());
             gcInfo.insert("workouts",mysettings->value("workouts").toString());
-            gcInfo.insert("gcpath",QDir::toNativeSeparators(gcPath));
             gcInfo.insert("valuefile",mysettings->value("valuefile").toString());
             valueFile = mysettings->value("valuefile").toString();
         mysettings->endGroup();
@@ -416,6 +418,7 @@ void settings::saveSettings()
         mysettings->setValue("athlete",gcInfo.value("athlete"));
         mysettings->setValue("yob",gcInfo.value("yob"));
         mysettings->setValue("folder",gcInfo.value("folder"));
+        mysettings->setValue("gcpath",gcInfo.value("gcpath"));
     mysettings->endGroup();
 
     mysettings->beginGroup("Filepath");

@@ -67,6 +67,8 @@ private slots:
     void on_tableView_hf_doubleClicked(const QModelIndex &index);
     void on_listWidget_useIn_doubleClicked(const QModelIndex &index);
     void on_listWidget_useIn_itemChanged(QListWidgetItem *item);
+    void on_pushButton_gcPath_clicked();
+    void on_lineEdit_gcpath_textChanged(const QString &arg1);
 
 private:
     Ui::Dialog_settings *ui;
