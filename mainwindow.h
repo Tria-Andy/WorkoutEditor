@@ -98,7 +98,7 @@ private:
     bool userSetup,isWeekMode,safeFlag,graphLoaded;
 
     void openPreferences();
-    void set_summerInfo();
+    void set_summeryInfo();
     void summery_view();
     void summery_calc(int,QModelIndex,bool);
     QString set_summeryString(int,bool);

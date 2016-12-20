@@ -162,7 +162,6 @@ QString MainWindow::set_summeryString(int pos,bool week)
     QString sumString;
     QString sum_name = "Summery";
     double percent = 0.0;
-
     if(week)
     {
         if(pos == 0)
@@ -180,12 +179,12 @@ QString MainWindow::set_summeryString(int pos,bool week)
     {
         if(pos == 0)
         {
-            if(dur_sum[5] != 0) percent = (static_cast<double>(dur_sum[5]) / static_cast<double>(dur_sum[5]))*100;
-            sumString = sum_name +"-"+ QString::number(work_sum[5]) +"-"+ settings::set_time(dur_sum[5]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[5]) +"-"+ QString::number(stress_sum[5]);
+            if(dur_sum[sportUse] != 0) percent = (static_cast<double>(dur_sum[sportUse]) / static_cast<double>(dur_sum[sportUse]))*100;
+            sumString = sum_name +"-"+ QString::number(work_sum[sportUse]) +"-"+ settings::set_time(dur_sum[sportUse]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[sportUse]) +"-"+ QString::number(stress_sum[sportUse]);
         }
         else
         {
-            if(dur_sum[pos-1] != 0) percent = (static_cast<double>(dur_sum[pos-1]) / static_cast<double>(dur_sum[5]))*100;
+            if(dur_sum[pos-1] != 0) percent = (static_cast<double>(dur_sum[pos-1]) / static_cast<double>(dur_sum[sportUse]))*100;
             sumString = settings::get_sportList().at(pos-1) +"-"+ QString::number(work_sum[pos-1]) +"-"+ settings::set_time(dur_sum[pos-1]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos-1]) +"-"+QString::number(stress_sum[pos-1]);
         }
     }
@@ -219,7 +218,7 @@ void MainWindow::summery_calc(int pos, QModelIndex index,bool week)
     }
 }
 
-void MainWindow::set_summerInfo()
+void MainWindow::set_summeryInfo()
 {
     if(isWeekMode)
     {
@@ -269,9 +268,10 @@ void MainWindow::summery_view()
     dist_sum.fill(0.0);
     stress_sum.fill(0);
 
+    QStringList sportList = settings::get_sportList();
+
     if(isWeekMode)
     {
-        QStringList sportList = settings::get_sportList();
         list = workSchedule->workout_schedule->findItems(weeknumber,Qt::MatchExactly,0);
         for(int i = 0; i < list.count(); ++i)
         {
@@ -295,10 +295,10 @@ void MainWindow::summery_view()
         {
             for(int row = 0; row < workSchedule->week_content->rowCount(); ++row)
             {
-                for(int col = 2; col < workSchedule->week_content->columnCount(); ++col)
+                for(int col = 0; col < sportUse+1; ++col)
                 {
-                    index = workSchedule->week_content->index(row,col,QModelIndex());
-                    this->summery_calc(col-2,index,isWeekMode);
+                    index = workSchedule->week_content->index(row,col+2,QModelIndex());
+                    this->summery_calc(col,index,isWeekMode);
                 }
             }
             sumValues << this->set_summeryString(0,isWeekMode);
@@ -312,14 +312,14 @@ void MainWindow::summery_view()
                 index = workSchedule->week_meta->indexFromItem(list.at(i));
                 weekID = workSchedule->week_meta->item(index.row(),1)->text();
 
-                for(int x = 0; x < workSchedule->week_content->rowCount(); ++x)
+                for(int row = 0; row < workSchedule->week_content->rowCount(); ++row)
                 {
-                    if(weekID == workSchedule->week_content->data(workSchedule->week_content->index(x,1,QModelIndex())).toString())
+                    if(weekID == workSchedule->week_content->data(workSchedule->week_content->index(row,1,QModelIndex())).toString())
                     {
-                        for(int col = 2; col < workSchedule->week_content->columnCount(); ++col)
+                        for(int col = 0; col < sportUse+1; ++col)
                         {
-                            index = workSchedule->week_content->index(x,col,QModelIndex());
-                            this->summery_calc(col-2,index,isWeekMode);
+                            index = workSchedule->week_content->index(row,col+2,QModelIndex());
+                            this->summery_calc(col,index,isWeekMode);
                         }
                     }
                 }
@@ -339,7 +339,7 @@ void MainWindow::summery_view()
         sum_model->insertRow(rowcount,QModelIndex());
         sum_model->setData(sum_model->index(i,0,QModelIndex()),sumValues.at(i));
     }
-    this->set_summerInfo();
+    this->set_summeryInfo();
 }
 
 void MainWindow::workout_calendar()
@@ -1583,7 +1583,30 @@ void MainWindow::on_actionIntervall_Editor_triggered()
 
 void MainWindow::on_actionPreferences_triggered()
 {
-    this->openPreferences();
+    int dialog_code;
+    Dialog_settings dia_settings(this);
+    dia_settings.setModal(true);
+    dialog_code = dia_settings.exec();
+    if(dialog_code == QDialog::Rejected)
+    {
+        if(settings::get_sportUseList().count() != sportUse)
+        {
+            ui->comboBox_schedMode->setCurrentIndex(0);
+            ui->comboBox_schedMode->setEnabled(false);
+
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::information(this,
+                                          tr("Restart!"),
+                                          "You changed Sport List used for Year Planning.\n WorkoutEditor has to be restarted!",
+                                          QMessageBox::Ok
+                                          );
+            if (reply == QMessageBox::Ok)
+            {
+                close();
+            }
+        }
+    }
+
 }
 
 void MainWindow::on_actionPace_Calculator_triggered()
