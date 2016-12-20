@@ -81,10 +81,10 @@ private:
     QStringList modus_list,cal_header,year_header,schedMode;
 
     //Intervall Chart
-    QVector<double> xTicker,speedValues,polishValues,speedMinMax,rangeMinMax;
+    QVector<double> secTicker,speedValues,polishValues,speedMinMax,rangeMinMax;
     void set_speedValues(int);
-    void set_speedgraph(double);
-    void set_speedPlot(double);
+    void set_speedgraph(double,double);
+    void set_speedPlot(double,double);
     void set_polishValues(int,double);
 
     int sel_count,sportUse;

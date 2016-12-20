@@ -45,7 +45,6 @@ private:
     void adjust_intervalls();
     void set_edit_samp_model(int);
 
-    double get_int_distance(int,bool);
     double get_int_value(int,int,bool);
     double interpolate_speed(int,int,double);
 
@@ -69,6 +68,7 @@ public:
     QStandardItemModel * set_int_model_pointer(bool);
     QStandardItemModel * set_samp_model_pointer(bool);
     void recalculate_intervalls(bool);
+    double get_int_distance(int,bool);
     int get_int_duration(int,bool);
     int get_int_pace(int,bool);
     double get_int_speed(int,bool);

@@ -990,7 +990,7 @@ void MainWindow::set_activty_intervalls()
 void MainWindow::set_polishValues(int lap,double factor)
 {
     double avg = curr_activity->get_int_speed(lap,settings::get_act_isrecalc());
-
+    double intdist = curr_activity->get_int_distance(lap,settings::get_act_isrecalc());
     for(int i = 0; i < speedValues.count(); ++i)
     {
         if(lap == 0 && i < 5)
@@ -1002,7 +1002,7 @@ void MainWindow::set_polishValues(int lap,double factor)
             polishValues[i] = curr_activity->polish_SpeedValues(speedValues[i],avg,0.10-factor,true);
         }
     }
-    this->set_speedPlot(avg);
+    this->set_speedPlot(avg,intdist);
 }
 
 void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
@@ -1030,11 +1030,14 @@ void MainWindow::on_comboBox_intervals_currentIndexChanged(int index)
 void MainWindow::set_speedValues(int index)
 {
     int lapLen;
-    ui->lineEdit_lapTime->setText(settings::set_time(curr_activity->get_int_duration(index,settings::get_act_isrecalc())));
-    ui->lineEdit_lapPace->setText(settings::set_time(curr_activity->get_int_pace(index,settings::get_act_isrecalc())));
-    ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,settings::get_act_isrecalc())));
-    double avg = curr_activity->get_int_speed(index,settings::get_act_isrecalc());
     double current = 0;
+    bool recalc = settings::get_act_isrecalc();
+    double avg = curr_activity->get_int_speed(index,recalc);
+    double intdist = curr_activity->get_int_distance(index,recalc);
+    ui->lineEdit_lapTime->setText(settings::set_time(curr_activity->get_int_duration(index,recalc)));
+    ui->lineEdit_lapDistance->setText(QString::number(intdist));
+    ui->lineEdit_lapPace->setText(settings::set_time(curr_activity->get_int_pace(index,recalc)));
+    ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,recalc)));
 
     int start = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(index,1,QModelIndex())).toInt();
     int stop = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(index,2,QModelIndex())).toInt();
@@ -1046,22 +1049,22 @@ void MainWindow::set_speedValues(int index)
 
     speedValues.resize(lapLen+1);
     polishValues.resize(lapLen+1);
-    xTicker.resize(lapLen+1);
+    secTicker.resize(lapLen+1);
 
     for(int i = start, pos=0; i <= stop; ++i,++pos)
     {
         current = curr_activity->sampSpeed[i];
-        xTicker[pos] = pos;
+        secTicker[pos] = pos;
         speedValues[pos] = current;
         if(speedMinMax[0] > current) rangeMinMax[0] = speedMinMax[0] = current;
         if(speedMinMax[1] < current) rangeMinMax[1] = speedMinMax[1] = current;
     }
 
     if(curr_activity->get_sport() != settings::isSwim) this->set_polishValues(index,0.0);
-    this->set_speedgraph(avg);
+    this->set_speedgraph(avg,intdist);
 }
 
-void MainWindow::set_speedgraph(double avg)
+void MainWindow::set_speedgraph(double avg,double intdist)
 {
     QFont plotFont;
     plotFont.setBold(true);
@@ -1071,7 +1074,8 @@ void MainWindow::set_speedgraph(double avg)
     ui->widget_plot->xAxis->setLabelFont(plotFont);
     ui->widget_plot->xAxis2->setVisible(true);
     ui->widget_plot->xAxis2->setLabelFont(plotFont);
-    ui->widget_plot->xAxis2->setTickLabels(false);
+    ui->widget_plot->xAxis2->setLabel("Distance");
+    ui->widget_plot->xAxis2->setTickLabels(true);
     ui->widget_plot->yAxis->setLabel("Speed");
     ui->widget_plot->yAxis->setLabelFont(plotFont);
     ui->widget_plot->yAxis2->setVisible(true);
@@ -1079,10 +1083,10 @@ void MainWindow::set_speedgraph(double avg)
     ui->widget_plot->legend->setVisible(true);
     ui->widget_plot->legend->setFont(plotFont);
 
-    this->set_speedPlot(avg);
+    this->set_speedPlot(avg,intdist);
 }
 
-void MainWindow::set_speedPlot(double avgSpeed)
+void MainWindow::set_speedPlot(double avgSpeed,double intdist)
 {
     int minValue = 5;
     ui->widget_plot->clearPlottables();
@@ -1093,7 +1097,7 @@ void MainWindow::set_speedPlot(double avgSpeed)
     QCPGraph *speedLine = ui->widget_plot->addGraph();
     speedLine->setName("Speed");
     speedLine->setLineStyle(QCPGraph::lsLine);
-    speedLine->setData(xTicker,speedValues);
+    speedLine->setData(secTicker,speedValues);
     speedLine->setPen(QPen(QColor(0,255,0),2));
 
     QCPItemLine *avgLine = new QCPItemLine(ui->widget_plot);
@@ -1110,7 +1114,7 @@ void MainWindow::set_speedPlot(double avgSpeed)
         QCPGraph *polishLine = ui->widget_plot->addGraph();
         polishLine->setName("Polished Speed");
         polishLine->setLineStyle(QCPGraph::lsLine);
-        polishLine->setData(xTicker,polishValues);
+        polishLine->setData(secTicker,polishValues);
         polishLine->setPen(QPen(QColor(255,0,0),2));
 
         QCPGraph *polishRangeP = ui->widget_plot->addGraph();
@@ -1129,9 +1133,11 @@ void MainWindow::set_speedPlot(double avgSpeed)
         minValue = 0;
     }
 
+    ui->widget_plot->xAxis->setRange(0,speedValues.count());
+    ui->widget_plot->xAxis2->setRange(0,intdist);
     ui->widget_plot->yAxis->setRange(speedMinMax[0]-minValue,speedMinMax[1]+2);
     ui->widget_plot->yAxis2->setRange(speedMinMax[0]-minValue,speedMinMax[1]+2);
-    ui->widget_plot->xAxis->setRange(0,speedValues.count());
+
     ui->widget_plot->replot();
 }
 
