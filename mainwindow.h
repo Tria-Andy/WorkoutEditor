@@ -78,7 +78,7 @@ private:
     del_intselect intSelect_del;
     del_level level_del;
     QStandardItemModel *calendar_model,*sum_model;
-    QStringList modus_list,cal_header,work_list,sum_name,year_header,schedMode,sum_header;
+    QStringList modus_list,cal_header,year_header,schedMode;
 
     //Intervall Chart
     QVector<double> xTicker,speedValues,polishValues,speedMinMax,rangeMinMax;
@@ -87,7 +87,7 @@ private:
     void set_speedPlot(double);
     void set_polishValues(int,double);
 
-    int fontSize,sel_count,sportUse;
+    int sel_count,sportUse;
     QDate selectedDate,firstdayofweek;
     QString weeknumber,phaseFilter;
     QVector<int> work_sum,dur_sum,stress_sum;

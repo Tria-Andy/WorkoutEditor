@@ -32,10 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     sportCounter = settings::get_sportList().count();
     graphLoaded = false;
     workSchedule = new schedule();
-    work_list << "Phase:" << "Week:" << "Date:" << "Time:" << "Sport:" << "Code:" << "Title:" << "Duration:" << "Distance:" << "Stress:";
-    sum_name << "Workouts:" << "Duration:" << "Distance:" << "StressScore:";
     schedMode << "Week" << "Year";
-    sum_header << "Summery:";    
     sportUse = settings::get_sportUseList().count();
     selectedDate = QDate::currentDate();
     firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
@@ -57,7 +54,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pushButton_ClearWorkContent->setEnabled(false);
     ui->pushButton_sync->setEnabled(false);
     ui->pushButton_putInt->setEnabled(false);
-    fontSize = 10;
     cal_header << "Week";
     for(int d = 1; d < 8; ++d)
     {
@@ -89,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QCPLayoutGrid *subLayout = new QCPLayoutGrid;
     ui->widget_plot->plotLayout()->addElement(1,0,subLayout);
-    subLayout->setMargins(QMargins(400,0,400,5));
+    subLayout->setMargins(QMargins(300,0,300,5));
     subLayout->addElement(0,0,ui->widget_plot->legend);
 
     this->set_menuItems(false,true);
@@ -251,7 +247,7 @@ void MainWindow::set_summerInfo()
 void MainWindow::summery_view()
 {
     sum_model->clear();
-    sum_model->setHorizontalHeaderLabels(sum_header);
+    sum_model->setColumnCount(1);
     ui->tableView_summery->setModel(sum_model);
     ui->tableView_summery->verticalHeader()->resetDefaultSectionSize();
     ui->tableView_summery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -275,44 +271,17 @@ void MainWindow::summery_view()
 
     if(isWeekMode)
     {
+        QStringList sportList = settings::get_sportList();
         list = workSchedule->workout_schedule->findItems(weeknumber,Qt::MatchExactly,0);
-
         for(int i = 0; i < list.count(); ++i)
         {
             index = workSchedule->workout_schedule->indexFromItem(list.at(i));
-            sport = workSchedule->workout_schedule->item(index.row(),3)->text();
-
-            if(sport != settings::isOther)
-            {
-                this->summery_calc(0,index,isWeekMode);
-            }
-            if(sport == settings::isSwim)
-            {
-                this->summery_calc(1,index,isWeekMode);
-            }
-            if(sport == settings::isBike)
-            {
-                this->summery_calc(2,index,isWeekMode);
-            }
-            if(sport == settings::isRun)
-            {
-                this->summery_calc(3,index,isWeekMode);
-            }
-            if(sport == settings::isStrength)
-            {
-                this->summery_calc(4,index,isWeekMode);
-            }
-            if(sport == settings::isAlt)
-            {
-                this->summery_calc(5,index,isWeekMode);
-            }
-            if(sport == settings::isTria)
-            {
-                this->summery_calc(6,index,isWeekMode);
-            }
+            sport = workSchedule->workout_schedule->item(index.row(),3)->text().trimmed();
+            this->summery_calc(0,index,isWeekMode);
+            this->summery_calc(sportList.indexOf(sport)+1,index,isWeekMode);
         }
 
-        for(int i = 0; i < 7; ++i)
+        for(int i = 0; i < sportList.count(); ++i)
         {
             if(work_sum[i] > 0)
             {

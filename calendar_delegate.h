@@ -37,7 +37,6 @@ public:
         painter->save();
         QFont phase_font,date_font, work_font;
         QString temp_value,dayDate;
-        QString emptyPhase = settings::get_gcInfo("emptyPhase");
         QStringList phaseList = settings::get_phaseList();
         QStringList sportList = settings::get_sportList();
         QStringList calendar_values;
