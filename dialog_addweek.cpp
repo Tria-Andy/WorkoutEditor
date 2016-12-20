@@ -37,8 +37,6 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
     this->fill_values(sel_week);
 }
 
-enum{SUMMERY,SWIM,BIKE,RUN};
-
 Dialog_addweek::~Dialog_addweek()
 {
     delete ui;
@@ -89,6 +87,7 @@ void Dialog_addweek::fill_values(QString selWeek)
     if(!content.isEmpty())
     {
         index = workSched->week_content->indexFromItem(content.at(0));
+
         for(int i = 2,row = 0; i < listCount+2; ++i,++row)
         {            
             value = workSched->week_content->item(index.row(),i)->text();
@@ -107,6 +106,7 @@ void Dialog_addweek::fill_values(QString selWeek)
             weekModel->setData(weekModel->index(row,5,QModelIndex()),settings::get_workout_pace(dist.toDouble(),duration,sportuseList.at(row),false));
             weekModel->setData(weekModel->index(row,6,QModelIndex()),stress.toInt());        
         }
+
         weekModel->setData(weekModel->index(listCount,0,QModelIndex()),"Summery");
         weekModel->setData(weekModel->index(listCount,1,QModelIndex()),this->sum_int(weekModel,&sportuseList,1));
         weekModel->setData(weekModel->index(listCount,2,QModelIndex()),this->sum_time(weekModel,&sportuseList,2));
@@ -135,7 +135,7 @@ void Dialog_addweek::fill_values(QString selWeek)
     for(int i = 0; i < listCount; ++i)
     {
         timePart = settings::get_timesec(weekModel->data(weekModel->index(i,2,QModelIndex())).toTime().toString(timeFormat));
-        weekModel->setData(weekModel->index(i,3,QModelIndex()),week_del.calc_percent(timeSum,timePart));
+        weekModel->setData(weekModel->index(i,3,QModelIndex()),this->calc_percent(timeSum,timePart));
     }
 }
 
@@ -164,7 +164,6 @@ void Dialog_addweek::store_values()
                     << weekID
                     << this->create_values();
     }
-
 }
 
 QStringList Dialog_addweek::create_values()
@@ -238,6 +237,19 @@ void Dialog_addweek::on_pushButton_ok_clicked()
     }
     accept();
 }
+
+double Dialog_addweek::calc_percent(int sum, int part)
+{
+    if(sum > 0 && part > 0)
+    {
+        return settings::set_doubleValue(static_cast<double>(part) / static_cast<double>(sum)*100.0,false);
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 int Dialog_addweek::sum_int(QStandardItemModel *model,QStringList *list, int col)
 {
     int sum = 0;

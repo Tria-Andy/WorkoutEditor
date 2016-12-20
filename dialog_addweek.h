@@ -51,6 +51,7 @@ private:
     QStringList sportuseList,weekHeader,weekMeta,weekContent;
     bool update;
 
+    double calc_percent(int, int);
     int sum_int(QStandardItemModel *,QStringList *, int);
     double sum_double(QStandardItemModel *,QStringList *, int);
     QTime sum_time(QStandardItemModel *,QStringList *, int);

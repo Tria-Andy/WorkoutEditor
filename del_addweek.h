@@ -61,15 +61,15 @@ public:
         }
         if(index.column() == 2 && index.row() != listCount)
         {
-            QTime value = index.model()->data(index,Qt::EditRole).toTime();
+            QTime dura = index.model()->data(index,Qt::EditRole).toTime();
             QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
-            timeEdit->setTime(value);
+            timeEdit->setTime(dura);
         }
         if(index.column() == 4 && index.row() != listCount)
         {
-            double value = index.model()->data(index, Qt::EditRole).toDouble();
+            double dist = index.model()->data(index, Qt::EditRole).toDouble();
             QDoubleSpinBox *doublespinBox = static_cast<QDoubleSpinBox*>(editor);
-            doublespinBox->setValue(value);
+            doublespinBox->setValue(dist);
         }
     }
 
@@ -89,35 +89,38 @@ public:
         if(index.column() == 1 && index.row() != listCount)
         {
             QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-            int value = spinBox->value();
+            int works = spinBox->value();
             spinBox->interpretText();
-            model->setData(index,value);
+            model->setData(index,works);
             model->setData(sum_index,sum_int(model,&sportList,1));
         }
         if(index.column() == 2 && index.row() != listCount)
         {
             QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
-            QTime value = timeEdit->time();
+            QTime dura = timeEdit->time();
             timeEdit->interpretText();
-            model->setData(index,value);
+            model->setData(index,dura);
             model->setData(sum_index,sum_time(model,&sportList,2));
-            model->setData(model->index(index.row(),6,QModelIndex()),round(settings::get_timesec(value.toString("hh:mm"))*factor));
+            model->setData(model->index(index.row(),6,QModelIndex()),round(get_timeMin(dura)*factor));
             model->setData(model->index(listCount,6,QModelIndex()),sum_int(model,&sportList,6));
+            calc_percent(&sportList,model);
+            setPace(model,index.row());
         }
         if(index.column() == 4 && index.row() != listCount)
         {
             QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
             spinBox->interpretText();
-            double value = spinBox->value();
-            model->setData(index, value, Qt::EditRole);
+            double dist = spinBox->value();
+            model->setData(index, dist, Qt::EditRole);
             model->setData(sum_index,sum_double(model,&sportList,4));
+            setPace(model,index.row());
         }
         if(index.column() == 6 && index.row() != listCount)
         {
             QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-            int value = spinBox->value();
+            int stress = spinBox->value();
             spinBox->interpretText();
-            model->setData(index,value);
+            model->setData(index,stress);
             model->setData(sum_index,sum_int(model,&sportList,6));
         }
     }
@@ -158,15 +161,33 @@ public:
         painter->restore();
     }
 
-    double calc_percent(int sum, int part)
+    int get_timeMin(QTime time) const
     {
-        if(sum > 0 && part > 0)
+        int minutes;
+        minutes = time.hour() * 60;
+        minutes = minutes + time.minute();
+        return minutes;
+    }
+
+    void setPace(QAbstractItemModel *model,int row) const
+    {
+        QString sport = model->data(model->index(row,0,QModelIndex())).toString();
+        double dist = model->data(model->index(row,4,QModelIndex())).toDouble();
+        QTime dura = model->data(model->index(row,2,QModelIndex())).toTime();
+        model->setData(model->index(row,5,QModelIndex()),settings::get_workout_pace(dist,dura,sport,false));
+    }
+
+    void calc_percent(QStringList *list,QAbstractItemModel *model) const
+    {
+        int sum = 0,part = 0;
+        sum = get_timeMin(model->data(model->index(list->count(),2,QModelIndex())).toTime());
+        if(sum > 0)
         {
-            return settings::set_doubleValue(static_cast<double>(part) / static_cast<double>(sum)*100.0,false);
-        }
-        else
-        {
-            return 0;
+            for(int i = 0; i < list->count(); ++i)
+            {
+                part = get_timeMin(model->data(model->index(i,2,QModelIndex())).toTime());
+                model->setData(model->index(i,3,QModelIndex()),settings::set_doubleValue(static_cast<double>(part) / static_cast<double>(sum)*100.0,false));
+            }
         }
     }
 
