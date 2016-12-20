@@ -195,7 +195,16 @@ void settings::loadSettings()
             if(sportuse_childs.isEmpty())
             {
                 sportuse_childs = myvalues->value("sports").toString();
-                myvalues->setValue("sportuse",sportuse_childs);
+                QStringList tempUse(sportuse_childs.split(splitter));
+                if(tempUse.count() > 5)
+                {
+                    for(int i = 5; i < tempUse.count();++i)
+                    {
+                        tempUse.removeAt(i);
+                    }
+                    tempUse.removeLast();
+                }
+                myvalues->setValue("sportuse",settings::setSettingString(tempUse));
             }
         myvalues->endGroup();
 
