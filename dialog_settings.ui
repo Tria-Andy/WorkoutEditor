@@ -53,9 +53,9 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>5</number>
         </property>
-        <widget class="QWidget" name="tab">
+        <widget class="QWidget" name="tab_gc">
          <attribute name="title">
           <string>Golden Cheetah</string>
          </attribute>
@@ -125,15 +125,15 @@
             <widget class="QLineEdit" name="lineEdit_activity"/>
            </item>
            <item row="0" column="2">
-            <widget class="QPushButton" name="pushButton_gcPath">
-             <property name="maximumSize">
-              <size>
-               <width>25</width>
-               <height>16777215</height>
-              </size>
-             </property>
+            <widget class="QToolButton" name="toolButton_gcPath">
              <property name="text">
               <string>...</string>
+             </property>
+             <property name="popupMode">
+              <enum>QToolButton::InstantPopup</enum>
+             </property>
+             <property name="autoRaise">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -186,32 +186,6 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
-            <widget class="QPushButton" name="pushButton_schedulePath">
-             <property name="maximumSize">
-              <size>
-               <width>25</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>...</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QPushButton" name="pushButton_workoutsPath">
-             <property name="maximumSize">
-              <size>
-               <width>25</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>...</string>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="0">
             <widget class="QLabel" name="label_2">
              <property name="text">
@@ -222,10 +196,39 @@
            <item row="2" column="1">
             <widget class="QLineEdit" name="lineEdit_configfile"/>
            </item>
+           <item row="0" column="2">
+            <widget class="QToolButton" name="toolButton_schedulePath">
+             <property name="text">
+              <string>...</string>
+             </property>
+             <property name="popupMode">
+              <enum>QToolButton::InstantPopup</enum>
+             </property>
+             <property name="autoRaise">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QToolButton" name="toolButton_workoutsPath">
+             <property name="text">
+              <string>...</string>
+             </property>
+             <property name="popupMode">
+              <enum>QToolButton::InstantPopup</enum>
+             </property>
+             <property name="autoRaise">
+              <bool>true</bool>
+             </property>
+             <property name="arrowType">
+              <enum>Qt::NoArrow</enum>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </widget>
-        <widget class="QWidget" name="tab_2">
+        <widget class="QWidget" name="tab_select">
          <attribute name="title">
           <string>Selections</string>
          </attribute>
@@ -622,6 +625,9 @@
                 <enum>QFrame::Raised</enum>
                </property>
                <layout class="QFormLayout" name="formLayout_3">
+                <property name="verticalSpacing">
+                 <number>5</number>
+                </property>
                 <property name="leftMargin">
                  <number>1</number>
                 </property>
@@ -641,44 +647,38 @@
                   </property>
                  </widget>
                 </item>
-                <item row="0" column="1">
-                 <widget class="QLineEdit" name="lineEdit_thresPower"/>
-                </item>
-                <item row="1" column="0">
+                <item row="2" column="0">
                  <widget class="QLabel" name="label_9">
                   <property name="text">
                    <string>Pace:</string>
                   </property>
                  </widget>
                 </item>
-                <item row="1" column="1">
-                 <widget class="QLineEdit" name="lineEdit_thresPace"/>
-                </item>
-                <item row="2" column="0">
+                <item row="4" column="0">
                  <widget class="QLabel" name="label_10">
                   <property name="text">
                    <string>Speed:</string>
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="1">
+                <item row="4" column="1">
                  <widget class="QLineEdit" name="lineEdit_speed">
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="1">
+                <item row="6" column="1">
                  <widget class="QDoubleSpinBox" name="doubleSpinBox_factor"/>
                 </item>
-                <item row="4" column="0">
+                <item row="6" column="0">
                  <widget class="QLabel" name="label_17">
                   <property name="text">
                    <string>Factor:</string>
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="1">
+                <item row="5" column="1">
                  <spacer name="verticalSpacer_5">
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
@@ -690,6 +690,20 @@
                    </size>
                   </property>
                  </spacer>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QSpinBox" name="spinBox_thresPower">
+                  <property name="maximum">
+                   <number>500</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QTimeEdit" name="timeEdit_thresPace">
+                  <property name="displayFormat">
+                   <string>mm:ss</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </widget>
@@ -722,7 +736,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tab_3">
+        <widget class="QWidget" name="tab_hf">
          <attribute name="title">
           <string>HF</string>
          </attribute>
@@ -746,9 +760,6 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="lineEdit_hfThres"/>
-             </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_12">
                <property name="text">
@@ -756,8 +767,19 @@
                </property>
               </widget>
              </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="spinBox_hfThres">
+               <property name="maximum">
+                <number>300</number>
+               </property>
+              </widget>
+             </item>
              <item row="1" column="1">
-              <widget class="QLineEdit" name="lineEdit_hfmax"/>
+              <widget class="QSpinBox" name="spinBox_hfMax">
+               <property name="maximum">
+                <number>300</number>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -767,7 +789,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tab_4">
+        <widget class="QWidget" name="tab_saison">
          <attribute name="title">
           <string>Saison</string>
          </attribute>
@@ -857,6 +879,29 @@
           </layout>
          </widget>
         </widget>
+        <widget class="QWidget" name="tab_lts">
+         <attribute name="title">
+          <string>LongTermStress</string>
+         </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <widget class="QGroupBox" name="groupBox_6">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="title">
+             <string>Edit Values</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QListWidget" name="listWidget_stressValue"/>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -925,9 +970,7 @@
   <tabstop>lineEdit_yob</tabstop>
   <tabstop>lineEdit_activity</tabstop>
   <tabstop>lineEdit_schedule</tabstop>
-  <tabstop>pushButton_schedulePath</tabstop>
   <tabstop>lineEdit_standard</tabstop>
-  <tabstop>pushButton_workoutsPath</tabstop>
   <tabstop>lineEdit_configfile</tabstop>
   <tabstop>pushButton_save</tabstop>
   <tabstop>pushButton_cancel</tabstop>
@@ -937,19 +980,15 @@
   <tabstop>pushButton_up</tabstop>
   <tabstop>tableView_level</tabstop>
   <tabstop>comboBox_thresSport</tabstop>
-  <tabstop>lineEdit_thresPower</tabstop>
   <tabstop>lineEdit_speed</tabstop>
   <tabstop>listWidget_selection</tabstop>
   <tabstop>doubleSpinBox_factor</tabstop>
   <tabstop>pushButton_delete</tabstop>
-  <tabstop>lineEdit_hfThres</tabstop>
-  <tabstop>lineEdit_hfmax</tabstop>
   <tabstop>tableView_hf</tabstop>
   <tabstop>lineEdit_saisonWeeks</tabstop>
   <tabstop>lineEdit_saison</tabstop>
   <tabstop>dateEdit_saisonStart</tabstop>
   <tabstop>dateEdit_saisonEnd</tabstop>
-  <tabstop>lineEdit_thresPace</tabstop>
   <tabstop>lineEdit_startWeek</tabstop>
   <tabstop>pushButton_color</tabstop>
   <tabstop>pushButton_add</tabstop>
