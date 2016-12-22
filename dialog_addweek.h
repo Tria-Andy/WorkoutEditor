@@ -46,15 +46,9 @@ private:
     schedule *workSched;
     del_addweek week_del;
     QStandardItemModel *weekModel;
-    QHash<QString,QString> sportValues;
     QString openID,selYear,weekID,timeFormat,empty;
     QStringList sportuseList,weekHeader,weekMeta,weekContent;
     bool update;
-
-    double calc_percent(int, int);
-    int sum_int(QStandardItemModel *,QStringList *, int);
-    double sum_double(QStandardItemModel *,QStringList *, int);
-    QTime sum_time(QStandardItemModel *,QStringList *, int);
 
     void fill_values(QString);
     QStringList create_values();

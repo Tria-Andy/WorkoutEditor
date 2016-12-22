@@ -57,7 +57,6 @@ void Dialog_addweek::fill_values(QString selWeek)
     QTime duration;
     QString value,work,dura,dist,stress;
     QStringList values;
-    int timeSum,timePart;
     int listCount = sportuseList.count();
 
     weekModel = new QStandardItemModel(sportuseList.count()+1,7);
@@ -67,6 +66,8 @@ void Dialog_addweek::fill_values(QString selWeek)
     ui->tableView_sportValues->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_sportValues->verticalHeader()->hide();
     ui->tableView_sportValues->setItemDelegate(&week_del);
+
+    QAbstractItemModel *ab_model = ui->tableView_sportValues->model();
 
     if(!meta.isEmpty())
     {
@@ -108,12 +109,12 @@ void Dialog_addweek::fill_values(QString selWeek)
         }
 
         weekModel->setData(weekModel->index(listCount,0,QModelIndex()),"Summery");
-        weekModel->setData(weekModel->index(listCount,1,QModelIndex()),this->sum_int(weekModel,&sportuseList,1));
-        weekModel->setData(weekModel->index(listCount,2,QModelIndex()),this->sum_time(weekModel,&sportuseList,2));
+        weekModel->setData(weekModel->index(listCount,1,QModelIndex()),week_del.sum_int(ab_model,&sportuseList,1));
+        weekModel->setData(weekModel->index(listCount,2,QModelIndex()),week_del.sum_time(ab_model,&sportuseList,2));
         weekModel->setData(weekModel->index(listCount,3,QModelIndex()),100);
-        weekModel->setData(weekModel->index(listCount,4,QModelIndex()),settings::set_doubleValue(this->sum_double(weekModel,&sportuseList,4),false));
+        weekModel->setData(weekModel->index(listCount,4,QModelIndex()),settings::set_doubleValue(week_del.sum_double(ab_model,&sportuseList,4),false));
         weekModel->setData(weekModel->index(listCount,5,QModelIndex()),"--");
-        weekModel->setData(weekModel->index(listCount,6,QModelIndex()),this->sum_int(weekModel,&sportuseList,6));
+        weekModel->setData(weekModel->index(listCount,6,QModelIndex()),week_del.sum_int(ab_model,&sportuseList,6));
     }
     else
     {
@@ -130,13 +131,7 @@ void Dialog_addweek::fill_values(QString selWeek)
         weekModel->setData(weekModel->index(listCount,0,QModelIndex()),"Summery");
     }
 
-    timeSum = settings::get_timesec(weekModel->data(weekModel->index(listCount,2,QModelIndex())).toTime().toString(timeFormat));
-    timePart = 0;
-    for(int i = 0; i < listCount; ++i)
-    {
-        timePart = settings::get_timesec(weekModel->data(weekModel->index(i,2,QModelIndex())).toTime().toString(timeFormat));
-        weekModel->setData(weekModel->index(i,3,QModelIndex()),this->calc_percent(timeSum,timePart));
-    }
+    week_del.calc_percent(&sportuseList,ab_model);
 }
 
 void Dialog_addweek::store_values()
@@ -236,48 +231,4 @@ void Dialog_addweek::on_pushButton_ok_clicked()
         }
     }
     accept();
-}
-
-double Dialog_addweek::calc_percent(int sum, int part)
-{
-    if(sum > 0 && part > 0)
-    {
-        return settings::set_doubleValue(static_cast<double>(part) / static_cast<double>(sum)*100.0,false);
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-int Dialog_addweek::sum_int(QStandardItemModel *model,QStringList *list, int col)
-{
-    int sum = 0;
-    for(int i = 0; i < list->count(); ++i)
-    {
-       sum = sum + model->data(model->index(i,col,QModelIndex())).toInt();
-    }
-    return sum;
-}
-
-double Dialog_addweek::sum_double(QStandardItemModel *model,QStringList *list, int col)
-{
-    double sum = 0;
-    for(int i = 0; i < list->count(); ++i)
-    {
-       sum = sum + model->data(model->index(i,col,QModelIndex())).toDouble();
-    }
-    return sum;
-}
-
-QTime Dialog_addweek::sum_time(QStandardItemModel *model,QStringList *list, int col)
-{
-    QTime sum(0,0,0);
-    QString sportTime;
-    for(int i = 0; i < list->count(); ++i)
-    {
-       sportTime =  model->data(model->index(i,col,QModelIndex())).toTime().toString(timeFormat);
-       sum = sum.addSecs(settings::get_timesec(sportTime));
-    }
-    return sum;
 }
