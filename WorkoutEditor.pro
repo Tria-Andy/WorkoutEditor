@@ -16,7 +16,7 @@ TEMPLATE = app
 #Application version
 VERSION_MAJOR = 1
 VERSION_MINOR = 1
-VERSION_BUILD = 8
+VERSION_BUILD = 9
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
        "VERSION_BUILD=$$VERSION_BUILD"
@@ -59,7 +59,6 @@ HEADERS  += mainwindow.h \
     dialog_workouts.h \
     activity.h \
     del_spinbox_int.h \
-    del_spinbox_double.h \
     dialog_stresscalc.h \
     qcustomplot.h \
     week_popup.h \
