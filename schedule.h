@@ -35,15 +35,17 @@ public:
     schedule();
     QStandardItemModel *workout_schedule,*week_meta,*week_content;
     void check_workoutFiles();
-    void load_workouts_file();
-    void save_workout_file();
-    void read_workout_values(QDomDocument);
-    void read_week_values(QDomDocument,QDomDocument);
-    void save_week_files();
+    void load_workoutsFiles();
+    void save_dayWorkouts();
+    void read_dayWorkouts(QDomDocument);
+    void read_weekPlan(QDomDocument,QDomDocument);
+    void read_ltsFile(QDomDocument);
+    void save_weekPlan();
     void changeYear();
     QString get_weekPhase(QDate);
     void copyWeek(QString,QString);
     void deleteWeek(QString);
+    QMap<QDate,int> *get_StressMap() {return &stressValues;}
 
 //Workout
     //Setter
@@ -67,6 +69,8 @@ private:
     QStringList workoutTags,metaTags,contentTags;
     QString schedulePath;
     QDate firstdayofweek;
+    QMap<QDate,int> stressValues;
+    void updateStress(QString,int,bool);
 
     //Workout Var
     QString workout_date;

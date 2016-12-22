@@ -436,6 +436,7 @@ void MainWindow::workout_calendar()
 
           calendar_model->setHorizontalHeaderLabels(year_header);
           ui->tableView_cal->setModel(calendar_model);
+          ui->tableView_cal->setEditTriggers(QAbstractItemView::NoEditTriggers);
           ui->tableView_cal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
           ui->tableView_cal->verticalHeader()->hide();
           ui->tableView_cal->setItemDelegate(&week_del);
@@ -568,7 +569,7 @@ void MainWindow::on_actionSave_Workout_Schedule_triggered()
                                       );
         if (reply == QMessageBox::Yes)
         {
-            workSchedule->save_workout_file();
+            workSchedule->save_dayWorkouts();
             ui->actionSave_Workout_Schedule->setEnabled(false);
             safeFlag = false;
         }
@@ -583,7 +584,7 @@ void MainWindow::on_actionSave_Workout_Schedule_triggered()
                                           );
         if (reply == QMessageBox::Yes)
         {
-            workSchedule->save_week_files();
+            workSchedule->save_weekPlan();
             ui->actionSave_Workout_Schedule->setEnabled(false);
             safeFlag = false;
         }
@@ -1088,7 +1089,6 @@ void MainWindow::set_speedgraph(double avg,double intdist)
 
 void MainWindow::set_speedPlot(double avgSpeed,double intdist)
 {
-    int minValue = 5;
     ui->widget_plot->clearPlottables();
     ui->widget_plot->clearItems();
     ui->widget_plot->legend->setFillOrder(QCPLegend::foColumnsFirst);
@@ -1128,15 +1128,17 @@ void MainWindow::set_speedPlot(double avgSpeed,double intdist)
         polishRange->setBrush(QBrush(QColor(255,255,0,50)));
     }
 
-    if(speedMinMax[0] == 0)
+    double yMin = 0,yMax = 0;
+    if(speedMinMax[0] > 0)
     {
-        minValue = 0;
+        yMin = speedMinMax[0]*0.1;
     }
+    yMax =  speedMinMax[1]*0.1;
 
     ui->widget_plot->xAxis->setRange(0,speedValues.count());
     ui->widget_plot->xAxis2->setRange(0,intdist);
-    ui->widget_plot->yAxis->setRange(speedMinMax[0]-minValue,speedMinMax[1]+2);
-    ui->widget_plot->yAxis2->setRange(speedMinMax[0]-minValue,speedMinMax[1]+2);
+    ui->widget_plot->yAxis->setRange(speedMinMax[0]-yMin,speedMinMax[1]+yMax);
+    ui->widget_plot->yAxis2->setRange(speedMinMax[0]-yMin,speedMinMax[1]+yMax);
 
     ui->widget_plot->replot();
 }
@@ -1392,7 +1394,7 @@ void MainWindow::on_actionExit_triggered()
                                       );
         if (reply == QMessageBox::Yes)
         {
-            workSchedule->save_workout_file();
+            workSchedule->save_dayWorkouts();
             this->freeMem();
             close();
         }
@@ -1411,7 +1413,7 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionExit_and_Save_triggered()
 {
-    workSchedule->save_workout_file();
+    workSchedule->save_dayWorkouts();
     this->freeMem();
 }
 
@@ -1590,7 +1592,7 @@ void MainWindow::on_actionIntervall_Editor_triggered()
 void MainWindow::on_actionPreferences_triggered()
 {
     int dialog_code;
-    Dialog_settings dia_settings(this);
+    Dialog_settings dia_settings(this,workSchedule);
     dia_settings.setModal(true);
     dialog_code = dia_settings.exec();
     if(dialog_code == QDialog::Rejected)
