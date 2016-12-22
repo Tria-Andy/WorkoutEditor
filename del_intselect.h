@@ -68,7 +68,7 @@ public:
         QItemDelegate::paint(painter, option, index);
     }
 
-    protected:
+protected:
     virtual void drawBackground(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         painter->save();
