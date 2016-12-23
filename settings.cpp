@@ -48,6 +48,7 @@ QString settings::isOther;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
 QHash<QString,double> settings::thresholdMap;
+QHash<QString,double> settings::ltsMap;
 QHash<QString,QString> settings::swimRange;
 QHash<QString,QString> settings::bikeRange;
 QHash<QString,QString> settings::runRange;
@@ -230,6 +231,12 @@ void settings::loadSettings()
             }
         myvalues->endGroup();
 //###########################Upgrade values ini done####################################
+
+        myvalues->beginGroup("Common");
+            ltsMap.insert("ltsdays",myvalues->value("ltsdays").toDouble());
+            ltsMap.insert("stsdays",myvalues->value("stsdays").toDouble());
+            ltsMap.insert("lastlts",myvalues->value("lastlts").toDouble());
+        myvalues->endGroup();
 
         myvalues->beginGroup("JsonFile");
             QString json_childs = myvalues->value("actinfo").toString();

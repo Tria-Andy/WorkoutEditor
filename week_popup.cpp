@@ -32,6 +32,8 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
     barSelection << "Duration" << "Distance";
     ui->comboBox_yValue->addItems(barSelection);
     xStress.resize(dayCount);
+    xLTS.resize(dayCount+1);
+    yLTS.resize(dayCount+1);
     yStress.resize(dayCount);
     xBar.resize(dayCount);
     yDura.resize(dayCount);
@@ -70,7 +72,7 @@ void week_popup::set_plotModel()
         weekStart.setTimeSpec(Qt::UTC);
         firstDay = weekStart.date();
 
-        for(int i = 0; i < 7; ++i)
+        for(int i = 0; i < dayCount; ++i)
         {
             weekDates.insert(i,weekStart.addDays(i));
         }
@@ -95,15 +97,43 @@ void week_popup::set_plotModel()
         ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(list.count()));
 
         double dateValue = 0;
+        double ltsDays = settings::get_ltsValue("ltsdays");
+        double lte = (double)exp(-1.0/ltsDays);
+        int ltsStart = -ltsDays;
+        double ltsStress = 0,currStress = 0,pastStress = 0,startLTS = 0;
+        QMap<QDate,double> *stressMap = workSched->get_StressMap();
+        pastStress = settings::get_ltsValue("lastlts");
+
+        for(QMap<QDate,double>::const_iterator it = stressMap->cbegin(), end = stressMap->find(weekDates.at(0).date().addDays(ltsStart)); it != end; ++it)
+        {
+            currStress = it.value();
+            ltsStress = (currStress * (1.0 - lte)) + (pastStress * lte);
+            pastStress = ltsStress;
+        }
+
+        startLTS = pastStress;
+        xLTS[0] = weekDates.at(0).addDays(-1).toTime_t();
 
         for(int i = 0; i < dayCount; ++i)
         {
+            pastStress = startLTS;
             dateValue = weekDates.at(i).toTime_t();
             xStress[i] = dateValue;
             xBar[i] = dateValue;
             xWorks[i] = dateValue;
-        }
+            xLTS[i+1] = dateValue;
 
+            for(int x = ltsStart; x <= 0; ++x)
+            {
+                if(i == 0 && x == 0) yLTS[0] = round(pastStress);
+                currStress = stressMap->value(weekDates.at(i).date().addDays(x));
+                ltsStress = (currStress * (1.0 - lte)) + (pastStress * lte);
+                pastStress = ltsStress;
+                if(x == ltsStart) startLTS = ltsStress;
+
+            }
+            yLTS[i+1] = round(ltsStress);
+        }
         workoutDate.setTimeSpec(Qt::UTC);
 
         for(int i = 0,day = 0; i < plotmodel->rowCount(); ++i)
@@ -194,6 +224,14 @@ void week_popup::set_weekPlot(int yValue)
     stressLine->setBrush(QBrush(QColor(255,0,0,50)));
     stressLine->setPen(QPen(QColor(255,0,0),2));
 
+    QCPGraph *ltsLine = ui->widget_plot->addGraph();
+    ltsLine->setName("LTS");
+    ltsLine->setLineStyle(QCPGraph::lsLine);
+    ltsLine->setData(xLTS,yLTS);
+    ltsLine->setAntialiased(true);
+    //ltsLine->setBrush(QBrush(QColor(0,255,0,50)));
+    ltsLine->setPen(QPen(QColor(0,255,0),2));
+
     QCPBars *workbars = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis);
     workbars->setName("Workouts");
     workbars->setWidth(dayCount*3000);
@@ -241,29 +279,47 @@ void week_popup::set_weekPlot(int yValue)
         itemTracer->setStyle(QCPItemTracer::tsCircle);
         itemTracer->setBrush(Qt::red);
 
-            QCPItemText *lineText = new QCPItemText(ui->widget_plot);
-            lineText->position->setType(QCPItemPosition::ptPlotCoords);
-            lineText->setPositionAlignment(Qt::AlignHCenter|Qt::AlignBottom);
-            lineText->position->setCoords(xStress[i],yStress[i]+1);
-            lineText->setText(QString::number(yStress[i]));
-            lineText->setTextAlignment(Qt::AlignCenter);
-            lineText->setFont(lineFont);
-            lineText->setPadding(QMargins(1, 1, 1, 1));
+        QCPItemText *lineText = new QCPItemText(ui->widget_plot);
+        lineText->position->setType(QCPItemPosition::ptPlotCoords);
+        lineText->setPositionAlignment(Qt::AlignHCenter|Qt::AlignBottom);
+        lineText->position->setCoords(xStress[i],yStress[i]+1);
+        lineText->setText(QString::number(yStress[i]));
+        lineText->setTextAlignment(Qt::AlignCenter);
+        lineText->setFont(lineFont);
+        lineText->setPadding(QMargins(1, 1, 1, 1));
 
-            QCPItemText *barText = new QCPItemText(ui->widget_plot);
-            barText->position->setType(QCPItemPosition::ptPlotCoords);
-            barText->position->setAxes(ui->widget_plot->xAxis,ui->widget_plot->yAxis2);
-            barText->position->setCoords(xBar[i],yValues[i]/2);
-            barText->setText(QString::number(yValues[i]));
-            barText->setFont(barFont);
-            barText->setColor(Qt::white);
+        QCPItemText *barText = new QCPItemText(ui->widget_plot);
+        barText->position->setType(QCPItemPosition::ptPlotCoords);
+        barText->position->setAxes(ui->widget_plot->xAxis,ui->widget_plot->yAxis2);
+        barText->position->setCoords(xBar[i],yValues[i]/2);
+        barText->setText(QString::number(yValues[i]));
+        barText->setFont(barFont);
+        barText->setColor(Qt::white);
 
-            QCPItemText *workText = new QCPItemText(ui->widget_plot);
-            workText->position->setType(QCPItemPosition::ptPlotCoords);
-            workText->position->setCoords(xWorks[i],yWorks[i]/2);
-            workText->setText(QString::number(yWorkCount[i]));
-            workText->setFont(barFont);
-            workText->setColor(Qt::red);
+        QCPItemText *workText = new QCPItemText(ui->widget_plot);
+        workText->position->setType(QCPItemPosition::ptPlotCoords);
+        workText->position->setCoords(xWorks[i],yWorks[i]/2);
+        workText->setText(QString::number(yWorkCount[i]));
+        workText->setFont(barFont);
+        workText->setColor(Qt::red);
+    }
+
+    for(int i = 0; i < xLTS.count(); ++i)
+    {
+        QCPItemTracer *itemTracer = new QCPItemTracer(ui->widget_plot);
+        itemTracer->setGraph(ltsLine);
+        itemTracer->setGraphKey(xLTS[i]);
+        itemTracer->setStyle(QCPItemTracer::tsCircle);
+        itemTracer->setBrush(Qt::green);
+
+        QCPItemText *ltsText = new QCPItemText(ui->widget_plot);
+        ltsText->position->setType(QCPItemPosition::ptPlotCoords);
+        ltsText->setPositionAlignment(Qt::AlignHCenter|Qt::AlignBottom);
+        ltsText->position->setCoords(xLTS[i],yLTS[i]+1);
+        ltsText->setText(QString::number(yLTS[i]));
+        ltsText->setTextAlignment(Qt::AlignCenter);
+        ltsText->setFont(lineFont);
+        ltsText->setPadding(QMargins(1, 1, 1, 1));
     }
 
     QSharedPointer<QCPAxisTickerDateTime> dateTimeTicker(new QCPAxisTickerDateTime);
@@ -279,17 +335,17 @@ void week_popup::set_weekPlot(int yValue)
     isLoad = true;
 }
 
-void week_popup::on_pushButton_close_clicked()
+void week_popup::on_comboBox_yValue_currentIndexChanged(int index)
+{
+    if(isLoad) this->set_weekPlot(index);
+}
+
+void week_popup::on_toolButton_close_clicked()
 {
     reject();
 }
 
-void week_popup::on_pushButton_edit_clicked()
+void week_popup::on_toolButton_edit_clicked()
 {
     accept();
-}
-
-void week_popup::on_comboBox_yValue_currentIndexChanged(int index)
-{
-    if(isLoad) this->set_weekPlot(index);
 }

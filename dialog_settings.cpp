@@ -56,6 +56,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->pushButton_add->setEnabled(false);
     ui->pushButton_edit->setEnabled(false);
     ui->pushButton_delete->setEnabled(false);
+    ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
     this->checkSetup();
 }
 
@@ -282,10 +283,11 @@ void Dialog_settings::set_hfmodel(double hfThres)
 
 void Dialog_settings::set_ltsList()
 {
-    QMap<QDate,int> *map = schedule_ptr->get_StressMap();
+    QMap<QDate,double> *map = schedule_ptr->get_StressMap();
     QString itemValue;
+    ui->listWidget_stressValue->clear();
 
-    for(QMap<QDate,int>::const_iterator it =  map->cbegin(), end = map->cend(); it != end; ++it)
+    for(QMap<QDate,double>::const_iterator it =  map->cbegin(), end = map->cend(); it != end; ++it)
     {
         itemValue = it.key().toString("dd.MM.yyyy") +" - "+QString::number(it.value());
         ui->listWidget_stressValue->addItem(itemValue);
@@ -654,4 +656,15 @@ void Dialog_settings::on_spinBox_hfMax_valueChanged(int value)
 {
     Q_UNUSED(value)
     this->enableSavebutton();
+}
+
+void Dialog_settings::on_dateEdit_stress_dateChanged(const QDate &date)
+{
+    ui->spinBox_stress->setValue(schedule_ptr->get_StressMap()->value(date));
+}
+
+void Dialog_settings::on_pushButton_stressEdit_clicked()
+{
+    schedule_ptr->set_stressMap(ui->dateEdit_stress->date(),ui->spinBox_stress->value());
+    this->set_ltsList();
 }

@@ -385,7 +385,7 @@ void schedule::read_ltsFile(QDomDocument stressContent)
 
         if(!stressValues.contains(wDate))
         {
-            stressValues.insert(wDate,stress_element.attribute("stress").toInt());
+            stressValues.insert(wDate,stress_element.attribute("stress").toDouble());
         }
     }
 
@@ -399,6 +399,61 @@ void schedule::read_ltsFile(QDomDocument stressContent)
         {
             stressValues.insert(firstWork.addDays(row),0);
         }
+    }
+    //if(QDate::currentDate() == firstdayofweek) this->save_ltsFile();
+    this->save_ltsFile();
+}
+
+void schedule::save_ltsFile()
+{
+    QDomDocument document;
+    QDomElement xmlroot = document.createElement("Stress");
+    document.appendChild(xmlroot);
+
+    double ltsStress = 0,currStress = 0,pastStress = 0,startLTS = 0;
+    startLTS = settings::get_ltsValue("lastlts");
+    int ltsDays = settings::get_ltsValue("ltsdays");
+    double lte = (double)exp(-1.0/ltsDays);
+    pastStress = startLTS;
+
+    for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays(-ltsDays)), end = stressValues.find(firstdayofweek.addDays((-ltsDays)+7)); it != end; ++it)
+    {
+        currStress = it.value();
+        ltsStress = (currStress * (1.0 - lte)) + (pastStress * lte);
+        pastStress = ltsStress;
+    }
+    //pastStress = settings::set_doubleValue(ltsStress,false);
+    //settings::set_ltsValue("lastlts",pastStress);
+    //qDebug() << "New LastLTS" << settings::set_doubleValue(ltsStress,false);
+
+    //qDebug() << "Save new LTS History";
+    for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays(-42)), end = stressValues.find(firstdayofweek); it != end; ++it)
+    {   /*
+        QDomElement xml_stress = document.createElement("StressLTS");
+        xml_stress.setAttribute("day",it.key().toString("dd.MM.yyy"));
+        xml_stress.setAttribute("stress",QString::number(it.value()));
+        xmlroot.appendChild(xml_stress);
+        */
+        //qDebug() << it.key().toString("dd.MM.yyyy") << QString::number(it.value());
+    }
+    /*
+    QFile file(schedulePath + QDir::separator() + "longtermstress.xml");
+
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qDebug() << "File not open!";
+    }
+
+    QTextStream stream(&file);
+    stream << document.toString();
+
+    file.close();
+    */
+    //qDebug() << "Remove old from List";
+    for(QMap<QDate,double>::const_iterator it = stressValues.cbegin(), end = stressValues.find(firstdayofweek.addDays(-ltsDays)); it != end; ++it)
+    {
+        //stressValues.remove(it.key());
+        //qDebug() << it.key() << it.value();
     }
 }
 
@@ -559,9 +614,9 @@ void schedule::delete_workout(QModelIndex index)
     this->updateStress(wDate,stress,false);
 }
 
-void schedule::updateStress(QString date,int stress,bool add)
+void schedule::updateStress(QString date,double stress,bool add)
 {
-    int stressValue = 0;
+    double stressValue = 0;
     QDate wDate = QDate::fromString(date,"dd.MM.yyyy");
 
     if(add)

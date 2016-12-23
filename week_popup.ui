@@ -91,21 +91,18 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_edit">
+       <widget class="QToolButton" name="toolButton_edit">
         <property name="minimumSize">
          <size>
-          <width>20</width>
-          <height>20</height>
+          <width>22</width>
+          <height>22</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>20</width>
-          <height>20</height>
+          <width>22</width>
+          <height>22</height>
          </size>
-        </property>
-        <property name="toolTip">
-         <string>Copy Week</string>
         </property>
         <property name="text">
          <string/>
@@ -114,20 +111,29 @@
          <iconset resource="resources.qrc">
           <normaloff>:/images/icons/Modify.png</normaloff>:/images/icons/Modify.png</iconset>
         </property>
+        <property name="iconSize">
+         <size>
+          <width>18</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_close">
+       <widget class="QToolButton" name="toolButton_close">
         <property name="minimumSize">
          <size>
-          <width>20</width>
-          <height>20</height>
+          <width>22</width>
+          <height>22</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>20</width>
-          <height>20</height>
+          <width>22</width>
+          <height>22</height>
          </size>
         </property>
         <property name="text">
@@ -136,6 +142,18 @@
         <property name="icon">
          <iconset resource="resources.qrc">
           <normaloff>:/images/icons/Close.png</normaloff>:/images/icons/Close.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>18</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonIconOnly</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

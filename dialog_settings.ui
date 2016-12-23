@@ -53,7 +53,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>5</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab_gc">
          <attribute name="title">
@@ -72,6 +72,9 @@
            <string>General</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
+           <property name="horizontalSpacing">
+            <number>5</number>
+           </property>
            <item row="1" column="1">
             <widget class="QLineEdit" name="lineEdit_athlete">
              <property name="toolTip">
@@ -152,6 +155,9 @@
            <string>FilePath</string>
           </property>
           <layout class="QGridLayout" name="gridLayout">
+           <property name="horizontalSpacing">
+            <number>5</number>
+           </property>
            <item row="0" column="1">
             <widget class="QLineEdit" name="lineEdit_schedule">
              <property name="enabled">
@@ -624,9 +630,12 @@
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
                </property>
-               <layout class="QFormLayout" name="formLayout_3">
-                <property name="verticalSpacing">
+               <layout class="QFormLayout" name="formLayout_2">
+                <property name="horizontalSpacing">
                  <number>5</number>
+                </property>
+                <property name="verticalSpacing">
+                 <number>8</number>
                 </property>
                 <property name="leftMargin">
                  <number>1</number>
@@ -647,50 +656,6 @@
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="label_9">
-                  <property name="text">
-                   <string>Pace:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="0">
-                 <widget class="QLabel" name="label_10">
-                  <property name="text">
-                   <string>Speed:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="1">
-                 <widget class="QLineEdit" name="lineEdit_speed">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="6" column="1">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox_factor"/>
-                </item>
-                <item row="6" column="0">
-                 <widget class="QLabel" name="label_17">
-                  <property name="text">
-                   <string>Factor:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="5" column="1">
-                 <spacer name="verticalSpacer_5">
-                  <property name="orientation">
-                   <enum>Qt::Vertical</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>20</width>
-                    <height>10</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
                 <item row="0" column="1">
                  <widget class="QSpinBox" name="spinBox_thresPower">
                   <property name="maximum">
@@ -698,28 +663,46 @@
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="1">
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_9">
+                  <property name="text">
+                   <string>Pace:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
                  <widget class="QTimeEdit" name="timeEdit_thresPace">
                   <property name="displayFormat">
                    <string>mm:ss</string>
                   </property>
                  </widget>
                 </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_10">
+                  <property name="text">
+                   <string>Speed:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QLineEdit" name="lineEdit_speed">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="label_17">
+                  <property name="text">
+                   <string>Factor:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox_factor"/>
+                </item>
                </layout>
               </widget>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_4">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </widget>
@@ -806,6 +789,9 @@
            <string>Saison Info</string>
           </property>
           <layout class="QFormLayout" name="formLayout_5">
+           <property name="horizontalSpacing">
+            <number>5</number>
+           </property>
            <item row="4" column="0">
             <widget class="QLabel" name="label_13">
              <property name="text">
@@ -892,13 +878,109 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="maximumSize">
+             <size>
+              <width>175</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="title">
              <string>Edit Values</string>
+            </property>
+            <layout class="QFormLayout" name="formLayout">
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_23">
+               <property name="text">
+                <string>LTS Days:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="spinBox_ltsDays"/>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_22">
+               <property name="text">
+                <string>Last LTS:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QSpinBox" name="spinBox_lastLTS"/>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="label_20">
+               <property name="text">
+                <string>Date:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QDateEdit" name="dateEdit_stress">
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
+               </property>
+               <property name="calendarPopup">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="0">
+              <widget class="QLabel" name="label_21">
+               <property name="text">
+                <string>Stress:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="1">
+              <widget class="QSpinBox" name="spinBox_stress">
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="1">
+              <widget class="QPushButton" name="pushButton_stressEdit">
+               <property name="text">
+                <string>Edit</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_24">
+               <property name="text">
+                <string>STS Days:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSpinBox" name="spinBox_stsDays"/>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QListWidget" name="listWidget_stressValue">
+            <property name="maximumSize">
+             <size>
+              <width>200</width>
+              <height>16777215</height>
+             </size>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="listWidget_stressValue"/>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>

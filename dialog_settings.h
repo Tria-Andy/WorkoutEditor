@@ -73,6 +73,10 @@ private slots:
 
     void on_spinBox_hfMax_valueChanged(int arg1);
 
+    void on_dateEdit_stress_dateChanged(const QDate &date);
+
+    void on_pushButton_stressEdit_clicked();
+
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;

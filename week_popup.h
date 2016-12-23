@@ -39,8 +39,8 @@ public:
     ~week_popup();
 
 private slots:
-    void on_pushButton_close_clicked();
-    void on_pushButton_edit_clicked();
+    void on_toolButton_close_clicked();
+    void on_toolButton_edit_clicked();
     void on_comboBox_yValue_currentIndexChanged(int index);
 
 private:
@@ -51,8 +51,8 @@ private:
     QDate firstDay;
     bool isLoad;
     QList<QDateTime> weekDates;
-    QVector<double> xStress,xBar,xWorks,maxValues;
-    QVector<double> yStress,yDura,yDist,yWorks,yWorkCount,yValues;
+    QVector<double> xStress,xLTS,xBar,xWorks,maxValues;
+    QVector<double> yStress,yLTS,yDura,yDist,yWorks,yWorkCount,yValues;
     int dayCount;
     void set_plotModel();
     void set_graph();
