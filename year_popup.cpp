@@ -59,11 +59,6 @@ year_popup::~year_popup()
     delete ui;
 }
 
-void year_popup::on_pushButton_close_clicked()
-{
-    reject();
-}
-
 void year_popup::set_plotValues()
 {
     QList<QStandardItem*> list;
@@ -325,4 +320,9 @@ void year_popup::set_plot(int yValue)
 void year_popup::on_comboBox_select_currentIndexChanged(int index)
 {
     if(isLoad)this->set_plot(index);
+}
+
+void year_popup::on_toolButton_close_clicked()
+{
+    reject();
 }

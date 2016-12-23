@@ -57,9 +57,7 @@ public:
     QModelIndex get_edit_index() {return curr_index;}
 
 private slots:
-
     void set_edit_calweek();
-
     void on_pushButton_close_clicked();
     void on_comboBox_time_currentIndexChanged(int index);
     void on_pushButton_edit_clicked();
@@ -67,8 +65,8 @@ private slots:
     void on_pushButton_delete_clicked();
     void on_doubleSpinBox_distance_valueChanged(double arg1);
     void on_timeEdit_duration_timeChanged(const QTime &time);
-    void on_pushButton_clicked();
     void on_dateEdit_edit_date_dateChanged(const QDate &date);
+    void on_toolButton_workouts_clicked();
 
 private:
     Ui::Dialog_edit *ui;

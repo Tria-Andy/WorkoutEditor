@@ -39,8 +39,8 @@ public:
     ~year_popup();
 
 private slots:
-    void on_pushButton_close_clicked();
     void on_comboBox_select_currentIndexChanged(int index);
+    void on_toolButton_close_clicked();
 
 private:
     Ui::year_popup *ui;

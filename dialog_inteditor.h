@@ -53,7 +53,6 @@ private slots:
     void on_treeWidget_planer_itemClicked(QTreeWidgetItem *item, int column);
     void on_pushButton_addtop_clicked();
     void refresh_model();
-    void on_pushButton_save_std_clicked();
     void on_spinBox_threshold_valueChanged(int arg1);
     void on_comboBox_level_currentIndexChanged(const QString &arg1);
     void on_pushButton_up_clicked();
@@ -61,8 +60,9 @@ private slots:
     void on_listView_workouts_clicked(const QModelIndex &index);
     void on_lineEdit_workoutname_textChanged(const QString &arg1);
     void on_treeWidget_planer_itemSelectionChanged();
-    void on_pushButton_delete_std_clicked();
-    void on_pushButton_copy_std_clicked();
+    void on_toolButton_save_clicked();
+    void on_toolButton_copy_clicked();
+    void on_toolButton_delete_clicked();
 
 private:
     Ui::Dialog_inteditor *ui;
