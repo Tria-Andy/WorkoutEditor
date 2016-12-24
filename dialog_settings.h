@@ -45,13 +45,9 @@ private slots:
     void on_listWidget_selection_itemDoubleClicked(QListWidgetItem *item);
     void on_pushButton_up_clicked();
     void on_pushButton_down_clicked();
-    void on_pushButton_add_clicked();
-    void on_pushButton_delete_clicked();
-    void on_pushButton_edit_clicked();
     void on_comboBox_thresSport_currentTextChanged(const QString &arg1);
     void on_pushButton_save_clicked();
     void on_dateEdit_saisonStart_dateChanged(const QDate &date);
-    void on_pushButton_color_clicked();
     void on_dateEdit_saisonEnd_dateChanged(const QDate &date);
     void on_lineEdit_schedule_textChanged(const QString &arg1);
     void on_lineEdit_standard_textChanged(const QString &arg1);
@@ -70,12 +66,13 @@ private slots:
     void on_toolButton_schedulePath_clicked();
     void on_toolButton_workoutsPath_clicked();
     void on_spinBox_hfThres_valueChanged(int arg1);
-
     void on_spinBox_hfMax_valueChanged(int arg1);
-
     void on_dateEdit_stress_dateChanged(const QDate &date);
-
     void on_pushButton_stressEdit_clicked();
+    void on_toolButton_add_clicked();
+    void on_toolButton_delete_clicked();
+    void on_toolButton_edit_clicked();
+    void on_toolButton_color_clicked();
 
 private:
     Ui::Dialog_settings *ui;

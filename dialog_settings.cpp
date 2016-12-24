@@ -52,10 +52,10 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->dateEdit_saisonEnd->setDate(QDate::fromString(settings::get_saisonInfo("endDate"),"dd.MM.yyyy"));
     ui->comboBox_thresSport->addItems(sportList);
     ui->pushButton_save->setEnabled(false);
-    ui->pushButton_color->setEnabled(false);
-    ui->pushButton_add->setEnabled(false);
-    ui->pushButton_edit->setEnabled(false);
-    ui->pushButton_delete->setEnabled(false);
+    ui->toolButton_color->setEnabled(false);
+    ui->toolButton_add->setEnabled(false);
+    ui->toolButton_edit->setEnabled(false);
+    ui->toolButton_delete->setEnabled(false);
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
     this->checkSetup();
 }
@@ -193,9 +193,9 @@ void Dialog_settings::on_comboBox_selInfo_currentTextChanged(const QString &valu
 {
     this->set_listEntries(value);
     ui->lineEdit_addedit->clear();
-    ui->pushButton_add->setEnabled(false);
-    ui->pushButton_delete->setEnabled(false);
-    ui->pushButton_edit->setEnabled(false);
+    ui->toolButton_add->setEnabled(false);
+    ui->toolButton_delete->setEnabled(false);
+    ui->toolButton_edit->setEnabled(false);
 }
 
 void Dialog_settings::set_listEntries(QString selection)
@@ -346,10 +346,10 @@ void Dialog_settings::set_thresholdModel(QString sport)
 
 void Dialog_settings::set_color(QColor color,bool write,QString key)
 {
-    QPalette palette = ui->pushButton_color->palette();
-    palette.setColor(ui->pushButton_color->backgroundRole(),color);
-    ui->pushButton_color->setAutoFillBackground(true);
-    ui->pushButton_color->setPalette(palette);
+    QPalette palette = ui->toolButton_color->palette();
+    palette.setColor(ui->toolButton_color->backgroundRole(),color);
+    ui->toolButton_color->setAutoFillBackground(true);
+    ui->toolButton_color->setPalette(palette);
 
     if(write)
     {
@@ -362,21 +362,21 @@ void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem 
     QString listValue = item->data(Qt::DisplayRole).toString();
     QColor color;
     ui->lineEdit_addedit->setText(listValue);
-    ui->pushButton_edit->setEnabled(true);
-    ui->pushButton_delete->setEnabled(true);
+    ui->toolButton_edit->setEnabled(true);
+    ui->toolButton_delete->setEnabled(true);
 
     color = settings::get_itemColor(listValue);
 
     if(useColor)
     {
         this->set_color(color,false,listValue);
-        ui->pushButton_color->setEnabled(true);
+        ui->toolButton_color->setEnabled(true);
     }
     else
     {
         color.setRgb(255,255,255,0);
         this->set_color(color,false,listValue);
-        ui->pushButton_color->setEnabled(false);
+        ui->toolButton_color->setEnabled(false);
     }
 }
 
@@ -396,32 +396,6 @@ void Dialog_settings::on_pushButton_down_clicked()
     QListWidgetItem *currentItem = ui->listWidget_selection->takeItem(currentindex);
     ui->listWidget_selection->insertItem(currentindex+1,currentItem);
     ui->listWidget_selection->setCurrentRow(currentindex+1);
-    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
-    this->enableSavebutton();
-}
-
-void Dialog_settings::on_pushButton_add_clicked()
-{
-    ui->listWidget_selection->insertItem(ui->listWidget_selection->currentRow(),ui->lineEdit_addedit->text());
-    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
-    this->enableSavebutton();
-}
-
-void Dialog_settings::on_pushButton_delete_clicked()
-{
-    QListWidgetItem *item = ui->listWidget_selection->takeItem(ui->listWidget_selection->currentRow());
-    ui->lineEdit_addedit->clear();
-    this->set_color(QColor(255,255,255,0),false,"");
-    delete item;
-    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
-    this->enableSavebutton();
-    ui->pushButton_delete->setEnabled(false);
-    ui->pushButton_add->setEnabled(true);
-}
-
-void Dialog_settings::on_pushButton_edit_clicked()
-{
-    ui->listWidget_selection->item(ui->listWidget_selection->currentRow())->setData(Qt::EditRole,ui->lineEdit_addedit->text());
     this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
     this->enableSavebutton();
 }
@@ -493,9 +467,9 @@ void Dialog_settings::on_dateEdit_saisonStart_dateChanged(const QDate &date)
 }
 
 
-void Dialog_settings::on_pushButton_color_clicked()
+void Dialog_settings::on_toolButton_color_clicked()
 {
-    QColor color = QColorDialog::getColor(ui->pushButton_color->palette().color(ui->pushButton_color->backgroundRole()),this);
+    QColor color = QColorDialog::getColor(ui->toolButton_color->palette().color(ui->toolButton_color->backgroundRole()),this);
     if(color.isValid())
     {
         this->set_color(color,true,ui->lineEdit_addedit->text());
@@ -546,11 +520,11 @@ void Dialog_settings::on_lineEdit_addedit_textChanged(const QString &value)
 {
     if(!value.isEmpty())
     {
-        ui->pushButton_add->setEnabled(true);
+        ui->toolButton_add->setEnabled(true);
     }
     else
     {
-        ui->pushButton_add->setEnabled(false);
+        ui->toolButton_add->setEnabled(false);
     }
 }
 
@@ -661,10 +635,37 @@ void Dialog_settings::on_spinBox_hfMax_valueChanged(int value)
 void Dialog_settings::on_dateEdit_stress_dateChanged(const QDate &date)
 {
     ui->spinBox_stress->setValue(schedule_ptr->get_StressMap()->value(date));
+    this->enableSavebutton();
 }
 
 void Dialog_settings::on_pushButton_stressEdit_clicked()
 {
     schedule_ptr->set_stressMap(ui->dateEdit_stress->date(),ui->spinBox_stress->value());
     this->set_ltsList();
+}
+
+void Dialog_settings::on_toolButton_add_clicked()
+{
+    ui->listWidget_selection->insertItem(ui->listWidget_selection->currentRow(),ui->lineEdit_addedit->text());
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_toolButton_delete_clicked()
+{
+    QListWidgetItem *item = ui->listWidget_selection->takeItem(ui->listWidget_selection->currentRow());
+    ui->lineEdit_addedit->clear();
+    this->set_color(QColor(255,255,255,0),false,"");
+    delete item;
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
+    this->enableSavebutton();
+    ui->toolButton_delete->setEnabled(false);
+    ui->toolButton_add->setEnabled(true);
+}
+
+void Dialog_settings::on_toolButton_edit_clicked()
+{
+    ui->listWidget_selection->item(ui->listWidget_selection->currentRow())->setData(Qt::EditRole,ui->lineEdit_addedit->text());
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
+    this->enableSavebutton();
 }

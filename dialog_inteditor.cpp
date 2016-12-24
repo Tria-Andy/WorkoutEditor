@@ -822,12 +822,6 @@ void Dialog_inteditor::on_treeWidget_planer_itemClicked(QTreeWidgetItem *item, i
     this->refresh_model();
 }
 
-void Dialog_inteditor::on_pushButton_addtop_clicked()
-{
-    this->add_topItem(ui->comboBox_topitem->currentText());
-    ui->comboBox_reps->setCurrentIndex(0);
-}
-
 QString Dialog_inteditor::get_treeValue(int item,int i_child, int c_sub,int pos,int level)
 {
     if(level == 0)
@@ -1163,4 +1157,10 @@ void Dialog_inteditor::on_toolButton_delete_clicked()
         this->reset_workoutInfo();
         this->get_workouts(current_sport);
     }
+}
+
+void Dialog_inteditor::on_toolButton_addTop_clicked()
+{
+    this->add_topItem(ui->comboBox_topitem->currentText());
+    ui->comboBox_reps->setCurrentIndex(0);
 }

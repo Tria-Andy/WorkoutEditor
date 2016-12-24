@@ -45,7 +45,7 @@ private slots:
     void on_timeEdit_intTime_timeChanged(const QTime &time);
     void on_spinBox_IntDist_valueChanged(int arg1);
     void on_pushButton_clicked();
-    void on_pushButton_copy_clicked();
+    void on_toolButton_copy_clicked();
 
 private:
     Ui::Dialog_paceCalc *ui;

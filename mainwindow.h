@@ -161,10 +161,10 @@ private slots:
     void on_horizontalSlider_polish_valueChanged(int value);
     void on_tableView_int_times_clicked(const QModelIndex &index);
     void on_actionSave_to_GoldenCheetah_triggered();
-    void on_pushButton_ClearWorkContent_clicked();
-    void on_pushButton_sync_clicked();
     void on_lineEdit_workContent_textChanged(const QString &arg1);
-    void on_pushButton_putInt_clicked();
+    void on_toolButton_putInt_clicked();
+    void on_toolButton_sync_clicked();
+    void on_toolButton_clearContent_clicked();
 };
 
 #endif // MAINWINDOW_H

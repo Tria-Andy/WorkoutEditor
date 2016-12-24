@@ -663,7 +663,7 @@
                   </widget>
                  </item>
                  <item>
-                  <spacer name="horizontalSpacer_8">
+                  <spacer name="horizontalSpacer_10">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
                    </property>
@@ -676,17 +676,17 @@
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="pushButton_putInt">
+                  <widget class="QToolButton" name="toolButton_putInt">
                    <property name="minimumSize">
                     <size>
-                     <width>0</width>
-                     <height>0</height>
+                     <width>22</width>
+                     <height>22</height>
                     </size>
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>20</width>
-                     <height>20</height>
+                     <width>22</width>
+                     <height>22</height>
                     </size>
                    </property>
                    <property name="text">
@@ -694,16 +694,31 @@
                    </property>
                    <property name="icon">
                     <iconset resource="resources.qrc">
-                     <normaloff>:/images/icons/Load.png</normaloff>:/images/icons/Load.png</iconset>
+                     <normaloff>:/images/icons/Add.png</normaloff>:/images/icons/Add.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>18</width>
+                     <height>18</height>
+                    </size>
+                   </property>
+                   <property name="autoRaise">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="pushButton_sync">
+                  <widget class="QToolButton" name="toolButton_sync">
+                   <property name="minimumSize">
+                    <size>
+                     <width>22</width>
+                     <height>22</height>
+                    </size>
+                   </property>
                    <property name="maximumSize">
                     <size>
-                     <width>20</width>
-                     <height>20</height>
+                     <width>22</width>
+                     <height>22</height>
                     </size>
                    </property>
                    <property name="text">
@@ -713,14 +728,29 @@
                     <iconset resource="resources.qrc">
                      <normaloff>:/images/icons/Sync.png</normaloff>:/images/icons/Sync.png</iconset>
                    </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>18</width>
+                     <height>18</height>
+                    </size>
+                   </property>
+                   <property name="autoRaise">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="pushButton_ClearWorkContent">
+                  <widget class="QToolButton" name="toolButton_clearContent">
+                   <property name="minimumSize">
+                    <size>
+                     <width>22</width>
+                     <height>22</height>
+                    </size>
+                   </property>
                    <property name="maximumSize">
                     <size>
-                     <width>20</width>
-                     <height>20</height>
+                     <width>22</width>
+                     <height>22</height>
                     </size>
                    </property>
                    <property name="text">
@@ -729,6 +759,15 @@
                    <property name="icon">
                     <iconset resource="resources.qrc">
                      <normaloff>:/images/icons/Erase.png</normaloff>:/images/icons/Erase.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>18</width>
+                     <height>18</height>
+                    </size>
+                   </property>
+                   <property name="autoRaise">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>

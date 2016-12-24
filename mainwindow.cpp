@@ -51,9 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
     ui->pushButton_current_week->setEnabled(false);
     ui->pushButton_week_minus->setEnabled(false);
-    ui->pushButton_ClearWorkContent->setEnabled(false);
-    ui->pushButton_sync->setEnabled(false);
-    ui->pushButton_putInt->setEnabled(false);
+    ui->toolButton_clearContent->setEnabled(false);
+    ui->toolButton_sync->setEnabled(false);
+    ui->toolButton_putInt->setEnabled(false);
     cal_header << "Week";
     for(int d = 1; d < 8; ++d)
     {
@@ -1259,7 +1259,7 @@ void MainWindow::fill_WorkoutContent()
     if(ui->lineEdit_workContent->text() == "")
     {
         ui->lineEdit_workContent->setText(content+newEntry);
-        ui->pushButton_ClearWorkContent->setEnabled(true);
+        ui->toolButton_clearContent->setEnabled(true);
     }
     else
     {
@@ -1282,7 +1282,7 @@ void MainWindow::unselect_intRow()
         this->set_avg_fields();
         ui->tableView_int->setCurrentIndex(curr_activity->curr_act_model->index(0,0,QModelIndex()));
     }
-    ui->pushButton_putInt->setEnabled(false);
+    ui->toolButton_putInt->setEnabled(false);
 }
 
 void MainWindow::on_pushButton_week_minus_clicked()
@@ -1487,11 +1487,11 @@ void MainWindow::on_tableView_int_clicked(const QModelIndex &index)
     }
     if(sel_count > 0)
     {
-        ui->pushButton_putInt->setEnabled(true);
+        ui->toolButton_putInt->setEnabled(true);
     }
     else
     {
-        ui->pushButton_putInt->setEnabled(false);
+        ui->toolButton_putInt->setEnabled(false);
     }
     this->set_avg_fields();
 }
@@ -1541,9 +1541,9 @@ void MainWindow::on_actionReset_triggered()
     ui->lineEdit_lapSpeed->setText("-");
     ui->comboBox_intervals->clear();
     ui->lineEdit_workContent->clear();
-    ui->pushButton_ClearWorkContent->setEnabled(false);
-    ui->pushButton_sync->setEnabled(false);
-    ui->pushButton_putInt->setEnabled(false);
+    ui->toolButton_clearContent->setEnabled(false);
+    ui->toolButton_sync->setEnabled(false);
+    ui->toolButton_putInt->setEnabled(false);
     ui->radioButton_time->setChecked(true);
     ui->checkBox_exact->setChecked(false);
 
@@ -1733,28 +1733,27 @@ void MainWindow::on_horizontalSlider_polish_valueChanged(int value)
     curr_activity->set_polishFactor(0.1-(static_cast<double>(value)/100));
 }
 
-
-void MainWindow::on_pushButton_ClearWorkContent_clicked()
-{
-    ui->lineEdit_workContent->clear();
-    ui->pushButton_ClearWorkContent->setEnabled(false);
-    ui->pushButton_sync->setEnabled(false);
-}
-
-void MainWindow::on_pushButton_sync_clicked()
-{
-    jsonhandler->set_tagData("Workout Content",ui->lineEdit_workContent->text());
-    ui->pushButton_sync->setEnabled(false);
-}
-
 void MainWindow::on_lineEdit_workContent_textChanged(const QString &value)
 {
     Q_UNUSED(value)
-    ui->pushButton_sync->setEnabled(true);
+    ui->toolButton_sync->setEnabled(true);
 }
 
-void MainWindow::on_pushButton_putInt_clicked()
+void MainWindow::on_toolButton_putInt_clicked()
 {
     this->fill_WorkoutContent();
     this->unselect_intRow();
+}
+
+void MainWindow::on_toolButton_sync_clicked()
+{
+    jsonhandler->set_tagData("Workout Content",ui->lineEdit_workContent->text());
+    ui->toolButton_sync->setEnabled(false);
+}
+
+void MainWindow::on_toolButton_clearContent_clicked()
+{
+    ui->lineEdit_workContent->clear();
+    ui->toolButton_clearContent->setEnabled(false);
+    ui->toolButton_sync->setEnabled(false);
 }

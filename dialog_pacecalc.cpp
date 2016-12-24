@@ -151,7 +151,7 @@ void Dialog_paceCalc::on_pushButton_clicked()
     ui->lineEdit_IntSpeed->setText("");
 }
 
-void Dialog_paceCalc::on_pushButton_copy_clicked()
+void Dialog_paceCalc::on_toolButton_copy_clicked()
 {
     QClipboard *clipboard = QApplication::clipboard();
     QByteArray speedArray;
