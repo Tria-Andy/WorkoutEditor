@@ -1655,6 +1655,7 @@
     <addaction name="actionLapEditor"/>
     <addaction name="actionPace_Calculator"/>
     <addaction name="actionStress_Calculator"/>
+    <addaction name="actionPMC"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -1702,6 +1703,7 @@
    <addaction name="actionIntervall_Editor"/>
    <addaction name="actionPace_Calculator"/>
    <addaction name="actionStress_Calculator"/>
+   <addaction name="actionPMC"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSelect_File">
@@ -1883,6 +1885,15 @@
    </property>
    <property name="text">
     <string>Save to GoldenCheetah</string>
+   </property>
+  </action>
+  <action name="actionPMC">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/images/icons/Stock graph.png</normaloff>:/images/icons/Stock graph.png</iconset>
+   </property>
+   <property name="text">
+    <string>PMC</string>
    </property>
   </action>
  </widget>

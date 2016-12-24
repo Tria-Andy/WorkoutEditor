@@ -611,7 +611,7 @@ void MainWindow::on_calendarWidget_clicked(const QDate &date)
    this->summery_view();
 }
 
-void MainWindow::on_tableView_cal_clicked(const QModelIndex &index)
+void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
 {
     int dialog_code;
     if(isWeekMode)
@@ -1756,4 +1756,11 @@ void MainWindow::on_toolButton_clearContent_clicked()
     ui->lineEdit_workContent->clear();
     ui->toolButton_clearContent->setEnabled(false);
     ui->toolButton_sync->setEnabled(false);
+}
+
+void MainWindow::on_actionPMC_triggered()
+{
+    stress_popup stressPop(this,workSchedule);
+    stressPop.setModal(true);
+    stressPop.exec();
 }

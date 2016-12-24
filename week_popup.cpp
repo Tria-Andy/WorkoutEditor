@@ -110,7 +110,6 @@ void week_popup::set_plotModel()
             ltsStress = (currStress * (1.0 - lte)) + (pastStress * lte);
             pastStress = ltsStress;
         }
-
         startLTS = pastStress;
         xLTS[0] = weekDates.at(0).addDays(-1).toTime_t();
 

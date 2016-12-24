@@ -39,6 +39,7 @@
 #include "day_popup.h"
 #include "week_popup.h"
 #include "year_popup.h"
+#include "stress_popup.h"
 #include "dialog_edit.h"
 #include "dialog_export.h"
 #include "dialog_stresscalc.h"
@@ -165,6 +166,7 @@ private slots:
     void on_toolButton_putInt_clicked();
     void on_toolButton_sync_clicked();
     void on_toolButton_clearContent_clicked();
+    void on_actionPMC_triggered();
 };
 
 #endif // MAINWINDOW_H
