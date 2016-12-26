@@ -34,16 +34,15 @@ class schedule
 public:
     schedule();
     QStandardItemModel *workout_schedule,*week_meta,*week_content;
-    void check_workoutFiles();
-    void load_workouts_file();
-    void save_workout_file();
-    void read_workout_values(QDomDocument);
-    void read_week_values(QDomDocument,QDomDocument);
-    void save_week_files();
+    void save_dayWorkouts();
+    void save_weekPlan();
+    void save_ltsFile(double);
     void changeYear();
     QString get_weekPhase(QDate);
     void copyWeek(QString,QString);
     void deleteWeek(QString);
+    QMap<QDate,double> *get_StressMap() {return &stressValues;}
+    void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
 
 //Workout
     //Setter
@@ -62,17 +61,20 @@ public:
     void edit_workout(QModelIndex);
     void delete_workout(QModelIndex);
 
-//Charts Objects
-    QValueAxis* get_qValueAxis(QString,bool,double,int);
-    QLineSeries* get_qLineSeries(bool);
-    QBarSeries* get_qBarSeries();
-    QBarSet* get_qBarSet();
-
 private:
     logger *logFile;
     QStringList workoutTags,metaTags,contentTags;
     QString schedulePath;
     QDate firstdayofweek;
+    QMap<QDate,double> stressValues;
+    void check_workoutFiles();
+    void load_workoutsFiles();
+    void read_dayWorkouts(QDomDocument);
+    void read_weekPlan(QDomDocument,QDomDocument);
+    void read_ltsFile(QDomDocument);
+    void updateStress(QString,double,bool);
+    void save_ltsValues();
+    void saveXML(QDomDocument,QString);
 
     //Workout Var
     QString workout_date;

@@ -43,8 +43,8 @@ public:
     ~day_popup();
 
 private slots:
-    void on_pushButton_edit_clicked();
-    void on_pushButton_close_clicked();
+    void on_toolButton_close_clicked();
+    void on_toolButton_edit_clicked();
 
 private:
     Ui::day_popup *ui;

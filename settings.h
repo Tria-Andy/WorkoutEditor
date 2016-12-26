@@ -35,11 +35,11 @@ private:
     static QStringList table_header,header_int,header_bike,header_int_time,header_swim_time;
 
     static QString settingFile,valueFile,valueFilePath;
-    static QStringList keyList,sportList,phaseList,cycleList,codeList,levelList,intPlanList,jsoninfos;
+    static QStringList keyList,extkeyList,sportList,sportUseList,phaseList,cycleList,codeList,levelList,intPlanList,jsoninfos;
     static QMap<int,QString> sampList,intList;
     static QHash<QString,QString> gcInfo,saisonInfo;
     static QHash<QString,QColor> colorMap;
-    static QHash<QString,double> thresholdMap;
+    static QHash<QString,double> thresholdMap,ltsMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
     static QHash<QString,int> generalMap;
     static bool act_isloaded,act_isrecalc;
@@ -67,6 +67,7 @@ public:
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
     static QString get_rangeValue(QString,QString);
     static double get_thresValue(QString key) {return thresholdMap.value(key);}
+    static double get_ltsValue(QString key) {return ltsMap.value(key);}
     static int get_generalValue(QString key) {return generalMap.value(key);}
 
     //QMap/QHash Setter
@@ -75,16 +76,21 @@ public:
     static void set_itemColor(QString key,QColor value) {colorMap.insert(key,value);}
     static void set_thresValue(QString key,double value) {thresholdMap.insert(key,value);}
     static void set_rangeValue(QString,QString,QString);
+    static void set_ltsValue(QString key,double value) {ltsMap.insert(key,value);}
 
     //Lists Getter
     static QStringList get_keyList() {return keyList;}
+    static QStringList get_extkeyList() {return extkeyList;}
     static QStringList get_phaseList() {return phaseList;}
     static QStringList get_sportList() {return sportList;}
+    static QStringList get_sportUseList() {return sportUseList;}
     static QStringList get_cycleList() {return cycleList;}
     static QStringList get_codeList() {return codeList;}
     static QStringList get_levelList() {return levelList;}
     static QStringList get_intPlanerList() {return intPlanList;}
     static QStringList get_jsoninfos() {return jsoninfos;}
+
+    //List Setter
 
     //common functions
     static int get_swimLaplen() {return swimLaplen;}
@@ -105,7 +111,8 @@ public:
     static void set_act_recalc(bool isrecalc) {act_isrecalc = isrecalc;}
     static bool get_act_isrecalc() {return act_isrecalc;}
     static void set_swimLaplen(int lapLen) {swimLaplen = lapLen;}
-    static void writeSettings(QString,QStringList);
+    static void writeListValues(QHash<QString,QStringList> *plist);
+    static void autoSave() {settings::saveSettings();}
 };
 
 #endif // SETTINGS_H

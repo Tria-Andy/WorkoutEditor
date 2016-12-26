@@ -24,7 +24,6 @@
 #include <QAbstractItemModel>
 #include <QTextBrowser>
 #include <QtXml>
-#include <QtCharts>
 #include "calendar_delegate.h"
 #include "week_delegate.h"
 #include "summery_delegate.h"
@@ -40,6 +39,7 @@
 #include "day_popup.h"
 #include "week_popup.h"
 #include "year_popup.h"
+#include "stress_popup.h"
 #include "dialog_edit.h"
 #include "dialog_export.h"
 #include "dialog_stresscalc.h"
@@ -79,30 +79,27 @@ private:
     del_intselect intSelect_del;
     del_level level_del;
     QStandardItemModel *calendar_model,*sum_model;
-    QStringList modus_list,cal_header,work_list,sum_name,year_header,schedMode,sum_header;
+    QStringList modus_list,cal_header,year_header,schedMode;
 
-    //Intercall Chart
-    QChart *intChart;
-    QChartView *intChartview;
-    QLineSeries *avgLine,*speedLine, *polishLine;
-    QValueAxis *ySpeed;
-    QCategoryAxis *axisX;
-    QVector<double> speedValues;
-    void set_intChartValues(int,double);
+    //Intervall Chart
+    QVector<double> secTicker,speedValues,polishValues,speedMinMax,rangeMinMax;
+    void set_speedValues(int);
+    void set_speedgraph(double,double);
+    void set_speedPlot(double,double);
     void set_polishValues(int,double);
 
-    int fontSize,sel_count;
+    int sel_count,sportUse;
     QDate selectedDate,firstdayofweek;
     QString weeknumber,phaseFilter;
     QVector<int> work_sum,dur_sum,stress_sum;
     QVector<double> dist_sum;
     int weekRange,weekpos;
     int saisonWeeks,weekDays;
-    unsigned int weekCounter;
-    bool userSetup,isWeekMode,safeFlag;
+    unsigned int weekCounter,sportCounter;
+    bool userSetup,isWeekMode,safeFlag,graphLoaded;
 
     void openPreferences();
-    void set_summerInfo();
+    void set_summeryInfo();
     void summery_view();
     void summery_calc(int,QModelIndex,bool);
     QString set_summeryString(int,bool);
@@ -165,10 +162,11 @@ private slots:
     void on_horizontalSlider_polish_valueChanged(int value);
     void on_tableView_int_times_clicked(const QModelIndex &index);
     void on_actionSave_to_GoldenCheetah_triggered();
-    void on_pushButton_ClearWorkContent_clicked();
-    void on_pushButton_sync_clicked();
     void on_lineEdit_workContent_textChanged(const QString &arg1);
-    void on_pushButton_putInt_clicked();
+    void on_toolButton_putInt_clicked();
+    void on_toolButton_sync_clicked();
+    void on_toolButton_clearContent_clicked();
+    void on_actionPMC_triggered();
 };
 
 #endif // MAINWINDOW_H

@@ -53,7 +53,7 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QFrame" name="frame_info_2">
+         <widget class="QFrame" name="frame_weekinfo">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>1</horstretch>
@@ -478,7 +478,7 @@
             <number>4</number>
            </property>
            <item>
-            <widget class="QFrame" name="frame_info">
+            <widget class="QFrame" name="frame_actinfo">
              <property name="frameShape">
               <enum>QFrame::Panel</enum>
              </property>
@@ -568,7 +568,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QFrame" name="frame">
+            <widget class="QFrame" name="frame_content">
              <property name="frameShape">
               <enum>QFrame::Box</enum>
              </property>
@@ -592,7 +592,7 @@
                <number>0</number>
               </property>
               <item>
-               <widget class="QFrame" name="frame_2">
+               <widget class="QFrame" name="frame_contentvalues">
                 <property name="frameShape">
                  <enum>QFrame::StyledPanel</enum>
                 </property>
@@ -663,7 +663,7 @@
                   </widget>
                  </item>
                  <item>
-                  <spacer name="horizontalSpacer_8">
+                  <spacer name="horizontalSpacer_10">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
                    </property>
@@ -676,17 +676,17 @@
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="pushButton_putInt">
+                  <widget class="QToolButton" name="toolButton_putInt">
                    <property name="minimumSize">
                     <size>
-                     <width>0</width>
-                     <height>0</height>
+                     <width>22</width>
+                     <height>22</height>
                     </size>
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>20</width>
-                     <height>20</height>
+                     <width>22</width>
+                     <height>22</height>
                     </size>
                    </property>
                    <property name="text">
@@ -694,16 +694,31 @@
                    </property>
                    <property name="icon">
                     <iconset resource="resources.qrc">
-                     <normaloff>:/images/icons/Load.png</normaloff>:/images/icons/Load.png</iconset>
+                     <normaloff>:/images/icons/Add.png</normaloff>:/images/icons/Add.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>18</width>
+                     <height>18</height>
+                    </size>
+                   </property>
+                   <property name="autoRaise">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="pushButton_sync">
+                  <widget class="QToolButton" name="toolButton_sync">
+                   <property name="minimumSize">
+                    <size>
+                     <width>22</width>
+                     <height>22</height>
+                    </size>
+                   </property>
                    <property name="maximumSize">
                     <size>
-                     <width>20</width>
-                     <height>20</height>
+                     <width>22</width>
+                     <height>22</height>
                     </size>
                    </property>
                    <property name="text">
@@ -713,14 +728,29 @@
                     <iconset resource="resources.qrc">
                      <normaloff>:/images/icons/Sync.png</normaloff>:/images/icons/Sync.png</iconset>
                    </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>18</width>
+                     <height>18</height>
+                    </size>
+                   </property>
+                   <property name="autoRaise">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="pushButton_ClearWorkContent">
+                  <widget class="QToolButton" name="toolButton_clearContent">
+                   <property name="minimumSize">
+                    <size>
+                     <width>22</width>
+                     <height>22</height>
+                    </size>
+                   </property>
                    <property name="maximumSize">
                     <size>
-                     <width>20</width>
-                     <height>20</height>
+                     <width>22</width>
+                     <height>22</height>
                     </size>
                    </property>
                    <property name="text">
@@ -729,6 +759,15 @@
                    <property name="icon">
                     <iconset resource="resources.qrc">
                      <normaloff>:/images/icons/Erase.png</normaloff>:/images/icons/Erase.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>18</width>
+                     <height>18</height>
+                    </size>
+                   </property>
+                   <property name="autoRaise">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -774,16 +813,25 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
           <property name="currentIndex">
            <number>0</number>
           </property>
-          <widget class="QWidget" name="tab">
+          <widget class="QWidget" name="tab_intervalls">
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
            <attribute name="title">
             <string>Intervalls</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
              <widget class="QFrame" name="frame_polish">
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
               <property name="frameShape">
                <enum>QFrame::Panel</enum>
               </property>
@@ -882,6 +930,9 @@
             </item>
             <item>
              <widget class="QFrame" name="frame_avgValue">
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
               <property name="frameShape">
                <enum>QFrame::Panel</enum>
               </property>
@@ -1021,7 +1072,10 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_6">
+          <widget class="QWidget" name="tab_interplol">
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
            <attribute name="title">
             <string>Interpolation</string>
            </attribute>
@@ -1039,6 +1093,9 @@
                 <width>0</width>
                 <height>25</height>
                </size>
+              </property>
+              <property name="autoFillBackground">
+               <bool>true</bool>
               </property>
               <property name="frameShape">
                <enum>QFrame::Panel</enum>
@@ -1136,6 +1193,15 @@
             </item>
             <item>
              <widget class="QGroupBox" name="groupBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
               <property name="title">
                <string>Interval Info</string>
               </property>
@@ -1149,6 +1215,26 @@
                </item>
                <item>
                 <widget class="QLineEdit" name="lineEdit_lapTime">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_25">
+                 <property name="text">
+                  <string>Lap Distance:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEdit_lapDistance">
                  <property name="enabled">
                   <bool>false</bool>
                  </property>
@@ -1257,32 +1343,20 @@
              </widget>
             </item>
             <item>
-             <widget class="QFrame" name="frame_5">
+             <widget class="QFrame" name="frame_plot">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>4</verstretch>
                </sizepolicy>
               </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>200</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>400</height>
-               </size>
-              </property>
               <property name="frameShape">
-               <enum>QFrame::Box</enum>
+               <enum>QFrame::Panel</enum>
               </property>
               <property name="frameShadow">
                <enum>QFrame::Raised</enum>
               </property>
-              <layout class="QVBoxLayout" name="verticalLayout_interpol">
+              <layout class="QHBoxLayout" name="horizontalLayout_6">
                <property name="spacing">
                 <number>0</number>
                </property>
@@ -1298,25 +1372,38 @@
                <property name="bottomMargin">
                 <number>0</number>
                </property>
+               <item>
+                <widget class="QCustomPlot" name="widget_plot" native="true">
+                 <property name="autoFillBackground">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </widget>
             </item>
             <item>
-             <spacer name="verticalSpacer_bikeSpacer">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
+             <widget class="QFrame" name="frame_space">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>2</verstretch>
+               </sizepolicy>
               </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
               </property>
-             </spacer>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_2">
+          <widget class="QWidget" name="tab_swimcalc">
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
            <attribute name="title">
             <string>Calculations</string>
            </attribute>
@@ -1568,6 +1655,7 @@
     <addaction name="actionLapEditor"/>
     <addaction name="actionPace_Calculator"/>
     <addaction name="actionStress_Calculator"/>
+    <addaction name="actionPMC"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -1615,6 +1703,7 @@
    <addaction name="actionIntervall_Editor"/>
    <addaction name="actionPace_Calculator"/>
    <addaction name="actionStress_Calculator"/>
+   <addaction name="actionPMC"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSelect_File">
@@ -1798,8 +1887,25 @@
     <string>Save to GoldenCheetah</string>
    </property>
   </action>
+  <action name="actionPMC">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/images/icons/Stock graph.png</normaloff>:/images/icons/Stock graph.png</iconset>
+   </property>
+   <property name="text">
+    <string>PMC</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

@@ -39,7 +39,6 @@ public:
     ~Dialog_workouts();
 
     //Getter
-    //QString get_workout_sport() {return w_sport;}
     QString get_workout_code() {return w_code;}
     QString get_workout_title() {return w_title;}
     QTime get_workout_duration() {return QTime::fromString(w_duration,"hh:mm:ss");}

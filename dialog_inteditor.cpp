@@ -69,9 +69,9 @@ Dialog_inteditor::Dialog_inteditor(QWidget *parent,standardWorkouts *p_workouts)
 
     ui->pushButton_down->setEnabled(false);
     ui->pushButton_up->setEnabled(false);
-    ui->pushButton_save_std->setEnabled(false);
-    ui->pushButton_copy_std->setEnabled(false);
-    ui->pushButton_delete_std->setEnabled(false);
+    ui->toolButton_save->setEnabled(false);
+    ui->toolButton_copy->setEnabled(false);
+    ui->toolButton_delete->setEnabled(false);
     this->set_pushbutton(false);
 }
 
@@ -107,9 +107,9 @@ void Dialog_inteditor::reset_values()
 void Dialog_inteditor::reset_workoutInfo()
 {
     current_workID = QString();
-    ui->pushButton_save_std->setEnabled(false);
-    ui->pushButton_copy_std->setEnabled(false);
-    ui->pushButton_delete_std->setEnabled(false);
+    ui->toolButton_save->setEnabled(false);
+    ui->toolButton_copy->setEnabled(false);
+    ui->toolButton_delete->setEnabled(false);
     ui->lineEdit_workoutname->setText("");
 }
 
@@ -450,8 +450,8 @@ void Dialog_inteditor::open_stdWorkout(QString workID)
         ui->treeWidget_planer->expandAll();       
     }
     this->set_plot_model();
-    ui->pushButton_save_std->setEnabled(true);
-    ui->pushButton_delete_std->setEnabled(true);
+    ui->toolButton_save->setEnabled(true);
+    ui->toolButton_delete->setEnabled(true);
     clearFlag = false;
 }
 
@@ -616,7 +616,7 @@ void Dialog_inteditor::set_plot_graphic(int c_ints)
     ui->widget_planerplot->yAxis->setLabel("Threshold %");
     ui->widget_planerplot->xAxis->setTickLabels(true);
     ui->widget_planerplot->yAxis->setTickLabels(true);
-    ui->widget_planerplot->replot(QCustomPlot::rpImmediate);
+    ui->widget_planerplot->replot();
 
     ui->label_duration->setText("Time:" + settings::set_time(static_cast<int>(ceil(time_sum))) + " - " + "Distance:" + QString::number(dist_sum) + " - " + "Stress:" + QString::number(round(stress_sum)));
 }
@@ -820,42 +820,6 @@ void Dialog_inteditor::on_treeWidget_planer_itemClicked(QTreeWidgetItem *item, i
     this->set_pushbutton(true);
     this->load_item(item);
     this->refresh_model();
-}
-
-void Dialog_inteditor::on_pushButton_addtop_clicked()
-{
-    this->add_topItem(ui->comboBox_topitem->currentText());
-    ui->comboBox_reps->setCurrentIndex(0);
-}
-
-void Dialog_inteditor::on_pushButton_save_std_clicked()
-{
-    this->save_workout();
-    ui->pushButton_copy_std->setEnabled(true);
-    ui->pushButton_delete_std->setEnabled(true);
-}
-
-void Dialog_inteditor::on_pushButton_copy_std_clicked()
-{
-    current_workID = QString();
-    this->save_workout();
-}
-
-void Dialog_inteditor::on_pushButton_delete_std_clicked()
-{
-    QMessageBox::StandardButton reply;
-
-    reply = QMessageBox::critical(this,"Delete Std Workout","Delete selected Std Workout?",QMessageBox::Yes|QMessageBox::No);
-
-    if (reply == QMessageBox::Yes)
-    {
-        stdWorkouts->delete_stdWorkout(current_workID,true);
-        current_workID = QString();
-        this->clearIntTree();
-        this->reset_values();
-        this->reset_workoutInfo();
-        this->get_workouts(current_sport);
-    }
 }
 
 QString Dialog_inteditor::get_treeValue(int item,int i_child, int c_sub,int pos,int level)
@@ -1101,24 +1065,24 @@ void Dialog_inteditor::on_lineEdit_workoutname_textChanged(const QString &value)
 {
     if(!value.isEmpty() && ui->treeWidget_planer->topLevelItemCount() > 0)
     {
-        ui->pushButton_save_std->setEnabled(true);
+        ui->toolButton_save->setEnabled(true);
     }
     for(QMap<QString,QString>::const_iterator it =  workoutMap.cbegin(), end = workoutMap.cend(); it != end; ++it)
     {
         if(it.value() == value)
         {
-            ui->pushButton_copy_std->setEnabled(false);
+            ui->toolButton_copy->setEnabled(false);
             break;
         }
         else
         {
             if(value.isEmpty())
             {
-                ui->pushButton_copy_std->setEnabled(false);
+                ui->toolButton_copy->setEnabled(false);
             }
             else
             {
-                ui->pushButton_copy_std->setEnabled(true);
+                ui->toolButton_copy->setEnabled(true);
             }
         }
     }
@@ -1163,4 +1127,40 @@ void Dialog_inteditor::on_treeWidget_planer_itemSelectionChanged()
             ui->pushButton_up->setEnabled(false);
         }
     }
+}
+
+void Dialog_inteditor::on_toolButton_save_clicked()
+{
+    this->save_workout();
+    ui->toolButton_copy->setEnabled(true);
+    ui->toolButton_delete->setEnabled(true);
+}
+
+void Dialog_inteditor::on_toolButton_copy_clicked()
+{
+    current_workID = QString();
+    this->save_workout();
+}
+
+void Dialog_inteditor::on_toolButton_delete_clicked()
+{
+    QMessageBox::StandardButton reply;
+
+    reply = QMessageBox::critical(this,"Delete Std Workout","Delete selected Std Workout?",QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        stdWorkouts->delete_stdWorkout(current_workID,true);
+        current_workID = QString();
+        this->clearIntTree();
+        this->reset_values();
+        this->reset_workoutInfo();
+        this->get_workouts(current_sport);
+    }
+}
+
+void Dialog_inteditor::on_toolButton_addTop_clicked()
+{
+    this->add_topItem(ui->comboBox_topitem->currentText());
+    ui->comboBox_reps->setCurrentIndex(0);
 }

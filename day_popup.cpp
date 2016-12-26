@@ -43,7 +43,7 @@ void day_popup::show_workouts()
     int col_count = (list.count()*3)-1;
     if(list.count() == 0)
     {
-        ui->pushButton_edit->setEnabled(false);
+        ui->toolButton_edit->setEnabled(false);
         return;
     }
     if(list.count() == 1) this->setFixedWidth(400);
@@ -116,12 +116,12 @@ void day_popup::show_workouts()
 
 }
 
-void day_popup::on_pushButton_edit_clicked()
+void day_popup::on_toolButton_close_clicked()
 {
-     accept();
+    reject();
 }
 
-void day_popup::on_pushButton_close_clicked()
+void day_popup::on_toolButton_edit_clicked()
 {
-     reject();
+    accept();
 }

@@ -16,7 +16,7 @@ TEMPLATE = app
 #Application version
 VERSION_MAJOR = 1
 VERSION_MINOR = 1
-VERSION_BUILD = 7
+VERSION_BUILD = 9
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
        "VERSION_BUILD=$$VERSION_BUILD"
@@ -48,7 +48,8 @@ SOURCES += main.cpp\
     dialog_version.cpp \
     dialog_lapeditor.cpp \
     jsonhandler.cpp \
-    logger.cpp
+    logger.cpp \
+    stress_popup.cpp
 
 HEADERS  += mainwindow.h \
     calendar_delegate.h \
@@ -59,7 +60,6 @@ HEADERS  += mainwindow.h \
     dialog_workouts.h \
     activity.h \
     del_spinbox_int.h \
-    del_spinbox_double.h \
     dialog_stresscalc.h \
     qcustomplot.h \
     week_popup.h \
@@ -81,7 +81,9 @@ HEADERS  += mainwindow.h \
     jsonhandler.h \
     logger.h \
     del_intview.h \
-    del_level.h
+    del_level.h \
+    del_addweek.h \
+    stress_popup.h
 
 FORMS    += mainwindow.ui \
     dialog_add.ui \
@@ -98,7 +100,8 @@ FORMS    += mainwindow.ui \
     year_popup.ui \
     dialog_week_copy.ui \
     dialog_version.ui \
-    dialog_lapeditor.ui
+    dialog_lapeditor.ui \
+    stress_popup.ui
 
 RESOURCES += \
     resources.qrc

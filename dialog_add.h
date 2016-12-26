@@ -57,11 +57,10 @@ private slots:
     void on_doubleSpinBox_dist_valueChanged(double arg1);
     void on_timeEdit_duration_timeChanged(const QTime &time);
     void on_comboBox_sport_currentTextChanged(const QString &arg1);
-    void on_pushButton_workouts_clicked();
     void on_dateEdit_wdate_dateChanged(const QDate &date);
     void on_timeEdit_time_timeChanged(const QTime &time);
     void on_spinBox_stress_score_valueChanged(int arg1);
-
+    void on_toolButton_workouts_clicked();
 };
 
 #endif // DIALOG_ADD_H

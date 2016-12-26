@@ -86,21 +86,6 @@ void Dialog_add::on_comboBox_sport_currentTextChanged(const QString &sport)
     ui->label_avg_speed->setText(settings::get_workout_pace(ui->doubleSpinBox_dist->value(),ui->timeEdit_duration->time(),sport,false));
 }
 
-void Dialog_add::on_pushButton_workouts_clicked()
-{
-    Dialog_workouts std_workouts(this,ui->comboBox_sport->currentText(),stdWorkouts);
-    std_workouts.setModal(true);
-    int returnCode = std_workouts.exec();
-    if(returnCode == QDialog::Accepted)
-    {
-        ui->comboBox_wcode->setCurrentText(std_workouts.get_workout_code());
-        ui->lineEdit_wtitle->setText(std_workouts.get_workout_title());
-        ui->timeEdit_duration->setTime(std_workouts.get_workout_duration());
-        ui->doubleSpinBox_dist->setValue(std_workouts.get_workout_distance());
-        ui->spinBox_stress_score->setValue(std_workouts.get_workout_stress());
-    }
-}
-
 void Dialog_add::on_dateEdit_wdate_dateChanged(const QDate &date)
 {
     workout_date = date;
@@ -127,4 +112,19 @@ void Dialog_add::on_timeEdit_time_timeChanged(const QTime &time)
 void Dialog_add::on_spinBox_stress_score_valueChanged(int stressValue)
 {
     w_stress = stressValue;
+}
+
+void Dialog_add::on_toolButton_workouts_clicked()
+{
+    Dialog_workouts std_workouts(this,ui->comboBox_sport->currentText(),stdWorkouts);
+    std_workouts.setModal(true);
+    int returnCode = std_workouts.exec();
+    if(returnCode == QDialog::Accepted)
+    {
+        ui->comboBox_wcode->setCurrentText(std_workouts.get_workout_code());
+        ui->lineEdit_wtitle->setText(std_workouts.get_workout_title());
+        ui->timeEdit_duration->setTime(std_workouts.get_workout_duration());
+        ui->doubleSpinBox_dist->setValue(std_workouts.get_workout_distance());
+        ui->spinBox_stress_score->setValue(std_workouts.get_workout_stress());
+    }
 }

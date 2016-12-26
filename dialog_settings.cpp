@@ -22,13 +22,17 @@
 #include <QColorDialog>
 #include <QFileDialog>
 
-Dialog_settings::Dialog_settings(QWidget *parent) :
+Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     QDialog(parent),
     ui(new Ui::Dialog_settings)
 {
     ui->setupUi(this);
+    schedule_ptr = psched;
     sportList << settings::isSwim << settings::isBike << settings::isRun;
+    keyList = settings::get_keyList();
+    extkeyList = settings::get_extkeyList();
     useColor = false;
+    stressEdit = false;
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
     level_model = new QStandardItemModel();
     hf_model = new QStandardItemModel();
@@ -40,22 +44,29 @@ Dialog_settings::Dialog_settings(QWidget *parent) :
     ui->lineEdit_schedule->setText(settings::get_gcInfo("schedule"));
     ui->lineEdit_standard->setText(settings::get_gcInfo("workouts"));
     ui->lineEdit_configfile->setText(settings::get_gcInfo("valuefile"));
-    ui->lineEdit_hfThres->setText(QString::number(settings::get_thresValue("hfthres")));
-    ui->lineEdit_hfmax->setText(QString::number(settings::get_thresValue("hfmax")));
-    ui->comboBox_selInfo->addItems(settings::get_keyList());
+    ui->spinBox_hfThres->setValue(settings::get_thresValue("hfthres"));
+    ui->spinBox_hfMax->setValue(settings::get_thresValue("hfmax"));
     ui->lineEdit_saison->setText(settings::get_saisonInfo("saison"));
     ui->lineEdit_saisonWeeks->setText(settings::get_saisonInfo("weeks"));
     ui->dateEdit_saisonStart->setDate(QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy"));
     ui->lineEdit_startWeek->setText(settings::get_saisonInfo("startkw"));
     ui->dateEdit_saisonEnd->setDate(QDate::fromString(settings::get_saisonInfo("endDate"),"dd.MM.yyyy"));
+    ui->spinBox_ltsDays->setValue(settings::get_ltsValue("ltsdays"));
+    ui->spinBox_stsDays->setValue(settings::get_ltsValue("stsdays"));
+    ui->spinBox_lastLTS->setValue(settings::get_ltsValue("lastlts"));
+    ui->spinBox_lastSTS->setValue(settings::get_ltsValue("laststs"));
     ui->comboBox_thresSport->addItems(sportList);
     ui->pushButton_save->setEnabled(false);
-    ui->pushButton_color->setEnabled(false);
-    ui->pushButton_add->setEnabled(false);
-    ui->pushButton_edit->setEnabled(false);
-    ui->pushButton_delete->setEnabled(false);
+    ui->toolButton_color->setEnabled(false);
+    ui->toolButton_add->setEnabled(false);
+    ui->toolButton_edit->setEnabled(false);
+    ui->toolButton_delete->setEnabled(false);
+    ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
     this->checkSetup();
 }
+
+enum {SPORT,LEVEL,PHASE,CYCLE,WCODE,JFILE,EDITOR};
+enum {SPORTUSE};
 
 Dialog_settings::~Dialog_settings()
 {
@@ -72,46 +83,72 @@ void Dialog_settings::on_pushButton_cancel_clicked()
 void Dialog_settings::checkSetup()
 {
     if(ui->lineEdit_athlete->text().isEmpty()) ui->pushButton_save->setEnabled(true);
-    this->set_hfmodel();
+    listMap.insert(keyList.at(SPORT),settings::get_sportList());
+    listMap.insert(keyList.at(LEVEL),settings::get_levelList());
+    listMap.insert(keyList.at(PHASE),settings::get_phaseList());
+    listMap.insert(keyList.at(CYCLE),settings::get_cycleList());
+    listMap.insert(keyList.at(WCODE),settings::get_codeList());
+    listMap.insert(keyList.at(JFILE),settings::get_jsoninfos());
+    listMap.insert(keyList.at(EDITOR),settings::get_intPlanerList());
+    listMap.insert(extkeyList.at(SPORTUSE),settings::get_sportUseList());
+    ui->comboBox_selInfo->addItems(keyList);
+    this->set_hfmodel(ui->spinBox_hfThres->value());
+    this->set_ltsList();
+}
+
+void Dialog_settings::updateListMap(int index,bool isKey)
+{
+    QStringList updateList;
+    if(isKey)
+    {
+        for(int i = 0; i < ui->listWidget_selection->count();++i)
+        {
+            updateList << ui->listWidget_selection->item(i)->data(Qt::DisplayRole).toString();
+        }
+        listMap.insert(keyList.at(index),updateList);
+    }
+    else
+    {
+        for(int i = 0; i < ui->listWidget_useIn->count();++i)
+        {
+            updateList << ui->listWidget_useIn->item(i)->data(Qt::DisplayRole).toString();
+        }
+        listMap.insert(extkeyList.at(index),updateList);
+    }
 }
 
 void Dialog_settings::writeChangedValues()
 {
-    QString selection = ui->comboBox_selInfo->currentText();
-    QStringList updateList;
     QString sport = ui->comboBox_thresSport->currentText();
-
-    for(int i = 0; i < ui->listWidget_selection->count();++i)
-    {
-        updateList << ui->listWidget_selection->item(i)->data(Qt::DisplayRole).toString();
-    }
+    double paceSec = (ui->timeEdit_thresPace->time().minute()*60) + ui->timeEdit_thresPace->time().second();
 
     if(sport == settings::isSwim)
     {
-        settings::set_thresValue("swimpower",ui->lineEdit_thresPower->text().toDouble());
-        settings::set_thresValue("swimpace",settings::get_timesec(ui->lineEdit_thresPace->text()));
+        settings::set_thresValue("swimpower",ui->spinBox_thresPower->value());
+        settings::set_thresValue("swimpace",paceSec);
         settings::set_thresValue("swimfactor",ui->doubleSpinBox_factor->value());
         this->writeRangeValues(sport);
     }
     if(sport == settings::isBike)
     {
-        settings::set_thresValue("bikepower",ui->lineEdit_thresPower->text().toDouble());
-        settings::set_thresValue("bikepace",settings::get_timesec(ui->lineEdit_thresPace->text()));
+        settings::set_thresValue("bikepower",ui->spinBox_thresPower->value());
+        settings::set_thresValue("bikepace",paceSec);
         settings::set_thresValue("bikefactor",ui->doubleSpinBox_factor->value());
         this->writeRangeValues(sport);
     }
     if(sport == settings::isRun)
     {
-        settings::set_thresValue("runpower",ui->lineEdit_thresPower->text().toDouble());
-        settings::set_thresValue("runpace",settings::get_timesec(ui->lineEdit_thresPace->text()));
+        settings::set_thresValue("runpower",ui->spinBox_thresPower->value());
+        settings::set_thresValue("runpace",paceSec);
         settings::set_thresValue("runfactor",ui->doubleSpinBox_factor->value());
         this->writeRangeValues(sport);
     }
 
-    settings::set_thresValue("hfthres",ui->lineEdit_hfThres->text().toDouble());
-    settings::set_thresValue("hfmax",ui->lineEdit_hfmax->text().toDouble());
+    settings::set_thresValue("hfthres",ui->spinBox_hfThres->value());
+    settings::set_thresValue("hfmax",ui->spinBox_hfMax->value());
     this->writeRangeValues("HF");
 
+    settings::set_gcInfo("gcpath",ui->lineEdit_gcpath->text());
     settings::set_gcInfo("athlete",ui->lineEdit_athlete->text());
     settings::set_gcInfo("yob",ui->lineEdit_yob->text());
     settings::set_gcInfo("folder",ui->lineEdit_activity->text());
@@ -125,14 +162,22 @@ void Dialog_settings::writeChangedValues()
     settings::set_saisonInfos("endDate",ui->dateEdit_saisonEnd->date().toString("dd.MM.yyyy"));
     settings::set_saisonInfos("weeks",ui->lineEdit_saisonWeeks->text());
 
-    settings::writeSettings(selection,updateList);
+    settings::set_ltsValue("ltsdays",ui->spinBox_ltsDays->value());
+    settings::set_ltsValue("stsdays",ui->spinBox_stsDays->value());
+    settings::set_ltsValue("lastlts",ui->spinBox_lastLTS->value());
+    settings::set_ltsValue("laststs",ui->spinBox_lastSTS->value());
 
-    thresPower = ui->lineEdit_thresPower->text().toDouble();
-    thresPace = settings::get_timesec(ui->lineEdit_thresPace->text());
+    settings::writeListValues(&listMap);
+
+    if(stressEdit) schedule_ptr->save_ltsFile(ui->spinBox_ltsDays->value());
+
+    thresPower = ui->spinBox_thresPower->value();
+    thresPace = paceSec;
     sportFactor = ui->doubleSpinBox_factor->value();
 
     this->set_thresholdView(ui->comboBox_thresSport->currentText());
-    this->set_hfmodel();
+    this->set_hfmodel(ui->spinBox_hfThres->value());
+
 }
 
 void Dialog_settings::writeRangeValues(QString sport)
@@ -161,48 +206,34 @@ void Dialog_settings::on_comboBox_selInfo_currentTextChanged(const QString &valu
 {
     this->set_listEntries(value);
     ui->lineEdit_addedit->clear();
-    ui->pushButton_add->setEnabled(false);
-    ui->pushButton_delete->setEnabled(false);
-    ui->pushButton_edit->setEnabled(false);
+    ui->toolButton_add->setEnabled(false);
+    ui->toolButton_delete->setEnabled(false);
+    ui->toolButton_edit->setEnabled(false);
 }
 
 void Dialog_settings::set_listEntries(QString selection)
 {
     ui->listWidget_selection->clear();
+    ui->listWidget_selection->addItems(listMap.value(selection));
 
-    if(selection == settings::get_keyList().at(0))
+
+    if(selection == keyList.at(SPORT))
     {
-        ui->listWidget_selection->addItems(settings::get_sportList());
+        ui->listWidget_useIn->addItems(listMap.value(extkeyList.at(SPORTUSE)));
+        ui->listWidget_useIn->setEnabled(true);
+        useColor = true;
+        this->checkSportUse();
+    }
+    else if(selection == keyList.at(LEVEL) || selection == keyList.at(PHASE))
+    {
+        ui->listWidget_useIn->clear();
+        ui->listWidget_useIn->setEnabled(false);
         useColor = true;
     }
-    if(selection == settings::get_keyList().at(1))
+    else
     {
-        ui->listWidget_selection->addItems(settings::get_levelList());
-        useColor = true;
-    }
-    if(selection == settings::get_keyList().at(2))
-    {
-        ui->listWidget_selection->addItems(settings::get_phaseList());
-        useColor = true;
-    }
-    if(selection == settings::get_keyList().at(3))
-    {
-        ui->listWidget_selection->addItems(settings::get_cycleList());
-        useColor = false;
-    }
-    if(selection == settings::get_keyList().at(4))
-    {
-        ui->listWidget_selection->addItems(settings::get_codeList());
-        useColor = false;
-    }
-    if(selection == settings::get_keyList().at(5))
-    {
-        ui->listWidget_selection->addItems(settings::get_jsoninfos());
-        useColor = false;
-    }
-    if(selection == settings::get_keyList().at(6))
-    {
-        ui->listWidget_selection->addItems(settings::get_intPlanerList());
+        ui->listWidget_useIn->clear();
+        ui->listWidget_useIn->setEnabled(false);
         useColor = false;
     }
 
@@ -215,22 +246,22 @@ void Dialog_settings::set_thresholdView(QString sport)
 {
     if(sport == settings::isSwim)
     {
-        ui->lineEdit_speed->setText(settings::get_speed(QTime::fromString(ui->lineEdit_thresPace->text(),"mm:ss"),100,ui->comboBox_thresSport->currentText(),true));
+        ui->lineEdit_speed->setText(settings::get_speed(ui->timeEdit_thresPace->time(),100,ui->comboBox_thresSport->currentText(),true));
         this->set_thresholdModel(sport);
     }
     if(sport == settings::isBike)
     {
-        ui->lineEdit_speed->setText(settings::get_speed(QTime::fromString(ui->lineEdit_thresPace->text(),"mm:ss"),1000,ui->comboBox_thresSport->currentText(),true));
+        ui->lineEdit_speed->setText(settings::get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true));
         this->set_thresholdModel(sport);
     }
     if(sport == settings::isRun)
     {
-        ui->lineEdit_speed->setText(settings::get_speed(QTime::fromString(ui->lineEdit_thresPace->text(),"mm:ss"),1000,ui->comboBox_thresSport->currentText(),true));
+        ui->lineEdit_speed->setText(settings::get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true));
         this->set_thresholdModel(sport);
     }
 }
 
-void Dialog_settings::set_hfmodel()
+void Dialog_settings::set_hfmodel(double hfThres)
 {
     QStringList levels = settings::get_levelList();
     if(hf_model->rowCount() > 0) hf_model->clear();
@@ -243,6 +274,8 @@ void Dialog_settings::set_hfmodel()
     ui->tableView_hf->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_hf->verticalHeader()->hide();
 
+    double percLow = 0,percHigh = 0;
+
     for(int i = 0; i < levels.count(); ++i)
     {
         range = settings::get_rangeValue("HF",levels.at(i));
@@ -251,9 +284,38 @@ void Dialog_settings::set_hfmodel()
         hf_model->insertRows(i,1,QModelIndex());
         hf_model->setData(hf_model->index(i,0,QModelIndex()),levels.at(i));
         hf_model->setData(hf_model->index(i,1,QModelIndex()),zone_low);
-        hf_model->setData(hf_model->index(i,2,QModelIndex()),settings::get_hfvalue(zone_low));
         hf_model->setData(hf_model->index(i,3,QModelIndex()),zone_high);
-        hf_model->setData(hf_model->index(i,4,QModelIndex()),settings::get_hfvalue(zone_high));
+
+        percLow = hf_model->data(hf_model->index(i,1)).toDouble()/100;
+        percHigh = hf_model->data(hf_model->index(i,3)).toDouble()/100;
+
+        hf_model->setData(hf_model->index(i,2,QModelIndex()),round(hfThres * percLow));
+        hf_model->setData(hf_model->index(i,4,QModelIndex()),round(hfThres * percHigh));
+    }
+}
+
+void Dialog_settings::set_ltsList()
+{
+    QMap<QDate,double> *map = schedule_ptr->get_StressMap();
+    QString itemValue;
+    ui->listWidget_stressValue->clear();
+
+    for(QMap<QDate,double>::const_iterator it =  map->cbegin(), end = map->cend(); it != end; ++it)
+    {
+        itemValue = it.key().toString("dd.MM.yyyy") +" - "+QString::number(it.value());
+        ui->listWidget_stressValue->addItem(itemValue);
+    }
+}
+
+void Dialog_settings::checkSportUse()
+{
+    if(ui->listWidget_useIn->count() >=5)
+    {
+        ui->listWidget_useIn->setDragDropMode(QAbstractItemView::NoDragDrop);
+    }
+    else
+    {
+        ui->listWidget_useIn->setDragDropMode(QAbstractItemView::DropOnly);
     }
 }
 
@@ -282,7 +344,7 @@ void Dialog_settings::set_thresholdModel(QString sport)
         percLow = level_model->data(level_model->index(i,1,QModelIndex())).toDouble()/100;
         percHigh = level_model->data(level_model->index(i,3,QModelIndex())).toDouble()/100;
 
-        if(ui->comboBox_thresSport->currentText() == settings::isBike)
+        if(sport == settings::isBike)
         {
             level_model->setData(level_model->index(i,2,QModelIndex()),round(thresPower * percLow));
             level_model->setData(level_model->index(i,4,QModelIndex()),round(thresPower * percHigh));
@@ -297,10 +359,10 @@ void Dialog_settings::set_thresholdModel(QString sport)
 
 void Dialog_settings::set_color(QColor color,bool write,QString key)
 {
-    QPalette palette = ui->pushButton_color->palette();
-    palette.setColor(ui->pushButton_color->backgroundRole(),color);
-    ui->pushButton_color->setAutoFillBackground(true);
-    ui->pushButton_color->setPalette(palette);
+    QPalette palette = ui->toolButton_color->palette();
+    palette.setColor(ui->toolButton_color->backgroundRole(),color);
+    ui->toolButton_color->setAutoFillBackground(true);
+    ui->toolButton_color->setPalette(palette);
 
     if(write)
     {
@@ -313,21 +375,21 @@ void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem 
     QString listValue = item->data(Qt::DisplayRole).toString();
     QColor color;
     ui->lineEdit_addedit->setText(listValue);
-    ui->pushButton_edit->setEnabled(true);
-    ui->pushButton_delete->setEnabled(true);
+    ui->toolButton_edit->setEnabled(true);
+    ui->toolButton_delete->setEnabled(true);
 
     color = settings::get_itemColor(listValue);
 
     if(useColor)
     {
         this->set_color(color,false,listValue);
-        ui->pushButton_color->setEnabled(true);
+        ui->toolButton_color->setEnabled(true);
     }
     else
     {
         color.setRgb(255,255,255,0);
         this->set_color(color,false,listValue);
-        ui->pushButton_color->setEnabled(false);
+        ui->toolButton_color->setEnabled(false);
     }
 }
 
@@ -337,6 +399,8 @@ void Dialog_settings::on_pushButton_up_clicked()
     QListWidgetItem *currentItem = ui->listWidget_selection->takeItem(currentindex);
     ui->listWidget_selection->insertItem(currentindex-1,currentItem);
     ui->listWidget_selection->setCurrentRow(currentindex-1);
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
+    this->enableSavebutton();
 }
 
 void Dialog_settings::on_pushButton_down_clicked()
@@ -345,65 +409,46 @@ void Dialog_settings::on_pushButton_down_clicked()
     QListWidgetItem *currentItem = ui->listWidget_selection->takeItem(currentindex);
     ui->listWidget_selection->insertItem(currentindex+1,currentItem);
     ui->listWidget_selection->setCurrentRow(currentindex+1);
-}
-
-void Dialog_settings::on_pushButton_add_clicked()
-{
-    int index = ui->listWidget_selection->count();
-    ui->listWidget_selection->insertItem(index,ui->lineEdit_addedit->text());
-    this->enableSavebutton();
-}
-
-void Dialog_settings::on_pushButton_delete_clicked()
-{
-    QListWidgetItem *item = ui->listWidget_selection->takeItem(ui->listWidget_selection->currentRow());
-    ui->lineEdit_addedit->clear();
-    this->set_color(QColor(255,255,255,0),false,"");
-    delete item;
-    this->enableSavebutton();
-    ui->pushButton_delete->setEnabled(false);
-    ui->pushButton_add->setEnabled(true);
-}
-
-void Dialog_settings::on_pushButton_edit_clicked()
-{
-    ui->listWidget_selection->item(ui->listWidget_selection->currentRow())->setData(Qt::EditRole,ui->lineEdit_addedit->text());
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
     this->enableSavebutton();
 }
 
 void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &value)
 {
+    QTime paceTime(0,0,0);
     QPalette gback,wback;
     gback.setColor(QPalette::Base,Qt::green);
-    wback.setColor(QPalette::Base,Qt::white);;
+    wback.setColor(QPalette::Base,Qt::white);
+
+    ui->timeEdit_thresPace->setTime(paceTime);
 
     if(value == settings::isSwim)
     {
         thresPower = settings::get_thresValue("swimpower");
         thresPace = settings::get_thresValue("swimpace");
         sportFactor = settings::get_thresValue("swimfactor");
-        ui->lineEdit_thresPower->setPalette(wback);
-        ui->lineEdit_thresPace->setPalette(gback);
+        ui->spinBox_thresPower->setPalette(wback);
+        ui->timeEdit_thresPace->setPalette(gback);
     }
     if(value == settings::isBike)
     {
         thresPower = settings::get_thresValue("bikepower");
         thresPace = settings::get_thresValue("bikepace");
         sportFactor = settings::get_thresValue("bikefactor");
-        ui->lineEdit_thresPower->setPalette(gback);
-        ui->lineEdit_thresPace->setPalette(wback);
+        ui->spinBox_thresPower->setPalette(gback);
+        ui->timeEdit_thresPace->setPalette(wback);
     }
     if(value == settings::isRun)
     {
         thresPower = settings::get_thresValue("runpower");
         thresPace = settings::get_thresValue("runpace");
         sportFactor = settings::get_thresValue("runfactor");
-        ui->lineEdit_thresPower->setPalette(wback);
-        ui->lineEdit_thresPace->setPalette(gback);
+        ui->spinBox_thresPower->setPalette(wback);
+        ui->timeEdit_thresPace->setPalette(gback);
     }
-
-    ui->lineEdit_thresPower->setText(QString::number(thresPower));
-    ui->lineEdit_thresPace->setText(settings::set_time(thresPace));
+    paceTime = paceTime.addSecs(static_cast<int>(thresPace));
+    ui->spinBox_thresPower->setValue(thresPower);
+    ui->timeEdit_thresPace->setTime(paceTime);
     ui->doubleSpinBox_factor->setValue(sportFactor);
 
     this->set_thresholdView(value);
@@ -428,35 +473,6 @@ void Dialog_settings::on_pushButton_save_clicked()
     }
 }
 
-
-void Dialog_settings::on_lineEdit_thresPace_textEdited(const QString &value)
-{
-    Q_UNUSED(value)
-    this->enableSavebutton();
-}
-
-void Dialog_settings::on_lineEdit_thresPower_textEdited(const QString &value)
-{
-    Q_UNUSED(value)
-    if(ui->comboBox_thresSport->currentText() == settings::isBike)
-    {
-        ui->lineEdit_thresPace->setText(settings::set_time(static_cast<int>(3600/(round(ui->lineEdit_thresPower->text().toDouble()/6.5)))));
-    }
-    this->enableSavebutton();
-}
-
-void Dialog_settings::on_lineEdit_hfThres_textEdited(const QString &value)
-{
-    Q_UNUSED(value)
-    this->enableSavebutton();
-}
-
-void Dialog_settings::on_lineEdit_hfmax_textEdited(const QString &value)
-{
-    Q_UNUSED(value)
-    this->enableSavebutton();
-}
-
 void Dialog_settings::on_dateEdit_saisonStart_dateChanged(const QDate &date)
 {
     ui->lineEdit_startWeek->setText(QString::number(date.weekNumber()));
@@ -464,9 +480,9 @@ void Dialog_settings::on_dateEdit_saisonStart_dateChanged(const QDate &date)
 }
 
 
-void Dialog_settings::on_pushButton_color_clicked()
+void Dialog_settings::on_toolButton_color_clicked()
 {
-    QColor color = QColorDialog::getColor(ui->pushButton_color->palette().color(ui->pushButton_color->backgroundRole()),this);
+    QColor color = QColorDialog::getColor(ui->toolButton_color->palette().color(ui->toolButton_color->backgroundRole()),this);
     if(color.isValid())
     {
         this->set_color(color,true,ui->lineEdit_addedit->text());
@@ -483,18 +499,10 @@ void Dialog_settings::on_dateEdit_saisonEnd_dateChanged(const QDate &enddate)
     this->enableSavebutton();
 }
 
-void Dialog_settings::on_pushButton_schedulePath_clicked()
+void Dialog_settings::on_lineEdit_gcpath_textChanged(const QString &value)
 {
-    QFileDialog dialogSched;
-    QString directory = dialogSched.getExistingDirectory(0,"Caption",QString(),QFileDialog::ShowDirsOnly);
-    ui->lineEdit_schedule->setText(QDir::toNativeSeparators(directory));
-}
-
-void Dialog_settings::on_pushButton_workoutsPath_clicked()
-{
-    QFileDialog dialogWork;
-    QString directory = dialogWork.getExistingDirectory(0,"Caption",QString(),QFileDialog::ShowDirsOnly);
-    ui->lineEdit_standard->setText(QDir::toNativeSeparators(directory));
+    Q_UNUSED(value)
+    this->enableSavebutton();
 }
 
 void Dialog_settings::on_lineEdit_schedule_textChanged(const QString &value)
@@ -525,11 +533,11 @@ void Dialog_settings::on_lineEdit_addedit_textChanged(const QString &value)
 {
     if(!value.isEmpty())
     {
-        ui->pushButton_add->setEnabled(true);
+        ui->toolButton_add->setEnabled(true);
     }
     else
     {
-        ui->pushButton_add->setEnabled(false);
+        ui->toolButton_add->setEnabled(false);
     }
 }
 
@@ -547,4 +555,163 @@ void Dialog_settings::on_tableView_hf_doubleClicked(const QModelIndex &index)
     {
         this->enableSavebutton();
     }
+}
+
+void Dialog_settings::on_listWidget_useIn_doubleClicked(const QModelIndex &index)
+{
+    QListWidgetItem *item = ui->listWidget_useIn->takeItem(index.row());
+    delete item;
+    this->updateListMap(SPORTUSE,false);
+    this->checkSportUse();
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_listWidget_useIn_itemChanged(QListWidgetItem *item)
+{
+    Q_UNUSED(item)
+    this->checkSportUse();
+    this->updateListMap(SPORTUSE,false);
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_toolButton_gcPath_clicked()
+{
+    QString dir = this->getDirectory("Set GC Activities Directory");
+    if(!dir.isEmpty())
+    {
+        ui->lineEdit_gcpath->setText(QDir::toNativeSeparators(dir));
+    }
+}
+
+void Dialog_settings::on_doubleSpinBox_factor_valueChanged(double value)
+{
+    sportFactor = value;
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_spinBox_thresPower_valueChanged(int value)
+{
+    if(ui->comboBox_thresSport->currentText() == settings::isBike)
+    {
+        thresPower = value;
+        QTime paceTime(0,0,0);
+        paceTime = paceTime.addSecs(static_cast<int>(3600/(round(static_cast<double>(value)/6.5))));
+        ui->timeEdit_thresPace->setTime(paceTime);
+        this->set_thresholdView(ui->comboBox_thresSport->currentText());
+    }
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_timeEdit_thresPace_timeChanged(const QTime &time)
+{
+    thresPace = time.minute()*60 + time.second();
+    this->set_thresholdView(ui->comboBox_thresSport->currentText());
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_toolButton_schedulePath_clicked()
+{
+    QString dir = this->getDirectory("Select Schedule File Dir");
+    if(!dir.isEmpty())
+    {
+        ui->lineEdit_schedule->setText(QDir::toNativeSeparators(dir));
+    }
+}
+
+QString Dialog_settings::getDirectory(QString getdir)
+{
+    QFileDialog dialogSched;
+    return dialogSched.getExistingDirectory(this,getdir,"C:\\",QFileDialog::ShowDirsOnly);
+}
+
+void Dialog_settings::on_toolButton_workoutsPath_clicked()
+{
+    QString dir = this->getDirectory("Select StandardWorkouts File Dir");
+    if(!dir.isEmpty())
+    {
+        ui->lineEdit_standard->setText(QDir::toNativeSeparators(dir));
+    }
+}
+
+void Dialog_settings::on_spinBox_hfThres_valueChanged(int value)
+{
+    this->set_hfmodel(static_cast<double>(value));
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_spinBox_hfMax_valueChanged(int value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_dateEdit_stress_dateChanged(const QDate &date)
+{
+    ui->spinBox_stress->setValue(schedule_ptr->get_StressMap()->value(date));
+}
+
+void Dialog_settings::on_pushButton_stressEdit_clicked()
+{
+    schedule_ptr->set_stressMap(ui->dateEdit_stress->date(),ui->spinBox_stress->value());
+    stressEdit = true;
+    this->set_ltsList();
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_toolButton_add_clicked()
+{
+    ui->listWidget_selection->insertItem(ui->listWidget_selection->currentRow(),ui->lineEdit_addedit->text());
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_toolButton_delete_clicked()
+{
+    QListWidgetItem *item = ui->listWidget_selection->takeItem(ui->listWidget_selection->currentRow());
+    ui->lineEdit_addedit->clear();
+    this->set_color(QColor(255,255,255,0),false,"");
+    delete item;
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
+    this->enableSavebutton();
+    ui->toolButton_delete->setEnabled(false);
+    ui->toolButton_add->setEnabled(true);
+}
+
+void Dialog_settings::on_toolButton_edit_clicked()
+{
+    ui->listWidget_selection->item(ui->listWidget_selection->currentRow())->setData(Qt::EditRole,ui->lineEdit_addedit->text());
+    this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_spinBox_ltsDays_valueChanged(int value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_spinBox_stsDays_valueChanged(int value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_spinBox_lastLTS_valueChanged(int value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_spinBox_lastSTS_valueChanged(int value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_listWidget_stressValue_itemClicked(QListWidgetItem *item)
+{
+    QString values = item->data(Qt::DisplayRole).toString();
+    QString stress = values.split(" - ").last();
+    ui->dateEdit_stress->setDate(QDate::fromString(values.split(" - ").first(),"dd.MM.yyyy"));
+    ui->spinBox_stress->setValue(stress.toInt());
 }

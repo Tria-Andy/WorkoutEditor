@@ -24,6 +24,7 @@
 #include <QListWidget>
 #include <QStandardItemModel>
 #include "del_level.h"
+#include "schedule.h"
 #include "settings.h"
 
 namespace Ui {
@@ -35,7 +36,7 @@ class Dialog_settings : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_settings(QWidget *parent = 0);
+    explicit Dialog_settings(QWidget *parent = 0,schedule *psched = 0);
     ~Dialog_settings();
 
 private slots:
@@ -44,20 +45,10 @@ private slots:
     void on_listWidget_selection_itemDoubleClicked(QListWidgetItem *item);
     void on_pushButton_up_clicked();
     void on_pushButton_down_clicked();
-    void on_pushButton_add_clicked();
-    void on_pushButton_delete_clicked();
-    void on_pushButton_edit_clicked();
     void on_comboBox_thresSport_currentTextChanged(const QString &arg1);
     void on_pushButton_save_clicked();
-    void on_lineEdit_thresPace_textEdited(const QString &arg1);
-    void on_lineEdit_thresPower_textEdited(const QString &arg1);
-    void on_lineEdit_hfThres_textEdited(const QString &arg1);
-    void on_lineEdit_hfmax_textEdited(const QString &arg1);
     void on_dateEdit_saisonStart_dateChanged(const QDate &date);
-    void on_pushButton_color_clicked();
     void on_dateEdit_saisonEnd_dateChanged(const QDate &date);
-    void on_pushButton_schedulePath_clicked();
-    void on_pushButton_workoutsPath_clicked();
     void on_lineEdit_schedule_textChanged(const QString &arg1);
     void on_lineEdit_standard_textChanged(const QString &arg1);
     void on_lineEdit_athlete_textChanged(const QString &arg1);
@@ -65,24 +56,58 @@ private slots:
     void on_lineEdit_addedit_textChanged(const QString &arg1);
     void on_tableView_level_doubleClicked(const QModelIndex &index);
     void on_tableView_hf_doubleClicked(const QModelIndex &index);
+    void on_listWidget_useIn_doubleClicked(const QModelIndex &index);
+    void on_listWidget_useIn_itemChanged(QListWidgetItem *item);
+    void on_lineEdit_gcpath_textChanged(const QString &arg1);
+    void on_toolButton_gcPath_clicked();
+    void on_doubleSpinBox_factor_valueChanged(double arg1);
+    void on_spinBox_thresPower_valueChanged(int arg1);
+    void on_timeEdit_thresPace_timeChanged(const QTime &time);
+    void on_toolButton_schedulePath_clicked();
+    void on_toolButton_workoutsPath_clicked();
+    void on_spinBox_hfThres_valueChanged(int arg1);
+    void on_spinBox_hfMax_valueChanged(int arg1);
+    void on_dateEdit_stress_dateChanged(const QDate &date);
+    void on_pushButton_stressEdit_clicked();
+    void on_toolButton_add_clicked();
+    void on_toolButton_delete_clicked();
+    void on_toolButton_edit_clicked();
+    void on_toolButton_color_clicked();
+
+    void on_spinBox_ltsDays_valueChanged(int arg1);
+
+    void on_spinBox_stsDays_valueChanged(int arg1);
+
+    void on_spinBox_lastLTS_valueChanged(int arg1);
+
+    void on_spinBox_lastSTS_valueChanged(int arg1);
+
+    void on_listWidget_stressValue_itemClicked(QListWidgetItem *item);
 
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;
-    QStringList sportList,model_header;
+    schedule *schedule_ptr;
+    QHash<QString,QStringList> listMap;
+    QStringList keyList,extkeyList,sportList,model_header;
     del_level level_del;
     double thresPower,thresPace,sportFactor;
-    bool useColor;
+    QString getDirectory(QString);
+    bool useColor,stressEdit;
     void checkSetup();
     void set_listEntries(QString);
     void set_color(QColor,bool,QString);
     void save_settingsChanges();
     void set_thresholdView(QString);
     void set_thresholdModel(QString);
-    void set_hfmodel();
+    void set_hfmodel(double);
+    void set_ltsList();
+    void checkSportUse();
     void enableSavebutton();
+    void updateListMap(int,bool);
     void writeChangedValues();
     void writeRangeValues(QString);
 };
+
 
 #endif // DIALOG_SETTINGS_H
