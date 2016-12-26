@@ -36,15 +36,19 @@ void stress_popup::on_toolButton_close_clicked()
 
 void stress_popup::set_graph()
 {
-    QFont plotFont;
+    QFont plotFont,selectFont;
     plotFont.setBold(true);
     plotFont.setPointSize(8);
+    selectFont.setPointSize(8);
+    selectFont.setItalic(true);
+
+    ui->widget_stressPlot->setInteractions(QCP::iSelectLegend | QCP::iMultiSelect);
 
     ui->widget_stressPlot->xAxis->setLabel("Date");
     ui->widget_stressPlot->xAxis->setLabelFont(plotFont);
 
     ui->widget_stressPlot->xAxis2->setVisible(true);
-    ui->widget_stressPlot->xAxis2->setLabel("Phase");
+    ui->widget_stressPlot->xAxis2->setLabel("Weeks");
     ui->widget_stressPlot->xAxis2->setLabelFont(plotFont);
 
     ui->widget_stressPlot->yAxis->setLabel("Stress");
@@ -56,6 +60,8 @@ void stress_popup::set_graph()
 
     ui->widget_stressPlot->legend->setVisible(true);
     ui->widget_stressPlot->legend->setFont(plotFont);
+    ui->widget_stressPlot->legend->setSelectedFont(selectFont);
+    ui->widget_stressPlot->legend->setSelectableParts(QCPLegend::spItems);
 
     QCPLayoutGrid *subLayout = new QCPLayoutGrid;
     ui->widget_stressPlot->plotLayout()->addElement(1,0,subLayout);
@@ -167,8 +173,10 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     ui->widget_stressPlot->plotLayout()->setRowStretchFactor(1,0.0001);
 
     QCPRange xRange(QCPAxisTickerDateTime::dateTimeToKey(rangeStart.addDays(-1)),QCPAxisTickerDateTime::dateTimeToKey(rangeEnd.addDays(1)));
+
     QFont lineFont;
     lineFont.setPointSize(8);
+    int xTickCount = dateRange;
 
     QCPGraph *ltsLine = ui->widget_stressPlot->addGraph();
     ltsLine->setName("LTS");
@@ -251,9 +259,19 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     dateTimeTicker->setDateTimeSpec(Qt::UTC);
     dateTimeTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
     dateTimeTicker->setDateTimeFormat("dd.MM");
-    dateTimeTicker->setTickCount(dateRange);
+
+    if(dateRange > 20 && dateRange < 42)
+    {
+        xTickCount = (dateRange+1)/3;
+    }
+    else if(dateRange >= 42)
+    {
+        xTickCount = (dateRange+1)/5;
+    }
+    dateTimeTicker->setTickCount(xTickCount);
 
     ui->widget_stressPlot->yAxis->setRange(0,stressMax+10);
+    ui->widget_stressPlot->xAxis2->setRange(0,(ui->dateEdit_start->date().daysTo(ui->dateEdit_end->date().addDays(1)))/7);
     ui->widget_stressPlot->yAxis2->setRange(tsbMinMax[0]-5,tsbMinMax[1]+5);
     ui->widget_stressPlot->xAxis->setRange(xRange);
     ui->widget_stressPlot->xAxis->setTicker(dateTimeTicker);
