@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>850</width>
-    <height>450</height>
+    <width>900</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -121,23 +121,26 @@
        <widget class="QPushButton" name="pushButton_values">
         <property name="minimumSize">
          <size>
-          <width>24</width>
-          <height>22</height>
+          <width>22</width>
+          <height>20</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>24</width>
-          <height>22</height>
+          <width>22</width>
+          <height>20</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Show Values</string>
         </property>
         <property name="text">
          <string/>
         </property>
         <property name="iconSize">
          <size>
-          <width>18</width>
-          <height>18</height>
+          <width>16</width>
+          <height>16</height>
          </size>
         </property>
         <property name="checkable">
@@ -174,6 +177,9 @@
           <width>22</width>
           <height>22</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Close</string>
         </property>
         <property name="text">
          <string/>
