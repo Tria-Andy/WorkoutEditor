@@ -112,6 +112,7 @@ public:
     static bool get_act_isrecalc() {return act_isrecalc;}
     static void set_swimLaplen(int lapLen) {swimLaplen = lapLen;}
     static void writeListValues(QHash<QString,QStringList> *plist);
+    static void autoSave() {settings::saveSettings();}
 };
 
 #endif // SETTINGS_H

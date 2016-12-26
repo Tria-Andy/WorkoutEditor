@@ -34,14 +34,9 @@ class schedule
 public:
     schedule();
     QStandardItemModel *workout_schedule,*week_meta,*week_content;
-    void check_workoutFiles();
-    void load_workoutsFiles();
     void save_dayWorkouts();
-    void read_dayWorkouts(QDomDocument);
-    void read_weekPlan(QDomDocument,QDomDocument);
     void save_weekPlan();
-    void read_ltsFile(QDomDocument);
-    void save_ltsFile();
+    void save_ltsFile(double);
     void changeYear();
     QString get_weekPhase(QDate);
     void copyWeek(QString,QString);
@@ -72,7 +67,14 @@ private:
     QString schedulePath;
     QDate firstdayofweek;
     QMap<QDate,double> stressValues;
+    void check_workoutFiles();
+    void load_workoutsFiles();
+    void read_dayWorkouts(QDomDocument);
+    void read_weekPlan(QDomDocument,QDomDocument);
+    void read_ltsFile(QDomDocument);
     void updateStress(QString,double,bool);
+    void save_ltsValues();
+    void saveXML(QDomDocument,QString);
 
     //Workout Var
     QString workout_date;

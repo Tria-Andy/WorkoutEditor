@@ -168,6 +168,17 @@ void settings::loadSettings()
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
 
 //###########################Upgrade values ini####################################
+        myvalues->beginGroup("Common");
+            QString com_childs = myvalues->value("ltsdays").toString();
+            if(com_childs.isEmpty()) myvalues->setValue("ltsdays","42");
+            com_childs = myvalues->value("stsdays").toString();
+            if(com_childs.isEmpty()) myvalues->setValue("stsdays","7");
+            com_childs = myvalues->value("lastlts").toString();
+            if(com_childs.isEmpty()) myvalues->setValue("lastlts","0");
+            com_childs = myvalues->value("laststs").toString();
+            if(com_childs.isEmpty()) myvalues->setValue("laststs","0");
+        myvalues->endGroup();
+
         myvalues->beginGroup("Level");
         QStringList levColor,levList;
             QString lev_childs = myvalues->value("levels").toString();
@@ -236,6 +247,7 @@ void settings::loadSettings()
             ltsMap.insert("ltsdays",myvalues->value("ltsdays").toDouble());
             ltsMap.insert("stsdays",myvalues->value("stsdays").toDouble());
             ltsMap.insert("lastlts",myvalues->value("lastlts").toDouble());
+            ltsMap.insert("laststs",myvalues->value("laststs").toDouble());
         myvalues->endGroup();
 
         myvalues->beginGroup("JsonFile");
@@ -443,6 +455,13 @@ void settings::saveSettings()
     mysettings->endGroup();
 
     QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
+
+    myvalues->beginGroup("Common");
+        myvalues->setValue("ltsdays",ltsMap.value("ltsdays"));
+        myvalues->setValue("stsdays",ltsMap.value("stsdays"));
+        myvalues->setValue("lastlts",ltsMap.value("lastlts"));
+        myvalues->setValue("laststs",ltsMap.value("laststs"));
+    myvalues->endGroup();
 
     myvalues->beginGroup("Threshold");
         myvalues->setValue("swimpower",QString::number(thresholdMap.value("swimpower")));

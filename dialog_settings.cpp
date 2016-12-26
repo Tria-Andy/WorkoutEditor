@@ -32,6 +32,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     keyList = settings::get_keyList();
     extkeyList = settings::get_extkeyList();
     useColor = false;
+    stressEdit = false;
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
     level_model = new QStandardItemModel();
     hf_model = new QStandardItemModel();
@@ -50,6 +51,10 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->dateEdit_saisonStart->setDate(QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy"));
     ui->lineEdit_startWeek->setText(settings::get_saisonInfo("startkw"));
     ui->dateEdit_saisonEnd->setDate(QDate::fromString(settings::get_saisonInfo("endDate"),"dd.MM.yyyy"));
+    ui->spinBox_ltsDays->setValue(settings::get_ltsValue("ltsdays"));
+    ui->spinBox_stsDays->setValue(settings::get_ltsValue("stsdays"));
+    ui->spinBox_lastLTS->setValue(settings::get_ltsValue("lastlts"));
+    ui->spinBox_lastSTS->setValue(settings::get_ltsValue("laststs"));
     ui->comboBox_thresSport->addItems(sportList);
     ui->pushButton_save->setEnabled(false);
     ui->toolButton_color->setEnabled(false);
@@ -157,7 +162,14 @@ void Dialog_settings::writeChangedValues()
     settings::set_saisonInfos("endDate",ui->dateEdit_saisonEnd->date().toString("dd.MM.yyyy"));
     settings::set_saisonInfos("weeks",ui->lineEdit_saisonWeeks->text());
 
+    settings::set_ltsValue("ltsdays",ui->spinBox_ltsDays->value());
+    settings::set_ltsValue("stsdays",ui->spinBox_stsDays->value());
+    settings::set_ltsValue("lastlts",ui->spinBox_lastLTS->value());
+    settings::set_ltsValue("laststs",ui->spinBox_lastSTS->value());
+
     settings::writeListValues(&listMap);
+
+    if(stressEdit) schedule_ptr->save_ltsFile(ui->spinBox_ltsDays->value());
 
     thresPower = ui->spinBox_thresPower->value();
     thresPace = paceSec;
@@ -165,6 +177,7 @@ void Dialog_settings::writeChangedValues()
 
     this->set_thresholdView(ui->comboBox_thresSport->currentText());
     this->set_hfmodel(ui->spinBox_hfThres->value());
+
 }
 
 void Dialog_settings::writeRangeValues(QString sport)
@@ -635,13 +648,14 @@ void Dialog_settings::on_spinBox_hfMax_valueChanged(int value)
 void Dialog_settings::on_dateEdit_stress_dateChanged(const QDate &date)
 {
     ui->spinBox_stress->setValue(schedule_ptr->get_StressMap()->value(date));
-    this->enableSavebutton();
 }
 
 void Dialog_settings::on_pushButton_stressEdit_clicked()
 {
     schedule_ptr->set_stressMap(ui->dateEdit_stress->date(),ui->spinBox_stress->value());
+    stressEdit = true;
     this->set_ltsList();
+    this->enableSavebutton();
 }
 
 void Dialog_settings::on_toolButton_add_clicked()
@@ -668,4 +682,36 @@ void Dialog_settings::on_toolButton_edit_clicked()
     ui->listWidget_selection->item(ui->listWidget_selection->currentRow())->setData(Qt::EditRole,ui->lineEdit_addedit->text());
     this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
     this->enableSavebutton();
+}
+
+void Dialog_settings::on_spinBox_ltsDays_valueChanged(int value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_spinBox_stsDays_valueChanged(int value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_spinBox_lastLTS_valueChanged(int value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_spinBox_lastSTS_valueChanged(int value)
+{
+    Q_UNUSED(value)
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_listWidget_stressValue_itemClicked(QListWidgetItem *item)
+{
+    QString values = item->data(Qt::DisplayRole).toString();
+    QString stress = values.split(" - ").last();
+    ui->dateEdit_stress->setDate(QDate::fromString(values.split(" - ").first(),"dd.MM.yyyy"));
+    ui->spinBox_stress->setValue(stress.toInt());
 }

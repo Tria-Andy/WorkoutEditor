@@ -1,5 +1,6 @@
 #include "stress_popup.h"
 #include "ui_stress_popup.h"
+#include <cmath>
 
 stress_popup::stress_popup(QWidget *parent,schedule *p_sched) :
     QDialog(parent),
@@ -12,6 +13,7 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched) :
     ltsDays = settings::get_ltsValue("ltsdays");
     stsDays = settings::get_ltsValue("stsdays");
     lastLTS = settings::get_ltsValue("lastlts");
+    lastSTS = settings::get_ltsValue("laststs");
     firstDayofWeek = QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek());
     dateRange = 6;
     ui->dateEdit_start->setDate(firstDayofWeek);
@@ -37,13 +39,18 @@ void stress_popup::set_graph()
 
     ui->widget_stressPlot->xAxis->setLabel("Date");
     ui->widget_stressPlot->xAxis->setLabelFont(plotFont);
+
     ui->widget_stressPlot->xAxis2->setVisible(true);
+    ui->widget_stressPlot->xAxis2->setLabel("Phase");
     ui->widget_stressPlot->xAxis2->setLabelFont(plotFont);
-    ui->widget_stressPlot->xAxis2->setTickLabels(false);
+
     ui->widget_stressPlot->yAxis->setLabel("Stress");
     ui->widget_stressPlot->yAxis->setLabelFont(plotFont);
+
     ui->widget_stressPlot->yAxis2->setVisible(true);
+    ui->widget_stressPlot->yAxis2->setLabel("TSB");
     ui->widget_stressPlot->yAxis2->setLabelFont(plotFont);
+
     ui->widget_stressPlot->legend->setVisible(true);
     ui->widget_stressPlot->legend->setFont(plotFont);
 
@@ -77,6 +84,10 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     ySTS.resize(dayCount);
     yTSB.resize(dayCount);
 
+    stressMax = 0;
+    tsbMinMax.resize(2);
+    tsbMinMax.fill(0);
+
     for(QMap<QDate,double>::const_iterator it = stressMap->cbegin(), end = stressMap->find(rangeStart.addDays(ltsStart)); it != end; ++it)
     {
         calcStress = calc_stress(pastStress,it.value(),ltsDays);
@@ -102,14 +113,16 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
 
         for(int x = ltsStart; x <= 0; ++x)
         {
+            if(i == 0 && x == 0) yTSB[0] = round(pastStress);
             currStress = stressMap->value(dayDate.addDays(x));
             calcStress = calc_stress(pastStress,currStress,ltsDays);
             pastStress = calcStress;
             if(x == ltsStart) startStress = calcStress;
         }
         yLTS[i] = round(calcStress);
+        if(stressMax < yLTS[i]) stressMax = yLTS[i];
     }
-    pastStress = lastLTS;
+    pastStress = lastSTS;
 
     for(QMap<QDate,double>::const_iterator it = stressMap->cbegin(), end = stressMap->find(rangeStart.addDays(stsStart)); it != end; ++it)
     {
@@ -125,13 +138,19 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
 
         for(int x = ltsStart; x <= 0; ++x)
         {
+            if(i == 0 && x == 0) yTSB[0] = round(yTSB[0]-pastStress);
             currStress = stressMap->value(dayDate.addDays(x));
             calcStress = calc_stress(pastStress,currStress,stsDays);
             pastStress = calcStress;
             if(x == ltsStart) startStress = calcStress;
         }
         ySTS[i] = round(calcStress);
-        yTSB[i] = yLTS[i] - ySTS[i];
+        if(stressMax < ySTS[i]) stressMax = ySTS[i];
+    }
+
+    for(int i = 1; i < dayCount;++i)
+    {
+        yTSB[i] = yLTS[i-1] - ySTS[i-1];
     }
 
     this->set_stressplot(rangeStart,rangeEnd);
@@ -141,7 +160,6 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd)
 {
     ui->widget_stressPlot->clearPlottables();
     ui->widget_stressPlot->clearItems();
-    ui->widget_stressPlot->setFixedWidth(this->width());
     ui->widget_stressPlot->legend->setFillOrder(QCPLegend::foColumnsFirst);
     ui->widget_stressPlot->plotLayout()->setRowStretchFactor(1,0.0001);
 
@@ -218,6 +236,9 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd)
         tsbText->setTextAlignment(Qt::AlignCenter);
         tsbText->setFont(lineFont);
         tsbText->setPadding(QMargins(1, 1, 1, 1));
+
+        if(tsbMinMax[0] > yTSB[i]) tsbMinMax[0] = yTSB[i];
+        if(tsbMinMax[1] < yTSB[i]) tsbMinMax[1] = yTSB[i];
     }
 
     QSharedPointer<QCPAxisTickerDateTime> dateTimeTicker(new QCPAxisTickerDateTime);
@@ -226,9 +247,8 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd)
     dateTimeTicker->setDateTimeFormat("dd.MM");
     dateTimeTicker->setTickCount(dateRange);
 
-    ui->widget_stressPlot->yAxis->setRange(0,150);
-    ui->widget_stressPlot->yAxis2->setRange(-50,50);
-    ui->widget_stressPlot->yAxis2->setLabel("TSB");
+    ui->widget_stressPlot->yAxis->setRange(0,stressMax+10);
+    ui->widget_stressPlot->yAxis2->setRange(tsbMinMax[0]-5,tsbMinMax[1]+5);
     ui->widget_stressPlot->xAxis->setRange(xRange);
     ui->widget_stressPlot->xAxis->setTicker(dateTimeTicker);
 

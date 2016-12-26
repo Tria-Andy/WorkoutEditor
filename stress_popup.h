@@ -25,9 +25,10 @@ private slots:
 private:
     Ui::stress_popup *ui;
     QDate firstDayofWeek;
-    double ltsDays,stsDays,lastLTS;
+    double ltsDays,stsDays,lastLTS,lastSTS,stressMax;
     QMap<QDate,double> *stressMap;
     QVector<double> xDate,yLTS,ySTS,yTSB;
+    QVector<double> tsbMinMax;
     int dateRange;
     bool isLoad;
 

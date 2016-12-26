@@ -74,6 +74,16 @@ private slots:
     void on_toolButton_edit_clicked();
     void on_toolButton_color_clicked();
 
+    void on_spinBox_ltsDays_valueChanged(int arg1);
+
+    void on_spinBox_stsDays_valueChanged(int arg1);
+
+    void on_spinBox_lastLTS_valueChanged(int arg1);
+
+    void on_spinBox_lastSTS_valueChanged(int arg1);
+
+    void on_listWidget_stressValue_itemClicked(QListWidgetItem *item);
+
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;
@@ -83,7 +93,7 @@ private:
     del_level level_del;
     double thresPower,thresPace,sportFactor;
     QString getDirectory(QString);
-    bool useColor;
+    bool useColor,stressEdit;
     void checkSetup();
     void set_listEntries(QString);
     void set_color(QColor,bool,QString);

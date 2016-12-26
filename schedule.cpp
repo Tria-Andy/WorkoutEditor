@@ -200,17 +200,7 @@ void schedule::save_dayWorkouts()
             xmlroot.appendChild(xml_workout);
         }
 
-        QFile file(schedulePath + QDir::separator() + "workout_schedule.xml");
-
-        if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        {
-            qDebug() << "File not open!";
-        }
-
-        QTextStream stream(&file);
-        stream << document.toString();
-
-        file.close();
+        this->saveXML(document,"workout_schedule.xml");
 }
 
 void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
@@ -311,6 +301,7 @@ void schedule::save_weekPlan()
 {
         QDomDocument document;
         QDomElement xmlroot;
+
         xmlroot = document.createElement("phases");
         document.appendChild(xmlroot);
 
@@ -323,20 +314,10 @@ void schedule::save_weekPlan()
             }
             xmlroot.appendChild(xml_phase);
         }
-
-        QFile meta_file(schedulePath + QDir::separator() + "workout_phase_meta.xml");
-
-        if(!meta_file.open(QIODevice::WriteOnly | QIODevice::Text))
-        {
-            qDebug() << "File not open!";
-        }
-
-        QTextStream meta(&meta_file);
-        meta << document.toString();
-
-        meta_file.close();
+        this->saveXML(document,"workout_phase_meta.xml");
 
         document.clear();
+
         xmlroot = document.createElement("contents");
         document.appendChild(xmlroot);
 
@@ -349,24 +330,12 @@ void schedule::save_weekPlan()
             }
             xmlroot.appendChild(xml_phase);
         }
-
-        QFile content_file(schedulePath + QDir::separator() + "workout_phase_content.xml");
-
-        if(!content_file.open(QIODevice::WriteOnly | QIODevice::Text))
-        {
-            qDebug() << "File not open!";
-        }
-
-        QTextStream content(&content_file);
-        content << document.toString();
-
-        content_file.close();
+        this->saveXML(document,"workout_phase_content.xml");
 }
 
 void schedule::read_ltsFile(QDomDocument stressContent)
 {
-    QStringList ltsHeader;
-    ltsHeader << "Date" << "StressScore";
+    int ltsDays = settings::get_ltsValue("ltsdays");
     QDomElement root_lts = stressContent.firstChildElement();
     QDomNodeList lts_list;
     QDate wDate;
@@ -389,7 +358,7 @@ void schedule::read_ltsFile(QDomDocument stressContent)
         }
     }
 
-    QDate firstWork = stressValues.firstKey();
+    QDate firstWork = firstdayofweek.addDays(-ltsDays);
     QDate lastWork = stressValues.lastKey();
     int total = firstWork.daysTo(lastWork)+1;
 
@@ -400,44 +369,68 @@ void schedule::read_ltsFile(QDomDocument stressContent)
             stressValues.insert(firstWork.addDays(row),0);
         }
     }
-    //if(QDate::currentDate() == firstdayofweek) this->save_ltsFile();
-    this->save_ltsFile();
+    if(QDate::currentDate() == firstdayofweek && stressValues.firstKey() < firstdayofweek.addDays(-ltsDays)) this->save_ltsValues();
 }
 
-void schedule::save_ltsFile()
+void schedule::save_ltsFile(double ltsDays)
 {
     QDomDocument document;
     QDomElement xmlroot = document.createElement("Stress");
     document.appendChild(xmlroot);
 
-    double ltsStress = 0,currStress = 0,pastStress = 0,startLTS = 0;
+    for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays(-ltsDays)), end = stressValues.find(firstdayofweek); it != end; ++it)
+    {
+        QDomElement xml_stress = document.createElement("StressLTS");
+        xml_stress.setAttribute("day",it.key().toString("dd.MM.yyyy"));
+        xml_stress.setAttribute("stress",QString::number(it.value()));
+        xmlroot.appendChild(xml_stress);
+    }
+    this->saveXML(document,"longtermstress.xml");
+}
+
+
+void schedule::save_ltsValues()
+{
+    double stress = 0,currStress = 0,pastStress = 0,startLTS = 0;
     startLTS = settings::get_ltsValue("lastlts");
     int ltsDays = settings::get_ltsValue("ltsdays");
-    double lte = (double)exp(-1.0/ltsDays);
+    double factor = (double)exp(-1.0/ltsDays);
     pastStress = startLTS;
 
     for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays(-ltsDays)), end = stressValues.find(firstdayofweek.addDays((-ltsDays)+7)); it != end; ++it)
     {
         currStress = it.value();
-        ltsStress = (currStress * (1.0 - lte)) + (pastStress * lte);
-        pastStress = ltsStress;
+        stress = (currStress * (1.0 - factor)) + (pastStress * factor);
+        pastStress = stress;
     }
-    //pastStress = settings::set_doubleValue(ltsStress,false);
-    //settings::set_ltsValue("lastlts",pastStress);
-    //qDebug() << "New LastLTS" << settings::set_doubleValue(ltsStress,false);
+    settings::set_ltsValue("lastlts",round(pastStress));
 
-    //qDebug() << "Save new LTS History";
-    for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays(-42)), end = stressValues.find(firstdayofweek); it != end; ++it)
-    {   /*
-        QDomElement xml_stress = document.createElement("StressLTS");
-        xml_stress.setAttribute("day",it.key().toString("dd.MM.yyy"));
-        xml_stress.setAttribute("stress",QString::number(it.value()));
-        xmlroot.appendChild(xml_stress);
-        */
-        //qDebug() << it.key().toString("dd.MM.yyyy") << QString::number(it.value());
+    startLTS = settings::get_ltsValue("laststs");
+    double stsDays = settings::get_ltsValue("stsdays");
+    factor = (double)exp(-1.0/stsDays);
+    pastStress = startLTS;
+
+    for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays(-stsDays)), end = stressValues.find(firstdayofweek.addDays((-stsDays)+7)); it != end; ++it)
+    {
+        currStress = it.value();
+        stress = (currStress * (1.0 - factor)) + (pastStress * factor);
+        pastStress = stress;
     }
-    /*
-    QFile file(schedulePath + QDir::separator() + "longtermstress.xml");
+    settings::set_ltsValue("laststs",round(pastStress));
+
+    this->save_ltsFile(ltsDays);
+
+    while (stressValues.firstKey() < firstdayofweek.addDays(-ltsDays))
+    {
+        stressValues.remove(stressValues.firstKey());
+    }
+
+    settings::autoSave();
+}
+
+void schedule::saveXML(QDomDocument xmlDoc,QString fileName)
+{
+    QFile file(schedulePath + QDir::separator() + fileName);
 
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
@@ -445,16 +438,9 @@ void schedule::save_ltsFile()
     }
 
     QTextStream stream(&file);
-    stream << document.toString();
+    stream << xmlDoc.toString();
 
     file.close();
-    */
-    //qDebug() << "Remove old from List";
-    for(QMap<QDate,double>::const_iterator it = stressValues.cbegin(), end = stressValues.find(firstdayofweek.addDays(-ltsDays)); it != end; ++it)
-    {
-        //stressValues.remove(it.key());
-        //qDebug() << it.key() << it.value();
-    }
 }
 
 void schedule::copyWeek(QString copyFrom,QString copyTo)
