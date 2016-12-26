@@ -16,7 +16,9 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched) :
     lastSTS = settings::get_ltsValue("laststs");
     firstDayofWeek = QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek());
     dateRange = 6;
+    ui->dateEdit_start->setDateRange(firstDayofWeek,stressMap->lastKey().addDays(-dateRange));
     ui->dateEdit_start->setDate(firstDayofWeek);
+    ui->dateEdit_end->setDateRange(firstDayofWeek.addDays(dateRange),stressMap->lastKey());
     ui->dateEdit_end->setDate(firstDayofWeek.addDays(dateRange));
     ui->pushButton_values->setIcon(QIcon(":/images/icons/No.png"));
     this->set_graph();
@@ -265,9 +267,10 @@ void stress_popup::on_dateEdit_start_dateChanged(const QDate &date)
 {
     if(isLoad)
     {
-        if(date < firstDayofWeek)
+        if(date > ui->dateEdit_end->date())
         {
-            ui->dateEdit_start->setDate(firstDayofWeek);
+            ui->dateEdit_end->setDate(date.addDays(dateRange));
+            dateRange = ui->dateEdit_start->date().daysTo(ui->dateEdit_end->date());
             this->set_stressValues(ui->dateEdit_start->date(),ui->dateEdit_end->date());
         }
         else
