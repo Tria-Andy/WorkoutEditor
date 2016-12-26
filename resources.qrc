@@ -42,5 +42,6 @@
         <file>icons/Load.png</file>
         <file>icons/workouteditor.png</file>
         <file>icons/Stock graph.png</file>
+        <file>icons/Turnoff.png</file>
     </qresource>
 </RCC>

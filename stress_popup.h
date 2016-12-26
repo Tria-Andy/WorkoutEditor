@@ -21,6 +21,7 @@ private slots:
     void on_toolButton_close_clicked();
     void on_dateEdit_start_dateChanged(const QDate &date);
     void on_dateEdit_end_dateChanged(const QDate &date);
+    void on_pushButton_values_toggled(bool checked);
 
 private:
     Ui::stress_popup *ui;
@@ -36,7 +37,7 @@ private:
 
     void set_graph();
     void set_stressValues(QDate,QDate);
-    void set_stressplot(QDate,QDate);
+    void set_stressplot(QDate,QDate,bool);
 };
 
 #endif // STRESS_POPUP_H
