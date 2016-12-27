@@ -1649,6 +1649,7 @@ void MainWindow::on_comboBox_schedMode_currentIndexChanged(int index)
            this->set_buttons(true);
        }
    }
+
    ui->comboBox_phasefilter->setEnabled(!isWeekMode);
    ui->label_month->setText("Week " + this->get_weekRange());
    this->workout_calendar();
@@ -1708,10 +1709,14 @@ void MainWindow::on_comboBox_phasefilter_currentIndexChanged(int index)
         ui->pushButton_fourplus->setEnabled(false);
         ui->pushButton_week_plus->setEnabled(false);
     }
-    phaseFilter = ui->comboBox_phasefilter->currentText();
-    this->workout_calendar();
-    this->summery_view();
-    ui->label_month->setText("Week " + this->get_weekRange());
+    QList<QStandardItem*> list = workSchedule->week_meta->findItems(phaseFilter,Qt::MatchContains,2);
+    if(!list.isEmpty())
+    {
+        phaseFilter = ui->comboBox_phasefilter->currentText();
+        this->workout_calendar();
+        this->summery_view();
+        ui->label_month->setText("Week " + this->get_weekRange());
+    }
 }
 
 void MainWindow::on_actionVersion_triggered()
