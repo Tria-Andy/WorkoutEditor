@@ -3,7 +3,6 @@
         <file>icons/Exit.png</file>
         <file>icons/Close.png</file>
         <file>icons/Save.png</file>
-        <file>icons/New.png</file>
         <file>icons/Add.png</file>
         <file>icons/Create.png</file>
         <file>icons/Back.png</file>
@@ -24,9 +23,6 @@
         <file>icons/Last.png</file>
         <file>icons/Erase.png</file>
         <file>icons/Table.png</file>
-        <file>icons/Next.png</file>
-        <file>icons/Previous.png</file>
-        <file>icons/Tune.png</file>
         <file>icons/Application.png</file>
         <file>icons/Save_Exit.png</file>
         <file>icons/OK.png</file>
@@ -35,12 +31,15 @@
         <file>icons/Stopwatch.png</file>
         <file>icons/Schedule.png</file>
         <file>icons/Question.png</file>
-        <file>icons/Clipboard.png</file>
         <file>icons/Modify.png</file>
-        <file>icons/Diagram.png</file>
         <file>icons/3d bar chart.png</file>
-        <file>icons/Load.png</file>
         <file>icons/workouteditor.png</file>
         <file>icons/Stock graph.png</file>
+        <file>icons/Bubble.png</file>
+        <file>icons/Bubble_No.png</file>
+        <file>icons/Tune.png</file>
+        <file>icons/Calendar.png</file>
+        <file>icons/Previous.png</file>
+        <file>icons/Left-right.png</file>
     </qresource>
 </RCC>

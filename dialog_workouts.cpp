@@ -28,6 +28,7 @@ Dialog_workouts::Dialog_workouts(QWidget *parent, QString v_sport, standardWorko
     w_sport = v_sport;
     stdWorkouts = p_workouts;
     this->create_workout_list();
+    ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 Dialog_workouts::~Dialog_workouts()

@@ -314,6 +314,9 @@
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Copy to Clipboard</string>
+        </property>
         <property name="text">
          <string/>
         </property>

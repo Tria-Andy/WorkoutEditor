@@ -66,7 +66,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->actionSave_Workout_Schedule->setEnabled(false);
     ui->actionEditor->setEnabled(true);
-    ui->actionPlaner->setIcon(QIcon(":/images/icons/Yes.png"));
     ui->actionPlaner->setEnabled(false);
     ui->stackedWidget->setGeometry(5,5,0,0);
     ui->frame_avgValue->setVisible(false);
@@ -120,15 +119,11 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     if(mEditor)
     {
         ui->actionPlaner->setEnabled(mEditor);
-        ui->actionPlaner->setIcon(QIcon(""));
-        ui->actionEditor->setIcon(QIcon(":/images/icons/Yes.png"));
         ui->actionEditor->setEnabled(mPlaner);
     }
     if(mPlaner)
     {
         ui->actionEditor->setEnabled(mPlaner);
-        ui->actionEditor->setIcon(QIcon(""));
-        ui->actionPlaner->setIcon(QIcon(":/images/icons/Yes.png"));
         ui->actionPlaner->setEnabled(mEditor);
     }
 
@@ -155,6 +150,8 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionSave_Workout_Schedule->setVisible(mPlaner);
     ui->actionExport_to_Golden_Cheetah->setVisible(mPlaner);
     ui->actionNew->setVisible(mPlaner);
+
+    if(workSchedule->get_StressMap()->count() == 0) ui->actionPMC->setEnabled(false);
 }
 
 QString MainWindow::set_summeryString(int pos,bool week)
@@ -273,19 +270,22 @@ void MainWindow::summery_view()
     if(isWeekMode)
     {
         list = workSchedule->workout_schedule->findItems(weeknumber,Qt::MatchExactly,0);
-        for(int i = 0; i < list.count(); ++i)
+        if(!list.empty())
         {
-            index = workSchedule->workout_schedule->indexFromItem(list.at(i));
-            sport = workSchedule->workout_schedule->item(index.row(),3)->text().trimmed();
-            this->summery_calc(0,index,isWeekMode);
-            this->summery_calc(sportList.indexOf(sport)+1,index,isWeekMode);
-        }
-
-        for(int i = 0; i < sportList.count(); ++i)
-        {
-            if(work_sum[i] > 0)
+            for(int i = 0; i < list.count(); ++i)
             {
-                sumValues << this->set_summeryString(i,isWeekMode);
+                index = workSchedule->workout_schedule->indexFromItem(list.at(i));
+                sport = workSchedule->workout_schedule->item(index.row(),3)->text().trimmed();
+                this->summery_calc(0,index,isWeekMode);
+                this->summery_calc(sportList.indexOf(sport)+1,index,isWeekMode);
+            }
+
+            for(int i = 0; i < sportList.count(); ++i)
+            {
+                if(work_sum[i] > 0)
+                {
+                    sumValues << this->set_summeryString(i,isWeekMode);
+                }
             }
         }
     }
@@ -546,6 +546,7 @@ void MainWindow::on_actionNew_triggered()
             safeFlag = true;
             ui->actionSave_Workout_Schedule->setEnabled(true);
             this->refresh_model();
+            ui->actionPMC->setEnabled(true);
         }
     }
 }
