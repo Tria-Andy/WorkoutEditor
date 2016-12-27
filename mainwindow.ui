@@ -1806,6 +1806,10 @@
    </property>
   </action>
   <action name="actionEditor">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/images/icons/Table.png</normaloff>:/images/icons/Table.png</iconset>
+   </property>
    <property name="text">
     <string>Editor</string>
    </property>
@@ -1814,6 +1818,10 @@
    </property>
   </action>
   <action name="actionPlaner">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/images/icons/Calendar.png</normaloff>:/images/icons/Calendar.png</iconset>
+   </property>
    <property name="text">
     <string>Planer</string>
    </property>
@@ -1887,7 +1895,7 @@
   <action name="actionLapEditor">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Table.png</normaloff>:/images/icons/Table.png</iconset>
+     <normaloff>:/images/icons/Tune.png</normaloff>:/images/icons/Tune.png</iconset>
    </property>
    <property name="text">
     <string>LapEditor</string>

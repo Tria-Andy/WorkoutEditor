@@ -66,7 +66,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->actionSave_Workout_Schedule->setEnabled(false);
     ui->actionEditor->setEnabled(true);
-    ui->actionPlaner->setIcon(QIcon(":/images/icons/Yes.png"));
     ui->actionPlaner->setEnabled(false);
     ui->stackedWidget->setGeometry(5,5,0,0);
     ui->frame_avgValue->setVisible(false);
@@ -120,15 +119,11 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     if(mEditor)
     {
         ui->actionPlaner->setEnabled(mEditor);
-        ui->actionPlaner->setIcon(QIcon(""));
-        ui->actionEditor->setIcon(QIcon(":/images/icons/Yes.png"));
         ui->actionEditor->setEnabled(mPlaner);
     }
     if(mPlaner)
     {
         ui->actionEditor->setEnabled(mPlaner);
-        ui->actionEditor->setIcon(QIcon(""));
-        ui->actionPlaner->setIcon(QIcon(":/images/icons/Yes.png"));
         ui->actionPlaner->setEnabled(mEditor);
     }
 
