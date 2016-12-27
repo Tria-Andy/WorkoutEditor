@@ -1709,10 +1709,12 @@ void MainWindow::on_comboBox_phasefilter_currentIndexChanged(int index)
         ui->pushButton_fourplus->setEnabled(false);
         ui->pushButton_week_plus->setEnabled(false);
     }
+
+    phaseFilter = ui->comboBox_phasefilter->currentText();
+
     QList<QStandardItem*> list = workSchedule->week_meta->findItems(phaseFilter,Qt::MatchContains,2);
     if(!list.isEmpty())
     {
-        phaseFilter = ui->comboBox_phasefilter->currentText();
         this->workout_calendar();
         this->summery_view();
         ui->label_month->setText("Week " + this->get_weekRange());
