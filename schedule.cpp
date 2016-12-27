@@ -149,32 +149,34 @@ void schedule::read_dayWorkouts(QDomDocument workouts)
     workout_schedule = new QStandardItemModel(workout_list.count(),9);
     QDate workDate;
     int stress = 0;
-
-    for(int i = 0; i < workout_list.count(); ++i)
+    if(!workout_list.isEmpty())
     {
-        QDomElement workout_element;
-
-        QDomNode workout_node = workout_list.at(i);
-
-        workout_element = workout_node.toElement();
-        for(int col = 0; col < workout_schedule->columnCount(); ++col)
+        for(int i = 0; i < workout_list.count(); ++i)
         {
-            workout_schedule->setData(workout_schedule->index(i,col,QModelIndex()),workout_element.attribute(workoutTags.at(col)));
-        }
-        workDate = QDate::fromString(workout_element.attribute("date"),"dd.MM.yyyy");
-        stress = workout_element.attribute("stress").toInt();
+            QDomElement workout_element;
 
-        if(stressValues.contains(workDate))
-        {
-            stress = stress + stressValues.value(workDate);
-            stressValues.insert(workDate,stress);
+            QDomNode workout_node = workout_list.at(i);
+
+            workout_element = workout_node.toElement();
+            for(int col = 0; col < workout_schedule->columnCount(); ++col)
+            {
+                workout_schedule->setData(workout_schedule->index(i,col,QModelIndex()),workout_element.attribute(workoutTags.at(col)));
+            }
+            workDate = QDate::fromString(workout_element.attribute("date"),"dd.MM.yyyy");
+            stress = workout_element.attribute("stress").toInt();
+
+            if(stressValues.contains(workDate))
+            {
+                stress = stress + stressValues.value(workDate);
+                stressValues.insert(workDate,stress);
+            }
+            else
+            {
+                stressValues.insert(workDate,stress);
+            }
         }
-        else
-        {
-            stressValues.insert(workDate,stress);
-        }
+        workout_schedule->sort(2);
     }
-    workout_schedule->sort(2);
 }
 
 void schedule::save_dayWorkouts()
@@ -344,32 +346,35 @@ void schedule::read_ltsFile(QDomDocument stressContent)
         lts_list = root_lts.elementsByTagName("StressLTS");
     }
 
+    if(!lts_list.isEmpty())
+    {
     for(int i = 0; i < lts_list.count(); ++i)
-    {
-        QDomElement stress_element;
-        QDomNode stress_node = lts_list.at(i);
-        stress_element = stress_node.toElement();
-
-        wDate = QDate::fromString(stress_element.attribute("day"),"dd.MM.yyyy");
-
-        if(!stressValues.contains(wDate))
         {
-            stressValues.insert(wDate,stress_element.attribute("stress").toDouble());
+            QDomElement stress_element;
+            QDomNode stress_node = lts_list.at(i);
+            stress_element = stress_node.toElement();
+
+            wDate = QDate::fromString(stress_element.attribute("day"),"dd.MM.yyyy");
+
+            if(!stressValues.contains(wDate))
+            {
+                stressValues.insert(wDate,stress_element.attribute("stress").toDouble());
+            }
         }
-    }
 
-    QDate firstWork = firstdayofweek.addDays(-ltsDays);
-    QDate lastWork = stressValues.lastKey();
-    int total = firstWork.daysTo(lastWork)+1;
+        QDate firstWork = firstdayofweek.addDays(-ltsDays);
+        QDate lastWork = stressValues.lastKey();
+        int total = firstWork.daysTo(lastWork)+1;
 
-    for(int row = 0 ; row < total; ++row)
-    {
-        if(!stressValues.contains(firstWork.addDays(row)))
+        for(int row = 0 ; row < total; ++row)
         {
-            stressValues.insert(firstWork.addDays(row),0);
+            if(!stressValues.contains(firstWork.addDays(row)))
+            {
+                stressValues.insert(firstWork.addDays(row),0);
+            }
         }
+        if(QDate::currentDate() == firstdayofweek && stressValues.firstKey() < firstdayofweek.addDays(-ltsDays)) this->save_ltsValues();
     }
-    if(QDate::currentDate() == firstdayofweek && stressValues.firstKey() < firstdayofweek.addDays(-ltsDays)) this->save_ltsValues();
 }
 
 void schedule::save_ltsFile(double ltsDays)
