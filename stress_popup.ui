@@ -118,6 +118,29 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButton_reset">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/images/icons/Left-right.png</normaloff>:/images/icons/Left-right.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButton_values">
         <property name="minimumSize">
          <size>

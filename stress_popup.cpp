@@ -7,7 +7,7 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched) :
     ui(new Ui::stress_popup)
 {
     ui->setupUi(this);
-    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     stressMap = p_sched->get_StressMap();
     isLoad = false;
     ltsDays = settings::get_ltsValue("ltsdays");
@@ -20,7 +20,7 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched) :
     ui->dateEdit_start->setDate(firstDayofWeek);
     ui->dateEdit_end->setDateRange(firstDayofWeek.addDays(dateRange),stressMap->lastKey());
     ui->dateEdit_end->setDate(firstDayofWeek.addDays(dateRange));
-    ui->pushButton_values->setIcon(QIcon(":/images/icons/No.png"));
+    ui->pushButton_values->setIcon(QIcon(":/images/icons/Bubble_No.png"));
     this->set_graph();
 }
 
@@ -42,7 +42,7 @@ void stress_popup::set_graph()
     selectFont.setPointSize(8);
     selectFont.setItalic(true);
 
-    ui->widget_stressPlot->setInteractions(QCP::iSelectLegend | QCP::iMultiSelect);
+    ui->widget_stressPlot->setInteractions(QCP::iSelectLegend | QCP::iMultiSelect | QCP::iRangeDrag | QCP::iRangeZoom);
 
     ui->widget_stressPlot->xAxis->setLabel("Date");
     ui->widget_stressPlot->xAxis->setLabelFont(plotFont);
@@ -165,6 +165,47 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     this->set_stressplot(rangeStart,rangeEnd,true);
 }
 
+QCPGraph *stress_popup::get_QCPLine(QString name,QColor gColor,QVector<double> &ydata, bool secondAxis)
+{
+    QCPGraph *graph = ui->widget_stressPlot->addGraph();
+    if(secondAxis)
+    {
+        graph->setValueAxis(ui->widget_stressPlot->yAxis2);
+    }
+    graph->setName(name);
+    graph->setLineStyle(QCPGraph::lsLine);
+    graph->setData(xDate,ydata);
+    graph->setAntialiased(true);
+    graph->setPen(QPen(gColor,1));
+
+    return graph;
+}
+
+void stress_popup::set_itemTracer(QCPGraph *graphline, QColor tColor,int pos)
+{
+    QCPItemTracer *tracer = new QCPItemTracer(ui->widget_stressPlot);
+    tracer->setGraph(graphline);
+    tracer->setGraphKey(xDate[pos]);
+    tracer->setStyle(QCPItemTracer::tsCircle);
+    tracer->setBrush(QBrush(tColor));
+}
+
+void stress_popup::set_itemText(QFont lineFont, QVector<double> &ydata,int pos,bool secondAxis)
+{
+    QCPItemText *itemText = new QCPItemText(ui->widget_stressPlot);
+    if(secondAxis)
+    {
+        itemText->position->setAxes(ui->widget_stressPlot->xAxis,ui->widget_stressPlot->yAxis2);
+    }
+    itemText->position->setType(QCPItemPosition::ptPlotCoords);
+    itemText->setPositionAlignment(Qt::AlignHCenter|Qt::AlignBottom);
+    itemText->position->setCoords(xDate[pos],ydata[pos]+1);
+    itemText->setText(QString::number(ydata[pos]));
+    itemText->setTextAlignment(Qt::AlignCenter);
+    itemText->setFont(lineFont);
+    itemText->setPadding(QMargins(1, 1, 1, 1));
+}
+
 void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValues)
 {
     ui->widget_stressPlot->clearPlottables();
@@ -177,78 +218,22 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     QFont lineFont;
     lineFont.setPointSize(8);
     int xTickCount = dateRange;
-
-    QCPGraph *ltsLine = ui->widget_stressPlot->addGraph();
-    ltsLine->setName("LTS");
-    ltsLine->setLineStyle(QCPGraph::lsLine);
-    ltsLine->setData(xDate,yLTS);
-    ltsLine->setAntialiased(true);
-    ltsLine->setPen(QPen(QColor(0,255,0),1));
-
-    QCPGraph *stsLine = ui->widget_stressPlot->addGraph();
-    stsLine->setName("STS");
-    stsLine->setLineStyle(QCPGraph::lsLine);
-    stsLine->setData(xDate,ySTS);
-    stsLine->setAntialiased(true);
-    stsLine->setPen(QPen(QColor(255,0,0),1));
-
-    QCPGraph *tsbLine = ui->widget_stressPlot->addGraph(ui->widget_stressPlot->xAxis,ui->widget_stressPlot->yAxis2);
-    tsbLine->setName("TSB");
-    tsbLine->setLineStyle(QCPGraph::lsLine);
-    tsbLine->setData(xDate,yTSB);
-    tsbLine->setAntialiased(true);
+    QCPGraph *ltsLine = this->get_QCPLine("LTS",QColor(0,255,0),yLTS,false);
+    QCPGraph *stsLine = this->get_QCPLine("STS",QColor(255,0,0),ySTS,false);
+    QCPGraph *tsbLine = this->get_QCPLine("TSB",QColor(255,170,0),yTSB,true);
     tsbLine->setBrush(QBrush(QColor(255,170,0,50)));
-    tsbLine->setPen(QPen(QColor(255,170,0),1));
 
     for(int i = 0; i < xDate.count(); ++i)
     {
-        QCPItemTracer *ltsTracer = new QCPItemTracer(ui->widget_stressPlot);
-        ltsTracer->setGraph(ltsLine);
-        ltsTracer->setGraphKey(xDate[i]);
-        ltsTracer->setStyle(QCPItemTracer::tsCircle);
-        ltsTracer->setBrush(Qt::green);
-
-        QCPItemTracer *stsTracer = new QCPItemTracer(ui->widget_stressPlot);
-        stsTracer->setGraph(stsLine);
-        stsTracer->setGraphKey(xDate[i]);
-        stsTracer->setStyle(QCPItemTracer::tsCircle);
-        stsTracer->setBrush(Qt::red);
-
-        QCPItemTracer *tsbTracer = new QCPItemTracer(ui->widget_stressPlot);
-        tsbTracer->setGraph(tsbLine);
-        tsbTracer->setGraphKey(xDate[i]);
-        tsbTracer->setStyle(QCPItemTracer::tsCircle);
-        tsbTracer->setBrush(QBrush(QColor(255,170,0)));
+        this->set_itemTracer(ltsLine,Qt::green,i);
+        this->set_itemTracer(stsLine,Qt::red,i);
+        this->set_itemTracer(tsbLine,QColor(255,170,0),i);
 
         if(showValues)
         {
-            QCPItemText *ltsText = new QCPItemText(ui->widget_stressPlot);
-            ltsText->position->setType(QCPItemPosition::ptPlotCoords);
-            ltsText->setPositionAlignment(Qt::AlignHCenter|Qt::AlignBottom);
-            ltsText->position->setCoords(xDate[i],yLTS[i]+1);
-            ltsText->setText(QString::number(yLTS[i]));
-            ltsText->setTextAlignment(Qt::AlignCenter);
-            ltsText->setFont(lineFont);
-            ltsText->setPadding(QMargins(1, 1, 1, 1));
-
-            QCPItemText *stsText = new QCPItemText(ui->widget_stressPlot);
-            stsText->position->setType(QCPItemPosition::ptPlotCoords);
-            stsText->setPositionAlignment(Qt::AlignHCenter|Qt::AlignBottom);
-            stsText->position->setCoords(xDate[i],ySTS[i]+1);
-            stsText->setText(QString::number(ySTS[i]));
-            stsText->setTextAlignment(Qt::AlignCenter);
-            stsText->setFont(lineFont);
-            stsText->setPadding(QMargins(1, 1, 1, 1));
-
-            QCPItemText *tsbText = new QCPItemText(ui->widget_stressPlot);
-            tsbText->position->setType(QCPItemPosition::ptPlotCoords);
-            tsbText->setPositionAlignment(Qt::AlignHCenter|Qt::AlignBottom);
-            tsbText->position->setCoords(xDate[i],yTSB[i]+1);
-            tsbText->position->setAxes(ui->widget_stressPlot->xAxis,ui->widget_stressPlot->yAxis2);
-            tsbText->setText(QString::number(yTSB[i]));
-            tsbText->setTextAlignment(Qt::AlignCenter);
-            tsbText->setFont(lineFont);
-            tsbText->setPadding(QMargins(1, 1, 1, 1));
+            this->set_itemText(lineFont,yLTS,i,false);
+            this->set_itemText(lineFont,ySTS,i,false);
+            this->set_itemText(lineFont,yTSB,i,true);
         }
 
         if(tsbMinMax[0] > yTSB[i]) tsbMinMax[0] = yTSB[i];
@@ -260,6 +245,7 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     dateTimeTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
     dateTimeTicker->setDateTimeFormat("dd.MM");
 
+
     if(dateRange > 20 && dateRange < 42)
     {
         xTickCount = (dateRange+1)/3;
@@ -268,6 +254,7 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     {
         xTickCount = (dateRange+1)/5;
     }
+
     dateTimeTicker->setTickCount(xTickCount);
 
     ui->widget_stressPlot->yAxis->setRange(0,stressMax+10);
@@ -320,12 +307,17 @@ void stress_popup::on_pushButton_values_toggled(bool checked)
 {
     if(checked)
     {
-        ui->pushButton_values->setIcon(QIcon(":/images/icons/No.png"));
+        ui->pushButton_values->setIcon(QIcon(":/images/icons/Bubble_No.png"));
         this->set_stressplot(ui->dateEdit_start->date(),ui->dateEdit_end->date(),checked);
     }
     else
     {
-        ui->pushButton_values->setIcon(QIcon(":/images/icons/Yes.png"));
+        ui->pushButton_values->setIcon(QIcon(":/images/icons/Bubble.png"));
         this->set_stressplot(ui->dateEdit_start->date(),ui->dateEdit_end->date(),checked);
     }
+}
+
+void stress_popup::on_pushButton_reset_clicked()
+{
+    this->set_stressplot(ui->dateEdit_start->date(),ui->dateEdit_end->date(),ui->pushButton_values->isChecked());
 }
