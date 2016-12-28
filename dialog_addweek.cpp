@@ -56,6 +56,7 @@ void Dialog_addweek::fill_values(QString selWeek)
     QModelIndex index;
     QTime duration;
     QString value,work,dura,dist,stress;
+    QString sumString = settings::get_gcInfo("sum");
     QStringList values;
     int listCount = sportuseList.count();
 
@@ -108,7 +109,7 @@ void Dialog_addweek::fill_values(QString selWeek)
             weekModel->setData(weekModel->index(row,6,QModelIndex()),stress.toInt());        
         }
 
-        weekModel->setData(weekModel->index(listCount,0,QModelIndex()),"Summery");
+        weekModel->setData(weekModel->index(listCount,0,QModelIndex()),sumString);
         weekModel->setData(weekModel->index(listCount,1,QModelIndex()),week_del.sum_int(ab_model,&sportuseList,1));
         weekModel->setData(weekModel->index(listCount,2,QModelIndex()),week_del.sum_time(ab_model,&sportuseList,2));
         weekModel->setData(weekModel->index(listCount,3,QModelIndex()),100);
@@ -128,7 +129,7 @@ void Dialog_addweek::fill_values(QString selWeek)
             weekModel->setData(weekModel->index(row,5,QModelIndex()),"--");
             weekModel->setData(weekModel->index(row,6,QModelIndex()),0);
         }
-        weekModel->setData(weekModel->index(listCount,0,QModelIndex()),"Summery");
+        weekModel->setData(weekModel->index(listCount,0,QModelIndex()),sumString);
     }
 
     week_del.calc_percent(&sportuseList,ab_model);

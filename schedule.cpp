@@ -361,7 +361,7 @@ void schedule::read_ltsFile(QDomDocument stressContent)
 
     if(!lts_list.isEmpty())
     {
-    for(int i = 0; i < lts_list.count(); ++i)
+        for(int i = 0; i < lts_list.count(); ++i)
         {
             QDomElement stress_element;
             QDomNode stress_node = lts_list.at(i);
@@ -388,6 +388,11 @@ void schedule::read_ltsFile(QDomDocument stressContent)
         }
         if(QDate::currentDate() == firstdayofweek && stressValues.firstKey() < firstdayofweek.addDays(-ltsDays)) this->save_ltsValues();
     }
+    else
+    {
+        stressValues.insert(firstdayofweek,0);
+    }
+
 }
 
 void schedule::save_ltsFile(double ltsDays)

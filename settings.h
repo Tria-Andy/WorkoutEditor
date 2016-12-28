@@ -37,11 +37,11 @@ private:
     static QString settingFile,valueFile,valueFilePath;
     static QStringList keyList,extkeyList,sportList,sportUseList,phaseList,cycleList,codeList,levelList,intPlanList,jsoninfos;
     static QMap<int,QString> sampList,intList;
-    static QHash<QString,QString> gcInfo,saisonInfo;
+    static QHash<QString,QString> generalMap,gcInfo,saisonInfo;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,double> thresholdMap,ltsMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
-    static QHash<QString,int> generalMap;
+    static QHash<QString,int> fontMap;
     static bool act_isloaded,act_isrecalc;
     static int swimLaplen;
 
@@ -69,7 +69,8 @@ public:
     static QString get_rangeValue(QString,QString);
     static double get_thresValue(QString key) {return thresholdMap.value(key);}
     static double get_ltsValue(QString key) {return ltsMap.value(key);}
-    static int get_generalValue(QString key) {return generalMap.value(key);}
+    static QString get_generalValue(QString key) {return generalMap.value(key);}
+    static int get_fontValue(QString key) {return fontMap.value(key);}
 
     //QMap/QHash Setter
     static void set_saisonInfos(QString key, QString value){saisonInfo.insert(key,value);}

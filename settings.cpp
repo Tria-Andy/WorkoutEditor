@@ -30,8 +30,9 @@ QString settings::settingFile;
 QString settings::splitter = "/";
 
 QHash<QString,QString> settings::gcInfo;
+QHash<QString,QString> settings::generalMap;
 QHash<QString,QColor> settings::colorMap;
-QHash<QString,int> settings::generalMap;
+QHash<QString,int> settings::fontMap;
 QHash<QString,QString> settings::saisonInfo;
 
 QString settings::valueFile;
@@ -216,7 +217,12 @@ void settings::loadSettings()
                     }
                     tempUse.removeLast();
                 }
-                myvalues->setValue("sportuse",settings::setSettingString(tempUse));
+                myvalues->setValue("sportuse",settings::setSettingString(tempUse));                
+            }
+            if(myvalues->value("sum").toString().isEmpty())
+            {
+                myvalues->setValue("sum","Summery");
+                myvalues->setValue("sumcolor","0-255-255");
             }
         myvalues->endGroup();
 
@@ -281,6 +287,8 @@ void settings::loadSettings()
             sportUseList << sport_childs.split(splitter);
             sport_childs = myvalues->value("color").toString();
             settings::fill_mapColor(&sportList,&sport_childs,false);
+            gcInfo.insert("sum",myvalues->value("sum").toString());
+            colorMap.insert("sumcolor",settings::get_colorRGB(myvalues->value("sumcolor").toString(),false));
         myvalues->endGroup();
 
         myvalues->beginGroup("Threshold");
@@ -359,19 +367,19 @@ void settings::loadSettings()
 
         if(screenHeight > 1000)
         {
-            generalMap.insert("weekRange",8);
-            generalMap.insert("weekOffSet",12);
-            generalMap.insert("fontBig",16);
-            generalMap.insert("fontMedium",14);
-            generalMap.insert("fontSmall",12);
+            fontMap.insert("weekRange",8);
+            fontMap.insert("weekOffSet",12);
+            fontMap.insert("fontBig",16);
+            fontMap.insert("fontMedium",14);
+            fontMap.insert("fontSmall",12);
         }
         else
         {
-            generalMap.insert("weekRange",6);
-            generalMap.insert("weekOffSet",8);
-            generalMap.insert("fontBig",14);
-            generalMap.insert("fontMedium",12);
-            generalMap.insert("fontSmall",10);
+            fontMap.insert("weekRange",6);
+            fontMap.insert("weekOffSet",8);
+            fontMap.insert("fontBig",14);
+            fontMap.insert("fontMedium",12);
+            fontMap.insert("fontSmall",10);
         }
 
         delete mysettings;

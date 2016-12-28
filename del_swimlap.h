@@ -37,7 +37,7 @@ public:
         QFont cFont;
         QString lapName;
         const QAbstractItemModel *model = index.model();
-        cFont.setPixelSize(settings::get_generalValue("fontSmall"));
+        cFont.setPixelSize(settings::get_fontValue("fontSmall"));
         QColor lapColor(Qt::lightGray);
         QColor breakColor(Qt::darkGray);
 

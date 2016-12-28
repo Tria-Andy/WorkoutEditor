@@ -45,11 +45,11 @@ public:
         int textMargin = 2;
         int celloffset = 21;
         phase_font.setBold(true);
-        phase_font.setPixelSize(settings::get_generalValue("fontBig"));
+        phase_font.setPixelSize(settings::get_fontValue("fontBig"));
         date_font.setBold(true);
-        date_font.setPixelSize(settings::get_generalValue("fontMedium"));
+        date_font.setPixelSize(settings::get_fontValue("fontMedium"));
         work_font.setBold(false);
-        work_font.setPixelSize(settings::get_generalValue("fontSmall")-1);
+        work_font.setPixelSize(settings::get_fontValue("fontSmall")-1);
 
         temp_value = index.data(Qt::DisplayRole).toString();
         calendar_values = temp_value.split(delimiter);

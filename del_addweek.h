@@ -147,7 +147,7 @@ public:
 
         if(index.row() == sportuse.count())
         {
-            painter->fillRect(option.rect,QBrush(QColor(0,255,255)));
+            painter->fillRect(option.rect,QBrush(settings::get_itemColor("sumcolor")));
             cFont.setBold(true);
         }
         else

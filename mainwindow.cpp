@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     selectedDate = QDate::currentDate();
     firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
     weeknumber = QString::number(selectedDate.weekNumber()) +"_"+QString::number(selectedDate.year());
-    weekRange = settings::get_generalValue("weekRange");
+    weekRange = settings::get_fontValue("weekRange");
     weekpos = 0;
     weekDays = 7;
     weekCounter = 0;
@@ -157,7 +157,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
 QString MainWindow::set_summeryString(int pos,bool week)
 {
     QString sumString;
-    QString sum_name = "Summery";
+    QString sum_name = settings::get_gcInfo("sum");
     double percent = 0.0;
     if(week)
     {
@@ -431,7 +431,7 @@ void MainWindow::workout_calendar()
                 temp = settings::get_sportUseList().at(i);
                 year_header << temp.toUpper();
             }
-            year_header << "Summery";
+            year_header << settings::get_gcInfo("sum");
         }
 
           calendar_model->setHorizontalHeaderLabels(year_header);
@@ -450,7 +450,7 @@ void MainWindow::workout_calendar()
           {
             ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
             showAll = true;
-            weekoffset = settings::get_generalValue("weekOffSet");
+            weekoffset = settings::get_fontValue("weekOffSet");
           }
           else
           {
@@ -727,7 +727,7 @@ QString MainWindow::get_weekRange()
     {
         if(ui->comboBox_phasefilter->currentIndex() == 0)
         {
-            display_weeks = QString::number(weekpos+1) + " - " + QString::number(weekpos + settings::get_generalValue("weekOffSet"));
+            display_weeks = QString::number(weekpos+1) + " - " + QString::number(weekpos + settings::get_fontValue("weekOffSet"));
         }
         else
         {
@@ -1327,7 +1327,7 @@ void MainWindow::on_pushButton_week_plus_clicked()
     else
     {
         ++weekpos;
-        if(weekpos + settings::get_generalValue("weekOffSet") == saisonWeeks)
+        if(weekpos + settings::get_fontValue("weekOffSet") == saisonWeeks)
         {
             ui->pushButton_fourplus->setEnabled(false);
             ui->pushButton_week_plus->setEnabled(false);
@@ -1353,7 +1353,7 @@ void MainWindow::on_pushButton_fourplus_clicked()
     }
     else
     {
-        int offSet = settings::get_generalValue("weekOffSet");
+        int offSet = settings::get_fontValue("weekOffSet");
         weekpos = weekpos+4;
         if(weekpos + offSet >= saisonWeeks)
         {
