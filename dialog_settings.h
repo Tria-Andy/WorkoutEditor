@@ -73,15 +73,10 @@ private slots:
     void on_toolButton_delete_clicked();
     void on_toolButton_edit_clicked();
     void on_toolButton_color_clicked();
-
     void on_spinBox_ltsDays_valueChanged(int arg1);
-
     void on_spinBox_stsDays_valueChanged(int arg1);
-
     void on_spinBox_lastLTS_valueChanged(int arg1);
-
     void on_spinBox_lastSTS_valueChanged(int arg1);
-
     void on_listWidget_stressValue_itemClicked(QListWidgetItem *item);
 
 private:
@@ -89,6 +84,7 @@ private:
     QStandardItemModel *level_model,*hf_model;
     schedule *schedule_ptr;
     QHash<QString,QStringList> listMap;
+    QHash<QString,QColor> colorMapCache;
     QStringList keyList,extkeyList,sportList,model_header;
     del_level level_del;
     double thresPower,thresPace,sportFactor;
@@ -96,7 +92,7 @@ private:
     bool useColor,stressEdit;
     void checkSetup();
     void set_listEntries(QString);
-    void set_color(QColor,bool,QString);
+    void set_color(QColor,QString);
     void save_settingsChanges();
     void set_thresholdView(QString);
     void set_thresholdModel(QString);

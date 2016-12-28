@@ -31,6 +31,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     sportList << settings::isSwim << settings::isBike << settings::isRun;
     keyList = settings::get_keyList();
     extkeyList = settings::get_extkeyList();
+    colorMapCache = settings::get_colorMap();
     useColor = false;
     stressEdit = false;
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
@@ -169,6 +170,11 @@ void Dialog_settings::writeChangedValues()
 
     settings::writeListValues(&listMap);
 
+    for(QHash<QString,QColor>::const_iterator it = colorMapCache.cbegin(), end = colorMapCache.cend(); it != end; ++it)
+    {
+        settings::set_itemColor(it.key(),it.value());
+    }
+
     if(stressEdit) schedule_ptr->save_ltsFile(ui->spinBox_ltsDays->value());
 
     thresPower = ui->spinBox_thresPower->value();
@@ -239,7 +245,7 @@ void Dialog_settings::set_listEntries(QString selection)
 
     QColor color;
     color.setRgb(255,255,255,0);
-    this->set_color(color,false,"");
+    this->set_color(color,"");
 }
 
 void Dialog_settings::set_thresholdView(QString sport)
@@ -357,17 +363,14 @@ void Dialog_settings::set_thresholdModel(QString sport)
     }
 }
 
-void Dialog_settings::set_color(QColor color,bool write,QString key)
+void Dialog_settings::set_color(QColor color,QString key)
 {
     QPalette palette = ui->toolButton_color->palette();
     palette.setColor(ui->toolButton_color->backgroundRole(),color);
     ui->toolButton_color->setAutoFillBackground(true);
     ui->toolButton_color->setPalette(palette);
+    colorMapCache.insert(key,color);
 
-    if(write)
-    {
-        settings::set_itemColor(key,color);
-    }
 }
 
 void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem *item)
@@ -378,17 +381,17 @@ void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem 
     ui->toolButton_edit->setEnabled(true);
     ui->toolButton_delete->setEnabled(true);
 
-    color = settings::get_itemColor(listValue);
+    color = colorMapCache.value(listValue);
 
     if(useColor)
     {
-        this->set_color(color,false,listValue);
+        this->set_color(color,listValue);
         ui->toolButton_color->setEnabled(true);
     }
     else
     {
         color.setRgb(255,255,255,0);
-        this->set_color(color,false,listValue);
+        this->set_color(color,listValue);
         ui->toolButton_color->setEnabled(false);
     }
 }
@@ -485,7 +488,7 @@ void Dialog_settings::on_toolButton_color_clicked()
     QColor color = QColorDialog::getColor(ui->toolButton_color->palette().color(ui->toolButton_color->backgroundRole()),this);
     if(color.isValid())
     {
-        this->set_color(color,true,ui->lineEdit_addedit->text());
+        this->set_color(color,ui->lineEdit_addedit->text());
         this->enableSavebutton();
     }
 }
@@ -669,7 +672,7 @@ void Dialog_settings::on_toolButton_delete_clicked()
 {
     QListWidgetItem *item = ui->listWidget_selection->takeItem(ui->listWidget_selection->currentRow());
     ui->lineEdit_addedit->clear();
-    this->set_color(QColor(255,255,255,0),false,"");
+    this->set_color(QColor(255,255,255,0),"");
     delete item;
     this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
     this->enableSavebutton();
