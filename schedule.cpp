@@ -211,6 +211,7 @@ void schedule::save_dayWorkouts()
 
 void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
 {
+    QString contentString;
     QDomElement root_meta = weekMeta.firstChildElement();
     QDomElement root_content = weekContent.firstChildElement();
     QDomNodeList meta_list,content_list;
@@ -296,7 +297,15 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
                 }
                 else
                 {
-                    week_content->setData(week_content->index(i,col,QModelIndex()),content_element.attribute(contentTags.at(col)));
+                    contentString = content_element.attribute(contentTags.at(col));
+                    if(!contentString.isEmpty())
+                    {
+                        week_content->setData(week_content->index(i,col,QModelIndex()),contentString);
+                    }
+                    else
+                    {
+                        week_content->setData(week_content->index(i,col,QModelIndex()),"0-0-00:00-0");
+                    }
                 }
             }
         }
