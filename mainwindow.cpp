@@ -1712,12 +1712,21 @@ void MainWindow::on_comboBox_phasefilter_currentIndexChanged(int index)
 
     phaseFilter = ui->comboBox_phasefilter->currentText();
 
-    QList<QStandardItem*> list = workSchedule->week_meta->findItems(phaseFilter,Qt::MatchContains,2);
-    if(!list.isEmpty())
-    {  
+    if(index == 0)
+    {
         this->workout_calendar();
         this->summery_view();
         ui->label_month->setText("Week " + this->get_weekRange());
+    }
+    else
+    {
+        QList<QStandardItem*> list = workSchedule->week_meta->findItems(phaseFilter,Qt::MatchContains,2);
+        if(!list.isEmpty())
+        {
+            this->workout_calendar();
+            this->summery_view();
+            ui->label_month->setText("Week " + this->get_weekRange());
+        }
     }
 }
 
