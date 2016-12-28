@@ -41,6 +41,7 @@ void schedule::check_workoutFiles()
     QFile workouts(schedulePath + QDir::separator() + "workout_schedule.xml");
     if(!workouts.exists())
     {
+        qDebug() << "Workout Schedule not exists! Created!";
         workouts.open(QIODevice::WriteOnly | QIODevice::Text);
         workouts.close();
     }
@@ -48,6 +49,7 @@ void schedule::check_workoutFiles()
     QFile weekMeta(schedulePath + QDir::separator() + "workout_phase_meta.xml");
     if(!weekMeta.exists())
     {
+        qDebug() << "Phases Meta File not exists! Created!";
         weekMeta.open(QIODevice::WriteOnly | QIODevice::Text);
         weekMeta.close();
     }
@@ -55,6 +57,7 @@ void schedule::check_workoutFiles()
     QFile weekContent(schedulePath + QDir::separator() + "workout_phase_content.xml");
     if(!weekContent.exists())
     {
+        qDebug() << "Phase Content File not exists! Created!";
         weekContent.open(QIODevice::WriteOnly | QIODevice::Text);
         weekContent.close();
     }
@@ -63,6 +66,7 @@ void schedule::check_workoutFiles()
     QFile ltsFile(schedulePath + QDir::separator() + "longtermstress.xml");
     if(!ltsFile.exists())
     {
+        qDebug() << "LTS File not exists! Created!";
         ltsFile.open(QIODevice::WriteOnly | QIODevice::Text);
         ltsFile.close();
     }
@@ -77,13 +81,13 @@ void schedule::load_workoutsFiles()
 
     if(!workouts.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        //logFile->logoutput("File not open: workout_schedule.xml");
+        qDebug() << "File not open: workout_schedule.xml";
     }
     else
     {
         if(!doc_workouts.setContent(&workouts))
         {
-            //logFile->logoutput("Workouts not loaded!");
+            qDebug() << "Workouts not loaded!";
         }
         workouts.close();
     }
@@ -92,13 +96,13 @@ void schedule::load_workoutsFiles()
     QDomDocument doc_week_meta;
     if(!weekMeta.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        //logFile->logoutput("File not open: workout_phase_meta.xml");
+        qDebug() << "File not open: workout_phase_meta.xml";
     }
     else
     {
         if(!doc_week_meta.setContent(&weekMeta))
         {
-            //logFile->logoutput("Meta not loaded!");
+            qDebug() << "Phase Meta Data not loaded!";
         }
         weekMeta.close();
     }
@@ -107,13 +111,13 @@ void schedule::load_workoutsFiles()
     QDomDocument doc_week_content;
     if(!weekContent.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        //logFile->logoutput("File not open: workout_phase_content.xml");
+        qDebug() << "File not open: workout_phase_content.xml";
     }
     else
     {
         if(!doc_week_content.setContent(&weekContent))
         {
-            //logFile->logoutput("Content not loaded!");
+            qDebug() << "Phase Content not loaded!";
         }
         weekContent.close();
     }
@@ -122,13 +126,13 @@ void schedule::load_workoutsFiles()
     QDomDocument doc_lts_content;
     if(!longStressContent.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        //logFile->logoutput("File not open: longtermstress.xml");
+        qDebug() << "File not open: longtermstress.xml";
     }
     else
     {
         if(!doc_lts_content.setContent(&longStressContent))
         {
-            //logFile->logoutput("Content not loaded!");
+            qDebug() << "LTS Values not loaded!";
         }
         longStressContent.close();
     }
@@ -439,7 +443,7 @@ void schedule::saveXML(QDomDocument xmlDoc,QString fileName)
 
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        qDebug() << "File not open!";
+        qDebug() << fileName+": File not open!";
     }
 
     QTextStream stream(&file);
