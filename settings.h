@@ -65,6 +65,7 @@ public:
     static QString get_saisonInfo(QString key) {return saisonInfo.value(key);}
     static QString get_gcInfo(QString key) {return gcInfo.value(key);}
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
+    static QHash<QString,QColor> get_colorMap() {return colorMap;}
     static QString get_rangeValue(QString,QString);
     static double get_thresValue(QString key) {return thresholdMap.value(key);}
     static double get_ltsValue(QString key) {return ltsMap.value(key);}
