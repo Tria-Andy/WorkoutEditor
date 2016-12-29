@@ -84,10 +84,12 @@ void Dialog_settings::on_pushButton_cancel_clicked()
 void Dialog_settings::checkSetup()
 {
     if(ui->lineEdit_athlete->text().isEmpty()) ui->pushButton_save->setEnabled(true);
+
     listMap = settings::get_listMap();
     listMap.insert(extkeyList.at(SPORTUSE),settings::get_listValues("Sportuse"));
 
     ui->comboBox_selInfo->addItems(keyList);
+    this->set_thresholdModel(ui->comboBox_thresSport->currentText());
     this->set_hfmodel(ui->spinBox_hfThres->value());
     this->set_ltsList();
 }
@@ -183,7 +185,7 @@ void Dialog_settings::writeChangedValues()
 
 void Dialog_settings::writeRangeValues(QString sport)
 {
-    QStringList levels = listMap.value("levels");
+    QStringList levels = listMap.value("Level");
     QString min,max;
     QStandardItemModel *model;
     if(sport == "HF")
@@ -219,6 +221,8 @@ void Dialog_settings::set_listEntries(QString selection)
 
     if(selection == keyList.at(SPORT))
     {
+        ui->pushButton_up->setEnabled(true);
+        ui->pushButton_down->setEnabled(true);
         ui->listWidget_useIn->addItems(listMap.value(extkeyList.at(SPORTUSE)));
         ui->listWidget_useIn->setEnabled(true);
         useColor = true;
@@ -226,17 +230,23 @@ void Dialog_settings::set_listEntries(QString selection)
     }
     else if(selection == keyList.at(LEVEL) || selection == keyList.at(PHASE))
     {
+        ui->pushButton_up->setEnabled(true);
+        ui->pushButton_down->setEnabled(true);
         ui->listWidget_useIn->clear();
         ui->listWidget_useIn->setEnabled(false);
         useColor = true;
     }
     else if(selection == keyList.at(MISC))
     {
+        ui->pushButton_up->setEnabled(false);
+        ui->pushButton_down->setEnabled(false);
         ui->listWidget_useIn->clear();
         ui->listWidget_useIn->setEnabled(false);
     }
     else
     {
+        ui->pushButton_up->setEnabled(true);
+        ui->pushButton_down->setEnabled(true);
         ui->listWidget_useIn->clear();
         ui->listWidget_useIn->setEnabled(false);
         useColor = false;
@@ -268,7 +278,7 @@ void Dialog_settings::set_thresholdView(QString sport)
 
 void Dialog_settings::set_hfmodel(double hfThres)
 {
-    QStringList levels = listMap.value("levels");
+    QStringList levels = listMap.value("Level");
     if(hf_model->rowCount() > 0) hf_model->clear();
     QString range,zone_low,zone_high;
 
@@ -326,7 +336,7 @@ void Dialog_settings::checkSportUse()
 
 void Dialog_settings::set_thresholdModel(QString sport)
 {
-    QStringList levels = listMap.value("levels");
+    QStringList levels = listMap.value("Level");
     if(level_model->rowCount() > 0) level_model->clear();
     level_model->setHorizontalHeaderLabels(model_header);
     ui->tableView_level->setModel(level_model);

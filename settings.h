@@ -48,6 +48,7 @@ private:
     static QColor get_colorRGB(QString,bool);
     static QStringList get_colorStringList(QStringList*);
 
+
     //Setter
     static void fill_mapList(QMap<int,QString>*,QString*);
     static void fill_mapColor(QStringList*,QString*,bool);

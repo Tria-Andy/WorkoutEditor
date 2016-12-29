@@ -96,12 +96,11 @@ void settings::fill_mapColor(QStringList *stringList, QString *colorString,bool 
 void settings::fill_mapRange(QHash<QString, QString> *map, QString *values)
 {
     QStringList list = values->split(splitter);
-    for(int i = 0; i < listMap.value("levels").count(); ++i)
+    for(int i = 0; i < listMap.value("Level").count(); ++i)
     {
-        map->insert(listMap.value("levels").at(i),list.at(i));
+        map->insert(listMap.value("Level").at(i),list.at(i));
     }
 }
-
 
 QStringList settings::get_colorStringList(QStringList *stringList)
 {
@@ -588,6 +587,17 @@ void settings::saveSettings()
     myvalues->beginGroup("IntEditor");
         settingList = listMap.value("IntEditor");
         myvalues->setValue("parts",settings::setSettingString(settingList));
+        settingList.clear();
+    myvalues->endGroup();
+
+    myvalues->beginGroup("Misc");
+        settingList = listMap.value("Misc");
+        myvalues->setValue("sum",settingList.at(0));
+        myvalues->setValue("empty",settingList.at(1));
+        myvalues->setValue("breakname",settingList.at(2));
+        myvalues->setValue("sumcolor",settings::set_colorString(colorMap.value("sumcolor")));
+        myvalues->setValue("emptycolor",settings::set_colorString(colorMap.value("emptycolor")));
+        myvalues->setValue("breakcolor",settings::set_colorString(colorMap.value("breakcolor")));
         settingList.clear();
     myvalues->endGroup();
 
