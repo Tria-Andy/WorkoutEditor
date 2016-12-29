@@ -25,13 +25,13 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
 {
     ui->setupUi(this);
     workSched = p_sched;
-    ui->comboBox_phase->addItems(settings::get_phaseList());
-    ui->comboBox_cycle->addItems(settings::get_cycleList());
+    ui->comboBox_phase->addItems(settings::get_listValues("Phase"));
+    ui->comboBox_cycle->addItems(settings::get_listValues("Cycle"));
     ui->dateEdit_selectDate->setDate(QDate().currentDate());
     timeFormat = "hh:mm:ss";
     empty = "0-0-00:00-0";
     weekHeader << "Sport" << "Workouts" << "Duration" << "%" << "Distance" << "Pace" << "Stress";
-    sportuseList = settings::get_sportUseList();
+    sportuseList = settings::get_listValues("Sportuse");
     this->setFixedHeight(100+(35*(sportuseList.count()+1)));
     this->setFixedWidth(650);
     this->fill_values(sel_week);
@@ -56,7 +56,7 @@ void Dialog_addweek::fill_values(QString selWeek)
     QModelIndex index;
     QTime duration;
     QString value,work,dura,dist,stress;
-    QString sumString = settings::get_gcInfo("sum");
+    QString sumString = settings::get_generalValue("sum");
     QStringList values;
     int listCount = sportuseList.count();
 

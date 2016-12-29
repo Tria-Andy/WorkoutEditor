@@ -17,7 +17,7 @@ public:
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         Q_UNUSED(option)
-        QStringList sportList = settings::get_sportUseList();
+        QStringList sportList = settings::get_listValues("Sportuse");
         int listCount = sportList.count();
 
         if((index.column() == 1 || index.column() == 6) && index.row() != listCount)
@@ -50,7 +50,7 @@ public:
 
     void setEditorData(QWidget *editor, const QModelIndex &index) const
     {
-        QStringList sportList = settings::get_sportUseList();
+        QStringList sportList = settings::get_listValues("Sportuse");
         int listCount = sportList.count();
 
         if((index.column() == 1 || index.column() == 6) && index.row() != listCount)
@@ -75,7 +75,7 @@ public:
 
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
     {
-        QStringList sportList = settings::get_sportUseList();
+        QStringList sportList = settings::get_listValues("Sportuse");
 
         int listCount = sportList.count();
         double factor = 1.0;
@@ -136,7 +136,7 @@ public:
         painter->save();
         QFont cFont;
         QString sportname,indexData;
-        QStringList sportuse = settings::get_sportUseList();
+        QStringList sportuse = settings::get_listValues("Sportuse");
         const QAbstractItemModel *model = index.model();
         cFont.setPixelSize(12);
 
@@ -147,7 +147,7 @@ public:
 
         if(index.row() == sportuse.count())
         {
-            painter->fillRect(option.rect,QBrush(settings::get_itemColor("sumcolor")));
+            painter->fillRect(option.rect,QBrush(settings::get_itemColor(settings::get_generalValue("sum"))));
             cFont.setBold(true);
         }
         else

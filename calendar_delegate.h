@@ -37,8 +37,8 @@ public:
         painter->save();
         QFont phase_font,date_font, work_font;
         QString temp_value,dayDate;
-        QStringList phaseList = settings::get_phaseList();
-        QStringList sportList = settings::get_sportList();
+        QStringList phaseList = settings::get_listValues("Phase");
+        QStringList sportList = settings::get_listValues("Sport");
         QStringList calendar_values;
         QString delimiter = "#";
         QColor rect_color;
@@ -132,7 +132,7 @@ public:
                     }
                     else
                     {
-                        rect_color = settings::get_itemColor("emptycolor");
+                        rect_color = settings::get_itemColor(settings::get_generalValue("empty"));
                     }
                 }
 

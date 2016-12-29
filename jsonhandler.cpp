@@ -159,18 +159,18 @@ void jsonHandler::read_json(QString jsonfile)
     itemObject = item_ride.value(QString("TAGS")).toObject();
     this->fill_qmap(&tagData,&itemObject);
     curr_act->set_sport(tagData.value("Sport"));
-    valueList = QStringList();
+    valueList = settings::get_listValues("IntEditor");
 
     curr_act->ride_info.insert("Date:",rideData.value("STARTTIME"));
     fileName = tagData.value("Filename").trimmed();
 
-    for(int i = 0; i < settings::get_jsoninfos().count();++i)
+    for(int i = 0; i < valueList.count();++i)
     {
-        stgValue = settings::get_jsoninfos().at(i);
+        stgValue = valueList.at(i);
         curr_act->ride_info.insert(stgValue+":",itemObject[stgValue].toString());
     }
     stgValue = QString();
-
+    valueList = QStringList();
     itemArray = item_ride["INTERVALS"].toArray();
     valueList << itemArray.at(0).toObject().keys();
     mapValues = settings::get_intList();

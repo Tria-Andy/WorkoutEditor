@@ -30,12 +30,7 @@ year_popup::year_popup(QWidget *parent, QString pInfo,int position,schedule *p_s
        workSched = p_sched;
        phase = pPhase;
        phaseindex = pIndex;
-       phaseList << "Year";
-
-       for(int i = 0; i < settings::get_phaseList().count(); ++i)
-       {
-           phaseList << settings::get_phaseList().at(i);
-       }
+       phaseList << "Year" << settings::get_listValues("Phase");
        selectList << "Duration" << "Distance" << "Workouts";
        ui->comboBox_select->addItems(selectList);
 
@@ -52,7 +47,6 @@ year_popup::year_popup(QWidget *parent, QString pInfo,int position,schedule *p_s
 }
 
 enum {DURATION,DISTANCE,WORKOUTS};
-enum {ALL,OFF,PREP,BASE,BUILD,PEAK,WK};
 
 year_popup::~year_popup()
 {

@@ -29,7 +29,7 @@ Dialog_edit::Dialog_edit(QWidget *parent, const QDate w_date, schedule *p_sched,
     ui->setupUi(this);
     workSched = p_sched;
     std_workouts = p_stdworkout;
-    ui->comboBox_wcode->addItems(settings::get_codeList());
+    ui->comboBox_wcode->addItems(settings::get_listValues("WorkoutCode"));
     this->set_workout_info(w_date);
 
     connect(ui->dateEdit_edit_date, SIGNAL(dateChanged(QDate)),this, SLOT(set_edit_calweek()));

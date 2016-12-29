@@ -30,7 +30,7 @@
 
 Activity::Activity()
 {
-    zone_count = settings::get_levelList().count();
+    zone_count = settings::get_listValues("Level").count();
     changeRowCount = false;
 }
 
@@ -120,7 +120,7 @@ void Activity::prepareData()
             else
             {
                 lapNr = 0;
-                swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),settings::get_gcInfo("breakName"));
+                swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),settings::get_generalValue("breakName"));
                 lapStart = lapStartPrev + lapPacePrev;          
                 lapSpeed = 0;
                 ++intCount;
@@ -194,7 +194,7 @@ void Activity::set_additional_ride_info()
 void Activity::set_swim_data()
 {
     bool recalc = settings::get_act_isrecalc();
-    QStringList levels = settings::get_levelList();
+    QStringList levels = settings::get_listValues("Level");
     QString temp,zone_low,zone_high;
 
     hf_threshold = settings::get_thresValue("hfthres");
@@ -581,7 +581,7 @@ void Activity::recalculate_intervalls(bool recalc)
                 }
                 else
                 {
-                    lapname = settings::get_gcInfo("breakName");
+                    lapname = settings::get_generalValue("breakName");
                     edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
                 }
             }

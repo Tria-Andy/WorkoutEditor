@@ -23,9 +23,9 @@ schedule::schedule()
     workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress";
     metaTags << "id" << "week" << "name" << "fdw";
     contentTags << "id" << "week";
-    for(int i = 0; i < settings::get_sportUseList().count();++i)
+    for(int i = 0; i < settings::get_listValues("Sportuse").count();++i)
     {
-        workout_sport = settings::get_sportUseList().at(i);
+        workout_sport = settings::get_listValues("Sportuse").at(i);
         contentTags << workout_sport.toLower();
     }
     contentTags << "summery";
@@ -226,7 +226,7 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
     {
         QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
         QString weekid;
-        QString noPhase = settings::get_gcInfo("emptyPhase");
+        QString noPhase = settings::get_generalValue("emptyPhase");
         int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
 
         week_meta->setRowCount(saisonWeeks);

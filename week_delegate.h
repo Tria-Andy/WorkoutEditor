@@ -38,8 +38,8 @@ public:
         QFont phase_font,date_font, work_font;
         QString temp_value,headInfo;
         QStringList calendar_values;
-        QStringList phaseList = settings::get_phaseList();
-        QStringList sportList = settings::get_sportUseList();
+        QStringList phaseList = settings::get_listValues("Phase");
+        QStringList sportList = settings::get_listValues("Sportuse");
         QString delimiter = "-";
         QColor rect_color;
         int textMargin = 2;
@@ -101,7 +101,7 @@ public:
                     }
                     else
                     {
-                        rect_color = settings::get_itemColor("sumcolor");
+                        rect_color = settings::get_itemColor(settings::get_generalValue("sum"));
                     }
                     break;
                 }

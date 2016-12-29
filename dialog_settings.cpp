@@ -66,7 +66,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     this->checkSetup();
 }
 
-enum {SPORT,LEVEL,PHASE,CYCLE,WCODE,JFILE,EDITOR};
+enum {SPORT,LEVEL,PHASE,CYCLE,WCODE,JFILE,EDITOR,MISC};
 enum {SPORTUSE};
 
 Dialog_settings::~Dialog_settings()
@@ -84,14 +84,9 @@ void Dialog_settings::on_pushButton_cancel_clicked()
 void Dialog_settings::checkSetup()
 {
     if(ui->lineEdit_athlete->text().isEmpty()) ui->pushButton_save->setEnabled(true);
-    listMap.insert(keyList.at(SPORT),settings::get_sportList());
-    listMap.insert(keyList.at(LEVEL),settings::get_levelList());
-    listMap.insert(keyList.at(PHASE),settings::get_phaseList());
-    listMap.insert(keyList.at(CYCLE),settings::get_cycleList());
-    listMap.insert(keyList.at(WCODE),settings::get_codeList());
-    listMap.insert(keyList.at(JFILE),settings::get_jsoninfos());
-    listMap.insert(keyList.at(EDITOR),settings::get_intPlanerList());
-    listMap.insert(extkeyList.at(SPORTUSE),settings::get_sportUseList());
+    listMap = settings::get_listMap();
+    listMap.insert(extkeyList.at(SPORTUSE),settings::get_listValues("Sportuse"));
+
     ui->comboBox_selInfo->addItems(keyList);
     this->set_hfmodel(ui->spinBox_hfThres->value());
     this->set_ltsList();
@@ -188,7 +183,7 @@ void Dialog_settings::writeChangedValues()
 
 void Dialog_settings::writeRangeValues(QString sport)
 {
-    QStringList levels = settings::get_levelList();
+    QStringList levels = listMap.value("levels");
     QString min,max;
     QStandardItemModel *model;
     if(sport == "HF")
@@ -222,7 +217,6 @@ void Dialog_settings::set_listEntries(QString selection)
     ui->listWidget_selection->clear();
     ui->listWidget_selection->addItems(listMap.value(selection));
 
-
     if(selection == keyList.at(SPORT))
     {
         ui->listWidget_useIn->addItems(listMap.value(extkeyList.at(SPORTUSE)));
@@ -235,6 +229,11 @@ void Dialog_settings::set_listEntries(QString selection)
         ui->listWidget_useIn->clear();
         ui->listWidget_useIn->setEnabled(false);
         useColor = true;
+    }
+    else if(selection == keyList.at(MISC))
+    {
+        ui->listWidget_useIn->clear();
+        ui->listWidget_useIn->setEnabled(false);
     }
     else
     {
@@ -269,7 +268,7 @@ void Dialog_settings::set_thresholdView(QString sport)
 
 void Dialog_settings::set_hfmodel(double hfThres)
 {
-    QStringList levels = settings::get_levelList();
+    QStringList levels = listMap.value("levels");
     if(hf_model->rowCount() > 0) hf_model->clear();
     QString range,zone_low,zone_high;
 
@@ -327,7 +326,7 @@ void Dialog_settings::checkSportUse()
 
 void Dialog_settings::set_thresholdModel(QString sport)
 {
-    QStringList levels = settings::get_levelList();
+    QStringList levels = listMap.value("levels");
     if(level_model->rowCount() > 0) level_model->clear();
     level_model->setHorizontalHeaderLabels(model_header);
     ui->tableView_level->setModel(level_model);

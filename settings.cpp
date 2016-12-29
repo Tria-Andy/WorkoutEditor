@@ -46,6 +46,7 @@ QString settings::isAlt;
 QString settings::isTria;
 QString settings::isOther;
 
+QHash<QString,QStringList> settings::listMap;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
 QHash<QString,double> settings::thresholdMap;
@@ -58,14 +59,6 @@ QHash<QString,QString> settings::hfRange;
 
 QStringList settings::keyList;
 QStringList settings::extkeyList;
-QStringList settings::sportList;
-QStringList settings::sportUseList;
-QStringList settings::phaseList;
-QStringList settings::cycleList;
-QStringList settings::codeList;
-QStringList settings::levelList;
-QStringList settings::intPlanList;
-QStringList settings::jsoninfos;
 
 bool settings::act_isloaded = false;
 bool settings::act_isrecalc = false;
@@ -103,9 +96,9 @@ void settings::fill_mapColor(QStringList *stringList, QString *colorString,bool 
 void settings::fill_mapRange(QHash<QString, QString> *map, QString *values)
 {
     QStringList list = values->split(splitter);
-    for(int i = 0; i < levelList.count(); ++i)
+    for(int i = 0; i < listMap.value("levels").count(); ++i)
     {
-        map->insert(levelList.at(i),list.at(i));
+        map->insert(listMap.value("levels").at(i),list.at(i));
     }
 }
 
@@ -169,87 +162,124 @@ void settings::loadSettings()
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
 
 //###########################Upgrade values ini####################################
+        QMap<QString,QString> updateMap;
+        QStringList updateList,updateList2;
+        QString updateString;
+
         myvalues->beginGroup("Common");
-            QString com_childs = myvalues->value("ltsdays").toString();
-            if(com_childs.isEmpty()) myvalues->setValue("ltsdays","42");
-            com_childs = myvalues->value("stsdays").toString();
-            if(com_childs.isEmpty()) myvalues->setValue("stsdays","7");
-            com_childs = myvalues->value("lastlts").toString();
-            if(com_childs.isEmpty()) myvalues->setValue("lastlts","0");
-            com_childs = myvalues->value("laststs").toString();
-            if(com_childs.isEmpty()) myvalues->setValue("laststs","0");
+            updateMap.insert("ltsdays",myvalues->value("ltsdays").toString());
+            updateMap.insert("stsdays",myvalues->value("stsdays").toString());
+            updateMap.insert("lastlts",myvalues->value("lastlts").toString());
+            updateMap.insert("laststs",myvalues->value("laststs").toString());
+            updateString = myvalues->value("ltsdays").toString();
+            if(updateString.isEmpty()) myvalues->setValue("ltsdays","42");
+            updateString = myvalues->value("stsdays").toString();
+            if(updateString.isEmpty()) myvalues->setValue("stsdays","7");
+            updateString = myvalues->value("lastlts").toString();
+            if(updateString.isEmpty()) myvalues->setValue("lastlts","0");
+            updateString = myvalues->value("laststs").toString();
+            if(updateString.isEmpty()) myvalues->setValue("laststs","0");
         myvalues->endGroup();
+
+        myvalues->remove("Common");
+
+        myvalues->beginGroup("Stressterm");
+        if(myvalues->value("ltsdays").toString().isEmpty())
+        {
+            for(QMap<QString,QString>::const_iterator it = updateMap.cbegin(), end = updateMap.cend(); it != end; ++it)
+            {
+               myvalues->setValue(it.key(),it.value());
+            }
+        }
+        myvalues->endGroup();
+        updateList.clear();
 
         myvalues->beginGroup("Level");
-        QStringList levColor,levList;
-            QString lev_childs = myvalues->value("levels").toString();
-            levList << lev_childs.split(splitter);
-            lev_childs = myvalues->value("color").toString();
-            if(levList.count() > 0 && lev_childs.isEmpty())
+            updateList = myvalues->value("levels").toString().split(splitter);
+            updateString = myvalues->value("color").toString();
+            if(updateList.count() > 0 && updateString.isEmpty())
             {
-                for(int i = 0; i < levList.count();++i)
+                for(int i = 0; i < updateList.count();++i)
                 {
-                    levColor.insert(i,"230-230-230");
+                    updateList2.insert(i,"230-230-230");
                 }
-                myvalues->setValue("color",settings::setSettingString(levColor));
+                myvalues->setValue("color",settings::setSettingString(updateList2));
             }
         myvalues->endGroup();
+        updateList.clear();
 
         myvalues->beginGroup("Keylist");
-            QString kList_childs = myvalues->value("extkeys").toString();
-            if(kList_childs.isEmpty())
+            updateList = myvalues->value("keys").toString().split(splitter);
+            if(!updateList.contains("Misc"))
+            {
+                updateList << "Misc";
+                myvalues->setValue("keys",settings::setSettingString(updateList));
+            }
+            updateString = myvalues->value("extkeys").toString();
+            if(updateString.isEmpty())
             {
                 myvalues->setValue("extkeys","Sportuse");
             }
         myvalues->endGroup();
+        updateList.clear();
 
         myvalues->beginGroup("Sport");
-            QString sportuse_childs = myvalues->value("sportuse").toString();
-            if(sportuse_childs.isEmpty())
+            updateString = myvalues->value("sportuse").toString();
+            if(updateString.isEmpty())
             {
-                sportuse_childs = myvalues->value("sports").toString();
-                QStringList tempUse(sportuse_childs.split(splitter));
-                if(tempUse.count() > 5)
+                updateList = myvalues->value("sports").toString().split(splitter);
+                if(updateList.count() > 5)
                 {
-                    for(int i = 5; i < tempUse.count();++i)
+                    for(int i = 5; i < updateList.count();++i)
                     {
-                        tempUse.removeAt(i);
+                        updateList.removeAt(i);
                     }
-                    tempUse.removeLast();
+                    updateList.removeLast();
                 }
-                myvalues->setValue("sportuse",settings::setSettingString(tempUse));                
+                myvalues->setValue("sportuse",settings::setSettingString(updateList));
             }
+        myvalues->endGroup();
+        updateList.clear();
+
+        myvalues->beginGroup("Threshold");
+            updateString = myvalues->value("pace").toString();
+            if(!updateString.isEmpty())
+            {
+                updateList << updateString.split(splitter);
+                myvalues->setValue("swimpace",QString::number(settings::get_timesec(updateList.at(0))));
+                myvalues->setValue("bikepace",QString::number(settings::get_timesec(updateList.at(1))));
+                myvalues->setValue("runpace",QString::number(settings::get_timesec(updateList.at(2))));
+                myvalues->remove("pace");
+            }
+            updateList.clear();
+            updateString = myvalues->value("hf").toString();
+            if(!updateString.isEmpty())
+            {
+                updateList << updateString.split(splitter);
+                myvalues->setValue("hfthres",updateList.at(0));
+                myvalues->setValue("hfmax",updateList.at(1));
+                myvalues->remove("hf");
+            }
+        myvalues->endGroup();
+        updateList.clear();
+
+        myvalues->beginGroup("Misc");
             if(myvalues->value("sum").toString().isEmpty())
             {
                 myvalues->setValue("sum","Summery");
                 myvalues->setValue("sumcolor","0-255-255");
-            }
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Threshold");
-            QStringList thresList;
-            QString thres_childs = myvalues->value("pace").toString();
-            if(!thres_childs.isEmpty())
-            {
-                thresList << thres_childs.split(splitter);
-                myvalues->setValue("swimpace",QString::number(settings::get_timesec(thresList.at(0))));
-                myvalues->setValue("bikepace",QString::number(settings::get_timesec(thresList.at(1))));
-                myvalues->setValue("runpace",QString::number(settings::get_timesec(thresList.at(2))));
-                myvalues->remove("pace");
-            }
-            thresList.clear();
-            thres_childs = myvalues->value("hf").toString();
-            if(!thres_childs.isEmpty())
-            {
-                thresList << thres_childs.split(splitter);
-                myvalues->setValue("hfthres",thresList.at(0));
-                myvalues->setValue("hfmax",thresList.at(1));
-                myvalues->remove("hf");
+                myvalues->setValue("empty","No_Phase");
+                myvalues->setValue("emptycolor","125-125-200");
+                myvalues->setValue("breakname","Break");
+                myvalues->setValue("breakcolor","125-125-125");
             }
         myvalues->endGroup();
 //###########################Upgrade values ini done####################################
 
-        myvalues->beginGroup("Common");
+        QStringList settingList;
+        QString settingString;
+
+        myvalues->beginGroup("Stressterm");
             ltsMap.insert("ltsdays",myvalues->value("ltsdays").toDouble());
             ltsMap.insert("stsdays",myvalues->value("stsdays").toDouble());
             ltsMap.insert("lastlts",myvalues->value("lastlts").toDouble());
@@ -257,19 +287,18 @@ void settings::loadSettings()
         myvalues->endGroup();
 
         myvalues->beginGroup("JsonFile");
-            QString json_childs = myvalues->value("actinfo").toString();
-            jsoninfos << json_childs.split(splitter);
-            json_childs = myvalues->value("intInfo").toString();
-            fill_mapList(&intList,&json_childs);
-            json_childs = myvalues->value("sampinfo").toString();
-            fill_mapList(&sampList,&json_childs);
+            settingList << myvalues->value("actinfo").toString().split(splitter);
+            listMap.insert("JsonFile",settingList);
+            settingString = myvalues->value("intInfo").toString();
+            fill_mapList(&intList,&settingString);
+            settingString = myvalues->value("sampinfo").toString();
+            fill_mapList(&sampList,&settingString);
+            settingList.clear();
         myvalues->endGroup();
 
         myvalues->beginGroup("Keylist");
-            QString key_childs = myvalues->value("keys").toString();
-            keyList << key_childs.split(splitter);
-            key_childs = myvalues->value("extkeys").toString();
-            extkeyList << key_childs.split(splitter);
+            keyList << myvalues->value("keys").toString().split(splitter);
+            extkeyList << myvalues->value("extkeys").toString().split(splitter);
         myvalues->endGroup();
 
         myvalues->beginGroup("Saisoninfo");
@@ -278,17 +307,6 @@ void settings::loadSettings()
             saisonInfo.insert("startkw",myvalues->value("startkw").toString());
             saisonInfo.insert("endDate",myvalues->value("endDate").toString());
             saisonInfo.insert("weeks",myvalues->value("weeks").toString());
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Sport");
-            QString sport_childs = myvalues->value("sports").toString();
-            sportList << sport_childs.split(splitter);
-            sport_childs = myvalues->value("sportuse").toString();
-            sportUseList << sport_childs.split(splitter);
-            sport_childs = myvalues->value("color").toString();
-            settings::fill_mapColor(&sportList,&sport_childs,false);
-            gcInfo.insert("sum",myvalues->value("sum").toString());
-            colorMap.insert("sumcolor",settings::get_colorRGB(myvalues->value("sumcolor").toString(),false));
         myvalues->endGroup();
 
         myvalues->beginGroup("Threshold");
@@ -307,59 +325,83 @@ void settings::loadSettings()
         myvalues->endGroup();
 
         myvalues->beginGroup("Level");
-            QString level_childs = myvalues->value("levels").toString();
-            levelList << level_childs.split(splitter);
-            level_childs = myvalues->value("color").toString();
-            settings::fill_mapColor(&levelList,&level_childs,true);
-            gcInfo.insert("breakName",myvalues->value("breakname").toString());
+            settingList = myvalues->value("levels").toString().split(splitter);
+            listMap.insert("Level",settingList);
+            settingString = myvalues->value("color").toString();
+            settings::fill_mapColor(&settingList,&settingString,true);
+            settingList.clear();
         myvalues->endGroup();
 
         myvalues->beginGroup("Range");
-            QString range_childs = myvalues->value("swim").toString();
-            settings::fill_mapRange(&swimRange,&range_childs);
-            range_childs = myvalues->value("bike").toString();
-            settings::fill_mapRange(&bikeRange,&range_childs);
-            range_childs = myvalues->value("run").toString();
-            settings::fill_mapRange(&runRange,&range_childs);
-            range_childs = myvalues->value("strength").toString();
-            settings::fill_mapRange(&stgRange,&range_childs);
-            range_childs = myvalues->value("hf").toString();
-            settings::fill_mapRange(&hfRange,&range_childs);
+            settingString = myvalues->value("swim").toString();
+            settings::fill_mapRange(&swimRange,&settingString);
+            settingString = myvalues->value("bike").toString();
+            settings::fill_mapRange(&bikeRange,&settingString);
+            settingString = myvalues->value("run").toString();
+            settings::fill_mapRange(&runRange,&settingString);
+            settingString = myvalues->value("strength").toString();
+            settings::fill_mapRange(&stgRange,&settingString);
+            settingString = myvalues->value("hf").toString();
+            settings::fill_mapRange(&hfRange,&settingString);
         myvalues->endGroup();
 
         myvalues->beginGroup("Phase");
-            QString phase_childs = myvalues->value("phases").toString();
-            phaseList << phase_childs.split(splitter);
-            phase_childs = myvalues->value("color").toString();
-            settings::fill_mapColor(&phaseList,&phase_childs,false);
-            gcInfo.insert("emptyPhase",myvalues->value("empty").toString());
-            colorMap.insert("emptycolor",settings::get_colorRGB(myvalues->value("emptycolor").toString(),false));
+            settingList = myvalues->value("phases").toString().split(splitter);
+            listMap.insert("Phase",settingList);
+            settingString = myvalues->value("color").toString();
+            settings::fill_mapColor(&settingList,&settingString,false);
+            settingList.clear();
         myvalues->endGroup();
 
         myvalues->beginGroup("Cycle");
-            QString cycle_childs = myvalues->value("cycles").toString();
-            cycleList << cycle_childs.split(splitter);
+            settingList = myvalues->value("cycles").toString().split(splitter);
+            listMap.insert("Cycle",settingList);
+            settingList.clear();
         myvalues->endGroup();
 
         myvalues->beginGroup("WorkoutCode");
-            QString work_childs = myvalues->value("codes").toString();
-            codeList << work_childs.split(splitter);
+            settingList = myvalues->value("codes").toString().split(splitter);
+            listMap.insert("WorkoutCode",settingList);
+            settingList.clear();
         myvalues->endGroup();
 
         myvalues->beginGroup("IntEditor");
-            QString intPlaner_childs = myvalues->value("parts").toString();
-            intPlanList << intPlaner_childs.split(splitter);
+            settingList = myvalues->value("parts").toString().split(splitter);
+            listMap.insert("IntEditor",settingList);
+            settingList.clear();
         myvalues->endGroup();
 
-        for(int i = 0; i < sportList.count(); ++i)
+        myvalues->beginGroup("Misc");
+            settingList << myvalues->value("sum").toString();
+            settingList << myvalues->value("empty").toString();
+            settingList << myvalues->value("breakname").toString();
+            listMap.insert("Misc",settingList);
+            generalMap.insert("sum", settingList.at(0));
+            colorMap.insert(settingList.at(0),settings::get_colorRGB(myvalues->value("sumcolor").toString(),false));
+            generalMap.insert("empty", settingList.at(1));
+            colorMap.insert(settingList.at(1),settings::get_colorRGB(myvalues->value("emptycolor").toString(),false));
+            generalMap.insert("breakname",settingList.at(2));
+            colorMap.insert(settingList.at(2),settings::get_colorRGB(myvalues->value("breakcolor").toString(),false));
+            settingList.clear();
+        myvalues->endGroup();
+
+        myvalues->beginGroup("Sport");
+            settingList <<  myvalues->value("sports").toString().split(splitter);
+            listMap.insert("Sport",myvalues->value("sports").toString().split(splitter));
+            listMap.insert("Sportuse",myvalues->value("sportuse").toString().split(splitter));
+            settingString = myvalues->value("color").toString();
+            settings::fill_mapColor(&settingList,&settingString,false);
+        myvalues->endGroup();
+
+        for(int i = 0; i < settingList.count(); ++i)
         {
-            if(sportList.at(i) == "Swim") isSwim = sportList.at(i);
-            else if(sportList.at(i) == "Bike") isBike = sportList.at(i);
-            else if(sportList.at(i) == "Run") isRun = sportList.at(i);
-            else if(sportList.at(i) == "Strength" || sportList.at(i) == "Power") isStrength = sportList.at(i);
-            else if(sportList.at(i) == "Alt" || sportList.at(i) == "Alternativ") isAlt = sportList.at(i);
-            else if(sportList.at(i) == "Tria" || sportList.at(i) == "Triathlon") isTria = sportList.at(i);
-            else if(sportList.at(i) == "Other") isOther = sportList.at(i);
+            if(settingList.at(i) == "Swim") isSwim = settingList.at(i);
+            else if(settingList.at(i) == "Bike") isBike = settingList.at(i);
+            else if(settingList.at(i) == "Run") isRun = settingList.at(i);
+            else if(settingList.at(i) == "Strength" || settingList.at(i) == "Power") isStrength = settingList.at(i);
+            else if(settingList.at(i) == "Alt" || settingList.at(i) == "Alternativ") isAlt = settingList.at(i);
+            else if(settingList.at(i) == "Tria" || settingList.at(i) == "Triathlon") isTria = settingList.at(i);
+            else if(settingList.at(i) == "Other") isOther = settingList.at(i);
         }
 
         QDesktopWidget desk;
@@ -409,15 +451,10 @@ void settings::set_rangeValue(QString map, QString key,QString value)
 
 void settings::writeListValues(QHash<QString,QStringList> *plist)
 {
-    sportList = plist->value(keyList.at(SPORT));
-    levelList = plist->value(keyList.at(LEVEL));
-    phaseList = plist->value(keyList.at(PHASE));
-    cycleList = plist->value(keyList.at(CYCLE));
-    codeList = plist->value(keyList.at(WCODE));
-    jsoninfos = plist->value(keyList.at(JFILE));
-    intPlanList = plist->value(keyList.at(EDITOR));
-    sportUseList = plist->value(extkeyList.at(SPORTUSE));
-
+    for(QHash<QString,QStringList>::const_iterator it =  plist->cbegin(), end = plist->cend(); it != end; ++it)
+    {
+        listMap.insert(it.key(),it.value());
+    }
     settings::saveSettings();
 }
 
@@ -437,9 +474,9 @@ QStringList settings::setRangeString(QHash<QString, QString> *hash)
 {
     QStringList rangeList;
 
-    for(int i = 0; i < levelList.count(); ++i)
+    for(int i = 0; i < listMap.value("levels").count(); ++i)
     {
-        rangeList.insert(i,hash->value(levelList.at(i)));
+        rangeList.insert(i,hash->value(listMap.value("levels").at(i)));
     }
     return rangeList;
 }
@@ -447,6 +484,7 @@ QStringList settings::setRangeString(QHash<QString, QString> *hash)
 void settings::saveSettings()
 {
     QStringList tempColor;
+    QStringList settingList;
     QSettings *mysettings = new QSettings(settingFile,QSettings::IniFormat);
 
     mysettings->beginGroup("GoldenCheetah");
@@ -464,7 +502,7 @@ void settings::saveSettings()
 
     QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
 
-    myvalues->beginGroup("Common");
+    myvalues->beginGroup("Stressterm");
         myvalues->setValue("ltsdays",ltsMap.value("ltsdays"));
         myvalues->setValue("stsdays",ltsMap.value("stsdays"));
         myvalues->setValue("lastlts",ltsMap.value("lastlts"));
@@ -495,24 +533,31 @@ void settings::saveSettings()
     myvalues->endGroup();
 
     myvalues->beginGroup("Sport");
-        myvalues->setValue("sports",settings::setSettingString(sportList));
-        myvalues->setValue("sportuse",settings::setSettingString(sportUseList));
-        tempColor = settings::get_colorStringList(&sportList);
+        settingList = listMap.value("Sport");
+        myvalues->setValue("sports",settings::setSettingString(settingList));
+        myvalues->setValue("sportuse",settings::setSettingString(listMap.value("sportuse")));
+        tempColor = settings::get_colorStringList(&settingList);
         myvalues->setValue("color",settings::setSettingString(tempColor));
         tempColor.clear();
+        settingList.clear();
     myvalues->endGroup();
 
     myvalues->beginGroup("Phase");
-        myvalues->setValue("phases",settings::setSettingString(phaseList));
-        tempColor = settings::get_colorStringList(&phaseList);
+        settingList = listMap.value("Phase");
+        myvalues->setValue("phases",settings::setSettingString(settingList));
+        tempColor = settings::get_colorStringList(&settingList);
         myvalues->setValue("color",settings::setSettingString(tempColor));
         tempColor.clear();
+        settingList.clear();
     myvalues->endGroup();
 
     myvalues->beginGroup("Level");
-        myvalues->setValue("levels",settings::setSettingString(levelList));
-        tempColor = settings::get_colorStringList(&levelList);
+        settingList = listMap.value("Level");
+        myvalues->setValue("levels",settings::setSettingString(settingList));
+        tempColor = settings::get_colorStringList(&settingList);
         myvalues->setValue("color",settings::setSettingString(tempColor));
+        tempColor.clear();
+        settingList.clear();
     myvalues->endGroup();
 
     myvalues->beginGroup("Range");
@@ -524,19 +569,26 @@ void settings::saveSettings()
     myvalues->endGroup();
 
     myvalues->beginGroup("Cycle");
-        myvalues->setValue("cycles",settings::setSettingString(cycleList));
+        settingList = listMap.value("Cycle");
+        myvalues->setValue("cycles",settings::setSettingString(settingList));
+        settingList.clear();
     myvalues->endGroup();
 
     myvalues->beginGroup("WorkoutCode");
-        myvalues->setValue("codes",settings::setSettingString(codeList));
+        settingList = listMap.value("WorkoutCode");
+        myvalues->setValue("codes",settings::setSettingString(settingList));
+        settingList.clear();
     myvalues->endGroup();
 
     myvalues->beginGroup("JsonFile");
-        myvalues->setValue("actinfo",settings::setSettingString(jsoninfos));
+        settingList = listMap.value("JsonFile");
+        myvalues->setValue("actinfo",settings::setSettingString(settingList));
     myvalues->endGroup();
 
     myvalues->beginGroup("IntEditor");
-        myvalues->setValue("parts",settings::setSettingString(intPlanList));
+        settingList = listMap.value("IntEditor");
+        myvalues->setValue("parts",settings::setSettingString(settingList));
+        settingList.clear();
     myvalues->endGroup();
 
     delete myvalues;

@@ -37,7 +37,7 @@ public:
         QFont phase_font,date_font, work_font;
         QString temp_value;
         QStringList sum_values;
-        QStringList sportList = settings::get_sportList();
+        QStringList sportList = settings::get_listValues("Sport");
         QString delimiter = "-";
         QColor rect_color;
         int textMargin = 2;
@@ -61,7 +61,7 @@ public:
             else
             {
                 //Summery
-                rect_color = settings::get_itemColor("sumcolor");
+                rect_color = settings::get_itemColor(settings::get_generalValue("sum"));
             }
         }
 
