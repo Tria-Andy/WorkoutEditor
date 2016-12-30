@@ -656,7 +656,7 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
 
             if(dialog_code == QDialog::Accepted)
             {
-                Dialog_week_copy week_copy(this,selected_week,workSchedule);
+                Dialog_week_copy week_copy(this,selected_week,workSchedule,true);
                 week_copy.setModal(true);
                 dialog_code = week_copy.exec();
 
@@ -1615,8 +1615,9 @@ void MainWindow::on_actionPreferences_triggered()
                 close();
             }
         }
+        this->summery_view();
+        this->workout_calendar();
     }
-
 }
 
 void MainWindow::on_actionPace_Calculator_triggered()
@@ -1781,4 +1782,24 @@ void MainWindow::on_actionPMC_triggered()
     stress_popup stressPop(this,workSchedule);
     stressPop.setModal(true);
     stressPop.exec();
+}
+
+void MainWindow::on_actionEdit_Week_triggered()
+{
+    int dialogCode;
+    Dialog_week_copy week_copy(this,QString(),workSchedule,false);
+    week_copy.setModal(true);
+    dialogCode = week_copy.exec();
+
+    if(dialogCode == QDialog::Accepted)
+    {
+        this->workout_calendar();
+        this->set_calender();
+        safeFlag = true;
+        ui->actionSave_Workout_Schedule->setEnabled(true);
+    }
+    if(dialogCode == QDialog::Rejected)
+    {
+        this->set_calender();
+    }
 }
