@@ -39,13 +39,13 @@ public:
         const QAbstractItemModel *model = index.model();
         cFont.setPixelSize(settings::get_fontValue("fontSmall"));
         QColor lapColor(Qt::lightGray);
-        QColor breakColor = settings::get_itemColor(settings::get_generalValue("break"));
+        QColor breakColor = settings::get_itemColor(settings::get_generalValue("breakname"));
 
         QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
 
         lapName = model->data(model->index(index.row(),0,QModelIndex())).toString();
 
-        if(lapName == settings::get_generalValue("breakName"))
+        if(lapName == settings::get_generalValue("breakname"))
         {
             painter->setPen(Qt::white);
             painter->fillRect(option.rect,QBrush(breakColor));
@@ -71,7 +71,7 @@ public:
         const QAbstractItemModel *model = index.model();
         QString lapName = model->data(model->index(index.row(),0,QModelIndex())).toString();
 
-        if(index.column() == 2 && lapName != settings::get_generalValue("breakName"))
+        if(index.column() == 2 && lapName != settings::get_generalValue("breakname"))
         {
             QFont eFont;
             eFont.setPixelSize(12);
@@ -124,7 +124,7 @@ public:
                 model->setData(new_index,startTime+lapTime,Qt::EditRole);
                 ++laprow;
                 currLap = model->data(model->index(laprow,0,QModelIndex())).toString();
-            } while ((currLap != settings::get_generalValue("breakName")) && (laprow < lapCount-1));
+            } while ((currLap != settings::get_generalValue("breakname")) && (laprow < lapCount-1));
 
             startTime = model->data(new_index).toInt();
             if(laprow == lapCount)

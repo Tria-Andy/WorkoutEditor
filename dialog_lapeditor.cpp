@@ -29,7 +29,7 @@ Dialog_lapeditor::Dialog_lapeditor(QWidget *parent,Activity *p_act,QModelIndex p
     selIndex = p_index;
     selRow = selIndex.row();
     swimLapLen = curr_act->get_swim_track();
-    breakName = settings::get_generalValue("breakName");
+    breakName = settings::get_generalValue("breakname");
 
     if(curr_act->get_sport() == settings::isSwim)
     {
