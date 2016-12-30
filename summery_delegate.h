@@ -37,16 +37,16 @@ public:
         QFont phase_font,date_font, work_font;
         QString temp_value;
         QStringList sum_values;
-        QStringList sportList = settings::get_sportList();
+        QStringList sportList = settings::get_listValues("Sport");
         QString delimiter = "-";
         QColor rect_color;
         int textMargin = 2;
         phase_font.setBold(true);
-        phase_font.setPixelSize(settings::get_generalValue("fontBig"));
+        phase_font.setPixelSize(settings::get_fontValue("fontBig"));
         date_font.setBold(true);
-        date_font.setPixelSize(settings::get_generalValue("fontMedium"));
+        date_font.setPixelSize(settings::get_fontValue("fontMedium"));
         work_font.setBold(false);
-        work_font.setPixelSize(settings::get_generalValue("fontSmall"));
+        work_font.setPixelSize(settings::get_fontValue("fontSmall"));
 
         temp_value = index.data(Qt::DisplayRole).toString();
         sum_values = temp_value.split(delimiter);
@@ -61,7 +61,7 @@ public:
             else
             {
                 //Summery
-                rect_color.setRgb(0,255,255);
+                rect_color = settings::get_itemColor(settings::get_generalValue("sum"));
             }
         }
 

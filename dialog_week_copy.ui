@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>285</width>
+    <width>305</width>
     <height>280</height>
    </rect>
   </property>
@@ -113,6 +113,16 @@
           </widget>
          </item>
          <item>
+          <widget class="QComboBox" name="comboBox_select">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer_2">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -144,7 +154,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <property name="spacing">
-          <number>15</number>
+          <number>5</number>
          </property>
          <property name="leftMargin">
           <number>10</number>
@@ -175,6 +185,19 @@
           </widget>
          </item>
          <item>
+          <widget class="QRadioButton" name="radioButton_clear">
+           <property name="minimumSize">
+            <size>
+             <width>75</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Clear</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QRadioButton" name="radioButton_save">
            <property name="enabled">
             <bool>false</bool>
@@ -186,20 +209,17 @@
             </size>
            </property>
            <property name="text">
-            <string>Save (v1.2)</string>
+            <string>Save</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="radioButton_clear">
-           <property name="minimumSize">
-            <size>
-             <width>75</width>
-             <height>0</height>
-            </size>
+          <widget class="QRadioButton" name="radioButton_load">
+           <property name="enabled">
+            <bool>false</bool>
            </property>
            <property name="text">
-            <string>Clear</string>
+            <string>Load</string>
            </property>
           </widget>
          </item>
@@ -452,8 +472,6 @@
  <tabstops>
   <tabstop>lineEdit_currweek</tabstop>
   <tabstop>radioButton_copy</tabstop>
-  <tabstop>radioButton_save</tabstop>
-  <tabstop>radioButton_clear</tabstop>
   <tabstop>comboBox_copyto</tabstop>
   <tabstop>pushButton_ok</tabstop>
   <tabstop>pushButton_cancel</tabstop>

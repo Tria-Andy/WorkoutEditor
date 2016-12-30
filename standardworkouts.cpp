@@ -31,6 +31,7 @@ void standardWorkouts::check_workoutFiles()
     QFile metaWork(workoutPath + QDir::separator() + "standard_workouts_meta.xml");
     if(!metaWork.exists())
     {
+        qDebug() << "Standard Workout Meta File not exists! Created!";
         metaWork.open(QIODevice::WriteOnly | QIODevice::Text);
         metaWork.close();
     }
@@ -39,6 +40,7 @@ void standardWorkouts::check_workoutFiles()
     QFile stepWork(workoutPath + QDir::separator() + "standard_workouts_steps.xml");
     if(!stepWork.exists())
     {
+        qDebug() << "Standard Workout Steps File not exists! Created!";
         stepWork.open(QIODevice::WriteOnly | QIODevice::Text);
         stepWork.close();
     }
@@ -60,13 +62,13 @@ void standardWorkouts::read_standard_workouts()
 
     if(!metaWork.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "File not open!";
+        qDebug() << "File not open: standard_workouts_meta.xml";
     }
     else
     {
         if(!meta_doc.setContent(&metaWork))
         {
-            qDebug() << "Workouts not loaded!";
+            qDebug() << "Standard Workouts not loaded!";
         }
         metaWork.close();
     }
@@ -89,13 +91,13 @@ void standardWorkouts::read_standard_workouts()
 
     if(!stepWork.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "File not open!";
+        qDebug() << "File not open: standard_workouts_steps.xml";
     }
     else
     {
         if(!step_doc.setContent(&stepWork))
         {
-            qDebug() << "Workouts not loaded!";
+            qDebug() << "Standard Workouts not loaded!";
         }
         stepWork.close();
     }

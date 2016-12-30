@@ -37,19 +37,19 @@ public:
         painter->save();
         QFont phase_font,date_font, work_font;
         QString temp_value,dayDate;
-        QStringList phaseList = settings::get_phaseList();
-        QStringList sportList = settings::get_sportList();
+        QStringList phaseList = settings::get_listValues("Phase");
+        QStringList sportList = settings::get_listValues("Sport");
         QStringList calendar_values;
         QString delimiter = "#";
         QColor rect_color;
         int textMargin = 2;
         int celloffset = 21;
         phase_font.setBold(true);
-        phase_font.setPixelSize(settings::get_generalValue("fontBig"));
+        phase_font.setPixelSize(settings::get_fontValue("fontBig"));
         date_font.setBold(true);
-        date_font.setPixelSize(settings::get_generalValue("fontMedium"));
+        date_font.setPixelSize(settings::get_fontValue("fontMedium"));
         work_font.setBold(false);
-        work_font.setPixelSize(settings::get_generalValue("fontSmall")-1);
+        work_font.setPixelSize(settings::get_fontValue("fontSmall")-1);
 
         temp_value = index.data(Qt::DisplayRole).toString();
         calendar_values = temp_value.split(delimiter);
@@ -132,7 +132,7 @@ public:
                     }
                     else
                     {
-                        rect_color = settings::get_itemColor("emptycolor");
+                        rect_color = settings::get_itemColor(settings::get_generalValue("empty"));
                     }
                 }
 

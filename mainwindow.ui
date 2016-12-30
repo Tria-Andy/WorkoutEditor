@@ -1622,6 +1622,7 @@
      <string>Workout</string>
     </property>
     <addaction name="actionNew"/>
+    <addaction name="actionEdit_Week"/>
     <addaction name="actionExport_to_Golden_Cheetah"/>
     <addaction name="separator"/>
     <addaction name="actionSwitch_Year"/>
@@ -1917,6 +1918,15 @@
    </property>
    <property name="text">
     <string>PMC</string>
+   </property>
+  </action>
+  <action name="actionEdit_Week">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/images/icons/Modify.png</normaloff>:/images/icons/Modify.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Week</string>
    </property>
   </action>
  </widget>

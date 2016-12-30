@@ -38,18 +38,18 @@ public:
         QFont phase_font,date_font, work_font;
         QString temp_value,headInfo;
         QStringList calendar_values;
-        QStringList phaseList = settings::get_phaseList();
-        QStringList sportList = settings::get_sportUseList();
+        QStringList phaseList = settings::get_listValues("Phase");
+        QStringList sportList = settings::get_listValues("Sportuse");
         QString delimiter = "-";
         QColor rect_color;
         int textMargin = 2;
         QString phase;
         phase_font.setBold(true);
-        phase_font.setPixelSize(settings::get_generalValue("fontBig"));
+        phase_font.setPixelSize(settings::get_fontValue("fontBig"));
         date_font.setBold(true);
-        date_font.setPixelSize(settings::get_generalValue("fontMedium"));
+        date_font.setPixelSize(settings::get_fontValue("fontMedium"));
         work_font.setBold(false);
-        work_font.setPixelSize(settings::get_generalValue("fontSmall"));
+        work_font.setPixelSize(settings::get_fontValue("fontSmall"));
 
         temp_value = index.data(Qt::DisplayRole).toString();
         calendar_values = temp_value.split(delimiter);
@@ -76,7 +76,7 @@ public:
                 }
                 else
                 {
-                    rect_color = settings::get_itemColor("emptycolor");
+                    rect_color = settings::get_itemColor(settings::get_generalValue("empty"));
                 }
             }
 
@@ -101,7 +101,7 @@ public:
                     }
                     else
                     {
-                        rect_color.setRgb(0,255,255);
+                        rect_color = settings::get_itemColor(settings::get_generalValue("sum"));
                     }
                     break;
                 }

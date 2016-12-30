@@ -31,6 +31,8 @@ Dialog_inteditor::Dialog_inteditor(QWidget *parent,standardWorkouts *p_workouts)
     stdWorkouts = p_workouts;
     model_header << "Phase" << "Level" << "Threshold %" << "Value" << "Time" << "TSS" << "Distance" << "Repeats";
     current_workID = QString();
+    sportList = settings::get_listValues("Sport");
+    levelList = settings::get_listValues("Level");
     ui->treeWidget_planer->setColumnCount(7);
     ui->treeWidget_planer->setHeaderHidden(false);
     ui->treeWidget_planer->setHeaderLabels(model_header);
@@ -49,18 +51,18 @@ Dialog_inteditor::Dialog_inteditor(QWidget *parent,standardWorkouts *p_workouts)
 
     ui->comboBox_topitem->addItem(isGroup);
     ui->comboBox_topitem->addItem(isSeries);
-    ui->comboBox_level->addItems(settings::get_levelList());
-    for(int i = 0; i < settings::get_levelList().count(); ++i)
+    ui->comboBox_level->addItems(levelList);
+    for(int i = 0; i < levelList.count(); ++i)
     {
-        ui->comboBox_level->setItemData(i,settings::get_itemColor(settings::get_levelList().at(i)),Qt::TextColorRole);
+        ui->comboBox_level->setItemData(i,settings::get_itemColor(levelList.at(i)),Qt::TextColorRole);
     }
-    ui->comboBox_sport->addItems(settings::get_sportList());
-    for(int i = 0; i < settings::get_sportList().count(); ++i)
+    ui->comboBox_sport->addItems(sportList);
+    for(int i = 0; i < sportList.count(); ++i)
     {
-        ui->comboBox_sport->setItemData(i,settings::get_itemColor(settings::get_sportList().at(i)),Qt::TextColorRole);
+        ui->comboBox_sport->setItemData(i,settings::get_itemColor(sportList.at(i)),Qt::TextColorRole);
     }
-    ui->comboBox_part->addItems(settings::get_intPlanerList());
-    ui->comboBox_code->addItems(settings::get_codeList());
+    ui->comboBox_part->addItems(settings::get_listValues("IntEditor"));
+    ui->comboBox_code->addItems(settings::get_listValues("WorkoutCode"));
     ui->comboBox_reps->addItem("-");
     for(int i = 2; i <= 20; ++i)
     {
@@ -993,7 +995,7 @@ void Dialog_inteditor::on_spinBox_threshold_valueChanged(int value)
 void Dialog_inteditor::on_comboBox_level_currentIndexChanged(const QString &value)
 {
     this->set_min_max(value,ui->comboBox_sport->currentText());
-    if(value == settings::get_levelList().at(0) && ui->comboBox_sport->currentText() == settings::isSwim)
+    if(value == levelList.at(0) && ui->comboBox_sport->currentText() == settings::isSwim)
     {
         ui->doubleSpinBox_int_dist->setValue(0.0);
     }

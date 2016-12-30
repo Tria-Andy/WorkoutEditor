@@ -37,8 +37,8 @@ Dialog_add::Dialog_add(QWidget *parent,schedule *p_sched,standardWorkouts *p_std
 
     ui->dateEdit_wdate->setDate(workout_date);
     ui->lineEdit_wkw->setText(QString::number(workout_date.weekNumber()));
-    ui->comboBox_sport->addItems(settings::get_sportList());
-    ui->comboBox_wcode->addItems(settings::get_codeList());
+    ui->comboBox_sport->addItems(settings::get_listValues("Sport"));
+    ui->comboBox_wcode->addItems(settings::get_listValues("codes"));
     w_cal_week = ui->lineEdit_wkw->text() +"_"+ QString::number(workout_date.addDays(1 - ui->dateEdit_wdate->date().dayOfWeek()).year());
 
     ui->lineEdit_phase->setText(workSched->get_weekPhase(workout_date));

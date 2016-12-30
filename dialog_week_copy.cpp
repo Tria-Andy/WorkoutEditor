@@ -19,18 +19,32 @@
 #include "dialog_week_copy.h"
 #include "ui_dialog_week_copy.h"
 
-Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedule *p_sched) :
+Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedule *p_sched,bool hasWeek) :
     QDialog(parent),
     ui(new Ui::Dialog_week_copy)
 {
     ui->setupUi(this);
-    ui->lineEdit_currweek->setText(selected_week.split("#").first());
     workSched = p_sched;
-    this->setFixedHeight(200);
     for(int i = 0; i < workSched->week_meta->rowCount(); ++i)
     {
         weekList << workSched->week_meta->data(workSched->week_meta->index(i,1,QModelIndex())).toString();
     }
+    fixWeek = hasWeek;
+
+    if(fixWeek)
+    {
+        ui->lineEdit_currweek->setText(selected_week.split("#").first());
+        ui->lineEdit_currweek->setVisible(true);
+        ui->comboBox_select->setVisible(false);
+    }
+    else
+    {
+        ui->comboBox_select->addItems(weekList);
+        ui->comboBox_select->setVisible(true);
+        ui->lineEdit_currweek->setVisible(false);
+    }
+
+    this->setFixedHeight(200);
     ui->comboBox_copyto->addItems(weekList);
     ui->frame_copy->setVisible(true);
     ui->frame_save->setVisible(false);
@@ -48,7 +62,16 @@ Dialog_week_copy::~Dialog_week_copy()
 
 void Dialog_week_copy::processWeek()
 {
-    QString sourceWeek = ui->lineEdit_currweek->text();
+    QString sourceWeek ;
+
+    if(fixWeek)
+    {
+        sourceWeek = ui->lineEdit_currweek->text();
+    }
+    else
+    {
+        sourceWeek = ui->comboBox_select->currentText();
+    }
 
     if(editMode == COPY)
     {

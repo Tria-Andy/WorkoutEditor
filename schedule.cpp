@@ -23,9 +23,9 @@ schedule::schedule()
     workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress";
     metaTags << "id" << "week" << "name" << "fdw";
     contentTags << "id" << "week";
-    for(int i = 0; i < settings::get_sportUseList().count();++i)
+    for(int i = 0; i < settings::get_listValues("Sportuse").count();++i)
     {
-        workout_sport = settings::get_sportUseList().at(i);
+        workout_sport = settings::get_listValues("Sportuse").at(i);
         contentTags << workout_sport.toLower();
     }
     contentTags << "summery";
@@ -41,6 +41,7 @@ void schedule::check_workoutFiles()
     QFile workouts(schedulePath + QDir::separator() + "workout_schedule.xml");
     if(!workouts.exists())
     {
+        qDebug() << "Workout Schedule not exists! Created!";
         workouts.open(QIODevice::WriteOnly | QIODevice::Text);
         workouts.close();
     }
@@ -48,6 +49,7 @@ void schedule::check_workoutFiles()
     QFile weekMeta(schedulePath + QDir::separator() + "workout_phase_meta.xml");
     if(!weekMeta.exists())
     {
+        qDebug() << "Phases Meta File not exists! Created!";
         weekMeta.open(QIODevice::WriteOnly | QIODevice::Text);
         weekMeta.close();
     }
@@ -55,6 +57,7 @@ void schedule::check_workoutFiles()
     QFile weekContent(schedulePath + QDir::separator() + "workout_phase_content.xml");
     if(!weekContent.exists())
     {
+        qDebug() << "Phase Content File not exists! Created!";
         weekContent.open(QIODevice::WriteOnly | QIODevice::Text);
         weekContent.close();
     }
@@ -63,6 +66,7 @@ void schedule::check_workoutFiles()
     QFile ltsFile(schedulePath + QDir::separator() + "longtermstress.xml");
     if(!ltsFile.exists())
     {
+        qDebug() << "LTS File not exists! Created!";
         ltsFile.open(QIODevice::WriteOnly | QIODevice::Text);
         ltsFile.close();
     }
@@ -77,13 +81,13 @@ void schedule::load_workoutsFiles()
 
     if(!workouts.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        //logFile->logoutput("File not open: workout_schedule.xml");
+        qDebug() << "File not open: workout_schedule.xml";
     }
     else
     {
         if(!doc_workouts.setContent(&workouts))
         {
-            //logFile->logoutput("Workouts not loaded!");
+            qDebug() << "Workouts not loaded!";
         }
         workouts.close();
     }
@@ -92,13 +96,13 @@ void schedule::load_workoutsFiles()
     QDomDocument doc_week_meta;
     if(!weekMeta.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        //logFile->logoutput("File not open: workout_phase_meta.xml");
+        qDebug() << "File not open: workout_phase_meta.xml";
     }
     else
     {
         if(!doc_week_meta.setContent(&weekMeta))
         {
-            //logFile->logoutput("Meta not loaded!");
+            qDebug() << "Phase Meta Data not loaded!";
         }
         weekMeta.close();
     }
@@ -107,13 +111,13 @@ void schedule::load_workoutsFiles()
     QDomDocument doc_week_content;
     if(!weekContent.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        //logFile->logoutput("File not open: workout_phase_content.xml");
+        qDebug() << "File not open: workout_phase_content.xml";
     }
     else
     {
         if(!doc_week_content.setContent(&weekContent))
         {
-            //logFile->logoutput("Content not loaded!");
+            qDebug() << "Phase Content not loaded!";
         }
         weekContent.close();
     }
@@ -122,13 +126,13 @@ void schedule::load_workoutsFiles()
     QDomDocument doc_lts_content;
     if(!longStressContent.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        //logFile->logoutput("File not open: longtermstress.xml");
+        qDebug() << "File not open: longtermstress.xml";
     }
     else
     {
         if(!doc_lts_content.setContent(&longStressContent))
         {
-            //logFile->logoutput("Content not loaded!");
+            qDebug() << "LTS Values not loaded!";
         }
         longStressContent.close();
     }
@@ -207,6 +211,7 @@ void schedule::save_dayWorkouts()
 
 void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
 {
+    QString contentString;
     QDomElement root_meta = weekMeta.firstChildElement();
     QDomElement root_content = weekContent.firstChildElement();
     QDomNodeList meta_list,content_list;
@@ -221,7 +226,7 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
     {
         QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
         QString weekid;
-        QString noPhase = settings::get_gcInfo("emptyPhase");
+        QString noPhase = settings::get_generalValue("emptyPhase");
         int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
 
         week_meta->setRowCount(saisonWeeks);
@@ -292,7 +297,15 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
                 }
                 else
                 {
-                    week_content->setData(week_content->index(i,col,QModelIndex()),content_element.attribute(contentTags.at(col)));
+                    contentString = content_element.attribute(contentTags.at(col));
+                    if(!contentString.isEmpty())
+                    {
+                        week_content->setData(week_content->index(i,col,QModelIndex()),contentString);
+                    }
+                    else
+                    {
+                        week_content->setData(week_content->index(i,col,QModelIndex()),"0-0-00:00-0");
+                    }
                 }
             }
         }
@@ -348,7 +361,7 @@ void schedule::read_ltsFile(QDomDocument stressContent)
 
     if(!lts_list.isEmpty())
     {
-    for(int i = 0; i < lts_list.count(); ++i)
+        for(int i = 0; i < lts_list.count(); ++i)
         {
             QDomElement stress_element;
             QDomNode stress_node = lts_list.at(i);
@@ -375,6 +388,11 @@ void schedule::read_ltsFile(QDomDocument stressContent)
         }
         if(QDate::currentDate() == firstdayofweek && stressValues.firstKey() < firstdayofweek.addDays(-ltsDays)) this->save_ltsValues();
     }
+    else
+    {
+        stressValues.insert(firstdayofweek,0);
+    }
+
 }
 
 void schedule::save_ltsFile(double ltsDays)
@@ -439,7 +457,7 @@ void schedule::saveXML(QDomDocument xmlDoc,QString fileName)
 
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        qDebug() << "File not open!";
+        qDebug() << fileName+": File not open!";
     }
 
     QTextStream stream(&file);

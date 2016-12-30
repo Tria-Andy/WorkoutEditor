@@ -39,14 +39,14 @@ public:
         const QAbstractItemModel *model = index.model();
         cFont.setPixelSize(12);
         QColor lapColor(Qt::lightGray);
-        QColor breakColor(Qt::darkGray);
+        QColor breakColor = settings::get_itemColor(settings::get_generalValue("break"));
 
         QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
         lapName = model->data(model->index(index.row(),0,QModelIndex())).toString().trimmed();
         indexData = index.data().toString();
         painter->setPen(Qt::black);
 
-        if(lapName == settings::get_gcInfo("breakName"))
+        if(lapName == settings::get_generalValue("breakName"))
         {
             painter->fillRect(option.rect,QBrush(breakColor));
         }

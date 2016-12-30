@@ -25,13 +25,13 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
 {
     ui->setupUi(this);
     workSched = p_sched;
-    ui->comboBox_phase->addItems(settings::get_phaseList());
-    ui->comboBox_cycle->addItems(settings::get_cycleList());
+    ui->comboBox_phase->addItems(settings::get_listValues("Phase"));
+    ui->comboBox_cycle->addItems(settings::get_listValues("Cycle"));
     ui->dateEdit_selectDate->setDate(QDate().currentDate());
     timeFormat = "hh:mm:ss";
     empty = "0-0-00:00-0";
     weekHeader << "Sport" << "Workouts" << "Duration" << "%" << "Distance" << "Pace" << "Stress";
-    sportuseList = settings::get_sportUseList();
+    sportuseList = settings::get_listValues("Sportuse");
     this->setFixedHeight(100+(35*(sportuseList.count()+1)));
     this->setFixedWidth(650);
     this->fill_values(sel_week);
@@ -56,6 +56,7 @@ void Dialog_addweek::fill_values(QString selWeek)
     QModelIndex index;
     QTime duration;
     QString value,work,dura,dist,stress;
+    QString sumString = settings::get_generalValue("sum");
     QStringList values;
     int listCount = sportuseList.count();
 
@@ -108,7 +109,7 @@ void Dialog_addweek::fill_values(QString selWeek)
             weekModel->setData(weekModel->index(row,6,QModelIndex()),stress.toInt());        
         }
 
-        weekModel->setData(weekModel->index(listCount,0,QModelIndex()),"Summery");
+        weekModel->setData(weekModel->index(listCount,0,QModelIndex()),sumString);
         weekModel->setData(weekModel->index(listCount,1,QModelIndex()),week_del.sum_int(ab_model,&sportuseList,1));
         weekModel->setData(weekModel->index(listCount,2,QModelIndex()),week_del.sum_time(ab_model,&sportuseList,2));
         weekModel->setData(weekModel->index(listCount,3,QModelIndex()),100);
@@ -128,7 +129,7 @@ void Dialog_addweek::fill_values(QString selWeek)
             weekModel->setData(weekModel->index(row,5,QModelIndex()),"--");
             weekModel->setData(weekModel->index(row,6,QModelIndex()),0);
         }
-        weekModel->setData(weekModel->index(listCount,0,QModelIndex()),"Summery");
+        weekModel->setData(weekModel->index(listCount,0,QModelIndex()),sumString);
     }
 
     week_del.calc_percent(&sportuseList,ab_model);

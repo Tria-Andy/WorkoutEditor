@@ -167,6 +167,7 @@ private slots:
     void on_toolButton_sync_clicked();
     void on_toolButton_clearContent_clicked();
     void on_actionPMC_triggered();
+    void on_actionEdit_Week_triggered();
 };
 
 #endif // MAINWINDOW_H

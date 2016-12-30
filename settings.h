@@ -31,23 +31,23 @@ private:
     static QStringList setRangeString(QHash<QString,QString>*);
     static QString set_colorString(QColor);
 
-    static QString splitter,header_swim;
-    static QStringList table_header,header_int,header_bike,header_int_time,header_swim_time;
+    static QString settingFile,valueFile,valueFilePath,splitter,header_swim;
+    static QStringList keyList,extkeyList,table_header,header_int,header_bike,header_int_time,header_swim_time;
 
-    static QString settingFile,valueFile,valueFilePath;
-    static QStringList keyList,extkeyList,sportList,sportUseList,phaseList,cycleList,codeList,levelList,intPlanList,jsoninfos;
+    static QHash<QString,QStringList> listMap;
     static QMap<int,QString> sampList,intList;
-    static QHash<QString,QString> gcInfo,saisonInfo;
+    static QHash<QString,QString> generalMap,gcInfo,saisonInfo;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,double> thresholdMap,ltsMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
-    static QHash<QString,int> generalMap;
+    static QHash<QString,int> fontMap;
     static bool act_isloaded,act_isrecalc;
     static int swimLaplen;
 
     //Getter
     static QColor get_colorRGB(QString,bool);
     static QStringList get_colorStringList(QStringList*);
+
 
     //Setter
     static void fill_mapList(QMap<int,QString>*,QString*);
@@ -60,15 +60,19 @@ public:
     static QString isAlt,isSwim,isBike,isRun,isTria,isStrength,isOther;
 
     //QMap/QHash Getter
+    static QHash<QString,QStringList> get_listMap() {return listMap;}
     static QMap<int,QString> get_sampList() {return sampList;}
     static QMap<int,QString> get_intList() {return intList;}
     static QString get_saisonInfo(QString key) {return saisonInfo.value(key);}
     static QString get_gcInfo(QString key) {return gcInfo.value(key);}
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
+    static QHash<QString,QColor> get_colorMap() {return colorMap;}
     static QString get_rangeValue(QString,QString);
     static double get_thresValue(QString key) {return thresholdMap.value(key);}
     static double get_ltsValue(QString key) {return ltsMap.value(key);}
-    static int get_generalValue(QString key) {return generalMap.value(key);}
+    static QString get_generalValue(QString key) {return generalMap.value(key);}
+    static int get_fontValue(QString key) {return fontMap.value(key);}
+
 
     //QMap/QHash Setter
     static void set_saisonInfos(QString key, QString value){saisonInfo.insert(key,value);}
@@ -77,20 +81,12 @@ public:
     static void set_thresValue(QString key,double value) {thresholdMap.insert(key,value);}
     static void set_rangeValue(QString,QString,QString);
     static void set_ltsValue(QString key,double value) {ltsMap.insert(key,value);}
+    static void set_generalValue(QString key,QString value) {generalMap.insert(key,value);}
 
     //Lists Getter
+    static QStringList get_listValues(QString key) {return listMap.value(key);}
     static QStringList get_keyList() {return keyList;}
     static QStringList get_extkeyList() {return extkeyList;}
-    static QStringList get_phaseList() {return phaseList;}
-    static QStringList get_sportList() {return sportList;}
-    static QStringList get_sportUseList() {return sportUseList;}
-    static QStringList get_cycleList() {return cycleList;}
-    static QStringList get_codeList() {return codeList;}
-    static QStringList get_levelList() {return levelList;}
-    static QStringList get_intPlanerList() {return intPlanList;}
-    static QStringList get_jsoninfos() {return jsoninfos;}
-
-    //List Setter
 
     //common functions
     static int get_swimLaplen() {return swimLaplen;}
