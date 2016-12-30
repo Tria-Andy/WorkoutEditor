@@ -76,7 +76,7 @@ public:
                 }
                 else
                 {
-                    rect_color = settings::get_itemColor("emptycolor");
+                    rect_color = settings::get_itemColor(settings::get_generalValue("empty"));
                 }
             }
 

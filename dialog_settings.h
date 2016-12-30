@@ -91,7 +91,7 @@ private:
     QString getDirectory(QString);
     bool useColor,stressEdit;
     void checkSetup();
-    void set_listEntries(QString);
+    void set_SelectControls(QString);
     void set_color(QColor,QString);
     void save_settingsChanges();
     void set_thresholdView(QString);

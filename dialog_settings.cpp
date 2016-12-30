@@ -58,10 +58,6 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->spinBox_lastSTS->setValue(settings::get_ltsValue("laststs"));
     ui->comboBox_thresSport->addItems(sportList);
     ui->pushButton_save->setEnabled(false);
-    ui->toolButton_color->setEnabled(false);
-    ui->toolButton_add->setEnabled(false);
-    ui->toolButton_edit->setEnabled(false);
-    ui->toolButton_delete->setEnabled(false);
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
     this->checkSetup();
 }
@@ -89,9 +85,64 @@ void Dialog_settings::checkSetup()
     listMap.insert(extkeyList.at(SPORTUSE),settings::get_listValues("Sportuse"));
 
     ui->comboBox_selInfo->addItems(keyList);
+    ui->toolButton_color->setEnabled(false);
+    ui->toolButton_add->setEnabled(false);
+    ui->toolButton_edit->setEnabled(false);
+    ui->toolButton_delete->setEnabled(false);
+
     this->set_thresholdModel(ui->comboBox_thresSport->currentText());
     this->set_hfmodel(ui->spinBox_hfThres->value());
     this->set_ltsList();
+}
+
+void Dialog_settings::set_SelectControls(QString selection)
+{
+    if(selection == keyList.at(SPORT))
+    {
+        ui->listWidget_useIn->clear();
+        ui->toolButton_add->setEnabled(true);
+        ui->toolButton_delete->setEnabled(true);
+        ui->toolButton_edit->setEnabled(true);
+        ui->pushButton_up->setEnabled(true);
+        ui->pushButton_down->setEnabled(true);
+        ui->listWidget_useIn->addItems(listMap.value(extkeyList.at(SPORTUSE)));
+        ui->listWidget_useIn->setEnabled(true);
+        useColor = true;
+        this->checkSportUse();
+    }
+    else if(selection == keyList.at(LEVEL) || selection == keyList.at(PHASE))
+    {
+        ui->toolButton_add->setEnabled(true);
+        ui->toolButton_delete->setEnabled(true);
+        ui->toolButton_edit->setEnabled(true);
+        ui->pushButton_up->setEnabled(true);
+        ui->pushButton_down->setEnabled(true);
+        ui->listWidget_useIn->clear();
+        ui->listWidget_useIn->setEnabled(false);
+        useColor = true;
+    }
+    else if(selection == keyList.at(MISC))
+    {
+        ui->toolButton_add->setEnabled(false);
+        ui->toolButton_delete->setEnabled(false);
+        ui->toolButton_edit->setEnabled(true);
+        ui->pushButton_up->setEnabled(false);
+        ui->pushButton_down->setEnabled(false);
+        ui->listWidget_useIn->clear();
+        ui->listWidget_useIn->setEnabled(false);
+        useColor = true;
+    }
+    else
+    {
+        ui->toolButton_add->setEnabled(true);
+        ui->toolButton_delete->setEnabled(true);
+        ui->toolButton_edit->setEnabled(true);
+        ui->pushButton_up->setEnabled(true);
+        ui->pushButton_down->setEnabled(true);
+        ui->listWidget_useIn->clear();
+        ui->listWidget_useIn->setEnabled(false);
+        useColor = false;
+    }
 }
 
 void Dialog_settings::updateListMap(int index,bool isKey)
@@ -165,12 +216,16 @@ void Dialog_settings::writeChangedValues()
     settings::set_ltsValue("lastlts",ui->spinBox_lastLTS->value());
     settings::set_ltsValue("laststs",ui->spinBox_lastSTS->value());
 
-    settings::writeListValues(&listMap);
+    if(settings::get_generalValue("sum") != listMap.value("Misc").at(0)) settings::set_generalValue("sum",listMap.value("Misc").at(0));
+    if(settings::get_generalValue("empty") != listMap.value("Misc").at(1)) settings::set_generalValue("empty",listMap.value("Misc").at(1));
+    if(settings::get_generalValue("breakname") != listMap.value("Misc").at(2)) settings::set_generalValue("breakname",listMap.value("Misc").at(2));
 
     for(QHash<QString,QColor>::const_iterator it = colorMapCache.cbegin(), end = colorMapCache.cend(); it != end; ++it)
     {
         settings::set_itemColor(it.key(),it.value());
     }
+
+    settings::writeListValues(&listMap);
 
     if(stressEdit) schedule_ptr->save_ltsFile(ui->spinBox_ltsDays->value());
 
@@ -207,54 +262,17 @@ void Dialog_settings::writeRangeValues(QString sport)
 
 void Dialog_settings::on_comboBox_selInfo_currentTextChanged(const QString &value)
 {
-    this->set_listEntries(value);
+    QColor color;
     ui->lineEdit_addedit->clear();
+    ui->listWidget_selection->clear();
+    ui->listWidget_selection->addItems(listMap.value(value));
+    this->set_SelectControls(ui->comboBox_selInfo->currentText());
+    color.setRgb(255,255,255,0);
+    this->set_color(color,"");
     ui->toolButton_add->setEnabled(false);
     ui->toolButton_delete->setEnabled(false);
     ui->toolButton_edit->setEnabled(false);
-}
 
-void Dialog_settings::set_listEntries(QString selection)
-{
-    ui->listWidget_selection->clear();
-    ui->listWidget_selection->addItems(listMap.value(selection));
-
-    if(selection == keyList.at(SPORT))
-    {
-        ui->pushButton_up->setEnabled(true);
-        ui->pushButton_down->setEnabled(true);
-        ui->listWidget_useIn->addItems(listMap.value(extkeyList.at(SPORTUSE)));
-        ui->listWidget_useIn->setEnabled(true);
-        useColor = true;
-        this->checkSportUse();
-    }
-    else if(selection == keyList.at(LEVEL) || selection == keyList.at(PHASE))
-    {
-        ui->pushButton_up->setEnabled(true);
-        ui->pushButton_down->setEnabled(true);
-        ui->listWidget_useIn->clear();
-        ui->listWidget_useIn->setEnabled(false);
-        useColor = true;
-    }
-    else if(selection == keyList.at(MISC))
-    {
-        ui->pushButton_up->setEnabled(false);
-        ui->pushButton_down->setEnabled(false);
-        ui->listWidget_useIn->clear();
-        ui->listWidget_useIn->setEnabled(false);
-    }
-    else
-    {
-        ui->pushButton_up->setEnabled(true);
-        ui->pushButton_down->setEnabled(true);
-        ui->listWidget_useIn->clear();
-        ui->listWidget_useIn->setEnabled(false);
-        useColor = false;
-    }
-
-    QColor color;
-    color.setRgb(255,255,255,0);
-    this->set_color(color,"");
 }
 
 void Dialog_settings::set_thresholdView(QString sport)
@@ -379,7 +397,6 @@ void Dialog_settings::set_color(QColor color,QString key)
     ui->toolButton_color->setAutoFillBackground(true);
     ui->toolButton_color->setPalette(palette);
     colorMapCache.insert(key,color);
-
 }
 
 void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem *item)
@@ -387,8 +404,6 @@ void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem 
     QString listValue = item->data(Qt::DisplayRole).toString();
     QColor color;
     ui->lineEdit_addedit->setText(listValue);
-    ui->toolButton_edit->setEnabled(true);
-    ui->toolButton_delete->setEnabled(true);
 
     color = colorMapCache.value(listValue);
 
@@ -403,6 +418,7 @@ void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem 
         this->set_color(color,listValue);
         ui->toolButton_color->setEnabled(false);
     }
+    this->set_SelectControls(ui->comboBox_selInfo->currentText());
 }
 
 void Dialog_settings::on_pushButton_up_clicked()
@@ -693,6 +709,7 @@ void Dialog_settings::on_toolButton_edit_clicked()
 {
     ui->listWidget_selection->item(ui->listWidget_selection->currentRow())->setData(Qt::EditRole,ui->lineEdit_addedit->text());
     this->updateListMap(ui->comboBox_selInfo->currentIndex(),true);
+    this->set_color(ui->toolButton_color->palette().color(ui->toolButton_color->backgroundRole()),ui->lineEdit_addedit->text());
     this->enableSavebutton();
 }
 

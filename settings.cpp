@@ -112,6 +112,30 @@ QStringList settings::get_colorStringList(QStringList *stringList)
     return colorList;
 }
 
+QColor settings::get_colorRGB(QString colorValue,bool trans)
+{
+    QColor color;
+    QString cRed,cGreen,cBlue;
+    int aValue = 0;
+    cRed = colorValue.split("-").at(0);
+    cGreen = colorValue.split("-").at(1);
+    cBlue = colorValue.split("-").at(2);
+    if(trans)
+    {
+        aValue = 125;
+    }
+    else
+    {
+        aValue = 255;
+    }
+
+    color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt(),aValue);
+
+    return color;
+}
+
+
+
 void settings::loadSettings()
 {
     header_int << "Interval" << "Duration" << "Distance" << "Distance (Int)" << "Pace";
@@ -183,15 +207,14 @@ void settings::loadSettings()
         myvalues->remove("Common");
 
         myvalues->beginGroup("Stressterm");
-        if(myvalues->value("ltsdays").toString().isEmpty())
-        {
-            for(QMap<QString,QString>::const_iterator it = updateMap.cbegin(), end = updateMap.cend(); it != end; ++it)
+            if(myvalues->value("ltsdays").toString().isEmpty())
             {
-               myvalues->setValue(it.key(),it.value());
+                for(QMap<QString,QString>::const_iterator it = updateMap.cbegin(), end = updateMap.cend(); it != end; ++it)
+                {
+                   myvalues->setValue(it.key(),it.value());
+                }
             }
-        }
         myvalues->endGroup();
-        updateList.clear();
 
         myvalues->beginGroup("Level");
             updateList = myvalues->value("levels").toString().split(splitter);
@@ -204,8 +227,10 @@ void settings::loadSettings()
                 }
                 myvalues->setValue("color",settings::setSettingString(updateList2));
             }
+            myvalues->remove("breakname");
+            updateList.clear();
         myvalues->endGroup();
-        updateList.clear();
+
 
         myvalues->beginGroup("Keylist");
             updateList = myvalues->value("keys").toString().split(splitter);
@@ -219,8 +244,14 @@ void settings::loadSettings()
             {
                 myvalues->setValue("extkeys","Sportuse");
             }
+            updateList.clear();
         myvalues->endGroup();
-        updateList.clear();
+
+
+        myvalues->beginGroup("Phase");
+            myvalues->remove("empty");
+            myvalues->remove("emptycolor");
+        myvalues->endGroup();
 
         myvalues->beginGroup("Sport");
             updateString = myvalues->value("sportuse").toString();
@@ -237,8 +268,9 @@ void settings::loadSettings()
                 }
                 myvalues->setValue("sportuse",settings::setSettingString(updateList));
             }
+            updateList.clear();
         myvalues->endGroup();
-        updateList.clear();
+
 
         myvalues->beginGroup("Threshold");
             updateString = myvalues->value("pace").toString();
@@ -473,9 +505,9 @@ QStringList settings::setRangeString(QHash<QString, QString> *hash)
 {
     QStringList rangeList;
 
-    for(int i = 0; i < listMap.value("levels").count(); ++i)
+    for(int i = 0; i < listMap.value("Level").count(); ++i)
     {
-        rangeList.insert(i,hash->value(listMap.value("levels").at(i)));
+        rangeList.insert(i,hash->value(listMap.value("Level").at(i)));
     }
     return rangeList;
 }
@@ -534,7 +566,7 @@ void settings::saveSettings()
     myvalues->beginGroup("Sport");
         settingList = listMap.value("Sport");
         myvalues->setValue("sports",settings::setSettingString(settingList));
-        myvalues->setValue("sportuse",settings::setSettingString(listMap.value("sportuse")));
+        myvalues->setValue("sportuse",settings::setSettingString(listMap.value("Sportuse")));
         tempColor = settings::get_colorStringList(&settingList);
         myvalues->setValue("color",settings::setSettingString(tempColor));
         tempColor.clear();
@@ -595,14 +627,20 @@ void settings::saveSettings()
         myvalues->setValue("sum",settingList.at(0));
         myvalues->setValue("empty",settingList.at(1));
         myvalues->setValue("breakname",settingList.at(2));
-        myvalues->setValue("sumcolor",settings::set_colorString(colorMap.value("sumcolor")));
-        myvalues->setValue("emptycolor",settings::set_colorString(colorMap.value("emptycolor")));
-        myvalues->setValue("breakcolor",settings::set_colorString(colorMap.value("breakcolor")));
+        myvalues->setValue("sumcolor",settings::set_colorString(colorMap.value(settingList.at(0))));
+        myvalues->setValue("emptycolor",settings::set_colorString(colorMap.value(settingList.at(1))));
+        myvalues->setValue("breakcolor",settings::set_colorString(colorMap.value(settingList.at(2))));
         settingList.clear();
     myvalues->endGroup();
 
     delete myvalues;
 }
+
+QString settings::set_colorString(QColor color)
+{
+    return QString::number(color.red())+"-"+QString::number(color.green())+"-"+QString::number(color.blue());;
+}
+
 
 QStringList settings::get_int_header(QString vSport)
 {
@@ -830,31 +868,4 @@ double settings::set_doubleValue(double value, bool isthree)
         return ((static_cast<int>(value *100 +.5)) / 100.0);
     }
     return 0;
-}
-
-QColor settings::get_colorRGB(QString colorValue,bool trans)
-{
-    QColor color;
-    QString cRed,cGreen,cBlue;
-    int aValue = 0;
-    cRed = colorValue.split("-").at(0);
-    cGreen = colorValue.split("-").at(1);
-    cBlue = colorValue.split("-").at(2);
-    if(trans)
-    {
-        aValue = 125;
-    }
-    else
-    {
-        aValue = 255;
-    }
-
-    color.setRgb(cRed.toInt(),cGreen.toInt(),cBlue.toInt(),aValue);
-
-    return color;
-}
-
-QString settings::set_colorString(QColor color)
-{
-    return QString::number(color.red())+"-"+QString::number(color.green())+"-"+QString::number(color.blue());;
 }

@@ -81,6 +81,7 @@ public:
     static void set_thresValue(QString key,double value) {thresholdMap.insert(key,value);}
     static void set_rangeValue(QString,QString,QString);
     static void set_ltsValue(QString key,double value) {ltsMap.insert(key,value);}
+    static void set_generalValue(QString key,QString value) {generalMap.insert(key,value);}
 
     //Lists Getter
     static QStringList get_listValues(QString key) {return listMap.value(key);}
