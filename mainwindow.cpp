@@ -38,9 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
     firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
     weeknumber = QString::number(selectedDate.weekNumber()) +"_"+QString::number(selectedDate.year());
     weekRange = settings::get_fontValue("weekRange");
-    weekpos = 0;
+    weekpos = weekCounter = 0;;
     weekDays = 7;
-    weekCounter = 0;
     work_sum.resize(sportCounter);
     dur_sum.resize(sportCounter);
     dist_sum.resize(sportCounter);
