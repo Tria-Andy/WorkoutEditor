@@ -1714,12 +1714,7 @@ void MainWindow::on_comboBox_phasefilter_currentIndexChanged(int index)
 
     phaseFilter = ui->comboBox_phasefilter->currentText();
 
-<<<<<<< HEAD
-    QList<QStandardItem*> list = workSchedule->week_meta->findItems(phaseFilter,Qt::MatchContains,2);
-    if(!list.isEmpty())
-=======
     if(index == 0)
->>>>>>> refs/remotes/origin/develop
     {
         this->workout_calendar();
         this->summery_view();
