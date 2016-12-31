@@ -33,13 +33,16 @@ year_popup::year_popup(QWidget *parent, QString pInfo,int position,schedule *p_s
        phaseList << "Year" << settings::get_listValues("Phase");
        selectList << "Duration" << "Distance" << "Workouts";
        ui->comboBox_select->addItems(selectList);
+       sportUseList = settings::get_listValues("Sportuse");
 
-       if(position == 0) col = 7;
-       if(position == 1) col = 2;
-       if(position == 2) col = 3;
-       if(position == 3) col = 4;
-       if(position == 4) col = 5;
-       if(position == 5) col = 6;
+       if(position == 0)
+       {
+           col = workSched->week_content->columnCount()-1;
+       }
+       else
+       {
+           col = position+1;
+       }
 
        ui->label_info->setText(phaseList.at(phaseindex) +": " + partInfo.at(0) + " Workouts: " + partInfo.at(1) + " - Hours: " + partInfo.at(2) + " - Distance: " + partInfo.at(4));
 

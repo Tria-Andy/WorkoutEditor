@@ -45,7 +45,7 @@ private slots:
 private:
     Ui::year_popup *ui;
 
-    QStringList partInfo,phaseList,selectList,weekList;
+    QStringList partInfo,phaseList,selectList,weekList,sportUseList;
     QString phase;
     int col,phaseindex,widthFactor,heightFactor,weekcount;
     bool isLoad;
