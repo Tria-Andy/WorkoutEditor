@@ -79,6 +79,8 @@ private slots:
     void on_spinBox_lastSTS_valueChanged(int arg1);
     void on_listWidget_stressValue_itemClicked(QListWidgetItem *item);
 
+    void on_tabWidget_tabBarClicked(int index);
+
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;

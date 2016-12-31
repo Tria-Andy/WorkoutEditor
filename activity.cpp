@@ -120,7 +120,7 @@ void Activity::prepareData()
             else
             {
                 lapNr = 0;
-                swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),settings::get_generalValue("breakName"));
+                swim_xdata->setData(swim_xdata->index(row,0,QModelIndex()),settings::get_generalValue("breakname"));
                 lapStart = lapStartPrev + lapPacePrev;          
                 lapSpeed = 0;
                 ++intCount;
@@ -581,7 +581,7 @@ void Activity::recalculate_intervalls(bool recalc)
                 }
                 else
                 {
-                    lapname = settings::get_generalValue("breakName");
+                    lapname = settings::get_generalValue("breakname");
                     edit_int_model->setData(edit_int_model->index(i,0,QModelIndex()),lapname);
                 }
             }
@@ -1037,7 +1037,7 @@ void Activity::set_avg_values(int counter, int row, bool add)
             avg_pace = avg_pace - t_pace;
             avg_dist = avg_dist - t_dist;
             avg_watt = avg_watt - t_watt;
-            avg_cad = avg_cad + t_cad;
+            avg_cad = avg_cad - t_cad;
         }
     }
     else

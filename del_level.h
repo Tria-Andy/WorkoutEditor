@@ -32,6 +32,8 @@ class del_level : public QItemDelegate
 public:
     explicit del_level(QObject *parent = 0) : QItemDelegate(parent) {}
 
+    QString thresSelect;
+    double threshold;
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         Q_UNUSED(option)
@@ -65,12 +67,26 @@ public:
         QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
         spinBox->interpretText();
         int value = spinBox->value();
+        double perc = 0;
+
+        perc = static_cast<double>(value) / 100.0;
 
         if(index.row() != 0)
         {
             max_index = model->index(index.row()-1,3,QModelIndex());
             model->setData(max_index,value,Qt::EditRole);
+            if(thresSelect == settings::isBike || thresSelect == "HF")
+            {
+                model->setData(model->index(index.row(),2),round(threshold * perc));
+                model->setData(model->index(index.row()-1,4),round(threshold * perc));
+            }
+            if(thresSelect == settings::isSwim || thresSelect == settings::isRun)
+            {
+                model->setData(model->index(index.row(),2),settings::set_time(static_cast<int>(round(threshold / perc))));
+                model->setData(model->index(index.row()-1,4),settings::set_time(static_cast<int>(round(threshold / perc))));
+            }
         }
+
         model->setData(index, value, Qt::EditRole);
     }
 

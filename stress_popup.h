@@ -29,6 +29,7 @@ private slots:
 private:
     Ui::stress_popup *ui;
     QDate firstDayofWeek;
+    QIcon showNum,hideNum;
     double ltsDays,stsDays,lastLTS,lastSTS,stressMax;
     QMap<QDate,double> *stressMap;
     QVector<double> xDate,yLTS,ySTS,yTSB;

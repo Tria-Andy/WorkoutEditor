@@ -38,9 +38,9 @@ private:
         }
         else
         {
-            if(name == settings::get_generalValue("breakName"))
+            if(name == settings::get_generalValue("breakname"))
             {
-                return QColor(Qt::darkGray);
+                return settings::get_itemColor(settings::get_generalValue("breakname"));
             }
             else
             {

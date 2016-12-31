@@ -406,7 +406,7 @@ void MainWindow::workout_calendar()
                     }
                     else
                     {
-                        phase_value = settings::get_generalValue("emptyPhase");
+                        phase_value = settings::get_generalValue("empty");
                     }
                     calendar_model->setData(cal_index,weekValue + delimiter + phase_value);
                 }
@@ -421,30 +421,27 @@ void MainWindow::workout_calendar()
     }
     else
     {
-        if(year_header.count() != sportuseList.count()+2)
+        year_header.clear();
+        QString temp;
+        year_header << "Week";
+        for(int i = 0; i < sportUse;++i)
         {
-            year_header.clear();
-            QString temp;
-            year_header << "Week";
-            for(int i = 0; i < sportUse;++i)
-            {
-                temp = sportuseList.at(i);
-                year_header << temp.toUpper();
-            }
-            year_header << settings::get_generalValue("sum");
+            temp = sportuseList.at(i);
+            year_header << temp.toUpper();
         }
+        year_header << settings::get_generalValue("sum");
 
-          calendar_model->setHorizontalHeaderLabels(year_header);
-          ui->tableView_cal->setModel(calendar_model);
-          ui->tableView_cal->setEditTriggers(QAbstractItemView::NoEditTriggers);
-          ui->tableView_cal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-          ui->tableView_cal->verticalHeader()->hide();
-          ui->tableView_cal->setItemDelegate(&week_del);
-          QString weekInfo,weekID;
-          QString empty = "0-0-00:00:00-0";
-          int weekoffset;
-          bool showAll;
-          workSchedule->week_meta->sort(0);
+        calendar_model->setHorizontalHeaderLabels(year_header);
+        ui->tableView_cal->setModel(calendar_model);
+        ui->tableView_cal->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        ui->tableView_cal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_cal->verticalHeader()->hide();
+        ui->tableView_cal->setItemDelegate(&week_del);
+        QString weekInfo,weekID;
+        QString empty = "0-0-00:00:00-0";
+        int weekoffset;
+        bool showAll;
+        workSchedule->week_meta->sort(0);
 
           if(ui->comboBox_phasefilter->currentIndex() == 0)
           {
