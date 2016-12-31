@@ -307,6 +307,9 @@ void Dialog_settings::set_hfmodel(double hfThres)
     ui->tableView_hf->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_hf->verticalHeader()->hide();
 
+    level_del.thresSelect = "HF";
+    level_del.threshold = ui->spinBox_hfThres->value();
+
     double percLow = 0,percHigh = 0;
 
     for(int i = 0; i < levels.count(); ++i)
@@ -447,7 +450,7 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
     QPalette gback,wback;
     gback.setColor(QPalette::Base,Qt::green);
     wback.setColor(QPalette::Base,Qt::white);
-
+    level_del.thresSelect = value;
     ui->timeEdit_thresPace->setTime(paceTime);
 
     if(value == settings::isSwim)
@@ -457,6 +460,7 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         sportFactor = settings::get_thresValue("swimfactor");
         ui->spinBox_thresPower->setPalette(wback);
         ui->timeEdit_thresPace->setPalette(gback);
+        level_del.threshold = thresPace;
     }
     if(value == settings::isBike)
     {
@@ -465,6 +469,7 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         sportFactor = settings::get_thresValue("bikefactor");
         ui->spinBox_thresPower->setPalette(gback);
         ui->timeEdit_thresPace->setPalette(wback);
+        level_del.threshold = thresPower;
     }
     if(value == settings::isRun)
     {
@@ -473,6 +478,7 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         sportFactor = settings::get_thresValue("runfactor");
         ui->spinBox_thresPower->setPalette(wback);
         ui->timeEdit_thresPace->setPalette(gback);
+        level_del.threshold = thresPace;
     }
     paceTime = paceTime.addSecs(static_cast<int>(thresPace));
     ui->spinBox_thresPower->setValue(thresPower);
@@ -743,4 +749,25 @@ void Dialog_settings::on_listWidget_stressValue_itemClicked(QListWidgetItem *ite
     QString stress = values.split(" - ").last();
     ui->dateEdit_stress->setDate(QDate::fromString(values.split(" - ").first(),"dd.MM.yyyy"));
     ui->spinBox_stress->setValue(stress.toInt());
+}
+
+void Dialog_settings::on_tabWidget_tabBarClicked(int index)
+{
+    if(index == 2)
+    {
+        level_del.thresSelect = ui->comboBox_thresSport->currentText();
+        if(ui->comboBox_thresSport->currentText() == settings::isBike)
+        {
+            level_del.threshold = thresPower;
+        }
+        else
+        {
+            level_del.threshold = thresPace;
+        }
+    }
+    if(index == 3)
+    {
+        level_del.thresSelect = "HF";
+        level_del.threshold = ui->spinBox_hfThres->value();
+    }
 }
