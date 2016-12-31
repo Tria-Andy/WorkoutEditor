@@ -115,13 +115,18 @@ void Dialog_lapeditor::set_duration()
 }
 void Dialog_lapeditor::set_lapSpeed(double dist)
 {
-    double lapSpeed,pace;
+    double lapSpeed = 0,pace = 0;
     int duration = ui->spinBox_endtime->value()-ui->spinBox_starttime->value();
-
-    pace = duration / (dist*10.0);
-    lapSpeed = 360.0 / pace;
-
-    ui->label_speed->setText(QString::number(settings::set_doubleValue(lapSpeed,false))+" km/h");
+    if(dist > 0)
+    {
+        pace = duration / (dist*10.0);
+        lapSpeed = 360.0 / pace;
+        ui->label_speed->setText(QString::number(settings::set_doubleValue(lapSpeed,false))+" km/h");
+    }
+    else
+    {
+        ui->label_speed->setText("0 km/h");
+    }
 }
 
 int Dialog_lapeditor::calc_strokes(int duration)
