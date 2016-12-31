@@ -771,6 +771,7 @@ void Dialog_inteditor::on_comboBox_sport_currentIndexChanged(const QString &sel_
     this->set_sport_threshold(current_sport);
     this->set_min_max(ui->comboBox_level->currentText(),sel_sport);
     ui->label_est_speed->setText(settings::get_workout_pace(ui->doubleSpinBox_int_dist->value(),ui->timeEdit_int_time->time(),sel_sport,false));
+    this->clearIntTree();
     this->reset_values();
     this->reset_workoutInfo();
     this->set_plot_graphic(plot_model->rowCount());
@@ -789,17 +790,24 @@ void Dialog_inteditor::on_doubleSpinBox_int_dist_valueChanged(double dist)
 
 void Dialog_inteditor::on_pushButton_delete_clicked()
 {
-    if(select_item->childCount() > 0)
+    if(ui->treeWidget_planer->topLevelItemCount() == 1)
     {
-        while(select_item->childCount() > 0)
+        ui->treeWidget_planer->clear();
+    }
+    else
+    {
+        if(select_item->childCount() > 0)
         {
-            for(int i = 0; i < select_item->childCount(); ++i)
+            while(select_item->childCount() > 0)
             {
-                delete select_item->child(i);
+                for(int i = 0; i < select_item->childCount(); ++i)
+                {
+                    delete select_item->child(i);
+                }
             }
         }
+        delete select_item;
     }
-    delete select_item;
     this->set_pushbutton(false);
     this->set_plot_model();
 }
