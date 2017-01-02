@@ -420,7 +420,7 @@ void schedule::save_ltsValues()
     double factor = (double)exp(-1.0/ltsDays);
     pastStress = startLTS;
 
-    for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays(-ltsDays)), end = stressValues.find(firstdayofweek.addDays((-ltsDays)+7)); it != end; ++it)
+    for(QMap<QDate,double>::const_iterator it = stressValues.cbegin(), end = stressValues.find(firstdayofweek.addDays(-ltsDays)); it != end; ++it)
     {
         currStress = it.value();
         stress = (currStress * (1.0 - factor)) + (pastStress * factor);
@@ -433,7 +433,7 @@ void schedule::save_ltsValues()
     factor = (double)exp(-1.0/stsDays);
     pastStress = startLTS;
 
-    for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays(-stsDays)), end = stressValues.find(firstdayofweek.addDays((-stsDays)+7)); it != end; ++it)
+    for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays((-stsDays)-7)), end = stressValues.find(firstdayofweek.addDays((-stsDays))); it != end; ++it)
     {
         currStress = it.value();
         stress = (currStress * (1.0 - factor)) + (pastStress * factor);
