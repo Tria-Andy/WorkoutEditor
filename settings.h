@@ -88,7 +88,6 @@ public:
     static QStringList get_extkeyList() {return extkeyList;}
 
     //common functions
-    static int get_swimLaplen() {return swimLaplen;}
     static int get_timesec(QString time);
     static QStringList get_int_header(QString);
     static QStringList get_time_header() {return header_int_time;}
@@ -97,7 +96,6 @@ public:
     static bool get_act_isload() {return act_isloaded;}
     static void set_act_recalc(bool isrecalc) {act_isrecalc = isrecalc;}
     static bool get_act_isrecalc() {return act_isrecalc;}
-    static void set_swimLaplen(int lapLen) {swimLaplen = lapLen;}
     static void writeListValues(QHash<QString,QStringList> *plist);
     static void autoSave() {settings::saveSettings();}
 };

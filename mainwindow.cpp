@@ -966,6 +966,7 @@ void MainWindow::set_activty_intervalls()
         ui->lineEdit_hf_threshold->setText(QString::number(settings::get_thresValue("hfthres")));
 
         ui->lineEdit_laplen->setText(QString::number(curr_activity->get_swim_track()));
+        swimlap_del.swimLapLen = curr_activity->get_swim_track();
         ui->lineEdit_swimtime->setText(QDateTime::fromTime_t(curr_activity->get_move_time()).toUTC().toString("hh:mm:ss"));
         ui->lineEdit_swimpace->setText(this->set_time(curr_activity->get_swim_pace()));
         this->write_hf_infos();

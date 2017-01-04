@@ -32,6 +32,8 @@ class del_swimlap : public QItemDelegate, public calculation
 public:
     explicit del_swimlap(QObject *parent = 0) : QItemDelegate(parent) {}
 
+    double swimLapLen;
+
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
@@ -106,7 +108,7 @@ public:
         int lapCount,lapTime,startTime;
         lapCount = model->rowCount()-1;
         int value = spinBox->value();
-        double lapSpeed = get_speed(QTime::fromString(set_time(value),"mm:ss"),settings::get_swimLaplen(),settings::isSwim,false).toDouble();
+        double lapSpeed = get_speed(QTime::fromString(set_time(value),"mm:ss"),swimLapLen,settings::isSwim,false).toDouble();
 
         model->setData(index, value, Qt::EditRole);
         model->setData(speed_index,lapSpeed);

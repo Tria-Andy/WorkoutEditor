@@ -65,7 +65,6 @@ void Activity::prepareData()
 
         if(curr_sport == settings::isSwim)
         {
-            settings::set_swimLaplen(swim_track);
             dist_factor = 1000;
             edit_int_model->setData(edit_int_model->index(row,5,QModelIndex()),this->get_swim_laps(row,false));
         }
