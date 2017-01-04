@@ -29,12 +29,13 @@
 #include "dialog_edit.h"
 #include "schedule.h"
 #include "settings.h"
+#include "calculation.h"
 
 namespace Ui {
 class day_popup;
 }
 
-class day_popup : public QDialog
+class day_popup : public QDialog, public calculation
 {
     Q_OBJECT
 

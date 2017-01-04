@@ -25,10 +25,11 @@
 #include <QStandardItemModel>
 #include "settings.h"
 #include "jsonhandler.h"
+#include "calculation.h"
 
 class jsonHandler;
 
-class Activity
+class Activity : public calculation
 {
 private:
     jsonHandler *jsonhandler;

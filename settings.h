@@ -48,7 +48,6 @@ private:
     static QColor get_colorRGB(QString,bool);
     static QStringList get_colorStringList(QStringList*);
 
-
     //Setter
     static void fill_mapList(QMap<int,QString>*,QString*);
     static void fill_mapColor(QStringList*,QString*,bool);
@@ -90,15 +89,7 @@ public:
 
     //common functions
     static int get_swimLaplen() {return swimLaplen;}
-    static double calc_totalWork(double,double,double);
-    static QString set_time(int);
-    static QString get_workout_pace(double, QTime, QString,bool);
-    static QString get_speed(QTime,int,QString,bool);
-    static double estimate_stress(QString,QString,int);
-    static int get_hfvalue(QString);
     static int get_timesec(QString time);
-    static double set_doubleValue(double,bool);
-
     static QStringList get_int_header(QString);
     static QStringList get_time_header() {return header_int_time;}
     static QStringList get_swimtime_header(){return header_swim_time;}

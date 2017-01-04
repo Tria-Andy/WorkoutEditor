@@ -23,6 +23,7 @@
 #include <QStandardItemModel>
 #include "schedule.h"
 #include "settings.h"
+#include "calculation.h"
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -30,7 +31,7 @@ namespace Ui {
 class year_popup;
 }
 
-class year_popup : public QDialog
+class year_popup : public QDialog, public calculation
 {
     Q_OBJECT
 

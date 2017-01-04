@@ -21,12 +21,13 @@
 
 #include <QDialog>
 #include "activity.h"
+#include "calculation.h"
 
 namespace Ui {
 class Dialog_lapeditor;
 }
 
-class Dialog_lapeditor : public QDialog
+class Dialog_lapeditor : public QDialog, public calculation
 {
     Q_OBJECT
 

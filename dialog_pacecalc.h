@@ -23,12 +23,13 @@
 #include <QtCore>
 #include <QStandardItemModel>
 #include "settings.h"
+#include "calculation.h"
 
 namespace Ui {
 class Dialog_paceCalc;
 }
 
-class Dialog_paceCalc : public QDialog
+class Dialog_paceCalc : public QDialog, public calculation
 {
     Q_OBJECT
 

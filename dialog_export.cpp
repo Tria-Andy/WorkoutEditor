@@ -106,8 +106,8 @@ void Dialog_export::set_filecontent(QModelIndex index)
     jsonhandler->set_tagData("Workout Title",modelSchedule->item(index.row(),5)->text());
 
     jsonhandler->set_overrideFlag(true);
-    jsonhandler->set_overrideData("time_riding",QString::number(settings::get_timesec(modelSchedule->item(index.row(),6)->text())));
-    jsonhandler->set_overrideData("workout_time",QString::number(settings::get_timesec(modelSchedule->item(index.row(),6)->text())));
+    jsonhandler->set_overrideData("time_riding",QString::number(this->get_timesec(modelSchedule->item(index.row(),6)->text())));
+    jsonhandler->set_overrideData("workout_time",QString::number(this->get_timesec(modelSchedule->item(index.row(),6)->text())));
     jsonhandler->set_overrideData(stressType,modelSchedule->item(index.row(),8)->text());
 
     jsonhandler->write_json();

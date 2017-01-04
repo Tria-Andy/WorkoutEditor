@@ -71,19 +71,19 @@ void Dialog_add::on_pushButton_add_clicked()
 
 void Dialog_add::on_doubleSpinBox_dist_valueChanged(double dist)
 {
-    ui->label_avg_speed->setText(settings::get_workout_pace(dist,ui->timeEdit_duration->time(),ui->comboBox_sport->currentText(),false));
+    ui->label_avg_speed->setText(this->get_workout_pace(dist,ui->timeEdit_duration->time(),ui->comboBox_sport->currentText(),false));
     w_distance = dist;
 }
 
 void Dialog_add::on_timeEdit_duration_timeChanged(const QTime &time)
 {
-    ui->label_avg_speed->setText(settings::get_workout_pace(ui->doubleSpinBox_dist->value(),time,ui->comboBox_sport->currentText(),false));
+    ui->label_avg_speed->setText(this->get_workout_pace(ui->doubleSpinBox_dist->value(),time,ui->comboBox_sport->currentText(),false));
     w_duration = time.toString("hh:mm:ss");
 }
 
 void Dialog_add::on_comboBox_sport_currentTextChanged(const QString &sport)
 {
-    ui->label_avg_speed->setText(settings::get_workout_pace(ui->doubleSpinBox_dist->value(),ui->timeEdit_duration->time(),sport,false));
+    ui->label_avg_speed->setText(this->get_workout_pace(ui->doubleSpinBox_dist->value(),ui->timeEdit_duration->time(),sport,false));
 }
 
 void Dialog_add::on_dateEdit_wdate_dateChanged(const QDate &date)

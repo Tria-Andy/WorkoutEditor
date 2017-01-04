@@ -164,12 +164,12 @@ QString MainWindow::set_summeryString(int pos,bool week)
         if(pos == 0)
         {
             if(dur_sum[pos] != 0) percent = (static_cast<double>(dur_sum[pos]) / static_cast<double>(dur_sum[0]))*100;
-            sumString = sum_name +"-"+ QString::number(work_sum[pos]) +"-"+ settings::set_time(dur_sum[pos]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos]) +"-"+ QString::number(stress_sum[pos]);
+            sumString = sum_name +"-"+ QString::number(work_sum[pos]) +"-"+ this->set_time(dur_sum[pos]) +"-"+ QString::number(this->set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos]) +"-"+ QString::number(stress_sum[pos]);
         }
         else
         {
             if(dur_sum[pos] != 0) percent = static_cast<double>(dur_sum[pos]) / (static_cast<double>(dur_sum[0]))*100;
-            sumString = sportList.at(pos-1) +"-"+ QString::number(work_sum[pos]) +"-"+ settings::set_time(dur_sum[pos]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos]) +"-"+QString::number(stress_sum[pos]);
+            sumString = sportList.at(pos-1) +"-"+ QString::number(work_sum[pos]) +"-"+ this->set_time(dur_sum[pos]) +"-"+ QString::number(this->set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos]) +"-"+QString::number(stress_sum[pos]);
         }
     }
     else
@@ -177,12 +177,12 @@ QString MainWindow::set_summeryString(int pos,bool week)
         if(pos == 0)
         {
             if(dur_sum[sportUse] != 0) percent = (static_cast<double>(dur_sum[sportUse]) / static_cast<double>(dur_sum[sportUse]))*100;
-            sumString = sum_name +"-"+ QString::number(work_sum[sportUse]) +"-"+ settings::set_time(dur_sum[sportUse]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[sportUse]) +"-"+ QString::number(stress_sum[sportUse]);
+            sumString = sum_name +"-"+ QString::number(work_sum[sportUse]) +"-"+ this->set_time(dur_sum[sportUse]) +"-"+ QString::number(this->set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[sportUse]) +"-"+ QString::number(stress_sum[sportUse]);
         }
         else
         {
             if(dur_sum[pos-1] != 0) percent = (static_cast<double>(dur_sum[pos-1]) / static_cast<double>(dur_sum[sportUse]))*100;
-            sumString = sportList.at(pos-1) +"-"+ QString::number(work_sum[pos-1]) +"-"+ settings::set_time(dur_sum[pos-1]) +"-"+ QString::number(settings::set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos-1]) +"-"+QString::number(stress_sum[pos-1]);
+            sumString = sportList.at(pos-1) +"-"+ QString::number(work_sum[pos-1]) +"-"+ this->set_time(dur_sum[pos-1]) +"-"+ QString::number(this->set_doubleValue(percent,false)) +"-"+ QString::number(dist_sum[pos-1]) +"-"+QString::number(stress_sum[pos-1]);
         }
     }
     return sumString;
@@ -193,7 +193,7 @@ void MainWindow::summery_calc(int pos, QModelIndex index,bool week)
     if(week)
     {
         work_sum[pos] = work_sum[pos] + 1;
-        dur_sum[pos] = dur_sum[pos] + settings::get_timesec(workSchedule->workout_schedule->item(index.row(),6)->text());
+        dur_sum[pos] = dur_sum[pos] + this->get_timesec(workSchedule->workout_schedule->item(index.row(),6)->text());
         dist_sum[pos] = dist_sum[pos] + workSchedule->workout_schedule->item(index.row(),7)->text().toDouble();
         stress_sum[pos] = stress_sum[pos] + workSchedule->workout_schedule->item(index.row(),8)->text().toInt();
     }
@@ -209,7 +209,7 @@ void MainWindow::summery_calc(int pos, QModelIndex index,bool week)
         stress = sumValues.at(3);
 
         work_sum[pos] = work_sum[pos] + work.toInt();
-        dur_sum[pos] = dur_sum[pos] + (settings::get_timesec(dura)*60);
+        dur_sum[pos] = dur_sum[pos] + (this->get_timesec(dura)*60);
         dist_sum[pos] = dist_sum[pos] + dist.toDouble();
         stress_sum[pos] = stress_sum[pos] + stress.toInt();
     }
@@ -962,12 +962,12 @@ void MainWindow::set_activty_intervalls()
         ui->tableView_hfzone->setItemDelegate(&level_del);
         ui->tableView_hfzone->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-        ui->lineEdit_swimcv->setText(settings::set_time(settings::get_thresValue("swimpace")));
+        ui->lineEdit_swimcv->setText(this->set_time(settings::get_thresValue("swimpace")));
         ui->lineEdit_hf_threshold->setText(QString::number(settings::get_thresValue("hfthres")));
 
         ui->lineEdit_laplen->setText(QString::number(curr_activity->get_swim_track()));
         ui->lineEdit_swimtime->setText(QDateTime::fromTime_t(curr_activity->get_move_time()).toUTC().toString("hh:mm:ss"));
-        ui->lineEdit_swimpace->setText(settings::set_time(curr_activity->get_swim_pace()));
+        ui->lineEdit_swimpace->setText(this->set_time(curr_activity->get_swim_pace()));
         this->write_hf_infos();
     }
     else
@@ -1033,9 +1033,9 @@ void MainWindow::set_speedValues(int index)
     bool recalc = settings::get_act_isrecalc();
     double avg = curr_activity->get_int_speed(index,recalc);
     double intdist = curr_activity->get_int_distance(index,recalc);
-    ui->lineEdit_lapTime->setText(settings::set_time(curr_activity->get_int_duration(index,recalc)));
+    ui->lineEdit_lapTime->setText(this->set_time(curr_activity->get_int_duration(index,recalc)));
     ui->lineEdit_lapDistance->setText(QString::number(intdist));
-    ui->lineEdit_lapPace->setText(settings::set_time(curr_activity->get_int_pace(index,recalc)));
+    ui->lineEdit_lapPace->setText(this->set_time(curr_activity->get_int_pace(index,recalc)));
     ui->lineEdit_lapSpeed->setText(QString::number(curr_activity->get_int_speed(index,recalc)));
 
     int start = curr_activity->edit_int_model->data(curr_activity->edit_int_model->index(index,1,QModelIndex())).toInt();
@@ -1147,7 +1147,7 @@ void MainWindow::write_hf_infos()
     double totalWork;
 
     ui->lineEdit_hfavg->setText(QString::number(curr_activity->get_hf_avg()));
-    totalWork = settings::calc_totalWork(jsonhandler->get_tagData("Weight").toDouble(),curr_activity->get_hf_avg(),curr_activity->get_move_time());
+    totalWork = this->calc_totalWork(jsonhandler->get_tagData("Weight").toDouble(),curr_activity->get_hf_avg(),curr_activity->get_move_time());
     totalWork = totalWork * curr_activity->get_swim_sri();
     ui->lineEdit_kal->setText(QString::number(ceil((totalWork/4)*4.184)));
     ui->lineEdit_kj->setText(QString::number(ceil(totalWork)));
@@ -1158,7 +1158,7 @@ void MainWindow::write_hf_infos()
     jsonhandler->set_overrideData("total_kcalories",ui->lineEdit_kal->text());
     for(int i = 0; i < 7; i++)
     {
-        hf_value = settings::get_timesec(curr_activity->swim_hf_model->data(curr_activity->swim_hf_model->index(i,3,QModelIndex())).toString());
+        hf_value = this->get_timesec(curr_activity->swim_hf_model->data(curr_activity->swim_hf_model->index(i,3,QModelIndex())).toString());
         jsonhandler->set_overrideData("time_in_zone_H" + QString::number(i+1),QString::number(hf_value));
     }
 }
@@ -1190,7 +1190,7 @@ void MainWindow::fill_WorkoutContent()
             label = "Sec";
         }
 
-        contentValue = settings::set_time(time)+label;
+        contentValue = this->set_time(time)+label;
     }
 
     if(ui->radioButton_distance->isChecked())
@@ -1222,11 +1222,11 @@ void MainWindow::fill_WorkoutContent()
     {
         if(sel_count > 1)
         {
-            newEntry = QString::number(sel_count)+"x"+QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor())+"/"+settings::set_time(curr_activity->get_avg_laptime());
+            newEntry = QString::number(sel_count)+"x"+QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor())+"/"+this->set_time(curr_activity->get_avg_laptime());
         }
         else
         {
-            newEntry = QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor())+"-"+settings::set_time(curr_activity->get_avg_laptime());
+            newEntry = QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor())+"-"+this->set_time(curr_activity->get_avg_laptime());
         }
     }
 
@@ -1246,11 +1246,11 @@ void MainWindow::fill_WorkoutContent()
     {
         if(sel_count > 1)
         {
-            newEntry = QString::number(sel_count)+"x"+contentValue+"-" +settings::set_time(curr_activity->get_avg_pace())+"/km";
+            newEntry = QString::number(sel_count)+"x"+contentValue+"-" +this->set_time(curr_activity->get_avg_pace())+"/km";
         }
         else
         {
-            newEntry = contentValue+"-" +settings::set_time(curr_activity->get_avg_pace())+"/km";
+            newEntry = contentValue+"-" +this->set_time(curr_activity->get_avg_pace())+"/km";
         }
     }
 
@@ -1423,8 +1423,8 @@ void MainWindow::on_actionSelect_File_triggered()
 void MainWindow::set_avg_fields()
 {
     ui->lineEdit_numsel->setText(QString::number(sel_count));
-    ui->lineEdit_lap->setText(settings::set_time(curr_activity->get_avg_laptime()));
-    ui->lineEdit_pace->setText(settings::set_time(curr_activity->get_avg_pace()));
+    ui->lineEdit_lap->setText(this->set_time(curr_activity->get_avg_laptime()));
+    ui->lineEdit_pace->setText(this->set_time(curr_activity->get_avg_pace()));
     ui->lineEdit_dist->setText(QString::number(curr_activity->get_avg_dist()*curr_activity->get_dist_factor()));
     ui->lineEdit_watt->setText(QString::number(round(curr_activity->get_avg_watts())));
     ui->lineEdit_cad->setText(QString::number(round(curr_activity->get_avg_cad())));

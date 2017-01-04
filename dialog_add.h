@@ -26,12 +26,13 @@
 #include "dialog_workouts.h"
 #include "settings.h"
 #include "standardworkouts.h"
+#include "calculation.h"
 
 namespace Ui {
 class Dialog_add;
 }
 
-class Dialog_add : public QDialog //, public schedule
+class Dialog_add : public QDialog , public calculation
 {
     Q_OBJECT
 

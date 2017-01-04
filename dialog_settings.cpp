@@ -279,17 +279,17 @@ void Dialog_settings::set_thresholdView(QString sport)
 {
     if(sport == settings::isSwim)
     {
-        ui->lineEdit_speed->setText(settings::get_speed(ui->timeEdit_thresPace->time(),100,ui->comboBox_thresSport->currentText(),true));
+        ui->lineEdit_speed->setText(this->get_speed(ui->timeEdit_thresPace->time(),100,ui->comboBox_thresSport->currentText(),true));
         this->set_thresholdModel(sport);
     }
     if(sport == settings::isBike)
     {
-        ui->lineEdit_speed->setText(settings::get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true));
+        ui->lineEdit_speed->setText(this->get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true));
         this->set_thresholdModel(sport);
     }
     if(sport == settings::isRun)
     {
-        ui->lineEdit_speed->setText(settings::get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true));
+        ui->lineEdit_speed->setText(this->get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true));
         this->set_thresholdModel(sport);
     }
 }
@@ -387,8 +387,8 @@ void Dialog_settings::set_thresholdModel(QString sport)
         }
         else
         {
-            level_model->setData(level_model->index(i,2,QModelIndex()),settings::set_time(static_cast<int>(round(thresPace / percLow))));
-            level_model->setData(level_model->index(i,4,QModelIndex()),settings::set_time(static_cast<int>(round(thresPace / percHigh))));
+            level_model->setData(level_model->index(i,2,QModelIndex()),this->set_time(static_cast<int>(round(thresPace / percLow))));
+            level_model->setData(level_model->index(i,4,QModelIndex()),this->set_time(static_cast<int>(round(thresPace / percHigh))));
         }
     }
 }

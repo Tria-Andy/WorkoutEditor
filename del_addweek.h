@@ -7,8 +7,9 @@
 #include <QTimeEdit>
 #include <QDebug>
 #include "settings.h"
+#include "calculation.h"
 
-class del_addweek : public QStyledItemDelegate
+class del_addweek : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 public:
@@ -174,7 +175,7 @@ public:
         QString sport = model->data(model->index(row,0,QModelIndex())).toString();
         double dist = model->data(model->index(row,4,QModelIndex())).toDouble();
         QTime dura = model->data(model->index(row,2,QModelIndex())).toTime();
-        model->setData(model->index(row,5,QModelIndex()),settings::get_workout_pace(dist,dura,sport,false));
+        model->setData(model->index(row,5,QModelIndex()),get_workout_pace(dist,dura,sport,false));
     }
 
     void calc_percent(QStringList *list,QAbstractItemModel *model) const
@@ -186,7 +187,7 @@ public:
             for(int i = 0; i < list->count(); ++i)
             {
                 part = get_timeMin(model->data(model->index(i,2,QModelIndex())).toTime());
-                model->setData(model->index(i,3,QModelIndex()),settings::set_doubleValue(static_cast<double>(part) / static_cast<double>(sum)*100.0,false));
+                model->setData(model->index(i,3,QModelIndex()),set_doubleValue(static_cast<double>(part) / static_cast<double>(sum)*100.0,false));
             }
         }
     }
@@ -218,7 +219,7 @@ public:
         for(int i = 0; i < list->count(); ++i)
         {
            sportTime =  model->data(model->index(i,col,QModelIndex())).toTime().toString("hh:mm:ss");
-           sum = sum.addSecs(settings::get_timesec(sportTime));
+           sum = sum.addSecs(get_timesec(sportTime));
         }
         return sum;
     }

@@ -27,12 +27,13 @@
 #include <QWidget>
 #include "settings.h"
 #include "standardworkouts.h"
+#include "calculation.h"
 
 namespace Ui {
 class Dialog_inteditor;
 }
 
-class Dialog_inteditor : public QDialog
+class Dialog_inteditor : public QDialog, public calculation
 {
     Q_OBJECT
 
@@ -63,6 +64,7 @@ private slots:
     void on_toolButton_copy_clicked();
     void on_toolButton_delete_clicked();
     void on_toolButton_addTop_clicked();
+    void on_treeWidget_planer_itemChanged(QTreeWidgetItem *item, int column);
 
 private:
     Ui::Dialog_inteditor *ui;

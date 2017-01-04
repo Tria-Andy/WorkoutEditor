@@ -137,9 +137,9 @@ void year_popup::set_plotValues()
             yStress[week] = stress.toDouble();
             if(max_stress < yStress[week]) max_stress = yStress[week];
 
-            yDura[week] = settings::set_doubleValue(static_cast<double>(settings::get_timesec(duration) / 60.0),false);
+            yDura[week] = this->set_doubleValue(static_cast<double>(this->get_timesec(duration) / 60.0),false);
             if(maxValues[0] < yDura[week]) maxValues[0] = yDura[week];
-            yDist[week] = settings::set_doubleValue(distance.toDouble(),false);
+            yDist[week] = this->set_doubleValue(distance.toDouble(),false);
             if(maxValues[1] < yDist[week]) maxValues[1] = yDist[week];
             yWorks[week] = workouts.toDouble();
             if(maxValues[2] < yWorks[week]) maxValues[2] = yWorks[week];
@@ -166,9 +166,9 @@ void year_popup::set_plotValues()
                     yStress[week] = stress.toDouble();
                     if(max_stress < yStress[week]) max_stress = yStress[week];
 
-                    yDura[week] = settings::set_doubleValue(static_cast<double>(settings::get_timesec(duration) / 60.0),false);
+                    yDura[week] = this->set_doubleValue(static_cast<double>(this->get_timesec(duration) / 60.0),false);
                     if(maxValues[0] < yDura[week]) maxValues[0] = yDura[week];
-                    yDist[week] = settings::set_doubleValue(distance.toDouble(),false);
+                    yDist[week] = this->set_doubleValue(distance.toDouble(),false);
                     if(maxValues[1] < yDist[week]) maxValues[1] = yDist[week];
                     yWorks[week] = workouts.toDouble();
                     if(maxValues[2] < yWorks[week]) maxValues[2] = yWorks[week];

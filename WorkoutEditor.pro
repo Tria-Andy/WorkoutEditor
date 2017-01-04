@@ -16,7 +16,7 @@ TEMPLATE = app
 #Application version
 VERSION_MAJOR = 1
 VERSION_MINOR = 2
-VERSION_BUILD = 0
+VERSION_BUILD = 1
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
        "VERSION_BUILD=$$VERSION_BUILD"
@@ -49,7 +49,8 @@ SOURCES += main.cpp\
     dialog_lapeditor.cpp \
     jsonhandler.cpp \
     logger.cpp \
-    stress_popup.cpp
+    stress_popup.cpp \
+    calculation.cpp
 
 HEADERS  += mainwindow.h \
     calendar_delegate.h \
@@ -83,7 +84,8 @@ HEADERS  += mainwindow.h \
     del_intview.h \
     del_level.h \
     del_addweek.h \
-    stress_popup.h
+    stress_popup.h \
+    calculation.h
 
 FORMS    += mainwindow.ui \
     dialog_add.ui \

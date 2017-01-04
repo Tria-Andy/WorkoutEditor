@@ -24,8 +24,9 @@
 #include <QSpinBox>
 #include <QDebug>
 #include "settings.h"
+#include "calculation.h"
 
-class del_level : public QItemDelegate
+class del_level : public QItemDelegate, public calculation
 {
     Q_OBJECT
 
@@ -82,8 +83,8 @@ public:
             }
             if(thresSelect == settings::isSwim || thresSelect == settings::isRun)
             {
-                model->setData(model->index(index.row(),2),settings::set_time(static_cast<int>(round(threshold / perc))));
-                model->setData(model->index(index.row()-1,4),settings::set_time(static_cast<int>(round(threshold / perc))));
+                model->setData(model->index(index.row(),2),calculation::set_time(static_cast<int>(round(threshold / perc))));
+                model->setData(model->index(index.row()-1,4),calculation::set_time(static_cast<int>(round(threshold / perc))));
             }
         }
 

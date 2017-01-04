@@ -68,7 +68,7 @@ void Dialog_edit::show_workout(int c_index)
     ui->lineEdit_wtitle->setText(workSched->workout_schedule->item(curr_index.row(),5)->text());
     ui->timeEdit_duration->setTime(QTime::fromString(workSched->workout_schedule->item(curr_index.row(),6)->text()));
     ui->doubleSpinBox_distance->setValue(workSched->workout_schedule->item(curr_index.row(),7)->text().toDouble());
-    ui->label_speed->setText(settings::get_workout_pace(ui->doubleSpinBox_distance->value(),ui->timeEdit_duration->time(),ui->lineEdit_sport->text(),false));
+    ui->label_speed->setText(this->get_workout_pace(ui->doubleSpinBox_distance->value(),ui->timeEdit_duration->time(),ui->lineEdit_sport->text(),false));
     ui->spinBox_stress->setValue(workSched->workout_schedule->item(curr_index.row(),8)->text().toInt());
 }
 
@@ -137,12 +137,12 @@ void Dialog_edit::on_pushButton_delete_clicked()
 
 void Dialog_edit::on_doubleSpinBox_distance_valueChanged(double dist)
 {
-    ui->label_speed->setText(settings::get_workout_pace(dist,ui->timeEdit_duration->time(),ui->lineEdit_sport->text(),false));
+    ui->label_speed->setText(this->get_workout_pace(dist,ui->timeEdit_duration->time(),ui->lineEdit_sport->text(),false));
 }
 
 void Dialog_edit::on_timeEdit_duration_timeChanged(const QTime &time)
 {
-    ui->label_speed->setText(settings::get_workout_pace(ui->doubleSpinBox_distance->value(),time,ui->lineEdit_sport->text(),false));
+    ui->label_speed->setText(this->get_workout_pace(ui->doubleSpinBox_distance->value(),time,ui->lineEdit_sport->text(),false));
 }
 
 void Dialog_edit::on_dateEdit_edit_date_dateChanged(const QDate &date)

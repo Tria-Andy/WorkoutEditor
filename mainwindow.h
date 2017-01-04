@@ -52,13 +52,14 @@
 #include "jsonhandler.h"
 #include "activity.h"
 #include "standardworkouts.h"
+#include "calculation.h"
 #include "logger.h"
 
 namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, public calculation
 {
     Q_OBJECT
 

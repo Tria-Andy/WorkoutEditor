@@ -89,7 +89,7 @@ void week_popup::set_plotModel()
             workoutDate.setTimeSpec(Qt::UTC);
             plotmodel->setData(plotmodel->index(i,0,QModelIndex()),workoutDate); //Date
             plotmodel->setData(plotmodel->index(i,1,QModelIndex()),workSched->workout_schedule->item(index.row(),8)->text().toInt()); //Stress
-            plotmodel->setData(plotmodel->index(i,2,QModelIndex()),settings::get_timesec(workSched->workout_schedule->item(index.row(),6)->text()) / 60.0); //Dura
+            plotmodel->setData(plotmodel->index(i,2,QModelIndex()),this->get_timesec(workSched->workout_schedule->item(index.row(),6)->text()) / 60.0); //Dura
             plotmodel->setData(plotmodel->index(i,3,QModelIndex()),workSched->workout_schedule->item(index.row(),7)->text().toDouble()); //Dist
         }
         plotmodel->sort(0);
@@ -147,7 +147,7 @@ void week_popup::set_plotModel()
                 if(workoutDate == weekDates.at(day))
                 {
                     yStress[day] = yStress[day] + stress;
-                    yDura[day] = yDura[day] + settings::set_doubleValue(dura,false);
+                    yDura[day] = yDura[day] + this->set_doubleValue(dura,false);
                     yDist[day] = yDist[day] + dist;
                     yWorkCount[day] = yWorkCount[day]+1;
                 }

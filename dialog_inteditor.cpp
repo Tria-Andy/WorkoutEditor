@@ -184,7 +184,7 @@ void Dialog_inteditor::set_sport_threshold(QString sport)
     {
        threshold_power = settings::get_thresValue("swimpower");
        threshold_pace = settings::get_thresValue("swimpace");
-       ui->label_sportThreshold->setText(settings::set_time(threshold_pace) + " /100m");
+       ui->label_sportThreshold->setText(this->set_time(threshold_pace) + " /100m");
     }
     if(sport == settings::isBike)
     {
@@ -196,7 +196,7 @@ void Dialog_inteditor::set_sport_threshold(QString sport)
     {
        threshold_power = settings::get_thresValue("runpower");
        threshold_pace = settings::get_thresValue("runpace");
-       ui->label_sportThreshold->setText(settings::set_time(threshold_pace) + " /km");
+       ui->label_sportThreshold->setText(this->set_time(threshold_pace) + " /km");
     }
     if(sport == settings::isStrength)
     {
@@ -219,8 +219,8 @@ QString Dialog_inteditor::calc_threshold(double percent)
         }
         if(current_sport == settings::isSwim)
         {
-            ui->label_thresValue->setText(settings::set_time(static_cast<int>(round(threshold_pace / (percent/100.0)))));
-            thresValue = settings::set_time(static_cast<int>(round(threshold_pace / (percent/100.0))));
+            ui->label_thresValue->setText(this->set_time(static_cast<int>(round(threshold_pace / (percent/100.0)))));
+            thresValue = this->set_time(static_cast<int>(round(threshold_pace / (percent/100.0))));
             current_power = threshold_power * (percent/100);
         }
         if(current_sport == settings::isBike)
@@ -231,8 +231,8 @@ QString Dialog_inteditor::calc_threshold(double percent)
         }
         if(current_sport == settings::isRun)
         {
-            ui->label_thresValue->setText(settings::set_time(static_cast<int>(round(threshold_pace / (percent/100.0)))));
-            thresValue = settings::set_time(static_cast<int>(round(threshold_pace / (percent/100.0))));
+            ui->label_thresValue->setText(this->set_time(static_cast<int>(round(threshold_pace / (percent/100.0)))));
+            thresValue = this->set_time(static_cast<int>(round(threshold_pace / (percent/100.0))));
             current_power = threshold_power * (percent/100);
         }
         if(current_sport == settings::isStrength)
@@ -261,16 +261,16 @@ void Dialog_inteditor::calc_distance(QString sport)
             }
             else
             {
-                ui->doubleSpinBox_int_dist->setValue((static_cast<double>(settings::get_timesec(ui->timeEdit_int_time->text())) / static_cast<double>(settings::get_timesec(ui->label_thresValue->text()))) / 10.0);
+                ui->doubleSpinBox_int_dist->setValue((static_cast<double>(this->get_timesec(ui->timeEdit_int_time->text())) / static_cast<double>(this->get_timesec(ui->label_thresValue->text()))) / 10.0);
             }
         }
         if(sport == settings::isBike)
         {
-            ui->doubleSpinBox_int_dist->setValue(static_cast<double>(settings::get_timesec(ui->timeEdit_int_time->text()) / static_cast<double>(current_pace)));
+            ui->doubleSpinBox_int_dist->setValue(static_cast<double>(this->get_timesec(ui->timeEdit_int_time->text()) / static_cast<double>(current_pace)));
         }
         if(sport == settings::isRun)
         {
-            ui->doubleSpinBox_int_dist->setValue(static_cast<double>(settings::get_timesec(ui->timeEdit_int_time->text()) / static_cast<double>(settings::get_timesec(ui->label_thresValue->text()))));
+            ui->doubleSpinBox_int_dist->setValue(static_cast<double>(this->get_timesec(ui->timeEdit_int_time->text()) / static_cast<double>(this->get_timesec(ui->label_thresValue->text()))));
         }
     }
 }
@@ -321,7 +321,7 @@ void Dialog_inteditor::edit_item(QTreeWidgetItem *item)
         item->setData(2,Qt::DisplayRole,QString::number(ui->spinBox_threshold->text().toDouble()));
         item->setData(3,Qt::DisplayRole,ui->label_thresValue->text());
         item->setData(4,Qt::DisplayRole,ui->timeEdit_int_time->time().toString("mm:ss"));
-        item->setData(5,Qt::DisplayRole,QString::number(settings::estimate_stress(ui->comboBox_sport->currentText(),ui->label_thresValue->text(),settings::get_timesec(ui->timeEdit_int_time->time().toString("mm:ss")))));
+        item->setData(5,Qt::DisplayRole,QString::number(this->estimate_stress(ui->comboBox_sport->currentText(),ui->label_thresValue->text(),this->get_timesec(ui->timeEdit_int_time->time().toString("mm:ss")))));
         item->setData(6,Qt::DisplayRole,QString::number(ui->doubleSpinBox_int_dist->value()));
     }
     this->set_plot_model();
@@ -361,7 +361,7 @@ QStringList Dialog_inteditor::add_int_values()
           << QString::number(ui->spinBox_threshold->text().toDouble())
           << ui->label_thresValue->text()
           << ui->timeEdit_int_time->time().toString("mm:ss")
-          << QString::number(settings::estimate_stress(ui->comboBox_sport->currentText(),ui->label_thresValue->text(),settings::get_timesec(ui->timeEdit_int_time->time().toString("mm:ss"))))
+          << QString::number(this->estimate_stress(ui->comboBox_sport->currentText(),ui->label_thresValue->text(),this->get_timesec(ui->timeEdit_int_time->time().toString("mm:ss"))))
           << QString::number(ui->doubleSpinBox_int_dist->value())
           << ui->comboBox_reps->currentText();
 
@@ -411,7 +411,7 @@ void Dialog_inteditor::open_stdWorkout(QString workID)
                   << step_model->item(index.row(),4)->text()
                   << thresValue
                   << step_model->item(index.row(),5)->text()
-                  << QString::number(settings::estimate_stress(ui->comboBox_sport->currentText(),thresValue,settings::get_timesec(step_model->item(index.row(),5)->text())))
+                  << QString::number(this->estimate_stress(ui->comboBox_sport->currentText(),thresValue,this->get_timesec(step_model->item(index.row(),5)->text())))
                   << step_model->item(index.row(),6)->text()
                   << step_model->item(index.row(),7)->text();
 
@@ -551,7 +551,7 @@ void Dialog_inteditor::add_to_plot(QTreeWidgetItem *item)
 
     plot_model->insertRows(row,1,QModelIndex());
     plot_model->setData(plot_model->index(row,0,QModelIndex()),item->data(2,Qt::DisplayRole).toDouble());
-    plot_model->setData(plot_model->index(row,1,QModelIndex()),time_sum + (settings::get_timesec(item->data(4,Qt::DisplayRole).toString()) / 60.0));
+    plot_model->setData(plot_model->index(row,1,QModelIndex()),time_sum + (this->get_timesec(item->data(4,Qt::DisplayRole).toString()) / 60.0));
     plot_model->setData(plot_model->index(row,2,QModelIndex()),dist_sum + item->data(6,Qt::DisplayRole).toDouble());
     plot_model->setData(plot_model->index(row,3,QModelIndex()),stress_sum + item->data(5,Qt::DisplayRole).toDouble());
     this->set_plot_graphic(plot_model->rowCount());
@@ -620,7 +620,7 @@ void Dialog_inteditor::set_plot_graphic(int c_ints)
     ui->widget_planerplot->yAxis->setTickLabels(true);
     ui->widget_planerplot->replot();
 
-    ui->label_duration->setText("Time:" + settings::set_time(static_cast<int>(ceil(time_sum))) + " - " + "Distance:" + QString::number(dist_sum) + " - " + "Stress:" + QString::number(round(stress_sum)));
+    ui->label_duration->setText("Time:" + this->set_time(static_cast<int>(ceil(time_sum))) + " - " + "Distance:" + QString::number(dist_sum) + " - " + "Stress:" + QString::number(round(stress_sum)));
 }
 
 int Dialog_inteditor::get_x2axis_values()
@@ -770,7 +770,7 @@ void Dialog_inteditor::on_comboBox_sport_currentIndexChanged(const QString &sel_
     this->get_workouts(current_sport);
     this->set_sport_threshold(current_sport);
     this->set_min_max(ui->comboBox_level->currentText(),sel_sport);
-    ui->label_est_speed->setText(settings::get_workout_pace(ui->doubleSpinBox_int_dist->value(),ui->timeEdit_int_time->time(),sel_sport,false));
+    ui->label_est_speed->setText(this->get_workout_pace(ui->doubleSpinBox_int_dist->value(),ui->timeEdit_int_time->time(),sel_sport,false));
     this->clearIntTree();
     this->reset_values();
     this->reset_workoutInfo();
@@ -779,13 +779,13 @@ void Dialog_inteditor::on_comboBox_sport_currentIndexChanged(const QString &sel_
 
 void Dialog_inteditor::on_timeEdit_int_time_timeChanged(const QTime &time)
 {
-    ui->label_est_speed->setText(settings::get_workout_pace(ui->doubleSpinBox_int_dist->value(),time,ui->comboBox_sport->currentText(),false));
+    ui->label_est_speed->setText(this->get_workout_pace(ui->doubleSpinBox_int_dist->value(),time,ui->comboBox_sport->currentText(),false));
     this->calc_distance(ui->comboBox_sport->currentText());
 }
 
 void Dialog_inteditor::on_doubleSpinBox_int_dist_valueChanged(double dist)
 {
-    ui->label_est_speed->setText(settings::get_workout_pace(dist,ui->timeEdit_int_time->time(),ui->comboBox_sport->currentText(),false));
+    ui->label_est_speed->setText(this->get_workout_pace(dist,ui->timeEdit_int_time->time(),ui->comboBox_sport->currentText(),false));
 }
 
 void Dialog_inteditor::on_pushButton_delete_clicked()
@@ -829,6 +829,11 @@ void Dialog_inteditor::on_treeWidget_planer_itemClicked(QTreeWidgetItem *item, i
     select_item = item;
     this->set_pushbutton(true);
     this->load_item(item);
+}
+
+void Dialog_inteditor::on_treeWidget_planer_itemChanged(QTreeWidgetItem *item, int column)
+{
+    qDebug() << column;
     this->refresh_model();
 }
 
@@ -884,7 +889,7 @@ void Dialog_inteditor::save_workout()
        }
    }
 
-   worktime = settings::set_time(static_cast<int>(ceil(time_sum)*60));
+   worktime = this->set_time(static_cast<int>(ceil(time_sum)*60));
 
    //Update Workout -> delete first
    if(current_workID.isEmpty())

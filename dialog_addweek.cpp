@@ -104,8 +104,8 @@ void Dialog_addweek::fill_values(QString selWeek)
             weekModel->setData(weekModel->index(row,1,QModelIndex()),work.toInt());
             weekModel->setData(weekModel->index(row,2,QModelIndex()),duration);
             weekModel->setData(weekModel->index(row,3,QModelIndex()),0.0);
-            weekModel->setData(weekModel->index(row,4,QModelIndex()),settings::set_doubleValue(dist.toDouble(),false));
-            weekModel->setData(weekModel->index(row,5,QModelIndex()),settings::get_workout_pace(dist.toDouble(),duration,sportuseList.at(row),false));
+            weekModel->setData(weekModel->index(row,4,QModelIndex()),this->set_doubleValue(dist.toDouble(),false));
+            weekModel->setData(weekModel->index(row,5,QModelIndex()),this->get_workout_pace(dist.toDouble(),duration,sportuseList.at(row),false));
             weekModel->setData(weekModel->index(row,6,QModelIndex()),stress.toInt());        
         }
 
@@ -113,7 +113,7 @@ void Dialog_addweek::fill_values(QString selWeek)
         weekModel->setData(weekModel->index(listCount,1,QModelIndex()),week_del.sum_int(ab_model,&sportuseList,1));
         weekModel->setData(weekModel->index(listCount,2,QModelIndex()),week_del.sum_time(ab_model,&sportuseList,2));
         weekModel->setData(weekModel->index(listCount,3,QModelIndex()),100);
-        weekModel->setData(weekModel->index(listCount,4,QModelIndex()),settings::set_doubleValue(week_del.sum_double(ab_model,&sportuseList,4),false));
+        weekModel->setData(weekModel->index(listCount,4,QModelIndex()),this->set_doubleValue(week_del.sum_double(ab_model,&sportuseList,4),false));
         weekModel->setData(weekModel->index(listCount,5,QModelIndex()),"--");
         weekModel->setData(weekModel->index(listCount,6,QModelIndex()),week_del.sum_int(ab_model,&sportuseList,6));
     }

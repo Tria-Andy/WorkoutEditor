@@ -23,8 +23,9 @@
 #include <QSpinBox>
 #include <QDebug>
 #include "settings.h"
+#include "calculation.h"
 
-class del_swimlap : public QItemDelegate
+class del_swimlap : public QItemDelegate, public calculation
 {
     Q_OBJECT
 
@@ -105,7 +106,7 @@ public:
         int lapCount,lapTime,startTime;
         lapCount = model->rowCount()-1;
         int value = spinBox->value();
-        double lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(value),"mm:ss"),settings::get_swimLaplen(),settings::isSwim,false).toDouble();
+        double lapSpeed = get_speed(QTime::fromString(set_time(value),"mm:ss"),settings::get_swimLaplen(),settings::isSwim,false).toDouble();
 
         model->setData(index, value, Qt::EditRole);
         model->setData(speed_index,lapSpeed);

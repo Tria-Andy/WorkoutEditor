@@ -25,12 +25,13 @@
 #include "jsonhandler.h"
 #include "schedule.h"
 #include "settings.h"
+#include "calculation.h"
 
 namespace Ui {
 class Dialog_export;
 }
 
-class Dialog_export : public QDialog
+class Dialog_export : public QDialog, public calculation
 {
     Q_OBJECT
 

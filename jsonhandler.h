@@ -21,9 +21,10 @@
 #include "activity.h"
 #include <QMap>
 #include <QStandardItemModel>
+#include "calculation.h"
 
 class Activity;
-class jsonHandler
+class jsonHandler : public calculation
 {
 public:
     jsonHandler(bool readFlag = false,QString jsonfile = QString(), Activity *p_act = 0);

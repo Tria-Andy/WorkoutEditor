@@ -61,7 +61,7 @@ void Activity::prepareData()
             editIndex = edit_int_model->index(row,col,QModelIndex());
             edit_int_model->setData(editIndex,int_model->data(intIndex,Qt::DisplayRole));
         }
-        edit_int_model->setData(edit_int_model->index(row,3,QModelIndex()),settings::set_doubleValue(this->get_int_distance(row,false),true));
+        edit_int_model->setData(edit_int_model->index(row,3,QModelIndex()),this->set_doubleValue(this->get_int_distance(row,false),true));
 
         if(curr_sport == settings::isSwim)
         {
@@ -115,7 +115,7 @@ void Activity::prepareData()
                     lapStart = lapStartPrev + lapPacePrev;
                 }
                 if(row == 1) lapStart = lapPacePrev-1;
-                lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(lapPace),"mm:ss"),swim_track,settings::isSwim,false).toDouble();
+                lapSpeed = this->get_speed(QTime::fromString(this->set_time(lapPace),"mm:ss"),swim_track,settings::isSwim,false).toDouble();
             }
             else
             {
@@ -208,13 +208,13 @@ void Activity::set_swim_data()
         zone_high = temp.split("-").last();
 
         swim_pace_model->setData(swim_pace_model->index(i,0,QModelIndex()),levels.at(i));
-        swim_pace_model->setData(swim_pace_model->index(i,1,QModelIndex()),settings::set_time(this->get_zone_values(zone_low.toDouble(),pace_cv,true)));
+        swim_pace_model->setData(swim_pace_model->index(i,1,QModelIndex()),this->set_time(this->get_zone_values(zone_low.toDouble(),pace_cv,true)));
 
         p_swim_time[i] = swim_cv*(zone_low.toDouble()/100);
 
         if(i < zone_count-1)
         {
-            swim_pace_model->setData(swim_pace_model->index(i,2,QModelIndex()),settings::set_time(this->get_zone_values(zone_high.toDouble(),pace_cv,true)));
+            swim_pace_model->setData(swim_pace_model->index(i,2,QModelIndex()),this->set_time(this->get_zone_values(zone_high.toDouble(),pace_cv,true)));
         }
         else
         {
@@ -227,7 +227,7 @@ void Activity::set_swim_data()
 
     for (int x = 1; x <= zone_count;x++)
     {
-        swim_pace_model->setData(swim_pace_model->index(x-1,3,QModelIndex()),settings::set_time(p_swim_timezone[x]));
+        swim_pace_model->setData(swim_pace_model->index(x-1,3,QModelIndex()),this->set_time(p_swim_timezone[x]));
     }
 
     //Set HF zone low and high
@@ -354,7 +354,7 @@ void Activity::set_hf_time_in_zone()
 
      for(int i = 0; i < zone_count; i++)
      {
-         swim_hf_model->setData(swim_hf_model->index(i,3,QModelIndex()),settings::set_time(p_hf_timezone[i]));
+         swim_hf_model->setData(swim_hf_model->index(i,3,QModelIndex()),this->set_time(p_hf_timezone[i]));
      }
     hf_avg = 0;
 
@@ -758,7 +758,7 @@ void Activity::set_edit_samp_model(int rowcount)
             sportpace = settings::get_thresValue("runpace");
             limitFactor = 0.20;
         }
-        lowLimit = settings::get_speed(QTime::fromString(settings::set_time(sportpace),"mm:ss"),0,curr_sport,true).toDouble();
+        lowLimit = this->get_speed(QTime::fromString(this->set_time(sportpace),"mm:ss"),0,curr_sport,true).toDouble();
         lowLimit = lowLimit - (lowLimit*limitFactor);
     }
     if(curr_sport == settings::isTria)
@@ -924,13 +924,13 @@ void Activity::set_edit_samp_model(int rowcount)
               }
           }
           jsonhandler->set_overrideFlag(true);
-          sportValue = round(settings::estimate_stress(settings::isSwim,settings::set_time(this->get_int_pace(0,true)/10),this->get_int_duration(0,true)));
+          sportValue = round(this->estimate_stress(settings::isSwim,this->set_time(this->get_int_pace(0,true)/10),this->get_int_duration(0,true)));
           jsonhandler->set_overrideData("swimscore",QString::number(sportValue));
           triValue = triValue + sportValue;
-          sportValue = round(settings::estimate_stress(settings::isBike,QString::number(this->get_int_value(2,4,true)),this->get_int_duration(2,true)));
+          sportValue = round(this->estimate_stress(settings::isBike,QString::number(this->get_int_value(2,4,true)),this->get_int_duration(2,true)));
           jsonhandler->set_overrideData("skiba_bike_score",QString::number(sportValue));
           triValue = triValue + sportValue;
-          sportValue = round(settings::estimate_stress(settings::isRun,settings::set_time(this->get_int_pace(4,true)),this->get_int_duration(4,true)));
+          sportValue = round(this->estimate_stress(settings::isRun,this->set_time(this->get_int_pace(4,true)),this->get_int_duration(4,true)));
           jsonhandler->set_overrideData("govss",QString::number(sportValue));
           triValue = triValue + sportValue;
           jsonhandler->set_overrideData("triscore",QString::number(triValue));
@@ -993,15 +993,15 @@ void Activity::set_curr_act_model(bool recalc)
     {
             data_index = p_int_model->index(row,0,QModelIndex());
             curr_act_model->setData(curr_act_model->index(row,0,QModelIndex()),p_int_model->data(data_index,Qt::DisplayRole).toString());
-            curr_act_model->setData(curr_act_model->index(row,1,QModelIndex()),settings::set_time(this->get_int_duration(row,recalc)));
+            curr_act_model->setData(curr_act_model->index(row,1,QModelIndex()),this->set_time(this->get_int_duration(row,recalc)));
             data_index = p_samp_model->index(p_int_model->data(p_int_model->index(row,2,QModelIndex()),Qt::DisplayRole).toInt()-1,1,QModelIndex());
-            curr_act_model->setData(curr_act_model->index(row,2,QModelIndex()),settings::set_doubleValue(p_samp_model->data(data_index,Qt::DisplayRole).toDouble(),true));
-            curr_act_model->setData(curr_act_model->index(row,3,QModelIndex()),settings::set_doubleValue(this->get_int_distance(row,recalc),true));
-            curr_act_model->setData(curr_act_model->index(row,4,QModelIndex()),settings::set_time(this->get_int_pace(row,recalc)));
+            curr_act_model->setData(curr_act_model->index(row,2,QModelIndex()),this->set_doubleValue(p_samp_model->data(data_index,Qt::DisplayRole).toDouble(),true));
+            curr_act_model->setData(curr_act_model->index(row,3,QModelIndex()),this->set_doubleValue(this->get_int_distance(row,recalc),true));
+            curr_act_model->setData(curr_act_model->index(row,4,QModelIndex()),this->set_time(this->get_int_pace(row,recalc)));
             if(curr_sport == settings::isSwim) curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),this->get_swim_laps(row,recalc));
             if(curr_sport == settings::isBike)
             {
-                curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),settings::set_doubleValue(this->get_int_value(row,4,recalc),false));
+                curr_act_model->setData(curr_act_model->index(row,5,QModelIndex()),this->set_doubleValue(this->get_int_value(row,4,recalc),false));
                 curr_act_model->setData(curr_act_model->index(row,6,QModelIndex()),round(this->get_int_value(row,3,recalc)));
             }
     }
@@ -1012,8 +1012,8 @@ void Activity::set_curr_act_model(bool recalc)
 void Activity::set_avg_values(int counter, int row, bool add)
 {
     avg_counter = counter;
-    double t_laptime = static_cast<double>(settings::get_timesec(curr_act_model->data(curr_act_model->index(row,1,QModelIndex())).toString()));
-    int t_pace = settings::get_timesec(curr_act_model->data(curr_act_model->index(row,4,QModelIndex())).toString());
+    double t_laptime = static_cast<double>(this->get_timesec(curr_act_model->data(curr_act_model->index(row,1,QModelIndex())).toString()));
+    int t_pace = this->get_timesec(curr_act_model->data(curr_act_model->index(row,4,QModelIndex())).toString());
     double t_dist = curr_act_model->data(curr_act_model->index(row,3,QModelIndex())).toDouble();
     double t_watt = 0.0,t_cad = 0.0;
     if(curr_sport == settings::isBike)

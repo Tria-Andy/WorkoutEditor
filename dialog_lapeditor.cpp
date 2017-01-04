@@ -105,12 +105,12 @@ void Dialog_lapeditor::set_duration()
     if(duration <= 3600)
     {
         ui->timeEdit_duration->setDisplayFormat("mm:ss");
-        ui->timeEdit_duration->setTime(QTime::fromString(settings::set_time(duration),"mm:ss"));
+        ui->timeEdit_duration->setTime(QTime::fromString(this->set_time(duration),"mm:ss"));
     }
     else
     {
         ui->timeEdit_duration->setDisplayFormat("hh:mm:ss");
-        ui->timeEdit_duration->setTime(QTime::fromString(settings::set_time(duration),"hh:mm:ss"));
+        ui->timeEdit_duration->setTime(QTime::fromString(this->set_time(duration),"hh:mm:ss"));
     }
 }
 void Dialog_lapeditor::set_lapSpeed(double dist)
@@ -121,7 +121,7 @@ void Dialog_lapeditor::set_lapSpeed(double dist)
     {
         pace = duration / (dist*10.0);
         lapSpeed = 360.0 / pace;
-        ui->label_speed->setText(QString::number(settings::set_doubleValue(lapSpeed,false))+" km/h");
+        ui->label_speed->setText(QString::number(this->set_doubleValue(lapSpeed,false))+" km/h");
     }
     else
     {
@@ -182,7 +182,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
         {
             stroke = ui->spinBox_strokes->value();
         }
-        lapSpeed = settings::get_speed(QTime::fromString(settings::set_time(duration),"mm:ss"),swimLapLen,settings::isSwim,false).toDouble();
+        lapSpeed = this->get_speed(QTime::fromString(this->set_time(duration),"mm:ss"),swimLapLen,settings::isSwim,false).toDouble();
     }
 
     if(editMode == UPDATE)
@@ -391,8 +391,8 @@ void Dialog_lapeditor::on_comboBox_lap_currentIndexChanged(int vLap)
         ui->lineEdit_newName->setText(ui->comboBox_lap->currentText());
     }
 
-    ui->label_start->setText(settings::set_time(ui->spinBox_starttime->value()));
-    ui->label_end->setText(settings::set_time(ui->spinBox_endtime->value()));
+    ui->label_start->setText(this->set_time(ui->spinBox_starttime->value()));
+    ui->label_end->setText(this->set_time(ui->spinBox_endtime->value()));
     this->set_lapSpeed(ui->doubleSpinBox_distance->value());
 }
 
@@ -414,13 +414,13 @@ void Dialog_lapeditor::on_comboBox_edit_currentIndexChanged(int index)
 
 void Dialog_lapeditor::on_spinBox_starttime_valueChanged(int value)
 {
-    ui->label_start->setText(settings::set_time(value));
+    ui->label_start->setText(this->set_time(value));
     this->set_duration();
 }
 
 void Dialog_lapeditor::on_spinBox_endtime_valueChanged(int value)
 {
-    ui->label_end->setText(settings::set_time(value));
+    ui->label_end->setText(this->set_time(value));
     this->set_duration();
 }
 
