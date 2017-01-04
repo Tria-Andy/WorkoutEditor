@@ -221,3 +221,45 @@ double calculation::set_doubleValue(double value, bool isthree)
     }
     return 0;
 }
+/*
+QCPGraph *calculation::get_QCPLine(QCustomPlot *plot,QString name,QColor gColor,QVector<double> &ydata, bool secondAxis)
+{
+    QCPGraph *graph = plot->addGraph();
+    if(secondAxis)
+    {
+        graph->setValueAxis(plot->yAxis2);
+    }
+    graph->setName(name);
+    graph->setLineStyle(QCPGraph::lsLine);
+    graph->setData(xDate,ydata);
+    graph->setAntialiased(true);
+    graph->setPen(QPen(gColor,1));
+
+    return graph;
+}
+
+void calculation::set_itemTracer(QCustomPlot *plot,QCPGraph *graphline, QColor tColor,int pos)
+{
+    QCPItemTracer *tracer = new QCPItemTracer(plot);
+    tracer->setGraph(graphline);
+    tracer->setGraphKey(xDate[pos]);
+    tracer->setStyle(QCPItemTracer::tsCircle);
+    tracer->setBrush(QBrush(tColor));
+}
+
+void calculation::set_itemText(QCustomPlot *plot,QFont lineFont, QVector<double> &ydata,int pos,bool secondAxis)
+{
+    QCPItemText *itemText = new QCPItemText(plot);
+    if(secondAxis)
+    {
+        itemText->position->setAxes(plot->xAxis,plot->yAxis2);
+    }
+    itemText->position->setType(QCPItemPosition::ptPlotCoords);
+    itemText->setPositionAlignment(Qt::AlignHCenter|Qt::AlignBottom);
+    itemText->position->setCoords(xDate[pos],ydata[pos]+1);
+    itemText->setText(QString::number(ydata[pos]));
+    itemText->setTextAlignment(Qt::AlignCenter);
+    itemText->setFont(lineFont);
+    itemText->setPadding(QMargins(1, 1, 1, 1));
+}
+*/
