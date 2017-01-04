@@ -20,7 +20,6 @@
 #define YEAR_POPUP_H
 
 #include <QDialog>
-#include <QStandardItemModel>
 #include "schedule.h"
 #include "settings.h"
 #include "calculation.h"

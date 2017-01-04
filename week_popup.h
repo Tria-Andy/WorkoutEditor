@@ -47,7 +47,7 @@ private slots:
 private:
     Ui::week_popup *ui;
     QStringList week_info,barSelection;
-    QStandardItemModel *plotmodel;
+    QSortFilterProxyModel *workProxy;
     schedule *workSched;
     QDate firstDay;
     bool isLoad;
@@ -55,7 +55,7 @@ private:
     QVector<double> xStress,xLTS,xBar,xWorks,maxValues;
     QVector<double> yStress,yLTS,yDura,yDist,yWorks,yWorkCount,yValues;
     int dayCount;
-    void set_plotModel();
+    void set_plotValues();
     void set_graph();
     void set_weekPlot(int);
 };

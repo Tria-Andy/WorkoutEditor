@@ -61,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
     stdWorkout = new standardWorkouts();
     calendar_model = new QStandardItemModel();
     sum_model = new QStandardItemModel();
+    proxyModel = new QSortFilterProxyModel;
     connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
 
     ui->actionSave_Workout_Schedule->setEnabled(false);
@@ -103,6 +104,7 @@ void MainWindow::freeMem()
         delete workSchedule;
         delete sum_model;
         delete calendar_model;
+        delete proxyModel;
     }
 }
 
@@ -255,6 +257,7 @@ void MainWindow::summery_view()
     ui->tableView_summery->setEditTriggers(QAbstractItemView::NoEditTriggers);
     QList<QStandardItem*> list;
 
+
     QModelIndex index;
     QString sport,weekID;
     QStringList sumValues;
@@ -352,7 +355,7 @@ void MainWindow::workout_calendar()
     QString weekValue,cal_value,phase_value;
     int dayofweek = currentdate.dayOfWeek();
     int rowcount;
-    QList<QStandardItem*> worklist,meta;
+    QList<QStandardItem*> worklist, meta;
     QStringList sportuseList = settings::get_listValues("Sportuse");
     calendar_model->clear();
     workSchedule->workout_schedule->sort(2);
@@ -365,6 +368,7 @@ void MainWindow::workout_calendar()
         ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_cal->verticalHeader()->hide();
         ui->tableView_cal->setItemDelegate(&calender_del);
+        proxyModel->setSourceModel(workSchedule->workout_schedule);
 
         int offset = (1 - dayofweek) + (weekDays*weekCounter);
 
@@ -378,18 +382,17 @@ void MainWindow::workout_calendar()
             for(int day = 0; day < 8 ; ++day)
             {
                 workout_date = currentdate.addDays(offset);
+                proxyModel->setFilterFixedString(workout_date.toString("dd.MM.yyyy"));
+                proxyModel->setFilterKeyColumn(1);
 
-                worklist = workSchedule->workout_schedule->findItems(workout_date.toString("dd.MM.yyyy"),Qt::MatchExactly,1);
-
-                for(int wa = 0; wa < worklist.count(); ++wa)
+                for(int wa = 0; wa < proxyModel->rowCount(); ++wa)
                 {
-                    if(!worklist.isEmpty())
+                    if(proxyModel->rowCount() > 0)
                     {
-                        index = workSchedule->workout_schedule->indexFromItem(worklist.at(wa));
-                        cal_value = cal_value + (workSchedule->workout_schedule->item(index.row(),3)->text() + w_connect);
-                        cal_value = cal_value + (workSchedule->workout_schedule->item(index.row(),4)->text() + "\n");
-                        cal_value = cal_value + (workSchedule->workout_schedule->item(index.row(),6)->text().left(5) + w_connect);
-                        cal_value = cal_value + (workSchedule->workout_schedule->item(index.row(),7)->text() + " km" + delimiter);
+                        cal_value = cal_value + (proxyModel->data(proxyModel->index(wa,3)).toString() + w_connect);
+                        cal_value = cal_value + (proxyModel->data(proxyModel->index(wa,4)).toString() + "\n");
+                        cal_value = cal_value + (proxyModel->data(proxyModel->index(wa,6)).toString().left(5) + w_connect);
+                        cal_value = cal_value + (proxyModel->data(proxyModel->index(wa,7)).toString() + " km" + delimiter);
                     }
                     else
                     {
@@ -1719,8 +1722,10 @@ void MainWindow::on_comboBox_phasefilter_currentIndexChanged(int index)
     }
     else
     {
-        QList<QStandardItem*> list = workSchedule->week_meta->findItems(phaseFilter,Qt::MatchContains,2);
-        if(!list.isEmpty())
+        proxyModel->setSourceModel(workSchedule->week_meta);
+        proxyModel->setFilterFixedString(phaseFilter);
+        proxyModel->setFilterKeyColumn(2);
+        if(proxyModel->rowCount() > 0)
         {
             this->workout_calendar();
             this->summery_view();

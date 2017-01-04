@@ -24,11 +24,13 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
     ui(new Ui::week_popup)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     isLoad = false;
     dayCount = 7;
-    week_info << weekinfo.split("#");
     workSched = p_sched;
-    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    week_info << weekinfo.split("#");
+    workProxy = new QSortFilterProxyModel;
+    workProxy->setSourceModel(workSched->workout_schedule);
     barSelection << "Duration" << "Distance";
     ui->comboBox_yValue->addItems(barSelection);
     xStress.resize(dayCount);
@@ -44,7 +46,7 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
     yValues.resize(dayCount);
     maxValues.resize(3);
     maxValues.fill(0);
-    this->set_plotModel();
+    this->set_plotValues();
 }
 
 enum {DURATION,DISTANCE};
@@ -52,21 +54,23 @@ enum {DURATION,DISTANCE};
 week_popup::~week_popup()
 {
     delete ui;
+    delete workProxy;
 }
 
-void week_popup::set_plotModel()
+void week_popup::set_plotValues()
 {
-    QModelIndex index;
+    workProxy->setFilterRegExp("\\b"+week_info.at(0)+"\\b");
+    workProxy->setFilterKeyColumn(0);
+    workProxy->sort(0);
+    int proxyCount = workProxy->rowCount();
     QDate tempDate;
-    QList<QStandardItem*> list = workSched->workout_schedule->findItems(week_info.at(0),Qt::MatchExactly,0);
 
-    if(!list.isEmpty())
+    if(proxyCount > 0)
     {
-        index = workSched->workout_schedule->indexFromItem(list.at(0));
         QDateTime weekStart,workoutDate;
         QTime wTime;
         wTime.fromString("00:00:00","hh:mm:ss");
-        tempDate = QDate::fromString(workSched->workout_schedule->item(index.row(),1)->text(),"dd.MM.yyyy");
+        tempDate = QDate::fromString(workProxy->data(workProxy->index(0,1)).toString(),"dd.MM.yyyy");
         weekStart.setDate(tempDate.addDays(1 - tempDate.dayOfWeek()));
         weekStart.setTime(wTime);
         weekStart.setTimeSpec(Qt::UTC);
@@ -77,24 +81,9 @@ void week_popup::set_plotModel()
             weekDates.insert(i,weekStart.addDays(i));
         }
 
-        plotmodel = new QStandardItemModel(list.count(),4);
-
         double stress,dura,dist;
 
-        for(int i = 0; i < list.count(); ++i)
-        {
-            index = workSched->workout_schedule->indexFromItem(list.at(i));
-            workoutDate.setDate(QDate::fromString(workSched->workout_schedule->item(index.row(),1)->text(),"dd.MM.yyyy"));
-            workoutDate.setTime(wTime);
-            workoutDate.setTimeSpec(Qt::UTC);
-            plotmodel->setData(plotmodel->index(i,0,QModelIndex()),workoutDate); //Date
-            plotmodel->setData(plotmodel->index(i,1,QModelIndex()),workSched->workout_schedule->item(index.row(),8)->text().toInt()); //Stress
-            plotmodel->setData(plotmodel->index(i,2,QModelIndex()),this->get_timesec(workSched->workout_schedule->item(index.row(),6)->text()) / 60.0); //Dura
-            plotmodel->setData(plotmodel->index(i,3,QModelIndex()),workSched->workout_schedule->item(index.row(),7)->text().toDouble()); //Dist
-        }
-        plotmodel->sort(0);
-
-        ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(list.count()));
+        ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(proxyCount));
 
         double dateValue = 0;
         double ltsDays = settings::get_ltsValue("ltsdays");
@@ -133,14 +122,16 @@ void week_popup::set_plotModel()
             }
             yLTS[i+1] = round(ltsStress);
         }
-        workoutDate.setTimeSpec(Qt::UTC);
 
-        for(int i = 0,day = 0; i < plotmodel->rowCount(); ++i)
+        for(int i = 0,day = 0; i < proxyCount; ++i)
         {
-            workoutDate = plotmodel->data(plotmodel->index(i,0,QModelIndex())).toDateTime();
-            stress = plotmodel->data(plotmodel->index(i,1,QModelIndex())).toDouble();
-            dura = plotmodel->data(plotmodel->index(i,2,QModelIndex())).toDouble() / 60;
-            dist = plotmodel->data(plotmodel->index(i,3,QModelIndex())).toDouble();
+            workoutDate = QDateTime::fromString(workProxy->data(workProxy->index(i,1,QModelIndex())).toString(),"dd.MM.yyyy");
+            workoutDate.setTime(wTime);
+            workoutDate.setTimeSpec(Qt::UTC);
+
+            stress = workProxy->data(workProxy->index(i,8,QModelIndex())).toDouble();
+            dura = static_cast<double>(this->get_timesec(workProxy->data(workProxy->index(i,6,QModelIndex())).toString())) / 60;
+            dist = workProxy->data(workProxy->index(i,7,QModelIndex())).toDouble();
 
             for( ; day < weekDates.count(); ++day)
             {
@@ -158,8 +149,6 @@ void week_popup::set_plotModel()
             day = 0;
         }
 
-        delete plotmodel;
-
         for(int i = 0; i < yWorkCount.count(); ++i)
         {
             yWorks[i] = yWorkCount[i]*10;
@@ -170,7 +159,7 @@ void week_popup::set_plotModel()
     }
     else
     {
-        ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(list.count()));
+        ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(proxyCount));
         this->set_graph();
     }
 }
@@ -214,6 +203,8 @@ void week_popup::set_weekPlot(int yValue)
     QFont lineFont,barFont;
     lineFont.setPointSize(10);
     barFont.setPointSize(10);
+
+    //QCPGraph *stressLine = this->get_QCPLine(ui->widget_plot,"StessScore",,,false);
 
     QCPGraph *stressLine = ui->widget_plot->addGraph();
     stressLine->setName("StressScore");

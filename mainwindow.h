@@ -80,6 +80,7 @@ private:
     del_intselect intSelect_del;
     del_level level_del;
     QStandardItemModel *calendar_model,*sum_model;
+    QSortFilterProxyModel *proxyModel;
     QStringList modus_list,cal_header,year_header,schedMode;
 
     //Intervall Chart
