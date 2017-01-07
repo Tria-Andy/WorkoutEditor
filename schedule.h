@@ -24,11 +24,11 @@
 #include <QtCharts>
 #include <QMessageBox>
 #include "settings.h"
-#include "logger.h"
+#include "xmlhandler.h"
 
 QT_CHARTS_USE_NAMESPACE
 
-class schedule
+class schedule : public xmlHandler
 {
 
 public:
@@ -62,11 +62,11 @@ public:
     void delete_workout(QModelIndex);
 
 private:
-    logger *logFile;
     QStringList workoutTags,metaTags,contentTags;
-    QString schedulePath;
+    QString schedulePath,workoutFile,metaFile,contentFile,ltsFile;
     QDate firstdayofweek;
     QMap<QDate,double> stressValues;
+    bool fileCreated;
     void check_workoutFiles();
     void load_workoutsFiles();
     void read_dayWorkouts(QDomDocument);

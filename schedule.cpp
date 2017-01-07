@@ -32,7 +32,21 @@ schedule::schedule()
     workout_sport.clear();
     firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
     schedulePath = settings::get_gcInfo("schedule");
-    if(!schedulePath.isEmpty()) this->check_workoutFiles();
+    workoutFile = "workout_schedule.xml";
+    metaFile = "workout_phase_meta.xml";
+    contentFile = "workout_phase_content.xml";
+    ltsFile = "longtermstress.xml";
+
+    if(!schedulePath.isEmpty())
+    {
+        this->check_File(schedulePath,workoutFile);
+
+        this->check_File(schedulePath,metaFile);
+        this->check_File(schedulePath,contentFile);
+        this->check_File(schedulePath,ltsFile);
+
+        this->load_workoutsFiles();
+    }
 }
 
 void schedule::check_workoutFiles()
@@ -143,6 +157,7 @@ void schedule::load_workoutsFiles()
 
 void schedule::read_dayWorkouts(QDomDocument workouts)
 {
+
     QDomElement root_workouts = workouts.firstChildElement();
     QDomNodeList workout_list;
     if(workouts.hasChildNodes())
