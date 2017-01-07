@@ -1586,9 +1586,14 @@ void MainWindow::on_actionEdit_Undo_triggered()
 
 void MainWindow::on_actionIntervall_Editor_triggered()
 {
-    Dialog_inteditor intEditor(this,stdWorkout);
-    intEditor.setModal(true);
-    intEditor.exec();
+    //Dialog_inteditor intEditor(this,stdWorkout);
+    //intEditor.setModal(true);
+    //intEditor.exec();
+
+    Dialog_workCreator workCreator(this,stdWorkout);
+    workCreator.setModal(true);
+    workCreator.exec();
+
 }
 
 void MainWindow::on_actionPreferences_triggered()

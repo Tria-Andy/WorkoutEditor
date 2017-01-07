@@ -44,6 +44,7 @@
 #include "dialog_export.h"
 #include "dialog_stresscalc.h"
 #include "dialog_inteditor.h"
+#include "dialog_workcreator.h"
 #include "dialog_settings.h"
 #include "dialog_pacecalc.h"
 #include "dialog_lapeditor.h"

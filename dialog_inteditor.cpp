@@ -345,6 +345,7 @@ void Dialog_inteditor::add_topItem(QString label)
     QTreeWidgetItem *item = new QTreeWidgetItem();
     item->setText(0,label+"-"+QString::number(counter));
     item->setText(7,ui->comboBox_reps->currentText());
+
     for(int i = 0; i < item->columnCount(); ++i)
     {
         item->setBackground(i,QBrush(itemColor));

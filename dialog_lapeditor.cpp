@@ -55,7 +55,7 @@ Dialog_lapeditor::Dialog_lapeditor(QWidget *parent,Activity *p_act,QModelIndex p
 
 }
 
-enum {UPDATE,ADD,DELETE};
+enum {UPDATE,ADD,DEL};
 enum {SWIMLAPS,INTERVALS};
 
 Dialog_lapeditor::~Dialog_lapeditor()
@@ -228,7 +228,7 @@ void Dialog_lapeditor::edit_laps(int editMode,int index)
         }
         this->set_lapinfo();
     }
-    if(editMode == DELETE)
+    if(editMode == DEL)
     {
         if(curr_act->get_sport() == settings::isSwim)
         {
@@ -344,7 +344,7 @@ void Dialog_lapeditor::on_pushButton_ok_clicked()
     selRow = index;
     if(ui->radioButton_update->isChecked()) editMode = UPDATE;
     if(ui->radioButton_add->isChecked()) editMode = ADD;
-    if(ui->radioButton_del->isChecked()) editMode = DELETE;
+    if(ui->radioButton_del->isChecked()) editMode = DEL;
     this->edit_laps(editMode,index);
 }
 
