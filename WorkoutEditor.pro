@@ -50,7 +50,9 @@ SOURCES += main.cpp\
     jsonhandler.cpp \
     logger.cpp \
     stress_popup.cpp \
-    calculation.cpp
+    calculation.cpp \
+    xmlhandler.cpp \
+    dialog_workcreator.cpp
 
 HEADERS  += mainwindow.h \
     calendar_delegate.h \
@@ -85,7 +87,10 @@ HEADERS  += mainwindow.h \
     del_level.h \
     del_addweek.h \
     stress_popup.h \
-    calculation.h
+    calculation.h \
+    xmlhandler.h \
+    dialog_workcreator.h \
+    del_workcreator.h
 
 FORMS    += mainwindow.ui \
     dialog_add.ui \
@@ -103,7 +108,8 @@ FORMS    += mainwindow.ui \
     dialog_week_copy.ui \
     dialog_version.ui \
     dialog_lapeditor.ui \
-    stress_popup.ui
+    stress_popup.ui \
+    dialog_workcreator.ui
 
 RESOURCES += \
     resources.qrc

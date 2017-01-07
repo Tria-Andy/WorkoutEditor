@@ -146,6 +146,42 @@ double calculation::calc_totalWork(double weight,double avgHF, double moveTime)
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
 }
 
+QString calculation::calc_threshold(QString sport,double threshold,double percent)
+{
+    QString thresValue = "00:00";
+    if(percent > 0)
+    {
+        if(sport == settings::isSwim || sport == settings::isRun)
+        {
+            thresValue = set_time(static_cast<int>(round(threshold / (percent/100.0))));
+        }
+        if(sport == settings::isBike || sport == settings::isStrength)
+        {
+            thresValue = QString::number(threshold * (percent/100));
+        }
+    }
+
+    return thresValue;
+}
+
+double calculation::calc_distance(QString duration, double pace)
+{
+    return set_doubleValue(get_timesec(duration) / pace,true);
+}
+
+QString calculation::calc_duration(QString sport,double dist, QString pace)
+{
+    if(sport == settings::isSwim)
+    {
+        return set_time(get_timesec(pace) * (dist*10));
+    }
+    else
+    {
+        return set_time(get_timesec(pace) * dist/1000);
+    }
+    return 0;
+}
+
 double calculation::estimate_stress(QString sport, QString p_goal, int duration)
 {
     double goal = 0;
@@ -209,9 +245,9 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
     return 0;
 }
 
-double calculation::set_doubleValue(double value, bool isthree)
+double calculation::set_doubleValue(double value, bool setthree)
 {
-    if(isthree)
+    if(setthree)
     {
         return value = round( value * 1000.0 ) / 1000.0;
     }
@@ -220,6 +256,24 @@ double calculation::set_doubleValue(double value, bool isthree)
         return ((static_cast<int>(value *100 +.5)) / 100.0);
     }
     return 0;
+}
+
+double calculation::get_thresPercent(QString sport, QString level, bool max)
+{
+    QString range = settings::get_rangeValue(sport,level);
+    QString value;
+
+    if(max)
+    {
+        value = range.split("-").last();
+        return value.toDouble();
+    }
+    else
+    {
+        value = range.split("-").first();
+        return value.toDouble();
+    }
+
 }
 /*
 QCPGraph *calculation::get_QCPLine(QCustomPlot *plot,QString name,QColor gColor,QVector<double> &ydata, bool secondAxis)
