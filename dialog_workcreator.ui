@@ -682,6 +682,12 @@
                </item>
                <item>
                 <widget class="QListView" name="listView_values">
+                 <property name="font">
+                  <font>
+                   <family>MS Shell Dlg 2</family>
+                   <pointsize>10</pointsize>
+                  </font>
+                 </property>
                  <property name="frameShape">
                   <enum>QFrame::Panel</enum>
                  </property>
@@ -819,6 +825,12 @@
                    <height>40</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>MS Shell Dlg 2</family>
+                   <pointsize>10</pointsize>
+                  </font>
+                 </property>
                  <property name="frameShape">
                   <enum>QFrame::Panel</enum>
                  </property>
@@ -832,6 +844,12 @@
                </item>
                <item>
                 <widget class="QListWidget" name="listWidget_phases">
+                 <property name="font">
+                  <font>
+                   <family>MS Shell Dlg 2</family>
+                   <pointsize>10</pointsize>
+                  </font>
+                 </property>
                  <property name="frameShape">
                   <enum>QFrame::Panel</enum>
                  </property>

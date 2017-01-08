@@ -54,146 +54,12 @@ void Dialog_workCreator::on_pushButton_close_clicked()
     reject();
 }
 
-void Dialog_workCreator::on_treeWidget_intervall_itemChanged(QTreeWidgetItem *item, int column)
-{
-    Q_UNUSED(column)
-    if(currentItem != item)
-    {
-        if(item->data(0,Qt::DisplayRole) == isGroup || item->data(0,Qt::DisplayRole) == isSeries)
-        {
-            this->set_defaultData(item,false);
-        }
-        else
-        {
-            this->set_defaultData(item,true);
-        }
-    }
-}
-
-void Dialog_workCreator::set_backColor(QTreeWidgetItem *item)
-{
-    QColor itemColor;
-    QString itemName = item->data(0,Qt::DisplayRole).toString();
-
-    itemColor = settings::get_itemColor(item->data(1,Qt::DisplayRole).toString());
-    if(itemName.contains(isGroup)) itemColor = QColor(Qt::darkGray);
-    if(itemName.contains(isSeries)) itemColor = QColor(Qt::lightGray);
-
-    for(int i = 0; i < item->columnCount(); ++i)
-    {
-        item->setBackground(i,QBrush(itemColor));
-    }
-}
-
-void Dialog_workCreator::set_itemData(QTreeWidgetItem *item)
-{
-    QString itemIdent = item->data(0,Qt::DisplayRole).toString();
-
-    if(itemIdent.contains(isGroup) || itemIdent.contains(isSeries))
-    {
-        item->setData(0,Qt::EditRole,valueModel->data(valueModel->index(0,0)));
-        item->setData(7,Qt::EditRole,valueModel->data(valueModel->index(1,0)));
-    }
-    else
-    {
-        for(int i = 0; i < valueModel->rowCount();++i)
-        {
-            item->setData(i,Qt::EditRole,valueModel->data(valueModel->index(i,0)));
-        }      
-    }
-    this->set_backColor(item);
-}
-
-void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
-{
-    currentItem = item;
-    QString itemIdent = item->data(0,Qt::DisplayRole).toString();
-    valueModel->clear();
-    valueModel->setColumnCount(2);
-
-    if(itemIdent.contains(isGroup) || itemIdent.contains(isSeries))
-    {
-        valueModel->setRowCount(2);
-        edit_del.hasValue = false;
-        valueModel->setData(valueModel->index(0,0,QModelIndex()),item->data(0,Qt::DisplayRole));
-        valueModel->setData(valueModel->index(1,0,QModelIndex()),item->data(7,Qt::DisplayRole));
-    }
-    else
-    {
-        valueModel->setRowCount(7);
-        for(int i = 0; i < item->columnCount();++i)
-        {
-            valueModel->setData(valueModel->index(i,0,QModelIndex()),item->data(i,Qt::DisplayRole));
-            valueModel->setData(valueModel->index(i,1,QModelIndex()),0);
-        }
-        valueModel->setData(valueModel->index(2,1,QModelIndex()),levelList.indexOf(valueModel->data(valueModel->index(1,0)).toString()));
-        edit_del.hasValue = true;
-    }
-
-    ui->frame_edit->setVisible(true);
-    ui->frame_pick->setVisible(false);
-    ui->label_head->setText("Edit Phase");
-}
-
-void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
-{
-    currentItem = item;
-    QString defaultTime;
-    int level = 1;
-    double dist;
-    double percent = this->get_thresPercent(current_sport,levelList.at(level),false);
-    QString threshold = this->calc_threshold(current_sport,currThres,percent);
-
-    if(current_sport == settings::isSwim)
-    {
-        if(item->data(0,Qt::DisplayRole).toString() == settings::get_generalValue("breakname"))
-        {
-            dist = percent = 0.0;
-            threshold = "00:00";
-            defaultTime = "00:30";
-            level = 0;
-        }
-        else
-        {
-            dist = 0.1;
-            defaultTime = this->calc_duration(current_sport,dist,threshold);
-        }
-
-    }
-    else
-    {
-        defaultTime = "05:00";
-        dist = this->calc_distance(defaultTime,static_cast<double>(this->get_timesec(threshold)));
-    }
-
-    if(hasValues)
-    {
-        item->setData(1,Qt::EditRole,levelList.at(level));
-        item->setData(2,Qt::EditRole,percent);
-        item->setData(3,Qt::EditRole,threshold);
-        item->setData(4,Qt::EditRole,defaultTime);
-        item->setData(5,Qt::EditRole,this->estimate_stress(current_sport,threshold,this->get_timesec(defaultTime)));
-        item->setData(6,Qt::EditRole,dist);
-        item->setData(7,Qt::EditRole,"");
-    }
-    else
-    {
-        QString itemName = item->data(0,Qt::DisplayRole).toString();
-        QList<QTreeWidgetItem*> groupCount = ui->treeWidget_intervall->findItems(itemName,Qt::MatchContains,0);
-        itemName = itemName +"-"+QString::number(groupCount.count());
-        item->setData(0,Qt::EditRole,itemName);
-        item->setData(7,Qt::EditRole,2);
-    }
-    this->set_backColor(item);
-    ui->treeWidget_intervall->expandAll();
-    this->set_plotModel();
-}
-
 void Dialog_workCreator::get_workouts(QString sport)
 {
     QString workID,workTitle,listString;
     workoutMap.clear();
     listModel->clear();
+    metaProxy->invalidate();
     metaProxy->setFilterFixedString(sport);
     metaProxy->setFilterKeyColumn(0);
 
@@ -212,37 +78,6 @@ void Dialog_workCreator::get_workouts(QString sport)
 
     ui->listView_workouts->setModel(listModel);
     ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
-}
-
-void Dialog_workCreator::clearIntTree()
-{
-    clearFlag = true;
-    QTreeWidgetItem *treeItem;
-    while(ui->treeWidget_intervall->topLevelItemCount() > 0)
-    {
-        for(int c_item = 0; c_item < ui->treeWidget_intervall->topLevelItemCount(); ++c_item)
-        {
-        treeItem = ui->treeWidget_intervall->topLevelItem(c_item);
-
-        if(treeItem->childCount() > 0)
-        {
-            for(int c_child = 0; c_child < treeItem->childCount(); ++c_child)
-            {
-                if(treeItem->child(c_child)->childCount() > 0)
-                {
-                    for(int subchild = 0; subchild < treeItem->child(c_child)->childCount(); ++subchild)
-                    {
-                        delete treeItem->child(c_child)->child(subchild);
-                    }
-                }
-                delete treeItem->child(c_child);
-            }
-        }
-        delete treeItem;
-        }
-    }
-    plotModel->clear();
-    this->set_plotGraphic(0);
 }
 
 void Dialog_workCreator::open_stdWorkout(QString workID)
@@ -305,6 +140,313 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     ui->treeWidget_intervall->expandAll();
     this->set_plotModel();
     clearFlag = false;
+}
+void Dialog_workCreator::save_workout()
+{
+    int counter = 1;
+    int workcounter;
+    QString workID,sport,phase,subphase,worktime,currWorkID;
+    QStringList workoutValues,existWorkIDs,sportWorkIDs;
+    sport = ui->comboBox_sport->currentText();
+    QTreeWidgetItem *currentItem;
+    QStandardItemModel *workModel;
+    metaProxy->setFilterFixedString(sport);
+    metaProxy->setFilterKeyColumn(0);
+
+    existWorkIDs = stdWorkouts->get_workoutIds();
+
+    for(int i = 0; i < existWorkIDs.count(); ++i)
+    {
+        currWorkID = existWorkIDs.at(i);
+        if(currWorkID.contains(sport))
+        {
+            sportWorkIDs << currWorkID;
+        }
+    }
+
+    worktime = this->set_time(static_cast<int>(ceil(time_sum)*60));
+
+    //Update Workout -> delete first
+    if(current_workID.isEmpty())
+    {
+        workcounter = metaProxy->rowCount();
+        workID = sport + "_" + QString::number(workcounter+1);
+
+        for(int i = 0; i < sportWorkIDs.count(); ++i)
+        {
+             if(workID == sportWorkIDs.at(i))
+             {
+                 workcounter++;
+                 workID = sport + "_" + QString::number(workcounter+1);
+                 i = 0;
+             }
+        }
+        current_workID = workID;
+    }
+    else
+    {
+        stdWorkouts->delete_stdWorkout(current_workID,false);
+        workID = current_workID;
+    }
+
+
+    if(worktime.length() == 5)
+    {
+        worktime = "00:"+worktime;
+    }
+
+    //Metadaten
+    workoutValues << current_sport
+                  << workID
+                  << ui->comboBox_code->currentText()
+                  << ui->lineEdit_workoutname->text()
+                  << worktime
+                  << QString::number(dist_sum)
+                  << QString::number(round(stress_sum));
+
+     workModel = stdWorkouts->workouts_meta;
+     this->save_workout_values(workoutValues,workModel);
+
+    //Intervalldaten
+     workModel = stdWorkouts->workouts_steps;
+     for(int c_item = 0; c_item < ui->treeWidget_intervall->topLevelItemCount(); ++c_item,++counter)
+     {
+         currentItem = ui->treeWidget_intervall->topLevelItem(c_item);
+
+         phase = get_treeValue(c_item,0,0,0,0);
+
+         workoutValues.clear();
+
+         workoutValues << workID
+                  << QString::number(counter)
+                  << get_treeValue(c_item,0,0,0,0)   //part
+                  << get_treeValue(c_item,0,0,1,0)   //level
+                  << get_treeValue(c_item,0,0,2,0)   //threshold
+                  << get_treeValue(c_item,0,0,4,0)   //time
+                  << get_treeValue(c_item,0,0,6,0)   //dist
+                  << get_treeValue(c_item,0,0,7,0)   //repeats
+                  << "-";
+         this->save_workout_values(workoutValues,workModel);
+
+         if(currentItem->childCount() > 0)
+         {
+             for(int c_child = 0; c_child < currentItem->childCount(); ++c_child)
+             {
+                 ++counter;
+                 workoutValues.clear();
+                 workoutValues << workID
+                          << QString::number(counter)
+                          << get_treeValue(c_item,c_child,0,0,1)
+                          << get_treeValue(c_item,c_child,0,1,1)
+                          << get_treeValue(c_item,c_child,0,2,1)
+                          << get_treeValue(c_item,c_child,0,4,1)
+                          << get_treeValue(c_item,c_child,0,6,1)
+                          << get_treeValue(c_item,c_child,0,7,1)
+                          << phase;
+
+                 this->save_workout_values(workoutValues,workModel);
+
+                 if(currentItem->child(c_child)->childCount() > 0)
+                 {
+                     for(int subchild = 0; subchild < currentItem->child(c_child)->childCount(); ++subchild)
+                     {
+                         ++counter;
+                         subphase = get_treeValue(c_item,c_child,0,0,1);
+                         workoutValues.clear();
+                         workoutValues << workID
+                                  << QString::number(counter)
+                                  << get_treeValue(c_item,c_child,subchild,0,2)
+                                  << get_treeValue(c_item,c_child,subchild,1,2)
+                                  << get_treeValue(c_item,c_child,subchild,2,2)
+                                  << get_treeValue(c_item,c_child,subchild,4,2)
+                                  << get_treeValue(c_item,c_child,subchild,6,2)
+                                  << get_treeValue(c_item,c_child,subchild,7,2)
+                                  << subphase;
+
+                         this->save_workout_values(workoutValues,workModel);
+                     }
+                 }
+
+             }
+         }
+     }
+     this->get_workouts(current_sport);
+     stdWorkouts->save_stdWorkouts();
+}
+
+void Dialog_workCreator::save_workout_values(QStringList values, QStandardItemModel *model)
+{
+    int row = model->rowCount();
+    model->insertRows(row,1,QModelIndex());
+
+    for(int i = 0; i < values.count();++i)
+    {
+        model->setData(model->index(row,i,QModelIndex()),values.at(i));
+    }
+}
+
+void Dialog_workCreator::on_treeWidget_intervall_itemChanged(QTreeWidgetItem *item, int column)
+{
+    Q_UNUSED(column)
+    if(currentItem != item)
+    {
+        if(item->data(0,Qt::DisplayRole) == isGroup || item->data(0,Qt::DisplayRole) == isSeries)
+        {
+            this->set_defaultData(item,false);
+        }
+        else
+        {
+            this->set_defaultData(item,true);
+        }
+    }
+}
+
+void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
+{
+    currentItem = item;
+    QString defaultTime = "05:00";
+    int level = 1;
+    double defaultDist;
+    double percent = this->get_thresPercent(current_sport,levelList.at(level),false);
+    QString threshold = this->calc_threshold(current_sport,currThres,percent);
+
+    if(current_sport == settings::isSwim)
+    {
+        if(item->data(0,Qt::DisplayRole).toString() == settings::get_generalValue("breakname"))
+        {
+            defaultDist = percent = 0.0;
+            threshold = "00:00";
+            defaultTime = "00:30";
+            level = 0;
+        }
+        else
+        {
+            defaultDist = 0.1;
+            defaultTime = this->calc_duration(current_sport,defaultDist,threshold);
+        }
+    }
+    else
+    {
+        defaultDist = this->calc_distance(defaultTime,static_cast<double>(this->get_timesec(threstopace(threshold_pace,percent))));
+    }
+
+    if(hasValues)
+    {
+        item->setData(1,Qt::EditRole,levelList.at(level));
+        item->setData(2,Qt::EditRole,percent);
+        item->setData(3,Qt::EditRole,threshold);
+        item->setData(4,Qt::EditRole,defaultTime);
+        item->setData(5,Qt::EditRole,this->estimate_stress(current_sport,threshold,this->get_timesec(defaultTime)));
+        item->setData(6,Qt::EditRole,defaultDist);
+        item->setData(7,Qt::EditRole,"");
+    }
+    else
+    {
+        QString itemName = item->data(0,Qt::DisplayRole).toString();
+        QList<QTreeWidgetItem*> groupCount = ui->treeWidget_intervall->findItems(itemName,Qt::MatchContains,0);
+        itemName = itemName +"-"+QString::number(groupCount.count());
+        item->setData(0,Qt::EditRole,itemName);
+        item->setData(7,Qt::EditRole,2);
+    }
+    this->set_backColor(item);
+    ui->treeWidget_intervall->expandAll();
+    this->set_plotModel();
+}
+
+void Dialog_workCreator::set_backColor(QTreeWidgetItem *item)
+{
+    QColor itemColor;
+    QString itemName = item->data(0,Qt::DisplayRole).toString();
+
+    itemColor = settings::get_itemColor(item->data(1,Qt::DisplayRole).toString());
+    if(itemName.contains(isGroup)) itemColor = QColor(Qt::darkGray);
+    if(itemName.contains(isSeries)) itemColor = QColor(Qt::lightGray);
+
+    for(int i = 0; i < item->columnCount(); ++i)
+    {
+        item->setBackground(i,QBrush(itemColor));
+    }
+}
+
+void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
+{
+    currentItem = item;
+    QString itemIdent = item->data(0,Qt::DisplayRole).toString();
+    valueModel->clear();
+    valueModel->setColumnCount(2);
+
+    if(itemIdent.contains(isGroup) || itemIdent.contains(isSeries))
+    {
+        valueModel->setRowCount(2);
+        edit_del.hasValue = false;
+        valueModel->setData(valueModel->index(0,0,QModelIndex()),item->data(0,Qt::DisplayRole));
+        valueModel->setData(valueModel->index(1,0,QModelIndex()),item->data(7,Qt::DisplayRole));
+    }
+    else
+    {
+        valueModel->setRowCount(7);
+        for(int i = 0; i < item->columnCount();++i)
+        {
+            valueModel->setData(valueModel->index(i,0,QModelIndex()),item->data(i,Qt::DisplayRole));
+            valueModel->setData(valueModel->index(i,1,QModelIndex()),0);
+        }
+        valueModel->setData(valueModel->index(2,1,QModelIndex()),levelList.indexOf(valueModel->data(valueModel->index(1,0)).toString()));
+        edit_del.hasValue = true;
+    }
+
+    ui->frame_edit->setVisible(true);
+    ui->frame_pick->setVisible(false);
+    ui->label_head->setText("Edit Phase");
+}
+
+void Dialog_workCreator::set_itemData(QTreeWidgetItem *item)
+{
+    QString itemIdent = item->data(0,Qt::DisplayRole).toString();
+
+    if(itemIdent.contains(isGroup) || itemIdent.contains(isSeries))
+    {
+        item->setData(0,Qt::EditRole,valueModel->data(valueModel->index(0,0)));
+        item->setData(7,Qt::EditRole,valueModel->data(valueModel->index(1,0)));
+    }
+    else
+    {
+        for(int i = 0; i < valueModel->rowCount();++i)
+        {
+            item->setData(i,Qt::EditRole,valueModel->data(valueModel->index(i,0)));
+        }
+    }
+    this->set_backColor(item);
+}
+
+void Dialog_workCreator::clearIntTree()
+{
+    clearFlag = true;
+    QTreeWidgetItem *treeItem;
+    while(ui->treeWidget_intervall->topLevelItemCount() > 0)
+    {
+        for(int c_item = 0; c_item < ui->treeWidget_intervall->topLevelItemCount(); ++c_item)
+        {
+        treeItem = ui->treeWidget_intervall->topLevelItem(c_item);
+
+        if(treeItem->childCount() > 0)
+        {
+            for(int c_child = 0; c_child < treeItem->childCount(); ++c_child)
+            {
+                if(treeItem->child(c_child)->childCount() > 0)
+                {
+                    for(int subchild = 0; subchild < treeItem->child(c_child)->childCount(); ++subchild)
+                    {
+                        delete treeItem->child(c_child)->child(subchild);
+                    }
+                }
+                delete treeItem->child(c_child);
+            }
+        }
+        delete treeItem;
+        }
+    }
+    plotModel->clear();
+    this->set_plotGraphic(0);
 }
 
 void Dialog_workCreator::set_plotModel()
@@ -467,7 +609,6 @@ void Dialog_workCreator::on_treeWidget_intervall_itemClicked(QTreeWidgetItem *it
 {
     Q_UNUSED(column)
     this->show_editItem(item);
-
 }
 
 void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &sport)
@@ -517,8 +658,8 @@ void Dialog_workCreator::set_sport_threshold(QString sport)
        currThres = threshold_power;
     }
     edit_del.currThres = currThres;
+    edit_del.thresPace = threshold_pace;
 }
-
 
 void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
 {
@@ -682,15 +823,30 @@ QString Dialog_workCreator::get_treeValue(int item,int i_child, int c_sub,int po
 
 void Dialog_workCreator::on_toolButton_save_clicked()
 {
-
+    this->save_workout();
+    ui->toolButton_copy->setEnabled(true);
+    ui->toolButton_delete->setEnabled(true);
 }
 
 void Dialog_workCreator::on_toolButton_copy_clicked()
 {
-
+    current_workID = QString();
+    this->save_workout();
 }
 
 void Dialog_workCreator::on_toolButton_delete_clicked()
 {
+    QMessageBox::StandardButton reply;
 
+    reply = QMessageBox::critical(this,"Delete Std Workout","Delete selected Std Workout?",QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        stdWorkouts->delete_stdWorkout(current_workID,true);
+        current_workID = QString();
+        this->clearIntTree();
+        ui->lineEdit_workoutname->clear();
+        ui->comboBox_code->setCurrentIndex(0);
+        this->get_workouts(current_sport);
+    }
 }

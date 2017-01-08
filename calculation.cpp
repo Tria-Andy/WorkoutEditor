@@ -146,9 +146,15 @@ double calculation::calc_totalWork(double weight,double avgHF, double moveTime)
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
 }
 
+QString calculation::threstopace(double thresPace, double percent)
+{
+    return set_time(static_cast<int>(round(thresPace / (percent/100.0))));
+}
+
 QString calculation::calc_threshold(QString sport,double threshold,double percent)
 {
     QString thresValue = "00:00";
+
     if(percent > 0)
     {
         if(sport == settings::isSwim || sport == settings::isRun)
@@ -166,6 +172,7 @@ QString calculation::calc_threshold(QString sport,double threshold,double percen
 
 double calculation::calc_distance(QString duration, double pace)
 {
+    qDebug() << "Calc" << duration << pace << get_timesec(duration) / pace;
     return set_doubleValue(get_timesec(duration) / pace,true);
 }
 
@@ -177,10 +184,12 @@ QString calculation::calc_duration(QString sport,double dist, QString pace)
     }
     else
     {
-        return set_time(get_timesec(pace) * dist/1000);
+        return set_time(get_timesec(pace) * dist);
     }
     return 0;
 }
+
+
 
 double calculation::estimate_stress(QString sport, QString p_goal, int duration)
 {

@@ -72,7 +72,8 @@ private:
     void add_to_plot(QTreeWidgetItem *item);
     void set_plotGraphic(int);
     void set_backColor(QTreeWidgetItem *item);
-
+    void save_workout();
+    void save_workout_values(QStringList,QStandardItemModel *);
 };
 
 #endif // DIALOG_WORKCREATOR_H
