@@ -17,6 +17,7 @@ public:
     explicit del_workcreator(QObject *parent = 0) : QStyledItemDelegate(parent) {}
     bool hasValue;
     QString sport;
+    QString groupName;
     double currThres;
     double thresPace;
 
@@ -108,14 +109,15 @@ public:
         }
         else
         {
-            if(index.row() == 0)
+            if(index.row() == 0 && setEdit)
             {
                 QComboBox *editor = new QComboBox(parent);
+
                 editor->setFrame(true);
                 editor->setFont(eFont);
                 return editor;
             }
-            if(index.row() == 1)
+            if(index.row() == 1 && setEdit)
             {
                 QSpinBox *editor = new QSpinBox(parent);
                 editor->setFrame(true);
@@ -169,10 +171,21 @@ public:
         {
             if(index.row() == 0)
             {
+                QString comboValue;
                 QString value = index.data(Qt::DisplayRole).toString();
                 QComboBox *comboBox = static_cast<QComboBox*>(editor);
-                comboBox->addItem("Group");
-                comboBox->addItem("Series");
+                if(groupName.contains("Group"))
+                {
+                    comboValue = "Group-";
+                }
+                else
+                {
+                    comboValue = "Series-";
+                }
+                for(int i = 1; i < 10; ++i)
+                {
+                    comboBox->addItem(comboValue+QString::number(i));
+                }
                 comboBox->setCurrentText(value);
             }
             if(index.row() == 1)

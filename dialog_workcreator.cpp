@@ -392,6 +392,7 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
     int rowCount = 8;
     currentItem = item;
     QString itemIdent = item->data(0,Qt::DisplayRole).toString();
+    edit_del.groupName = itemIdent;
     valueModel->clear();
     valueModel->setColumnCount(3);
 
@@ -400,7 +401,9 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
         valueModel->setRowCount(2);
         edit_del.hasValue = false;
         valueModel->setData(valueModel->index(0,0,QModelIndex()),item->data(0,Qt::DisplayRole));
+        valueModel->setData(valueModel->index(0,2,QModelIndex()),true);
         valueModel->setData(valueModel->index(1,0,QModelIndex()),item->data(7,Qt::DisplayRole));
+        valueModel->setData(valueModel->index(1,2,QModelIndex()),true);
     }
     else
     {
