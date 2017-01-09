@@ -188,6 +188,7 @@ public:
                     timeEdit->interpretText();
                     model->setData(model->index(4,0),value.toString("mm:ss"), Qt::EditRole);
                     set_distance(model,value);
+                    set_stressValue(model);
                 }
             }
             if(index.row() == 6) //Distance
@@ -241,6 +242,7 @@ public:
         else
         {
             set_duration(model);
+            set_speed(model,static_cast<double>(get_timesec(model->data(model->index(3,0)).toString())));
         }
 
         set_stressValue(model);
@@ -248,7 +250,7 @@ public:
 
     void set_duration(QAbstractItemModel *model) const
     {
-        model->setData(model->index(4,0),calc_duration(sport,model->data(model->index(6,0)).toDouble(),model->data(model->index(3,0)).toString()));
+        if(sport != settings::isBike) model->setData(model->index(4,0),calc_duration(sport,model->data(model->index(6,0)).toDouble(),model->data(model->index(3,0)).toString()));
     }
 
     void set_stressValue(QAbstractItemModel *model) const
@@ -260,12 +262,19 @@ public:
     {
         if(sport == settings::isBike)
         {
-            model->setData(model->index(6,0),calc_distance(value.toString("mm:ss"),get_timesec(threstopace(thresPace,model->data(model->index(2,0)).toDouble()))));
+            int pace = get_timesec(threstopace(thresPace,model->data(model->index(2,0)).toDouble()));
+            model->setData(model->index(6,0),calc_distance(value.toString("mm:ss"),pace));
+            set_speed(model,static_cast<double>(pace));
         }
         else
         {
             model->setData(model->index(6,0),calc_distance(value.toString("mm:ss"),get_timesec(model->data(model->index(3,0)).toString())));
         }
+    }
+
+    void set_speed(QAbstractItemModel *model,double sec) const
+    {
+        model->setData(model->index(7,0),calc_lapSpeed(sport,sec));
     }
 };
 

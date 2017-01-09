@@ -40,6 +40,8 @@ private slots:
     void on_toolButton_copy_clicked();
     void on_toolButton_delete_clicked();
 
+    void on_lineEdit_workoutname_textChanged(const QString &arg1);
+
 private:
     Ui::Dialog_workCreator *ui;
 
@@ -60,6 +62,7 @@ private:
     int get_series_count();
     int get_group_count();
 
+    void control_editPanel(bool);
     void set_sport_threshold(QString);
     void set_itemData(QTreeWidgetItem *item);
     void show_editItem(QTreeWidgetItem *item);

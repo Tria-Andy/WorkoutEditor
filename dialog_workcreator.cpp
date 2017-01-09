@@ -73,6 +73,7 @@ void Dialog_workCreator::get_workouts(QString sport)
         listString = metaProxy->data(metaProxy->index(i,2)).toString() + " - " + workTitle;
         listModel->setData(listModel->index(i,0,QModelIndex()),listString);
         listModel->setData(listModel->index(i,1,QModelIndex()),workID);
+        workoutMap.insert(workID,workTitle);
     }
     listModel->sort(0);
 
@@ -89,8 +90,14 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     QStringList valueList;
     QString parentItem,partName,thresValue,stepTime,empty = "";
     double percent;
+    double currDist;
+    bool isBike = false;
+    bool isSwim = false;
     stepProxy->setFilterRegExp("\\b"+workID+"\\b");
     stepProxy->setFilterKeyColumn(0);
+
+    if(current_sport == settings::isSwim) isSwim = true;
+    if(current_sport == settings::isBike) isBike = true;
 
     for(int i = 0; i < stepProxy->rowCount();++i)
     {
@@ -113,13 +120,23 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             thresValue = this->calc_threshold(current_sport,currThres,percent);
             stepTime = stepProxy->data(stepProxy->index(i,5)).toString();
 
+            if(isBike)
+            {
+                currDist = this->calc_distance(stepTime,this->get_timesec(this->threstopace(threshold_pace,percent)));
+            }
+            else
+            {
+                currDist = this->calc_distance(stepTime,this->get_timesec(thresValue));
+                if(isSwim) currDist = currDist/10.0;
+            }
+
             valueList << stepProxy->data(stepProxy->index(i,2)).toString()
                       << stepProxy->data(stepProxy->index(i,3)).toString()
                       << QString::number(percent)
                       << thresValue
                       << stepTime
                       << QString::number(this->estimate_stress(ui->comboBox_sport->currentText(),thresValue,this->get_timesec(stepTime)))
-                      << stepProxy->data(stepProxy->index(i,6)).toString()
+                      << QString::number(this->set_doubleValue(currDist,true))
                       << stepProxy->data(stepProxy->index(i,7)).toString();
         }
         QTreeWidgetItem *item = new QTreeWidgetItem(valueList);
@@ -188,7 +205,6 @@ void Dialog_workCreator::save_workout()
         stdWorkouts->delete_stdWorkout(current_workID,false);
         workID = current_workID;
     }
-
 
     if(worktime.length() == 5)
     {
@@ -384,19 +400,24 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
     }
     else
     {
-        valueModel->setRowCount(7);
+        valueModel->setRowCount(8);
         for(int i = 0; i < item->columnCount();++i)
         {
             valueModel->setData(valueModel->index(i,0,QModelIndex()),item->data(i,Qt::DisplayRole));
             valueModel->setData(valueModel->index(i,1,QModelIndex()),0);
         }
         valueModel->setData(valueModel->index(2,1,QModelIndex()),levelList.indexOf(valueModel->data(valueModel->index(1,0)).toString()));
+        if(current_sport == settings::isBike)
+        {
+            valueModel->setData(valueModel->index(7,0,QModelIndex()),this->calc_lapSpeed(current_sport,get_timesec(threstopace(threshold_pace,item->data(2,Qt::DisplayRole).toDouble()))));
+        }
+        else
+        {
+            valueModel->setData(valueModel->index(7,0,QModelIndex()),this->calc_lapSpeed(current_sport,static_cast<double>(this->get_timesec(item->data(3,Qt::DisplayRole).toString()))));
+        }
         edit_del.hasValue = true;
     }
-
-    ui->frame_edit->setVisible(true);
-    ui->frame_pick->setVisible(false);
-    ui->label_head->setText("Edit Phase");
+    this->control_editPanel(true);
 }
 
 void Dialog_workCreator::set_itemData(QTreeWidgetItem *item)
@@ -410,7 +431,7 @@ void Dialog_workCreator::set_itemData(QTreeWidgetItem *item)
     }
     else
     {
-        for(int i = 0; i < valueModel->rowCount();++i)
+        for(int i = 0; i < valueModel->rowCount()-1;++i)
         {
             item->setData(i,Qt::EditRole,valueModel->data(valueModel->index(i,0)));
         }
@@ -580,7 +601,6 @@ void Dialog_workCreator::set_plotGraphic(int c_ints)
              {
                  thres_high = y_thres[counter];
              }
-
         }
         time_sum = plotModel->data(plotModel->index(plotModel->rowCount()-1,1,QModelIndex())).toDouble();
         dist_sum = plotModel->data(plotModel->index(plotModel->rowCount()-1,2,QModelIndex())).toDouble();
@@ -676,16 +696,12 @@ void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
 void Dialog_workCreator::on_pushButton_clear_clicked()
 {
     this->clearIntTree();
-    ui->frame_edit->setVisible(false);
-    ui->frame_pick->setVisible(true);
-    ui->label_head->setText("Add Phase");
+    this->control_editPanel(false);
 }
 
 void Dialog_workCreator::on_toolButton_update_clicked()
 {
-    ui->frame_edit->setVisible(false);
-    ui->frame_pick->setVisible(true);
-    ui->label_head->setText("Add Phase");
+    this->control_editPanel(false);
     this->set_itemData(currentItem);
     this->set_plotModel();
 }
@@ -694,7 +710,9 @@ void Dialog_workCreator::on_toolButton_remove_clicked()
 {
     if(ui->treeWidget_intervall->topLevelItemCount() == 1)
     {
-        ui->treeWidget_intervall->clear();
+        //ui->treeWidget_intervall->clear();
+        this->clearIntTree();
+        this->control_editPanel(false);
     }
     else
     {
@@ -709,9 +727,9 @@ void Dialog_workCreator::on_toolButton_remove_clicked()
             }
         }
         delete currentItem;
+        this->show_editItem(ui->treeWidget_intervall->currentItem());
     }
     this->set_plotModel();
-    this->show_editItem(ui->treeWidget_intervall->currentItem());
 }
 
 void Dialog_workCreator::move_item(bool up)
@@ -821,6 +839,22 @@ QString Dialog_workCreator::get_treeValue(int item,int i_child, int c_sub,int po
     return 0;
 }
 
+void Dialog_workCreator::control_editPanel(bool setedit)
+{
+    if(setedit)
+    {
+        ui->frame_edit->setVisible(true);
+        ui->frame_pick->setVisible(false);
+        ui->label_head->setText("Edit Phase");
+    }
+    else
+    {
+        ui->frame_edit->setVisible(false);
+        ui->frame_pick->setVisible(true);
+        ui->label_head->setText("Add Phase");
+    }
+}
+
 void Dialog_workCreator::on_toolButton_save_clicked()
 {
     this->save_workout();
@@ -848,5 +882,32 @@ void Dialog_workCreator::on_toolButton_delete_clicked()
         ui->lineEdit_workoutname->clear();
         ui->comboBox_code->setCurrentIndex(0);
         this->get_workouts(current_sport);
+    }
+}
+
+void Dialog_workCreator::on_lineEdit_workoutname_textChanged(const QString &value)
+{
+    if(!value.isEmpty() && ui->treeWidget_intervall->topLevelItemCount() > 0)
+    {
+        ui->toolButton_save->setEnabled(true);
+    }
+    for(QMap<QString,QString>::const_iterator it =  workoutMap.cbegin(), end = workoutMap.cend(); it != end; ++it)
+    {
+        if(it.value() == value)
+        {
+            ui->toolButton_copy->setEnabled(false);
+            break;
+        }
+        else
+        {
+            if(value.isEmpty())
+            {
+                ui->toolButton_copy->setEnabled(false);
+            }
+            else
+            {
+                ui->toolButton_copy->setEnabled(true);
+            }
+        }
     }
 }

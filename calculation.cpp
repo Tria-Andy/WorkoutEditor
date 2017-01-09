@@ -119,7 +119,6 @@ QString calculation::get_speed(QTime pace,int dist,QString sport,bool fixdist)
             else
             {
                 speed = 3600.0/sec;
-
             }
         }
         else
@@ -130,6 +129,19 @@ QString calculation::get_speed(QTime pace,int dist,QString sport,bool fixdist)
     }
 
     return "--";
+}
+
+QString calculation::calc_lapSpeed(QString sport,double sec)
+{
+    if(sport == settings::isSwim)
+    {
+        return QString::number(set_doubleValue(360.0/sec,false))+" km/h";
+    }
+    else
+    {
+        return QString::number(set_doubleValue(3600.0/sec,false))+" km/h";
+    }
+    return 0;
 }
 
 int calculation::get_hfvalue(QString percent)
@@ -172,8 +184,11 @@ QString calculation::calc_threshold(QString sport,double threshold,double percen
 
 double calculation::calc_distance(QString duration, double pace)
 {
-    qDebug() << "Calc" << duration << pace << get_timesec(duration) / pace;
-    return set_doubleValue(get_timesec(duration) / pace,true);
+    if(pace > 0)
+    {
+        return set_doubleValue(get_timesec(duration) / pace,true);
+    }
+    return 0;
 }
 
 QString calculation::calc_duration(QString sport,double dist, QString pace)
@@ -188,8 +203,6 @@ QString calculation::calc_duration(QString sport,double dist, QString pace)
     }
     return 0;
 }
-
-
 
 double calculation::estimate_stress(QString sport, QString p_goal, int duration)
 {
