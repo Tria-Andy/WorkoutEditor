@@ -21,7 +21,6 @@
 
 #include <QMainWindow>
 #include <QStandardItemModel>
-#include <QAbstractItemModel>
 #include <QTextBrowser>
 #include <QtXml>
 #include "calendar_delegate.h"
@@ -43,7 +42,6 @@
 #include "dialog_edit.h"
 #include "dialog_export.h"
 #include "dialog_stresscalc.h"
-#include "dialog_inteditor.h"
 #include "dialog_workcreator.h"
 #include "dialog_settings.h"
 #include "dialog_pacecalc.h"

@@ -35,7 +35,6 @@ SOURCES += main.cpp\
     dialog_stresscalc.cpp \
     qcustomplot.cpp \
     week_popup.cpp \
-    dialog_inteditor.cpp \
     day_popup.cpp \
     dialog_settings.cpp \
     dialog_pacecalc.cpp \
@@ -65,7 +64,6 @@ HEADERS  += mainwindow.h \
     dialog_stresscalc.h \
     qcustomplot.h \
     week_popup.h \
-    dialog_inteditor.h \
     day_popup.h \
     dialog_settings.h \
     dialog_pacecalc.h \
@@ -98,7 +96,6 @@ FORMS    += mainwindow.ui \
     dialog_workouts.ui \
     dialog_stresscalc.ui \
     week_popup.ui \
-    dialog_inteditor.ui \
     day_popup.ui \
     dialog_settings.ui \
     dialog_pacecalc.ui \
