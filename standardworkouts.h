@@ -20,16 +20,15 @@
 #define STANDARDWORKOUTS_H
 
 #include <QStandardItemModel>
-#include <QAbstractItemModel>
 #include <QtXml>
-#include <QFile>
 #include "settings.h"
+#include "xmlhandler.h"
 
-class standardWorkouts
+class standardWorkouts : public xmlHandler
 {
 public:
     standardWorkouts();
-    QStandardItemModel *standard_workouts,*workouts_meta, *workouts_steps;
+    QStandardItemModel *workouts_meta, *workouts_steps;
 
     void set_saveFlag(bool isSave) {save_workouts = isSave;}
     void save_stdWorkouts() {write_standard_workouts();}
@@ -38,10 +37,10 @@ public:
 
 private:
     QStringList meta_tags,step_tags,workoutIDs;
-    QString workoutPath;
+    QString workoutPath,metaFile,stepFile;
     bool save_workouts;
     void check_workoutFiles();
-    void read_standard_workouts();
+    void read_standard_workouts(QDomDocument,QDomDocument);
     void write_standard_workouts();
     void set_workoutIds();
 };

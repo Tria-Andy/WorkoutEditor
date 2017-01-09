@@ -9,23 +9,43 @@ void xmlHandler::check_File(QString path,QString fileName)
     QFile workFile(path + QDir::separator() + fileName);
     if(!workFile.exists())
     {
-        qDebug() << "File not exists! Created "+fileName;
+        qDebug() << "File not exists! Created:"+fileName;
         workFile.open(QIODevice::WriteOnly | QIODevice::Text);
         workFile.close();
     }
 }
 
-void xmlHandler::write_XMLFile(QString path,QDomDocument xmlDoc,QString fileName)
+QDomDocument xmlHandler::load_XMLFile(QString path,QString fileName)
 {
-    QFile file(path + QDir::separator() + fileName);
+    QFile xmlFile(path + QDir::separator() + fileName);
+    QDomDocument xmldoc = QDomDocument();
 
-    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    if(!xmlFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << fileName+": File not open!";
+        qDebug() << "File not open:"+fileName;
+    }
+    else
+    {
+        if(!xmldoc.setContent(&xmlFile))
+        {
+            qDebug() << "File content not loaded:"+fileName;
+        }
+        xmlFile.close();
+    }
+    return xmldoc;
+}
+
+void xmlHandler::write_XMLFile(QString path,QDomDocument *xmlDoc,QString fileName)
+{
+    QFile xmlFile(path + QDir::separator() + fileName);
+
+    if(!xmlFile.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qDebug() << fileName+": File not open:"+fileName;
     }
 
-    QTextStream stream(&file);
-    stream << xmlDoc.toString();
+    QTextStream stream(&xmlFile);
+    stream << xmlDoc->toString();
 
-    file.close();
+    xmlFile.close();
 }

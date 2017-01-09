@@ -21,12 +21,9 @@
 
 #include <QStandardItemModel>
 #include <QtXml>
-#include <QtCharts>
 #include <QMessageBox>
 #include "settings.h"
 #include "xmlhandler.h"
-
-QT_CHARTS_USE_NAMESPACE
 
 class schedule : public xmlHandler
 {
@@ -67,14 +64,11 @@ private:
     QDate firstdayofweek;
     QMap<QDate,double> stressValues;
     bool fileCreated;
-    void check_workoutFiles();
-    void load_workoutsFiles();
     void read_dayWorkouts(QDomDocument);
     void read_weekPlan(QDomDocument,QDomDocument);
     void read_ltsFile(QDomDocument);
     void updateStress(QString,double,bool);
     void save_ltsValues();
-    void saveXML(QDomDocument,QString);
 
     //Workout Var
     QString workout_date;

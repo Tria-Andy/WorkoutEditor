@@ -11,9 +11,8 @@ public:
 
 protected:
     void check_File(QString,QString);
-    void load_XMLFile();
-    void read_XMLFile();
-    void write_XMLFile(QString,QDomDocument,QString);
+    QDomDocument load_XMLFile(QString,QString);
+    void write_XMLFile(QString,QDomDocument*,QString);
 
 private:
 
