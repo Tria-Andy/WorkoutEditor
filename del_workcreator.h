@@ -20,24 +20,51 @@ public:
     double currThres;
     double thresPace;
 
+    void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
+    {
+        painter->save();
+        const QAbstractItemModel *model = index.model();
+        QColor editColor(0,255,0,50);
+        QColor notColor(255,0,0,50);
+        bool setEdit;
+        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
+        setEdit = model->data(model->index(index.row(),2,QModelIndex())).toBool();
+
+        if(setEdit)
+        {
+            painter->fillRect(option.rect,QBrush(editColor));
+            painter->fillRect(rect_text,QBrush(editColor));
+        }
+        else
+        {
+            painter->fillRect(option.rect,QBrush(notColor));
+            painter->fillRect(rect_text,QBrush(notColor));
+        }
+
+        painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+        painter->restore();
+    }
+
+
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
+        Q_UNUSED(option)
         QFont eFont;
         eFont.setPixelSize(settings::get_fontValue("fontSmall"));
+        const QAbstractItemModel *model = index.model();
+        bool setEdit = model->data(model->index(index.row(),2,QModelIndex())).toBool();
 
-        Q_UNUSED(option)
         if(hasValue)
         {
-            if(index.row() == 0 || index.row() == 1)
+            if((index.row() == 0 || index.row() == 1) && setEdit)
             {
                 QComboBox *editor = new QComboBox(parent);
                 editor->setFrame(false);
                 editor->setFont(eFont);
                 return editor;
             }
-            if(index.row() == 2)
+            if(index.row() == 2 && setEdit)
             {
-                const QAbstractItemModel *model = index.model();
                 QString level = model->data(model->index(1,0)).toString();
                 QSpinBox *editor = new QSpinBox(parent);
                 editor->setFrame(true);
@@ -48,7 +75,7 @@ public:
             }
             if(sport != settings::isSwim)
             {
-                if(index.row() ==  4)
+                if(index.row() ==  4 && setEdit)
                 {
                     QTimeEdit *editor = new QTimeEdit(parent);
                     editor->setDisplayFormat("mm:ss");
@@ -58,7 +85,7 @@ public:
                 }
             }
 
-            if(index.row() == 6)
+            if(index.row() == 6 && setEdit)
             {
                 QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
                 editor->setFrame(true);
@@ -239,7 +266,7 @@ public:
         {
             set_distance(model,QTime::fromString(model->data(model->index(4,0)).toString(),"mm:ss"));
         }
-        else
+        else if(sport == settings::isBike || sport == settings::isRun)
         {
             set_duration(model);
             set_speed(model,static_cast<double>(get_timesec(model->data(model->index(3,0)).toString())));
@@ -250,7 +277,8 @@ public:
 
     void set_duration(QAbstractItemModel *model) const
     {
-        if(sport != settings::isBike) model->setData(model->index(4,0),calc_duration(sport,model->data(model->index(6,0)).toDouble(),model->data(model->index(3,0)).toString()));
+        if(sport == settings::isSwim || sport == settings::isRun)
+            model->setData(model->index(4,0),calc_duration(sport,model->data(model->index(6,0)).toDouble(),model->data(model->index(3,0)).toString()));
     }
 
     void set_stressValue(QAbstractItemModel *model) const
@@ -266,7 +294,7 @@ public:
             model->setData(model->index(6,0),calc_distance(value.toString("mm:ss"),pace));
             set_speed(model,static_cast<double>(pace));
         }
-        else
+        else if(sport == settings::isBike || sport == settings::isRun)
         {
             model->setData(model->index(6,0),calc_distance(value.toString("mm:ss"),get_timesec(model->data(model->index(3,0)).toString())));
         }
@@ -277,8 +305,5 @@ public:
         model->setData(model->index(7,0),calc_lapSpeed(sport,sec));
     }
 };
-
-
-
 
 #endif // DEL_WORKCREATOR_H

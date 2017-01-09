@@ -137,10 +137,15 @@ QString calculation::calc_lapSpeed(QString sport,double sec)
     {
         return QString::number(set_doubleValue(360.0/sec,false))+" km/h";
     }
-    else
+    else if(sport == settings::isBike || sport == settings::isRun)
     {
         return QString::number(set_doubleValue(3600.0/sec,false))+" km/h";
     }
+    else
+    {
+        return "--";
+    }
+
     return 0;
 }
 

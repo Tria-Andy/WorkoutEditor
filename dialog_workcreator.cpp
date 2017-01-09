@@ -16,6 +16,8 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent,standardWorkouts *p_worko
     stepProxy = new QSortFilterProxyModel;
     stepProxy->setSourceModel(stdWorkouts->workouts_steps);
 
+    editRow <<1<<1<<1<<0<<1<<0<<1<<0;
+
     isSeries = "Series";
     isGroup = "Group";
     groupList << isGroup << isSeries;
@@ -46,6 +48,7 @@ Dialog_workCreator::~Dialog_workCreator()
     delete stepProxy;
     delete plotModel;
     delete valueModel;
+    delete listModel;
     delete ui;
 }
 
@@ -386,10 +389,11 @@ void Dialog_workCreator::set_backColor(QTreeWidgetItem *item)
 
 void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
 {
+    int rowCount = 8;
     currentItem = item;
     QString itemIdent = item->data(0,Qt::DisplayRole).toString();
     valueModel->clear();
-    valueModel->setColumnCount(2);
+    valueModel->setColumnCount(3);
 
     if(itemIdent.contains(isGroup) || itemIdent.contains(isSeries))
     {
@@ -400,11 +404,12 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
     }
     else
     {
-        valueModel->setRowCount(8);
+        valueModel->setRowCount(rowCount);
         for(int i = 0; i < item->columnCount();++i)
         {
             valueModel->setData(valueModel->index(i,0,QModelIndex()),item->data(i,Qt::DisplayRole));
             valueModel->setData(valueModel->index(i,1,QModelIndex()),0);
+            valueModel->setData(valueModel->index(i,2,QModelIndex()),editRow[i]);
         }
         valueModel->setData(valueModel->index(2,1,QModelIndex()),levelList.indexOf(valueModel->data(valueModel->index(1,0)).toString()));
         if(current_sport == settings::isBike)
@@ -468,6 +473,9 @@ void Dialog_workCreator::clearIntTree()
     }
     plotModel->clear();
     this->set_plotGraphic(0);
+
+    ui->lineEdit_workoutname->clear();
+    ui->comboBox_code->setCurrentIndex(0);
 }
 
 void Dialog_workCreator::set_plotModel()
@@ -640,14 +648,43 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
     this->set_sport_threshold(sport);
 }
 
+void Dialog_workCreator::set_editRow(QString sport)
+{
+    if(sport == settings::isSwim)
+    {
+        editRow[2] = 1;
+        editRow[4] = 0;
+        editRow[6] = 1;
+    }
+    else if(sport == settings::isBike || sport == settings::isRun)
+    {
+        editRow[2] = 1;
+        editRow[4] = 1;
+        editRow[6] = 1;
+    }
+    else if(sport == settings::isStrength)
+    {
+        editRow[2] = 1;
+        editRow[4] = 1;
+        editRow[6] = 0;
+    }
+    else
+    {
+        editRow[2] = 0;
+        editRow[4] = 1;
+        editRow[6] = 1;
+    }
+}
+
 void Dialog_workCreator::set_sport_threshold(QString sport)
 {
-    if(sport == settings::isAlt || sport == settings::isOther )
+    if(sport == settings::isAlt || sport == settings::isOther)
     {
         threshold_pace = 0;
         threshold_power = 0.0;
         ui->label_threshold->setText("-");
         currThres = threshold_power;
+
     }
     if(sport == settings::isSwim)
     {
@@ -679,6 +716,7 @@ void Dialog_workCreator::set_sport_threshold(QString sport)
     }
     edit_del.currThres = currThres;
     edit_del.thresPace = threshold_pace;
+    this->set_editRow(sport);
 }
 
 void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
@@ -879,8 +917,6 @@ void Dialog_workCreator::on_toolButton_delete_clicked()
         stdWorkouts->delete_stdWorkout(current_workID,true);
         current_workID = QString();
         this->clearIntTree();
-        ui->lineEdit_workoutname->clear();
-        ui->comboBox_code->setCurrentIndex(0);
         this->get_workouts(current_sport);
     }
 }

@@ -55,6 +55,7 @@ private:
     del_workcreator edit_del;
     double time_sum,dist_sum,stress_sum;
     int currThres,threshold_pace,current_pace,threshold_power,current_power;
+    QVector<bool> editRow;
 
     bool clearFlag;
 
@@ -63,6 +64,7 @@ private:
     int get_group_count();
 
     void control_editPanel(bool);
+    void set_editRow(QString);
     void set_sport_threshold(QString);
     void set_itemData(QTreeWidgetItem *item);
     void show_editItem(QTreeWidgetItem *item);
