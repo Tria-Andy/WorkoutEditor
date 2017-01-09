@@ -24,8 +24,6 @@
 #include "settings.h"
 #include "calculation.h"
 
-QT_CHARTS_USE_NAMESPACE
-
 namespace Ui {
 class year_popup;
 }
