@@ -21,9 +21,7 @@
 
 #include <QDialog>
 #include <QStandardItemModel>
-#include <QAbstractItemModel>
-#include <QtXml>
-#include <QFile>
+#include <QSortFilterProxyModel>
 #include "standardworkouts.h"
 
 namespace Ui {
@@ -52,9 +50,8 @@ private slots:
 
 private:
     Ui::Dialog_workouts *ui;
-    standardWorkouts *stdWorkouts;
-    QStandardItemModel *workout_model;
-    QList<QStandardItem*> selected_workout;
+    QStandardItemModel *listModel;
+    QSortFilterProxyModel *metaProxy;
     QString w_id,w_sport,w_code,w_title,w_duration;
     double w_distance;
     int w_stress;

@@ -26,43 +26,17 @@ Dialog_workouts::Dialog_workouts(QWidget *parent, QString v_sport, standardWorko
 {
     ui->setupUi(this);
     w_sport = v_sport;
-    stdWorkouts = p_workouts;
+    metaProxy = new QSortFilterProxyModel;
+    metaProxy->setSourceModel(p_workouts->workouts_meta);
+    listModel = new QStandardItemModel;
     this->create_workout_list();
-    ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 Dialog_workouts::~Dialog_workouts()
 {
-    delete workout_model;
+    delete metaProxy;
+    delete listModel;
     delete ui;
-}
-
-void Dialog_workouts::create_workout_list()
-{
-    QStandardItemModel *std_model;
-    std_model = stdWorkouts->workouts_meta;
-
-    QModelIndex model_index,index;
-    QList<QStandardItem*> list = std_model->findItems(w_sport,Qt::MatchExactly,0);
-    workout_model = new QStandardItemModel(list.count(),6,this);
-
-    for(int i = 0; i < list.count(); ++i)
-    {
-        QString listString;
-        model_index = std_model->indexFromItem(list.at(i));
-        index = workout_model->index(i,0,QModelIndex());
-        listString = std_model->item(model_index.row(),2)->text() + " - " + std_model->item(model_index.row(),3)->text();
-        workout_model->setData(index,listString);
-
-        workout_model->setData(workout_model->index(i,1,QModelIndex()),std_model->item(model_index.row(),0)->text());
-        workout_model->setData(workout_model->index(i,2,QModelIndex()),std_model->item(model_index.row(),1)->text());
-        workout_model->setData(workout_model->index(i,3,QModelIndex()),std_model->item(model_index.row(),4)->text());
-        workout_model->setData(workout_model->index(i,4,QModelIndex()),std_model->item(model_index.row(),5)->text());
-        workout_model->setData(workout_model->index(i,5,QModelIndex()),std_model->item(model_index.row(),6)->text());
-    }
-    workout_model->sort(0);
-    ui->label_sport->setText(w_sport + " Workouts");
-    ui->listView_workouts->setModel(workout_model);
 }
 
 void Dialog_workouts::on_pushButton_ok_clicked()
@@ -75,25 +49,44 @@ void Dialog_workouts::on_pushButton_close_clicked()
     reject();
 }
 
+void Dialog_workouts::create_workout_list()
+{
+    QString workID,workTitle,listString;
+    metaProxy->setFilterFixedString(w_sport);
+    metaProxy->setFilterKeyColumn(0);
+
+    listModel->setRowCount(metaProxy->rowCount());
+    listModel->setColumnCount(2);
+
+    for(int i = 0; i < metaProxy->rowCount(); ++i)
+    {
+        workID = metaProxy->data(metaProxy->index(i,1)).toString();
+        workTitle = metaProxy->data(metaProxy->index(i,3)).toString();
+        listString = metaProxy->data(metaProxy->index(i,2)).toString() + " - " + workTitle;
+        listModel->setData(listModel->index(i,0,QModelIndex()),listString);
+        listModel->setData(listModel->index(i,1,QModelIndex()),workID);
+    }
+    listModel->sort(0);
+
+    ui->label_sport->setText(w_sport + " Workouts");
+    ui->listView_workouts->setModel(listModel);
+    ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
+
 void Dialog_workouts::on_listView_workouts_clicked(const QModelIndex &index)
 {
-    QStandardItemModel *std_model;
-    std_model = stdWorkouts->workouts_meta;
-    QModelIndex model_index;
+    QString workoutTitle = listModel->data(listModel->index(index.row(),0)).toString();
+    QString workoutID = listModel->data(listModel->index(index.row(),1)).toString();
+    metaProxy->setFilterRegExp("\\b"+workoutID+"\\b");
+    metaProxy->setFilterKeyColumn(1);
 
+    w_sport = metaProxy->data(metaProxy->index(0,1)).toString();
+    w_code = metaProxy->data(metaProxy->index(0,2)).toString();
+    w_title = metaProxy->data(metaProxy->index(0,3)).toString();
+    w_duration = metaProxy->data(metaProxy->index(0,4)).toString();
+    w_distance = metaProxy->data(metaProxy->index(0,5)).toDouble();
+    w_stress = metaProxy->data(metaProxy->index(0,6)).toInt();
+
+    ui->label_selected->setText(workoutTitle + " - " + w_duration + " - " + QString::number(w_distance) + " - " + QString::number(w_stress));
     ui->pushButton_ok->setEnabled(true);
-
-    w_id = workout_model->item(index.row(),2)->text();
-
-    selected_workout = std_model->findItems(w_id,Qt::MatchExactly,1);
-
-    model_index = std_model->indexFromItem(selected_workout.at(0));
-    w_sport = std_model->item(model_index.row(),1)->text();
-    w_code = std_model->item(model_index.row(),2)->text();
-    w_title = std_model->item(model_index.row(),3)->text();
-    w_duration = std_model->item(model_index.row(),4)->text();
-    w_distance = std_model->item(model_index.row(),5)->text().toDouble();
-    w_stress = std_model->item(model_index.row(),6)->text().toInt();
-
-    ui->label_selected->setText(workout_model->item(index.row(),0)->text() + " - " + w_duration + " - " + QString::number(w_distance) + " - " + QString::number(w_stress));
 }
