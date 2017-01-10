@@ -50,7 +50,6 @@ void stress_popup::set_graph()
     ui->widget_stressPlot->xAxis->setLabelFont(plotFont);
 
     ui->widget_stressPlot->xAxis2->setVisible(true);
-    ui->widget_stressPlot->xAxis2->setLabel("Weeks");
     ui->widget_stressPlot->xAxis2->setLabelFont(plotFont);
 
     ui->widget_stressPlot->yAxis->setLabel("Stress");
@@ -222,6 +221,7 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     QFont lineFont;
     lineFont.setPointSize(8);
     int xTickCount = dateRange;
+    double dayCount = rangeStart.daysTo(rangeEnd)+2;
     QCPGraph *ltsLine = this->get_QCPLine("LTS",QColor(0,255,0),yLTS,false);
     QCPGraph *stsLine = this->get_QCPLine("STS",QColor(255,0,0),ySTS,false);
     QCPGraph *tsbLine = this->get_QCPLine("TSB",QColor(255,170,0),yTSB,true);
@@ -249,6 +249,9 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     dateTimeTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
     dateTimeTicker->setDateTimeFormat("dd.MM");
 
+    QSharedPointer<QCPAxisTickerFixed> dayTicker(new QCPAxisTickerFixed);
+    dayTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
+    dayTicker->setTickStep(1.0);
 
     if(dateRange > 20 && dateRange < 42)
     {
@@ -258,14 +261,26 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     {
         xTickCount = (dateRange+1)/5;
     }
+    if(dayCount >= 21)
+    {
+        dayCount = dayCount / 7;
+        xTickCount2 = dayCount;
+        ui->widget_stressPlot->xAxis2->setLabel("Weeks");
+    }
+    else
+    {
+        ui->widget_stressPlot->xAxis2->setLabel("Days");
+    }
 
     dateTimeTicker->setTickCount(xTickCount);
+    dayTicker->setTickCount(dayCount);
 
     ui->widget_stressPlot->yAxis->setRange(0,stressMax+10);
-    ui->widget_stressPlot->xAxis2->setRange(0,(ui->dateEdit_start->date().daysTo(ui->dateEdit_end->date().addDays(1)))/7);
     ui->widget_stressPlot->yAxis2->setRange(tsbMinMax[0]-5,tsbMinMax[1]+5);
     ui->widget_stressPlot->xAxis->setRange(xRange);
     ui->widget_stressPlot->xAxis->setTicker(dateTimeTicker);
+    ui->widget_stressPlot->xAxis2->setRange(0,dayCount);
+    ui->widget_stressPlot->xAxis2->setTicker(dayTicker);
 
     ui->widget_stressPlot->replot();
 

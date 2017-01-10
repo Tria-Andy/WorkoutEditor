@@ -35,24 +35,25 @@ Dialog_edit::Dialog_edit(QWidget *parent, const QDate w_date, schedule *p_sched,
     connect(ui->dateEdit_edit_date, SIGNAL(dateChanged(QDate)),this, SLOT(set_edit_calweek()));
 }
 
+enum {EDIT,COPY,DEL};
+
 Dialog_edit::~Dialog_edit()
 {
     delete ui;
 }
 
-void Dialog_edit::set_workout_info(const QDate &d)
+void Dialog_edit::set_workout_info(const QDate &date)
 {
     QModelIndex index;
-    ui->dateEdit_workoutdate->setDate(d);
+    ui->dateEdit_workoutdate->setDate(date);
 
-    list = workSched->workout_schedule->findItems(d.toString("dd.MM.yyyy"),Qt::MatchExactly,1);
+    list = workSched->workout_schedule->findItems(date.toString("dd.MM.yyyy"),Qt::MatchExactly,1);
 
     for(int i = 0; i < list.count();++i)
     {
         index = workSched->workout_schedule->indexFromItem(list.at(i));
         ui->comboBox_time->addItem(workSched->workout_schedule->item(index.row(),2)->text());
     }
-
 }
 
 void Dialog_edit::show_workout(int c_index)
@@ -107,9 +108,9 @@ void Dialog_edit::set_result(QString result_text,int result_code)
 {
     QMessageBox::StandardButton reply = QMessageBox::No;
 
-    if(result_code == 1)reply = QMessageBox::warning(this,result_text + " Workout",result_text + " Workout?",QMessageBox::Yes|QMessageBox::No);
-    if(result_code == 2)reply = QMessageBox::question(this,result_text + " Workout",result_text + " Workout?",QMessageBox::Yes|QMessageBox::No);
-    if(result_code == 3) reply = QMessageBox::critical(this,result_text + " Workout",result_text + " Workout?",QMessageBox::Yes|QMessageBox::No);
+    if(result_code == EDIT)reply = QMessageBox::warning(this,result_text + " Workout",result_text + " Workout?",QMessageBox::Yes|QMessageBox::No);
+    if(result_code == COPY)reply = QMessageBox::question(this,result_text + " Workout",result_text + " Workout?",QMessageBox::Yes|QMessageBox::No);
+    if(result_code == DEL) reply = QMessageBox::critical(this,result_text + " Workout",result_text + " Workout?",QMessageBox::Yes|QMessageBox::No);
 
     if (reply == QMessageBox::Yes)
     {
@@ -121,18 +122,18 @@ void Dialog_edit::set_result(QString result_text,int result_code)
 void Dialog_edit::on_pushButton_edit_clicked()
 {
     this->set_workout_data();
-    this->set_result("Edit",1);
+    this->set_result("Edit",EDIT);
 }
 
 void Dialog_edit::on_pushButton_copy_clicked()
 {
     this->set_workout_data();
-    this->set_result("Copy",2);
+    this->set_result("Copy",COPY);
 }
 
 void Dialog_edit::on_pushButton_delete_clicked()
 {
-    this->set_result("Delete",3);
+    this->set_result("Delete",DEL);
 }
 
 void Dialog_edit::on_doubleSpinBox_distance_valueChanged(double dist)

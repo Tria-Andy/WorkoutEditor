@@ -120,6 +120,13 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QCheckBox" name="checkBox_complete">
+        <property name="text">
+         <string>Complete Day</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

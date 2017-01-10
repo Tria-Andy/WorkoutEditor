@@ -1153,7 +1153,7 @@ void MainWindow::write_hf_infos()
     ui->lineEdit_hfavg->setText(QString::number(curr_activity->get_hf_avg()));
     totalWork = this->calc_totalWork(jsonhandler->get_tagData("Weight").toDouble(),curr_activity->get_hf_avg(),curr_activity->get_move_time());
     totalWork = totalWork * curr_activity->get_swim_sri();
-    ui->lineEdit_kal->setText(QString::number(ceil((totalWork/4)*4.184)));
+    ui->lineEdit_kal->setText(QString::number(ceil((totalWork*4)/4.184)));
     ui->lineEdit_kj->setText(QString::number(ceil(totalWork)));
 
     jsonhandler->set_overrideFlag(true);
