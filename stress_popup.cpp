@@ -264,7 +264,6 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     if(dayCount >= 21)
     {
         dayCount = dayCount / 7;
-        xTickCount2 = dayCount;
         ui->widget_stressPlot->xAxis2->setLabel("Weeks");
     }
     else
