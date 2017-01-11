@@ -79,7 +79,7 @@ private:
     del_intselect intSelect_del;
     del_level level_del;
     QStandardItemModel *calendar_model,*sum_model;
-    QSortFilterProxyModel *proxyModel;
+    QSortFilterProxyModel *scheduleProxy,*metaProxy,*contentProxy;
     QStringList modus_list,cal_header,year_header,schedMode;
 
     //Intervall Chart
@@ -102,7 +102,7 @@ private:
     void openPreferences();
     void set_summeryInfo();
     void summery_view();
-    void summery_calc(int,QModelIndex,bool);
+    void week_summery(int,int);
     QString set_summeryString(int,bool);
     void workout_calendar();
     QString get_weekRange();
