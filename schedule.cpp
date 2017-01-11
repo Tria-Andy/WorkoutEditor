@@ -67,7 +67,6 @@ void schedule::read_dayWorkouts(QDomDocument workouts)
         for(int i = 0; i < workout_list.count(); ++i)
         {
             QDomElement workout_element;
-
             QDomNode workout_node = workout_list.at(i);
 
             workout_element = workout_node.toElement();
@@ -428,14 +427,14 @@ void schedule::deleteWeek(QString deleteWeek)
 
 QString schedule::get_weekPhase(QDate currDate)
 {
+    QSortFilterProxyModel *metaProxy = new QSortFilterProxyModel();
+    metaProxy->setSourceModel(week_meta);
     QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.addDays(1 - currDate.dayOfWeek()).year());
-    QList<QStandardItem*> metaPhase = week_meta->findItems(weekID,Qt::MatchExactly,1);
-    QModelIndex index;
-    if(!metaPhase.isEmpty())
-    {
-        index = week_meta->indexFromItem(metaPhase.at(0));
-        return week_meta->item(index.row(),2)->text();
-    }
+    metaProxy->setFilterRegExp("\\b"+weekID+"\\b");
+    metaProxy->setFilterKeyColumn(1);
+
+    if(metaProxy->rowCount() == 1) return metaProxy->data(metaProxy->index(0,2)).toString();
+
     return 0;
 }
 
