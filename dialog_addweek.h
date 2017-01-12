@@ -44,9 +44,9 @@ private slots:
 
 private:
     Ui::Dialog_addweek *ui;
-    schedule *workSched;
     del_addweek week_del;
     QStandardItemModel *weekModel;
+    QSortFilterProxyModel *metaProxy,*contentProxy;
     QString openID,selYear,weekID,timeFormat,empty;
     QStringList sportuseList,weekHeader,weekMeta,weekContent;
     bool update;
