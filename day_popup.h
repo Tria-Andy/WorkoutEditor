@@ -23,7 +23,7 @@
 #include <QDialog>
 #include <QTimeEdit>
 #include <QTextBrowser>
-#include <QStandardItemModel>
+#include <QSortFilterProxyModel>
 #include <QVBoxLayout>
 #include <QPushButton>
 #include "dialog_edit.h"
@@ -50,9 +50,7 @@ private slots:
 private:
     Ui::day_popup *ui;
     schedule *workSched;
-    const QDate *workout_date;
-    QString weekPhase;
-    void show_workouts();
+    void show_workouts(QDate,schedule*);
 
 };
 

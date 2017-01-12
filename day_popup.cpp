@@ -24,11 +24,8 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
     ui(new Ui::day_popup)
 {
     ui->setupUi(this);
-    workout_date = &w_date;
-    workSched = p_sched;
-    weekPhase = workSched->get_weekPhase(w_date);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    this->show_workouts();
+    this->show_workouts(w_date,p_sched);
 }
 
 day_popup::~day_popup()
@@ -36,23 +33,29 @@ day_popup::~day_popup()
     delete ui;
 }
 
-void day_popup::show_workouts()
+void day_popup::show_workouts(QDate w_date,schedule *schedP)
 {
-    QModelIndex index;
-    QList<QStandardItem*> list = workSched->workout_schedule->findItems(workout_date->toString("dd.MM.yyyy"),Qt::MatchExactly,1);
-    int col_count = (list.count()*3)-1;
-    if(list.count() == 0)
+    QString workoutDate = w_date.toString("dd.MM.yyyy");
+    QSortFilterProxyModel *scheduleProxy = new QSortFilterProxyModel();
+    scheduleProxy->setSourceModel(schedP->workout_schedule);
+    scheduleProxy->setFilterRegExp("\\b"+workoutDate+"\\b");
+    scheduleProxy->setFilterKeyColumn(1);
+    int workCount = scheduleProxy->rowCount();
+    int col_count = (workCount*3)-1;
+
+    if(workCount == 0)
     {
         ui->toolButton_edit->setEnabled(false);
         return;
     }
-    if(list.count() == 1) this->setFixedWidth(400);
-    if(list.count() > 1 ) this->setFixedWidth(300*list.count());
-    index = workSched->workout_schedule->indexFromItem(list.at(0));
-    ui->label_weekinfo->setText(workout_date->toString("dd.MM.yyyy") + " - Phase: " + weekPhase + " - Workouts: " + QString::number(list.count()) );
+    if(workCount == 1) this->setFixedWidth(400);
+    if(workCount > 1 ) this->setFixedWidth(300*workCount);
+
+    ui->label_weekinfo->setText(workoutDate + " - Phase: " + schedP->get_weekPhase(w_date) + " - Workouts: " + QString::number(workCount) );
 
     QStringList work_list;
     work_list << "Workout:" << "Sport:" << "Code:" << "Title:" << "Duration:" << "Distance:" << "Stress:" << "Pace:";
+    int worklistCount = work_list.count();
     int fontsize = 10;
     int clabel,cvalue;
 
@@ -77,7 +80,7 @@ void day_popup::show_workouts()
 
     tableFormat.setColumnWidthConstraints(constraints);
 
-    QTextTable *table = cursor.insertTable(work_list.count(),col_count,tableFormat);
+    QTextTable *table = cursor.insertTable(worklistCount,col_count,tableFormat);
     QTextCharFormat format = cursor.charFormat();
     format.setFontPointSize(fontsize);
 
@@ -87,11 +90,9 @@ void day_popup::show_workouts()
     QTextTableCell cell;
     QTextCursor cellcursor;
 
-    for(int i = 0; i < list.count();++i)
+    for(int i = 0; i < workCount;++i)
     {
-        index = workSched->workout_schedule->indexFromItem(list.at(i));
-
-        for(int x = 0; x < work_list.count(); ++x)
+        for(int x = 0; x < worklistCount; ++x)
         {
             clabel = i*2;
             cvalue = clabel+1;
@@ -103,17 +104,18 @@ void day_popup::show_workouts()
             cellcursor = cell.firstCursorPosition();
             if(x == 7)
             {
-                cellcursor.insertText(this->get_workout_pace(workSched->workout_schedule->item(index.row(),7)->text().toDouble(),QTime::fromString(workSched->workout_schedule->item(index.row(),6)->text(),"hh:mm:ss"),workSched->workout_schedule->item(index.row(),3)->text(),true));
+                cellcursor.insertText(this->get_workout_pace(scheduleProxy->data(scheduleProxy->index(i,7)).toDouble(),
+                                                             QTime::fromString(scheduleProxy->data(scheduleProxy->index(i,6)).toString(),"hh:mm:ss"),
+                                                             scheduleProxy->data(scheduleProxy->index(i,3)).toString(),true));
             }
             else
             {
-                cellcursor.insertText(workSched->workout_schedule->item(index.row(),x+2)->text());
+                cellcursor.insertText(scheduleProxy->data(scheduleProxy->index(i,x+2)).toString());
             }
         }
     }
     table->insertRows(table->rows(),1);
     cursor.endEditBlock();
-
 }
 
 void day_popup::on_toolButton_close_clicked()
