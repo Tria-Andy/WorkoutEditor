@@ -31,9 +31,11 @@ class schedule : public xmlHandler
 public:
     schedule();
     QStandardItemModel *workout_schedule,*week_meta,*week_content;
+    void freeMem();
     void save_dayWorkouts();
     void save_weekPlan();
     void save_ltsFile(double);
+    int check_workouts(QDate);
     void changeYear();
     QString get_weekPhase(QDate);
     void copyWeek(QString,QString);
@@ -59,6 +61,7 @@ public:
     void delete_workout(QModelIndex);
 
 private:
+    QSortFilterProxyModel *scheduleProxy;
     QStringList workoutTags,metaTags,contentTags;
     QString schedulePath,workoutFile,metaFile,contentFile,ltsFile;
     QDate firstdayofweek;

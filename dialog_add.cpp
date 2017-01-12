@@ -91,8 +91,8 @@ void Dialog_add::on_dateEdit_wdate_dateChanged(const QDate &date)
     workout_date = date;
     w_date = workout_date.toString("dd.MM.yyyy");
     ui->lineEdit_phase->setText(workSched->get_weekPhase(workout_date));
-    QList<QStandardItem*> workCount = workSched->workout_schedule->findItems(w_date,Qt::MatchExactly,1);
-    if(workCount.count() == 3)
+
+    if(workSched->check_workouts(date) == 3)
     {
         ui->pushButton_add->setEnabled(false);
     }

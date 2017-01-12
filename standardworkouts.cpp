@@ -133,14 +133,16 @@ void standardWorkouts::set_workoutIds()
 
 void standardWorkouts::delete_stdWorkout(QString workID,bool isdelete)
 {
-    QList<QStandardItem*> list = workouts_meta->findItems(workID,Qt::MatchExactly,1);
-    workouts_meta->removeRow(workouts_meta->indexFromItem(list.at(0)).row(),QModelIndex());
+    QSortFilterProxyModel *metaProxy =  new QSortFilterProxyModel();
+    metaProxy->setSourceModel(workouts_meta);
+    metaProxy->setFilterRegExp("\\b"+workID+"\\b");
+    metaProxy->setFilterKeyColumn(1);
+    metaProxy->removeRow(0,QModelIndex());
 
-    list = workouts_steps->findItems(workID,Qt::MatchExactly,0);
-    for(int i = 0; i < list.count(); ++i)
-    {
-        workouts_steps->removeRow(workouts_steps->indexFromItem(list.at(i)).row(),QModelIndex());
-    }
+    QSortFilterProxyModel *stepProxy = new QSortFilterProxyModel();
+    stepProxy->setSourceModel(workouts_steps);
+    stepProxy->setFilterRegExp("\\b"+workID+"\\b");
+    stepProxy->removeRows(0,stepProxy->rowCount(),QModelIndex());
 
     if(isdelete) this->set_workoutIds();
     this->write_standard_workouts();

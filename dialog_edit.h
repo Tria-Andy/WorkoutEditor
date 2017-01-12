@@ -39,12 +39,11 @@ class Dialog_edit : public QDialog, public calculation
 private:
     schedule *workSched;
     standardWorkouts *std_workouts;
-    QStandardItemModel *workout_model;
-    QModelIndex curr_index;
-    QList<QStandardItem*> list;
+    QSortFilterProxyModel *scheduleProxy;
     QStringList w_code;
+    QModelIndex curr_index;
     int edit_result;
-
+    void controlButtons(QDate);
     void set_result(QString,int);
     void set_workout_data();
 

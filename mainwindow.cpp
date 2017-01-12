@@ -109,6 +109,7 @@ void MainWindow::freeMem()
 {
     if(userSetup)
     {
+        workSchedule->freeMem();
         calendar_model->clear();
         delete stdWorkout;
         delete workSchedule;
@@ -589,9 +590,9 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
               dialog_code = edit_workout.exec();
               if(dialog_code == QDialog::Accepted)
               {
-                  if(edit_workout.get_result() == 1) workSchedule->edit_workout(edit_workout.get_edit_index());
-                  if(edit_workout.get_result() == 2) workSchedule->add_workout();
-                  if(edit_workout.get_result() == 3) workSchedule->delete_workout(edit_workout.get_edit_index());
+                  if(edit_workout.get_result() == 0) workSchedule->edit_workout(edit_workout.get_edit_index());
+                  if(edit_workout.get_result() == 1) workSchedule->add_workout();
+                  if(edit_workout.get_result() == 2) workSchedule->delete_workout(edit_workout.get_edit_index());
                   safeFlag = true;
                   ui->actionSave_Workout_Schedule->setEnabled(true);
                   this->refresh_model();

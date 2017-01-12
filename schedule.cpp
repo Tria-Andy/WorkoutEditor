@@ -49,6 +49,14 @@ schedule::schedule()
     }
 }
 
+void schedule::freeMem()
+{
+    delete scheduleProxy;
+    delete workout_schedule;
+    delete week_meta;
+    delete week_content;
+}
+
 void schedule::read_dayWorkouts(QDomDocument workouts)
 {
 
@@ -89,6 +97,8 @@ void schedule::read_dayWorkouts(QDomDocument workouts)
         }
         workout_schedule->sort(2);
     }
+    scheduleProxy = new QSortFilterProxyModel();
+    scheduleProxy->setSourceModel(workout_schedule);
 }
 
 void schedule::save_dayWorkouts()
@@ -317,6 +327,18 @@ void schedule::save_ltsFile(double ltsDays)
     this->write_XMLFile(schedulePath,&xmlDoc,ltsFile);
 }
 
+int schedule::check_workouts(QDate date)
+{
+    int workCount;
+    scheduleProxy->setSourceModel(workout_schedule);
+    scheduleProxy->setFilterRegExp("\\b"+date.toString("dd.MM.yyyy")+"\\");
+    scheduleProxy->setFilterKeyColumn(1);
+    workCount = scheduleProxy->rowCount();
+    scheduleProxy->setFilterRegExp("");
+
+    return workCount;
+}
+
 void schedule::save_ltsValues()
 {
     double stress = 0,currStress = 0,pastStress = 0,startLTS = 0;
@@ -414,10 +436,17 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
     }
 }
 
+void schedule::delete_workout(QModelIndex index)
+{
+    QString wDate = workout_schedule->data(workout_schedule->index(index.row(),1)).toString();
+    int stress = workout_schedule->data(workout_schedule->index(index.row(),8)).toInt();
+    workout_schedule->removeRow(index.row(),QModelIndex());
+    this->updateStress(wDate,stress,false);
+}
+
 void schedule::deleteWeek(QString deleteWeek)
 {
-    QList<QStandardItem*> deleteList;
-    deleteList = workout_schedule->findItems(deleteWeek,Qt::MatchExactly,0);
+    QList<QStandardItem*> deleteList = workout_schedule->findItems(deleteWeek,Qt::MatchExactly,0);
 
     for(int i = 0; i < deleteList.count(); ++i)
     {
@@ -502,14 +531,6 @@ void schedule::edit_workout(QModelIndex index)
     workout_schedule->setData(workout_schedule->index(index.row(),8,QModelIndex()),workout_stress_score);
 
     this->updateStress(workout_date,workout_stress_score-stress,true);
-}
-
-void schedule::delete_workout(QModelIndex index)
-{
-    QString wDate = workout_schedule->data(workout_schedule->index(index.row(),1)).toString();
-    int stress = workout_schedule->data(workout_schedule->index(index.row(),8)).toInt();
-    workout_schedule->removeRow(index.row(),QModelIndex());
-    this->updateStress(wDate,stress,false);
 }
 
 void schedule::updateStress(QString date,double stress,bool add)
