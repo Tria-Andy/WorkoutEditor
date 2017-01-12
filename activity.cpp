@@ -83,6 +83,7 @@ void Activity::prepareData()
         QString swimLapName;
         edit_int_model->setData(edit_int_model->index(0,1,QModelIndex()),0);
         int rowCounter = xdata_model->rowCount();
+        double swimoffset = settings::get_thresValue("swimoffset");
         swim_xdata = new QStandardItemModel(rowCounter,7);
         swim_xdata->setHorizontalHeaderLabels(settings::get_swimtime_header());
 
@@ -94,7 +95,7 @@ void Activity::prepareData()
 
         for(int row = 0; row < rowCounter; ++row)
         {
-            lapPace = round(xdata_model->data(xdata_model->index(row,3,QModelIndex())).toDouble() - 0.1);
+            lapPace = round(xdata_model->data(xdata_model->index(row,3,QModelIndex())).toDouble() - swimoffset);
             type = xdata_model->data(xdata_model->index(row,2,QModelIndex())).toInt();
             lapDist = xdata_model->data(xdata_model->index(row,1,QModelIndex())).toDouble();
 
@@ -439,6 +440,7 @@ double Activity::get_int_distance(int row,bool recalc)
         dist_stop = p_samp_model->data(p_samp_model->index(int_stop,1,QModelIndex()),Qt::DisplayRole).toDouble();
         dist = dist_stop - dist_start;
     }
+
     if(curr_sport == settings::isSwim)
     {
         if(recalc)
@@ -450,7 +452,6 @@ double Activity::get_int_distance(int row,bool recalc)
             tempdist = ceil(round(dist*100));
             return tempdist/100.0;
         }
-
     }
 
     return dist;
@@ -715,6 +716,7 @@ double Activity::interpolate_speed(int row,int sec,double limit)
             return curr_speed;
         }
     }
+
     return 0;
 }
 
@@ -1004,7 +1006,6 @@ void Activity::set_curr_act_model(bool recalc)
                 curr_act_model->setData(curr_act_model->index(row,6,QModelIndex()),round(this->get_int_value(row,3,recalc)));
             }
     }
-
     curr_act_model->setHorizontalHeaderLabels(settings::get_int_header(curr_sport));
 }
 
