@@ -49,6 +49,7 @@ private:
     QStandardItemModel *plotModel,*valueModel,*listModel;
     QSortFilterProxyModel *metaProxy,*stepProxy;
     QMap<QString,QString> workoutMap;
+    QMap<int,QString> dataPoint;
     QStringList modelHeader,phaseList,groupList,levelList;
     standardWorkouts *stdWorkouts;
     QTreeWidgetItem *currentItem;
@@ -68,6 +69,7 @@ private:
     void set_sport_threshold(QString);
     void set_itemData(QTreeWidgetItem *item);
     void show_editItem(QTreeWidgetItem *item);
+    void set_selectData(QTreeWidgetItem *item);
     void move_item(bool);
     void set_defaultData(QTreeWidgetItem *item,bool);
     void get_workouts(QString);

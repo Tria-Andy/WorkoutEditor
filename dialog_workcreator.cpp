@@ -484,38 +484,44 @@ void Dialog_workCreator::clearIntTree()
 void Dialog_workCreator::set_plotModel()
 {
     plotModel->clear();
-    plotModel->setHorizontalHeaderLabels(modelHeader);
+    plotModel->setColumnCount(4);
+    //plotModel->setHorizontalHeaderLabels(modelHeader);
     int parentReps = 0;
     int childReps = 0;
     int childCount = 0;
     int subchildCount = 0;
     bool isload = false;
     QString phase,subphase;
+    QTreeWidgetItem *topItem,*childItem;
 
     for(int c_item = 0; c_item < ui->treeWidget_intervall->topLevelItemCount(); ++c_item)
     {
         //TopItems
-        phase = ui->treeWidget_intervall->topLevelItem(c_item)->data(0,Qt::DisplayRole).toString();
-        childCount = ui->treeWidget_intervall->topLevelItem(c_item)->childCount();
+        topItem = ui->treeWidget_intervall->topLevelItem(c_item);
+        phase = topItem->data(0,Qt::DisplayRole).toString();
+        childCount = topItem->childCount();
+
+        qDebug() << phase+"-Top";
 
         if(childCount > 0)
         {
             if(phase.contains(isGroup))
             {
-                parentReps = ui->treeWidget_intervall->topLevelItem(c_item)->data(7,Qt::DisplayRole).toInt();
+                parentReps = topItem->data(7,Qt::DisplayRole).toInt();
 
                 for(int c_parent = 0; c_parent < parentReps; ++c_parent)
                 {
                     for(int c_childs = 0; c_childs < childCount ; ++c_childs)
                     {
-                        subchildCount = ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs)->childCount();
-                        subphase = ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs)->data(0,Qt::DisplayRole).toString();
+                        childItem = ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs);
+                        subchildCount = childItem->childCount();
+                        subphase = childItem->data(0,Qt::DisplayRole).toString();
 
                         if(subchildCount > 0)
                         {
                             if(subphase.contains(isSeries))
                             {
-                                childReps = ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs)->data(7,Qt::DisplayRole).toInt();
+                                childReps = childItem->data(7,Qt::DisplayRole).toInt();
                                 for(int c_child = 0; c_child < childReps; ++c_child)
                                 {
                                     for(int c_subchilds = 0; c_subchilds < subchildCount; ++c_subchilds)
@@ -523,18 +529,26 @@ void Dialog_workCreator::set_plotModel()
                                         this->add_to_plot(ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs)->child(c_subchilds));
                                     }
                                 }
+                                for(int i = 0; i < childCount; ++i)
+                                {
+                                    qDebug() << childItem->data(0,Qt::DisplayRole).toString()+"-"+QString::number(i);
+                                }
                             }
                         }
                         else
                         {
-                            this->add_to_plot(ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs));
+                            this->add_to_plot(childItem);
                         }
                     }
+                }
+                for(int i = 0; i < childCount; ++i)
+                {
+                    qDebug() << topItem->data(0,Qt::DisplayRole).toString()+"-"+QString::number(i);
                 }
             }
             else if(phase.contains(isSeries))
             {
-                parentReps = ui->treeWidget_intervall->topLevelItem(c_item)->data(7,Qt::DisplayRole).toInt();
+                parentReps = topItem->data(7,Qt::DisplayRole).toInt();
 
                 for(int c_parent = 0; c_parent < parentReps; ++c_parent)
                 {
@@ -543,6 +557,10 @@ void Dialog_workCreator::set_plotModel()
                         this->add_to_plot(ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs));
                     }
                 }
+                for(int i = 0; i < childCount; ++i)
+                {
+                    qDebug() << topItem->data(0,Qt::DisplayRole).toString()+"-"+QString::number(i);
+                }
             }
         }
         else
@@ -550,7 +568,7 @@ void Dialog_workCreator::set_plotModel()
             //Items without connection
             if(!phase.contains(isSeries) && !phase.contains(isGroup))
             {
-            this->add_to_plot(ui->treeWidget_intervall->topLevelItem(c_item));
+                this->add_to_plot(topItem);
             }
         }
         if(c_item == ui->treeWidget_intervall->topLevelItemCount()-1) isload = true;
@@ -590,7 +608,12 @@ void Dialog_workCreator::set_plotGraphic(int c_ints)
     stress_sum = 0.0;
     double thres_high = 0.0;
 
+    ui->widget_plot->setInteraction(QCP::iSelectPlottables);
+    QCPSelectionDecorator *lineDec = new QCPSelectionDecorator;
+    lineDec->setPen(QPen(QColor(255,0,0)));
+    lineDec->setBrush(QColor(255,0,0,50));
     QCPGraph *workout_line = ui->widget_plot->addGraph();
+    workout_line->setSelectionDecorator(lineDec);
 
     if(c_ints != 0)
     {
@@ -636,10 +659,53 @@ void Dialog_workCreator::set_plotGraphic(int c_ints)
     ui->label_duration->setText("Time:" + this->set_time(static_cast<int>(ceil(time_sum))) + " - " + "Distance:" + QString::number(dist_sum) + " - " + "Stress:" + QString::number(round(stress_sum)));
 }
 
+void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
+{
+    QCPGraph *graph = ui->widget_plot->graph(0);
+    QString itemIdent = item->data(0,Qt::DisplayRole).toString();
+
+    if(item->parent() == nullptr)
+    {
+        qDebug() << item->data(0,Qt::DisplayRole).toString()+"-Top" << item->data(7,Qt::DisplayRole).toInt();
+    }
+    else
+    {
+        qDebug() << item->parent()->data(0,Qt::DisplayRole).toString()+"-"+QString::number(ui->treeWidget_intervall->currentIndex().row());
+    }
+
+    /*
+    QCPDataSelection selection;
+
+    if(itemIdent.contains(isGroup) || itemIdent.contains(isSeries))
+    {
+        graph->setSelectable(QCP::stDataRange);
+        QCPDataRange dataRange;
+        dataRange.setBegin(pos);
+        dataRange.setEnd(pos*repeat);
+        selection.addDataRange(dataRange);
+    }
+    else
+    {
+        graph->setSelectable(QCP::stMultipleDataRanges);
+        for(int i = 0; i < repeat; ++i)
+        {
+            QCPDataRange *dataRange = new QCPDataRange();
+            //selection.addDataRange(dataRange);
+        }
+    }
+
+    graph->selectionChanged(selection);
+    ui->widget_plot->replot();
+    */
+}
+
+
 void Dialog_workCreator::on_treeWidget_intervall_itemClicked(QTreeWidgetItem *item, int column)
 {
     Q_UNUSED(column)
+    ui->widget_plot->graph(0)->setSelection(QCPDataSelection(QCPDataRange(0,0)));
     this->show_editItem(item);
+    this->set_selectData(item);
 }
 
 void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &sport)
