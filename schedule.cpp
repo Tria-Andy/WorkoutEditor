@@ -307,7 +307,6 @@ void schedule::read_ltsFile(QDomDocument stressContent)
     {
         stressValues.insert(firstdayofweek,0);
     }
-
 }
 
 void schedule::save_ltsFile(double ltsDays)

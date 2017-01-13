@@ -50,19 +50,16 @@ private slots:
 
 private:
     Ui::Dialog_export *ui;
-    QStandardItemModel *modelMeta,*modelSchedule;
-    schedule *workoutschedule;
-    QList<QStandardItem*> workoutWeek,workoutCount;
-    QStringList weeks;
+    QSortFilterProxyModel *exportProxy;
     QString fileName, fileContent;
     jsonHandler *jsonhandler;
-    int export_mode;
+    int exportMode;
 
     void workout_export();
-    void set_filecontent(QModelIndex);
+    void set_filecontent(int);
     void set_exportselection(bool,bool);
     void set_infolabel(int);
-    void get_exportinfo(QString,QString,bool);
+    void get_exportinfo(QString,int);
     void set_comboBox_time();
 };
 

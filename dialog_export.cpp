@@ -27,24 +27,24 @@ Dialog_export::Dialog_export(QWidget *parent, schedule *p_schedule) :
     ui(new Ui::Dialog_export)
 {
     ui->setupUi(this);
-    QModelIndex index;
     jsonhandler = new jsonHandler(false,"",nullptr);
-    workoutschedule = p_schedule;
-    modelMeta = workoutschedule->week_meta;
-    modelSchedule = workoutschedule->workout_schedule;
+    exportProxy = new QSortFilterProxyModel();
+    exportProxy->setSourceModel(p_schedule->week_meta);
+    exportProxy->setDynamicSortFilter(true);
+
     QDate currDate = QDate().currentDate();
-    workoutWeek = modelMeta->findItems(currDate.addDays(1 - currDate.dayOfWeek()).toString("dd.MM.yyyy"),Qt::MatchExactly,3);
-    workoutschedule->workout_schedule->sort(0);
+    exportProxy->setFilterRegExp("\\b"+currDate.addDays(1 - currDate.dayOfWeek()).toString("dd.MM.yyyy")+"\\b");
+    exportProxy->setFilterKeyColumn(3);
+    exportProxy->sort(0);
+    int weekID = exportProxy->data(exportProxy->index(0,0)).toInt()-1;
 
-    QModelIndex modelindex = modelMeta->indexFromItem(workoutWeek.at(0));
-    int weekID = modelMeta->item(modelindex.row(),0)->text().toInt()-1;
-
-    for(int i = weekID; i < modelMeta->rowCount();++i)
+    for(int i = weekID; i < p_schedule->week_meta->rowCount();++i)
     {
-        index = modelMeta->index(i,1,QModelIndex());
-        ui->comboBox_week_export->addItem(modelMeta->data(index).toString());
+        ui->comboBox_week_export->addItem(p_schedule->week_meta->data(p_schedule->week_meta->index(i,1)).toString());
     }
-    export_mode = 0;
+    exportProxy->invalidate();
+    exportProxy->setSourceModel(p_schedule->workout_schedule);
+    exportMode = 0;
 
     ui->dateEdit_export->setDate(currDate);
     ui->comboBox_week_export->setEnabled(false);
@@ -56,6 +56,7 @@ enum{ALL,TIME,WEEK};
 
 Dialog_export::~Dialog_export()
 {
+    delete exportProxy;
     delete jsonhandler;
     delete ui;
 }
@@ -65,29 +66,31 @@ void Dialog_export::set_comboBox_time()
     ui->comboBox_time_export->clear();
     ui->comboBox_time_export->addItem("all");
 
-    for(int i = 0; i < workoutCount.count();++i)
+    for(int i = 0; i < exportProxy->rowCount();++i)
     {
-        ui->comboBox_time_export->addItem(modelSchedule->item(modelSchedule->indexFromItem(workoutCount.at(i)).row(),2)->text());
+        ui->comboBox_time_export->addItem(exportProxy->data(exportProxy->index(i,2)).toString());
     }
 }
 
-void Dialog_export::set_filecontent(QModelIndex index)
+void Dialog_export::set_filecontent(int row)
 {
     QDate workoutDate;
     QTime workoutTime;
     QDateTime workoutDateTime;
     QString tempDate,tempTime,sport,stressType;
 
-    tempDate = modelSchedule->item(index.row(),1)->text();
+    tempDate = exportProxy->data(exportProxy->index(row,1)).toString();
     workoutDate = QDate::fromString(tempDate,"dd.MM.yyyy");
 
-    tempTime = modelSchedule->item(index.row(),2)->text();
+    tempTime = exportProxy->data(exportProxy->index(row,2)).toString();
     workoutTime = QTime::fromString(tempTime,"hh:mm");
 
     fileName = workoutDate.toString("yyyy_MM_dd_") + workoutTime.toString("hh_mm_ss") +".json";
     workoutDateTime = QDateTime::fromString(tempDate+"T"+tempTime+":00","dd.MM.yyyyThh:mm:ss").toUTC();
 
-    sport = modelSchedule->item(index.row(),3)->text();
+    sport = exportProxy->data(exportProxy->index(row,3)).toString();
+    tempTime = exportProxy->data(exportProxy->index(row,6)).toString();
+
     if(sport == settings::isSwim) stressType = "swimscore";
     if(sport == settings::isBike) stressType = "skiba_bike_score";
     if(sport == settings::isRun) stressType = "govss";
@@ -102,13 +105,13 @@ void Dialog_export::set_filecontent(QModelIndex index)
     jsonhandler->set_rideData("OVERRIDES","");
 
     jsonhandler->set_tagData("Sport",sport);
-    jsonhandler->set_tagData("Workout Code",modelSchedule->item(index.row(),4)->text());
-    jsonhandler->set_tagData("Workout Title",modelSchedule->item(index.row(),5)->text());
+    jsonhandler->set_tagData("Workout Code",exportProxy->data(exportProxy->index(row,4)).toString());
+    jsonhandler->set_tagData("Workout Title",exportProxy->data(exportProxy->index(row,5)).toString());
 
     jsonhandler->set_overrideFlag(true);
-    jsonhandler->set_overrideData("time_riding",QString::number(this->get_timesec(modelSchedule->item(index.row(),6)->text())));
-    jsonhandler->set_overrideData("workout_time",QString::number(this->get_timesec(modelSchedule->item(index.row(),6)->text())));
-    jsonhandler->set_overrideData(stressType,modelSchedule->item(index.row(),8)->text());
+    jsonhandler->set_overrideData("time_riding",QString::number(this->get_timesec(tempTime)));
+    jsonhandler->set_overrideData("workout_time",QString::number(this->get_timesec(tempTime)));
+    jsonhandler->set_overrideData(stressType,exportProxy->data(exportProxy->index(row,8)).toString());
 
     jsonhandler->write_json();
 }
@@ -117,51 +120,23 @@ void Dialog_export::workout_export()
 {
     fileName = QString();
     fileContent = QString();
-    QList<QStandardItem*> list;
-    QModelIndex index;
 
-    if(export_mode == WEEK)
+    for(int i = 0; i < exportProxy->rowCount(); ++i)
     {
-        QString weeknumber = ui->comboBox_week_export->currentText();
-        list = modelSchedule->findItems(weeknumber,Qt::MatchExactly,0);
-
-        for(int i = 0; i < list.count(); ++i)
+        if(exportProxy->data(exportProxy->index(i,3,QModelIndex())).toString() != settings::isOther)
         {
-            index = modelSchedule->indexFromItem(list.at(i));
-            if(modelSchedule->data(modelSchedule->index(index.row(),3,QModelIndex())).toString() != settings::isOther)
+            if(exportMode == ALL || exportMode == WEEK)
             {
-                this->set_filecontent(modelSchedule->indexFromItem(list.at(i)));
-                ui->progressBar->setValue((100/list.count())*i);
+                this->set_filecontent(i);
             }
-        }
-        ui->progressBar->setValue(100);
-
-    }
-    if(export_mode == ALL || export_mode == TIME)
-    {
-        QString workoutdate = ui->dateEdit_export->date().toString("dd.MM.yyyy");
-        list = modelSchedule->findItems(workoutdate,Qt::MatchExactly,1);
-
-        for(int i = 0; i < list.count(); ++i)
-        {
-            index = modelSchedule->indexFromItem(list.at(i));
-            if(modelSchedule->data(modelSchedule->index(index.row(),3,QModelIndex())).toString() != settings::isOther)
+            if(exportMode == TIME)
             {
-                if(export_mode == ALL)
+                if(ui->comboBox_time_export->currentText() == exportProxy->data(exportProxy->index(i,2)).toString())
                 {
-                    this->set_filecontent(modelSchedule->indexFromItem(list.at(i)));
-                    ui->progressBar->setValue((100/list.count())*i);
-                }
-                if(export_mode == TIME)
-                {
-                    QString time_value = modelSchedule->data(modelSchedule->index(modelSchedule->indexFromItem(list.at(i)).row(),2,QModelIndex()),Qt::DisplayRole).toString();
-                    if(time_value == ui->comboBox_time_export->currentText())
-                    {
-                        this->set_filecontent(modelSchedule->indexFromItem(list.at(i)));
-                        ui->progressBar->setValue((100/list.count())*i);
-                    }
+                   this->set_filecontent(i);
                 }
             }
+            ui->progressBar->setValue((100/exportProxy->rowCount()*i));
         }
         ui->progressBar->setValue(100);
     }
@@ -184,21 +159,16 @@ void Dialog_export::set_exportselection(bool b_day,bool b_week)
     ui->dateEdit_export->setEnabled(b_day);
 }
 
-void Dialog_export::get_exportinfo(QString v_week,QString v_date,bool week)
+void Dialog_export::get_exportinfo(QString filterValue,int filterCol)
 {
-    QList<QStandardItem*> list;
-    QModelIndex index;
     int workcount = 0;
-    if(week)
-    {
-        list = modelSchedule->findItems(v_week,Qt::MatchExactly,0);
-    }
-    else
-    {
-        list = modelSchedule->findItems(v_date,Qt::MatchExactly,1);
-    }
+    int workouts = 0;
 
-    if(list.count() == 0)
+    exportProxy->setFilterRegExp("\\b"+filterValue+"\\b");
+    exportProxy->setFilterKeyColumn(filterCol);
+    workouts = exportProxy->rowCount();
+
+    if(workouts == 0)
     {
         ui->pushButton_export->setEnabled(false);
     }
@@ -207,12 +177,11 @@ void Dialog_export::get_exportinfo(QString v_week,QString v_date,bool week)
         ui->pushButton_export->setEnabled(true);
     }
 
-    if(export_mode == ALL || export_mode == WEEK)
+    if(exportMode == ALL || exportMode == WEEK)
     {
-        for(int i = 0; i < list.count(); i++)
+        for(int i = 0; i < workouts; i++)
         {
-            index = modelSchedule->indexFromItem(list.at(i));
-            if(modelSchedule->data(modelSchedule->index(index.row(),3,QModelIndex())).toString() != settings::isOther)
+            if(exportProxy->data(exportProxy->index(i,3,QModelIndex())).toString() != settings::isOther)
             {
                 ++workcount;
             }
@@ -227,18 +196,18 @@ void Dialog_export::get_exportinfo(QString v_week,QString v_date,bool week)
 
 void Dialog_export::on_radioButton_day_clicked()
 {
-    export_mode = ALL;
+    exportMode = ALL;
     ui->progressBar->setValue(0);
     this->set_exportselection(true,false);
-    this->get_exportinfo("NULL",ui->dateEdit_export->date().toString("dd.MM.yyyy"),false);
+    this->get_exportinfo(ui->dateEdit_export->date().toString("dd.MM.yyyy"),1);
 }
 
 void Dialog_export::on_radioButton_week_clicked()
 {
-    export_mode = WEEK;
+    exportMode = WEEK;
     ui->progressBar->setValue(0);
     this->set_exportselection(false,true);
-    this->get_exportinfo(ui->comboBox_week_export->currentText(),"NULL",true);
+    this->get_exportinfo(ui->comboBox_week_export->currentText(),0);
 }
 
 void Dialog_export::set_infolabel(int value)
@@ -249,15 +218,17 @@ void Dialog_export::set_infolabel(int value)
 void Dialog_export::on_comboBox_week_export_currentIndexChanged(const QString &weekvalue)
 {
     ui->progressBar->setValue(0);
-    this->get_exportinfo(weekvalue,"NULL",true);
+    this->get_exportinfo(weekvalue,0);
 }
 
 void Dialog_export::on_dateEdit_export_dateChanged(const QDate &date)
 {
+    QString selDate = date.toString("dd.MM.yyyy");
+    exportProxy->setFilterRegExp("\\b"+selDate+"\\b");
+    exportProxy->setFilterKeyColumn(1);
     ui->progressBar->setValue(0);
-    workoutCount = modelSchedule->findItems(date.toString("dd.MM.yyyy"),Qt::MatchExactly,1);
     this->set_comboBox_time();
-    this->get_exportinfo("NULL",date.toString("dd.MM.yyyy"),false);
+    this->get_exportinfo(selDate,1);
 }
 
 void Dialog_export::on_comboBox_time_export_currentIndexChanged(const QString &value)
@@ -265,11 +236,11 @@ void Dialog_export::on_comboBox_time_export_currentIndexChanged(const QString &v
     ui->progressBar->setValue(0);
     if(value == "all")
     {
-        export_mode = ALL;
+        exportMode = ALL;
     }
     else
     {
-        export_mode = TIME;
+        exportMode = TIME;
     }
-    this->get_exportinfo("NULL",ui->dateEdit_export->date().toString("dd.MM.yyyy"),false);
+    this->get_exportinfo(ui->dateEdit_export->date().toString("dd.MM.yyyy"),1);
 }
