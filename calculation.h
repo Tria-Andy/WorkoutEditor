@@ -28,10 +28,6 @@ protected:
     static double get_thresPercent(QString,QString,bool);
     static double calc_distance(QString, double);
     static double estimate_stress(QString,QString,int);
-
-    QCPGraph *get_QCPLine(QCustomPlot*,QString,QColor,QVector<double> &ydata,bool);
-    void set_itemTracer(QCustomPlot*,QCPGraph*,QColor,int);
-    void set_itemText(QFont,QVector<double> &ydata,int,bool);
 };
 
 #endif // CALCULATION_H
