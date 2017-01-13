@@ -379,8 +379,10 @@ void schedule::save_ltsValues()
 
 void schedule::copyWeek(QString copyFrom,QString copyTo)
 {
-    QModelIndex index;
-    QList<QStandardItem*> fromList,toList;
+    scheduleProxy->setFilterRegExp("\\b"+copyFrom+"\\b");
+    scheduleProxy->setFilterKeyColumn(0);
+    this->deleteWeek(copyTo);
+
     QString fromWeek,toWeek,fromYear,toYear,workdate;
     int fromWeek_int,fromYear_int,toWeek_int,toYear_int,addfactor = 0;
     int days = 7;
@@ -396,9 +398,6 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
     toWeek_int = toWeek.toInt();
     toYear_int = toYear.toInt();
 
-    fromList = workout_schedule->findItems(copyFrom,Qt::MatchExactly,0);
-    toList = workout_schedule->findItems(copyTo,Qt::MatchExactly,0);
-
     if(toYear_int == fromYear_int)
     {
         addfactor = toWeek_int - fromWeek_int;
@@ -408,31 +407,21 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
        addfactor = (lastDay.weekNumber() - fromWeek_int) + toWeek_int;
     }
 
-    if(!toList.isEmpty())
+    for(int i = 0; i < scheduleProxy->rowCount(); ++i)
     {
-        for(int i = 0; i < toList.count(); ++i)
-        {
-            this->delete_workout(workout_schedule->indexFromItem(toList.at(i)));
-        }
-    }
-
-    for(int i = 0; i < fromList.count(); ++i)
-    {
-        index = workout_schedule->indexFromItem(fromList.at(i));
-        workdate = workout_schedule->item(index.row(),1)->text();
-
+        workdate = scheduleProxy->data(scheduleProxy->index(i,1)).toString();
         workout_calweek = copyTo;
         workout_date = workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy");
-        workout_time = workout_schedule->item(index.row(),2)->text();
-        workout_sport = workout_schedule->item(index.row(),3)->text();
-        workout_code = workout_schedule->item(index.row(),4)->text();
-        workout_title = workout_schedule->item(index.row(),5)->text();
-        workout_duration = workout_schedule->item(index.row(),6)->text();
-        workout_distance = workout_schedule->item(index.row(),7)->text().toDouble();
-        workout_stress_score = workout_schedule->item(index.row(),8)->text().toInt();
-
+        workout_time = scheduleProxy->data(scheduleProxy->index(i,2)).toString();
+        workout_sport = scheduleProxy->data(scheduleProxy->index(i,3)).toString();
+        workout_code = scheduleProxy->data(scheduleProxy->index(i,4)).toString();
+        workout_title = scheduleProxy->data(scheduleProxy->index(i,5)).toString();
+        workout_duration = scheduleProxy->data(scheduleProxy->index(i,6)).toString();
+        workout_distance = scheduleProxy->data(scheduleProxy->index(i,7)).toDouble();
+        workout_stress_score = scheduleProxy->data(scheduleProxy->index(i,8)).toInt();
         this->add_workout();
     }
+    scheduleProxy->setFilterRegExp("");
 }
 
 void schedule::delete_workout(QModelIndex index)
