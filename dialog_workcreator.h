@@ -39,7 +39,6 @@ private slots:
     void on_toolButton_save_clicked();
     void on_toolButton_copy_clicked();
     void on_toolButton_delete_clicked();
-
     void on_lineEdit_workoutname_textChanged(const QString &arg1);
 
 private:
@@ -76,7 +75,7 @@ private:
     void clearIntTree();
     void open_stdWorkout(QString);
     void set_plotModel();
-    void add_to_plot(QTreeWidgetItem *item);
+    void add_to_plot(QTreeWidgetItem *item,int);
     void set_plotGraphic(int);
     void set_backColor(QTreeWidgetItem *item);
     void save_workout();

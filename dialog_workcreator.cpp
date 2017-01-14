@@ -484,15 +484,16 @@ void Dialog_workCreator::clearIntTree()
 void Dialog_workCreator::set_plotModel()
 {
     plotModel->clear();
-    plotModel->setColumnCount(4);
+    plotModel->setColumnCount(6);
     //plotModel->setHorizontalHeaderLabels(modelHeader);
     int parentReps = 0;
     int childReps = 0;
     int childCount = 0;
     int subchildCount = 0;
+    int currIndex = 0;
     bool isload = false;
     QString phase,subphase;
-    QTreeWidgetItem *topItem,*childItem;
+    QTreeWidgetItem *topItem,*childItem,*subItem;
 
     for(int c_item = 0; c_item < ui->treeWidget_intervall->topLevelItemCount(); ++c_item)
     {
@@ -500,8 +501,8 @@ void Dialog_workCreator::set_plotModel()
         topItem = ui->treeWidget_intervall->topLevelItem(c_item);
         phase = topItem->data(0,Qt::DisplayRole).toString();
         childCount = topItem->childCount();
-
-        qDebug() << phase+"-Top";
+        ui->treeWidget_intervall->setCurrentItem(topItem);
+        currIndex = ui->treeWidget_intervall->currentIndex().row();
 
         if(childCount > 0)
         {
@@ -516,6 +517,8 @@ void Dialog_workCreator::set_plotModel()
                         childItem = ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs);
                         subchildCount = childItem->childCount();
                         subphase = childItem->data(0,Qt::DisplayRole).toString();
+                        ui->treeWidget_intervall->setCurrentItem(childItem);
+                        currIndex = ui->treeWidget_intervall->currentIndex().row();
 
                         if(subchildCount > 0)
                         {
@@ -526,24 +529,19 @@ void Dialog_workCreator::set_plotModel()
                                 {
                                     for(int c_subchilds = 0; c_subchilds < subchildCount; ++c_subchilds)
                                     {
-                                        this->add_to_plot(ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs)->child(c_subchilds));
+                                        subItem = ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs)->child(c_subchilds);
+                                        ui->treeWidget_intervall->setCurrentItem(subItem);
+                                        currIndex = ui->treeWidget_intervall->currentIndex().row();
+                                        this->add_to_plot(subItem,currIndex);
                                     }
-                                }
-                                for(int i = 0; i < childCount; ++i)
-                                {
-                                    qDebug() << childItem->data(0,Qt::DisplayRole).toString()+"-"+QString::number(i);
                                 }
                             }
                         }
                         else
                         {
-                            this->add_to_plot(childItem);
+                            this->add_to_plot(childItem,currIndex);
                         }
                     }
-                }
-                for(int i = 0; i < childCount; ++i)
-                {
-                    qDebug() << topItem->data(0,Qt::DisplayRole).toString()+"-"+QString::number(i);
                 }
             }
             else if(phase.contains(isSeries))
@@ -554,12 +552,11 @@ void Dialog_workCreator::set_plotModel()
                 {
                     for(int c_childs = 0; c_childs < childCount ; ++c_childs)
                     {
-                        this->add_to_plot(ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs));
+                        childItem = ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs);
+                        ui->treeWidget_intervall->setCurrentItem(childItem);
+                        currIndex = ui->treeWidget_intervall->currentIndex().row();
+                        this->add_to_plot(ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs),currIndex);
                     }
-                }
-                for(int i = 0; i < childCount; ++i)
-                {
-                    qDebug() << topItem->data(0,Qt::DisplayRole).toString()+"-"+QString::number(i);
                 }
             }
         }
@@ -568,7 +565,7 @@ void Dialog_workCreator::set_plotModel()
             //Items without connection
             if(!phase.contains(isSeries) && !phase.contains(isGroup))
             {
-                this->add_to_plot(topItem);
+                this->add_to_plot(topItem,currIndex);
             }
         }
         if(c_item == ui->treeWidget_intervall->topLevelItemCount()-1) isload = true;
@@ -576,7 +573,7 @@ void Dialog_workCreator::set_plotModel()
     if(isload) this->set_plotGraphic(plotModel->rowCount());
 }
 
-void Dialog_workCreator::add_to_plot(QTreeWidgetItem *item)
+void Dialog_workCreator::add_to_plot(QTreeWidgetItem *item,int currIndex)
 {
     double time_sum = 0;
     double dist_sum = 0;
@@ -595,6 +592,18 @@ void Dialog_workCreator::add_to_plot(QTreeWidgetItem *item)
     plotModel->setData(plotModel->index(row,1,QModelIndex()),time_sum + (this->get_timesec(item->data(4,Qt::DisplayRole).toString()) / 60.0));
     plotModel->setData(plotModel->index(row,2,QModelIndex()),dist_sum + item->data(6,Qt::DisplayRole).toDouble());
     plotModel->setData(plotModel->index(row,3,QModelIndex()),stress_sum + item->data(5,Qt::DisplayRole).toDouble());
+
+    if(item->parent() == nullptr)
+    {
+        //qDebug() << item->data(0,Qt::DisplayRole).toString()+"#"+QString::number(currIndex) << row;
+        plotModel->setData(plotModel->index(row,4,QModelIndex()),item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
+    }
+    else
+    {
+        //qDebug() << item->parent()->data(0,Qt::DisplayRole).toString()+"#"+item->data(0,Qt::DisplayRole).toString()+"-"+QString::number(currIndex) << row;
+        plotModel->setData(plotModel->index(row,4,QModelIndex()),item->parent()->data(0,Qt::DisplayRole).toString()+"#"+item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
+    }
+    plotModel->setData(plotModel->index(row,5,QModelIndex()),row);
 }
 
 void Dialog_workCreator::set_plotGraphic(int c_ints)
@@ -608,7 +617,7 @@ void Dialog_workCreator::set_plotGraphic(int c_ints)
     stress_sum = 0.0;
     double thres_high = 0.0;
 
-    ui->widget_plot->setInteraction(QCP::iSelectPlottables);
+    ui->widget_plot->setInteractions(QCP::iSelectPlottables | QCP::iMultiSelect);
     QCPSelectionDecorator *lineDec = new QCPSelectionDecorator;
     lineDec->setPen(QPen(QColor(255,0,0)));
     lineDec->setBrush(QColor(255,0,0,50));
@@ -662,41 +671,85 @@ void Dialog_workCreator::set_plotGraphic(int c_ints)
 void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
 {
     QCPGraph *graph = ui->widget_plot->graph(0);
-    QString itemIdent = item->data(0,Qt::DisplayRole).toString();
+    int currIndex = ui->treeWidget_intervall->currentIndex().row();
+    QString itemIdent;
+    int dataCount = 0;
+    bool groupRange = false;
+
+    QSortFilterProxyModel *plotProxy = new QSortFilterProxyModel;
+    plotProxy->setSourceModel(plotModel);
 
     if(item->parent() == nullptr)
     {
-        qDebug() << item->data(0,Qt::DisplayRole).toString()+"-Top" << item->data(7,Qt::DisplayRole).toInt();
-    }
-    else
-    {
-        qDebug() << item->parent()->data(0,Qt::DisplayRole).toString()+"-"+QString::number(ui->treeWidget_intervall->currentIndex().row());
-    }
-
-    /*
-    QCPDataSelection selection;
-
-    if(itemIdent.contains(isGroup) || itemIdent.contains(isSeries))
-    {
         graph->setSelectable(QCP::stDataRange);
-        QCPDataRange dataRange;
-        dataRange.setBegin(pos);
-        dataRange.setEnd(pos*repeat);
-        selection.addDataRange(dataRange);
+        itemIdent = item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex);
+        if(itemIdent.contains(isSeries))
+        {
+            itemIdent = itemIdent.split(":").first();
+        }
+        if(itemIdent.contains(isGroup))
+        {
+            groupRange = true;
+            int childCount,groupCount;
+            dataCount = groupCount = item->data(7,Qt::DisplayRole).toInt();
+            childCount = item->childCount();
+            if(childCount > 0)
+            {
+                itemIdent = item->child(0)->data(0,Qt::DisplayRole).toString();
+                for(int i = 0; i < childCount; ++i)
+                {
+                    if(item->child(i)->childCount() > 0)
+                    {
+                        int subCount = item->child(i)->childCount();
+                        dataCount = dataCount*(subCount*item->child(i)->data(7,Qt::DisplayRole).toInt());
+                    }
+                    else
+                    {
+                        dataCount += groupCount;
+                    }
+                }
+            }
+        }
     }
     else
     {
         graph->setSelectable(QCP::stMultipleDataRanges);
-        for(int i = 0; i < repeat; ++i)
+        itemIdent = item->parent()->data(0,Qt::DisplayRole).toString()+"#"+item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex);
+        if(item->data(0,Qt::DisplayRole).toString().contains(isSeries))
         {
-            QCPDataRange *dataRange = new QCPDataRange();
-            //selection.addDataRange(dataRange);
+            itemIdent = itemIdent.split("#").last();
+            itemIdent = itemIdent.split(":").first();
+        }
+    }
+    plotProxy->setFilterFixedString(itemIdent);
+    plotProxy->setFilterKeyColumn(4);
+    plotProxy->sort(5);
+
+    QCPDataSelection selection;
+
+    if(graph->selectable() == 3)
+    {
+        if(groupRange)
+        {
+            int dataStart = plotProxy->data(plotProxy->index(0,5)).toInt();
+            selection.addDataRange(QCPDataRange(dataStart,dataStart+dataCount+1));
+        }
+        else
+        {
+            selection.addDataRange(QCPDataRange(plotProxy->data(plotProxy->index(0,5)).toInt(),plotProxy->data(plotProxy->index(plotProxy->rowCount()-1,5)).toInt()+2));
         }
     }
 
-    graph->selectionChanged(selection);
+    if(graph->selectable() == 4)
+    {
+        for(int i = 0; i < plotProxy->rowCount(); ++i)
+        {
+            selection.addDataRange(QCPDataRange(plotProxy->data(plotProxy->index(i,5)).toInt(),plotProxy->data(plotProxy->index(i,5)).toInt()+2));
+        }
+    }
+
+    graph->setSelection(selection);
     ui->widget_plot->replot();
-    */
 }
 
 
