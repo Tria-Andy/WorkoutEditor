@@ -60,8 +60,6 @@ private:
     bool clearFlag;
 
     QString get_treeValue(int,int,int,int,int);
-    int get_series_count();
-    int get_group_count();
 
     void control_editPanel(bool);
     void set_editRow(QString);
