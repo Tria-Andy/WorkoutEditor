@@ -279,7 +279,7 @@ public:
         {
             set_distance(model,QTime::fromString(model->data(model->index(4,0)).toString(),"mm:ss"));
         }
-        else if(sport == settings::isBike || sport == settings::isRun)
+        else if(sport == settings::isSwim || sport == settings::isRun)
         {
             set_duration(model);
             set_speed(model,static_cast<double>(get_timesec(model->data(model->index(3,0)).toString())));
@@ -291,7 +291,9 @@ public:
     void set_duration(QAbstractItemModel *model) const
     {
         if(sport == settings::isSwim || sport == settings::isRun)
+        {
             model->setData(model->index(4,0),calc_duration(sport,model->data(model->index(6,0)).toDouble(),model->data(model->index(3,0)).toString()));
+        }
     }
 
     void set_stressValue(QAbstractItemModel *model) const

@@ -44,7 +44,7 @@ private slots:
 private:
     Ui::Dialog_workCreator *ui;
 
-    QString isSeries,isGroup,current_sport,current_workID;
+    QString isSeries,isGroup,current_sport,current_workID,isBreak;
     QStandardItemModel *plotModel,*valueModel,*listModel;
     QSortFilterProxyModel *metaProxy,*stepProxy;
     QMap<QString,QString> workoutMap;
@@ -62,6 +62,7 @@ private:
     QString get_treeValue(int,int,int,int,int);
 
     void control_editPanel(bool);
+    void resetAxis();
     void set_editRow(QString);
     void set_sport_threshold(QString);
     void set_itemData(QTreeWidgetItem *item);

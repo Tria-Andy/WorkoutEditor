@@ -20,6 +20,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent,standardWorkouts *p_worko
 
     isSeries = "Series";
     isGroup = "Group";
+    isBreak = settings::get_generalValue("breakname");
     groupList << isGroup << isSeries;
     levelList = settings::get_listValues("Level");
     ui->listWidget_group->addItems(groupList);
@@ -40,6 +41,18 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent,standardWorkouts *p_worko
     ui->listView_values->setModel(valueModel);
     ui->listView_values->setItemDelegate(&edit_del);
     ui->label_head->setText("Add Phase");
+
+    ui->widget_plot->xAxis->setTicks(true);
+    ui->widget_plot->xAxis->setTickLabels(true);
+    ui->widget_plot->xAxis->setLabel("Time - Minutes");
+    ui->widget_plot->yAxis->setTicks(true);
+    ui->widget_plot->yAxis->setTickLabels(true);
+    ui->widget_plot->yAxis->setLabel("Threshold %");
+    ui->widget_plot->xAxis2->setVisible(true);
+    ui->widget_plot->xAxis2->setLabel("Distance - KM");
+    ui->widget_plot->yAxis2->setVisible(true);
+
+    this->resetAxis();
 }
 
 Dialog_workCreator::~Dialog_workCreator()
@@ -130,7 +143,11 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             else
             {
                 currDist = this->calc_distance(stepTime,this->get_timesec(thresValue));
-                if(isSwim) currDist = currDist/10.0;
+                if(isSwim)
+                {
+                    currDist = currDist/10.0;
+                    if(!partName.contains(isBreak)) stepTime = this->calc_duration(current_sport,currDist,thresValue);
+                }
             }
 
             valueList << stepProxy->data(stepProxy->index(i,2)).toString()
@@ -142,6 +159,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                       << QString::number(this->set_doubleValue(currDist,true))
                       << stepProxy->data(stepProxy->index(i,7)).toString();
         }
+
         QTreeWidgetItem *item = new QTreeWidgetItem(valueList);
         this->set_backColor(item);
         parentItem = stepProxy->data(stepProxy->index(i,8)).toString();
@@ -331,7 +349,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
 
     if(current_sport == settings::isSwim)
     {
-        if(item->data(0,Qt::DisplayRole).toString() == settings::get_generalValue("breakname"))
+        if(item->data(0,Qt::DisplayRole).toString() == isBreak)
         {
             defaultDist = percent = 0.0;
             threshold = "00:00";
@@ -389,7 +407,6 @@ void Dialog_workCreator::set_backColor(QTreeWidgetItem *item)
 
 void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
 {
-    int rowCount = 8;
     currentItem = item;
     QString itemIdent = item->data(0,Qt::DisplayRole).toString();
     edit_del.groupName = itemIdent;
@@ -407,7 +424,7 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
     }
     else
     {
-        valueModel->setRowCount(rowCount);
+        valueModel->setRowCount(8);
         for(int i = 0; i < item->columnCount();++i)
         {
             valueModel->setData(valueModel->index(i,0,QModelIndex()),item->data(i,Qt::DisplayRole));
@@ -488,14 +505,17 @@ void Dialog_workCreator::clearIntTree()
 
     ui->lineEdit_workoutname->clear();
     ui->comboBox_code->setCurrentIndex(0);
+    this->control_editPanel(false);
+    this->resetAxis();
 }
 
 void Dialog_workCreator::set_plotModel()
 {
     plotModel->clear();
     plotModel->setColumnCount(6);
-    int parentReps = 0;
-    int childReps = 0;
+    QTreeWidget *intTree = ui->treeWidget_intervall;
+    int groupReps = 0;
+    int seriesReps = 0;
     int childCount = 0;
     int subchildCount = 0;
     int currIndex = 0;
@@ -506,40 +526,40 @@ void Dialog_workCreator::set_plotModel()
     for(int c_item = 0; c_item < ui->treeWidget_intervall->topLevelItemCount(); ++c_item)
     {
         //TopItems
-        topItem = ui->treeWidget_intervall->topLevelItem(c_item);
+        topItem = intTree->topLevelItem(c_item);
         phase = topItem->data(0,Qt::DisplayRole).toString();
         childCount = topItem->childCount();
-        ui->treeWidget_intervall->setCurrentItem(topItem);
-        currIndex = ui->treeWidget_intervall->currentIndex().row();
+        intTree->setCurrentItem(topItem);
+        currIndex = intTree->currentIndex().row();
 
         if(childCount > 0)
         {
             if(phase.contains(isGroup))
             {
-                parentReps = topItem->data(7,Qt::DisplayRole).toInt();
+                groupReps = topItem->data(7,Qt::DisplayRole).toInt();
 
-                for(int c_parent = 0; c_parent < parentReps; ++c_parent)
+                for(int repeat = 0; repeat < groupReps; ++repeat)
                 {
-                    for(int c_childs = 0; c_childs < childCount ; ++c_childs)
+                    for(int groupChild = 0; groupChild < childCount ; ++groupChild)
                     {
-                        childItem = ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs);
+                        childItem = topItem->child(groupChild);
                         subchildCount = childItem->childCount();
                         subphase = childItem->data(0,Qt::DisplayRole).toString();
-                        ui->treeWidget_intervall->setCurrentItem(childItem);
-                        currIndex = ui->treeWidget_intervall->currentIndex().row();
+                        intTree->setCurrentItem(childItem);
+                        currIndex = intTree->currentIndex().row();
 
                         if(subchildCount > 0)
                         {
                             if(subphase.contains(isSeries))
                             {
-                                childReps = childItem->data(7,Qt::DisplayRole).toInt();
-                                for(int c_child = 0; c_child < childReps; ++c_child)
+                                seriesReps = childItem->data(7,Qt::DisplayRole).toInt();
+                                for(int repeat = 0; repeat < seriesReps; ++repeat)
                                 {
-                                    for(int c_subchilds = 0; c_subchilds < subchildCount; ++c_subchilds)
+                                    for(int subChild = 0; subChild < subchildCount; ++subChild)
                                     {
-                                        subItem = ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs)->child(c_subchilds);
-                                        ui->treeWidget_intervall->setCurrentItem(subItem);
-                                        currIndex = ui->treeWidget_intervall->currentIndex().row();
+                                        subItem = childItem->child(subChild);
+                                        intTree->setCurrentItem(subItem);
+                                        currIndex = intTree->currentIndex().row();
                                         this->add_to_plot(subItem,currIndex);
                                     }
                                 }
@@ -554,16 +574,16 @@ void Dialog_workCreator::set_plotModel()
             }
             else if(phase.contains(isSeries))
             {
-                parentReps = topItem->data(7,Qt::DisplayRole).toInt();
+                seriesReps = topItem->data(7,Qt::DisplayRole).toInt();
 
-                for(int c_parent = 0; c_parent < parentReps; ++c_parent)
+                for(int repeat = 0; repeat < seriesReps; ++repeat)
                 {
-                    for(int c_childs = 0; c_childs < childCount ; ++c_childs)
+                    for(int seriesChild = 0; seriesChild < childCount ; ++seriesChild)
                     {
-                        childItem = ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs);
-                        ui->treeWidget_intervall->setCurrentItem(childItem);
-                        currIndex = ui->treeWidget_intervall->currentIndex().row();
-                        this->add_to_plot(ui->treeWidget_intervall->topLevelItem(c_item)->child(c_childs),currIndex);
+                        childItem = topItem->child(seriesChild);
+                        intTree->setCurrentItem(childItem);
+                        currIndex = intTree->currentIndex().row();
+                        this->add_to_plot(childItem,currIndex);
                     }
                 }
             }
@@ -576,7 +596,7 @@ void Dialog_workCreator::set_plotModel()
                 this->add_to_plot(topItem,currIndex);
             }
         }
-        if(c_item == ui->treeWidget_intervall->topLevelItemCount()-1) isload = true;
+        if(c_item == intTree->topLevelItemCount()-1) isload = true;
     }
     if(isload) this->set_plotGraphic(plotModel->rowCount());
 }
@@ -595,30 +615,35 @@ void Dialog_workCreator::add_to_plot(QTreeWidgetItem *item,int currIndex)
         stress_sum = plotModel->data(plotModel->index(row-1,3,QModelIndex())).toDouble();
     }
 
-    plotModel->insertRows(row,1,QModelIndex());
+    plotModel->insertRows(row,2,QModelIndex());
     plotModel->setData(plotModel->index(row,0,QModelIndex()),item->data(2,Qt::DisplayRole).toDouble());
-    plotModel->setData(plotModel->index(row,1,QModelIndex()),time_sum + (this->get_timesec(item->data(4,Qt::DisplayRole).toString()) / 60.0));
-    plotModel->setData(plotModel->index(row,2,QModelIndex()),dist_sum + item->data(6,Qt::DisplayRole).toDouble());
-    plotModel->setData(plotModel->index(row,3,QModelIndex()),stress_sum + item->data(5,Qt::DisplayRole).toDouble());
+    plotModel->setData(plotModel->index(row,1,QModelIndex()),time_sum);
+    plotModel->setData(plotModel->index(row,2,QModelIndex()),dist_sum);
+    plotModel->setData(plotModel->index(row,3,QModelIndex()),0);
+
+    plotModel->setData(plotModel->index(row+1,0,QModelIndex()),item->data(2,Qt::DisplayRole).toDouble());
+    plotModel->setData(plotModel->index(row+1,1,QModelIndex()),time_sum + (this->get_timesec(item->data(4,Qt::DisplayRole).toString()) / 60.0));
+    plotModel->setData(plotModel->index(row+1,2,QModelIndex()),dist_sum + item->data(6,Qt::DisplayRole).toDouble());
+    plotModel->setData(plotModel->index(row+1,3,QModelIndex()),stress_sum + item->data(5,Qt::DisplayRole).toDouble());
 
     if(item->parent() == nullptr)
     {
         plotModel->setData(plotModel->index(row,4,QModelIndex()),item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
+        plotModel->setData(plotModel->index(row+1,4,QModelIndex()),item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
     }
     else
     {
         plotModel->setData(plotModel->index(row,4,QModelIndex()),item->parent()->data(0,Qt::DisplayRole).toString()+"#"+item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
+        plotModel->setData(plotModel->index(row+1,4,QModelIndex()),item->parent()->data(0,Qt::DisplayRole).toString()+"#"+item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
     }
     plotModel->setData(plotModel->index(row,5,QModelIndex()),row);
-
+    plotModel->setData(plotModel->index(row+1,5,QModelIndex()),row+1);
 }
 
-void Dialog_workCreator::set_plotGraphic(int c_ints)
+void Dialog_workCreator::set_plotGraphic(int dataPoints)
 {
     ui->widget_plot->clearPlottables();
-    int int_loops = c_ints;
-    int offset = 1;
-    QVector<double> x_time(int_loops+offset),x_dist(int_loops+offset),y_thres(int_loops+offset);
+    QVector<double> x_time(dataPoints),x_dist(dataPoints),y_thres(dataPoints);
     time_sum = 0.0;
     dist_sum = 0.0;
     stress_sum = 0.0;
@@ -631,47 +656,36 @@ void Dialog_workCreator::set_plotGraphic(int c_ints)
     QCPGraph *workout_line = ui->widget_plot->addGraph();
     workout_line->setSelectionDecorator(lineDec);
 
-    if(c_ints != 0)
+    if(dataPoints != 0)
     {
         workout_line->setPen(QPen(Qt::blue));
         workout_line->setBrush(QColor(0,170,255,60));
-        workout_line->setLineStyle((QCPGraph::lsStepLeft));
-        workout_line->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, QPen(Qt::red),QBrush(Qt::white), 5));
+        workout_line->setLineStyle((QCPGraph::lsLine));
+        workout_line->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, QPen(Qt::red),QBrush(Qt::white), 3));
 
-        x_time[0] = 0.01;
-        y_thres[0] = plotModel->data(plotModel->index(0,0,QModelIndex())).toDouble();
-
-        for (int i=0,counter=1 ; i < int_loops; ++i,++counter)
+        for (int data=0 ;  data < dataPoints; ++data)
         {
-             y_thres[counter-1] = plotModel->data(plotModel->index(i,0,QModelIndex())).toDouble();
-             y_thres[counter] = y_thres[counter-1];
-             x_time[counter] = plotModel->data(plotModel->index(i,1,QModelIndex())).toDouble();
-             x_dist[counter] = plotModel->data(plotModel->index(i,2,QModelIndex())).toDouble();
-             if(y_thres[counter] > thres_high)
+             y_thres[data] = plotModel->data(plotModel->index(data,0,QModelIndex())).toDouble();
+             x_time[data] = plotModel->data(plotModel->index(data,1,QModelIndex())).toDouble();
+             x_dist[data] = plotModel->data(plotModel->index(data,2,QModelIndex())).toDouble();
+             if(y_thres[data] > thres_high)
              {
-                 thres_high = y_thres[counter];
+                 thres_high = y_thres[data];
              }
         }
-        time_sum = plotModel->data(plotModel->index(plotModel->rowCount()-1,1,QModelIndex())).toDouble();
-        dist_sum = plotModel->data(plotModel->index(plotModel->rowCount()-1,2,QModelIndex())).toDouble();
-        stress_sum = plotModel->data(plotModel->index(plotModel->rowCount()-1,3,QModelIndex())).toDouble();
-        workout_line->setData(x_time,y_thres);
-        ui->widget_plot->graph()->rescaleAxes(true);
-        ui->widget_plot->xAxis->setRange(0,time_sum+((time_sum/2)*0.1));
-        ui->widget_plot->xAxis2->setRange(0,dist_sum+((dist_sum/2)*0.1));
-        ui->widget_plot->xAxis2->setVisible(true);
+
+        time_sum = plotModel->data(plotModel->index(dataPoints-1,1,QModelIndex())).toDouble();
+        dist_sum = plotModel->data(plotModel->index(dataPoints-1,2,QModelIndex())).toDouble();
+        stress_sum = plotModel->data(plotModel->index(dataPoints-1,3,QModelIndex())).toDouble();
+
+        workout_line->setData(x_time,y_thres,true);
+
+        ui->widget_plot->xAxis->setRange(0,time_sum+(time_sum*0.015));
+        ui->widget_plot->xAxis2->setRange(0,dist_sum+(dist_sum*0.015));
         ui->widget_plot->yAxis->setRange(0,thres_high+20.0);
+        ui->widget_plot->yAxis2->setRange(0,thres_high+20.0);
     }
-
-    ui->widget_plot->xAxis->setTicks(true);
-    ui->widget_plot->yAxis->setTicks(true);
-    ui->widget_plot->xAxis->setLabel("Time - Minutes");
-    ui->widget_plot->xAxis2->setLabel("Distance - KM");
-    ui->widget_plot->yAxis->setLabel("Threshold %");
-    ui->widget_plot->xAxis->setTickLabels(true);
-    ui->widget_plot->yAxis->setTickLabels(true);
     ui->widget_plot->replot();
-
     ui->label_duration->setText("Time:" + this->set_time(static_cast<int>(ceil(time_sum))) + " - " + "Distance:" + QString::number(dist_sum) + " - " + "Stress:" + QString::number(round(stress_sum)));
 }
 
@@ -699,7 +713,7 @@ void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
         {
             groupRange = true;
             int childCount,groupCount;
-            dataCount = groupCount = item->data(7,Qt::DisplayRole).toInt();
+            dataCount = groupCount = item->data(7,Qt::DisplayRole).toInt()*2;
             childCount = item->childCount();
             if(childCount > 0)
             {
@@ -740,12 +754,11 @@ void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
         if(groupRange)
         {
             int dataStart = plotProxy->data(plotProxy->index(0,5)).toInt();
-            selection.addDataRange(QCPDataRange(dataStart,dataStart+dataCount+1));
+            selection.addDataRange(QCPDataRange(dataStart,dataStart+dataCount));
         }
         else
         {
-            qDebug() << plotProxy->data(plotProxy->index(0,5)).toInt() <<"-"<< plotProxy->data(plotProxy->index(0,5)).toInt()+2;
-            selection.addDataRange(QCPDataRange(plotProxy->data(plotProxy->index(0,5)).toInt(),plotProxy->data(plotProxy->index(plotProxy->rowCount()-1,5)).toInt()+2));
+            selection.addDataRange(QCPDataRange(plotProxy->data(plotProxy->index(0,5)).toInt(),plotProxy->data(plotProxy->index(plotProxy->rowCount()-1,5)).toInt()+1));
         }
     }
 
@@ -753,14 +766,22 @@ void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
     {
         for(int i = 0; i < plotProxy->rowCount(); ++i)
         {
-            qDebug() << plotProxy->data(plotProxy->index(i,5)).toInt() <<"-"<< plotProxy->data(plotProxy->index(i,5)).toInt()+1;
             selection.addDataRange(QCPDataRange(plotProxy->data(plotProxy->index(i,5)).toInt(),plotProxy->data(plotProxy->index(i,5)).toInt()+1),false);
         }
-        qDebug() << selection.dataRangeCount();
     }
 
     graph->setSelection(selection);
     ui->widget_plot->replot();
+}
+
+void Dialog_workCreator::resetAxis()
+{
+    ui->widget_plot->xAxis->setRange(0,10.0);
+    ui->widget_plot->xAxis->rescale(true);
+    ui->widget_plot->yAxis->setRange(0,50.0);
+    ui->widget_plot->xAxis2->setRange(0,5.0);
+    ui->widget_plot->yAxis2->setRange(0,50.0);
+    //ui->widget_plot->graph()->rescaleAxes(true);
 }
 
 void Dialog_workCreator::on_treeWidget_intervall_itemClicked(QTreeWidgetItem *item, int column)
@@ -816,7 +837,6 @@ void Dialog_workCreator::set_sport_threshold(QString sport)
         threshold_power = 0.0;
         ui->label_threshold->setText("-");
         currThres = threshold_power;
-
     }
     if(sport == settings::isSwim)
     {
@@ -866,7 +886,6 @@ void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
 void Dialog_workCreator::on_pushButton_clear_clicked()
 {
     this->clearIntTree();
-    this->control_editPanel(false);
 }
 
 void Dialog_workCreator::on_toolButton_update_clicked()
@@ -880,9 +899,7 @@ void Dialog_workCreator::on_toolButton_remove_clicked()
 {
     if(ui->treeWidget_intervall->topLevelItemCount() == 1)
     {
-        //ui->treeWidget_intervall->clear();
         this->clearIntTree();
-        this->control_editPanel(false);
     }
     else
     {
