@@ -29,6 +29,7 @@ class jsonHandler : public calculation
 public:
     jsonHandler(bool readFlag = false,QString jsonfile = QString(), Activity *p_act = 0);
     QString get_jsonfile() {return jsonFile;}
+    bool hasOverrideData() {return hasOverride;}
     void set_filename(QString fname) {fileName = fname;}
     void write_json();
     void set_overrideData(QString vKey,QString vValue)
