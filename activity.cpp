@@ -83,7 +83,8 @@ void Activity::prepareData()
         QString swimLapName;
         edit_int_model->setData(edit_int_model->index(0,1,QModelIndex()),0);
         int rowCounter = xdata_model->rowCount();
-        double swimoffset = settings::get_thresValue("swimoffset");
+        double swimoffset = 0.0;
+        if(!jsonhandler->hasOverrideData()) swimoffset = settings::get_thresValue("swimoffset");
         swim_xdata = new QStandardItemModel(rowCounter,7);
         swim_xdata->setHorizontalHeaderLabels(settings::get_swimtime_header());
 
