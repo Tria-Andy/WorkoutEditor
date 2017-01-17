@@ -59,7 +59,6 @@ void Dialog_edit::set_workout_info(const QDate &date)
 
 void Dialog_edit::show_workout(int row)
 {
-    //curr_index = workSched->workout_schedule->indexFromItem(list.at(row));
     curr_index = scheduleProxy->mapToSource(scheduleProxy->index(row,2));
     QDate workDate = QDate::fromString(scheduleProxy->data(scheduleProxy->index(row,1)).toString(),"dd.MM.yyyy");
 
@@ -70,7 +69,7 @@ void Dialog_edit::show_workout(int row)
     ui->lineEdit_sport->setText(scheduleProxy->data(scheduleProxy->index(row,3)).toString());
     ui->comboBox_wcode->setCurrentText(scheduleProxy->data(scheduleProxy->index(row,4)).toString());
     ui->lineEdit_wtitle->setText(scheduleProxy->data(scheduleProxy->index(row,5)).toString());
-    ui->timeEdit_duration->setTime(QTime::fromString(scheduleProxy->data(scheduleProxy->index(row,6)).toString(),"dd.MM.yyyy"));
+    ui->timeEdit_duration->setTime(QTime::fromString(scheduleProxy->data(scheduleProxy->index(row,6)).toString(),"hh:mm:ss"));
     ui->doubleSpinBox_distance->setValue(scheduleProxy->data(scheduleProxy->index(row,7)).toString().toDouble());
     ui->label_speed->setText(this->get_workout_pace(ui->doubleSpinBox_distance->value(),ui->timeEdit_duration->time(),ui->lineEdit_sport->text(),false));
     ui->spinBox_stress->setValue(scheduleProxy->data(scheduleProxy->index(row,8)).toString().toInt());
