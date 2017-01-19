@@ -74,18 +74,14 @@ public:
                 editor->setMaximum(get_thresPercent(sport,level,true));
                 return editor;
             }
-            if(sport != settings::isSwim)
+            if(index.row() ==  4 && setEdit)
             {
-                if(index.row() ==  4 && setEdit)
-                {
                     QTimeEdit *editor = new QTimeEdit(parent);
                     editor->setDisplayFormat("mm:ss");
                     editor->setFrame(true);
                     editor->setFont(eFont);
                     return editor;
-                }
             }
-
             if(index.row() == 6 && setEdit)
             {
                 QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
@@ -153,13 +149,10 @@ public:
                 QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
                 spinBox->setValue(index.data(Qt::DisplayRole).toInt());
             }
-            if(sport != settings::isSwim)
+            if(index.row() == 4)
             {
-                if(index.row() == 4)
-                {
-                    QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
-                    timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"mm:ss"));
-                }
+                QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
+                timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"mm:ss"));
             }
             if(index.row() == 6)
             {
@@ -219,17 +212,14 @@ public:
                 model->setData(index,value, Qt::EditRole);
                 rangeChanged(model,value);
             }
-            if(sport != settings::isSwim)
+            if(index.row() == 4) //Duration
             {
-                if(index.row() == 4) //Duration
-                {
                     QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
                     QTime value = timeEdit->time();
                     timeEdit->interpretText();
                     model->setData(model->index(4,0),value.toString("mm:ss"), Qt::EditRole);
                     set_distance(model,value);
                     set_stressValue(model);
-                }
             }
             if(index.row() == 6) //Distance
             {

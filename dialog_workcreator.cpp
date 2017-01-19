@@ -446,6 +446,10 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
             }
             else
             {
+                if(current_sport == settings::isSwim && item->data(0,Qt::DisplayRole) == settings::get_generalValue("breakname"))
+                {
+                    valueModel->setData(valueModel->index(4,2),true);
+                }
                 valueModel->setData(valueModel->index(7,0,QModelIndex()),"0 km/h");
             }
         }
