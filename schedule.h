@@ -43,25 +43,21 @@ public:
     QMap<QDate,double> *get_StressMap() {return &stressValues;}
     void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
 
+
 //Workout
     //Setter
+    void add_itemList(QModelIndex index, QStringList value) {itemList.insert(index,value);}
     void set_workout_date(QString w_date) {workout_date = w_date;}
-    void set_workout_time(QString w_time) {workout_time = w_time;}
-    void set_workout_calweek(QString w_calweek) {workout_calweek = w_calweek;}
-    void set_workout_sport(QString sport) {workout_sport = sport;}
-    void set_workout_code(QString wcode) {workout_code = wcode;}
-    void set_workout_title(QString wtitle) {workout_title = wtitle;}
-    void set_workout_duration(QString wduration) {workout_duration = wduration;}
-    void set_workout_distance(double wdistance) {workout_distance = wdistance;}
-    void set_workout_stress(int wstress) {workout_stress_score = wstress;}
 
     //edit Workouts
     void add_workout();
     void edit_workout(QModelIndex);
+    void set_workoutData(int);
     void delete_workout(QModelIndex);
 
 private:
     QSortFilterProxyModel *scheduleProxy;
+    QMap<QModelIndex,QStringList> itemList;
     QStringList workoutTags,metaTags,contentTags;
     QString schedulePath,workoutFile,metaFile,contentFile,ltsFile;
     QDate firstdayofweek;
@@ -74,16 +70,8 @@ private:
     void save_ltsValues();
 
     //Workout Var
-    QString workout_date;
-    QString workout_time;
-    QString workout_calweek;
-    QString workout_phase;
+    QString workout_date;   
     QString workout_sport;
-    QString workout_code;
-    QString workout_title;
-    QString workout_duration;
-    float workout_distance;
-    int workout_stress_score;
 
 };
 

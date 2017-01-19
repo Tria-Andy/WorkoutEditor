@@ -28,7 +28,6 @@ Dialog_add::Dialog_add(QWidget *parent,schedule *p_sched,standardWorkouts *p_std
     workSched = p_sched;
     stdWorkouts = p_stdWorkout;
     workout_date = QDate().currentDate();
-
     w_date = workout_date.toString("dd.MM.yyyy");
     w_time = ui->timeEdit_time->time().toString("hh:mm");
     w_distance = 0.0;
@@ -56,16 +55,19 @@ void Dialog_add::on_pushButton_cancel_clicked()
 
 void Dialog_add::on_pushButton_add_clicked()
 {
-    workSched->set_workout_date(w_date);
-    workSched->set_workout_time(w_time);
-    workSched->set_workout_calweek(w_cal_week);
-    workSched->set_workout_sport(ui->comboBox_sport->currentText());
-    workSched->set_workout_code(ui->comboBox_wcode->currentText());
-    workSched->set_workout_title(ui->lineEdit_wtitle->text());
-    workSched->set_workout_duration(w_duration);
-    workSched->set_workout_distance(w_distance);
-    workSched->set_workout_stress(w_stress);
+    QStringList addValues;
+    addValues << w_cal_week
+              << w_date
+              << w_time
+              << ui->comboBox_sport->currentText()
+              << ui->comboBox_wcode->currentText()
+              << ui->lineEdit_wtitle->text()
+              << w_duration
+              << QString::number(w_distance)
+              << QString::number(w_stress);
 
+    workSched->add_itemList(QModelIndex(),addValues);
+    workSched->set_workoutData(1);
     accept();
 }
 

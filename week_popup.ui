@@ -105,7 +105,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Copy Week</string>
+         <string>Edit Week</string>
         </property>
         <property name="text">
          <string/>

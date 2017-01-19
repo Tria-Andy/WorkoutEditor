@@ -42,10 +42,9 @@ private:
     QSortFilterProxyModel *scheduleProxy;
     QStringList w_code;
     QModelIndex curr_index;
-    int edit_result;
     void controlButtons(QDate);
     void set_result(QString,int);
-    void set_workout_data();
+    void set_workout_data(bool);
 
 public:
     explicit Dialog_edit(QWidget *parent = 0, const QDate edit_date = QDate(), schedule *p_sched = 0, standardWorkouts *p_stdworkouts = 0);
@@ -53,8 +52,6 @@ public:
     bool delete_workout;
     void set_workout_info(const QDate &d);
     void show_workout(int);
-    int get_result() {return edit_result;}
-    QModelIndex get_edit_index() {return curr_index;}
 
 private slots:
     void set_edit_calweek();
@@ -67,6 +64,7 @@ private slots:
     void on_timeEdit_duration_timeChanged(const QTime &time);
     void on_dateEdit_edit_date_dateChanged(const QDate &date);
     void on_toolButton_workouts_clicked();
+    void on_checkBox_complete_toggled(bool checked);
 
 private:
     Ui::Dialog_edit *ui;

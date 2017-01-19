@@ -42,7 +42,6 @@ private:
     schedule *workSched;
     QDate workout_date;
     QString w_date,w_time,w_cal_week,w_duration;
-
     double w_distance;
     int w_stress;
 

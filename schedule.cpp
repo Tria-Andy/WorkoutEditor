@@ -382,7 +382,7 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
     scheduleProxy->setFilterRegExp("\\b"+copyFrom+"\\b");
     scheduleProxy->setFilterKeyColumn(0);
     this->deleteWeek(copyTo);
-
+    QStringList copyValues;
     QString fromWeek,toWeek,fromYear,toYear,workdate;
     int fromWeek_int,fromYear_int,toWeek_int,toYear_int,addfactor = 0;
     int days = 7;
@@ -407,27 +407,25 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
        addfactor = (lastDay.weekNumber() - fromWeek_int) + toWeek_int;
     }
 
-    for(int i = 0; i < scheduleProxy->rowCount(); ++i)
+    for(int row = 0; row < scheduleProxy->rowCount(); ++row)
     {
-        workdate = scheduleProxy->data(scheduleProxy->index(i,1)).toString();
-        workout_calweek = copyTo;
-        workout_date = workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy");
-        workout_time = scheduleProxy->data(scheduleProxy->index(i,2)).toString();
-        workout_sport = scheduleProxy->data(scheduleProxy->index(i,3)).toString();
-        workout_code = scheduleProxy->data(scheduleProxy->index(i,4)).toString();
-        workout_title = scheduleProxy->data(scheduleProxy->index(i,5)).toString();
-        workout_duration = scheduleProxy->data(scheduleProxy->index(i,6)).toString();
-        workout_distance = scheduleProxy->data(scheduleProxy->index(i,7)).toDouble();
-        workout_stress_score = scheduleProxy->data(scheduleProxy->index(i,8)).toInt();
-        this->add_workout();
+        copyValues.clear();
+        workdate = scheduleProxy->data(scheduleProxy->index(row,1)).toString();
+        copyValues << copyTo << workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy");
+        for(int col = 2; col < scheduleProxy->columnCount();++col)
+        {
+            copyValues << scheduleProxy->data(scheduleProxy->index(row,col)).toString();
+        }
+        itemList.insert(scheduleProxy->index(row,0),copyValues);
     }
+    this->set_workoutData(1);
     scheduleProxy->setFilterRegExp("");
 }
 
 void schedule::delete_workout(QModelIndex index)
 {
     QString wDate = workout_schedule->data(workout_schedule->index(index.row(),1)).toString();
-    int stress = workout_schedule->data(workout_schedule->index(index.row(),8)).toInt();
+    double stress = workout_schedule->data(workout_schedule->index(index.row(),8)).toDouble();
     workout_schedule->removeRow(index.row(),QModelIndex());
     this->updateStress(wDate,stress,false);
 }
@@ -485,43 +483,45 @@ void schedule::changeYear()
     this->save_weekPlan();
 }
 
-void schedule::add_workout()
+void schedule::set_workoutData(int mode)
 {
-    int row = workout_schedule->rowCount();
-
-    workout_schedule->insertRows(row,1,QModelIndex());
-    workout_schedule->setData(workout_schedule->index(row,0,QModelIndex()),workout_calweek);
-    workout_schedule->setData(workout_schedule->index(row,1,QModelIndex()),workout_date);
-    workout_schedule->setData(workout_schedule->index(row,2,QModelIndex()),workout_time);
-    workout_schedule->setData(workout_schedule->index(row,3,QModelIndex()),workout_sport);
-    workout_schedule->setData(workout_schedule->index(row,4,QModelIndex()),workout_code);
-    workout_schedule->setData(workout_schedule->index(row,5,QModelIndex()),workout_title);
-    workout_schedule->setData(workout_schedule->index(row,6,QModelIndex()),workout_duration);
-    workout_schedule->setData(workout_schedule->index(row,7,QModelIndex()),QString::number(workout_distance));
-    workout_schedule->setData(workout_schedule->index(row,8,QModelIndex()),workout_stress_score);
-
-    this->updateStress(workout_date,workout_stress_score,true);
-
+    QString workoutStress;
+    double currStress = 0;
+    int row = 0;
+    if(mode == 0) //EDIT
+    {
+        for(QMap<QModelIndex,QStringList>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it)
+        {
+            row = it.key().row();
+            currStress = workout_schedule->data(workout_schedule->index(row,8)).toDouble();
+            for(int i = 0; i < it.value().count(); ++i)
+            {
+                workout_schedule->setData(workout_schedule->index(row,i,QModelIndex()),it.value().at(i));
+            }
+            workout_date = it.value().at(1);
+            workoutStress = it.value().last();
+            this->updateStress(workout_date,workoutStress.toDouble()-currStress,true);
+        }
+    }
+    else if(mode == 1) //ADD and COPY
+    {
+        int row = 0;
+        workout_schedule->insertRows(workout_schedule->rowCount(),itemList.count(),QModelIndex());
+        for(QMap<QModelIndex,QStringList>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it,++row)
+        {
+            for(int i = 0; i < it.value().count(); ++i)
+            {
+                workout_schedule->setData(workout_schedule->index(row,i,QModelIndex()),it.value().at(i));
+            }
+            workout_date = it.value().at(1);
+            workoutStress = it.value().last();
+            this->updateStress(workout_date,workoutStress.toDouble(),true);
+        }
+    }
+    itemList.clear();
 }
 
-void schedule::edit_workout(QModelIndex index)
-{
-    int stress = workout_schedule->data(workout_schedule->index(index.row(),8)).toInt();
-
-    workout_schedule->setData(workout_schedule->index(index.row(),0,QModelIndex()),workout_calweek);
-    workout_schedule->setData(workout_schedule->index(index.row(),1,QModelIndex()),workout_date);
-    workout_schedule->setData(workout_schedule->index(index.row(),2,QModelIndex()),workout_time);
-    workout_schedule->setData(workout_schedule->index(index.row(),3,QModelIndex()),workout_sport);
-    workout_schedule->setData(workout_schedule->index(index.row(),4,QModelIndex()),workout_code);
-    workout_schedule->setData(workout_schedule->index(index.row(),5,QModelIndex()),workout_title);
-    workout_schedule->setData(workout_schedule->index(index.row(),6,QModelIndex()),workout_duration);
-    workout_schedule->setData(workout_schedule->index(index.row(),7,QModelIndex()),QString::number(workout_distance));
-    workout_schedule->setData(workout_schedule->index(index.row(),8,QModelIndex()),workout_stress_score);
-
-    this->updateStress(workout_date,workout_stress_score-stress,true);
-}
-
-void schedule::updateStress(QString date,double stress,bool add)
+void schedule::updateStress(QString date,double addStress,bool add)
 {
     double stressValue = 0;
     QDate wDate = QDate::fromString(date,"dd.MM.yyyy");
@@ -531,23 +531,23 @@ void schedule::updateStress(QString date,double stress,bool add)
         if(stressValues.contains(wDate))
         {
             stressValue = stressValues.value(wDate);
-            stressValues.insert(wDate,stressValue+stress);
+            stressValues.insert(wDate,stressValue+addStress);
         }
         else
         {
-            stressValues.insert(wDate,stress);
+            stressValues.insert(wDate,addStress);
         }
     }
     else
     {
         stressValue = stressValues.value(wDate);
-        if(stressValue - stress == 0)
+        if(stressValue - addStress == 0)
         {
             stressValues.insert(wDate,0);
         }
         else
         {
-            stressValues.insert(wDate,stressValue -stress);
+            stressValues.insert(wDate,stressValue -addStress);
         }
     }
 }
