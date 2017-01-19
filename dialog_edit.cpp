@@ -244,9 +244,9 @@ void Dialog_edit::on_toolButton_workouts_clicked()
 void Dialog_edit::on_checkBox_complete_toggled(bool checked)
 {
     ui->comboBox_wcode->setEnabled(!checked);
-    ui->comboBox_wcode->setCurrentIndex(0);
+    ui->comboBox_wcode->setCurrentIndex(-1);
     ui->lineEdit_sport->setText("-");
-    ui->lineEdit_sport->setEnabled(!checked);
+    ui->toolButton_workouts->setEnabled(!checked);
     ui->lineEdit_wtitle->setText("-");
     ui->lineEdit_wtitle->setEnabled(!checked);
     ui->timeEdit_duration->setTime(QTime::fromString("00:00:00","hh:mm:ss"));

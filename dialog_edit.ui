@@ -108,7 +108,7 @@
        <widget class="QComboBox" name="comboBox_time"/>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
+       <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
