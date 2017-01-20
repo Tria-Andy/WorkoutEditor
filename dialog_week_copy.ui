@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>305</width>
-    <height>280</height>
+    <width>350</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -200,7 +200,7 @@
          <item>
           <widget class="QRadioButton" name="radioButton_save">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="minimumSize">
             <size>
@@ -216,7 +216,7 @@
          <item>
           <widget class="QRadioButton" name="radioButton_load">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Load</string>
@@ -331,9 +331,9 @@
           <number>5</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_saveas">
+          <widget class="QLabel" name="label_saveload">
            <property name="text">
-            <string>Save as:</string>
+            <string>-</string>
            </property>
            <property name="buddy">
             <cstring>lineEdit_saveas</cstring>
@@ -342,6 +342,34 @@
          </item>
          <item>
           <widget class="QLineEdit" name="lineEdit_saveas"/>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toolButton_addweek">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/images/icons/Add.png</normaloff>:/images/icons/Add.png</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toolButton_delete">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/images/icons/Erase.png</normaloff>:/images/icons/Erase.png</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -391,6 +419,9 @@
          </item>
         </layout>
        </widget>
+      </item>
+      <item>
+       <widget class="QListView" name="listView_weeks"/>
       </item>
      </layout>
     </widget>
@@ -476,6 +507,8 @@
   <tabstop>pushButton_ok</tabstop>
   <tabstop>pushButton_cancel</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
