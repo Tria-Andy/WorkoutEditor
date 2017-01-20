@@ -62,11 +62,13 @@ private:
     QStandardItemModel *saveWeekModel,*listModel;
     QStringList weekList,weekTags;
     QString sourceWeek,schedulePath,saveweekFile;
+    QModelIndex listIndex;
     bool fixWeek,isSaveWeek;
     int editMode;
 
     void readSaveweeks(QDomDocument);
     void write_weekList();
+    void addWeek();
     void saveWeek();
     void processWeek();
 };

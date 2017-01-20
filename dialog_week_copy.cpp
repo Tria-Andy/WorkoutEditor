@@ -116,21 +116,6 @@ void Dialog_week_copy::readSaveweeks(QDomDocument xmldoc)
         }
     }
     listModel->sort(0);
-    /*
-    for(int i = 0; i < saveWeekModel->rowCount();++i)
-    {
-        qDebug() << saveWeekModel->data(saveWeekModel->index(i,0)).toString()
-                 << saveWeekModel->data(saveWeekModel->index(i,1)).toString()
-                 << saveWeekModel->data(saveWeekModel->index(i,2)).toString()
-                 << saveWeekModel->data(saveWeekModel->index(i,3)).toString()
-                 << saveWeekModel->data(saveWeekModel->index(i,4)).toString()
-                 << saveWeekModel->data(saveWeekModel->index(i,5)).toString()
-                 << saveWeekModel->data(saveWeekModel->index(i,6)).toString()
-                 << saveWeekModel->data(saveWeekModel->index(i,7)).toString()
-                 << saveWeekModel->data(saveWeekModel->index(i,8)).toString()
-                 << saveWeekModel->data(saveWeekModel->index(i,9)).toString();
-    }
-    */
 }
 
 void Dialog_week_copy::write_weekList()
@@ -173,6 +158,35 @@ void Dialog_week_copy::write_weekList()
     xmlDoc.clear();
 }
 
+void Dialog_week_copy::addWeek()
+{
+    QString weekName = listModel->data(listModel->index(listIndex.row(),1)).toString();
+    QSortFilterProxyModel *workProxy = new QSortFilterProxyModel;
+    workProxy->setSourceModel(saveWeekModel);
+    workProxy->setFilterRegExp("\\b"+weekName+"\\b");
+    workProxy->setFilterKeyColumn(0);
+    workProxy->sort(1);
+    int workCount = workProxy->rowCount();
+    int schedCount = workSched->workout_schedule->rowCount();
+
+    QModelIndex index = workSched->week_meta->findItems(sourceWeek,Qt::MatchExactly,1).at(0)->index();
+
+    QDate sourceFirstDay = QDate::fromString(workSched->week_meta->data(workSched->week_meta->index(index.row(),3)).toString(),"dd.MM.yyyy");
+    workSched->workout_schedule->insertRows(schedCount,workCount,QModelIndex());
+
+    int dayofweek;
+
+    for(int work = 0; work < workCount; ++work)
+    {
+        dayofweek = workProxy->data(workProxy->index(work,2)).toInt();
+
+        for(int col = 1; col < workProxy->columnCount(); ++col)
+        {
+            qDebug() << sourceFirstDay.addDays(dayofweek-1) << workProxy->data(workProxy->index(work,col));
+        }
+    }
+}
+
 
 void Dialog_week_copy::processWeek()
 {
@@ -189,6 +203,20 @@ void Dialog_week_copy::processWeek()
         if (reply == QMessageBox::Yes)
         {
             workSched->copyWeek(sourceWeek,targetWeek);
+            accept();
+        }
+    }
+    if(editMode == CLEAR)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this,
+                                      "Clear Week",
+                                      "Clear all Workouts of Week "+sourceWeek+"?",
+                                      QMessageBox::Yes|QMessageBox::No
+                                      );
+        if (reply == QMessageBox::Yes)
+        {
+            workSched->deleteWeek(sourceWeek);
             accept();
         }
     }
@@ -209,17 +237,18 @@ void Dialog_week_copy::processWeek()
             }
         }
     }
-    if(editMode == CLEAR)
+    if(editMode == LOAD)
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this,
-                                      "Clear Week",
-                                      "Clear all Workouts of Week "+sourceWeek+"?",
+                                      "Load Week",
+                                      "Load selected Week into " +sourceWeek+"?",
                                       QMessageBox::Yes|QMessageBox::No
                                       );
         if (reply == QMessageBox::Yes)
         {
-            workSched->deleteWeek(sourceWeek);
+            qDebug() << "Call AddWeek";
+            this->addWeek();
             accept();
         }
     }
@@ -291,6 +320,7 @@ void Dialog_week_copy::on_listView_weeks_clicked(const QModelIndex &index)
     QString selectWeek = listModel->data(index).toString();
     ui->lineEdit_saveas->setText(selectWeek);
     ui->toolButton_delete->setEnabled(true);
+    listIndex = index;
 }
 
 void Dialog_week_copy::on_toolButton_addweek_clicked()
