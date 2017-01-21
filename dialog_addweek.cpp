@@ -24,6 +24,7 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
     ui(new Ui::Dialog_addweek)
 {
     ui->setupUi(this);
+    workSched = p_sched;
     metaProxy = new QSortFilterProxyModel();
     metaProxy->setSourceModel(p_sched->week_meta);
     contentProxy = new QSortFilterProxyModel();
@@ -237,5 +238,6 @@ void Dialog_addweek::on_pushButton_ok_clicked()
             contentProxy->setData(contentProxy->index(rowcount,i,QModelIndex()),weekContent.at(i));
         }
     }
+    workSched->set_isUpdated(true);
     accept();
 }

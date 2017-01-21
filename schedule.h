@@ -42,12 +42,13 @@ public:
     void deleteWeek(QString);
     QMap<QDate,double> *get_StressMap() {return &stressValues;}
     void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
-
-
+    void updateStress(QString,double,bool);
+    bool get_isUpdated() {return isUpdated;}
 //Workout
     //Setter
     void add_itemList(QModelIndex index, QStringList value) {itemList.insert(index,value);}
     void set_workout_date(QString w_date) {workout_date = w_date;}
+    void set_isUpdated(bool updateFlag) {isUpdated = updateFlag;}
 
     //edit Workouts
     void add_workout();
@@ -62,11 +63,10 @@ private:
     QString schedulePath,workoutFile,metaFile,contentFile,ltsFile;
     QDate firstdayofweek;
     QMap<QDate,double> stressValues;
-    bool fileCreated;
+    bool fileCreated,isUpdated;
     void read_dayWorkouts(QDomDocument);
     void read_weekPlan(QDomDocument,QDomDocument);
-    void read_ltsFile(QDomDocument);
-    void updateStress(QString,double,bool);
+    void read_ltsFile(QDomDocument);   
     void save_ltsValues();
 
     //Workout Var

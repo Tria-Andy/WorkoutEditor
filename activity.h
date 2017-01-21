@@ -39,7 +39,7 @@ private:
     QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg;
     double swim_track,avg_dist,avg_watt,avg_cad,avg_laptime,swim_cv,swim_sri,polishFactor,hf_threshold,hf_max;
     int dist_factor,avg_counter,avg_pace,pace_cv,zone_count,move_time,swim_pace,hf_avg;
-    bool changeRowCount;
+    bool changeRowCount,isUpdated;
 
     //Functions
     void set_time_in_zones(bool);
@@ -76,11 +76,8 @@ public:
     double polish_SpeedValues(double,double,double,bool);
 
     //Value Getter and Setter
-    void set_changeRowCount(bool setCount) {changeRowCount = setCount;}
     void set_polishFactor(double vFactor) {polishFactor = vFactor;}
     int get_header_num();
-    void set_date(QString a_date) {v_date = a_date;}
-    QString get_date() {return v_date;}
     void set_sport(QString a_sport) {curr_sport = a_sport;}
     QString get_sport() {return curr_sport;}
 

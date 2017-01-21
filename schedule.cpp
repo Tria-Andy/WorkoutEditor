@@ -47,6 +47,7 @@ schedule::schedule()
         this->check_File(schedulePath,ltsFile);
         this->read_ltsFile(this->load_XMLFile(schedulePath,ltsFile));
     }
+    isUpdated = false;
 }
 
 void schedule::freeMem()
@@ -550,4 +551,5 @@ void schedule::updateStress(QString date,double addStress,bool add)
             stressValues.insert(wDate,stressValue -addStress);
         }
     }
+    isUpdated = true;
 }

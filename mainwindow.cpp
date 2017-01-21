@@ -45,7 +45,6 @@ MainWindow::MainWindow(QWidget *parent) :
     dist_sum.resize(sportCounter);
     stress_sum.resize(sportCounter);
     isWeekMode = true;
-    safeFlag = false;
     sel_count = 0;
     ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
     ui->pushButton_current_week->setEnabled(false);
@@ -499,8 +498,6 @@ void MainWindow::on_actionNew_triggered()
 
         if(dialog_code == QDialog::Accepted)
         {
-            //workSchedule->add_workout();
-            safeFlag = true;
             ui->actionSave_Workout_Schedule->setEnabled(true);
             this->refresh_model();
             ui->actionPMC->setEnabled(true);
@@ -528,8 +525,8 @@ void MainWindow::on_actionSave_Workout_Schedule_triggered()
         if (reply == QMessageBox::Yes)
         {
             workSchedule->save_dayWorkouts();
+            workSchedule->set_isUpdated(false);
             ui->actionSave_Workout_Schedule->setEnabled(false);
-            safeFlag = false;
         }
     }
     else
@@ -543,8 +540,8 @@ void MainWindow::on_actionSave_Workout_Schedule_triggered()
         if (reply == QMessageBox::Yes)
         {
             workSchedule->save_weekPlan();
+            workSchedule->set_isUpdated(false);
             ui->actionSave_Workout_Schedule->setEnabled(false);
-            safeFlag = false;
         }
     }
 }
@@ -590,8 +587,7 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
               dialog_code = edit_workout.exec();
               if(dialog_code == QDialog::Accepted)
               {
-                  safeFlag = true;
-                  ui->actionSave_Workout_Schedule->setEnabled(true);
+                  ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
                   this->refresh_model();
               }
             }
@@ -618,8 +614,7 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
                     this->workout_calendar();
                     //weekCounter = 0;
                     this->set_calender();
-                    safeFlag = true;
-                    ui->actionSave_Workout_Schedule->setEnabled(true);
+                    ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
                 }
             }
 
@@ -644,8 +639,7 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
             {
                 this->workout_calendar();
                 this->summery_view();
-                safeFlag = true;
-                ui->actionSave_Workout_Schedule->setEnabled(true);
+                ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
             }
         }
     }
@@ -1338,7 +1332,7 @@ void MainWindow::on_actionPlaner_triggered()
 
 void MainWindow::on_actionExit_triggered()
 {
-    if(safeFlag)
+    if(workSchedule->get_isUpdated())
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this,
@@ -1734,8 +1728,7 @@ void MainWindow::on_actionEdit_Week_triggered()
     {
         this->workout_calendar();
         this->set_calender();
-        safeFlag = true;
-        ui->actionSave_Workout_Schedule->setEnabled(true);
+        ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
     }
     if(dialogCode == QDialog::Rejected)
     {

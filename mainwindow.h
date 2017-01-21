@@ -97,7 +97,7 @@ private:
     int weekRange,weekpos;
     int saisonWeeks,weekDays;
     unsigned int weekCounter,sportCounter;
-    bool userSetup,isWeekMode,safeFlag,graphLoaded;
+    bool userSetup,isWeekMode,graphLoaded;
 
     void openPreferences();
     void set_summeryInfo();
