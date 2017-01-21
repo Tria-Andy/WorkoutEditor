@@ -56,6 +56,8 @@ private slots:
 
     void on_comboBox_select_currentIndexChanged(const QString &arg1);
 
+    void on_toolButton_delete_clicked();
+
 private:
     Ui::Dialog_week_copy *ui;
     schedule *workSched;

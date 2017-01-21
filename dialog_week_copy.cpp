@@ -66,7 +66,7 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
     this->readSaveweeks(this->load_XMLFile(schedulePath,saveweekFile));
 }
 
-enum {COPY,CLEAR,SAVE,LOAD};
+enum {COPY,CLEAR,SAVE,LOAD,DEL};
 
 Dialog_week_copy::~Dialog_week_copy()
 {
@@ -162,28 +162,36 @@ void Dialog_week_copy::addWeek()
 {
     QString weekName = listModel->data(listModel->index(listIndex.row(),1)).toString();
     QSortFilterProxyModel *workProxy = new QSortFilterProxyModel;
+    QStandardItemModel *schedModel = workSched->workout_schedule;
     workProxy->setSourceModel(saveWeekModel);
     workProxy->setFilterRegExp("\\b"+weekName+"\\b");
     workProxy->setFilterKeyColumn(0);
     workProxy->sort(1);
     int workCount = workProxy->rowCount();
-    int schedCount = workSched->workout_schedule->rowCount();
-
+    int schedCount = schedModel->rowCount();
+    double addStress = 0;
+    QString setDate;
     QModelIndex index = workSched->week_meta->findItems(sourceWeek,Qt::MatchExactly,1).at(0)->index();
 
     QDate sourceFirstDay = QDate::fromString(workSched->week_meta->data(workSched->week_meta->index(index.row(),3)).toString(),"dd.MM.yyyy");
-    workSched->workout_schedule->insertRows(schedCount,workCount,QModelIndex());
+    schedModel->insertRows(schedCount,workCount,QModelIndex());
 
     int dayofweek;
 
     for(int work = 0; work < workCount; ++work)
     {
         dayofweek = workProxy->data(workProxy->index(work,2)).toInt();
+        addStress = workProxy->data(workProxy->index(work,9)).toDouble();
+        setDate = sourceFirstDay.addDays(dayofweek-1).toString("dd.MM.yyyy");
 
-        for(int col = 1; col < workProxy->columnCount(); ++col)
+        schedModel->setData(schedModel->index(schedCount+work,0),sourceWeek);
+        schedModel->setData(schedModel->index(schedCount+work,1),setDate);
+
+        for(int col = 3; col < workProxy->columnCount(); ++col)
         {
-            qDebug() << sourceFirstDay.addDays(dayofweek-1) << workProxy->data(workProxy->index(work,col));
+            schedModel->setData(schedModel->index(schedCount+work,col-1),workProxy->data(workProxy->index(work,col)));
         }
+        workSched->updateStress(setDate,addStress,true);
     }
 }
 
@@ -206,7 +214,7 @@ void Dialog_week_copy::processWeek()
             accept();
         }
     }
-    if(editMode == CLEAR)
+    else if(editMode == CLEAR)
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this,
@@ -220,7 +228,7 @@ void Dialog_week_copy::processWeek()
             accept();
         }
     }
-    if(editMode == SAVE)
+    else if(editMode == SAVE)
     {
         if(isSaveWeek)
         {
@@ -237,7 +245,7 @@ void Dialog_week_copy::processWeek()
             }
         }
     }
-    if(editMode == LOAD)
+    else if(editMode == LOAD)
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this,
@@ -247,10 +255,13 @@ void Dialog_week_copy::processWeek()
                                       );
         if (reply == QMessageBox::Yes)
         {
-            qDebug() << "Call AddWeek";
             this->addWeek();
             accept();
         }
+    }
+    else
+    {
+        accept();
     }
 }
 
@@ -384,6 +395,31 @@ void Dialog_week_copy::on_toolButton_addweek_clicked()
     ui->toolButton_addweek->setEnabled(false);
     isSaveWeek = true;
 }
+
+void Dialog_week_copy::on_toolButton_delete_clicked()
+{
+    QString weekName = listModel->data(listModel->index(listIndex.row(),1)).toString();
+
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this,
+                                  "Delete Week",
+                                  "Delete saved week " +weekName+"?",
+                                  QMessageBox::Yes|QMessageBox::No
+                                  );
+    if (reply == QMessageBox::Yes)
+    {
+        listModel->removeRow(listIndex.row());
+
+        QList<QStandardItem*> deleteList = saveWeekModel->findItems(weekName,Qt::MatchExactly,0);
+        for(int i = 0; i < deleteList.count();++i)
+        {
+            saveWeekModel->removeRow(saveWeekModel->indexFromItem(deleteList.at(i)).row());
+        }
+        editMode = DEL;
+        this->write_weekList();
+    }
+}
+
 
 void Dialog_week_copy::on_lineEdit_saveas_textChanged(const QString &value)
 {
