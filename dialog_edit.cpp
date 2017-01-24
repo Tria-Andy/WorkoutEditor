@@ -49,6 +49,7 @@ void Dialog_edit::set_workout_info(const QDate &date)
     ui->dateEdit_workoutdate->setDate(date);
     scheduleProxy->setFilterRegExp("\\b"+date.toString("dd.MM.yyyy")+"\\b");
     scheduleProxy->setFilterKeyColumn(1);
+    scheduleProxy->sort(2);
 
     for(int i = 0; i < scheduleProxy->rowCount();++i)
     {

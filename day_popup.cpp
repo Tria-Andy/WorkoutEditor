@@ -40,6 +40,7 @@ void day_popup::show_workouts(QDate w_date,schedule *schedP)
     scheduleProxy->setSourceModel(schedP->workout_schedule);
     scheduleProxy->setFilterRegExp("\\b"+workoutDate+"\\b");
     scheduleProxy->setFilterKeyColumn(1);
+    scheduleProxy->sort(2);
     int workCount = scheduleProxy->rowCount();
     int col_count = (workCount*3)-1;
 

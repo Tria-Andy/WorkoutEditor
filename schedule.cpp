@@ -506,13 +506,13 @@ void schedule::set_workoutData(int mode)
     }
     else if(mode == 1) //ADD and COPY
     {
-        int row = 0;
-        workout_schedule->insertRows(workout_schedule->rowCount(),itemList.count(),QModelIndex());
-        for(QMap<QModelIndex,QStringList>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it,++row)
+        int rowCount = workout_schedule->rowCount();
+        workout_schedule->insertRows(rowCount,itemList.count(),QModelIndex());
+        for(QMap<QModelIndex,QStringList>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it,++rowCount)
         {
             for(int i = 0; i < it.value().count(); ++i)
             {
-                workout_schedule->setData(workout_schedule->index(row,i,QModelIndex()),it.value().at(i));
+                workout_schedule->setData(workout_schedule->index(rowCount,i,QModelIndex()),it.value().at(i));
             }
             workout_date = it.value().at(1);
             workoutStress = it.value().last();
