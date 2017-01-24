@@ -23,6 +23,8 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched) :
     ui->dateEdit_end->setDateRange(firstDayofWeek.addDays(dateRange),stressMap->lastKey());
     ui->dateEdit_end->setDate(firstDayofWeek.addDays(dateRange));
     ui->pushButton_values->setIcon(hideNum);
+
+    connect(ui->widget_stressPlot,SIGNAL(selectionChangedByUser()),this,SLOT(selectionChanged()));
     this->set_graph();
 }
 
@@ -43,6 +45,14 @@ void stress_popup::set_graph()
     plotFont.setPointSize(8);
     selectFont.setPointSize(8);
     selectFont.setItalic(true);
+
+    QList<QCPAxis*> xaxisList;
+    xaxisList.append(ui->widget_stressPlot->xAxis);
+    xaxisList.append(ui->widget_stressPlot->xAxis2);
+
+    QList<QCPAxis*> yaxisList;
+    yaxisList.append(ui->widget_stressPlot->yAxis);
+    //yaxisList.append(ui->widget_stressPlot->yAxis2);
 
     ui->widget_stressPlot->setInteractions(QCP::iSelectLegend | QCP::iMultiSelect | QCP::iRangeDrag | QCP::iRangeZoom);
 
@@ -68,6 +78,9 @@ void stress_popup::set_graph()
     ui->widget_stressPlot->plotLayout()->addElement(1,0,subLayout);
     subLayout->setMargins(QMargins(dateRange*10,0,dateRange*10,5));
     subLayout->addElement(0,0,ui->widget_stressPlot->legend);
+
+    ui->widget_stressPlot->axisRect()->setRangeDragAxes(xaxisList,yaxisList);
+    ui->widget_stressPlot->axisRect()->setRangeZoomAxes(xaxisList,yaxisList);
 
     this->set_stressValues(ui->dateEdit_start->date(),ui->dateEdit_end->date());
 }
@@ -338,4 +351,21 @@ void stress_popup::on_pushButton_values_toggled(bool checked)
 void stress_popup::on_pushButton_reset_clicked()
 {
     this->set_stressplot(ui->dateEdit_start->date(),ui->dateEdit_end->date(),ui->pushButton_values->isChecked());
+}
+
+void stress_popup::selectionChanged()
+{
+    for(int i = 0; i < ui->widget_stressPlot->graphCount(); ++i)
+    {
+        QCPGraph *graph = ui->widget_stressPlot->graph(i);
+        QCPPlottableLegendItem *item = ui->widget_stressPlot->legend->itemWithPlottable(graph);
+        if(item->selected())
+        {
+            ui->widget_stressPlot->graph(i)->setVisible(false);
+        }
+        else
+        {
+            ui->widget_stressPlot->graph(i)->setVisible(true);
+        }
+    }
 }
