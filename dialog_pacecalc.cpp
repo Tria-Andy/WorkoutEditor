@@ -107,14 +107,14 @@ void Dialog_paceCalc::on_comboBox_sport_currentTextChanged(const QString &sport)
     }
 
     this->set_pace();
-    ui->lineEdit_speed->setText(this->get_speed(ui->timeEdit_pace->time(),0,sport,true));
+    ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_pace->time(),0,sport,true)));
     this->set_freeField(ui->lineEdit_dist->text().toInt());
 }
 
 
 void Dialog_paceCalc::on_timeEdit_pace_timeChanged(const QTime &time)
 {
-    ui->lineEdit_speed->setText(this->get_speed(time,0,ui->comboBox_sport->currentText(),true));
+    ui->lineEdit_speed->setText(QString::number(this->get_speed(time,0,ui->comboBox_sport->currentText(),true)));
     this->set_freeField(ui->lineEdit_dist->text().toInt());
     this->set_pace();
 }
@@ -133,12 +133,12 @@ void Dialog_paceCalc::on_spinBox_factor_valueChanged(int value)
 
 void Dialog_paceCalc::on_timeEdit_intTime_timeChanged(const QTime &time)
 {
-    ui->lineEdit_IntSpeed->setText(this->get_speed(time,ui->spinBox_IntDist->value(),ui->comboBox_sport->currentText(),false));
+    ui->lineEdit_IntSpeed->setText(QString::number(this->get_speed(time,ui->spinBox_IntDist->value(),ui->comboBox_sport->currentText(),false)));
 }
 
 void Dialog_paceCalc::on_spinBox_IntDist_valueChanged(int dist)
 {
-    ui->lineEdit_IntSpeed->setText(this->get_speed(ui->timeEdit_intTime->time(),dist,ui->comboBox_sport->currentText(),false));
+    ui->lineEdit_IntSpeed->setText(QString::number(this->get_speed(ui->timeEdit_intTime->time(),dist,ui->comboBox_sport->currentText(),false)));
 }
 
 void Dialog_paceCalc::on_pushButton_clicked()

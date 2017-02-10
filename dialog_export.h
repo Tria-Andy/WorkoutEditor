@@ -31,7 +31,7 @@ namespace Ui {
 class Dialog_export;
 }
 
-class Dialog_export : public QDialog, public calculation
+class Dialog_export : public QDialog, public jsonHandler
 {
     Q_OBJECT
 
@@ -51,8 +51,7 @@ private slots:
 private:
     Ui::Dialog_export *ui;
     QSortFilterProxyModel *exportProxy;
-    QString fileName, fileContent;
-    jsonHandler *jsonhandler;
+    QString fileContent;
     int exportMode;
 
     void workout_export();

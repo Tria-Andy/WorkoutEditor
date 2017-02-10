@@ -55,21 +55,30 @@ public:
         calendar_values = temp_value.split(delimiter);
         dayDate = calendar_values.at(0);
         dayDate = dayDate.left(7);
+
+        QLinearGradient setGradient(option.rect.topLeft(),option.rect.bottomLeft());
+        setGradient.setSpread(QGradient::RepeatSpread);
+        QColor setColor0,setColor1;
+
         QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),20);
-        QRect rect_head_text(option.rect.x()+ textMargin,option.rect.y(), option.rect.width(),20);
-        rect_color.setRgb(128,128,128);
-        painter->fillRect(rect_head,QBrush(rect_color));
-        painter->fillRect(rect_head_text,QBrush(rect_color));
-        QTextOption dateOption(Qt::AlignLeft);
+        QRect rect_head_text(option.rect.x(),option.rect.y(), option.rect.width(),20);
+        QTextOption dateOption(Qt::AlignLeft | Qt::AlignVCenter);
 
         if(QDate::fromString(calendar_values.at(0),"dd MMM yy").addYears(100) ==(QDate::currentDate()))
         {
-            painter->fillRect(rect_head,QBrush(QColor(200,0,0)));
+            setColor0.setRgb(255,0,0,100);
+            setColor1.setRgb(125,0,0,150);
         }
         else
         {
-            painter->fillRect(rect_head,QBrush(rect_color));
+            setColor0.setRgb(115,115,115,100);
+            setColor1.setRgb(85,85,85,150);
         }
+
+        setGradient.setColorAt(0,setColor0);
+        setGradient.setColorAt(1,setColor1);
+        painter->fillRect(rect_head,setGradient);
+        painter->fillRect(rect_head_text,setGradient);
 
         painter->setPen(Qt::white);
         painter->setFont(date_font);
@@ -91,7 +100,7 @@ public:
                     QString workout = calendar_values.at(i);
 
                     QRect rect_work(option.rect.x(),y,option.rect.width(),height);
-                    QRect rect_work_text(option.rect.x()+ textMargin,y,option.rect.width(),height);
+                    QRect rect_work_text(option.rect.x(),y,option.rect.width(),height);
 
                     y += height+1;
 
@@ -111,13 +120,12 @@ public:
                     painter->setPen(Qt::black);
                     painter->setFont(work_font);
                     painter->drawText(rect_work_text,workout,workoption);
+                    //painter->drawText(rect_work_text,Qt::AlignVCenter,workout,QRectF(2,2,2,2));
                 }
-
             }
         }
         else
         {
-
             QString phase = index.data(Qt::DisplayRole).toString();
             phase = phase.remove(0,phase.indexOf(delimiter)+1);
             phase = phase.remove(0,phase.indexOf(delimiter)+1);

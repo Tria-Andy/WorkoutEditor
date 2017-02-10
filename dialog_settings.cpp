@@ -279,17 +279,17 @@ void Dialog_settings::set_thresholdView(QString sport)
 {
     if(sport == settings::isSwim)
     {
-        ui->lineEdit_speed->setText(this->get_speed(ui->timeEdit_thresPace->time(),100,ui->comboBox_thresSport->currentText(),true));
+        ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_thresPace->time(),100,ui->comboBox_thresSport->currentText(),true)));
         this->set_thresholdModel(sport);
     }
     if(sport == settings::isBike)
     {
-        ui->lineEdit_speed->setText(this->get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true));
+        ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true)));
         this->set_thresholdModel(sport);
     }
     if(sport == settings::isRun)
     {
-        ui->lineEdit_speed->setText(this->get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true));
+        ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true)));
         this->set_thresholdModel(sport);
     }
 }

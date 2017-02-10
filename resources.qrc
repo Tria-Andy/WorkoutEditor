@@ -16,7 +16,6 @@
         <file>icons/No.png</file>
         <file>icons/Download.png</file>
         <file>icons/Refresh.png</file>
-        <file>icons/Undo.png</file>
         <file>icons/List.png</file>
         <file>icons/Report.png</file>
         <file>icons/Sync.png</file>
@@ -37,9 +36,8 @@
         <file>icons/Stock graph.png</file>
         <file>icons/Bubble.png</file>
         <file>icons/Bubble_No.png</file>
-        <file>icons/Tune.png</file>
         <file>icons/Calendar.png</file>
         <file>icons/Previous.png</file>
-        <file>icons/Left-right.png</file>
+        <file>icons/Expand.png</file>
     </qresource>
 </RCC>

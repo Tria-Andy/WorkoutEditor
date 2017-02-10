@@ -131,12 +131,15 @@
           <height>20</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Expand</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">
-          <normaloff>:/images/icons/Left-right.png</normaloff>:/images/icons/Left-right.png</iconset>
+          <normaloff>:/images/icons/Expand.png</normaloff>:/images/icons/Expand.png</iconset>
         </property>
        </widget>
       </item>

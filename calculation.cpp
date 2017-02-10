@@ -102,7 +102,7 @@ QString calculation::get_workout_pace(double dist, QTime duration,QString sport,
     return speedLabel.at(3);
 }
 
-QString calculation::get_speed(QTime pace,int dist,QString sport,bool fixdist)
+double calculation::get_speed(QTime pace,int dist,QString sport,bool fixdist)
 {
     int sec = pace.minute()*60;
     sec = sec + pace.second();
@@ -125,10 +125,15 @@ QString calculation::get_speed(QTime pace,int dist,QString sport,bool fixdist)
         {
             speed = (3600.0/sec) / (1000.0/dist);
         }
-        return QString::number(speed);
+        return speed;
     }
 
-    return "--";
+    return 0;
+}
+
+double calculation::calcSpeed(double sec, double dist, double factor)
+{
+    return 3600.0 / (sec / (dist/factor));
 }
 
 QString calculation::calc_lapSpeed(QString sport,double sec)
@@ -146,6 +151,28 @@ QString calculation::calc_lapSpeed(QString sport,double sec)
         return "--";
     }
 
+    return 0;
+}
+
+int calculation::calc_lapPace(QString sport, int duration, double distance)
+{
+    int pace;
+    if(distance > 0)
+    {
+        if (sport == settings::isSwim)
+        {
+            pace = duration * (100.0/distance);
+        }
+        else
+        {
+            pace = duration / distance;
+        }
+        return pace;
+    }
+    else
+    {
+        return 0;
+    }
     return 0;
 }
 

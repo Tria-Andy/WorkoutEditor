@@ -18,70 +18,40 @@
 
 #ifndef JSONHANDLER_H
 #define JSONHANDLER_H
-#include "activity.h"
 #include <QMap>
+#include <QHash>
 #include <QStandardItemModel>
 #include "calculation.h"
 
-class Activity;
 class jsonHandler : public calculation
 {
 public:
-    jsonHandler(bool readFlag = false,QString jsonfile = QString(), Activity *p_act = 0);
-    QString get_jsonfile() {return jsonFile;}
-    bool hasOverrideData() {return hasOverride;}
-    void set_filename(QString fname) {fileName = fname;}
-    void write_json();
-    void set_overrideData(QString vKey,QString vValue)
-    {
-        overrideData.insert(vKey,vValue);
-    }
-    QString get_overrideDate(QString vKey)
-    {
-        return overrideData.value(vKey);
-    }
-    void set_overrideFlag(bool oFlag)
-    {
-        hasOverride = oFlag;
-    }
-    void set_rideData(QString vKey,QString vValue)
-    {
-        rideData.insert(vKey,vValue);
-    }
-    QString get_tagData(QString vKey)
-    {
-        return tagData.value(vKey);
-    }
-    void set_tagData(QString vKey,QString vValue)
-    {
-        tagData.insert(vKey,vValue);
-    }
-    void reset_maps()
-    {
-        rideData.clear();
-        tagData.clear();
-        overrideData.clear();
-    }
+    jsonHandler();
+
+protected:
+    QString readJsonContent(QString);
+    void init_actModel(QString,QMap<int,QString> *,QStandardItemModel*,QStringList*,int);
+    void init_xdataModel(QString,QStandardItemModel*);
+    void init_jsonFile();
+    void write_actModel(QString,QStandardItemModel*,QStringList*);
+    void write_xdataModel(QString,QStandardItemModel*);
+    void write_jsonFile();
+    bool hasXdata,hasOverride;
+    QHash<QString,QString> rideData,tagData,overrideData;
+    QStringList intList,sampList;
+    QString fileName;
 
 private:
-    Activity *curr_act;
-    QString jsonFile,fileName;
-    bool hasXdata,hasOverride,hasFile;
-    QStandardItemModel *p_int,*p_samp;
-    QStringList intList,sampList,xdataValues,xdataUnits;
-    QMap<QString,QString> rideData;
-    QMap<QString,QString> tagData;
-    QMap<QString,QString> xData;
-    QMap<QString,QString> overrideData;
+    QJsonObject activityItem;
+    QString jsonFile;
+    QStringList xdataValues,xdataUnits;
+    QHash<QString,QString> xData;
 
-    void read_json(QString);   
-    void write_file(QJsonDocument);
-
-    void fill_qmap(QMap<QString,QString>*,QJsonObject*);
+    void fill_qmap(QHash<QString,QString>*,QJsonObject*);
     void fill_keyList(QStringList*,QMap<int,QString>*,QStringList*);
     void fill_model(QStandardItemModel*,QJsonArray*,QStringList*);
     void fill_list(QJsonArray*,QStringList*);
-    QJsonObject mapToJson(QMap<QString,QString>*);
+    QJsonObject mapToJson(QHash<QString,QString>*);
     QJsonArray listToJson(QStringList*);
     QJsonArray modelToJson(QStandardItemModel*,QStringList*);
 };

@@ -48,6 +48,10 @@ public:
         work_font.setBold(false);
         work_font.setPixelSize(settings::get_fontValue("fontSmall"));
 
+        QLinearGradient setGradient(option.rect.topLeft(),option.rect.bottomLeft());
+        setGradient.setSpread(QGradient::RepeatSpread);
+        QColor setColor0,setColor1;
+
         temp_value = index.data(Qt::DisplayRole).toString();
         sum_values = temp_value.split(delimiter);
 
@@ -56,18 +60,25 @@ public:
             if(sum_values.at(0) == sportList.at(i))
             {
                 rect_color = settings::get_itemColor(sportList.at(i));
+                //setColor1 = settings::get_itemColor(sportList.at(i));
                 break;
             }
             else
             {
                 //Summery
                 rect_color = settings::get_itemColor(settings::get_generalValue("sum"));
+                //setColor1 = settings::get_itemColor(settings::get_generalValue("sum"));
             }
         }
+
+        setColor0.setRgb(255,255,255,100);
+        setGradient.setColorAt(0,setColor0);
+        setGradient.setColorAt(1,setColor1);
 
         QRect rect_head(option.rect.x(),option.rect.y(),option.rect.width(),20);
         QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(),option.rect.width(),20);
         painter->setBrush(QBrush(rect_color));
+
         painter->fillRect(rect_head,QBrush(rect_color));
         painter->fillRect(rect_head_text,QBrush(rect_color));
         painter->drawRect(rect_head);

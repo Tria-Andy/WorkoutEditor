@@ -31,8 +31,9 @@ private:
     static QStringList setRangeString(QHash<QString,QString>*);
     static QString set_colorString(QColor);
 
-    static QString settingFile,valueFile,valueFilePath,splitter,header_swim;
-    static QStringList keyList,extkeyList,table_header,header_int,header_bike,header_int_time,header_swim_time;
+    static QString settingFile,valueFile,valueFilePath,splitter;
+    static QStringList table_header,header_swim,header_bike,header_run;
+    static QStringList keyList,extkeyList,header_int_time,header_swim_time;
 
     static QHash<QString,QStringList> listMap;
     static QMap<int,QString> sampList,intList;
@@ -71,7 +72,6 @@ public:
     static double get_ltsValue(QString key) {return ltsMap.value(key);}
     static QString get_generalValue(QString key) {return generalMap.value(key);}
     static int get_fontValue(QString key) {return fontMap.value(key);}
-
 
     //QMap/QHash Setter
     static void set_saisonInfos(QString key, QString value){saisonInfo.insert(key,value);}

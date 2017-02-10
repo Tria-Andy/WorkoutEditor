@@ -27,7 +27,6 @@ Dialog_export::Dialog_export(QWidget *parent, schedule *p_schedule) :
     ui(new Ui::Dialog_export)
 {
     ui->setupUi(this);
-    jsonhandler = new jsonHandler(false,"",nullptr);
     exportProxy = new QSortFilterProxyModel();
     exportProxy->setSourceModel(p_schedule->week_meta);
     exportProxy->setDynamicSortFilter(true);
@@ -57,7 +56,6 @@ enum{ALL,TIME,WEEK};
 Dialog_export::~Dialog_export()
 {
     delete exportProxy;
-    delete jsonhandler;
     delete ui;
 }
 
@@ -96,24 +94,24 @@ void Dialog_export::set_filecontent(int row)
     if(sport == settings::isRun) stressType = "govss";
     if(sport == settings::isAlt || sport == settings::isStrength) stressType = "triscore";
 
-    jsonhandler->reset_maps();
-    jsonhandler->set_filename(fileName);
-    jsonhandler->set_rideData("STARTTIME",workoutDateTime.toString("yyyy/MM/dd hh:mm:ss UTC"));
-    jsonhandler->set_rideData("RECINTSECS","");
-    jsonhandler->set_rideData("DEVICETYPE","Manual");
-    jsonhandler->set_rideData("IDENTIFIER","");
-    jsonhandler->set_rideData("OVERRIDES","");
 
-    jsonhandler->set_tagData("Sport",sport);
-    jsonhandler->set_tagData("Workout Code",exportProxy->data(exportProxy->index(row,4)).toString());
-    jsonhandler->set_tagData("Workout Title",exportProxy->data(exportProxy->index(row,5)).toString());
+    this->rideData.insert("STARTTIME",workoutDateTime.toString("yyyy/MM/dd hh:mm:ss UTC"));
+    this->rideData.insert("RECINTSECS","");
+    this->rideData.insert("DEVICETYPE","Manual");
+    this->rideData.insert("IDENTIFIER","");
+    this->rideData.insert("OVERRIDES","");
 
-    jsonhandler->set_overrideFlag(true);
-    jsonhandler->set_overrideData("time_riding",QString::number(this->get_timesec(tempTime)));
-    jsonhandler->set_overrideData("workout_time",QString::number(this->get_timesec(tempTime)));
-    jsonhandler->set_overrideData(stressType,exportProxy->data(exportProxy->index(row,8)).toString());
+    this->tagData.insert("Sport",sport);
+    this->tagData.insert("Workout Code",exportProxy->data(exportProxy->index(row,4)).toString());
+    this->tagData.insert("Workout Title",exportProxy->data(exportProxy->index(row,5)).toString());
 
-    jsonhandler->write_json();
+    this->hasOverride = true;
+    overrideData.insert("time_riding",QString::number(this->get_timesec(tempTime)));
+    overrideData.insert("workout_time",QString::number(this->get_timesec(tempTime)));
+    overrideData.insert(stressType,exportProxy->data(exportProxy->index(row,8)).toString());
+
+    this->init_jsonFile();
+    this->write_jsonFile();
 }
 
 void Dialog_export::workout_export()
