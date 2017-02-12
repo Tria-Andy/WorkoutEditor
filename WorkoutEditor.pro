@@ -49,7 +49,8 @@ SOURCES += main.cpp\
     stress_popup.cpp \
     calculation.cpp \
     xmlhandler.cpp \
-    dialog_workcreator.cpp
+    dialog_workcreator.cpp \
+    filereader.cpp
 
 HEADERS  += mainwindow.h \
     calendar_delegate.h \
@@ -85,7 +86,8 @@ HEADERS  += mainwindow.h \
     dialog_workcreator.h \
     del_workcreator.h \
     del_treeview.h \
-    del_avgselect.h
+    del_avgselect.h \
+    filereader.h
 
 FORMS    += mainwindow.ui \
     dialog_add.ui \

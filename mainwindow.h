@@ -47,6 +47,7 @@
 #include "dialog_week_copy.h"
 #include "settings.h"
 #include "jsonhandler.h"
+#include "filereader.h"
 #include "activity.h"
 #include "standardworkouts.h"
 #include "calculation.h"
@@ -66,6 +67,7 @@ private:
     schedule *workSchedule;
     Activity *curr_activity;
     jsonHandler *jsonhandler;
+    fileReader *actFileReader;
     settings editorSettings;
     standardWorkouts *stdWorkout;
     calendar_delegate calender_del;
@@ -80,7 +82,10 @@ private:
     QItemSelectionModel *treeSelection;
     QSortFilterProxyModel *scheduleProxy,*metaProxy,*contentProxy;
     QStringList modus_list,cal_header,year_header,schedMode;
-    QToolButton *planMode;
+    QLabel *planerMode;
+    QToolButton *planMode,*appMode;
+    QWidget *menuSpacer;
+    QButtonGroup *phaseGroup;
 
     //Intervall Chart
     QVector<double> secTicker,speedValues,polishValues,speedMinMax,rangeMinMax;
@@ -97,7 +102,7 @@ private:
     QVector<double> dist_sum;
     int weekRange,weekpos;
     int saisonWeeks,weekDays;
-    unsigned int weekCounter,sportCounter;
+    unsigned int weekCounter,sportCounter,phaseFilterID;
     bool userSetup,isWeekMode,graphLoaded,actLoaded;
 
     void openPreferences();
@@ -109,7 +114,7 @@ private:
     QString get_weekRange();
     void set_buttons(bool);
     void set_calender();
-    void set_comboIntervall();
+    void set_phaseButtons();
 
     //Editor
     void select_activityFile();
@@ -156,19 +161,20 @@ private slots:
     void on_calendarWidget_clicked(const QDate &date);
     void on_tableView_cal_clicked(const QModelIndex &index);
     void on_tableView_summery_clicked(const QModelIndex &index);
-    void on_comboBox_phasefilter_currentIndexChanged(int index);
     void on_actionEdit_Week_triggered();
-    void toolButton_planMode(bool);
     void on_toolButton_weekCurrent_clicked();
     void on_toolButton_weekMinus_clicked();
     void on_toolButton_weekPlus_clicked();
     void on_toolButton_weekFour_clicked();
+    void toolButton_planMode(bool);
+    void toolButton_appMode(bool);
+    void set_phaseFilter(int);
 
     //Editor
     void setSelectedIntRow(QModelIndex);
     void on_horizontalSlider_factor_valueChanged(int value);
     void on_treeView_intervall_clicked(const QModelIndex &index);
-    void on_listView_files_clicked(const QModelIndex &index);
+    void on_treeView_files_clicked(const QModelIndex &index);
     void on_actionSave_to_GoldenCheetah_triggered();
     void on_lineEdit_workContent_textChanged(const QString &arg1);
     void on_toolButton_sync_clicked();

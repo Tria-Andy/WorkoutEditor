@@ -50,13 +50,27 @@ MainWindow::MainWindow(QWidget *parent) :
     isWeekMode = true;
 
     ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
-    ui->statusBar->setVisible(true);
+    appMode = new QToolButton(this);
+    appMode->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    appMode->setIcon(QIcon(":/images/icons/Table.png"));
+    appMode->setText("Editor");
+    appMode->setProperty("Mode",0);
+    appMode->setToolTip("Change Mode");
+
+    planerMode = new QLabel(this);
+    planerMode->setText("Planer Mode:");
     planMode = new QToolButton(this);
     planMode->setCheckable(true);
+    planMode->setToolTip("Change Planer Mode");
     planMode->setMinimumHeight(25);
     planMode->setMinimumWidth(75);
     planMode->setText(schedMode.at(0));
-    ui->statusBar->addPermanentWidget(planMode);
+    menuSpacer = new QWidget();
+    menuSpacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    ui->mainToolBar->addWidget(appMode);
+    ui->mainToolBar->addWidget(menuSpacer);
+    ui->mainToolBar->addWidget(planerMode);
+    ui->mainToolBar->addWidget(planMode);
     ui->toolButton_weekCurrent->setEnabled(false);
     ui->toolButton_weekMinus->setEnabled(false);
     stdWorkout = new standardWorkouts();
@@ -68,7 +82,8 @@ MainWindow::MainWindow(QWidget *parent) :
     metaProxy->setSourceModel(workSchedule->week_meta);
     contentProxy = new QSortFilterProxyModel();
     contentProxy->setSourceModel(workSchedule->week_content);
-
+    this->set_phaseButtons();
+    ui->frame_phases->setVisible(false);
     cal_header << "Week";
     for(int d = 1; d < 8; ++d)
     {
@@ -83,7 +98,10 @@ MainWindow::MainWindow(QWidget *parent) :
     actLoaded = false;
 
     connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
-    connect(planMode,SIGNAL(toggled(bool)),this,SLOT(toolButton_planMode(bool)));
+    connect(appMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_appMode(bool)));
+    connect(planMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_planMode(bool)));
+    connect(phaseGroup,SIGNAL(buttonClicked(int)),this,SLOT(set_phaseFilter(int)));
+
 
     //UI
     ui->actionSave_Workout_Schedule->setEnabled(false);
@@ -96,9 +114,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView_cal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_cal->horizontalHeader()->setSectionsClickable(false);
     ui->tableView_cal->verticalHeader()->hide();
-    ui->comboBox_phasefilter->addItem("All");
-    ui->comboBox_phasefilter->addItems(settings::get_listValues("Phase"));
-    ui->comboBox_phasefilter->setEnabled(false);
     ui->toolButton_addSelect->setEnabled(false);
     ui->toolButton_clearSelect->setEnabled(false);
     ui->toolButton_clearContent->setEnabled(false);
@@ -109,7 +124,10 @@ MainWindow::MainWindow(QWidget *parent) :
     this->read_activityFiles();
 
     this->set_menuItems(false,true);
+    this->set_phaseFilter(1);
 }
+
+enum {PLANER,EDITOR};
 
 MainWindow::~MainWindow()
 {
@@ -133,46 +151,13 @@ void MainWindow::freeMem()
 
 void MainWindow::read_activityFiles()
 {
-    Activity *readFile;
-    QFile file;
-    QString filePath,actString;
-    int jsonMaxFiles = settings::get_generalValue("filecount").toInt();
-    QStringList infoHeader = settings::get_listValues("JsonFile");
-    QDir directory(settings::get_gcInfo("gcpath"));
-    directory.setSorting(QDir::Name | QDir::Reversed);
-    directory.setFilter(QDir::Files);
-    QFileInfoList fileList = directory.entryInfoList();
-    int fileCount = fileList.count() > jsonMaxFiles ? jsonMaxFiles : fileList.count();
-    QDateTime workDateTime;
-    workDateTime.setTimeSpec(Qt::TimeZone);
-    fileModel->setRowCount(fileCount);
+    actFileReader = new fileReader(fileModel);
+    ui->treeView_files->setModel(fileModel);
 
-    for(int i = 0; i < fileCount; ++i)
-    {
-        filePath = fileList.at(i).path()+QDir::separator()+fileList.at(i).fileName();
-        file.setFileName(filePath);
-        file.open(QFile::ReadOnly | QFile::Text);
-        readFile = new Activity(file.readAll(),false);
-        workDateTime = QDateTime::fromString(readFile->ride_info.value("Date"),"yyyy/MM/dd hh:mm:ss UTC").addSecs(workDateTime.offsetFromUtc());
-        actString = QDate().shortDayName(workDateTime.date().dayOfWeek())+" - " +workDateTime.toString("dd.MM.yyyy hh:mm:ss")+" - "+readFile->ride_info.value("Sport") + " - " + readFile->ride_info.value("Workout Code");
-        fileModel->setData(fileModel->index(i,0),actString);
-        fileModel->setData(fileModel->index(i,1),filePath);
-        file.close();
-        delete readFile;
-    }
-
-    ui->listView_files->setModel(fileModel);
-    infoModel = new QStandardItemModel(infoHeader.count(),1);
-    infoModel->setVerticalHeaderLabels(infoHeader);
-    ui->tableView_actInfo->setModel(infoModel);
-    ui->tableView_actInfo->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableView_actInfo->horizontalHeader()->setStretchLastSection(true);
-    ui->tableView_actInfo->horizontalHeader()->setVisible(false);
-    ui->tableView_actInfo->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_actInfo->verticalHeader()->setSectionsClickable(false);
-    ui->tableView_actInfo->setFixedHeight(infoHeader.count()*25);
-    this->loadfile(fileList.at(0).path()+QDir::separator()+fileList.at(0).fileName());
+    this->loadfile(fileModel->data(fileModel->index(0,1)).toString());
     actLoaded = true;
+
+    delete actFileReader;
 }
 
 void MainWindow::clearActivtiy()
@@ -195,6 +180,13 @@ void MainWindow::clearActivtiy()
         delete curr_activity;
     }
     actLoaded = false;
+
+    QString viewBackground = "background-color: #e6e6e6";
+
+    ui->tableView_actInfo->setStyleSheet(viewBackground);
+    ui->treeView_intervall->setStyleSheet(viewBackground);
+    ui->treeView_files->setStyleSheet(viewBackground);
+
     ui->actionSelect_File->setEnabled(true);
     ui->actionReset->setEnabled(false);
 }
@@ -208,23 +200,31 @@ void MainWindow::openPreferences()
 
 void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
 {
+    ui->stackedWidget->setCurrentIndex(mEditor);
+
     if(mEditor)
     {
         ui->actionPlaner->setEnabled(mEditor);
         ui->actionEditor->setEnabled(mPlaner);
+        appMode->setIcon(QIcon(":/images/icons/Calendar.png"));
+        appMode->setText("Planer");
+
     }
     if(mPlaner)
     {
         ui->actionEditor->setEnabled(mPlaner);
         ui->actionPlaner->setEnabled(mEditor);
+        appMode->setIcon(QIcon(":/images/icons/Table.png"));
+        appMode->setText("Editor");
     }
+
+    appMode->setProperty("Mode",mEditor);
 
     //Editor
     ui->actionSave_Workout_File->setVisible(mEditor);
     ui->actionSave_to_GoldenCheetah->setVisible(mEditor);
     ui->actionReset->setVisible(mEditor);
     ui->actionSelect_File->setVisible(mEditor);
-
     ui->actionReset->setEnabled(settings::get_act_isload());
     ui->actionSave_to_GoldenCheetah->setEnabled(settings::get_act_isload());
 
@@ -233,6 +233,9 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionSave_Workout_Schedule->setVisible(mPlaner);
     ui->actionExport_to_Golden_Cheetah->setVisible(mPlaner);
     ui->actionNew->setVisible(mPlaner);
+    planerMode->setEnabled(mPlaner);
+    planMode->setEnabled(mPlaner);
+    planerMode->setVisible(mPlaner);
 
     if(workSchedule->get_StressMap()->count() == 0) ui->actionPMC->setEnabled(false);
 }
@@ -296,13 +299,13 @@ void MainWindow::set_summeryInfo()
     }
     else
     {
-        if(ui->comboBox_phasefilter->currentIndex() == 0)
+        if(phaseFilterID == 1)
         {
             ui->label_selWeek->setText("All Phases " +settings::get_saisonInfo("saison"));
         }
         else
         {
-            ui->label_selWeek->setText("Phase: "+ ui->comboBox_phasefilter->currentText());
+            ui->label_selWeek->setText("Phase: "+ phaseFilter);
         }
     }
 }
@@ -364,9 +367,9 @@ void MainWindow::summery_view()
     {
         QString work,dura,dist,stress;
 
-        if(ui->comboBox_phasefilter->currentIndex() != 0)
+        if(phaseFilterID > 1)
         {
-          metaProxy->setFilterFixedString(ui->comboBox_phasefilter->currentText());
+          metaProxy->setFilterFixedString(phaseFilter);
           metaProxy->setFilterKeyColumn(2);
         }
         metaProxy->sort(0);
@@ -501,7 +504,7 @@ void MainWindow::workout_calendar()
         QString empty = "0-0-00:00:00-0";
         int weekoffset;
 
-          if(ui->comboBox_phasefilter->currentIndex() == 0)
+          if(phaseFilterID == 1)
           {
             ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
             weekoffset = settings::get_fontValue("weekOffSet");
@@ -511,7 +514,7 @@ void MainWindow::workout_calendar()
             ui->tableView_cal->verticalHeader()->resetDefaultSectionSize();
             ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
             ui->tableView_cal->verticalHeader()->setDefaultSectionSize(ui->tableView_cal->verticalHeader()->defaultSectionSize()*2.5);
-            metaProxy->setFilterFixedString(ui->comboBox_phasefilter->currentText());
+            metaProxy->setFilterFixedString(phaseFilter);
             metaProxy->setFilterKeyColumn(2);
             weekoffset = metaProxy->rowCount();
           }
@@ -562,7 +565,6 @@ void MainWindow::refresh_model()
 QString MainWindow::get_weekRange()
 {
     QString display_weeks;
-    QModelIndex index;
 
     int phaseStart;
     if(isWeekMode)
@@ -580,7 +582,7 @@ QString MainWindow::get_weekRange()
     }
     else
     {
-        if(ui->comboBox_phasefilter->currentIndex() == 0)
+        if(phaseFilterID == 1)
         {
             display_weeks = QString::number(weekpos+1) + " - " + QString::number(weekpos + settings::get_fontValue("weekOffSet"));
         }
@@ -613,6 +615,33 @@ void MainWindow::set_calender()
 
     weeknumber = QString::number(ui->calendarWidget->selectedDate().weekNumber())+"_"+QString::number(ui->calendarWidget->selectedDate().year());
     this->summery_view();
+}
+
+void MainWindow::set_phaseButtons()
+{
+    QStringList phases;
+    phases << "All" <<  settings::get_listValues("Phase");
+    QHBoxLayout *layout = new QHBoxLayout(ui->frame_phases);
+    layout->setContentsMargins(1,1,1,1);
+    layout->addSpacing(2);
+    phaseGroup = new QButtonGroup(this);
+
+    for(int i = 0;i < phases.count(); ++i)
+    {
+        QToolButton *pButton = new QToolButton();
+        pButton->setText(phases.at(i));
+        pButton->setFixedHeight(25);
+        pButton->setFixedWidth(50);
+        pButton->setAutoRaise(true);
+        pButton->setCheckable(true);
+        QFrame *sline = new QFrame();
+        sline->setFrameShape(QFrame::VLine);
+        sline->setFrameShadow(QFrame::Sunken);
+        layout->addWidget(sline);
+        layout->addWidget(pButton);
+        phaseGroup->addButton(pButton,i+1);
+    }
+    phaseGroup->button(1)->setChecked(true);
 }
 
 //ACTIONS**********************************************************************
@@ -960,13 +989,25 @@ void MainWindow::loadfile(const QString &filename)
             ui->horizontalSlider_factor->setEnabled(false);
         }
 
-        this->update_infoModel();
         this->init_editorViews();
+        this->update_infoModel();
      }
 }
 
 void MainWindow::init_editorViews()
 {
+    QStringList infoHeader = settings::get_listValues("JsonFile");
+    infoModel = new QStandardItemModel(infoHeader.count(),1);
+    infoModel->setVerticalHeaderLabels(infoHeader);
+
+    ui->tableView_actInfo->setModel(infoModel);
+    ui->tableView_actInfo->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableView_actInfo->horizontalHeader()->setStretchLastSection(true);
+    ui->tableView_actInfo->horizontalHeader()->setVisible(false);
+    ui->tableView_actInfo->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_actInfo->verticalHeader()->setSectionsClickable(false);
+    ui->tableView_actInfo->setFixedHeight(infoHeader.count()*25);
+
     ui->treeView_intervall->setModel(curr_activity->intTreeModel);
     ui->treeView_intervall->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->treeView_intervall->header()->setSectionResizeMode(QHeaderView::Stretch);
@@ -1005,7 +1046,7 @@ void MainWindow::init_controlStyleSheets(QString sport)
 
     ui->tableView_actInfo->setStyleSheet(actBackground);
     ui->treeView_intervall->setStyleSheet(viewBackground);
-    ui->listView_files->setStyleSheet(viewBackground);
+    ui->treeView_files->setStyleSheet(viewBackground);
 
     ui->toolButton_addSelect->setStyleSheet(buttonStyle);
     ui->toolButton_clearSelect->setStyleSheet(buttonStyle);
@@ -1481,10 +1522,10 @@ void MainWindow::setCurrentTreeIndex(bool up)
     treeSelection->setCurrentIndex(index,QItemSelectionModel::Select);
 }
 
-void MainWindow::on_listView_files_clicked(const QModelIndex &index)
+void MainWindow::on_treeView_files_clicked(const QModelIndex &index)
 {
     this->clearActivtiy();
-    this->loadfile(fileModel->data(fileModel->index(index.row(),1)).toString());
+    //this->loadfile(fileModel->data(fileModel->index(index.row(),1)).toString());
 }
 
 void MainWindow::on_actionEditor_triggered()
@@ -1595,12 +1636,10 @@ void MainWindow::on_actionPace_Calculator_triggered()
 
 void MainWindow::on_tableView_summery_clicked(const QModelIndex &index)
 {
-    int filterindex = ui->comboBox_phasefilter->currentIndex();
-
     if(!isWeekMode)
     {
         int dialog_code;
-        year_popup year_pop(this,sum_model->data(index,Qt::DisplayRole).toString(),index.row(),workSchedule,phaseFilter,filterindex);
+        year_popup year_pop(this,sum_model->data(index,Qt::DisplayRole).toString(),index.row(),workSchedule,phaseFilter,phaseFilterID-1);
         year_pop.setModal(true);
         dialog_code = year_pop.exec();
         if(dialog_code == QDialog::Rejected)
@@ -1632,22 +1671,24 @@ void MainWindow::on_actionSwitch_Year_triggered()
     }
 }
 
-void MainWindow::on_comboBox_phasefilter_currentIndexChanged(int index)
+void MainWindow::set_phaseFilter(int phaseID)
 {
-    if(index == 0)
+    phaseFilterID = phaseID;
+
+    if(phaseID == 1)
     {
         this->set_buttons(false);
         ui->toolButton_weekFour->setEnabled(true);
         ui->toolButton_weekPlus->setEnabled(true);
+        phaseFilter = "All";
     }
     else
     {
         this->set_buttons(false);
         ui->toolButton_weekFour->setEnabled(false);
         ui->toolButton_weekPlus->setEnabled(false);
+        phaseFilter = settings::get_listValues("Phase").at(phaseID-2);
     }
-
-    phaseFilter = ui->comboBox_phasefilter->currentText();
 
     this->workout_calendar();
     this->summery_view();
@@ -1721,7 +1762,6 @@ void MainWindow::toolButton_planMode(bool checked)
         weekCounter = 0;
         ui->actionNew->setEnabled(!checked);
         this->set_buttons(checked);
-        ui->comboBox_phasefilter->setCurrentIndex(0);
     }
     else
     {
@@ -1735,8 +1775,22 @@ void MainWindow::toolButton_planMode(bool checked)
             this->set_buttons(true);
         }
     }
-    ui->comboBox_phasefilter->setEnabled(checked);
+    ui->frame_phases->setVisible(checked);
     ui->label_month->setText("Week " + this->get_weekRange());
     this->workout_calendar();
     this->summery_view();
 }
+
+void MainWindow::toolButton_appMode(bool toggle)
+{
+    if(appMode->property("Mode").toInt() == 0)
+    {
+        this->set_menuItems(true,toggle);
+    }
+    else
+    {
+        this->set_menuItems(toggle,true);
+    }
+}
+
+
