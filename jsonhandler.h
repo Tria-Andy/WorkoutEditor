@@ -30,6 +30,7 @@ public:
 
 protected:
     QString readJsonContent(QString);
+    void fill_qmap(QHash<QString,QString>*,QJsonObject*);
     void init_actModel(QString,QMap<int,QString> *,QStandardItemModel*,QStringList*,int);
     void init_xdataModel(QString,QStandardItemModel*);
     void init_jsonFile();
@@ -47,7 +48,6 @@ private:
     QStringList xdataValues,xdataUnits;
     QHash<QString,QString> xData;
 
-    void fill_qmap(QHash<QString,QString>*,QJsonObject*);
     void fill_keyList(QStringList*,QMap<int,QString>*,QStringList*);
     void fill_model(QStandardItemModel*,QJsonArray*,QStringList*);
     void fill_list(QJsonArray*,QStringList*);
