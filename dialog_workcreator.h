@@ -68,7 +68,7 @@ private:
     void set_itemData(QTreeWidgetItem *item);
     void show_editItem(QTreeWidgetItem *item);
     void set_selectData(QTreeWidgetItem *item);
-    void move_item(bool);
+    QTreeWidgetItem* move_item(bool,QTreeWidgetItem*);
     void set_defaultData(QTreeWidgetItem *item,bool);
     void get_workouts(QString);
     void clearIntTree();

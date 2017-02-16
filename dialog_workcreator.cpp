@@ -923,53 +923,55 @@ void Dialog_workCreator::on_toolButton_remove_clicked()
     this->set_plotModel();
 }
 
-void Dialog_workCreator::move_item(bool up)
+QTreeWidgetItem* Dialog_workCreator::move_item(bool up, QTreeWidgetItem *currentItem)
 {
     int currentindex = ui->treeWidget_intervall->currentIndex().row();
-
-    QTreeWidgetItem *currentItem = ui->treeWidget_intervall->currentItem();
 
     if(currentItem->parent())
     {
         QTreeWidgetItem *parent = currentItem->parent();
         int index = parent->indexOfChild(currentItem);
-        QTreeWidgetItem *child = parent->takeChild(index);
+        QTreeWidgetItem *childItem = parent->takeChild(index);
         if(up)
         {
-            parent->insertChild(index-1,child);
+            parent->insertChild(index-1,childItem);
             parent->setExpanded(true);
         }
         else
         {
-            parent->insertChild(index+1,child);
+            parent->insertChild(index+1,childItem);
             parent->setExpanded(true);
         }
+        return childItem;
     }
     else
     {
-        ui->treeWidget_intervall->takeTopLevelItem(currentindex);
+        QTreeWidgetItem *topItem = ui->treeWidget_intervall->takeTopLevelItem(currentindex);
         if(up)
         {
-            ui->treeWidget_intervall->insertTopLevelItem(currentindex-1,currentItem);
+            ui->treeWidget_intervall->insertTopLevelItem(currentindex-1,topItem);
         }
         else
         {
-            ui->treeWidget_intervall->insertTopLevelItem(currentindex+1,currentItem);
+            ui->treeWidget_intervall->insertTopLevelItem(currentindex+1,topItem);
         }
-        ui->treeWidget_intervall->setCurrentItem(currentItem);
+        return topItem;
     }
+    return 0;
 }
 
 void Dialog_workCreator::on_toolButton_up_clicked()
 {
-    this->move_item(true);
+    QTreeWidgetItem *currentItem = this->move_item(true,ui->treeWidget_intervall->currentItem());
     this->set_plotModel();
+    ui->treeWidget_intervall->setCurrentItem(currentItem);
 }
 
 void Dialog_workCreator::on_toolButton_down_clicked()
 {
-    this->move_item(false);
+    QTreeWidgetItem *currentItem = this->move_item(false,ui->treeWidget_intervall->currentItem());
     this->set_plotModel();
+    ui->treeWidget_intervall->setCurrentItem(currentItem);
 }
 
 void Dialog_workCreator::on_treeWidget_intervall_itemSelectionChanged()
