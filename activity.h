@@ -32,7 +32,7 @@ private:
     QList<QStandardItem*> setIntRow(int,bool);
     QList<QStandardItem*> setSwimLap(int,QString);
     QSortFilterProxyModel *swimProxy;
-    QString v_date,curr_sport,intLabel;
+    QString v_date,curr_sport,intLabel,breakName;
     QMap<int,QStringList> itemHeader,avgHeader;
     QHash<QString,int> paceTimeInZone,hfTimeInZone,hfZoneAvg;
     QHash<QString,QPair<double,double>> rangeLevels;
@@ -41,7 +41,7 @@ private:
     QVector<double> calc_speed,calc_cadence,swimTime,new_dist;
     double swim_track,swim_cv,swim_sri,polishFactor,hf_threshold,hf_max;
     int distFactor,avgCounter,pace_cv,zone_count,move_time,swim_pace,hf_avg;
-    bool isSwim,changeRowCount,isUpdated,selectInt;
+    bool isSwim,isBike,isRun,isTria,isStrength,changeRowCount,isUpdated,selectInt;
 
     //Functions
     void readJsonFile(QString,bool);
@@ -66,6 +66,7 @@ private:
     QString checkRangeLevel(double);
     int get_swim_laps(int);
     int get_zone_values(double,int,bool);
+    int get_moveTime();
 
 public:
     explicit Activity(QString jsonfile = QString(),bool intAct = false);
@@ -100,16 +101,6 @@ public:
     //Averages
     void reset_avgSelection();
     void set_avgValues(int,int);
-    int get_distFactor() {return distFactor;}
-
-    int get_move_time() {return move_time;}
-    int get_swim_pace() {return swim_pace;}
-    double get_swim_sri() { return swim_sri;}
-    double get_hf_zone_avg();
-    int get_hf_avg() {return hf_avg;}
-
-    void set_swim_track(double trackLen) {swim_track = trackLen;}
-    double get_swim_track() {return swim_track;}
 };
 
 #endif // ACTIVITY_H

@@ -273,7 +273,7 @@ void jsonHandler::write_jsonFile()
     jsonDoc.setObject(rideFile);
 
     QFile file(settings::get_gcInfo("gcpath") + QDir::separator() + fileName);
-    //QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName);
+    //QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName); //Test
     if(!file.open(QFile::WriteOnly))
     {
         qDebug() << "File not open!";
@@ -281,7 +281,7 @@ void jsonHandler::write_jsonFile()
     }
 
     file.write(jsonDoc.toJson(QJsonDocument::Compact));
-    //file.write(jsonDoc.toJson());
+    //file.write(jsonDoc.toJson()); //Test
     file.flush();
     file.close();
 }

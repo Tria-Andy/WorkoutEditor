@@ -93,7 +93,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //Editor Mode
     avgCounter = 0;
     fileModel = new QStandardItemModel;
-    fileModel->setColumnCount(2);
     avgCounter = 0;
     actLoaded = false;
 
@@ -101,7 +100,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(appMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_appMode(bool)));
     connect(planMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_planMode(bool)));
     connect(phaseGroup,SIGNAL(buttonClicked(int)),this,SLOT(set_phaseFilter(int)));
-
 
     //UI
     ui->actionSave_Workout_Schedule->setEnabled(false);
@@ -151,12 +149,11 @@ void MainWindow::freeMem()
 
 void MainWindow::read_activityFiles()
 {
-    actFileReader = new fileReader(fileModel);
-    ui->treeView_files->setModel(fileModel);
-
-    this->loadfile(fileModel->data(fileModel->index(0,1)).toString());
+    fileModel->clear();
+    QStandardItem *rootItem = fileModel->invisibleRootItem();
+    actFileReader = new fileReader(fileModel,rootItem);
+    this->loadfile(fileModel->data(fileModel->index(0,4)).toString());
     actLoaded = true;
-
     delete actFileReader;
 }
 
@@ -171,6 +168,7 @@ void MainWindow::clearActivtiy()
 
     if(actLoaded)
     {
+        curr_activity->reset_avgSelection();
         delete curr_activity->intModel;
         delete curr_activity->sampleModel;
         delete curr_activity->intTreeModel;
@@ -183,6 +181,7 @@ void MainWindow::clearActivtiy()
 
     QString viewBackground = "background-color: #e6e6e6";
 
+    ui->lineEdit_workContent->clear();
     ui->tableView_actInfo->setStyleSheet(viewBackground);
     ui->treeView_intervall->setStyleSheet(viewBackground);
     ui->treeView_files->setStyleSheet(viewBackground);
@@ -223,6 +222,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     //Editor
     ui->actionSave_Workout_File->setVisible(mEditor);
     ui->actionSave_to_GoldenCheetah->setVisible(mEditor);
+    ui->actionRefresh_Filelist->setVisible(mEditor);
     ui->actionReset->setVisible(mEditor);
     ui->actionSelect_File->setVisible(mEditor);
     ui->actionReset->setEnabled(settings::get_act_isload());
@@ -1000,6 +1000,13 @@ void MainWindow::init_editorViews()
     infoModel = new QStandardItemModel(infoHeader.count(),1);
     infoModel->setVerticalHeaderLabels(infoHeader);
 
+    ui->treeView_files->setModel(fileModel);
+    ui->treeView_files->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->treeView_files->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->treeView_files->header()->setVisible(false);
+    ui->treeView_files->setItemDelegate(&fileList_del);
+    ui->treeView_files->hideColumn(4);
+
     ui->tableView_actInfo->setModel(infoModel);
     ui->tableView_actInfo->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView_actInfo->horizontalHeader()->setStretchLastSection(true);
@@ -1018,6 +1025,7 @@ void MainWindow::init_editorViews()
     connect(treeSelection,SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(setSelectedIntRow(QModelIndex)));
 
     ui->tableView_selectInt->setModel(curr_activity->selItemModel);
+    ui->tableView_selectInt->setEditTriggers(QAbstractItemView::CurrentChanged);
     ui->tableView_selectInt->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_selectInt->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->tableView_selectInt->verticalHeader()->setFixedWidth(100);
@@ -1047,6 +1055,8 @@ void MainWindow::init_controlStyleSheets(QString sport)
     ui->tableView_actInfo->setStyleSheet(actBackground);
     ui->treeView_intervall->setStyleSheet(viewBackground);
     ui->treeView_files->setStyleSheet(viewBackground);
+    ui->tableView_cal->setStyleSheet(viewBackground);
+    ui->tableView_summery->setStyleSheet(viewBackground);
 
     ui->toolButton_addSelect->setStyleSheet(buttonStyle);
     ui->toolButton_clearSelect->setStyleSheet(buttonStyle);
@@ -1114,8 +1124,10 @@ void MainWindow::setSelectedIntRow(QModelIndex index)
     {
         ui->tableView_selectInt->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     }
+
     intSelect_del.intType = isInt;
     ui->label_lapType->setText(intLabel.at(isInt));
+    ui->tableView_selectInt->setCurrentIndex(curr_activity->selItemModel->index(0,0));
 }
 
 void MainWindow::selectAvgValues(QModelIndex index, int avgCol)
@@ -1383,7 +1395,6 @@ void MainWindow::fill_WorkoutContent()
         else
         {
             dist = ceil(dist*10)/10.0;
-
         }
 
         if(dist < 1)
@@ -1463,9 +1474,10 @@ void MainWindow::unselect_intRow(bool setToolButton)
 
 void MainWindow::on_toolButton_update_clicked()
 {
-    ui->tableView_selectInt->setCurrentIndex(curr_activity->selItemModel->index(0,0));
+    ui->treeView_intervall->setFocus();
     curr_activity->updateRow_intTree(treeSelection);
     this->update_infoModel();
+    ui->treeView_intervall->setCurrentIndex(treeSelection->currentIndex());
 }
 
 void MainWindow::on_toolButton_delete_clicked()
@@ -1520,12 +1532,6 @@ void MainWindow::setCurrentTreeIndex(bool up)
     }
 
     treeSelection->setCurrentIndex(index,QItemSelectionModel::Select);
-}
-
-void MainWindow::on_treeView_files_clicked(const QModelIndex &index)
-{
-    this->clearActivtiy();
-    //this->loadfile(fileModel->data(fileModel->index(index.row(),1)).toString());
 }
 
 void MainWindow::on_actionEditor_triggered()
@@ -1793,4 +1799,13 @@ void MainWindow::toolButton_appMode(bool toggle)
     }
 }
 
+void MainWindow::on_treeView_files_clicked(const QModelIndex &index)
+{
+    this->clearActivtiy();
+    this->loadfile(fileModel->data(fileModel->index(index.row(),4)).toString());
+}
 
+void MainWindow::on_actionRefresh_Filelist_triggered()
+{
+    this->read_activityFiles();
+}

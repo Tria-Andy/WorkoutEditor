@@ -33,7 +33,7 @@
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="schedule">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -452,7 +452,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QTableView" name="tableView_cal"/>
+            <widget class="QTableView" name="tableView_cal">
+             <property name="showGrid">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -1477,6 +1481,7 @@
     <addaction name="separator"/>
     <addaction name="actionSave_Workout_File"/>
     <addaction name="actionSave_Workout_Schedule"/>
+    <addaction name="actionRefresh_Filelist"/>
     <addaction name="actionSave_to_GoldenCheetah"/>
     <addaction name="separator"/>
     <addaction name="actionExit_and_Save"/>
@@ -1547,6 +1552,7 @@
    <addaction name="separator"/>
    <addaction name="actionNew"/>
    <addaction name="actionSelect_File"/>
+   <addaction name="actionRefresh_Filelist"/>
    <addaction name="actionSave_Workout_Schedule"/>
    <addaction name="actionSave_to_GoldenCheetah"/>
    <addaction name="separator"/>
@@ -1743,6 +1749,15 @@
    </property>
    <property name="text">
     <string>Edit Week</string>
+   </property>
+  </action>
+  <action name="actionRefresh_Filelist">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/images/icons/Refresh.png</normaloff>:/images/icons/Refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh Filelist</string>
    </property>
   </action>
  </widget>

@@ -27,6 +27,7 @@
 #include "summery_delegate.h"
 #include "del_spinbox_int.h"
 #include "del_treeview.h"
+#include "del_filelist.h"
 #include "del_intselect.h"
 #include "del_avgselect.h"
 #include "del_level.h"
@@ -74,6 +75,7 @@ private:
     week_delegate week_del;
     summery_delegate sum_del;
     del_spinbox_int time_del;
+    del_filelist fileList_del;
     del_treeview tree_del;
     del_intselect intSelect_del;
     del_avgselect avgSelect_del;
@@ -174,7 +176,6 @@ private slots:
     void setSelectedIntRow(QModelIndex);
     void on_horizontalSlider_factor_valueChanged(int value);
     void on_treeView_intervall_clicked(const QModelIndex &index);
-    void on_treeView_files_clicked(const QModelIndex &index);
     void on_actionSave_to_GoldenCheetah_triggered();
     void on_lineEdit_workContent_textChanged(const QString &arg1);
     void on_toolButton_sync_clicked();
@@ -186,7 +187,8 @@ private slots:
     void on_toolButton_downInt_clicked();
     void on_toolButton_addSelect_clicked();
     void on_toolButton_clearSelect_clicked();
-
+    void on_treeView_files_clicked(const QModelIndex &index);
+    void on_actionRefresh_Filelist_triggered();
 };
 
 #endif // MAINWINDOW_H
