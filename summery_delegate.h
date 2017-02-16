@@ -39,8 +39,10 @@ public:
         QStringList sum_values;
         QStringList sportList = settings::get_listValues("Sport");
         QString delimiter = "-";
-        QColor rect_color;
+        QColor rect_color,gradColor;
+        gradColor.setHsv(0,0,180,200);
         int textMargin = 2;
+        int celloffset = 21;
         phase_font.setBold(true);
         phase_font.setPixelSize(settings::get_fontValue("fontBig"));
         date_font.setBold(true);
@@ -48,9 +50,9 @@ public:
         work_font.setBold(false);
         work_font.setPixelSize(settings::get_fontValue("fontSmall"));
 
-        QLinearGradient setGradient(option.rect.topLeft(),option.rect.bottomLeft());
-        setGradient.setSpread(QGradient::RepeatSpread);
-        QColor setColor0,setColor1;
+        QLinearGradient rectGradient;
+        rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
+        rectGradient.setSpread(QGradient::RepeatSpread);
 
         temp_value = index.data(Qt::DisplayRole).toString();
         sum_values = temp_value.split(delimiter);
@@ -59,33 +61,31 @@ public:
         {
             if(sum_values.at(0) == sportList.at(i))
             {
-                rect_color = settings::get_itemColor(sportList.at(i));
-                //setColor1 = settings::get_itemColor(sportList.at(i));
+                rect_color = settings::get_itemColor(sportList.at(i)).toHsv();
                 break;
             }
             else
             {
                 //Summery
-                rect_color = settings::get_itemColor(settings::get_generalValue("sum"));
-                //setColor1 = settings::get_itemColor(settings::get_generalValue("sum"));
+                rect_color = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
             }
         }
 
-        setColor0.setRgb(255,255,255,100);
-        setGradient.setColorAt(0,setColor0);
-        setGradient.setColorAt(1,setColor1);
+        rect_color.setAlpha(225);
+        rectGradient.setColorAt(0,rect_color);
+        rectGradient.setColorAt(1,gradColor);
 
-        QRect rect_head(option.rect.x(),option.rect.y(),option.rect.width(),20);
-        QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(),option.rect.width(),20);
-        painter->setBrush(QBrush(rect_color));
+        QPainterPath rectHead;
+        QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),20);
+        rectHead.addRoundedRect(rect_head,4,4);
+        QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,20);
 
-        painter->fillRect(rect_head,QBrush(rect_color));
-        painter->fillRect(rect_head_text,QBrush(rect_color));
-        painter->drawRect(rect_head);
-        QTextOption headoption(Qt::AlignLeft);
         painter->setPen(Qt::black);
+        painter->setBrush(rectGradient);
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+        painter->drawPath(rectHead);
         painter->setFont(date_font);
-        painter->drawText(rect_head_text,sum_values.at(0),headoption);
+        painter->drawText(rect_head_text,Qt::AlignLeft,sum_values.at(0));
 
         QString labels;
         labels = "Workouts:\n";
@@ -94,15 +94,13 @@ public:
         labels = labels + "Distance(Km):\n";
         labels = labels + "Stress(TSS):";
 
-        QRect rect_label(option.rect.x(),option.rect.y()+21,option.rect.width()/2,option.rect.height()-21);
-        QRect rect_label_text(option.rect.x()+textMargin,option.rect.y()+21,option.rect.width()/2,option.rect.height()-21);
-        painter->setBrush(QBrush(rect_color));
-        painter->fillRect(rect_label,QBrush(rect_color));
-        painter->fillRect(rect_label_text,QBrush(rect_color));
-        QTextOption labeloption(Qt::AlignLeft);
-        painter->setPen(Qt::black);
-        painter->setFont(work_font);
-        painter->drawText(rect_label_text,labels,labeloption);
+        QPainterPath rectSummery;
+        QRect rectSportSum(option.rect.x(),option.rect.y()+celloffset,option.rect.width(),option.rect.height()-celloffset-1);
+        rectSummery.addRoundedRect(rectSportSum,5,5);
+        QRect rectLabel(option.rect.x()+textMargin,option.rect.y()+celloffset+textMargin,(option.rect.width()/2)-textMargin,option.rect.height()-celloffset-textMargin-1);
+
+        rectGradient.setColorAt(0,gradColor);
+        rectGradient.setColorAt(1,rect_color);
 
         if(!sum_values.isEmpty())
         {
@@ -114,13 +112,15 @@ public:
             partValue = partValue + sum_values.at(4) + "\n";
             partValue = partValue + sum_values.at(5) + "\n";
 
-            QRect rect_work(option.rect.x()+(option.rect.width()/2) ,option.rect.y()+21,(option.rect.width()/2)+1,option.rect.height()-21);
-            painter->setBrush(QBrush(rect_color));
-            painter->fillRect(rect_work,QBrush(rect_color));
-            QTextOption workoption(Qt::AlignLeft);
+            QRect rectValues(option.rect.x()+(option.rect.width()/2),option.rect.y()+celloffset+textMargin,(option.rect.width()/2)-textMargin-1,option.rect.height()-+celloffset-textMargin-2);
+
+            painter->setBrush(rectGradient);
+            painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
             painter->setPen(Qt::black);
+            painter->drawPath(rectSummery);
             painter->setFont(work_font);
-            painter->drawText(rect_work,partValue,workoption);
+            painter->drawText(rectLabel,Qt::AlignLeft,labels);
+            painter->drawText(rectValues,Qt::AlignLeft,partValue);
         }
         painter->restore();
     }
