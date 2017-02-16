@@ -1,15 +1,14 @@
 #include "filereader.h"
 #include "settings.h"
 
-fileReader::fileReader(QStandardItemModel *fModel)
+fileReader::fileReader(QStandardItemModel *fModel,QStandardItem *froot)
 {
     fileModel = fModel;
-    this->readJsonFiles();
+    this->readJsonFiles(froot);
 }
 
-void fileReader::readJsonFiles()
+void fileReader::readJsonFiles(QStandardItem *rootItem)
 {
-    QStandardItem *rootItem = fileModel->invisibleRootItem();
     QFile file;
     QString filePath;
     int jsonMaxFiles = settings::get_generalValue("filecount").toInt();
@@ -18,7 +17,6 @@ void fileReader::readJsonFiles()
     directory.setFilter(QDir::Files);
     QFileInfoList fileList = directory.entryInfoList();
     int fileCount = fileList.count() > jsonMaxFiles ? jsonMaxFiles : fileList.count();
-    fileModel->setRowCount(fileCount);
 
     for(int i = 0; i < fileCount; ++i)
     {
@@ -32,7 +30,7 @@ void fileReader::readJsonFiles()
 
 QList<QStandardItem *> fileReader::readFileContent(QString jsonfile,QString filePath)
 {
-    QList<QStandardItem*> listItems;
+    QList<QStandardItem *> listItems;
     QStringList valueList;
 
     valueList = settings::get_listValues("JsonFile");

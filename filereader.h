@@ -8,13 +8,12 @@
 class fileReader : public jsonHandler
 {
 public:
-    fileReader(QStandardItemModel *fModel);
+    fileReader(QStandardItemModel *fModel,QStandardItem *);
 
 private:
     QStandardItemModel *fileModel;
-    void readJsonFiles();
+    void readJsonFiles(QStandardItem *);
     QList<QStandardItem *> readFileContent(QString,QString);
-
     QHash<QString,QString> actInfo;
 };
 
