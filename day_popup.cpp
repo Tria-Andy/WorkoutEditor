@@ -30,6 +30,7 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
 
 day_popup::~day_popup()
 {
+    delete dayModel;
     delete ui;
 }
 
@@ -42,81 +43,60 @@ void day_popup::show_workouts(QDate w_date,schedule *schedP)
     scheduleProxy->setFilterKeyColumn(1);
     scheduleProxy->sort(2);
     int workCount = scheduleProxy->rowCount();
-    int col_count = (workCount*3)-1;
 
     if(workCount == 0)
     {
         ui->toolButton_edit->setEnabled(false);
         return;
     }
-    if(workCount == 1) this->setFixedWidth(400);
-    if(workCount > 1 ) this->setFixedWidth(300*workCount);
 
-    ui->label_weekinfo->setText(workoutDate + " - Phase: " + schedP->get_weekPhase(w_date) + " - Workouts: " + QString::number(workCount) );
-
-    QStringList work_list;
-    work_list << "Workout:" << "Sport:" << "Code:" << "Title:" << "Duration:" << "Distance:" << "Stress:" << "Pace:";
-    int worklistCount = work_list.count();
-    int fontsize = 10;
-    int clabel,cvalue;
-
-    QTextCursor cursor = ui->textBrowser_work->textCursor();
-    cursor.beginEditBlock();
-
-    QTextTableFormat tableFormat;
-    tableFormat.setAlignment(Qt::AlignAbsolute);
-    tableFormat.setBackground(Qt::white);
-    tableFormat.setCellPadding(1);
-    tableFormat.setCellSpacing(1);
-    tableFormat.setBorder(0);
-    QVector<QTextLength> constraints;
-        constraints << QTextLength(QTextLength::FixedLength,70)
-                    << QTextLength(QTextLength::FixedLength,200)
-                    << QTextLength(QTextLength::FixedLength,20)
-                    << QTextLength(QTextLength::FixedLength,70)
-                    << QTextLength(QTextLength::FixedLength,200)
-                    << QTextLength(QTextLength::FixedLength,20)
-                    << QTextLength(QTextLength::FixedLength,70)
-                    << QTextLength(QTextLength::FixedLength,200);
-
-    tableFormat.setColumnWidthConstraints(constraints);
-
-    QTextTable *table = cursor.insertTable(worklistCount,col_count,tableFormat);
-    QTextCharFormat format = cursor.charFormat();
-    format.setFontPointSize(fontsize);
-
-    QTextCharFormat boldFormat = format;
-    boldFormat.setFontWeight(QFont::Bold);
-
-    QTextTableCell cell;
-    QTextCursor cellcursor;
-
-    for(int i = 0; i < workCount;++i)
+    if(workCount > 1)
     {
-        for(int x = 0; x < worklistCount; ++x)
-        {
-            clabel = i*2;
-            cvalue = clabel+1;
-            cell = table->cellAt(x,clabel+i);
-            cellcursor = cell.firstCursorPosition();
-            cellcursor.insertText(work_list.at(x));
+        this->setFixedWidth(280*workCount);
+    }
+    else
+    {
+        this->setFixedWidth(360);
+    }
 
-            cell = table->cellAt(x,cvalue+i);
-            cellcursor = cell.firstCursorPosition();
-            if(x == 7)
+    this->setFixedHeight(275);
+    ui->label_weekinfo->setText(workoutDate + " - Phase: " + schedP->get_weekPhase(w_date));
+    QStringList workList,workoutHeader;
+    workList << "Workout:" << "Sport:" << "Code:" << "Title:" << "Duration:" << "Distance:" << "Stress:" << "Pace:";
+
+    for(int i = 1; i <= workCount; ++i)
+    {
+        workoutHeader << "Workout " + QString::number(i);
+    }
+
+    int worklistCount = workList.count();
+    dayModel = new QStandardItemModel(worklistCount,workCount);
+    dayModel->setVerticalHeaderLabels(workList);
+    dayModel->setHorizontalHeaderLabels(workoutHeader);
+
+    ui->tableView_day->setModel(dayModel);
+    ui->tableView_day->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableView_day->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_day->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_day->horizontalHeader()->setSectionsClickable(false);
+    ui->tableView_day->verticalHeader()->setSectionsClickable(false);
+    ui->tableView_day->verticalHeader()->setFixedWidth(100);
+    ui->tableView_day->setItemDelegate(&daypop_del);
+
+
+    for(int col = 0; col < workCount; ++col)
+    {
+        for(int row = 0; row < workList.count(); ++row)
+        {
+            dayModel->setData(dayModel->index(row,col,QModelIndex()),scheduleProxy->data(scheduleProxy->index(col,row+2)).toString());
+            if(row == 7)
             {
-                cellcursor.insertText(this->get_workout_pace(scheduleProxy->data(scheduleProxy->index(i,7)).toDouble(),
-                                                             QTime::fromString(scheduleProxy->data(scheduleProxy->index(i,6)).toString(),"hh:mm:ss"),
-                                                             scheduleProxy->data(scheduleProxy->index(i,3)).toString(),true));
-            }
-            else
-            {
-                cellcursor.insertText(scheduleProxy->data(scheduleProxy->index(i,x+2)).toString());
+                dayModel->setData(dayModel->index(row,col,QModelIndex()),this->get_workout_pace(scheduleProxy->data(scheduleProxy->index(col,7)).toDouble(),
+                                                                                                QTime::fromString(scheduleProxy->data(scheduleProxy->index(col,6)).toString(),"hh:mm:ss"),
+                                                                                                scheduleProxy->data(scheduleProxy->index(col,3)).toString(),true));
             }
         }
     }
-    table->insertRows(table->rows(),1);
-    cursor.endEditBlock();
 }
 
 void day_popup::on_toolButton_close_clicked()

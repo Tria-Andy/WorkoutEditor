@@ -21,12 +21,10 @@
 
 #include <QtGui>
 #include <QDialog>
-#include <QTimeEdit>
-#include <QTextBrowser>
 #include <QSortFilterProxyModel>
-#include <QVBoxLayout>
-#include <QPushButton>
+#include <QStandardItemModel>
 #include "dialog_edit.h"
+#include "del_daypop.h"
 #include "schedule.h"
 #include "settings.h"
 #include "calculation.h"
@@ -50,6 +48,8 @@ private slots:
 private:
     Ui::day_popup *ui;
     schedule *workSched;
+    del_daypop daypop_del;
+    QStandardItemModel *dayModel;
     void show_workouts(QDate,schedule*);
 
 };

@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>646</width>
-    <height>240</height>
+    <height>250</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>240</height>
+    <height>250</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>240</height>
+    <height>250</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -150,24 +150,12 @@
     </widget>
    </item>
    <item>
-    <widget class="QTextBrowser" name="textBrowser_work">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>3</verstretch>
-      </sizepolicy>
+    <widget class="QTableView" name="tableView_day">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SingleSelection</enum>
      </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
+     <property name="showGrid">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
