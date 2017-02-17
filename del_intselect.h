@@ -20,11 +20,51 @@ public:
     int intType;
     QString sport;
 
+    virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        painter->save();
+        const QAbstractItemModel *model = index.model();
+        QColor rectColor,gradColor;
+        gradColor.setHsv(0,0,180,200);
+        bool setEdit;
+
+        QLinearGradient rectGradient;
+        rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
+        rectGradient.setSpread(QGradient::RepeatSpread);
+
+        QPainterPath rectValue;
+        QRect rectBack(option.rect.x(),option.rect.y(), option.rect.width(),option.rect.height());
+        rectValue.addRoundedRect(rectBack,1,1);
+        QRect rectText(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
+        setEdit = model->data(model->index(index.row(),1,QModelIndex())).toBool();
+
+        if(setEdit)
+        {
+            rectColor.setHsv(120,180,200,200);
+            painter->setPen(Qt::black);
+        }
+        else
+        {
+            rectColor.setHsv(0,180,220,200);
+            painter->setPen(Qt::darkRed);
+        }
+        rectGradient.setColorAt(0,rectColor);
+        rectGradient.setColorAt(1,gradColor);
+
+        painter->setBrush(rectGradient);
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+        painter->drawPath(rectValue);
+        painter->drawText(rectText,Qt::AlignLeft | Qt::AlignVCenter,index.data().toString());
+        painter->restore();
+    }
+
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         Q_UNUSED(option)
+        const QAbstractItemModel *model = index.model();
+        bool setEdit = model->data(model->index(index.row(),1,QModelIndex())).toBool();
 
-        if(index.row() == 0)
+        if(index.row() == 0 && setEdit)
         {
             QLineEdit *editor = new QLineEdit(parent);
             editor->setFrame(true);
@@ -33,13 +73,13 @@ public:
 
         if(intType == SwimLap)
         {
-            if(index.row() == 1)
+            if(index.row() == 1 && setEdit)
             {
                 QComboBox *editor = new QComboBox(parent);
                 editor->setFrame(true);
                 return editor;
             }
-            if(index.row() == 3 || index.row() == 6)
+            if((index.row() == 3 || index.row() == 6) && setEdit)
             {
                 QSpinBox *editor = new QSpinBox(parent);
                 editor->setMinimum(0);
@@ -50,7 +90,7 @@ public:
         }
         if(intType == Interval)
         {
-            if(index.row() == 1)
+            if(index.row() == 1 && setEdit)
             {
                 QSpinBox *editor = new QSpinBox(parent);
                 editor->setMinimum(0);
@@ -58,7 +98,7 @@ public:
                 editor->setFrame(true);
                 return editor;
             }
-            if(index.row() == 2)
+            if(index.row() == 2 && setEdit)
             {
                 QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
                 editor->setMinimum(0.0);

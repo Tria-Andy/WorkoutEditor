@@ -68,13 +68,11 @@ public:
                 painter->setPen(Qt::black);
             }
         }
-
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
         painter->fillRect(option.rect,QBrush(setColor));
-
 
         QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
         painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
-        //painter->setFont(cFont);
         painter->restore();
     }
 
