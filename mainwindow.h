@@ -126,7 +126,7 @@ private:
     void selectAvgValues(QModelIndex,int);
     void setCurrentTreeIndex(bool);
     void init_editorViews();
-    void init_controlStyleSheets(QString);
+    void init_controlStyleSheets();
     void update_infoModel();
     void fill_WorkoutContent();
     void unselect_intRow(bool);

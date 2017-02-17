@@ -32,10 +32,13 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent,standardWorkouts *p_worko
     modelHeader << "Phase" << "Level" << "Threshold %" << "Value" << "Time" << "TSS" << "Distance" << "Repeats";
     ui->treeWidget_intervall->setHeaderLabels(modelHeader);
     ui->treeWidget_intervall->header()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->treeWidget_intervall->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
     ui->treeWidget_intervall->setAcceptDrops(true);
     ui->treeWidget_intervall->setDragEnabled(true);
     ui->treeWidget_intervall->setDragDropMode(QAbstractItemView::DragDrop);
     ui->treeWidget_intervall->setEnabled(true);
+    ui->treeWidget_intervall->setItemDelegate(&workTree_del);
+    workTree_del.groupList = groupList;
 
     ui->frame_edit->setVisible(false);
     ui->listView_values->setModel(valueModel);
@@ -95,6 +98,11 @@ void Dialog_workCreator::get_workouts(QString sport)
 
     ui->listView_workouts->setModel(listModel);
     ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    QColor sportColor = settings::get_itemColor(sport);
+    QString sportBack = "rgb("+QString::number(sportColor.red())+","+QString::number(sportColor.green())+","+QString::number(sportColor.blue())+",35%)";
+    QString actBackground = "background: "+sportBack;
+    ui->listView_workouts->setStyleSheet(actBackground);
 }
 
 void Dialog_workCreator::open_stdWorkout(QString workID)
@@ -161,7 +169,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
         }
 
         QTreeWidgetItem *item = new QTreeWidgetItem(valueList);
-        this->set_backColor(item);
+
         parentItem = stepProxy->data(stepProxy->index(i,8)).toString();
 
         if(parentItem.contains(isGroup) || parentItem.contains(isSeries))
@@ -385,24 +393,9 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
         item->setData(0,Qt::EditRole,itemName);
         item->setData(7,Qt::EditRole,2);
     }
-    this->set_backColor(item);
     ui->treeWidget_intervall->expandAll();
+    ui->treeWidget_intervall->setTreePosition(-1);
     this->set_plotModel();
-}
-
-void Dialog_workCreator::set_backColor(QTreeWidgetItem *item)
-{
-    QColor itemColor;
-    QString itemName = item->data(0,Qt::DisplayRole).toString();
-
-    itemColor = settings::get_itemColor(item->data(1,Qt::DisplayRole).toString());
-    if(itemName.contains(isGroup)) itemColor = QColor(Qt::darkGray);
-    if(itemName.contains(isSeries)) itemColor = QColor(Qt::lightGray);
-
-    for(int i = 0; i < item->columnCount(); ++i)
-    {
-        item->setBackground(i,QBrush(itemColor));
-    }
 }
 
 void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
@@ -474,7 +467,6 @@ void Dialog_workCreator::set_itemData(QTreeWidgetItem *item)
             item->setData(i,Qt::EditRole,valueModel->data(valueModel->index(i,0)));
         }
     }
-    this->set_backColor(item);
 }
 
 void Dialog_workCreator::clearIntTree()

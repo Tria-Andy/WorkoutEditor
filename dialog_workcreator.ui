@@ -211,7 +211,7 @@
             <string>Clear</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="resources.qrc">
              <normaloff>:/images/icons/No.png</normaloff>:/images/icons/No.png</iconset>
            </property>
           </widget>
@@ -341,7 +341,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="resources.qrc">
              <normaloff>:/images/icons/Save.png</normaloff>:/images/icons/Save.png</iconset>
            </property>
            <property name="iconSize">
@@ -373,7 +373,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="resources.qrc">
              <normaloff>:/images/icons/Copy.png</normaloff>:/images/icons/Copy.png</iconset>
            </property>
            <property name="iconSize">
@@ -405,7 +405,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="resources.qrc">
              <normaloff>:/images/icons/Erase.png</normaloff>:/images/icons/Erase.png</iconset>
            </property>
            <property name="iconSize">
@@ -706,6 +706,9 @@
                  <property name="frameShape">
                   <enum>QFrame::Panel</enum>
                  </property>
+                 <property name="editTriggers">
+                  <set>QAbstractItemView::CurrentChanged|QAbstractItemView::EditKeyPressed</set>
+                 </property>
                 </widget>
                </item>
                <item>
@@ -750,7 +753,7 @@
                      <string>...</string>
                     </property>
                     <property name="icon">
-                     <iconset>
+                     <iconset resource="resources.qrc">
                       <normaloff>:/images/icons/Up.png</normaloff>:/images/icons/Up.png</iconset>
                     </property>
                     <property name="iconSize">
@@ -785,7 +788,7 @@
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset>
+                     <iconset resource="resources.qrc">
                       <normaloff>:/images/icons/Down.png</normaloff>:/images/icons/Down.png</iconset>
                     </property>
                     <property name="iconSize">
@@ -868,6 +871,9 @@
                  <property name="frameShape">
                   <enum>QFrame::Panel</enum>
                  </property>
+                 <property name="editTriggers">
+                  <set>QAbstractItemView::CurrentChanged|QAbstractItemView::EditKeyPressed</set>
+                 </property>
                  <property name="dragEnabled">
                   <bool>true</bool>
                  </property>
@@ -898,6 +904,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

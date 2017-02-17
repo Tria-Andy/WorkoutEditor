@@ -975,10 +975,8 @@ void MainWindow::loadfile(const QString &filename)
         settings::set_act_isload(true);
         ui->actionSelect_File->setEnabled(false);
         ui->actionReset->setEnabled(true);
-        intSelect_del.sport = tree_del.sport = curr_activity->get_sport();
+        intSelect_del.sport = tree_del.sport = avgSelect_del.sport = curr_activity->get_sport();
         this->set_menuItems(true,false);
-
-
 
         if(curr_activity->get_sport() == settings::isRun || curr_activity->get_sport() == settings::isBike)
         {
@@ -1013,6 +1011,7 @@ void MainWindow::init_editorViews()
     ui->tableView_actInfo->horizontalHeader()->setVisible(false);
     ui->tableView_actInfo->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_actInfo->verticalHeader()->setSectionsClickable(false);
+    ui->tableView_actInfo->setItemDelegate(&avgSelect_del);
     ui->tableView_actInfo->setFixedHeight(infoHeader.count()*25);
 
     ui->treeView_intervall->setModel(curr_activity->intTreeModel);
@@ -1032,6 +1031,7 @@ void MainWindow::init_editorViews()
     ui->tableView_selectInt->verticalHeader()->setMinimumSectionSize(20);
     ui->tableView_selectInt->verticalHeader()->setSectionsClickable(false);
     ui->tableView_selectInt->horizontalHeader()->setVisible(false);
+    ui->tableView_selectInt->hideColumn(1);
     ui->tableView_selectInt->setItemDelegate(&intSelect_del);
 
     ui->tableView_avgValues->setModel(curr_activity->avgModel);
@@ -1041,18 +1041,17 @@ void MainWindow::init_editorViews()
     ui->tableView_avgValues->verticalHeader()->setFixedWidth(100);
     ui->tableView_avgValues->verticalHeader()->setSectionsClickable(false);
     ui->tableView_avgValues->horizontalHeader()->setVisible(false);
-    this->init_controlStyleSheets(curr_activity->get_sport());
+    ui->tableView_avgValues->setItemDelegate(&avgSelect_del);
+    this->init_controlStyleSheets();
 }
 
-void MainWindow::init_controlStyleSheets(QString sport)
+void MainWindow::init_controlStyleSheets()
 {
     QString buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00ff00, stop: 0.5 #00d300,stop: 1 #009800)}";
-    QColor sportColor = settings::get_itemColor(sport);
-    QString sportBack = "rgb("+QString::number(sportColor.red())+","+QString::number(sportColor.green())+","+QString::number(sportColor.blue())+",35%)";
     QString viewBackground = "background-color: #e6e6e6";
-    QString actBackground = "background: "+sportBack;
 
-    ui->tableView_actInfo->setStyleSheet(actBackground);
+    ui->tableView_selectInt->setStyleSheet(viewBackground);
+    ui->tableView_avgValues->setStyleSheet(viewBackground);
     ui->treeView_intervall->setStyleSheet(viewBackground);
     ui->treeView_files->setStyleSheet(viewBackground);
     ui->tableView_cal->setStyleSheet(viewBackground);
@@ -1102,11 +1101,13 @@ void MainWindow::setSelectedIntRow(QModelIndex index)
         {
             isInt = false;
         }
+        curr_activity->set_editRow(lapIdent,isInt);
         curr_activity->showSwimLap(isInt);
     }
     else
     {
         ui->horizontalSlider_factor->setEnabled(true);
+        curr_activity->set_editRow(lapIdent,isInt);
         curr_activity->showInterval(true);
     }
 

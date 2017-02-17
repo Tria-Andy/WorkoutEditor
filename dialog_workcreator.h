@@ -10,6 +10,7 @@
 #include "settings.h"
 #include "standardworkouts.h"
 #include "del_workcreator.h"
+#include "del_workcreatoredit.h"
 #include "calculation.h"
 
 namespace Ui {
@@ -52,7 +53,8 @@ private:
     QStringList modelHeader,phaseList,groupList,levelList;
     standardWorkouts *stdWorkouts;
     QTreeWidgetItem *currentItem;
-    del_workcreator edit_del;
+    del_workcreator workTree_del;
+    del_workcreatoredit edit_del;
     double time_sum,dist_sum,stress_sum;
     int currThres,threshold_pace,current_pace,threshold_power,current_power;
     QVector<bool> editRow;
@@ -76,7 +78,6 @@ private:
     void set_plotModel();
     void add_to_plot(QTreeWidgetItem *item,int);
     void set_plotGraphic(int);
-    void set_backColor(QTreeWidgetItem *item);
     void save_workout();
     void save_workout_values(QStringList,QStandardItemModel *);
 };
