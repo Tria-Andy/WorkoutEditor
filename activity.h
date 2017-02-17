@@ -42,6 +42,7 @@ private:
     double swim_track,swim_cv,swim_sri,polishFactor,hf_threshold,hf_max;
     int distFactor,avgCounter,pace_cv,zone_count,move_time,swim_pace,hf_avg;
     bool isSwim,isBike,isRun,isTria,isStrength,changeRowCount,isUpdated,selectInt;
+    QVector<bool> editRow;
 
     //Functions
     void readJsonFile(QString,bool);
@@ -72,6 +73,7 @@ public:
     explicit Activity(QString jsonfile = QString(),bool intAct = false);
 
     void set_selectedItem(QItemSelectionModel*);
+    void set_editRow(QString,bool);
     void showSwimLap(bool);
     void showInterval(bool);
     void updateIntModel(int,int);

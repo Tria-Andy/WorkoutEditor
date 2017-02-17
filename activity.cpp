@@ -78,7 +78,7 @@ void Activity::prepareData()
     avgHeader.insert(1,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance:" << "Watts:" << "CAD:");
     intTreeModel = new QStandardItemModel;
     selItemModel = new QStandardItemModel;
-    selItemModel->setColumnCount(1);
+    selItemModel->setColumnCount(2);
     avgModel = new QStandardItemModel;
     avgModel->setColumnCount(1);
 
@@ -270,7 +270,7 @@ void Activity::prepareData()
     {
         distFactor = 1;
 
-        if(curr_sport == settings::isBike)
+        if(isBike)
         {
             threshold = settings::get_thresValue("bikepower");
             this->fillRangeLevel(threshold,false);
@@ -576,6 +576,33 @@ void Activity::set_selectedItem(QItemSelectionModel *treeSelect)
         selItem.insert(i,treeSelect->selectedRows(i).at(0));
     }
 }
+void Activity::set_editRow(QString lapIdent,bool isInt)
+{
+    editRow.clear();
+
+    if(isSwim)
+    {
+        if(isInt && lapIdent.contains(breakName))
+        {
+           editRow << 1 << 1 << 1 << 0 << 0 << 0;
+        }
+        else
+        {
+            if(isInt)
+            {
+                editRow << 1 << 1 << 0 << 0 << 0 << 0;
+            }
+            else
+            {
+                editRow << 1 << 1 << 0 << 1 << 0 << 0 << 1;
+            }
+        }
+    }
+    else
+    {
+        if(isInt) editRow << 1 << 1 << 1 << 0 << 0 << 0;
+    }
+}
 
 void Activity::showSwimLap(bool isInt)
 {
@@ -612,6 +639,11 @@ void Activity::showSwimLap(bool isInt)
         selItemModel->setData(selItemModel->index(5,0), intTreeModel->data(selItem.value(7)).toDouble());
         selItemModel->setData(selItemModel->index(6,0), intTreeModel->data(selItem.value(8)).toString());
     }
+
+    for(int i = 0; i < editRow.count(); ++i)
+    {
+        selItemModel->setData(selItemModel->index(i,1),editRow[i]);
+    }
 }
 
 void Activity::showInterval(bool isInt)
@@ -626,6 +658,11 @@ void Activity::showInterval(bool isInt)
     selItemModel->setData(selItemModel->index(3,0),intTreeModel->data(selItem.value(1)).toString());
     selItemModel->setData(selItemModel->index(4,0),intTreeModel->data(selItem.value(5)).toString());
     selItemModel->setData(selItemModel->index(5,0),intTreeModel->data(selItem.value(6)).toString());
+
+    for(int i = 0; i < editRow.count(); ++i)
+    {
+        selItemModel->setData(selItemModel->index(i,1),editRow[i]);
+    }
 }
 
 void Activity::updateRow_intTree(QItemSelectionModel *treeSelect)
@@ -1471,7 +1508,7 @@ void Activity::set_avgValues(int counter,int factor)
         avgModel->setData(avgModel->index(0,0),avgCounter);
         avgModel->setData(avgModel->index(1,0),this->set_time(round(avgValues[1]/avgCounter)));
         avgModel->setData(avgModel->index(2,0),this->set_time(round(avgValues[2]/avgCounter)));
-        avgModel->setData(avgModel->index(3,0),avgValues[3]/avgCounter);
+        avgModel->setData(avgModel->index(3,0),this->set_doubleValue(avgValues[3]/avgCounter,true));
     }
     else
     {
