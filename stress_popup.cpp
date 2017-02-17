@@ -229,6 +229,12 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     ui->widget_stressPlot->legend->setFillOrder(QCPLegend::foColumnsFirst);
     ui->widget_stressPlot->plotLayout()->setRowStretchFactor(1,0.0001);
 
+    QTime time(0,0,0);
+    QDateTime rStart(rangeStart);
+    rStart.setTime(time);
+    QDateTime rStop(rangeEnd);
+    rStop.setTime(time);
+
     QCPRange xRange(QCPAxisTickerDateTime::dateTimeToKey(rangeStart.addDays(-1)),QCPAxisTickerDateTime::dateTimeToKey(rangeEnd.addDays(1)));
 
     QFont lineFont;
@@ -257,10 +263,10 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
         if(tsbMinMax[1] < yTSB[i]) tsbMinMax[1] = yTSB[i];
     }
 
-    QSharedPointer<QCPAxisTickerDateTime> dateTimeTicker(new QCPAxisTickerDateTime);
-    dateTimeTicker->setDateTimeSpec(Qt::UTC);
-    dateTimeTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
-    dateTimeTicker->setDateTimeFormat("dd.MM");
+    QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+    dateTicker->setDateTimeSpec(Qt::UTC);
+    dateTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
+    dateTicker->setDateTimeFormat("dd.MM");
 
     QSharedPointer<QCPAxisTickerFixed> dayTicker(new QCPAxisTickerFixed);
     dayTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
@@ -284,13 +290,13 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
         ui->widget_stressPlot->xAxis2->setLabel("Days");
     }
 
-    dateTimeTicker->setTickCount(xTickCount);
+    dateTicker->setTickCount(xTickCount);
     dayTicker->setTickCount(dayCount);
 
     ui->widget_stressPlot->yAxis->setRange(0,stressMax+10);
     ui->widget_stressPlot->yAxis2->setRange(tsbMinMax[0]-5,tsbMinMax[1]+5);
     ui->widget_stressPlot->xAxis->setRange(xRange);
-    ui->widget_stressPlot->xAxis->setTicker(dateTimeTicker);
+    ui->widget_stressPlot->xAxis->setTicker(dateTicker);
     ui->widget_stressPlot->xAxis2->setRange(0,dayCount);
     ui->widget_stressPlot->xAxis2->setTicker(dayTicker);
 
