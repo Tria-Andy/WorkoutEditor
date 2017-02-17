@@ -89,7 +89,8 @@ HEADERS  += mainwindow.h \
     del_avgselect.h \
     filereader.h \
     del_filelist.h \
-    del_daypop.h
+    del_daypop.h \
+    del_workcreatoredit.h
 
 FORMS    += mainwindow.ui \
     dialog_add.ui \
