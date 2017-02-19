@@ -35,7 +35,10 @@ QList<QStandardItem *> fileReader::readFileContent(QString jsonfile,QString file
 
     valueList = settings::get_listValues("JsonFile");
     QDateTime workDateTime;
-    workDateTime.setTimeSpec(Qt::TimeZone);
+    workDateTime.setTimeSpec(Qt::UTC);
+
+    QDateTime localTime(QDateTime::currentDateTime());
+    localTime.setTimeSpec(Qt::LocalTime);
 
     QJsonObject rideObject,tagObject;
     QJsonDocument d = QJsonDocument::fromJson(jsonfile.toUtf8());
@@ -47,7 +50,7 @@ QList<QStandardItem *> fileReader::readFileContent(QString jsonfile,QString file
     tagObject = rideObject.value(QString("TAGS")).toObject();
     this->fill_qmap(&actInfo,&tagObject);
 
-    workDateTime = QDateTime::fromString(actInfo.value("STARTTIME"),"yyyy/MM/dd hh:mm:ss UTC").addSecs(workDateTime.offsetFromUtc());
+    workDateTime = QDateTime::fromString(actInfo.value("STARTTIME"),"yyyy/MM/dd hh:mm:ss UTC").addSecs(localTime.offsetFromUtc());
 
     listItems << new QStandardItem(QDate().shortDayName(workDateTime.date().dayOfWeek()));
     listItems << new QStandardItem(workDateTime.toString("dd.MM.yyyy hh:mm:ss"));
