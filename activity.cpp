@@ -90,6 +90,7 @@ void Activity::prepareData()
 
     int sampCount = sampleModel->rowCount();
     int intModelCount = intModel->rowCount();
+    int intStart,intStop;
     int avgHF = 0;
     int posHF = sampList.indexOf("HR");
     int lapCount = 1;
@@ -139,7 +140,6 @@ void Activity::prepareData()
         pace_cv = temp_cv;
         int intCounter = 1;
         int breakCounter = 1;
-        int intStart,intStop;
         int swimLap = 0;
 
         swimModel = new QStandardItemModel(xdataModel->rowCount(),10);
@@ -293,6 +293,8 @@ void Activity::prepareData()
             intModel->setData(intModel->index(row,3),this->get_int_distance(row));
             intModel->setData(intModel->index(row,4),lapCount);
             intModel->setData(intModel->index(row,5),"Int-"+QString::number(row));
+            intStart = intModel->data(intModel->index(row,1)).toInt();
+            intStop = intModel->data(intModel->index(row,1)).toInt();
         }
     }
 
@@ -910,15 +912,27 @@ void Activity::recalcIntTree()
     }
     else
     {
+        double msec = 0;
+        double lapDist = 0;
         for(int row = 0; row < rowCount; ++row)
         {
            startTime = this->get_timesec(intTreeModel->data(intTreeModel->index(row,2)).toString());
            intTime = this->get_timesec(intTreeModel->data(intTreeModel->index(row,1)).toString());
-           workDist = workDist + intTreeModel->data(intTreeModel->index(row,4)).toDouble();
+           lapDist = intTreeModel->data(intTreeModel->index(row,4)).toDouble();
+           msec = lapDist / intTime;
+
+           if(row < rowCount-1)
+           {
+                workDist = workDist + (lapDist + msec);
+           }
+           else
+           {
+                workDist = workDist + lapDist;
+           }
 
            intTreeModel->setData(intTreeModel->index(row,1),this->set_time(intTime));
            intTreeModel->setData(intTreeModel->index(row,2),this->set_time(startTime));
-           intTreeModel->setData(intTreeModel->index(row,3),this->set_doubleValue(workDist,true));
+           intTreeModel->setData(intTreeModel->index(row,3),this->set_doubleValue(workDist,true)); 
         }
     }
     ride_info.insert("Distance",QString::number(workDist/distFactor));
@@ -1125,13 +1139,11 @@ void Activity::updateSampleModel(int rowcount)
     }
     else
     {
-        double workDist = 0;
         for(int intRow = 0; intRow < intModel->rowCount(); ++intRow)
         {
             intStart = intModel->data(intModel->index(intRow,1)).toInt();
             intStop = intModel->data(intModel->index(intRow,2)).toInt();
-            workDist = workDist + intModel->data(intModel->index(intRow,3)).toDouble();
-            msec = floor((intModel->data(intModel->index(intRow,3)).toDouble() / (intStop-intStart))*100000.0)/100000.0;
+            msec = intModel->data(intModel->index(intRow,3)).toDouble() / (intStop-intStart);
 
             if(isBike || isRun)
             {
@@ -1148,7 +1160,6 @@ void Activity::updateSampleModel(int rowcount)
                         if(isBike) calc_cadence[intSec] = sampleModel->data(sampleModel->index(intSec,3,QModelIndex())).toDouble();
                     }
                 }
-                new_dist[intStop] = workDist;
             }
         }
     }
