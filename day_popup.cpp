@@ -25,8 +25,12 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    ui->frame_edit->hide();
+    popupMode = false;
     this->show_workouts(w_date,p_sched);
 }
+
+enum {SHOW,EDIT};
 
 day_popup::~day_popup()
 {
@@ -56,10 +60,10 @@ void day_popup::show_workouts(QDate w_date,schedule *schedP)
     }
     else
     {
-        this->setFixedWidth(360);
+        this->setFixedWidth(600);
     }
 
-    this->setFixedHeight(275);
+    this->setFixedHeight(260);
     ui->label_weekinfo->setText(workoutDate + " - Phase: " + schedP->get_weekPhase(w_date));
     QStringList workList,workoutHeader;
     workList << "Workout:" << "Sport:" << "Code:" << "Title:" << "Duration:" << "Distance:" << "Stress:" << "Pace:";
@@ -106,5 +110,18 @@ void day_popup::on_toolButton_close_clicked()
 
 void day_popup::on_toolButton_edit_clicked()
 {
-    accept();
+    if(popupMode)
+    {
+        popupMode = SHOW;
+        this->setFixedHeight(260);
+        ui->frame_edit->hide();
+        ui->tableView_day->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    }
+    else
+    {
+        popupMode = EDIT;
+        this->setFixedHeight(325);
+        ui->frame_edit->show();
+        ui->tableView_day->setEditTriggers(QAbstractItemView::CurrentChanged);
+    }
 }

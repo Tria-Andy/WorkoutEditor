@@ -50,6 +50,8 @@ private:
     schedule *workSched;
     del_daypop daypop_del;
     QStandardItemModel *dayModel;
+    bool popupMode;
+
     void show_workouts(QDate,schedule*);
 
 };
