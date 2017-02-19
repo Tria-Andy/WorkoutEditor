@@ -39,5 +39,6 @@
         <file>icons/Calendar.png</file>
         <file>icons/Previous.png</file>
         <file>icons/Expand.png</file>
+        <file>icons/Delete.png</file>
     </qresource>
 </RCC>
