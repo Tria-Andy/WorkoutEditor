@@ -157,7 +157,7 @@ QString jsonHandler::readJsonContent(QString jsonfile)
     return tagData.value("Sport");
 }
 
-void jsonHandler::init_actModel(QString tagName, QMap<int,QString> *mapValues,QStandardItemModel *model, QStringList *list,int offSet)
+void jsonHandler::init_actModel(QString tagName, QMap<int,QString> *mapValues,QStandardItemModel *model, QStringList *list,int addCol)
 {
     QStringList valueList;
     QJsonArray itemArray;
@@ -168,7 +168,7 @@ void jsonHandler::init_actModel(QString tagName, QMap<int,QString> *mapValues,QS
     this->fill_keyList(list,mapValues,&valueList);
 
     model->setRowCount(itemArray.count());
-    model->setColumnCount(list->count()+offSet);
+    model->setColumnCount(list->count()+addCol);
 
     this->fill_model(model,&itemArray,list);
 }
