@@ -76,7 +76,7 @@ public:
         if(index.row() == 0 && index.column() == selCol)
         {
             QTimeEdit *editor = new QTimeEdit(parent);
-            editor->setDisplayFormat("mm:ss");
+            editor->setDisplayFormat("hh:mm");
             editor->setFrame(true);
             return editor;
         }
@@ -131,7 +131,8 @@ public:
         if(index.row() == 0)
         {
             QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
-            timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"mm:ss"));
+            timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"hh:mm"));
+            timeEdit->
         }
         if(index.row() == 1 && addWork)
         {
@@ -178,7 +179,7 @@ public:
             QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
             QTime value = timeEdit->time();
             timeEdit->interpretText();
-            model->setData(index,value.toString("mm:ss"), Qt::EditRole);
+            model->setData(index,value.toString("hh:mm"), Qt::EditRole);
         }
         if(index.row() == 1) //Sport
         {
