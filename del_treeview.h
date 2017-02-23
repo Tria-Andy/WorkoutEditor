@@ -14,8 +14,6 @@ class del_treeview : public QStyledItemDelegate
 public:
     explicit del_treeview(QObject *parent = 0) : QStyledItemDelegate(parent) {}
 
-    QString sport;
-
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
@@ -41,23 +39,21 @@ public:
             if(lapName.contains(levels.at(i))) levelName = levels.at(i);
         }
 
-        QLinearGradient setGradient(option.rect.topLeft(),option.rect.bottomLeft());
-        setGradient.setColorAt(0,QColor(255,255,255,100));
-        setGradient.setSpread(QGradient::RepeatSpread);
+        QLinearGradient rowGradient(option.rect.topLeft(),option.rect.bottomLeft());
+        rowGradient.setSpread(QGradient::RepeatSpread);
 
-        QColor setColor;
+        QColor rowColor,gradColor;
+        gradColor.setHsv(0,0,200,150);
 
-        if(option.state & QStyle::State_Selected)
+        if(option.state & (QStyle::State_Selected | QStyle::State_MouseOver))
         {
-            setColor.setRgb(0,0,255,100);
-            setGradient.setColorAt(1,setColor);
-            painter->fillRect(option.rect,setGradient);
+            rowColor.setHsv(240,255,255,180);
             painter->setPen(Qt::white);
         }
         else
         {
-            setColor = settings::get_itemColor(levelName);
-            setColor.setAlpha(75);
+            rowColor = settings::get_itemColor(levelName).toHsv();
+            rowColor.setAlpha(125);
 
             if(lapName == breakName)
             {
@@ -68,10 +64,13 @@ public:
                 painter->setPen(Qt::black);
             }
         }
-        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-        painter->fillRect(option.rect,QBrush(setColor));
+        rowGradient.setColorAt(0,gradColor);
+        rowGradient.setColorAt(1,rowColor);
 
-        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+        painter->fillRect(option.rect,rowGradient);
+
+        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
         painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->restore();
     }

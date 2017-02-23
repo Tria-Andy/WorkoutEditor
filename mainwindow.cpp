@@ -967,7 +967,7 @@ void MainWindow::loadfile(const QString &filename)
 
         ui->actionSelect_File->setEnabled(false);
         ui->actionReset->setEnabled(true);
-        intSelect_del.sport = tree_del.sport = avgSelect_del.sport = curr_activity->get_sport();
+        intSelect_del.sport = avgSelect_del.sport = curr_activity->get_sport();
         this->set_menuItems(true,false);
 
         if(curr_activity->get_sport() == settings::isRun || curr_activity->get_sport() == settings::isBike)

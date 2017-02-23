@@ -35,7 +35,7 @@ public:
 
         gradColor.setHsv(0,0,200,150);
 
-        if(option.state & QStyle::State_Selected)
+        if(option.state & (QStyle::State_Selected | QStyle::State_MouseOver))
         {
             itemColor.setHsv(240,255,255,180);
             painter->setPen(Qt::white);
