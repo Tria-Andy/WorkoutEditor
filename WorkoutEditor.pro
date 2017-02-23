@@ -15,7 +15,7 @@ TEMPLATE = app
 #Application version
 VERSION_MAJOR = 1
 VERSION_MINOR = 2
-VERSION_BUILD = 7
+VERSION_BUILD = 8
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
        "VERSION_BUILD=$$VERSION_BUILD"
@@ -27,8 +27,6 @@ VERSION_PE_HEADER = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
 SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
-    dialog_add.cpp \
-    dialog_edit.cpp \
     dialog_export.cpp \
     dialog_workouts.cpp \
     activity.cpp \
@@ -55,8 +53,6 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     calendar_delegate.h \
     settings.h \
-    dialog_add.h \
-    dialog_edit.h \
     dialog_export.h \
     dialog_workouts.h \
     activity.h \
@@ -93,8 +89,6 @@ HEADERS  += mainwindow.h \
     del_workcreatoredit.h
 
 FORMS    += mainwindow.ui \
-    dialog_add.ui \
-    dialog_edit.ui \
     dialog_export.ui \
     dialog_workouts.ui \
     dialog_stresscalc.ui \
@@ -102,7 +96,6 @@ FORMS    += mainwindow.ui \
     day_popup.ui \
     dialog_settings.ui \
     dialog_pacecalc.ui \
-    dialog_addweek.ui \
     year_popup.ui \
     dialog_week_copy.ui \
     dialog_version.ui \
