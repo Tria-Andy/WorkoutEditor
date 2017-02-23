@@ -88,11 +88,11 @@ public:
             }
             if(index.row() ==  4 && setEdit)
             {
-                    QTimeEdit *editor = new QTimeEdit(parent);
-                    editor->setDisplayFormat("mm:ss");
-                    editor->setFrame(true);
-                    editor->setFont(eFont);
-                    return editor;
+                QTimeEdit *editor = new QTimeEdit(parent);
+                editor->setDisplayFormat("mm:ss");
+                editor->setFrame(true);
+                editor->setFont(eFont);
+                return editor;
             }
             if(index.row() == 6 && setEdit)
             {

@@ -32,14 +32,12 @@
 #include "del_avgselect.h"
 #include "del_level.h"
 #include "schedule.h"
-#include "dialog_add.h"
 #include "dialog_addweek.h"
 #include "dialog_version.h"
 #include "day_popup.h"
 #include "week_popup.h"
 #include "year_popup.h"
 #include "stress_popup.h"
-#include "dialog_edit.h"
 #include "dialog_export.h"
 #include "dialog_stresscalc.h"
 #include "dialog_workcreator.h"
@@ -50,7 +48,6 @@
 #include "jsonhandler.h"
 #include "filereader.h"
 #include "activity.h"
-#include "standardworkouts.h"
 #include "calculation.h"
 #include "logger.h"
 
@@ -70,7 +67,6 @@ private:
     jsonHandler *jsonhandler;
     fileReader *actFileReader;
     settings editorSettings;
-    standardWorkouts *stdWorkout;
     calendar_delegate calender_del;
     week_delegate week_del;
     summery_delegate sum_del;
@@ -138,8 +134,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void refresh_model();
-
 private slots:
     //Menu
     void on_actionEditor_triggered();
@@ -171,6 +165,7 @@ private slots:
     void toolButton_planMode(bool);
     void toolButton_appMode(bool);
     void set_phaseFilter(int);
+    void refresh_model();
 
     //Editor
     void setSelectedIntRow(QModelIndex);

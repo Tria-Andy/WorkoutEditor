@@ -205,6 +205,12 @@
            </property>
            <item>
             <widget class="QFrame" name="frame_calControl">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>26</height>
+              </size>
+             </property>
              <property name="frameShape">
               <enum>QFrame::Panel</enum>
              </property>
@@ -256,13 +262,13 @@
                    <property name="minimumSize">
                     <size>
                      <width>50</width>
-                     <height>25</height>
+                     <height>26</height>
                     </size>
                    </property>
                    <property name="maximumSize">
                     <size>
                      <width>50</width>
-                     <height>25</height>
+                     <height>26</height>
                     </size>
                    </property>
                    <property name="text">
@@ -271,6 +277,12 @@
                    <property name="icon">
                     <iconset resource="resources.qrc">
                      <normaloff>:/images/icons/First.png</normaloff>:/images/icons/First.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>20</width>
+                     <height>20</height>
+                    </size>
                    </property>
                    <property name="autoRaise">
                     <bool>true</bool>
@@ -292,13 +304,13 @@
                    <property name="minimumSize">
                     <size>
                      <width>50</width>
-                     <height>25</height>
+                     <height>26</height>
                     </size>
                    </property>
                    <property name="maximumSize">
                     <size>
                      <width>50</width>
-                     <height>25</height>
+                     <height>26</height>
                     </size>
                    </property>
                    <property name="text">
@@ -307,6 +319,12 @@
                    <property name="icon">
                     <iconset resource="resources.qrc">
                      <normaloff>:/images/icons/Back.png</normaloff>:/images/icons/Back.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>20</width>
+                     <height>20</height>
+                    </size>
                    </property>
                    <property name="autoRaise">
                     <bool>true</bool>
@@ -361,13 +379,13 @@
                    <property name="minimumSize">
                     <size>
                      <width>50</width>
-                     <height>25</height>
+                     <height>26</height>
                     </size>
                    </property>
                    <property name="maximumSize">
                     <size>
                      <width>50</width>
-                     <height>25</height>
+                     <height>26</height>
                     </size>
                    </property>
                    <property name="text">
@@ -376,6 +394,12 @@
                    <property name="icon">
                     <iconset resource="resources.qrc">
                      <normaloff>:/images/icons/Forward.png</normaloff>:/images/icons/Forward.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>20</width>
+                     <height>20</height>
+                    </size>
                    </property>
                    <property name="autoRaise">
                     <bool>true</bool>
@@ -394,13 +418,13 @@
                    <property name="minimumSize">
                     <size>
                      <width>50</width>
-                     <height>25</height>
+                     <height>26</height>
                     </size>
                    </property>
                    <property name="maximumSize">
                     <size>
                      <width>50</width>
-                     <height>25</height>
+                     <height>26</height>
                     </size>
                    </property>
                    <property name="text">
@@ -408,7 +432,16 @@
                    </property>
                    <property name="icon">
                     <iconset resource="resources.qrc">
-                     <normaloff>:/images/icons/Last.png</normaloff>:/images/icons/Last.png</iconset>
+                     <normaloff>:/images/icons/JumpForward.png</normaloff>:/images/icons/JumpForward.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>20</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                   <property name="shortcut">
+                    <string/>
                    </property>
                    <property name="autoRaise">
                     <bool>true</bool>
@@ -715,6 +748,31 @@
            </item>
            <item>
             <widget class="QTreeView" name="treeView_files"/>
+           </item>
+           <item>
+            <widget class="QProgressBar" name="progressBar_fileState">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>5</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>6</height>
+              </size>
+             </property>
+             <property name="toolTipDuration">
+              <number>7</number>
+             </property>
+             <property name="value">
+              <number>0</number>
+             </property>
+             <property name="textVisible">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>

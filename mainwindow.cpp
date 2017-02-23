@@ -73,7 +73,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mainToolBar->addWidget(planMode);
     ui->toolButton_weekCurrent->setEnabled(false);
     ui->toolButton_weekMinus->setEnabled(false);
-    stdWorkout = new standardWorkouts();
     calendar_model = new QStandardItemModel();
     sum_model = new QStandardItemModel();
     scheduleProxy = new QSortFilterProxyModel();
@@ -100,6 +99,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(appMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_appMode(bool)));
     connect(planMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_planMode(bool)));
     connect(phaseGroup,SIGNAL(buttonClicked(int)),this,SLOT(set_phaseFilter(int)));
+    connect(workSchedule->workout_schedule,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
+    connect(workSchedule->workout_schedule,SIGNAL(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)),this,SLOT(refresh_model()));
+    connect(workSchedule->workout_schedule,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_model()));
+    connect(workSchedule->workout_schedule,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SLOT(refresh_model()));
+
 
     //UI
     ui->actionSave_Workout_Schedule->setEnabled(false);
@@ -138,7 +142,6 @@ void MainWindow::freeMem()
     {
         workSchedule->freeMem();
         calendar_model->clear();
-        delete stdWorkout;
         delete workSchedule;
         delete sum_model;
         delete calendar_model;
@@ -168,6 +171,7 @@ void MainWindow::clearActivtiy()
 
     if(actLoaded)
     {
+        delete treeSelection;
         curr_activity->reset_avgSelection();
         delete curr_activity->intModel;
         delete curr_activity->sampleModel;
@@ -225,8 +229,8 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     ui->actionRefresh_Filelist->setVisible(mEditor);
     ui->actionReset->setVisible(mEditor);
     ui->actionSelect_File->setVisible(mEditor);
-    ui->actionReset->setEnabled(settings::get_act_isload());
-    ui->actionSave_to_GoldenCheetah->setEnabled(settings::get_act_isload());
+    ui->actionReset->setEnabled(actLoaded);
+    ui->actionSave_to_GoldenCheetah->setEnabled(actLoaded);
 
     //Schedule
     ui->menuWorkout->setEnabled(mPlaner);
@@ -652,14 +656,12 @@ void MainWindow::on_actionNew_triggered()
 
     if(isWeekMode)
     {
-        Dialog_add new_workout(this,workSchedule,stdWorkout);
-        new_workout.setModal(true);
-        dialog_code = new_workout.exec();
-
-        if(dialog_code == QDialog::Accepted)
+        day_popup day_pop(this,QDate::currentDate(),workSchedule);
+        day_pop.setModal(true);
+        dialog_code = day_pop.exec();
+        if(dialog_code == QDialog::Rejected)
         {
-            ui->actionSave_Workout_Schedule->setEnabled(true);
-            this->refresh_model();
+            ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
             ui->actionPMC->setEnabled(true);
         }
     }
@@ -746,18 +748,9 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
             day_popup day_pop(this,selectDate,workSchedule);
             day_pop.setModal(true);
             dialog_code = day_pop.exec();
-
-            if(dialog_code == QDialog::Accepted)
+            if(dialog_code == QDialog::Rejected)
             {
-
-              Dialog_edit edit_workout(this,selectDate,workSchedule,stdWorkout);
-              edit_workout.setModal(true);
-              dialog_code = edit_workout.exec();
-              if(dialog_code == QDialog::Accepted)
-              {
-                  ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
-                  this->refresh_model();
-              }
+                ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
             }
         }
         else
@@ -821,7 +814,7 @@ void MainWindow::on_toolButton_weekCurrent_clicked()
         weekCounter = 0;
         this->set_calender();
         this->set_buttons(false);
-        this->refresh_model();
+        emit workSchedule->workout_schedule->layoutChanged();
     }
     else
     {
@@ -844,7 +837,7 @@ void MainWindow::on_toolButton_weekMinus_clicked()
            this->set_buttons(false);
         }
         this->set_calender();
-        this->refresh_model();
+        emit workSchedule->workout_schedule->layoutChanged();
     }
     else
     {
@@ -870,7 +863,7 @@ void MainWindow::on_toolButton_weekPlus_clicked()
         ++weekCounter;
         this->set_calender();
         this->set_buttons(true);
-        this->refresh_model();
+        emit workSchedule->workout_schedule->layoutChanged();
     }
     else
     {
@@ -897,7 +890,7 @@ void MainWindow::on_toolButton_weekFour_clicked()
         weekCounter = weekCounter+4;
         this->set_calender();
         this->set_buttons(true);
-        this->refresh_model();
+        emit workSchedule->workout_schedule->layoutChanged();
     }
     else
     {
@@ -972,7 +965,6 @@ void MainWindow::loadfile(const QString &filename)
         actLoaded = true;
         file.close();
 
-        settings::set_act_isload(true);
         ui->actionSelect_File->setEnabled(false);
         ui->actionReset->setEnabled(true);
         intSelect_del.sport = tree_del.sport = avgSelect_del.sport = curr_activity->get_sport();
@@ -1600,7 +1592,7 @@ void MainWindow::on_toolButton_clearSelect_clicked()
 
 void MainWindow::on_actionIntervall_Editor_triggered()
 {
-    Dialog_workCreator workCreator(this,stdWorkout);
+    Dialog_workCreator workCreator(this);
     workCreator.setModal(true);
     workCreator.exec();
 }

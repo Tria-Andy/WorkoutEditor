@@ -105,7 +105,7 @@ public:
         const QAbstractItemModel *model = index.model();
         cFont.setPixelSize(12);
 
-        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
+        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
         levelName = model->data(model->index(index.row(),0,QModelIndex())).toString().trimmed();
         indexData = index.data().toString();
 
