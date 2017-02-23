@@ -20,14 +20,14 @@
 #include "ui_dialog_workouts.h"
 #include <QDebug>
 
-Dialog_workouts::Dialog_workouts(QWidget *parent, QString v_sport, standardWorkouts *p_workouts) :
+Dialog_workouts::Dialog_workouts(QWidget *parent, QString v_sport) :
     QDialog(parent),
     ui(new Ui::Dialog_workouts)
 {
     ui->setupUi(this);
-    w_sport = v_sport;
+    workoutSport = v_sport;
     metaProxy = new QSortFilterProxyModel;
-    metaProxy->setSourceModel(p_workouts->workouts_meta);
+    metaProxy->setSourceModel(this->workouts_meta);
     listModel = new QStandardItemModel;
     this->create_workout_list();
 }
@@ -52,7 +52,7 @@ void Dialog_workouts::on_pushButton_close_clicked()
 void Dialog_workouts::create_workout_list()
 {
     QString workID,workTitle,listString;
-    metaProxy->setFilterFixedString(w_sport);
+    metaProxy->setFilterFixedString(workoutSport);
     metaProxy->setFilterKeyColumn(0);
 
     listModel->setRowCount(metaProxy->rowCount());
@@ -68,7 +68,7 @@ void Dialog_workouts::create_workout_list()
     }
     listModel->sort(0);
 
-    ui->label_sport->setText(w_sport + " Workouts");
+    ui->label_sport->setText(workoutSport + " Workouts");
     ui->listView_workouts->setModel(listModel);
     ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
@@ -80,13 +80,12 @@ void Dialog_workouts::on_listView_workouts_clicked(const QModelIndex &index)
     metaProxy->setFilterRegExp("\\b"+workoutID+"\\b");
     metaProxy->setFilterKeyColumn(1);
 
-    w_sport = metaProxy->data(metaProxy->index(0,1)).toString();
-    w_code = metaProxy->data(metaProxy->index(0,2)).toString();
-    w_title = metaProxy->data(metaProxy->index(0,3)).toString();
-    w_duration = metaProxy->data(metaProxy->index(0,4)).toString();
-    w_distance = metaProxy->data(metaProxy->index(0,5)).toDouble();
-    w_stress = metaProxy->data(metaProxy->index(0,6)).toInt();
+    //"sport" << "id" << "code" << "title" << "duration" << "distance" << "stress";
+    for(int i = 0; i < metaProxy->columnCount()-1; ++i)
+    {
+        workData.insert(i,metaProxy->data(metaProxy->index(0,i+1)).toString());
+    }
 
-    ui->label_selected->setText(workoutTitle + " - " + w_duration + " - " + QString::number(w_distance) + " - " + QString::number(w_stress));
+    ui->label_selected->setText(workoutTitle + " - " + workData.value(3) + " - " + workData.value(4) + " - " + workData.value(5));
     ui->pushButton_ok->setEnabled(true);
 }

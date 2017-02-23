@@ -1,20 +1,19 @@
 #include "dialog_workcreator.h"
 #include "ui_dialog_workcreator.h"
 
-Dialog_workCreator::Dialog_workCreator(QWidget *parent,standardWorkouts *p_workouts) :
+Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Dialog_workCreator)
 {
     ui->setupUi(this);
-    stdWorkouts = p_workouts;
     listModel = new QStandardItemModel;
     plotModel = new QStandardItemModel;
     valueModel = new QStandardItemModel;
 
     metaProxy = new QSortFilterProxyModel;
-    metaProxy->setSourceModel(stdWorkouts->workouts_meta);
+    metaProxy->setSourceModel(this->workouts_meta);
     stepProxy = new QSortFilterProxyModel;
-    stepProxy->setSourceModel(stdWorkouts->workouts_steps);
+    stepProxy->setSourceModel(this->workouts_steps);
 
     editRow <<1<<1<<1<<0<<1<<0<<1<<0;
 
@@ -44,6 +43,13 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent,standardWorkouts *p_worko
     ui->listView_values->setModel(valueModel);
     ui->listView_values->setItemDelegate(&edit_del);
     ui->label_head->setText("Add Phase");
+
+    buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00ff00, stop: 0.5 #00d300,stop: 1 #009800)}";
+
+    ui->toolButton_remove->setStyleSheet(buttonStyle);
+    ui->toolButton_update->setStyleSheet(buttonStyle);
+    ui->toolButton_down->setStyleSheet(buttonStyle);
+    ui->toolButton_up->setStyleSheet(buttonStyle);
 
     ui->widget_plot->xAxis->setTicks(true);
     ui->widget_plot->xAxis->setTickLabels(true);
@@ -199,7 +205,7 @@ void Dialog_workCreator::save_workout()
     metaProxy->setFilterFixedString(sport);
     metaProxy->setFilterKeyColumn(0);
 
-    existWorkIDs = stdWorkouts->get_workoutIds();
+    existWorkIDs = this->get_workoutIds();
 
     for(int i = 0; i < existWorkIDs.count(); ++i)
     {
@@ -231,7 +237,7 @@ void Dialog_workCreator::save_workout()
     }
     else
     {
-        stdWorkouts->delete_stdWorkout(current_workID,false);
+        this->delete_stdWorkout(current_workID,false);
         workID = current_workID;
     }
 
@@ -249,11 +255,11 @@ void Dialog_workCreator::save_workout()
                   << QString::number(dist_sum)
                   << QString::number(round(stress_sum));
 
-     workModel = stdWorkouts->workouts_meta;
+     workModel = this->workouts_meta;
      this->save_workout_values(workoutValues,workModel);
 
     //Intervalldaten
-     workModel = stdWorkouts->workouts_steps;
+     workModel = this->workouts_steps;
      for(int c_item = 0; c_item < ui->treeWidget_intervall->topLevelItemCount(); ++c_item,++counter)
      {
          currentItem = ui->treeWidget_intervall->topLevelItem(c_item);
@@ -316,7 +322,7 @@ void Dialog_workCreator::save_workout()
          }
      }
      this->get_workouts(current_sport);
-     stdWorkouts->save_stdWorkouts();
+     this->save_stdWorkouts();
 }
 
 void Dialog_workCreator::save_workout_values(QStringList values, QStandardItemModel *model)
@@ -1061,7 +1067,7 @@ void Dialog_workCreator::on_toolButton_delete_clicked()
 
     if (reply == QMessageBox::Yes)
     {
-        stdWorkouts->delete_stdWorkout(current_workID,true);
+        this->delete_stdWorkout(current_workID,true);
         current_workID = QString();
         this->clearIntTree();
         this->get_workouts(current_sport);

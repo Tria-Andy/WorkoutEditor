@@ -17,12 +17,12 @@ namespace Ui {
 class Dialog_workCreator;
 }
 
-class Dialog_workCreator : public QDialog, public calculation
+class Dialog_workCreator : public QDialog, public calculation, public standardWorkouts
 {
     Q_OBJECT
 
 public:
-    explicit Dialog_workCreator(QWidget *parent = 0,standardWorkouts *p_workouts = 0);
+    explicit Dialog_workCreator(QWidget *parent = 0);
     ~Dialog_workCreator();
 
 private slots:
@@ -45,13 +45,12 @@ private slots:
 private:
     Ui::Dialog_workCreator *ui;
 
-    QString isSeries,isGroup,current_sport,current_workID,isBreak;
+    QString isSeries,isGroup,current_sport,current_workID,isBreak,buttonStyle;
     QStandardItemModel *plotModel,*valueModel,*listModel;
     QSortFilterProxyModel *metaProxy,*stepProxy;
     QMap<QString,QString> workoutMap;
     QMap<int,QString> dataPoint;
     QStringList modelHeader,phaseList,groupList,levelList;
-    standardWorkouts *stdWorkouts;
     QTreeWidgetItem *currentItem;
     del_workcreator workTree_del;
     del_workcreatoredit edit_del;
