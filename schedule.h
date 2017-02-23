@@ -41,9 +41,11 @@ public:
     void copyWeek(QString,QString);
     void deleteWeek(QString);
     QMap<QDate,double> *get_StressMap() {return &stressValues;}
+    QHash<QModelIndex,QStringList> itemList;
     void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
     void updateStress(QString,double,bool);
     bool get_isUpdated() {return isUpdated;}
+
 //Workout
     //Setter
     void add_itemList(QModelIndex index, QStringList value) {itemList.insert(index,value);}
@@ -51,14 +53,11 @@ public:
     void set_isUpdated(bool updateFlag) {isUpdated = updateFlag;}
 
     //edit Workouts
-    void add_workout();
-    void edit_workout(QModelIndex);
     void set_workoutData(int);
     void delete_workout(QModelIndex);
 
 private:
     QSortFilterProxyModel *scheduleProxy;
-    QMap<QModelIndex,QStringList> itemList;
     QStringList workoutTags,metaTags,contentTags;
     QString schedulePath,workoutFile,metaFile,contentFile,ltsFile;
     QDate firstdayofweek;

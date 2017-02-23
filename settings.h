@@ -42,7 +42,6 @@ private:
     static QHash<QString,double> thresholdMap,ltsMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
     static QHash<QString,int> fontMap;
-    static bool act_isloaded,act_isrecalc;
     static int swimLaplen;
 
     //Getter
@@ -92,10 +91,6 @@ public:
     static QStringList get_int_header(QString);
     static QStringList get_time_header() {return header_int_time;}
     static QStringList get_swimtime_header(){return header_swim_time;}
-    static void set_act_isload(bool isloaded) {act_isloaded = isloaded;}
-    static bool get_act_isload() {return act_isloaded;}
-    static void set_act_recalc(bool isrecalc) {act_isrecalc = isrecalc;}
-    static bool get_act_isrecalc() {return act_isrecalc;}
     static void writeListValues(QHash<QString,QStringList> *plist);
     static void autoSave() {settings::saveSettings();}
 };

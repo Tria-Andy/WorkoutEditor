@@ -60,9 +60,6 @@ QHash<QString,QString> settings::hfRange;
 QStringList settings::keyList;
 QStringList settings::extkeyList;
 
-bool settings::act_isloaded = false;
-bool settings::act_isrecalc = false;
-
 QStringList settings::table_header;
 QStringList settings::header_swim;
 QStringList settings::header_bike;

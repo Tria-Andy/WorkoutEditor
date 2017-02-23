@@ -50,6 +50,8 @@ schedule::schedule()
     isUpdated = false;
 }
 
+enum {ADD,EDITMOVE,COPY,DEL};
+
 void schedule::freeMem()
 {
     delete scheduleProxy;
@@ -489,9 +491,9 @@ void schedule::set_workoutData(int mode)
     QString workoutStress;
     double currStress = 0;
     int row = 0;
-    if(mode == 0) //EDIT
+    if(mode == EDITMOVE) //EDIT
     {
-        for(QMap<QModelIndex,QStringList>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it)
+        for(QHash<QModelIndex,QStringList>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it)
         {
             row = it.key().row();
             currStress = workout_schedule->data(workout_schedule->index(row,8)).toDouble();
@@ -504,11 +506,11 @@ void schedule::set_workoutData(int mode)
             this->updateStress(workout_date,workoutStress.toDouble()-currStress,true);
         }
     }
-    else if(mode == 1) //ADD and COPY
+    else if(mode == ADD || mode == COPY) //ADD and COPY
     {
         int rowCount = workout_schedule->rowCount();
         workout_schedule->insertRows(rowCount,itemList.count(),QModelIndex());
-        for(QMap<QModelIndex,QStringList>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it,++rowCount)
+        for(QHash<QModelIndex,QStringList>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it,++rowCount)
         {
             for(int i = 0; i < it.value().count(); ++i)
             {
