@@ -5,9 +5,6 @@
         <file>icons/Save.png</file>
         <file>icons/Add.png</file>
         <file>icons/Create.png</file>
-        <file>icons/Back.png</file>
-        <file>icons/Forward.png</file>
-        <file>icons/First.png</file>
         <file>icons/Upload.png</file>
         <file>icons/Folder.png</file>
         <file>icons/Copy.png</file>
@@ -19,7 +16,6 @@
         <file>icons/List.png</file>
         <file>icons/Report.png</file>
         <file>icons/Sync.png</file>
-        <file>icons/Last.png</file>
         <file>icons/Erase.png</file>
         <file>icons/Table.png</file>
         <file>icons/Application.png</file>
@@ -40,5 +36,10 @@
         <file>icons/Previous.png</file>
         <file>icons/Expand.png</file>
         <file>icons/Delete.png</file>
+        <file>icons/Globe.png</file>
+        <file>icons/Back.png</file>
+        <file>icons/First.png</file>
+        <file>icons/JumpForward.png</file>
+        <file>icons/Forward.png</file>
     </qresource>
 </RCC>
