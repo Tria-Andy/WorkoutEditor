@@ -39,7 +39,7 @@ public:
         QStringList sum_values;
         QStringList sportList = settings::get_listValues("Sport");
         QString delimiter = "-";
-        QColor rect_color,gradColor;
+        QColor rectColor,gradColor;
         gradColor.setHsv(0,0,180,200);
         int textMargin = 2;
         int celloffset = 21;
@@ -61,18 +61,18 @@ public:
         {
             if(sum_values.at(0) == sportList.at(i))
             {
-                rect_color = settings::get_itemColor(sportList.at(i)).toHsv();
+                rectColor = settings::get_itemColor(sportList.at(i)).toHsv();
                 break;
             }
             else
             {
                 //Summery
-                rect_color = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
+                rectColor = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
             }
         }
 
-        rect_color.setAlpha(225);
-        rectGradient.setColorAt(0,rect_color);
+        rectColor.setAlpha(225);
+        rectGradient.setColorAt(0,rectColor);
         rectGradient.setColorAt(1,gradColor);
 
         QPainterPath rectHead;
@@ -99,8 +99,8 @@ public:
         rectSummery.addRoundedRect(rectSportSum,5,5);
         QRect rectLabel(option.rect.x()+textMargin,option.rect.y()+celloffset+textMargin,(option.rect.width()/2)-textMargin,option.rect.height()-celloffset-textMargin-1);
 
-        rectGradient.setColorAt(0,gradColor);
-        rectGradient.setColorAt(1,rect_color);
+        rectGradient.setColorAt(0,rectColor);
+        rectGradient.setColorAt(1,gradColor);
 
         if(!sum_values.isEmpty())
         {

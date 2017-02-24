@@ -215,7 +215,7 @@ public:
     {
         double factor = sport == settings::isSwim ? 1000.0 : 1.0;
         double dist = model->data(model->index(2,0)).toDouble();
-        model->setData(model->index(5,0),calcSpeed(sec,dist,factor));
+        model->setData(model->index(5,0),set_doubleValue(calcSpeed(sec,dist,factor),true));
     }
 
     void set_duration(QAbstractItemModel *model) const

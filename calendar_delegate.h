@@ -19,18 +19,18 @@
 #ifndef CALENDAR_DELEGATE
 #define CALENDAR_DELEGATE
 #include <QtGui>
-#include <QItemDelegate>
+#include <QStyledItemDelegate>
 #include <QTableView>
 #include <QDebug>
 #include <QDate>
 #include "settings.h"
 
-class calendar_delegate : public QItemDelegate
+class calendar_delegate : public QStyledItemDelegate
 {
     Q_OBJECT
 
 public:
-    calendar_delegate(QTableView *parent = 0) : QItemDelegate(parent) {}
+    calendar_delegate(QTableView *parent = 0) : QStyledItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -44,7 +44,7 @@ public:
         QStringList sportList = settings::get_listValues("Sport");
         QStringList calendar_values;
         QString delimiter = "#";
-        QColor rect_color,gradColor;
+        QColor rectColor,gradColor;
         gradColor.setHsv(0,0,180,200);
         int textMargin = 2;
         int celloffset = 21;
@@ -70,16 +70,24 @@ public:
         rectHead.addRoundedRect(rect_head,3,3);
         QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,20);
 
-        if(QDate::fromString(calendar_values.at(0),"dd MMM yy").addYears(100) ==(QDate::currentDate()))
+
+        if(option.state & QStyle::State_Selected)
         {
-            rect_color.setHsv(0,255,255,225);
+            rectColor.setHsv(240,255,255,180);
+            painter->setPen(Qt::white);
         }
         else
         {
-            rect_color.setHsv(360,0,85,200);
+            if(QDate::fromString(calendar_values.at(0),"dd MMM yy").addYears(100) ==(QDate::currentDate()))
+            {
+                rectColor.setHsv(0,255,255,225);
+            }
+            else
+            {
+                rectColor.setHsv(360,0,85,200);
+            }
         }
-
-        rectGradient.setColorAt(0,rect_color);
+        rectGradient.setColorAt(0,rectColor);
         rectGradient.setColorAt(1,gradColor);
 
         painter->setPen(rectPen);
@@ -116,14 +124,14 @@ public:
                     {
                         if(workout.contains(sportList.at(pos)))
                         {
-                            rect_color = settings::get_itemColor(sportList.at(pos)).toHsv();
+                            rectColor = settings::get_itemColor(sportList.at(pos)).toHsv();
                             break;
                         }
                     }
 
-                    rect_color.setAlpha(225);
-                    rectGradient.setColorAt(0,gradColor);
-                    rectGradient.setColorAt(1,rect_color);
+                    rectColor.setAlpha(225);
+                    rectGradient.setColorAt(0,rectColor);
+                    rectGradient.setColorAt(1,gradColor);
 
                     painter->setPen(rectPen);
                     painter->setFont(work_font);
@@ -158,12 +166,12 @@ public:
                 {
                     if(phase.contains(phaseList.at(pos)))
                     {
-                        rect_color = settings::get_itemColor(phaseList.at(pos)).toHsv();
+                        rectColor = settings::get_itemColor(phaseList.at(pos)).toHsv();
                         break;
                     }
                     else
                     {
-                        rect_color = settings::get_itemColor(settings::get_generalValue("empty")).toHsv();
+                        rectColor = settings::get_itemColor(settings::get_generalValue("empty")).toHsv();
                     }
                 }
 
@@ -171,9 +179,9 @@ public:
                 rectPhase.addRoundedRect(rect_phase,4,4);
                 QRect rect_phase_text(option.rect.x()+textMargin,option.rect.y()+celloffset, option.rect.width()-textMargin,option.rect.height()-celloffset-1);
 
-                rect_color.setAlpha(225);
-                rectGradient.setColorAt(0,gradColor);
-                rectGradient.setColorAt(1,rect_color);
+                rectColor.setAlpha(225);
+                rectGradient.setColorAt(0,rectColor);
+                rectGradient.setColorAt(1,gradColor);
 
                 painter->setPen(rectPen);
                 painter->setFont(phase_font);

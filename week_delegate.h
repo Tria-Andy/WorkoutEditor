@@ -42,7 +42,7 @@ public:
         QStringList phaseList = settings::get_listValues("Phase");
         QStringList sportList = settings::get_listValues("Sportuse");
         QString delimiter = "-";
-        QColor rect_color,gradColor;
+        QColor rectColor,gradColor;
         gradColor.setHsv(0,0,180,200);
         int textMargin = 4;
         int celloffset = 21;
@@ -74,8 +74,8 @@ public:
             QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,20);
 
             gradColor.setHsv(0,0,180,200);
-            rect_color.setHsv(360,0,80,200);
-            rectGradient.setColorAt(0,rect_color);
+            rectColor.setHsv(360,0,80,200);
+            rectGradient.setColorAt(0,rectColor);
             rectGradient.setColorAt(1,gradColor);
 
             painter->setPen(Qt::black);
@@ -92,12 +92,12 @@ public:
             {
                 if(phase.contains(phaseList.at(pos)))
                 {
-                    rect_color = settings::get_itemColor(phaseList.at(pos)).toHsv();
+                    rectColor = settings::get_itemColor(phaseList.at(pos)).toHsv();
                     break;
                 }
                 else
                 {
-                    rect_color = settings::get_itemColor(settings::get_generalValue("empty")).toHsv();
+                    rectColor = settings::get_itemColor(settings::get_generalValue("empty")).toHsv();
                 }
             }
 
@@ -106,9 +106,9 @@ public:
             rectPhase.addRoundedRect(rect_phase,4,4);
             QRect rect_phase_text(option.rect.x()+textMargin,option.rect.y()+celloffset, option.rect.width(),option.rect.height()-celloffset-1);
 
-            rect_color.setAlpha(225);
-            rectGradient.setColorAt(0,gradColor);
-            rectGradient.setColorAt(1,rect_color);
+            rectColor.setAlpha(225);
+            rectGradient.setColorAt(0,rectColor);
+            rectGradient.setColorAt(1,gradColor);
 
             painter->setBrush(rectGradient);
             painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
@@ -125,11 +125,11 @@ public:
                 {
                     if(index.column() != sportList.count()+1)
                     {
-                        rect_color = settings::get_itemColor(sportList.at(pos)).toHsv();
+                        rectColor = settings::get_itemColor(sportList.at(pos)).toHsv();
                     }
                     else
                     {
-                        rect_color = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
+                        rectColor = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
                     }
                     break;
                 }
@@ -146,9 +146,9 @@ public:
             QRect rectLabel(option.rect.x()+textMargin,option.rect.y()+textMargin,(option.rect.width()/2)-textMargin,option.rect.height()-textMargin-1);
             rectWork.addRoundedRect(rectWeek,5,5);
 
-            rect_color.setAlpha(225);
-            rectGradient.setColorAt(0,gradColor);
-            rectGradient.setColorAt(1,rect_color);
+            rectColor.setAlpha(225);
+            rectGradient.setColorAt(0,rectColor);
+            rectGradient.setColorAt(1,gradColor);
 
             if(!calendar_values.isEmpty())
             {

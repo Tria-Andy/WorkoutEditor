@@ -53,7 +53,7 @@ public:
         else
         {
             rowColor = settings::get_itemColor(levelName).toHsv();
-            rowColor.setAlpha(125);
+            rowColor.setAlpha(100);
 
             if(lapName == breakName)
             {
