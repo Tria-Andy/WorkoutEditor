@@ -525,7 +525,7 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
     intItems << new QStandardItem(this->set_time(this->get_int_duration(pInt)));
     intItems << new QStandardItem(this->set_time(intModel->data(intModel->index(pInt,1)).toInt()));
     intItems << new QStandardItem(this->set_time(this->get_int_pace(pInt,lapName)));
-    intItems << new QStandardItem(QString::number(this->get_int_speed(pInt)));
+    intItems << new QStandardItem(QString::number(this->set_doubleValue(this->get_int_speed(pInt),true)));
     intItems << new QStandardItem(QString::number(strokeCount));
     intItems << new QStandardItem("-");
 
@@ -548,7 +548,7 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
             subItems << new QStandardItem(this->set_time(lapTime));
             subItems << new QStandardItem("-");
             subItems << new QStandardItem(this->set_time(swimProxy->data(swimProxy->index(i,6)).toInt()));
-            subItems << new QStandardItem(QString::number(swimProxy->data(swimProxy->index(i,7)).toDouble()));
+            subItems << new QStandardItem(QString::number(this->set_doubleValue(swimProxy->data(swimProxy->index(i,7)).toDouble(),true)));
             subItems << new QStandardItem(swimProxy->data(swimProxy->index(i,8)).toString());
 
             lastType = currType;
