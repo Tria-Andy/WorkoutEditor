@@ -1020,7 +1020,7 @@ void MainWindow::init_editorViews()
     ui->tableView_selectInt->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_selectInt->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->tableView_selectInt->verticalHeader()->setFixedWidth(100);
-    ui->tableView_selectInt->verticalHeader()->setMinimumSectionSize(20);
+    //ui->tableView_selectInt->verticalHeader()->setMinimumSectionSize(20);
     ui->tableView_selectInt->verticalHeader()->setSectionsClickable(false);
     ui->tableView_selectInt->horizontalHeader()->setVisible(false);
     ui->tableView_selectInt->hideColumn(1);

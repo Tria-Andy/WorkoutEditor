@@ -132,7 +132,6 @@ public:
         {
             QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
             timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"hh:mm"));
-            timeEdit->
         }
         if(index.row() == 1 && addWork)
         {

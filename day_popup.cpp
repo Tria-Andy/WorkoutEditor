@@ -165,6 +165,8 @@ void day_popup::load_workValues(int workout)
 {
     this->set_controlButtons(true);
 
+    qDebug() << ui->tableView_day->model()->headerData(workout,Qt::Horizontal).toString();
+
     if(workout == scheduleProxy->rowCount())
     {
         daypop_del.addWork = true;
