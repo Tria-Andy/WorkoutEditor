@@ -43,15 +43,13 @@ public:
 
 private slots:
     void on_toolButton_close_clicked();
-    void on_toolButton_edit_clicked();
     void on_toolButton_editMove_clicked();
     void on_toolButton_copy_clicked();
     void on_toolButton_delete_clicked();
     void on_toolButton_stdwork_clicked();
-    void load_workValues(int);
-    void set_editValues(QDate);
+    void edit_workoutDate(QDate);
+    void load_workoutData(int);
     void setNextEditRow();
-    void set_popupMode();
     void update_workValues();
     void on_tableView_day_clicked(const QModelIndex &index);
     void on_toolButton_dayEdit_clicked(bool checked);
@@ -66,9 +64,11 @@ private:
     QDate popupDate,newDate;
     QModelIndex selIndex;
     QStringList workListHeader;
-    int popupMode,selWorkout;
+    QIcon editIcon,addIcon;
+    int selWorkout;
+    bool editMode,addWorkout;
 
-    void init_dayWorkouts(QDate);
+    void init_dayWorkouts(QDate);   
     void set_controlButtons(bool);
     void set_dayData(bool);
     void set_result(QString,int);

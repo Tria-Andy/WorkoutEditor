@@ -50,7 +50,7 @@ schedule::schedule()
     isUpdated = false;
 }
 
-enum {ADD,EDITMOVE,COPY,DEL};
+enum {ADD,EDIT,COPY,DEL};
 
 void schedule::freeMem()
 {
@@ -491,7 +491,7 @@ void schedule::set_workoutData(int mode)
     QString workoutStress;
     double currStress = 0;
     int row = 0;
-    if(mode == EDITMOVE) //EDIT
+    if(mode == EDIT) //EDIT
     {
         for(QHash<QModelIndex,QStringList>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it)
         {

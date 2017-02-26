@@ -15,8 +15,6 @@ class del_daypop: public QStyledItemDelegate, public calculation
 
 public:
     explicit del_daypop(QObject *parent = 0) : QStyledItemDelegate(parent) {}
-
-    bool addWork;
     int selCol;
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
@@ -80,7 +78,7 @@ public:
             editor->setFrame(true);
             return editor;
         }
-        if(index.row() == 1 && addWork)
+        if(index.row() == 1 && index.column() == selCol)
         {
             QComboBox *editor = new QComboBox(parent);
             editor->setFrame(false);
@@ -133,7 +131,7 @@ public:
             QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
             timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"hh:mm"));
         }
-        if(index.row() == 1 && addWork)
+        if(index.row() == 1)
         {
             QString value = index.data(Qt::DisplayRole).toString();
             QComboBox *comboBox = static_cast<QComboBox*>(editor);
