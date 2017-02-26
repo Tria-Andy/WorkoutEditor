@@ -45,7 +45,7 @@ private slots:
 private:
     Ui::Dialog_workCreator *ui;
 
-    QString isSeries,isGroup,current_sport,current_workID,isBreak,buttonStyle;
+    QString isSeries,isGroup,current_sport,current_workID,isBreak,buttonStyle,viewBackground;
     QStandardItemModel *plotModel,*valueModel,*listModel;
     QSortFilterProxyModel *metaProxy,*stepProxy;
     QMap<QString,QString> workoutMap;

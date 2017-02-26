@@ -44,12 +44,19 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     ui->listView_values->setItemDelegate(&edit_del);
     ui->label_head->setText("Add Phase");
 
+    viewBackground = "background-color: #e6e6e6";
     buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00ff00, stop: 0.5 #00d300,stop: 1 #009800)}";
 
     ui->toolButton_remove->setStyleSheet(buttonStyle);
     ui->toolButton_update->setStyleSheet(buttonStyle);
     ui->toolButton_down->setStyleSheet(buttonStyle);
     ui->toolButton_up->setStyleSheet(buttonStyle);
+
+    ui->treeWidget_intervall->setStyleSheet(viewBackground);
+    ui->listWidget_group->setStyleSheet(viewBackground);
+    ui->listWidget_phases->setStyleSheet(viewBackground);
+    ui->listView_values->setStyleSheet(viewBackground);
+    ui->widget_plot->setStyleSheet(viewBackground);
 
     ui->widget_plot->xAxis->setTicks(true);
     ui->widget_plot->xAxis->setTickLabels(true);
