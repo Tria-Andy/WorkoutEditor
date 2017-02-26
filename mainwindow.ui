@@ -66,6 +66,11 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="font">
+           <font>
+            <family>Segoe UI</family>
+           </font>
+          </property>
           <property name="frameShape">
            <enum>QFrame::Panel</enum>
           </property>
@@ -183,6 +188,11 @@
             <horstretch>5</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>Segoe UI</family>
+           </font>
           </property>
           <property name="frameShape">
            <enum>QFrame::Panel</enum>
@@ -497,6 +507,11 @@
        </layout>
       </widget>
       <widget class="QWidget" name="editor">
+       <property name="font">
+        <font>
+         <family>Segoe UI</family>
+        </font>
+       </property>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <property name="spacing">
          <number>5</number>
@@ -741,7 +756,13 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_workContent"/>
+               <widget class="QLineEdit" name="lineEdit_workContent">
+                <property name="font">
+                 <font>
+                  <family>Segoe UI</family>
+                 </font>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -1372,6 +1393,11 @@
                   <height>0</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <family>Segoe UI</family>
+                 </font>
+                </property>
                 <property name="frameShape">
                  <enum>QFrame::Panel</enum>
                 </property>
@@ -1591,6 +1617,11 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
    <property name="toolTip">
     <string>Save to Golden Cheetah</string>
    </property>

@@ -16,6 +16,11 @@
     <height>365</height>
    </size>
   </property>
+  <property name="font">
+   <font>
+    <family>Segoe UI</family>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Preferences</string>
   </property>
