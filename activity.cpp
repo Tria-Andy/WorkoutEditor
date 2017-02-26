@@ -131,13 +131,14 @@ void Activity::prepareData()
     {
         distFactor = 1000;
         swim_track = tagData.value("Pool Length").toDouble();
-        double temp_cv = settings::get_thresValue("swimpace");
+        //double temp_cv = settings::get_thresValue("swimpace");
+        swimPace_cv = settings::get_thresValue("swimpace");
         hf_threshold = settings::get_thresValue("hfthres");
         hf_max = settings::get_thresValue("hfmax");
 
         zone_count = levels.count();
-        swim_cv = (3600.0 / temp_cv) / 10.0;
-        pace_cv = temp_cv;
+        //swim_cv = (3600.0 / temp_cv) / 10.0;
+        //swimPace_cv = temp_cv;
         int intCounter = 1;
         int breakCounter = 1;
         int swimLap = 0;
@@ -253,13 +254,6 @@ void Activity::prepareData()
         swimProxy->setSourceModel(swimModel);
 
         xdataModel->clear();
-
-        //Calc Swim Data
-        move_time = this->get_moveTime();
-
-        swim_pace = ceil(static_cast<double>(move_time) / (ride_info.value("Distance").toDouble()*10));
-        double goal = sqrt(pow(static_cast<double>(swim_pace),3.0))/10;
-        swim_sri = static_cast<double>(pace_cv) / goal;
 
         avgValues.resize(4);
         avgModel->setVerticalHeaderLabels(avgHeader.value(0));
@@ -1251,7 +1245,11 @@ void Activity::swimhfTimeInZone(bool recalc)
     }
 
     //Calc Total Work and Calories
-    move_time = this->get_moveTime();
+    int move_time = this->get_moveTime();
+    double swim_pace = ceil(static_cast<double>(move_time) / (ride_info.value("Distance").toDouble()*10));
+    double goal = sqrt(pow(static_cast<double>(swim_pace),3.0))/10;
+    double swim_sri = static_cast<double>(swimPace_cv) / goal;
+
     double totalWork = ceil(this->calc_totalWork(tagData.value("Weight").toDouble(),hf_avg,move_time) * swim_sri);
     double totalCal = ceil((totalWork*4)/4.184);
 
