@@ -347,7 +347,6 @@ void settings::loadSettings()
             thresholdMap.insert("swimpace",myvalues->value("swimpace").toDouble());
             thresholdMap.insert("bikepace",myvalues->value("bikepace").toDouble());
             thresholdMap.insert("runpace",myvalues->value("runpace").toDouble());
-            thresholdMap.insert("swimoffset",myvalues->value("swimoffset").toDouble());
             thresholdMap.insert("hfthres",myvalues->value("hfthres").toDouble());
             thresholdMap.insert("hfmax",myvalues->value("hfmax").toDouble());
         myvalues->endGroup();
