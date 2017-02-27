@@ -426,6 +426,10 @@ QString Activity::checkRangeLevel(double lapValue)
         {
             currZone = it.key();
         }
+        if(lapValue < rangeLevels.value(levels.last()).second)
+        {
+            currZone = levels.last();
+        }
     }
     return currZone;
 }
@@ -684,22 +688,42 @@ void Activity::updateRow_intTree(QItemSelectionModel *treeSelect)
 
 void Activity::addRow_intTree(QItemSelectionModel *treeSelect)
 {
-    QStandardItem *parentItem = intTreeModel->itemFromIndex(selItem.value(0))->parent();
-    QList<QStandardItem*> subItems;
 
-    if(selItem.value(0).isValid())
+    if(intTreeModel->itemFromIndex(selItem.value(0))->parent() != nullptr)
     {
-        subItems << new QStandardItem(selItem.value(0).data().toString());
-        subItems << new QStandardItem(selItem.value(1).data().toString());
-        subItems << new QStandardItem("-");
-        subItems << new QStandardItem(QString::number(swim_track));
-        subItems << new QStandardItem("00:00");
-        subItems << new QStandardItem("-");
-        subItems << new QStandardItem("00:00");
-        subItems << new QStandardItem(QString::number(0.0));
-        subItems << new QStandardItem(QString::number(0));
+        QStandardItem *parentItem = intTreeModel->itemFromIndex(selItem.value(0))->parent();
+        QList<QStandardItem*> subItems;
 
-        parentItem->insertRow(treeSelect->currentIndex().row(),subItems);
+        if(selItem.value(0).isValid())
+        {
+            subItems << new QStandardItem(selItem.value(0).data().toString());
+            subItems << new QStandardItem(selItem.value(1).data().toString());
+            subItems << new QStandardItem("-");
+            subItems << new QStandardItem(QString::number(swim_track));
+            subItems << new QStandardItem("00:00");
+            subItems << new QStandardItem("-");
+            subItems << new QStandardItem("00:00");
+            subItems << new QStandardItem(QString::number(0.0));
+            subItems << new QStandardItem(QString::number(0));
+
+            parentItem->insertRow(treeSelect->currentIndex().row(),subItems);
+        }
+    }
+    else
+    {
+        QList<QStandardItem*> intItems;
+        int intStart = this->get_timesec(intTreeModel->data(intTreeModel->index(treeSelect->currentIndex().row(),4)).toString())+this->get_timesec(intTreeModel->data(intTreeModel->index(treeSelect->currentIndex().row(),5)).toString())+1;
+
+        intItems << new QStandardItem("New Int");
+        intItems << new QStandardItem(swimType.at(0));
+        intItems << new QStandardItem("0");
+        intItems << new QStandardItem("0");
+        intItems << new QStandardItem("00:01");
+        intItems << new QStandardItem(this->set_time(intStart));
+        intItems << new QStandardItem("00:00");
+        intItems << new QStandardItem(QString::number(0.0));
+
+        intTreeModel->invisibleRootItem()->insertRow(treeSelect->currentIndex().row(),intItems);
     }
 }
 
