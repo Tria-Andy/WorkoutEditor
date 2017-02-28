@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>400</height>
+    <height>430</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -429,6 +429,16 @@
        <widget class="QListView" name="listView_weeks"/>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar_copy">
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignJustify|Qt::AlignVCenter</set>
+     </property>
     </widget>
    </item>
    <item>

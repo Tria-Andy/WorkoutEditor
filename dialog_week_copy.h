@@ -45,17 +45,11 @@ private slots:
     void on_radioButton_copy_clicked();
     void on_radioButton_save_clicked();
     void on_radioButton_clear_clicked();
-
     void on_radioButton_load_clicked();
-
     void on_listView_weeks_clicked(const QModelIndex &index);
-
     void on_toolButton_addweek_clicked();
-
     void on_lineEdit_saveas_textChanged(const QString &arg1);
-
     void on_comboBox_select_currentIndexChanged(const QString &arg1);
-
     void on_toolButton_delete_clicked();
 
 private:

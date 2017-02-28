@@ -195,7 +195,6 @@ void Dialog_week_copy::addWeek()
     }
 }
 
-
 void Dialog_week_copy::processWeek()
 {
     if(editMode == COPY)
@@ -210,7 +209,9 @@ void Dialog_week_copy::processWeek()
                                       );
         if (reply == QMessageBox::Yes)
         {
+            ui->progressBar_copy->setValue(50);
             workSched->copyWeek(sourceWeek,targetWeek);
+            ui->progressBar_copy->setValue(100);
             accept();
         }
     }
@@ -419,7 +420,6 @@ void Dialog_week_copy::on_toolButton_delete_clicked()
         this->write_weekList();
     }
 }
-
 
 void Dialog_week_copy::on_lineEdit_saveas_textChanged(const QString &value)
 {
