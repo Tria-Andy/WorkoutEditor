@@ -37,8 +37,8 @@ private:
     int dateRange;
     bool isLoad;
     QCPGraph *get_QCPLine(QString,QColor,QVector<double> &ydata,bool);
-    void set_itemTracer(QCPGraph*,QColor,int);
-    void set_itemText(QFont,QVector<double> &ydata,int,bool);
+    void set_itemTracer(QString,QCPGraph*,QColor,int);
+    void set_itemText(QString,QFont,QVector<double> &ydata,int,bool);
     double calc_stress(double,double,double);
     void set_graph();
     void set_stressValues(QDate,QDate);

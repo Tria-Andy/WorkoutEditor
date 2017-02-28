@@ -81,7 +81,11 @@ void stress_popup::set_graph()
 
     ui->widget_stressPlot->axisRect()->setRangeDragAxes(xaxisList,yaxisList);
     ui->widget_stressPlot->axisRect()->setRangeZoomAxes(xaxisList,yaxisList);
-
+    ui->widget_stressPlot->addLayer("TSB",ui->widget_stressPlot->layer(0),QCustomPlot::limAbove);
+    ui->widget_stressPlot->addLayer("STS",ui->widget_stressPlot->layer(1),QCustomPlot::limAbove);
+    ui->widget_stressPlot->addLayer("LTS",ui->widget_stressPlot->layer(2),QCustomPlot::limAbove);
+    ui->widget_stressPlot->xAxis->grid()->setLayer("TSB");
+    ui->widget_stressPlot->yAxis->grid()->setLayer("TSB");
     this->set_stressValues(ui->dateEdit_start->date(),ui->dateEdit_end->date());
 }
 
@@ -193,20 +197,22 @@ QCPGraph *stress_popup::get_QCPLine(QString name,QColor gColor,QVector<double> &
     graph->setData(xDate,ydata);
     graph->setAntialiased(true);
     graph->setPen(QPen(gColor,1));
+    graph->setLayer(name);
 
     return graph;
 }
 
-void stress_popup::set_itemTracer(QCPGraph *graphline, QColor tColor,int pos)
+void stress_popup::set_itemTracer(QString layer,QCPGraph *graphline, QColor tColor,int pos)
 {
     QCPItemTracer *tracer = new QCPItemTracer(ui->widget_stressPlot);
     tracer->setGraph(graphline);
     tracer->setGraphKey(xDate[pos]);
     tracer->setStyle(QCPItemTracer::tsCircle);
     tracer->setBrush(QBrush(tColor));
+    tracer->setLayer(layer);
 }
 
-void stress_popup::set_itemText(QFont lineFont, QVector<double> &ydata,int pos,bool secondAxis)
+void stress_popup::set_itemText(QString layer,QFont lineFont, QVector<double> &ydata,int pos,bool secondAxis)
 {
     QCPItemText *itemText = new QCPItemText(ui->widget_stressPlot);
     if(secondAxis)
@@ -220,6 +226,7 @@ void stress_popup::set_itemText(QFont lineFont, QVector<double> &ydata,int pos,b
     itemText->setTextAlignment(Qt::AlignCenter);
     itemText->setFont(lineFont);
     itemText->setPadding(QMargins(1, 1, 1, 1));
+    itemText->setLayer(layer);
 }
 
 void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValues)
@@ -248,15 +255,15 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
 
     for(int i = 0; i < xDate.count(); ++i)
     {
-        this->set_itemTracer(ltsLine,Qt::green,i);
-        this->set_itemTracer(stsLine,Qt::red,i);
-        this->set_itemTracer(tsbLine,QColor(255,170,0),i);
+        this->set_itemTracer("LTS",ltsLine,Qt::green,i);
+        this->set_itemTracer("STS",stsLine,Qt::red,i);
+        this->set_itemTracer("TSB",tsbLine,QColor(255,170,0),i);
 
         if(showValues)
         {
-            this->set_itemText(lineFont,yLTS,i,false);
-            this->set_itemText(lineFont,ySTS,i,false);
-            this->set_itemText(lineFont,yTSB,i,true);
+            this->set_itemText("LTS",lineFont,yLTS,i,false);
+            this->set_itemText("STS",lineFont,ySTS,i,false);
+            this->set_itemText("TSB",lineFont,yTSB,i,true);
         }
 
         if(tsbMinMax[0] > yTSB[i]) tsbMinMax[0] = yTSB[i];
@@ -365,13 +372,15 @@ void stress_popup::selectionChanged()
     {
         QCPGraph *graph = ui->widget_stressPlot->graph(i);
         QCPPlottableLegendItem *item = ui->widget_stressPlot->legend->itemWithPlottable(graph);
-        if(item->selected())
+        if(item->selected() || graph->selected())
         {
-            ui->widget_stressPlot->graph(i)->setVisible(false);
+            item->setSelected(true);
+            graph->layer()->setVisible(false);
         }
         else
         {
-            ui->widget_stressPlot->graph(i)->setVisible(true);
+            item->setSelected(false);
+            graph->layer()->setVisible(true);
         }
     }
 }
