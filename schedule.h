@@ -31,6 +31,7 @@ class schedule : public xmlHandler
 public:
     schedule();
     QStandardItemModel *workout_schedule,*week_meta,*week_content;
+    QHash<QModelIndex,QHash<int,QString>> itemList;
     void freeMem();
     void save_dayWorkouts();
     void save_weekPlan();
@@ -41,14 +42,12 @@ public:
     void copyWeek(QString,QString);
     void deleteWeek(QString);
     QMap<QDate,double> *get_StressMap() {return &stressValues;}
-    QHash<QModelIndex,QStringList> itemList;
     void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
     void updateStress(QString,double,bool);
     bool get_isUpdated() {return isUpdated;}
 
 //Workout
     //Setter
-    void add_itemList(QModelIndex index, QStringList value) {itemList.insert(index,value);}
     void set_workout_date(QString w_date) {workout_date = w_date;}
     void set_isUpdated(bool updateFlag) {isUpdated = updateFlag;}
 

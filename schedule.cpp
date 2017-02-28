@@ -385,7 +385,7 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
     scheduleProxy->setFilterRegExp("\\b"+copyFrom+"\\b");
     scheduleProxy->setFilterKeyColumn(0);
     this->deleteWeek(copyTo);
-    QStringList copyValues;
+    QHash<int,QString> valueList;
     QString fromWeek,toWeek,fromYear,toYear,workdate;
     int fromWeek_int,fromYear_int,toWeek_int,toYear_int,addfactor = 0;
     int days = 7;
@@ -412,16 +412,17 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
 
     for(int row = 0; row < scheduleProxy->rowCount(); ++row)
     {
-        copyValues.clear();
         workdate = scheduleProxy->data(scheduleProxy->index(row,1)).toString();
-        copyValues << copyTo << workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy");
+        valueList.insert(0,copyTo);
+        valueList.insert(1,workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy"));
+
         for(int col = 2; col < scheduleProxy->columnCount();++col)
         {
-            copyValues << scheduleProxy->data(scheduleProxy->index(row,col)).toString();
+            valueList.insert(col,scheduleProxy->data(scheduleProxy->index(row,col)).toString());
         }
-        itemList.insert(scheduleProxy->index(row,0),copyValues);
+        itemList.insert(scheduleProxy->index(row,0),valueList);
     }
-    this->set_workoutData(1);
+    this->set_workoutData(COPY);
     scheduleProxy->setFilterRegExp("");
 }
 
@@ -436,7 +437,6 @@ void schedule::delete_workout(QModelIndex index)
 void schedule::deleteWeek(QString deleteWeek)
 {
     QList<QStandardItem*> deleteList = workout_schedule->findItems(deleteWeek,Qt::MatchExactly,0);
-
     for(int i = 0; i < deleteList.count(); ++i)
     {
         this->delete_workout(workout_schedule->indexFromItem(deleteList.at(i)));
@@ -491,18 +491,19 @@ void schedule::set_workoutData(int mode)
     QString workoutStress;
     double currStress = 0;
     int row = 0;
+    int col = 0;
     if(mode == EDIT) //EDIT
     {
-        for(QHash<QModelIndex,QStringList>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it)
+        for(QHash<QModelIndex,QHash<int,QString>>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it)
         {
             row = it.key().row();
             currStress = workout_schedule->data(workout_schedule->index(row,8)).toDouble();
-            for(int i = 0; i < it.value().count(); ++i)
+            for(QHash<int,QString>::const_iterator vStart = it.value().cbegin(), vEnd = it.value().cend(); vStart != vEnd; ++vStart,++col)
             {
-                workout_schedule->setData(workout_schedule->index(row,i,QModelIndex()),it.value().at(i));
+                workout_schedule->setData(workout_schedule->index(row,col,QModelIndex()),it.value().value(col));
             }
-            workout_date = it.value().at(1);
-            workoutStress = it.value().last();
+            workout_date = it.value().value(1);
+            workoutStress = it.value().value(8);
             this->updateStress(workout_date,workoutStress.toDouble()-currStress,true);
         }
     }
@@ -510,15 +511,17 @@ void schedule::set_workoutData(int mode)
     {
         int rowCount = workout_schedule->rowCount();
         workout_schedule->insertRows(rowCount,itemList.count(),QModelIndex());
-        for(QHash<QModelIndex,QStringList>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it,++rowCount)
+
+        for(QHash<QModelIndex,QHash<int,QString>>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it,++rowCount)
         {
-            for(int i = 0; i < it.value().count(); ++i)
+            for(QHash<int,QString>::const_iterator vStart = it.value().cbegin(), vEnd = it.value().cend(); vStart != vEnd; ++vStart,++col)
             {
-                workout_schedule->setData(workout_schedule->index(rowCount,i,QModelIndex()),it.value().at(i));
+                workout_schedule->setData(workout_schedule->index(rowCount,col,QModelIndex()),it.value().value(col));
             }
-            workout_date = it.value().at(1);
-            workoutStress = it.value().last();
+            workout_date = it.value().value(1);
+            workoutStress = it.value().value(8);
             this->updateStress(workout_date,workoutStress.toDouble(),true);
+            col = 0;
         }
     }
     itemList.clear();
