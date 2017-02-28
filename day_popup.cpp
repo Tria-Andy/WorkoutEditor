@@ -39,12 +39,14 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
 
     workListHeader << "Time" << "Sport" << "Code" << "Title" << "Duration" << "Distance" << "Stress" << "Pace";
     dayModel = new QStandardItemModel();
+
     this->init_dayWorkouts(popupDate);
     ui->label_workoutInfo->setText(workSched->get_weekPhase(w_date)+" - Week: "+ QString::number(w_date.weekNumber()));
 
     connect(ui->tableView_day->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(load_workoutData(int)));
     connect(ui->dateEdit_workDate,SIGNAL(dateChanged(QDate)),this,SLOT(edit_workoutDate(QDate)));
     connect(ui->tableView_day->itemDelegate(),SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)),this,SLOT(setNextEditRow()));
+
 }
 
 enum {ADD,EDIT,COPY,DEL};
@@ -153,21 +155,21 @@ void day_popup::set_dayData(bool completeDay)
 {
     QString weekNumber = QString::number(newDate.weekNumber());
     weekNumber = weekNumber+"_"+QString::number(newDate.addDays(1 - ui->dateEdit_workDate->date().dayOfWeek()).year());
-    QStringList addValues;
+    QHash<int,QString> valueList;
     QModelIndex modIndex;
 
     if(completeDay)
     {
         for(int row = 0; row < scheduleProxy->rowCount(); ++row)
         {
-            addValues.clear();
-            addValues << weekNumber << newDate.toString("dd.MM.yyyy");
+            valueList.insert(0,weekNumber);
+            valueList.insert(1,newDate.toString("dd.MM.yyyy"));
             modIndex = scheduleProxy->mapToSource(scheduleProxy->index(row,0));
             for(int col = 2; col < scheduleProxy->columnCount(); ++col)
             {
-                addValues << scheduleProxy->data(scheduleProxy->index(row,col)).toString();
+                valueList.insert(col,scheduleProxy->data(scheduleProxy->index(row,col)).toString());
             }
-            workSched->add_itemList(modIndex,addValues);
+            workSched->itemList.insert(modIndex,valueList);
         }
     }
 }
@@ -220,20 +222,23 @@ void day_popup::load_workoutData(int workout)
 
 void day_popup::update_workValues()
 {
-    QString weekNumber = QString::number(newDate.weekNumber());
-    weekNumber = weekNumber+"_"+QString::number(newDate.addDays(1 - ui->dateEdit_workDate->date().dayOfWeek()).year());
-    QStringList addValues;
-    addValues << weekNumber << newDate.toString("dd.MM.yyyy");
-    workSched->itemList.clear();
-
-    for(int i = 0; i < dayModel->rowCount()-1; ++i)
+    if(editMode)
     {
-        addValues << dayModel->data(dayModel->index(i,selWorkout)).toString();
-    }
+        QString weekNumber = QString::number(newDate.weekNumber());
+        weekNumber = weekNumber+"_"+QString::number(newDate.addDays(1 - ui->dateEdit_workDate->date().dayOfWeek()).year());
+        QHash<int,QString> valueList;
+        valueList.insert(0,weekNumber);
+        valueList.insert(1,newDate.toString("dd.MM.yyyy"));
 
-    workSched->itemList.insert(selIndex,addValues);
-    ui->label_selected->setText(ui->tableView_day->model()->headerData(selWorkout,Qt::Horizontal).toString()+" - "+dayModel->data(dayModel->index(1,selWorkout)).toString());
-    ui->timeEdit_time->setTime(QTime::fromString(dayModel->data(dayModel->index(0,selWorkout)).toString(),"hh:mm"));
+        for(int i = 2; i < dayModel->rowCount()+1; ++i)
+        {
+            valueList.insert(i,dayModel->data(dayModel->index(i-2,selWorkout)).toString());
+        }
+
+        workSched->itemList.insert(selIndex,valueList);
+        ui->label_selected->setText(ui->tableView_day->model()->headerData(selWorkout,Qt::Horizontal).toString()+" - "+dayModel->data(dayModel->index(1,selWorkout)).toString());
+        ui->timeEdit_time->setTime(QTime::fromString(dayModel->data(dayModel->index(0,selWorkout)).toString(),"hh:mm"));
+    }
 }
 
 void day_popup::set_result(QString resultText,int resultCode)
@@ -279,13 +284,11 @@ void day_popup::set_result(QString resultText,int resultCode)
             }
         }
     }
-
+    editMode = false;
     this->set_controlButtons(false);
-    ui->dateEdit_workDate->setDate(popupDate);
     ui->label_selected->setText("-");
     ui->timeEdit_time->setTime(QTime::fromString("00:00","mm:ss"));
     this->init_dayWorkouts(popupDate);
-    editMode = false;
 }
 
 void day_popup::edit_workoutDate(QDate workDate)
@@ -310,7 +313,7 @@ void day_popup::edit_workoutDate(QDate workDate)
     }
     else
     {
-        this->update_workValues();
+        if(editMode) this->update_workValues();
     }
 }
 
