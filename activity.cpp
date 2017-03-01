@@ -263,7 +263,6 @@ void Activity::prepareData()
     {
         distFactor = 1;
 
-
         if(isBike)
         {
             threshold = settings::get_thresValue("bikepower");
@@ -454,7 +453,8 @@ QString Activity::checkRangeLevel(double lapValue)
         {
             currZone = it.key();
         }
-        if(lapValue < rangeLevels.value(levels.last()).second)
+
+        if(lapValue < rangeLevels.value(levels.last()).second && (isSwim || isRun))
         {
             currZone = levels.last();
         }
