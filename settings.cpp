@@ -64,6 +64,7 @@ QStringList settings::table_header;
 QStringList settings::header_swim;
 QStringList settings::header_bike;
 QStringList settings::header_run;
+QStringList settings::header_other;
 
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
@@ -139,6 +140,7 @@ void settings::loadSettings()
     header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes";
     header_bike << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD";
     header_run << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed";
+    header_other << "Interval" << "Duration" << "Start" << "Distance";
 
     settingFile = QApplication::applicationDirPath() + QDir::separator() +"WorkoutEditor.ini";
 
@@ -647,9 +649,22 @@ QStringList settings::get_int_header(QString vSport)
 {
     QString avg = "Avg";
     table_header.clear();
-    if(vSport == isSwim) return table_header << header_swim << avg;
-    if(vSport == isBike) return table_header << header_bike << avg;
-    if(vSport == isRun) return table_header << header_run << avg;
+    if(vSport == isSwim)
+    {
+        return table_header << header_swim << avg;
+    }
+    else if(vSport == isBike)
+    {
+        return table_header << header_bike << avg;
+    }
+    else if(vSport == isRun)
+    {
+        return table_header << header_run << avg;
+    }
+    else
+    {
+        return table_header << header_other << avg;
+    }
     return table_header;
 }
 

@@ -74,8 +74,10 @@ void Activity::prepareData()
     isSwim = isBike = isRun = isTria = isStrength = false;
     itemHeader.insert(0,QStringList() << "Name:" << "Type:" << "Distance (M):" << "Duration (Sec):" << "Pace/100m:" << "Speed km/h:" << "Strokes:");
     itemHeader.insert(1,QStringList() << "Name:" << "Start:" << "Distance:" << "Duration:" << "Pace:" << "Speed km/h:");
+    itemHeader.insert(2,QStringList() << "Name:" << "Start:" << "Distance:" << "Duration:");
     avgHeader.insert(0,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance:");
     avgHeader.insert(1,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance:" << "Watts:" << "CAD:");
+    avgHeader.insert(2,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance");
     intTreeModel = new QStandardItemModel;
     selItemModel = new QStandardItemModel;
     selItemModel->setColumnCount(2);
@@ -131,14 +133,11 @@ void Activity::prepareData()
     {
         distFactor = 1000;
         swim_track = tagData.value("Pool Length").toDouble();
-        //double temp_cv = settings::get_thresValue("swimpace");
         swimPace_cv = settings::get_thresValue("swimpace");
         hf_threshold = settings::get_thresValue("hfthres");
         hf_max = settings::get_thresValue("hfmax");
 
         zone_count = levels.count();
-        //swim_cv = (3600.0 / temp_cv) / 10.0;
-        //swimPace_cv = temp_cv;
         int intCounter = 1;
         int breakCounter = 1;
         int swimLap = 0;
@@ -264,6 +263,7 @@ void Activity::prepareData()
     {
         distFactor = 1;
 
+
         if(isBike)
         {
             threshold = settings::get_thresValue("bikepower");
@@ -271,15 +271,23 @@ void Activity::prepareData()
             isTimeBased = true;
             avgValues.resize(6);
             avgModel->setVerticalHeaderLabels(avgHeader.value(1));
+            selItemModel->setVerticalHeaderLabels(itemHeader.value(1));
         }
-
-        if(isRun)
+        else if(isRun)
         {
             threshold = settings::get_thresValue("runpace");
             this->fillRangeLevel(threshold,true);
             isTimeBased = false;
             avgValues.resize(4);
             avgModel->setVerticalHeaderLabels(avgHeader.value(0));
+            selItemModel->setVerticalHeaderLabels(itemHeader.value(1));
+        }
+        else
+        {
+            isTimeBased = true;
+            avgValues.resize(4);
+            avgModel->setVerticalHeaderLabels(avgHeader.value(2));
+            selItemModel->setVerticalHeaderLabels(itemHeader.value(2));
         }
 
         for(int row = 0; row < intModelCount; ++row)
@@ -293,7 +301,6 @@ void Activity::prepareData()
     }
 
     avgModel->setRowCount(avgValues.count());
-    selItemModel->setVerticalHeaderLabels(itemHeader.value(1));
 
     this->reset_avgSelection();
     this->build_intTree(isTimeBased);
@@ -302,6 +309,9 @@ void Activity::prepareData()
 void Activity::build_intTree(bool timeBased)
 {
     QStandardItem *rootItem = intTreeModel->invisibleRootItem();
+    QList<QStandardItem*> intItems;
+    QModelIndex data_index;
+
     if(isSwim)
     {
         QString intKey;
@@ -311,11 +321,29 @@ void Activity::build_intTree(bool timeBased)
             rootItem->appendRow(setSwimLap(i,intKey));
         }
     }
-    else
+    else if(isBike || isRun)
     {
         for(int i = 0; i < intModel->rowCount(); ++i)
         {
             rootItem->appendRow(setIntRow(i,timeBased));
+        }
+    }
+    else
+    {
+        for(int i = 0; i < intModel->rowCount(); ++i)
+        {
+            data_index = sampleModel->index(intModel->data(intModel->index(i,2)).toInt()-1,1);
+            QString lapName = intModel->data(intModel->index(i,0)).toString();
+            int lapTime = this->get_int_duration(i);
+
+            intItems << new QStandardItem(lapName);
+            intItems << new QStandardItem(this->set_time(lapTime));
+            intItems << new QStandardItem(this->set_time(intModel->data(intModel->index(i,1)).toInt()));
+            intItems << new QStandardItem(QString::number(this->set_doubleValue(sampleModel->data(data_index).toDouble(),true)));
+            intItems << new QStandardItem("-");
+
+            rootItem->appendRow(intItems);
+            intItems.clear();
         }
     }
     intTreeModel->setHorizontalHeaderLabels(settings::get_int_header(curr_sport));
