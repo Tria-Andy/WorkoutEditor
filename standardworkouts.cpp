@@ -20,7 +20,7 @@
 
 standardWorkouts::standardWorkouts()
 {
-    meta_tags << "sport" << "id" << "code" << "title" << "duration" << "distance" << "stress";
+    meta_tags << "sport" << "id" << "code" << "title" << "duration" << "distance" << "stress" << "timebase";
     step_tags << "sport-id" << "id" << "part" << "level" << "threshold" << "int-time" << "int-dist" << "repeats" << "parent";
     workoutPath = settings::get_gcInfo("workouts");
 
@@ -38,7 +38,7 @@ standardWorkouts::standardWorkouts()
 
 void standardWorkouts::read_standard_workouts(QDomDocument meta_doc,QDomDocument step_doc)
 {
-    workouts_meta = new QStandardItemModel(0,7);
+    workouts_meta = new QStandardItemModel(0,8);
     workouts_steps = new QStandardItemModel(0,9);
     QDomElement rootTag;
     QDomNodeList xmlList;

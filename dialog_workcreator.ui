@@ -262,13 +262,13 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>25</height>
+          <height>28</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>25</height>
+          <height>28</height>
          </size>
         </property>
         <property name="frameShape">
@@ -329,21 +329,35 @@
           </widget>
          </item>
          <item>
+          <widget class="QCheckBox" name="checkBox_timebased">
+           <property name="text">
+            <string>Timebased</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="toolButton_save">
            <property name="minimumSize">
             <size>
-             <width>22</width>
-             <height>22</height>
+             <width>26</width>
+             <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>22</width>
-             <height>22</height>
+             <width>26</width>
+             <height>24</height>
             </size>
            </property>
            <property name="text">
-            <string>...</string>
+            <string/>
            </property>
            <property name="icon">
             <iconset resource="resources.qrc">
@@ -351,8 +365,8 @@
            </property>
            <property name="iconSize">
             <size>
-             <width>18</width>
-             <height>18</height>
+             <width>20</width>
+             <height>20</height>
             </size>
            </property>
            <property name="autoRaise">
@@ -361,17 +375,24 @@
           </widget>
          </item>
          <item>
+          <widget class="Line" name="line_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="toolButton_copy">
            <property name="minimumSize">
             <size>
-             <width>22</width>
-             <height>22</height>
+             <width>26</width>
+             <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>22</width>
-             <height>22</height>
+             <width>26</width>
+             <height>24</height>
             </size>
            </property>
            <property name="text">
@@ -383,8 +404,8 @@
            </property>
            <property name="iconSize">
             <size>
-             <width>18</width>
-             <height>18</height>
+             <width>20</width>
+             <height>20</height>
             </size>
            </property>
            <property name="autoRaise">
@@ -393,17 +414,24 @@
           </widget>
          </item>
          <item>
+          <widget class="Line" name="line_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="toolButton_delete">
            <property name="minimumSize">
             <size>
-             <width>22</width>
-             <height>22</height>
+             <width>26</width>
+             <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>22</width>
-             <height>22</height>
+             <width>26</width>
+             <height>24</height>
             </size>
            </property>
            <property name="text">
@@ -415,12 +443,19 @@
            </property>
            <property name="iconSize">
             <size>
-             <width>18</width>
-             <height>18</height>
+             <width>20</width>
+             <height>20</height>
             </size>
            </property>
            <property name="autoRaise">
             <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line_4">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
            </property>
           </widget>
          </item>
@@ -436,6 +471,13 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="Line" name="line_5">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="label_duration">

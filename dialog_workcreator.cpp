@@ -89,13 +89,14 @@ void Dialog_workCreator::on_pushButton_close_clicked()
 void Dialog_workCreator::get_workouts(QString sport)
 {
     QString workID,workTitle,listString;
+    bool timeBased;
     workoutMap.clear();
     listModel->clear();
     metaProxy->invalidate();
     metaProxy->setFilterFixedString(sport);
     metaProxy->setFilterKeyColumn(0);
 
-    listModel->setColumnCount(2);
+    listModel->setColumnCount(3);
     listModel->setRowCount(metaProxy->rowCount());
 
     for(int i = 0; i < metaProxy->rowCount(); ++i)
@@ -103,8 +104,10 @@ void Dialog_workCreator::get_workouts(QString sport)
         workID = metaProxy->data(metaProxy->index(i,1)).toString();
         workTitle = metaProxy->data(metaProxy->index(i,3)).toString();
         listString = metaProxy->data(metaProxy->index(i,2)).toString() + " - " + workTitle;
+        timeBased = metaProxy->data(metaProxy->index(i,7)).toBool();
         listModel->setData(listModel->index(i,0,QModelIndex()),listString);
         listModel->setData(listModel->index(i,1,QModelIndex()),workID);
+        listModel->setData(listModel->index(i,2,QModelIndex()),timeBased);
         workoutMap.insert(workID,workTitle);
     }
     listModel->sort(0);
@@ -130,6 +133,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     double currDist;
     bool isBike = false;
     bool isSwim = false;
+    bool timeBase = ui->checkBox_timebased->isChecked();
     stepProxy->setFilterRegExp("\\b"+workID+"\\b");
     stepProxy->setFilterKeyColumn(0);
 
@@ -155,15 +159,34 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
         {
             percent = stepProxy->data(stepProxy->index(i,4)).toDouble();
             thresValue = this->calc_threshold(current_sport,currThres,percent);
-            stepTime = stepProxy->data(stepProxy->index(i,5)).toString();
+
 
             if(isBike)
             {
-                currDist = this->calc_distance(stepTime,this->get_timesec(this->threstopace(threshold_pace,percent)));
+                if(timeBase)
+                {
+                    stepTime = stepProxy->data(stepProxy->index(i,5)).toString();
+                    currDist = this->calc_distance(stepTime,this->get_timesec(this->threstopace(threshold_pace,percent)));
+                }
+                else
+                {
+                    currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
+                    stepTime = this->calc_duration(current_sport,currDist,thresValue);
+                }
             }
             else
             {
-                currDist = this->calc_distance(stepTime,this->get_timesec(thresValue));
+                if(timeBase)
+                {
+                    stepTime = stepProxy->data(stepProxy->index(i,5)).toString();
+                    currDist = this->calc_distance(stepTime,this->get_timesec(thresValue));
+                }
+                else
+                {
+                    currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
+                    stepTime = this->calc_duration(current_sport,currDist,thresValue);
+                }
+
                 if(isSwim)
                 {
                     currDist = currDist/10.0;
@@ -260,7 +283,8 @@ void Dialog_workCreator::save_workout()
                   << ui->lineEdit_workoutname->text()
                   << worktime
                   << QString::number(dist_sum)
-                  << QString::number(round(stress_sum));
+                  << QString::number(round(stress_sum))
+                  << QString::number(ui->checkBox_timebased->isEnabled());
 
      workModel = this->workouts_meta;
      this->save_workout_values(workoutValues,workModel);
@@ -889,6 +913,7 @@ void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
     current_workID = workoutID;
     ui->comboBox_code->setCurrentText(workCode.replace(" ",""));
     ui->lineEdit_workoutname->setText(workTitle.replace(" ",""));
+    ui->checkBox_timebased->setChecked(listModel->data(listModel->index(index.row(),2)).toBool());
     this->open_stdWorkout(workoutID);
 }
 
