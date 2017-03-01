@@ -85,7 +85,7 @@ public:
         painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
         painter->drawPath(rectHead);
         painter->setFont(date_font);
-        painter->drawText(rect_head_text,Qt::AlignLeft,sum_values.at(0));
+        painter->drawText(rect_head_text,Qt::AlignLeft | Qt::AlignVCenter,sum_values.at(0));
 
         QString labels;
         labels = "Workouts:\n";
