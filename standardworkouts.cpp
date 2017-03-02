@@ -33,7 +33,6 @@ standardWorkouts::standardWorkouts()
         this->check_File(workoutPath,stepFile);
         this->read_standard_workouts(this->load_XMLFile(workoutPath,metaFile),this->load_XMLFile(workoutPath,stepFile));
     }
-
 }
 
 void standardWorkouts::read_standard_workouts(QDomDocument meta_doc,QDomDocument step_doc)
