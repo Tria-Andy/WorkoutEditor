@@ -133,12 +133,14 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     double currDist;
     bool isBike = false;
     bool isSwim = false;
+    bool isRun = false;
     bool timeBase = ui->checkBox_timebased->isChecked();
     stepProxy->setFilterRegExp("\\b"+workID+"\\b");
     stepProxy->setFilterKeyColumn(0);
 
     if(current_sport == settings::isSwim) isSwim = true;
     if(current_sport == settings::isBike) isBike = true;
+    if(current_sport == settings::isRun) isRun = true;
 
     for(int i = 0; i < stepProxy->rowCount();++i)
     {
@@ -159,13 +161,13 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
         {
             percent = stepProxy->data(stepProxy->index(i,4)).toDouble();
             thresValue = this->calc_threshold(current_sport,currThres,percent);
-
+            stepTime = stepProxy->data(stepProxy->index(i,5)).toString();
+            currDist = this->calc_distance(stepTime,this->get_timesec(thresValue));
 
             if(isBike)
             {
                 if(timeBase)
                 {
-                    stepTime = stepProxy->data(stepProxy->index(i,5)).toString();
                     currDist = this->calc_distance(stepTime,this->get_timesec(this->threstopace(threshold_pace,percent)));
                 }
                 else
@@ -174,24 +176,18 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                     stepTime = this->calc_duration(current_sport,currDist,thresValue);
                 }
             }
-            else
+            else if(isRun)
             {
-                if(timeBase)
-                {
-                    stepTime = stepProxy->data(stepProxy->index(i,5)).toString();
-                    currDist = this->calc_distance(stepTime,this->get_timesec(thresValue));
-                }
-                else
+                if(!timeBase)
                 {
                     currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
                     stepTime = this->calc_duration(current_sport,currDist,thresValue);
                 }
-
-                if(isSwim)
-                {
-                    currDist = currDist/10.0;
-                    if(!partName.contains(isBreak)) stepTime = this->calc_duration(current_sport,currDist,thresValue);
-                }
+            }
+            else if(isSwim)
+            {
+                currDist = currDist/10.0;
+                if(!partName.contains(isBreak)) stepTime = this->calc_duration(current_sport,currDist,thresValue);
             }
 
             valueList << stepProxy->data(stepProxy->index(i,2)).toString()
@@ -538,6 +534,7 @@ void Dialog_workCreator::clearIntTree()
 
     ui->lineEdit_workoutname->clear();
     ui->comboBox_code->setCurrentIndex(0);
+    ui->checkBox_timebased->setChecked(false);
     this->control_editPanel(false);
     this->resetAxis();
 }
