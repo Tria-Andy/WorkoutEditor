@@ -21,20 +21,19 @@
 
 #include <QtGui>
 #include <QDialog>
-#include <QTimeEdit>
-#include <QTextBrowser>
+#include <QSortFilterProxyModel>
 #include <QStandardItemModel>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include "dialog_edit.h"
+#include <dialog_workouts.h>
+#include "del_daypop.h"
 #include "schedule.h"
 #include "settings.h"
+#include "calculation.h"
 
 namespace Ui {
 class day_popup;
 }
 
-class day_popup : public QDialog
+class day_popup : public QDialog, public calculation
 {
     Q_OBJECT
 
@@ -44,14 +43,35 @@ public:
 
 private slots:
     void on_toolButton_close_clicked();
-    void on_toolButton_edit_clicked();
+    void on_toolButton_editMove_clicked();
+    void on_toolButton_copy_clicked();
+    void on_toolButton_delete_clicked();
+    void on_toolButton_stdwork_clicked();
+    void edit_workoutDate(QDate);
+    void load_workoutData(int);
+    void setNextEditRow();
+    void update_workValues();
+    void on_tableView_day_clicked(const QModelIndex &index);
+    void on_toolButton_dayEdit_clicked(bool checked);
 
 private:
     Ui::day_popup *ui;
     schedule *workSched;
-    const QDate *workout_date;
-    QString weekPhase;
-    void show_workouts();
+    del_daypop daypop_del;
+    QStandardItemModel *dayModel;
+    QSortFilterProxyModel *scheduleProxy;
+    QHash<QString,QString> currWorkout;
+    QDate popupDate,newDate;
+    QModelIndex selIndex;
+    QStringList workListHeader;
+    QIcon editIcon,addIcon;
+    int selWorkout;
+    bool editMode,addWorkout;
+
+    void init_dayWorkouts(QDate);   
+    void set_controlButtons(bool);
+    void set_dayData(bool);
+    void set_result(QString,int);
 
 };
 

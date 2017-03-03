@@ -31,8 +31,9 @@ private:
     static QStringList setRangeString(QHash<QString,QString>*);
     static QString set_colorString(QColor);
 
-    static QString settingFile,valueFile,valueFilePath,splitter,header_swim;
-    static QStringList keyList,extkeyList,table_header,header_int,header_bike,header_int_time,header_swim_time;
+    static QString settingFile,valueFile,valueFilePath,splitter;
+    static QStringList table_header,header_swim,header_bike,header_run,header_other;
+    static QStringList keyList,extkeyList,header_int_time,header_swim_time;
 
     static QHash<QString,QStringList> listMap;
     static QMap<int,QString> sampList,intList;
@@ -41,13 +42,11 @@ private:
     static QHash<QString,double> thresholdMap,ltsMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
     static QHash<QString,int> fontMap;
-    static bool act_isloaded,act_isrecalc;
     static int swimLaplen;
 
     //Getter
     static QColor get_colorRGB(QString,bool);
     static QStringList get_colorStringList(QStringList*);
-
 
     //Setter
     static void fill_mapList(QMap<int,QString>*,QString*);
@@ -73,7 +72,6 @@ public:
     static QString get_generalValue(QString key) {return generalMap.value(key);}
     static int get_fontValue(QString key) {return fontMap.value(key);}
 
-
     //QMap/QHash Setter
     static void set_saisonInfos(QString key, QString value){saisonInfo.insert(key,value);}
     static void set_gcInfo(QString key, QString value){gcInfo.insert(key,value);}
@@ -89,24 +87,10 @@ public:
     static QStringList get_extkeyList() {return extkeyList;}
 
     //common functions
-    static int get_swimLaplen() {return swimLaplen;}
-    static double calc_totalWork(double,double,double);
-    static QString set_time(int);
-    static QString get_workout_pace(double, QTime, QString,bool);
-    static QString get_speed(QTime,int,QString,bool);
-    static double estimate_stress(QString,QString,int);
-    static int get_hfvalue(QString);
     static int get_timesec(QString time);
-    static double set_doubleValue(double,bool);
-
     static QStringList get_int_header(QString);
     static QStringList get_time_header() {return header_int_time;}
     static QStringList get_swimtime_header(){return header_swim_time;}
-    static void set_act_isload(bool isloaded) {act_isloaded = isloaded;}
-    static bool get_act_isload() {return act_isloaded;}
-    static void set_act_recalc(bool isrecalc) {act_isrecalc = isrecalc;}
-    static bool get_act_isrecalc() {return act_isrecalc;}
-    static void set_swimLaplen(int lapLen) {swimLaplen = lapLen;}
     static void writeListValues(QHash<QString,QStringList> *plist);
     static void autoSave() {settings::saveSettings();}
 };

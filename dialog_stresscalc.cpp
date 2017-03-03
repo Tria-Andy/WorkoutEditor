@@ -39,13 +39,13 @@ Dialog_stresscalc::~Dialog_stresscalc()
     delete ui;
 }
 
-void Dialog_stresscalc::estimate_stress()
+void Dialog_stresscalc::estimateStress()
 {
     double stressScore,current;
 
     if(sport == settings::isSwim)
     {
-        current = settings::get_timesec(ui->lineEdit_goal_power->text());
+        current = this->get_timesec(ui->lineEdit_goal_power->text());
         current = thresPace / current;
         current = pow(current,3.0);
         ui->lineEdit_intensity->setText(QString::number(current));
@@ -57,11 +57,12 @@ void Dialog_stresscalc::estimate_stress()
     }
     if(sport == settings::isRun)
     {
-        current = settings::get_timesec(ui->lineEdit_goal_power->text());
+        current = this->get_timesec(ui->lineEdit_goal_power->text());
         ui->lineEdit_intensity->setText(QString::number(thresPace / current));
     }
-    stressScore = settings::estimate_stress(sport,ui->lineEdit_goal_power->text(),settings::get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")));
+    stressScore = this->estimate_stress(sport,ui->lineEdit_goal_power->text(),this->get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")));
     ui->lineEdit_stressScore->setText(QString::number(stressScore));
+
 }
 
 void Dialog_stresscalc::set_sport_threshold()
@@ -72,7 +73,7 @@ void Dialog_stresscalc::set_sport_threshold()
         thresPace = settings::get_thresValue("swimpace");
         ui->label_threshold->setText("Threshold Pace:");
         ui->label_workout_power->setText("Workout Pace:");
-        ui->lineEdit_power->setText(settings::set_time(thresPace));
+        ui->lineEdit_power->setText(this->set_time(thresPace));
         ui->lineEdit_goal_power->setInputMask("00:00");
     }
     if(sport == settings::isBike)
@@ -89,7 +90,7 @@ void Dialog_stresscalc::set_sport_threshold()
         thresPace = settings::get_thresValue("runpace");
         ui->label_threshold->setText("Threshold Pace:");
         ui->label_workout_power->setText("Workout Pace:");
-        ui->lineEdit_power->setText(settings::set_time(thresPace));
+        ui->lineEdit_power->setText(this->set_time(thresPace));
         ui->lineEdit_goal_power->setInputMask("00:00");
     }
 }
@@ -112,7 +113,7 @@ void Dialog_stresscalc::reset_calc()
 
 void Dialog_stresscalc::on_pushButton_calc_clicked()
 {
-    this->estimate_stress();
+    this->estimateStress();
 }
 
 void Dialog_stresscalc::on_comboBox_sport_currentIndexChanged(int index)

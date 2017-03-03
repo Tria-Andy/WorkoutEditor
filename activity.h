@@ -21,90 +21,88 @@
 
 #include <QFile>
 #include <QFileDialog>
-#include <QtXml>
 #include <QStandardItemModel>
 #include "settings.h"
 #include "jsonhandler.h"
+#include "calculation.h"
 
-class jsonHandler;
-
-class Activity
+class Activity : public jsonHandler
 {
 private:
-    jsonHandler *jsonhandler;
-    QString v_date,curr_sport;
-    QStringList ride_items;
-    QVector<double> calc_speed,calc_cadence,p_swim_time,new_dist;
-    QVector<int> p_swim_timezone,p_hf_timezone,hf_zone_avg;
-    double swim_track,avg_dist,avg_watt,avg_cad,avg_laptime,swim_cv,swim_sri,polishFactor,hf_threshold,hf_max;
-    int dist_factor,avg_counter,avg_pace,pace_cv,zone_count,move_time,swim_pace,hf_avg;
-    bool changeRowCount;
+    QList<QStandardItem*> setIntRow(int);
+    QList<QStandardItem*> setSwimLap(int,QString);
+    QSortFilterProxyModel *swimProxy;
+    QString v_date,curr_sport,intLabel,breakName;
+    QMap<int,QStringList> itemHeader,avgHeader;
+    QHash<QString,int> paceTimeInZone,hfTimeInZone,hfZoneAvg;
+    QHash<QString,QPair<double,double>> rangeLevels;
+    QHash<QString,QVector<double>> swimHFZoneFactor;
+    QStringList ride_items,swimType,levels;
+    QVector<double> calc_speed,calc_cadence,swimTime,new_dist;
+    double swim_track,polishFactor,hf_threshold,hf_max;
+    int distFactor,avgCounter,swimPace_cv,zone_count,hf_avg;
+    bool isSwim,isBike,isRun,isTria,isStrength,changeRowCount,isUpdated,selectInt,isTimeBased;
+    QVector<bool> editRow;
 
     //Functions
-    void set_time_in_zones(bool);
-    void adjust_intervalls();
-    void set_edit_samp_model(int);
-
-    double get_int_value(int,int,bool);
+    void readJsonFile(QString,bool);
+    void prepareData();
+    void build_intTree();
+    int build_swimModel(bool,QString,int,int,int,int);
+    QString build_lapName(QString,int,double);
+    void updateSwimLap();
+    void updateSwimInt(QModelIndex,QItemSelectionModel*);
+    void updateSwimBreak(QModelIndex,QItemSelectionModel*,int);
+    void updateInterval();
+    void recalcIntTree();
+    void updateSampleModel(int);
+    void calcAvgValues();
+    double get_int_value(int,int);
     double interpolate_speed(int,int,double);
 
-    int get_swim_laps(int,bool);
-    int check_is_intervall(int);
+    //Swim Calculations
+    void swimhfTimeInZone(bool);
+    void swimTimeInZone(int,double);
+    void fillRangeLevel(double,bool);
+    QString checkRangeLevel(double);
+    int get_swim_laps(int);
     int get_zone_values(double,int,bool);
+    int get_moveTime();
 
 public:
-    explicit Activity();
-    void set_jsonhandler(jsonHandler *p) {jsonhandler = p;}
-    void prepareData();
-    void set_additional_ride_info();
-    void set_curr_act_model(bool);
-    void act_reset();
-    QStandardItemModel *int_model,*samp_model,*curr_act_model,*edit_int_model,*xdata_model,*swim_xdata,*edit_samp_model;
-    QStandardItemModel *swim_pace_model, *swim_hf_model;
+    explicit Activity(QString jsonfile = QString(),bool intAct = false);
+
+    void set_selectedItem(QItemSelectionModel*);
+    void set_editRow(QString,bool);
+    void showSwimLap(bool);
+    void showInterval(bool);
+    void updateIntModel(int,int);
+    void set_workoutContent(QString);
+    void updateXDataModel();
+    void writeChangedData();
+    QHash<int,QModelIndex> selItem,avgItems;
+    QHash<QString,int> swimPace,swimHF;
+    QStandardItemModel *intModel,*sampleModel,*xdataModel,*swimModel,*intTreeModel,*selItemModel,*avgModel;
     QMap<QString,QString> ride_info;
-    QVector<double> sampSpeed;
+    QVector<double> sampSpeed,avgValues;
 
     //Recalculation
-    QStandardItemModel * set_int_model_pointer(bool);
-    QStandardItemModel * set_samp_model_pointer(bool);
-    void recalculate_intervalls(bool);
-    double get_int_distance(int,bool);
-    int get_int_duration(int,bool);
-    int get_int_pace(int,bool);
-    double get_int_speed(int,bool);
+    void updateRow_intTree(QItemSelectionModel *);
+    void addRow_intTree(QItemSelectionModel *);
+    void removeRow_intTree(QItemSelectionModel *);
+    double get_int_distance(int);
+    int get_int_duration(int);
+    int get_int_pace(int,QString);
+    double get_int_speed(int);
     double polish_SpeedValues(double,double,double,bool);
 
     //Value Getter and Setter
-    void set_changeRowCount(bool setCount) {changeRowCount = setCount;}
     void set_polishFactor(double vFactor) {polishFactor = vFactor;}
-    int get_header_num();
-    void set_date(QString a_date) {v_date = a_date;}
-    QString get_date() {return v_date;}
-    void set_sport(QString a_sport) {curr_sport = a_sport;}
     QString get_sport() {return curr_sport;}
 
-
     //Averages
-    void reset_avg();
-    void set_avg_values(int,int,bool);
-    int get_dist_factor() {return dist_factor;}
-    int get_avg_laptime() {return round(avg_laptime/avg_counter);}
-    int get_avg_pace() {return avg_pace/avg_counter;}
-    double get_avg_dist() {return avg_dist/avg_counter;}
-    double get_avg_watts() {return avg_watt/avg_counter;}
-    double get_avg_cad() {return avg_cad/avg_counter;}
-
-    //Swim Calculations
-    void set_swim_data();
-    int get_move_time() {return move_time;}
-    int get_swim_pace() {return swim_pace;}
-    double get_swim_sri() { return swim_sri;}
-    void set_hf_zone_avg(double,double,int);
-    double get_hf_zone_avg();
-    int get_hf_avg() {return hf_avg;}
-    void set_hf_time_in_zone();
-    void set_swim_track(double trackLen) {swim_track = trackLen;}
-    double get_swim_track() {return swim_track;}   
+    void reset_avgSelection();
+    void set_avgValues(int,int);
 };
 
 #endif // ACTIVITY_H

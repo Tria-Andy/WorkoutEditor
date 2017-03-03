@@ -20,17 +20,15 @@
 #define YEAR_POPUP_H
 
 #include <QDialog>
-#include <QStandardItemModel>
 #include "schedule.h"
 #include "settings.h"
-
-QT_CHARTS_USE_NAMESPACE
+#include "calculation.h"
 
 namespace Ui {
 class year_popup;
 }
 
-class year_popup : public QDialog
+class year_popup : public QDialog, public calculation
 {
     Q_OBJECT
 

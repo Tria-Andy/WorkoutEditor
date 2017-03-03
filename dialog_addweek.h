@@ -23,12 +23,13 @@
 #include "schedule.h"
 #include "del_addweek.h"
 #include "settings.h"
+#include "calculation.h"
 
 namespace Ui {
 class Dialog_addweek;
 }
 
-class Dialog_addweek : public QDialog
+class Dialog_addweek : public QDialog, public calculation
 {
     Q_OBJECT
 
@@ -46,6 +47,7 @@ private:
     schedule *workSched;
     del_addweek week_del;
     QStandardItemModel *weekModel;
+    QSortFilterProxyModel *metaProxy,*contentProxy;
     QString openID,selYear,weekID,timeFormat,empty;
     QStringList sportuseList,weekHeader,weekMeta,weekContent;
     bool update;

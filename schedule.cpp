@@ -32,117 +32,37 @@ schedule::schedule()
     workout_sport.clear();
     firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
     schedulePath = settings::get_gcInfo("schedule");
-    if(!schedulePath.isEmpty()) this->check_workoutFiles();
+    workoutFile = "workout_schedule.xml";
+    metaFile = "workout_phase_meta.xml";
+    contentFile = "workout_phase_content.xml";
+    ltsFile = "longtermstress.xml";
+
+    if(!schedulePath.isEmpty())
+    {
+        this->check_File(schedulePath,workoutFile);
+        this->read_dayWorkouts(this->load_XMLFile(schedulePath,workoutFile));
+        this->check_File(schedulePath,metaFile);
+        this->check_File(schedulePath,contentFile);
+        this->read_weekPlan(this->load_XMLFile(schedulePath,metaFile),this->load_XMLFile(schedulePath,contentFile));
+        this->check_File(schedulePath,ltsFile);
+        this->read_ltsFile(this->load_XMLFile(schedulePath,ltsFile));
+    }
+    isUpdated = false;
 }
 
-void schedule::check_workoutFiles()
+enum {ADD,EDIT,COPY,DEL};
+
+void schedule::freeMem()
 {
-    //Check workout_schedule.xml exist
-    QFile workouts(schedulePath + QDir::separator() + "workout_schedule.xml");
-    if(!workouts.exists())
-    {
-        qDebug() << "Workout Schedule not exists! Created!";
-        workouts.open(QIODevice::WriteOnly | QIODevice::Text);
-        workouts.close();
-    }
-    //Check workout_phase_meta.xml exist
-    QFile weekMeta(schedulePath + QDir::separator() + "workout_phase_meta.xml");
-    if(!weekMeta.exists())
-    {
-        qDebug() << "Phases Meta File not exists! Created!";
-        weekMeta.open(QIODevice::WriteOnly | QIODevice::Text);
-        weekMeta.close();
-    }
-    //Check workout_phase_content.xml exist
-    QFile weekContent(schedulePath + QDir::separator() + "workout_phase_content.xml");
-    if(!weekContent.exists())
-    {
-        qDebug() << "Phase Content File not exists! Created!";
-        weekContent.open(QIODevice::WriteOnly | QIODevice::Text);
-        weekContent.close();
-    }
-
-    //Check longtermstress.xml exist
-    QFile ltsFile(schedulePath + QDir::separator() + "longtermstress.xml");
-    if(!ltsFile.exists())
-    {
-        qDebug() << "LTS File not exists! Created!";
-        ltsFile.open(QIODevice::WriteOnly | QIODevice::Text);
-        ltsFile.close();
-    }
-
-    this->load_workoutsFiles();
-}
-
-void schedule::load_workoutsFiles()
-{
-    QFile workouts(schedulePath + QDir::separator() + "workout_schedule.xml");
-    QDomDocument doc_workouts;
-
-    if(!workouts.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qDebug() << "File not open: workout_schedule.xml";
-    }
-    else
-    {
-        if(!doc_workouts.setContent(&workouts))
-        {
-            qDebug() << "Workouts not loaded!";
-        }
-        workouts.close();
-    }
-
-    QFile weekMeta(schedulePath + QDir::separator() + "workout_phase_meta.xml");
-    QDomDocument doc_week_meta;
-    if(!weekMeta.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qDebug() << "File not open: workout_phase_meta.xml";
-    }
-    else
-    {
-        if(!doc_week_meta.setContent(&weekMeta))
-        {
-            qDebug() << "Phase Meta Data not loaded!";
-        }
-        weekMeta.close();
-    }
-
-    QFile weekContent(schedulePath + QDir::separator() + "workout_phase_content.xml");
-    QDomDocument doc_week_content;
-    if(!weekContent.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qDebug() << "File not open: workout_phase_content.xml";
-    }
-    else
-    {
-        if(!doc_week_content.setContent(&weekContent))
-        {
-            qDebug() << "Phase Content not loaded!";
-        }
-        weekContent.close();
-    }
-
-    QFile longStressContent(schedulePath + QDir::separator() + "longtermstress.xml");
-    QDomDocument doc_lts_content;
-    if(!longStressContent.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qDebug() << "File not open: longtermstress.xml";
-    }
-    else
-    {
-        if(!doc_lts_content.setContent(&longStressContent))
-        {
-            qDebug() << "LTS Values not loaded!";
-        }
-        longStressContent.close();
-    }
-    this->read_weekPlan(doc_week_meta,doc_week_content);
-    this->read_dayWorkouts(doc_workouts);
-    this->read_ltsFile(doc_lts_content);
+    delete scheduleProxy;
+    delete workout_schedule;
+    delete week_meta;
+    delete week_content;
 }
 
 void schedule::read_dayWorkouts(QDomDocument workouts)
 {
+
     QDomElement root_workouts = workouts.firstChildElement();
     QDomNodeList workout_list;
     if(workouts.hasChildNodes())
@@ -158,7 +78,6 @@ void schedule::read_dayWorkouts(QDomDocument workouts)
         for(int i = 0; i < workout_list.count(); ++i)
         {
             QDomElement workout_element;
-
             QDomNode workout_node = workout_list.at(i);
 
             workout_element = workout_node.toElement();
@@ -181,32 +100,33 @@ void schedule::read_dayWorkouts(QDomDocument workouts)
         }
         workout_schedule->sort(2);
     }
+    scheduleProxy = new QSortFilterProxyModel();
+    scheduleProxy->setSourceModel(workout_schedule);
 }
 
 void schedule::save_dayWorkouts()
 {
         QModelIndex index;
-        QDomDocument document;
-
-        QDomElement xmlroot = document.createElement("workouts");
-        document.appendChild(xmlroot);
+        QDomDocument xmlDoc;
+        QDomElement xmlRoot,xmlElement;
+        xmlRoot = xmlDoc.createElement("workouts");
+        xmlDoc.appendChild(xmlRoot);
 
         for(int i = 0; i < workout_schedule->rowCount(); ++i)
         {
             index = workout_schedule->index(i,1,QModelIndex());
             if(QDate::fromString(workout_schedule->data(index,Qt::DisplayRole).toString(),"dd.MM.yyyy") < firstdayofweek ) continue;
 
-            QDomElement xml_workout = document.createElement("workout");
+            xmlElement = xmlDoc.createElement("workout");
 
             for(int x = 0; x < workout_schedule->columnCount(); ++x)
             {
                 index = workout_schedule->index(i,x,QModelIndex());
-                xml_workout.setAttribute(workoutTags.at(x),workout_schedule->data(index,Qt::DisplayRole).toString());
+                xmlElement.setAttribute(workoutTags.at(x),workout_schedule->data(index,Qt::DisplayRole).toString());
             }
-            xmlroot.appendChild(xml_workout);
+            xmlRoot.appendChild(xmlElement);
         }
-
-        this->saveXML(document,"workout_schedule.xml");
+        this->write_XMLFile(schedulePath,&xmlDoc,workoutFile);
 }
 
 void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
@@ -314,38 +234,36 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
 
 void schedule::save_weekPlan()
 {
-        QDomDocument document;
-        QDomElement xmlroot;
+    QDomDocument xmlDoc;
+    QDomElement xmlRoot,xmlElement;
+    xmlRoot = xmlDoc.createElement("phases");
+    xmlDoc.appendChild(xmlRoot);
 
-        xmlroot = document.createElement("phases");
-        document.appendChild(xmlroot);
-
-        for(int i = 0; i < week_meta->rowCount(); ++i)
+    for(int i = 0; i < week_meta->rowCount(); ++i)
+    {
+        xmlElement = xmlDoc.createElement("phase");
+        for(int col = 0; col < week_meta->columnCount(); ++col)
         {
-            QDomElement xml_phase = document.createElement("phase");
-            for(int col = 0; col < week_meta->columnCount(); ++col)
-            {
-                xml_phase.setAttribute(metaTags.at(col) ,week_meta->data(week_meta->index(i,col,QModelIndex())).toString());
-            }
-            xmlroot.appendChild(xml_phase);
+            xmlElement.setAttribute(metaTags.at(col) ,week_meta->data(week_meta->index(i,col,QModelIndex())).toString());
         }
-        this->saveXML(document,"workout_phase_meta.xml");
+        xmlRoot.appendChild(xmlElement);
+    }
+    this->write_XMLFile(schedulePath,&xmlDoc,metaFile);
+    xmlDoc.clear();
 
-        document.clear();
+    xmlRoot = xmlDoc.createElement("contents");
+    xmlDoc.appendChild(xmlRoot);
 
-        xmlroot = document.createElement("contents");
-        document.appendChild(xmlroot);
-
-        for(int i = 0; i < week_content->rowCount(); ++i)
+    for(int i = 0; i < week_content->rowCount(); ++i)
+    {
+        xmlElement = xmlDoc.createElement("content");
+        for(int col = 0; col < week_content->columnCount(); ++col)
         {
-            QDomElement xml_phase = document.createElement("content");
-            for(int col = 0; col < week_content->columnCount(); ++col)
-            {
-                xml_phase.setAttribute(contentTags.at(col) ,week_content->data(week_content->index(i,col,QModelIndex())).toString());
-            }
-            xmlroot.appendChild(xml_phase);
+            xmlElement.setAttribute(contentTags.at(col) ,week_content->data(week_content->index(i,col,QModelIndex())).toString());
         }
-        this->saveXML(document,"workout_phase_content.xml");
+        xmlRoot.appendChild(xmlElement);
+    }
+    this->write_XMLFile(schedulePath,&xmlDoc,contentFile);
 }
 
 void schedule::read_ltsFile(QDomDocument stressContent)
@@ -392,25 +310,36 @@ void schedule::read_ltsFile(QDomDocument stressContent)
     {
         stressValues.insert(firstdayofweek,0);
     }
-
 }
 
 void schedule::save_ltsFile(double ltsDays)
 {
-    QDomDocument document;
-    QDomElement xmlroot = document.createElement("Stress");
-    document.appendChild(xmlroot);
+    QDomDocument xmlDoc;
+    QDomElement xmlRoot,xmlElement;
+    xmlRoot = xmlDoc.createElement("Stress");
+    xmlDoc.appendChild(xmlRoot);
 
     for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays(-ltsDays)), end = stressValues.find(firstdayofweek); it != end; ++it)
     {
-        QDomElement xml_stress = document.createElement("StressLTS");
-        xml_stress.setAttribute("day",it.key().toString("dd.MM.yyyy"));
-        xml_stress.setAttribute("stress",QString::number(it.value()));
-        xmlroot.appendChild(xml_stress);
+        xmlElement = xmlDoc.createElement("StressLTS");
+        xmlElement.setAttribute("day",it.key().toString("dd.MM.yyyy"));
+        xmlElement.setAttribute("stress",QString::number(it.value()));
+        xmlRoot.appendChild(xmlElement);
     }
-    this->saveXML(document,"longtermstress.xml");
+    this->write_XMLFile(schedulePath,&xmlDoc,ltsFile);
 }
 
+int schedule::check_workouts(QDate date)
+{
+    int workCount;
+    scheduleProxy->setSourceModel(workout_schedule);
+    scheduleProxy->setFilterRegExp("\\b"+date.toString("dd.MM.yyyy")+"\\");
+    scheduleProxy->setFilterKeyColumn(1);
+    workCount = scheduleProxy->rowCount();
+    scheduleProxy->setFilterRegExp("");
+
+    return workCount;
+}
 
 void schedule::save_ltsValues()
 {
@@ -451,25 +380,12 @@ void schedule::save_ltsValues()
     settings::autoSave();
 }
 
-void schedule::saveXML(QDomDocument xmlDoc,QString fileName)
-{
-    QFile file(schedulePath + QDir::separator() + fileName);
-
-    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
-        qDebug() << fileName+": File not open!";
-    }
-
-    QTextStream stream(&file);
-    stream << xmlDoc.toString();
-
-    file.close();
-}
-
 void schedule::copyWeek(QString copyFrom,QString copyTo)
 {
-    QModelIndex index;
-    QList<QStandardItem*> fromList,toList;
+    scheduleProxy->setFilterRegExp("\\b"+copyFrom+"\\b");
+    scheduleProxy->setFilterKeyColumn(0);
+    this->deleteWeek(copyTo);
+    QHash<int,QString> valueList;
     QString fromWeek,toWeek,fromYear,toYear,workdate;
     int fromWeek_int,fromYear_int,toWeek_int,toYear_int,addfactor = 0;
     int days = 7;
@@ -485,9 +401,6 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
     toWeek_int = toWeek.toInt();
     toYear_int = toYear.toInt();
 
-    fromList = workout_schedule->findItems(copyFrom,Qt::MatchExactly,0);
-    toList = workout_schedule->findItems(copyTo,Qt::MatchExactly,0);
-
     if(toYear_int == fromYear_int)
     {
         addfactor = toWeek_int - fromWeek_int;
@@ -497,55 +410,49 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
        addfactor = (lastDay.weekNumber() - fromWeek_int) + toWeek_int;
     }
 
-    if(!toList.isEmpty())
+    for(int row = 0; row < scheduleProxy->rowCount(); ++row)
     {
-        for(int i = 0; i < toList.count(); ++i)
+        workdate = scheduleProxy->data(scheduleProxy->index(row,1)).toString();
+        valueList.insert(0,copyTo);
+        valueList.insert(1,workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy"));
+
+        for(int col = 2; col < scheduleProxy->columnCount();++col)
         {
-            this->delete_workout(workout_schedule->indexFromItem(toList.at(i)));
+            valueList.insert(col,scheduleProxy->data(scheduleProxy->index(row,col)).toString());
         }
+        itemList.insert(scheduleProxy->index(row,0),valueList);
     }
+    this->set_workoutData(COPY);
+    scheduleProxy->setFilterRegExp("");
+}
 
-    for(int i = 0; i < fromList.count(); ++i)
-    {
-        index = workout_schedule->indexFromItem(fromList.at(i));
-        workdate = workout_schedule->item(index.row(),1)->text();
-
-        workout_calweek = copyTo;
-        workout_date = workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy");
-        workout_time = workout_schedule->item(index.row(),2)->text();
-        workout_sport = workout_schedule->item(index.row(),3)->text();
-        workout_code = workout_schedule->item(index.row(),4)->text();
-        workout_title = workout_schedule->item(index.row(),5)->text();
-        workout_duration = workout_schedule->item(index.row(),6)->text();
-        workout_distance = workout_schedule->item(index.row(),7)->text().toDouble();
-        workout_stress_score = workout_schedule->item(index.row(),8)->text().toInt();
-
-        this->add_workout();
-    }
+void schedule::delete_workout(QModelIndex index)
+{
+    QString wDate = workout_schedule->data(workout_schedule->index(index.row(),1)).toString();
+    double stress = workout_schedule->data(workout_schedule->index(index.row(),8)).toDouble();
+    workout_schedule->removeRow(index.row(),QModelIndex());
+    this->updateStress(wDate,stress,false);
 }
 
 void schedule::deleteWeek(QString deleteWeek)
 {
-    QList<QStandardItem*> deleteList;
-    deleteList = workout_schedule->findItems(deleteWeek,Qt::MatchExactly,0);
-
+    QList<QStandardItem*> deleteList = workout_schedule->findItems(deleteWeek,Qt::MatchExactly,0);
     for(int i = 0; i < deleteList.count(); ++i)
     {
         this->delete_workout(workout_schedule->indexFromItem(deleteList.at(i)));
     }
 }
 
-
 QString schedule::get_weekPhase(QDate currDate)
 {
+    QSortFilterProxyModel *metaProxy = new QSortFilterProxyModel();
+    metaProxy->setSourceModel(week_meta);
     QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.addDays(1 - currDate.dayOfWeek()).year());
-    QList<QStandardItem*> metaPhase = week_meta->findItems(weekID,Qt::MatchExactly,1);
-    QModelIndex index;
-    if(!metaPhase.isEmpty())
-    {
-        index = week_meta->indexFromItem(metaPhase.at(0));
-        return week_meta->item(index.row(),2)->text();
-    }
+    metaProxy->setFilterRegExp("\\b"+weekID+"\\b");
+    metaProxy->setFilterKeyColumn(1);
+
+    if(metaProxy->rowCount() == 1) return metaProxy->data(metaProxy->index(0,2)).toString();
+
     return 0;
 }
 
@@ -579,51 +486,48 @@ void schedule::changeYear()
     this->save_weekPlan();
 }
 
-void schedule::add_workout()
+void schedule::set_workoutData(int mode)
 {
-    int row = workout_schedule->rowCount();
+    QString workoutStress;
+    double currStress = 0;
+    int row = 0;
+    int col = 0;
+    if(mode == EDIT) //EDIT
+    {
+        for(QHash<QModelIndex,QHash<int,QString>>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it)
+        {
+            row = it.key().row();
+            currStress = workout_schedule->data(workout_schedule->index(row,8)).toDouble();
+            for(QHash<int,QString>::const_iterator vStart = it.value().cbegin(), vEnd = it.value().cend(); vStart != vEnd; ++vStart,++col)
+            {
+                workout_schedule->setData(workout_schedule->index(row,col,QModelIndex()),it.value().value(col));
+            }
+            workout_date = it.value().value(1);
+            workoutStress = it.value().value(8);
+            this->updateStress(workout_date,workoutStress.toDouble()-currStress,true);
+        }
+    }
+    else if(mode == ADD || mode == COPY) //ADD and COPY
+    {
+        int rowCount = workout_schedule->rowCount();
+        workout_schedule->insertRows(rowCount,itemList.count(),QModelIndex());
 
-    workout_schedule->insertRows(row,1,QModelIndex());
-    workout_schedule->setData(workout_schedule->index(row,0,QModelIndex()),workout_calweek);
-    workout_schedule->setData(workout_schedule->index(row,1,QModelIndex()),workout_date);
-    workout_schedule->setData(workout_schedule->index(row,2,QModelIndex()),workout_time);
-    workout_schedule->setData(workout_schedule->index(row,3,QModelIndex()),workout_sport);
-    workout_schedule->setData(workout_schedule->index(row,4,QModelIndex()),workout_code);
-    workout_schedule->setData(workout_schedule->index(row,5,QModelIndex()),workout_title);
-    workout_schedule->setData(workout_schedule->index(row,6,QModelIndex()),workout_duration);
-    workout_schedule->setData(workout_schedule->index(row,7,QModelIndex()),QString::number(workout_distance));
-    workout_schedule->setData(workout_schedule->index(row,8,QModelIndex()),workout_stress_score);
-
-    this->updateStress(workout_date,workout_stress_score,true);
-
+        for(QHash<QModelIndex,QHash<int,QString>>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it,++rowCount)
+        {
+            for(QHash<int,QString>::const_iterator vStart = it.value().cbegin(), vEnd = it.value().cend(); vStart != vEnd; ++vStart,++col)
+            {
+                workout_schedule->setData(workout_schedule->index(rowCount,col,QModelIndex()),it.value().value(col));
+            }
+            workout_date = it.value().value(1);
+            workoutStress = it.value().value(8);
+            this->updateStress(workout_date,workoutStress.toDouble(),true);
+            col = 0;
+        }
+    }
+    itemList.clear();
 }
 
-void schedule::edit_workout(QModelIndex index)
-{
-    int stress = workout_schedule->data(workout_schedule->index(index.row(),8)).toInt();
-
-    workout_schedule->setData(workout_schedule->index(index.row(),0,QModelIndex()),workout_calweek);
-    workout_schedule->setData(workout_schedule->index(index.row(),1,QModelIndex()),workout_date);
-    workout_schedule->setData(workout_schedule->index(index.row(),2,QModelIndex()),workout_time);
-    workout_schedule->setData(workout_schedule->index(index.row(),3,QModelIndex()),workout_sport);
-    workout_schedule->setData(workout_schedule->index(index.row(),4,QModelIndex()),workout_code);
-    workout_schedule->setData(workout_schedule->index(index.row(),5,QModelIndex()),workout_title);
-    workout_schedule->setData(workout_schedule->index(index.row(),6,QModelIndex()),workout_duration);
-    workout_schedule->setData(workout_schedule->index(index.row(),7,QModelIndex()),QString::number(workout_distance));
-    workout_schedule->setData(workout_schedule->index(index.row(),8,QModelIndex()),workout_stress_score);
-
-    this->updateStress(workout_date,workout_stress_score-stress,true);
-}
-
-void schedule::delete_workout(QModelIndex index)
-{
-    QString wDate = workout_schedule->data(workout_schedule->index(index.row(),1)).toString();
-    int stress = workout_schedule->data(workout_schedule->index(index.row(),8)).toInt();
-    workout_schedule->removeRow(index.row(),QModelIndex());
-    this->updateStress(wDate,stress,false);
-}
-
-void schedule::updateStress(QString date,double stress,bool add)
+void schedule::updateStress(QString date,double addStress,bool add)
 {
     double stressValue = 0;
     QDate wDate = QDate::fromString(date,"dd.MM.yyyy");
@@ -633,23 +537,24 @@ void schedule::updateStress(QString date,double stress,bool add)
         if(stressValues.contains(wDate))
         {
             stressValue = stressValues.value(wDate);
-            stressValues.insert(wDate,stressValue+stress);
+            stressValues.insert(wDate,stressValue+addStress);
         }
         else
         {
-            stressValues.insert(wDate,stress);
+            stressValues.insert(wDate,addStress);
         }
     }
     else
     {
         stressValue = stressValues.value(wDate);
-        if(stressValue - stress == 0)
+        if(stressValue - addStress == 0)
         {
             stressValues.insert(wDate,0);
         }
         else
         {
-            stressValues.insert(wDate,stressValue -stress);
+            stressValues.insert(wDate,stressValue -addStress);
         }
     }
+    isUpdated = true;
 }

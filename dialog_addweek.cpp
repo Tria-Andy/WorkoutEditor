@@ -25,6 +25,11 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
 {
     ui->setupUi(this);
     workSched = p_sched;
+    metaProxy = new QSortFilterProxyModel();
+    metaProxy->setSourceModel(p_sched->week_meta);
+    contentProxy = new QSortFilterProxyModel();
+    contentProxy->setSourceModel(p_sched->week_content);
+
     ui->comboBox_phase->addItems(settings::get_listValues("Phase"));
     ui->comboBox_cycle->addItems(settings::get_listValues("Cycle"));
     ui->dateEdit_selectDate->setDate(QDate().currentDate());
@@ -51,9 +56,11 @@ void Dialog_addweek::on_pushButton_cancel_clicked()
 void Dialog_addweek::fill_values(QString selWeek)
 {
     QStringList weekInfo = selWeek.split("-");
-    QList<QStandardItem*> content = workSched->week_content->findItems(weekInfo.at(1),Qt::MatchExactly,1);
-    QList<QStandardItem*> meta = workSched->week_meta->findItems(weekInfo.at(1),Qt::MatchExactly,1);
-    QModelIndex index;
+    metaProxy->setFilterRegExp("\\b"+weekInfo.at(1)+"\\b");
+    metaProxy->setFilterKeyColumn(1);
+    contentProxy->setFilterRegExp("\\b"+weekInfo.at(1)+"\\b");
+    contentProxy->setFilterKeyColumn(1);
+
     QTime duration;
     QString value,work,dura,dist,stress;
     QString sumString = settings::get_generalValue("sum");
@@ -70,11 +77,10 @@ void Dialog_addweek::fill_values(QString selWeek)
 
     QAbstractItemModel *ab_model = ui->tableView_sportValues->model();
 
-    if(!meta.isEmpty())
+    if(metaProxy->rowCount() > 0)
     {
         openID = weekInfo.at(1);
-        index = workSched->week_meta->indexFromItem(meta.at(0));
-        ui->dateEdit_selectDate->setDate(QDate::fromString(workSched->week_meta->item(index.row(),3)->text(),"dd.MM.yyyy"));
+        ui->dateEdit_selectDate->setDate(QDate::fromString(metaProxy->data(metaProxy->index(0,3)).toString(),"dd.MM.yyyy"));
         ui->lineEdit_week->setText(QString::number(ui->dateEdit_selectDate->date().weekNumber()));
         value = weekInfo.at(3);
         ui->comboBox_phase->setCurrentText(value.split("_").first());
@@ -86,13 +92,11 @@ void Dialog_addweek::fill_values(QString selWeek)
         update = false;
     }
 
-    if(!content.isEmpty())
+    if(contentProxy->rowCount() > 0)
     {
-        index = workSched->week_content->indexFromItem(content.at(0));
-
         for(int i = 2,row = 0; i < listCount+2; ++i,++row)
         {            
-            value = workSched->week_content->item(index.row(),i)->text();
+            value = contentProxy->data(contentProxy->index(0,i)).toString();
             values = value.split("-");
             work = values.at(0);
             dist = values.at(1);
@@ -104,8 +108,8 @@ void Dialog_addweek::fill_values(QString selWeek)
             weekModel->setData(weekModel->index(row,1,QModelIndex()),work.toInt());
             weekModel->setData(weekModel->index(row,2,QModelIndex()),duration);
             weekModel->setData(weekModel->index(row,3,QModelIndex()),0.0);
-            weekModel->setData(weekModel->index(row,4,QModelIndex()),settings::set_doubleValue(dist.toDouble(),false));
-            weekModel->setData(weekModel->index(row,5,QModelIndex()),settings::get_workout_pace(dist.toDouble(),duration,sportuseList.at(row),false));
+            weekModel->setData(weekModel->index(row,4,QModelIndex()),this->set_doubleValue(dist.toDouble(),false));
+            weekModel->setData(weekModel->index(row,5,QModelIndex()),this->get_workout_pace(dist.toDouble(),duration,sportuseList.at(row),false));
             weekModel->setData(weekModel->index(row,6,QModelIndex()),stress.toInt());        
         }
 
@@ -113,7 +117,7 @@ void Dialog_addweek::fill_values(QString selWeek)
         weekModel->setData(weekModel->index(listCount,1,QModelIndex()),week_del.sum_int(ab_model,&sportuseList,1));
         weekModel->setData(weekModel->index(listCount,2,QModelIndex()),week_del.sum_time(ab_model,&sportuseList,2));
         weekModel->setData(weekModel->index(listCount,3,QModelIndex()),100);
-        weekModel->setData(weekModel->index(listCount,4,QModelIndex()),settings::set_doubleValue(week_del.sum_double(ab_model,&sportuseList,4),false));
+        weekModel->setData(weekModel->index(listCount,4,QModelIndex()),this->set_doubleValue(week_del.sum_double(ab_model,&sportuseList,4),false));
         weekModel->setData(weekModel->index(listCount,5,QModelIndex()),"--");
         weekModel->setData(weekModel->index(listCount,6,QModelIndex()),week_del.sum_int(ab_model,&sportuseList,6));
     }
@@ -133,13 +137,15 @@ void Dialog_addweek::fill_values(QString selWeek)
     }
 
     week_del.calc_percent(&sportuseList,ab_model);
+    metaProxy->setFilterRegExp("");
+    contentProxy->setFilterRegExp("");
 }
 
 void Dialog_addweek::store_values()
 {
     weekMeta = QStringList();
     weekID = ui->lineEdit_week->text()+"_"+selYear;
-    int currID = workSched->week_meta->rowCount()+1;
+    int currID = metaProxy->rowCount()+1;
     if(update)
     {
         weekMeta << weekID
@@ -190,46 +196,48 @@ void Dialog_addweek::on_pushButton_ok_clicked()
 
     if(update)
     {
-        QList<QStandardItem*> openItem = workSched->week_meta->findItems(openID,Qt::MatchExactly,1);
+        metaProxy->setFilterRegExp("\\b"+openID+"\\b");
+        metaProxy->setFilterKeyColumn(1);
+        contentProxy->setFilterRegExp("\\b"+openID+"\\b");
+        contentProxy->setFilterKeyColumn(1);
 
-        if(!openItem.isEmpty())
+        if(metaProxy->rowCount() > 0)
         {
-            QModelIndex index = workSched->week_meta->indexFromItem(openItem.at(0));
-            workSched->week_meta->setData(workSched->week_meta->index(index.row(),1,QModelIndex()),weekMeta.at(0));
-            workSched->week_meta->setData(workSched->week_meta->index(index.row(),2,QModelIndex()),weekMeta.at(1));
-            workSched->week_meta->setData(workSched->week_meta->index(index.row(),3,QModelIndex()),weekMeta.at(2));
-        }
-        openItem.clear();
-
-        openItem = workSched->week_content->findItems(openID,Qt::MatchExactly,1);
-
-        if(!openItem.isEmpty())
-        {
-            QModelIndex index = workSched->week_content->indexFromItem(openItem.at(0));
-            for(int i = 1; i <= weekContent.count(); ++i)
+            for(int i = 0; i < weekMeta.count(); ++i)
             {
-                workSched->week_content->setData(workSched->week_content->index(index.row(),i,QModelIndex()),weekContent.at(i-1));
+                metaProxy->setData(metaProxy->index(0,i+1),weekMeta.at(i));
             }
         }
+
+        if(contentProxy->rowCount() > 0)
+        {
+            for(int i = 1; i <= weekContent.count(); ++i)
+            {
+                contentProxy->setData(contentProxy->index(0,i),weekContent.at(i-1));
+            }
+        }
+        metaProxy->setFilterRegExp("");
+        contentProxy->setFilterRegExp("");
     }
     else
     {
         int rowcount;
-        rowcount = workSched->week_meta->rowCount();
-        workSched->week_meta->insertRow(rowcount,QModelIndex());
+        rowcount = metaProxy->rowCount();
+        metaProxy->insertRow(rowcount,QModelIndex());
 
         for(int i = 0; i < weekMeta.count(); ++i)
         {
-            workSched->week_meta->setData(workSched->week_meta->index(rowcount,i,QModelIndex()),weekMeta.at(i));
+            metaProxy->setData(metaProxy->index(rowcount,i,QModelIndex()),weekMeta.at(i));
         }
 
-        rowcount = workSched->week_content->rowCount();
-        workSched->week_content->insertRow(rowcount,QModelIndex());
+        rowcount = contentProxy->rowCount();
+        contentProxy->insertRow(rowcount,QModelIndex());
 
         for(int i = 0; i < weekContent.count(); ++i)
         {
-            workSched->week_content->setData(workSched->week_content->index(rowcount,i,QModelIndex()),weekContent.at(i));
+            contentProxy->setData(contentProxy->index(rowcount,i,QModelIndex()),weekContent.at(i));
         }
     }
+    workSched->set_isUpdated(true);
     accept();
 }

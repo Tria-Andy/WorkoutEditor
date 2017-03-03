@@ -23,6 +23,8 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched) :
     ui->dateEdit_end->setDateRange(firstDayofWeek.addDays(dateRange),stressMap->lastKey());
     ui->dateEdit_end->setDate(firstDayofWeek.addDays(dateRange));
     ui->pushButton_values->setIcon(hideNum);
+
+    connect(ui->widget_stressPlot,SIGNAL(selectionChangedByUser()),this,SLOT(selectionChanged()));
     this->set_graph();
 }
 
@@ -44,13 +46,20 @@ void stress_popup::set_graph()
     selectFont.setPointSize(8);
     selectFont.setItalic(true);
 
+    QList<QCPAxis*> xaxisList;
+    xaxisList.append(ui->widget_stressPlot->xAxis);
+    xaxisList.append(ui->widget_stressPlot->xAxis2);
+
+    QList<QCPAxis*> yaxisList;
+    yaxisList.append(ui->widget_stressPlot->yAxis);
+    //yaxisList.append(ui->widget_stressPlot->yAxis2);
+
     ui->widget_stressPlot->setInteractions(QCP::iSelectLegend | QCP::iMultiSelect | QCP::iRangeDrag | QCP::iRangeZoom);
 
     ui->widget_stressPlot->xAxis->setLabel("Date");
     ui->widget_stressPlot->xAxis->setLabelFont(plotFont);
 
     ui->widget_stressPlot->xAxis2->setVisible(true);
-    ui->widget_stressPlot->xAxis2->setLabel("Weeks");
     ui->widget_stressPlot->xAxis2->setLabelFont(plotFont);
 
     ui->widget_stressPlot->yAxis->setLabel("Stress");
@@ -70,6 +79,13 @@ void stress_popup::set_graph()
     subLayout->setMargins(QMargins(dateRange*10,0,dateRange*10,5));
     subLayout->addElement(0,0,ui->widget_stressPlot->legend);
 
+    ui->widget_stressPlot->axisRect()->setRangeDragAxes(xaxisList,yaxisList);
+    ui->widget_stressPlot->axisRect()->setRangeZoomAxes(xaxisList,yaxisList);
+    ui->widget_stressPlot->addLayer("TSB",ui->widget_stressPlot->layer(0),QCustomPlot::limAbove);
+    ui->widget_stressPlot->addLayer("STS",ui->widget_stressPlot->layer(1),QCustomPlot::limAbove);
+    ui->widget_stressPlot->addLayer("LTS",ui->widget_stressPlot->layer(2),QCustomPlot::limAbove);
+    ui->widget_stressPlot->xAxis->grid()->setLayer("TSB");
+    ui->widget_stressPlot->yAxis->grid()->setLayer("TSB");
     this->set_stressValues(ui->dateEdit_start->date(),ui->dateEdit_end->date());
 }
 
@@ -181,20 +197,22 @@ QCPGraph *stress_popup::get_QCPLine(QString name,QColor gColor,QVector<double> &
     graph->setData(xDate,ydata);
     graph->setAntialiased(true);
     graph->setPen(QPen(gColor,1));
+    graph->setLayer(name);
 
     return graph;
 }
 
-void stress_popup::set_itemTracer(QCPGraph *graphline, QColor tColor,int pos)
+void stress_popup::set_itemTracer(QString layer,QCPGraph *graphline, QColor tColor,int pos)
 {
     QCPItemTracer *tracer = new QCPItemTracer(ui->widget_stressPlot);
     tracer->setGraph(graphline);
     tracer->setGraphKey(xDate[pos]);
     tracer->setStyle(QCPItemTracer::tsCircle);
     tracer->setBrush(QBrush(tColor));
+    tracer->setLayer(layer);
 }
 
-void stress_popup::set_itemText(QFont lineFont, QVector<double> &ydata,int pos,bool secondAxis)
+void stress_popup::set_itemText(QString layer,QFont lineFont, QVector<double> &ydata,int pos,bool secondAxis)
 {
     QCPItemText *itemText = new QCPItemText(ui->widget_stressPlot);
     if(secondAxis)
@@ -208,6 +226,7 @@ void stress_popup::set_itemText(QFont lineFont, QVector<double> &ydata,int pos,b
     itemText->setTextAlignment(Qt::AlignCenter);
     itemText->setFont(lineFont);
     itemText->setPadding(QMargins(1, 1, 1, 1));
+    itemText->setLayer(layer);
 }
 
 void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValues)
@@ -217,11 +236,18 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     ui->widget_stressPlot->legend->setFillOrder(QCPLegend::foColumnsFirst);
     ui->widget_stressPlot->plotLayout()->setRowStretchFactor(1,0.0001);
 
+    QTime time(0,0,0);
+    QDateTime rStart(rangeStart);
+    rStart.setTime(time);
+    QDateTime rStop(rangeEnd);
+    rStop.setTime(time);
+
     QCPRange xRange(QCPAxisTickerDateTime::dateTimeToKey(rangeStart.addDays(-1)),QCPAxisTickerDateTime::dateTimeToKey(rangeEnd.addDays(1)));
 
     QFont lineFont;
     lineFont.setPointSize(8);
     int xTickCount = dateRange;
+    double dayCount = rangeStart.daysTo(rangeEnd)+2;
     QCPGraph *ltsLine = this->get_QCPLine("LTS",QColor(0,255,0),yLTS,false);
     QCPGraph *stsLine = this->get_QCPLine("STS",QColor(255,0,0),ySTS,false);
     QCPGraph *tsbLine = this->get_QCPLine("TSB",QColor(255,170,0),yTSB,true);
@@ -229,26 +255,29 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
 
     for(int i = 0; i < xDate.count(); ++i)
     {
-        this->set_itemTracer(ltsLine,Qt::green,i);
-        this->set_itemTracer(stsLine,Qt::red,i);
-        this->set_itemTracer(tsbLine,QColor(255,170,0),i);
+        this->set_itemTracer("LTS",ltsLine,Qt::green,i);
+        this->set_itemTracer("STS",stsLine,Qt::red,i);
+        this->set_itemTracer("TSB",tsbLine,QColor(255,170,0),i);
 
         if(showValues)
         {
-            this->set_itemText(lineFont,yLTS,i,false);
-            this->set_itemText(lineFont,ySTS,i,false);
-            this->set_itemText(lineFont,yTSB,i,true);
+            this->set_itemText("LTS",lineFont,yLTS,i,false);
+            this->set_itemText("STS",lineFont,ySTS,i,false);
+            this->set_itemText("TSB",lineFont,yTSB,i,true);
         }
 
         if(tsbMinMax[0] > yTSB[i]) tsbMinMax[0] = yTSB[i];
         if(tsbMinMax[1] < yTSB[i]) tsbMinMax[1] = yTSB[i];
     }
 
-    QSharedPointer<QCPAxisTickerDateTime> dateTimeTicker(new QCPAxisTickerDateTime);
-    dateTimeTicker->setDateTimeSpec(Qt::UTC);
-    dateTimeTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
-    dateTimeTicker->setDateTimeFormat("dd.MM");
+    QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+    dateTicker->setDateTimeSpec(Qt::UTC);
+    dateTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
+    dateTicker->setDateTimeFormat("dd.MM");
 
+    QSharedPointer<QCPAxisTickerFixed> dayTicker(new QCPAxisTickerFixed);
+    dayTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
+    dayTicker->setTickStep(1.0);
 
     if(dateRange > 20 && dateRange < 42)
     {
@@ -258,14 +287,25 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     {
         xTickCount = (dateRange+1)/5;
     }
+    if(dayCount >= 21)
+    {
+        dayCount = dayCount / 7;
+        ui->widget_stressPlot->xAxis2->setLabel("Weeks");
+    }
+    else
+    {
+        ui->widget_stressPlot->xAxis2->setLabel("Days");
+    }
 
-    dateTimeTicker->setTickCount(xTickCount);
+    dateTicker->setTickCount(xTickCount);
+    dayTicker->setTickCount(dayCount);
 
     ui->widget_stressPlot->yAxis->setRange(0,stressMax+10);
-    ui->widget_stressPlot->xAxis2->setRange(0,(ui->dateEdit_start->date().daysTo(ui->dateEdit_end->date().addDays(1)))/7);
     ui->widget_stressPlot->yAxis2->setRange(tsbMinMax[0]-5,tsbMinMax[1]+5);
     ui->widget_stressPlot->xAxis->setRange(xRange);
-    ui->widget_stressPlot->xAxis->setTicker(dateTimeTicker);
+    ui->widget_stressPlot->xAxis->setTicker(dateTicker);
+    ui->widget_stressPlot->xAxis2->setRange(0,dayCount);
+    ui->widget_stressPlot->xAxis2->setTicker(dayTicker);
 
     ui->widget_stressPlot->replot();
 
@@ -324,4 +364,23 @@ void stress_popup::on_pushButton_values_toggled(bool checked)
 void stress_popup::on_pushButton_reset_clicked()
 {
     this->set_stressplot(ui->dateEdit_start->date(),ui->dateEdit_end->date(),ui->pushButton_values->isChecked());
+}
+
+void stress_popup::selectionChanged()
+{
+    for(int i = 0; i < ui->widget_stressPlot->graphCount(); ++i)
+    {
+        QCPGraph *graph = ui->widget_stressPlot->graph(i);
+        QCPPlottableLegendItem *item = ui->widget_stressPlot->legend->itemWithPlottable(graph);
+        if(item->selected() || graph->selected())
+        {
+            item->setSelected(true);
+            graph->layer()->setVisible(false);
+        }
+        else
+        {
+            item->setSelected(false);
+            graph->layer()->setVisible(true);
+        }
+    }
 }

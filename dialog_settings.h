@@ -26,12 +26,13 @@
 #include "del_level.h"
 #include "schedule.h"
 #include "settings.h"
+#include "calculation.h"
 
 namespace Ui {
 class Dialog_settings;
 }
 
-class Dialog_settings : public QDialog
+class Dialog_settings : public QDialog, public calculation
 {
     Q_OBJECT
 

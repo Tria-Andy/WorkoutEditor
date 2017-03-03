@@ -64,34 +64,34 @@ void Dialog_paceCalc::init_paceView()
 
 void Dialog_paceCalc::set_pace()
 {
-    int pace = settings::get_timesec(ui->timeEdit_pace->time().toString("mm:ss"));
+    int pace = this->get_timesec(ui->timeEdit_pace->time().toString("mm:ss"));
 
     for(int i = 0; i < 10; ++i)
     {
         if(ui->comboBox_sport->currentText() == settings::isSwim)
         {
             pace_model->setData(pace_model->index(i,0,QModelIndex()),dist[i]*distFactor);
-            pace_model->setData(pace_model->index(i,1,QModelIndex()),settings::set_time(static_cast<int>(round(pace * (dist[i]*distFactor)/100))));
+            pace_model->setData(pace_model->index(i,1,QModelIndex()),this->set_time(static_cast<int>(round(pace * (dist[i]*distFactor)/100))));
         }
         else
         {
             pace_model->setData(pace_model->index(i,0,QModelIndex()),dist[i]*distFactor);
-            pace_model->setData(pace_model->index(i,1,QModelIndex()),settings::set_time(static_cast<int>(round(pace * (dist[i]*distFactor)/1000))));
+            pace_model->setData(pace_model->index(i,1,QModelIndex()),this->set_time(static_cast<int>(round(pace * (dist[i]*distFactor)/1000))));
         }
     }
 }
 
 void Dialog_paceCalc::set_freeField(int dist)
 {
-    int pace = settings::get_timesec(ui->timeEdit_pace->time().toString("mm:ss"));
+    int pace = this->get_timesec(ui->timeEdit_pace->time().toString("mm:ss"));
 
     if(ui->comboBox_sport->currentText() == settings::isSwim)
     {
-        ui->lineEdit_dura->setText(settings::set_time(pace * dist/100));
+        ui->lineEdit_dura->setText(this->set_time(pace * dist/100));
     }
     else
     {
-        ui->lineEdit_dura->setText(settings::set_time(pace * dist/1000));
+        ui->lineEdit_dura->setText(this->set_time(pace * dist/1000));
     }
 }
 
@@ -107,14 +107,14 @@ void Dialog_paceCalc::on_comboBox_sport_currentTextChanged(const QString &sport)
     }
 
     this->set_pace();
-    ui->lineEdit_speed->setText(settings::get_speed(ui->timeEdit_pace->time(),0,sport,true));
+    ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_pace->time(),0,sport,true)));
     this->set_freeField(ui->lineEdit_dist->text().toInt());
 }
 
 
 void Dialog_paceCalc::on_timeEdit_pace_timeChanged(const QTime &time)
 {
-    ui->lineEdit_speed->setText(settings::get_speed(time,0,ui->comboBox_sport->currentText(),true));
+    ui->lineEdit_speed->setText(QString::number(this->get_speed(time,0,ui->comboBox_sport->currentText(),true)));
     this->set_freeField(ui->lineEdit_dist->text().toInt());
     this->set_pace();
 }
@@ -133,12 +133,12 @@ void Dialog_paceCalc::on_spinBox_factor_valueChanged(int value)
 
 void Dialog_paceCalc::on_timeEdit_intTime_timeChanged(const QTime &time)
 {
-    ui->lineEdit_IntSpeed->setText(settings::get_speed(time,ui->spinBox_IntDist->value(),ui->comboBox_sport->currentText(),false));
+    ui->lineEdit_IntSpeed->setText(QString::number(this->get_speed(time,ui->spinBox_IntDist->value(),ui->comboBox_sport->currentText(),false)));
 }
 
 void Dialog_paceCalc::on_spinBox_IntDist_valueChanged(int dist)
 {
-    ui->lineEdit_IntSpeed->setText(settings::get_speed(ui->timeEdit_intTime->time(),dist,ui->comboBox_sport->currentText(),false));
+    ui->lineEdit_IntSpeed->setText(QString::number(this->get_speed(ui->timeEdit_intTime->time(),dist,ui->comboBox_sport->currentText(),false)));
 }
 
 void Dialog_paceCalc::on_pushButton_clicked()
@@ -157,7 +157,7 @@ void Dialog_paceCalc::on_toolButton_copy_clicked()
     QByteArray speedArray;
     QMimeData *mimeData = new QMimeData();
     double speed = ui->lineEdit_IntSpeed->text().toDouble();
-    int sec = settings::get_timesec(ui->timeEdit_intTime->time().toString("mm:ss"));
+    int sec = this->get_timesec(ui->timeEdit_intTime->time().toString("mm:ss"));
 
     for(int i = 0; i < sec; ++i)
     {

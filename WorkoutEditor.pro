@@ -4,7 +4,6 @@
 #
 #-------------------------------------------------
 
-QT       += charts
 QT       += core gui
 QT       += xml
 
@@ -16,7 +15,7 @@ TEMPLATE = app
 #Application version
 VERSION_MAJOR = 1
 VERSION_MINOR = 2
-VERSION_BUILD = 0
+VERSION_BUILD = 10
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
        "VERSION_BUILD=$$VERSION_BUILD"
@@ -28,15 +27,12 @@ VERSION_PE_HEADER = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
 SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
-    dialog_add.cpp \
-    dialog_edit.cpp \
     dialog_export.cpp \
     dialog_workouts.cpp \
     activity.cpp \
     dialog_stresscalc.cpp \
     qcustomplot.cpp \
     week_popup.cpp \
-    dialog_inteditor.cpp \
     day_popup.cpp \
     dialog_settings.cpp \
     dialog_pacecalc.cpp \
@@ -46,16 +42,17 @@ SOURCES += main.cpp\
     schedule.cpp \
     dialog_week_copy.cpp \
     dialog_version.cpp \
-    dialog_lapeditor.cpp \
     jsonhandler.cpp \
     logger.cpp \
-    stress_popup.cpp
+    stress_popup.cpp \
+    calculation.cpp \
+    xmlhandler.cpp \
+    dialog_workcreator.cpp \
+    filereader.cpp
 
 HEADERS  += mainwindow.h \
     calendar_delegate.h \
     settings.h \
-    dialog_add.h \
-    dialog_edit.h \
     dialog_export.h \
     dialog_workouts.h \
     activity.h \
@@ -63,7 +60,6 @@ HEADERS  += mainwindow.h \
     dialog_stresscalc.h \
     qcustomplot.h \
     week_popup.h \
-    dialog_inteditor.h \
     day_popup.h \
     dialog_settings.h \
     dialog_pacecalc.h \
@@ -75,33 +71,36 @@ HEADERS  += mainwindow.h \
     schedule.h \
     dialog_week_copy.h \
     dialog_version.h \
-    dialog_lapeditor.h \
-    del_swimlap.h \
     del_intselect.h \
     jsonhandler.h \
     logger.h \
-    del_intview.h \
     del_level.h \
     del_addweek.h \
-    stress_popup.h
+    stress_popup.h \
+    calculation.h \
+    xmlhandler.h \
+    dialog_workcreator.h \
+    del_workcreator.h \
+    del_treeview.h \
+    del_avgselect.h \
+    filereader.h \
+    del_filelist.h \
+    del_daypop.h \
+    del_workcreatoredit.h
 
 FORMS    += mainwindow.ui \
-    dialog_add.ui \
-    dialog_edit.ui \
     dialog_export.ui \
     dialog_workouts.ui \
     dialog_stresscalc.ui \
     week_popup.ui \
-    dialog_inteditor.ui \
     day_popup.ui \
     dialog_settings.ui \
     dialog_pacecalc.ui \
-    dialog_addweek.ui \
     year_popup.ui \
     dialog_week_copy.ui \
     dialog_version.ui \
-    dialog_lapeditor.ui \
-    stress_popup.ui
+    stress_popup.ui \
+    dialog_workcreator.ui
 
 RESOURCES += \
     resources.qrc

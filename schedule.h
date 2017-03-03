@@ -21,72 +21,55 @@
 
 #include <QStandardItemModel>
 #include <QtXml>
-#include <QtCharts>
 #include <QMessageBox>
 #include "settings.h"
-#include "logger.h"
+#include "xmlhandler.h"
 
-QT_CHARTS_USE_NAMESPACE
-
-class schedule
+class schedule : public xmlHandler
 {
 
 public:
     schedule();
     QStandardItemModel *workout_schedule,*week_meta,*week_content;
+    QHash<QModelIndex,QHash<int,QString>> itemList;
+    void freeMem();
     void save_dayWorkouts();
     void save_weekPlan();
     void save_ltsFile(double);
+    int check_workouts(QDate);
     void changeYear();
     QString get_weekPhase(QDate);
     void copyWeek(QString,QString);
     void deleteWeek(QString);
     QMap<QDate,double> *get_StressMap() {return &stressValues;}
     void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
+    void updateStress(QString,double,bool);
+    bool get_isUpdated() {return isUpdated;}
 
 //Workout
     //Setter
     void set_workout_date(QString w_date) {workout_date = w_date;}
-    void set_workout_time(QString w_time) {workout_time = w_time;}
-    void set_workout_calweek(QString w_calweek) {workout_calweek = w_calweek;}
-    void set_workout_sport(QString sport) {workout_sport = sport;}
-    void set_workout_code(QString wcode) {workout_code = wcode;}
-    void set_workout_title(QString wtitle) {workout_title = wtitle;}
-    void set_workout_duration(QString wduration) {workout_duration = wduration;}
-    void set_workout_distance(double wdistance) {workout_distance = wdistance;}
-    void set_workout_stress(int wstress) {workout_stress_score = wstress;}
+    void set_isUpdated(bool updateFlag) {isUpdated = updateFlag;}
 
     //edit Workouts
-    void add_workout();
-    void edit_workout(QModelIndex);
+    void set_workoutData(int);
     void delete_workout(QModelIndex);
 
 private:
-    logger *logFile;
+    QSortFilterProxyModel *scheduleProxy;
     QStringList workoutTags,metaTags,contentTags;
-    QString schedulePath;
+    QString schedulePath,workoutFile,metaFile,contentFile,ltsFile;
     QDate firstdayofweek;
     QMap<QDate,double> stressValues;
-    void check_workoutFiles();
-    void load_workoutsFiles();
+    bool fileCreated,isUpdated;
     void read_dayWorkouts(QDomDocument);
     void read_weekPlan(QDomDocument,QDomDocument);
-    void read_ltsFile(QDomDocument);
-    void updateStress(QString,double,bool);
+    void read_ltsFile(QDomDocument);   
     void save_ltsValues();
-    void saveXML(QDomDocument,QString);
 
     //Workout Var
-    QString workout_date;
-    QString workout_time;
-    QString workout_calweek;
-    QString workout_phase;
+    QString workout_date;   
     QString workout_sport;
-    QString workout_code;
-    QString workout_title;
-    QString workout_duration;
-    float workout_distance;
-    int workout_stress_score;
 
 };
 

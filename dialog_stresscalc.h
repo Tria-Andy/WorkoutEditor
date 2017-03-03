@@ -21,12 +21,13 @@
 
 #include <QDialog>
 #include "settings.h"
+#include "calculation.h"
 
 namespace Ui {
 class Dialog_stresscalc;
 }
 
-class Dialog_stresscalc : public QDialog
+class Dialog_stresscalc : public QDialog, public calculation
 {
     Q_OBJECT
 
@@ -53,7 +54,7 @@ private:
 
     void read_threshold_values();
     void set_sport_threshold();
-    void estimate_stress();
+    void estimateStress();
     void reset_calc();
 
 };

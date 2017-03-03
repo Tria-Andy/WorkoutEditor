@@ -25,12 +25,13 @@
 #include "jsonhandler.h"
 #include "schedule.h"
 #include "settings.h"
+#include "calculation.h"
 
 namespace Ui {
 class Dialog_export;
 }
 
-class Dialog_export : public QDialog
+class Dialog_export : public QDialog, public jsonHandler
 {
     Q_OBJECT
 
@@ -49,19 +50,15 @@ private slots:
 
 private:
     Ui::Dialog_export *ui;
-    QStandardItemModel *modelMeta,*modelSchedule;
-    schedule *workoutschedule;
-    QList<QStandardItem*> workoutWeek,workoutCount;
-    QStringList weeks;
-    QString fileName, fileContent;
-    jsonHandler *jsonhandler;
-    int export_mode;
+    QSortFilterProxyModel *exportProxy;
+    QString fileContent;
+    int exportMode;
 
     void workout_export();
-    void set_filecontent(QModelIndex);
+    void set_filecontent(int);
     void set_exportselection(bool,bool);
     void set_infolabel(int);
-    void get_exportinfo(QString,QString,bool);
+    void get_exportinfo(QString,int);
     void set_comboBox_time();
 };
 

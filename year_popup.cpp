@@ -58,8 +58,8 @@ year_popup::~year_popup()
 
 void year_popup::set_plotValues()
 {
-    QList<QStandardItem*> list;
-    QModelIndex index;
+    QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel;
+    proxyModel->setSourceModel(workSched->week_meta);
     QString weekID;
 
     if(phaseindex == 0)
@@ -68,8 +68,9 @@ void year_popup::set_plotValues()
     }
     else
     {
-        weekcount = workSched->week_meta->findItems(phase,Qt::MatchContains,2).count();
-        list = workSched->week_meta->findItems(phase,Qt::MatchContains,2);
+        proxyModel->setFilterFixedString(phase);
+        proxyModel->setFilterKeyColumn(2);
+        weekcount = proxyModel->rowCount();
     }
 
     if(weekcount > 40)
@@ -137,9 +138,9 @@ void year_popup::set_plotValues()
             yStress[week] = stress.toDouble();
             if(max_stress < yStress[week]) max_stress = yStress[week];
 
-            yDura[week] = settings::set_doubleValue(static_cast<double>(settings::get_timesec(duration) / 60.0),false);
+            yDura[week] = this->set_doubleValue(static_cast<double>(this->get_timesec(duration) / 60.0),false);
             if(maxValues[0] < yDura[week]) maxValues[0] = yDura[week];
-            yDist[week] = settings::set_doubleValue(distance.toDouble(),false);
+            yDist[week] = this->set_doubleValue(distance.toDouble(),false);
             if(maxValues[1] < yDist[week]) maxValues[1] = yDist[week];
             yWorks[week] = workouts.toDouble();
             if(maxValues[2] < yWorks[week]) maxValues[2] = yWorks[week];
@@ -147,10 +148,9 @@ void year_popup::set_plotValues()
     }
     else
     {
-        for(int week = 0; week < list.count(); ++week)
+        for(int week = 0; week < proxyModel->rowCount(); ++week)
         {
-            index = workSched->week_meta->indexFromItem(list.at(week));
-            weekID = workSched->week_meta->item(index.row(),1)->text();
+            weekID = proxyModel->data(proxyModel->index(week,1)).toString();
 
             for(int i = 0; i < workSched->week_content->rowCount(); ++i)
             {
@@ -166,9 +166,9 @@ void year_popup::set_plotValues()
                     yStress[week] = stress.toDouble();
                     if(max_stress < yStress[week]) max_stress = yStress[week];
 
-                    yDura[week] = settings::set_doubleValue(static_cast<double>(settings::get_timesec(duration) / 60.0),false);
+                    yDura[week] = this->set_doubleValue(static_cast<double>(this->get_timesec(duration) / 60.0),false);
                     if(maxValues[0] < yDura[week]) maxValues[0] = yDura[week];
-                    yDist[week] = settings::set_doubleValue(distance.toDouble(),false);
+                    yDist[week] = this->set_doubleValue(distance.toDouble(),false);
                     if(maxValues[1] < yDist[week]) maxValues[1] = yDist[week];
                     yWorks[week] = workouts.toDouble();
                     if(maxValues[2] < yWorks[week]) maxValues[2] = yWorks[week];

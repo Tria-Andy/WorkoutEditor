@@ -60,15 +60,14 @@ QHash<QString,QString> settings::hfRange;
 QStringList settings::keyList;
 QStringList settings::extkeyList;
 
-bool settings::act_isloaded = false;
-bool settings::act_isrecalc = false;
-
-QStringList settings::header_int;
+QStringList settings::table_header;
+QStringList settings::header_swim;
 QStringList settings::header_bike;
+QStringList settings::header_run;
+QStringList settings::header_other;
+
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
-QStringList settings::table_header;
-QString settings::header_swim;
 
 int settings::swimLaplen;
 
@@ -138,11 +137,10 @@ QColor settings::get_colorRGB(QString colorValue,bool trans)
 
 void settings::loadSettings()
 {
-    header_int << "Interval" << "Duration" << "Distance" << "Distance (Int)" << "Pace";
-    header_int_time << "Interval" << "Start Sec" << "Stop Sec" << "Distance";
-    header_swim_time << "Lap" << "Start" << "Time" << "Strokes" << "Speed";
-    header_swim = "Swim Laps";
-    header_bike << "Watt" << "CAD";
+    header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes";
+    header_bike << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD";
+    header_run << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed";
+    header_other << "Interval" << "Duration" << "Start" << "Distance";
 
     settingFile = QApplication::applicationDirPath() + QDir::separator() +"WorkoutEditor.ini";
 
@@ -400,12 +398,16 @@ void settings::loadSettings()
             settingList = myvalues->value("parts").toString().split(splitter);
             listMap.insert("IntEditor",settingList);
             settingList.clear();
+            settingList = myvalues->value("swimstyle").toString().split(splitter);
+            listMap.insert("SwimStyle",settingList);
+            settingList.clear();
         myvalues->endGroup();
 
         myvalues->beginGroup("Misc");
             settingList << myvalues->value("sum").toString();
             settingList << myvalues->value("empty").toString();
             settingList << myvalues->value("breakname").toString();
+            settingList << myvalues->value("filecount").toString();
             listMap.insert("Misc",settingList);
             generalMap.insert("sum", settingList.at(0));
             colorMap.insert(settingList.at(0),settings::get_colorRGB(myvalues->value("sumcolor").toString(),false));
@@ -413,6 +415,7 @@ void settings::loadSettings()
             colorMap.insert(settingList.at(1),settings::get_colorRGB(myvalues->value("emptycolor").toString(),false));
             generalMap.insert("breakname",settingList.at(2));
             colorMap.insert(settingList.at(2),settings::get_colorRGB(myvalues->value("breakcolor").toString(),false));
+            generalMap.insert("filecount",settingList.at(3));
             settingList.clear();
         myvalues->endGroup();
 
@@ -644,33 +647,25 @@ QString settings::set_colorString(QColor color)
 
 QStringList settings::get_int_header(QString vSport)
 {
+    QString avg = "Avg";
     table_header.clear();
-    if(vSport == isSwim) return table_header << header_int << header_swim;
-    if(vSport == isBike) return table_header << header_int << header_bike;
-
-    return header_int;
-}
-
-QString settings::set_time(int sec)
-{
-    if(sec < 3600)
+    if(vSport == isSwim)
     {
-        return QDateTime::fromTime_t(sec).toUTC().toString("mm:ss");
+        return table_header << header_swim << avg;
     }
-    if(sec >= 3600 && sec < 86400)
+    else if(vSport == isBike)
     {
-        return QDateTime::fromTime_t(sec).toUTC().toString("hh:mm:ss");
+        return table_header << header_bike << avg;
     }
-    if(sec >=86400)
+    else if(vSport == isRun)
     {
-        QString timeVal;
-        int hours, minutes;
-        hours = sec / 60 / 60;
-        minutes = (sec - (hours*60*60)) / 60;
-        timeVal = QString::number(hours) + ":" + QString::number(minutes);
-        return timeVal;
+        return table_header << header_run << avg;
     }
-    return 0;
+    else
+    {
+        return table_header << header_other << avg;
+    }
+    return table_header;
 }
 
 int settings::get_timesec(QString time)
@@ -693,179 +688,3 @@ int settings::get_timesec(QString time)
     return sec;
 }
 
-QString settings::get_workout_pace(double dist, QTime duration,QString sport,bool full_label)
-{
-    QStringList speedLabel;
-    speedLabel << " min/km - " << " km/h" << " min/km" << "no Speed";
-    int nr=0;
-    double speed = 0;
-
-    int sec = duration.hour()*60*60;
-    sec = sec + duration.minute()*60;
-    sec = sec + duration.second();
-
-    int min = duration.hour()*60;
-    min = min + duration.minute();
-
-    if(dist != 0.0 || min != 0)
-    {
-        if(sport == isSwim) speed = sec/dist, nr=0;
-        if(sport == isBike)
-        {
-            if(min > 0)
-            {
-                speed = (dist/min)*60, nr=1;
-            }
-            else
-            {
-                speed = (dist/sec)*3600, nr=1;
-            }
-        }
-        if(sport == isRun)  speed = sec/dist, nr=2;
-        if(sport == isAlt || sport == isStrength) speed = 0.0, nr=3;
-
-        speed = settings::set_doubleValue(speed,false);
-
-        if(full_label)
-        {
-            if(nr == 0) return (QDateTime::fromTime_t(speed).toUTC().toString("mm:ss") + speedLabel.at(nr) + QDateTime::fromTime_t(speed/10.0).toUTC().toString("mm:ss") +" min/100m");
-            if(nr == 1) return (QString::number(speed) + speedLabel.at(nr));
-            if(nr == 2) return (QDateTime::fromTime_t(speed).toUTC().toString("mm:ss") + speedLabel.at(nr));
-            if(nr == 3) return speedLabel.at(nr);
-        }
-        else
-        {
-            if(nr == 0) return (QDateTime::fromTime_t(speed/10.0).toUTC().toString("mm:ss") +" min/100m");
-            if(nr == 1) return (QString::number(speed) + speedLabel.at(nr));
-            if(nr == 2) return (QDateTime::fromTime_t(speed).toUTC().toString("mm:ss") + speedLabel.at(nr));
-            if(nr == 3) return speedLabel.at(nr);
-        }
-    }
-    else
-    {
-        speed = 0.0;
-    }
-
-    return speedLabel.at(3);
-}
-
-QString settings::get_speed(QTime pace,int dist,QString sport,bool fixdist)
-{
-    int sec = pace.minute()*60;
-    sec = sec + pace.second();
-    double speed;
-
-    if(sec > 0)
-    {
-        if(fixdist)
-        {
-            if(sport == settings::isSwim)
-            {
-                speed = 360.0/sec;
-            }
-            else
-            {
-                speed = 3600.0/sec;
-
-            }
-        }
-        else
-        {
-            speed = (3600.0/sec) / (1000.0/dist);
-        }
-        return QString::number(speed);
-    }
-
-    return "--";
-}
-
-int settings::get_hfvalue(QString percent)
-{
-    double value = percent.toDouble();
-
-    return static_cast<int>(round(thresholdMap.value("hfthres") * (value / 100.0)));
-}
-
-double settings::calc_totalWork(double weight,double avgHF, double moveTime)
-{
-    int age = QDate::currentDate().year() - gcInfo.value("yob").toInt();
-
-    return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
-}
-
-double settings::estimate_stress(QString sport, QString p_goal, int duration)
-{
-    double goal = 0;
-    double est_stress = 0;
-    double est_power = 0;
-    double raw_effort = 0;
-    double cv_effort = 0;
-    double thresPower = 0;
-    if(sport == settings::isSwim)
-    {
-        goal = settings::get_timesec(p_goal);
-    }
-    if(sport == settings::isBike)
-    {
-        goal = p_goal.toDouble();
-    }
-    if(sport == settings::isRun)
-    {
-        goal = settings::get_timesec(p_goal);
-    }
-    if(sport == settings::isStrength)
-    {
-        goal = p_goal.toDouble();
-    }
-
-
-    if(goal > 0)
-    {
-        if(sport == settings::isSwim)
-        {
-            thresPower = thresholdMap.value("swimpower");
-            goal = thresholdMap.value("swimpace") / goal;
-            goal = pow(goal,3.0);
-            est_power = thresPower * goal;
-            raw_effort = (duration * est_power) * (est_power / thresPower);
-            cv_effort = thresPower * 3600;
-
-        }
-        if(sport == settings::isBike)
-        {
-            thresPower = thresholdMap.value("bikepower");
-            raw_effort = (duration * goal) * (goal / thresPower);
-            cv_effort = thresPower * 3600;
-        }
-        if(sport == settings::isRun)
-        {
-            thresPower = thresholdMap.value("runpower");
-            est_power = thresPower * (thresholdMap.value("runpace")/goal);
-            raw_effort = (duration * est_power) * (est_power / thresPower);
-            cv_effort = thresPower * 3600;
-
-        }
-        if(sport == settings::isStrength)
-        {
-            thresPower = thresholdMap.value("stgpower");
-            raw_effort = (duration * goal) * (goal / thresPower);
-            cv_effort = thresPower * 3600;
-        }
-        est_stress = (raw_effort / cv_effort) * 100;
-        return settings::set_doubleValue(est_stress,false);
-    }
-    return 0;
-}
-
-double settings::set_doubleValue(double value, bool isthree)
-{
-    if(isthree)
-    {
-        return value = round( value * 1000.0 ) / 1000.0;
-    }
-    else
-    {
-        return ((static_cast<int>(value *100 +.5)) / 100.0);
-    }
-    return 0;
-}

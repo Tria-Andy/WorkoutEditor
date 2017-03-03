@@ -16,6 +16,11 @@
     <height>365</height>
    </size>
   </property>
+  <property name="font">
+   <font>
+    <family>Segoe UI</family>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Preferences</string>
   </property>
@@ -306,7 +311,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QFrame" name="frame_4">
+              <widget class="QFrame" name="frame_buttons">
                <property name="frameShape">
                 <enum>QFrame::StyledPanel</enum>
                </property>
@@ -315,20 +320,27 @@
                </property>
                <layout class="QHBoxLayout" name="horizontalLayout_4">
                 <property name="spacing">
-                 <number>6</number>
+                 <number>2</number>
                 </property>
                 <property name="leftMargin">
-                 <number>0</number>
+                 <number>1</number>
                 </property>
                 <property name="topMargin">
-                 <number>2</number>
+                 <number>1</number>
                 </property>
                 <property name="rightMargin">
-                 <number>0</number>
+                 <number>1</number>
                 </property>
                 <property name="bottomMargin">
-                 <number>2</number>
+                 <number>1</number>
                 </property>
+                <item>
+                 <widget class="Line" name="line_5">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                 </widget>
+                </item>
                 <item>
                  <widget class="QToolButton" name="toolButton_add">
                   <property name="minimumSize">
@@ -361,6 +373,13 @@
                   </property>
                   <property name="autoRaise">
                    <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="Line" name="line">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
                   </property>
                  </widget>
                 </item>
@@ -400,6 +419,13 @@
                  </widget>
                 </item>
                 <item>
+                 <widget class="Line" name="line_3">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <widget class="QToolButton" name="toolButton_edit">
                   <property name="minimumSize">
                    <size>
@@ -434,7 +460,21 @@
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="Line" name="line_4">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                 </widget>
+                </item>
                </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="Line" name="line_6">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
               </widget>
              </item>
              <item>

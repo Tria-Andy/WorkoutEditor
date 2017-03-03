@@ -10,6 +10,11 @@
     <height>450</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Segoe UI</family>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
@@ -105,7 +110,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Copy Week</string>
+         <string>Edit Week</string>
         </property>
         <property name="text">
          <string/>
