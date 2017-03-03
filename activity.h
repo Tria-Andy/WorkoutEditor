@@ -49,7 +49,7 @@ private:
     void prepareData();
     void build_intTree(bool);
     int build_swimModel(bool,QString,int,int,int,int);
-    QString build_lapName(double,bool);
+    QString build_lapName(QString,int,double,bool);
     void updateSwimLap();
     void updateSwimInt(QModelIndex,QItemSelectionModel*);
     void updateSwimBreak(QModelIndex,QItemSelectionModel*,int);
