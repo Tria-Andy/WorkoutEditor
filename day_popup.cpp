@@ -333,6 +333,7 @@ void day_popup::setNextEditRow()
 
 void day_popup::on_toolButton_close_clicked()
 {
+    workSched->itemList.clear();
     reject();
 }
 
