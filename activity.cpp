@@ -100,7 +100,7 @@ void Activity::prepareData()
     int dist = 0;
     int lapIdent = 0;
     double threshold;
-    bool isTimeBased = true;
+    isTimeBased = true;
     levels = settings::get_listValues("Level");
     breakName = settings::get_generalValue("breakname");
     QString lapName;
@@ -302,10 +302,10 @@ void Activity::prepareData()
     avgModel->setRowCount(avgValues.count());
 
     this->reset_avgSelection();
-    this->build_intTree(isTimeBased);
+    this->build_intTree();
 }
 
-void Activity::build_intTree(bool timeBased)
+void Activity::build_intTree()
 {
     QStandardItem *rootItem = intTreeModel->invisibleRootItem();
     QList<QStandardItem*> intItems;
@@ -324,7 +324,7 @@ void Activity::build_intTree(bool timeBased)
     {
         for(int i = 0; i < intModel->rowCount(); ++i)
         {
-            rootItem->appendRow(setIntRow(i,timeBased));
+            rootItem->appendRow(setIntRow(i));
         }
     }
     else
@@ -349,7 +349,7 @@ void Activity::build_intTree(bool timeBased)
     this->recalcIntTree();
 }
 
-QList<QStandardItem *> Activity::setIntRow(int pInt,bool timeBased)
+QList<QStandardItem *> Activity::setIntRow(int pInt)
 {
     QList<QStandardItem*> intItems;
     QModelIndex data_index = sampleModel->index(intModel->data(intModel->index(pInt,2)).toInt()-1,1);
@@ -378,7 +378,7 @@ QList<QStandardItem *> Activity::setIntRow(int pInt,bool timeBased)
         lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(lapPace);
     }
 
-    lapName = this->build_lapName(lapName,lapTime,lapDist,timeBased);
+    lapName = this->build_lapName(lapName,lapTime,lapDist);
 
     intItems.at(0)->setData(lapName,Qt::EditRole);
     intItems << new QStandardItem("-");
@@ -450,11 +450,11 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
     return intItems;
 }
 
-QString Activity::build_lapName(QString lapName,int lapTime, double lapDist,bool timeBased)
+QString Activity::build_lapName(QString lapName,int lapTime, double lapDist)
 {
     QString label;
 
-    if(timeBased)
+    if(isTimeBased)
     {
         if(lapTime < 60)
         {
@@ -881,7 +881,13 @@ void Activity::updateInterval()
     }
     else
     {
-        intTreeModel->setData(selItem.value(0),selItemModel->data(selItemModel->index(0,0)));
+        QString lapName = selItemModel->data(selItemModel->index(0,0)).toString().split("-").first();
+        double lapDist = selItemModel->data(selItemModel->index(2,0)).toDouble();
+        int lapTime = this->get_timesec(selItemModel->data(selItemModel->index(4,0)).toString());
+        lapName = this->build_lapName(lapName,lapTime,lapDist);
+        selItemModel->setData(selItemModel->index(0,0),lapName);
+
+        intTreeModel->setData(selItem.value(0),lapName);
         intTreeModel->setData(selItem.value(1),selItemModel->data(selItemModel->index(3,0)));
         intTreeModel->setData(selItem.value(2),this->set_time(selItemModel->data(selItemModel->index(1,0)).toInt()));
         intTreeModel->setData(selItem.value(4),selItemModel->data(selItemModel->index(2,0)));

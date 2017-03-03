@@ -223,5 +223,7 @@ public:
         model->data(model->index(1,0)).toInt();
     }
 
+
+
 };
 #endif // DEL_INTSELECT_H

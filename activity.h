@@ -29,7 +29,7 @@
 class Activity : public jsonHandler
 {
 private:
-    QList<QStandardItem*> setIntRow(int,bool);
+    QList<QStandardItem*> setIntRow(int);
     QList<QStandardItem*> setSwimLap(int,QString);
     QSortFilterProxyModel *swimProxy;
     QString v_date,curr_sport,intLabel,breakName;
@@ -41,15 +41,15 @@ private:
     QVector<double> calc_speed,calc_cadence,swimTime,new_dist;
     double swim_track,polishFactor,hf_threshold,hf_max;
     int distFactor,avgCounter,swimPace_cv,zone_count,hf_avg;
-    bool isSwim,isBike,isRun,isTria,isStrength,changeRowCount,isUpdated,selectInt;
+    bool isSwim,isBike,isRun,isTria,isStrength,changeRowCount,isUpdated,selectInt,isTimeBased;
     QVector<bool> editRow;
 
     //Functions
     void readJsonFile(QString,bool);
     void prepareData();
-    void build_intTree(bool);
+    void build_intTree();
     int build_swimModel(bool,QString,int,int,int,int);
-    QString build_lapName(QString,int,double,bool);
+    QString build_lapName(QString,int,double);
     void updateSwimLap();
     void updateSwimInt(QModelIndex,QItemSelectionModel*);
     void updateSwimBreak(QModelIndex,QItemSelectionModel*,int);
