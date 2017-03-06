@@ -153,11 +153,14 @@ void MainWindow::freeMem()
 void MainWindow::read_activityFiles()
 {
     fileModel->clear();
+    ui->progressBar_fileState->setValue(20);
     QStandardItem *rootItem = fileModel->invisibleRootItem();
     actFileReader = new fileReader(fileModel,rootItem);
+    ui->progressBar_fileState->setValue(75);
     this->loadfile(fileModel->data(fileModel->index(0,4)).toString());
     actLoaded = true;
     delete actFileReader;
+    ui->progressBar_fileState->setValue(100);
 }
 
 void MainWindow::clearActivtiy()
@@ -710,6 +713,7 @@ void MainWindow::on_actionSave_Workout_Schedule_triggered()
 
 void MainWindow::on_actionSave_to_GoldenCheetah_triggered()
 {
+    ui->progressBar_fileState->setValue(10);
     QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this,
                                       tr("Save File"),
@@ -726,8 +730,11 @@ void MainWindow::on_actionSave_to_GoldenCheetah_triggered()
         {
             curr_activity->updateIntModel(2,1);
         }
+        ui->progressBar_fileState->setValue(25);
         curr_activity->writeChangedData();
+        ui->progressBar_fileState->setValue(75);
     }
+    ui->progressBar_fileState->setValue(100);
 }
 
 void MainWindow::on_calendarWidget_clicked(const QDate &date)
@@ -1582,6 +1589,7 @@ void MainWindow::on_actionSelect_File_triggered()
 void MainWindow::on_actionReset_triggered()
 {
     this->clearActivtiy();
+    avgSelect_del.sport = QString();
     actLoaded = false;
 }
 
@@ -1800,5 +1808,7 @@ void MainWindow::on_treeView_files_clicked(const QModelIndex &index)
 
 void MainWindow::on_actionRefresh_Filelist_triggered()
 {
+    ui->progressBar_fileState->setValue(10);
     this->read_activityFiles();
+    ui->progressBar_fileState->setValue(100);
 }
