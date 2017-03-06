@@ -130,7 +130,7 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     wTime.fromString("00:00:00","hh:mm:ss");
     startDate.setDate(rangeStart);
     startDate.setTime(wTime);
-    startDate.setTimeSpec(Qt::UTC);
+    startDate.setTimeSpec(Qt::LocalTime);
 
     for(int i = 0; i < dayCount; ++i)
     {
@@ -239,8 +239,10 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     QTime time(0,0,0);
     QDateTime rStart(rangeStart);
     rStart.setTime(time);
+    rStart.setTimeSpec(Qt::LocalTime);
     QDateTime rStop(rangeEnd);
     rStop.setTime(time);
+    rStop.setTimeSpec(Qt::LocalTime);
 
     QCPRange xRange(QCPAxisTickerDateTime::dateTimeToKey(rangeStart.addDays(-1)),QCPAxisTickerDateTime::dateTimeToKey(rangeEnd.addDays(1)));
 
@@ -271,7 +273,7 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     }
 
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
-    dateTicker->setDateTimeSpec(Qt::UTC);
+    dateTicker->setDateTimeSpec(Qt::LocalTime);
     dateTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
     dateTicker->setDateTimeFormat("dd.MM");
 
