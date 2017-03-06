@@ -324,7 +324,10 @@
             </size>
            </property>
            <property name="maxLength">
-            <number>30</number>
+            <number>35</number>
+           </property>
+           <property name="clearButtonEnabled">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -718,6 +721,13 @@
                    </widget>
                   </item>
                   <item>
+                   <widget class="Line" name="line_6">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
                    <widget class="QToolButton" name="toolButton_remove">
                     <property name="minimumSize">
                      <size>
@@ -817,6 +827,13 @@
                     </property>
                     <property name="arrowType">
                      <enum>Qt::UpArrow</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="Line" name="line_7">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
                     </property>
                    </widget>
                   </item>
