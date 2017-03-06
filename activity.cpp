@@ -972,27 +972,30 @@ void Activity::updateSwimInt(QModelIndex parentIndex,QItemSelectionModel *treeSe
 
 void Activity::updateSwimBreak(QModelIndex intIndex,QItemSelectionModel *treeSelect,int value)
 {
-    QStandardItem *nextBreak = intTreeModel->item(intIndex.row()+1);
-    int breakStart,breakStop,breakDura;
-
-    breakDura = this->get_timesec(intTreeModel->data(treeSelect->selectedRows(5).at(0)).toString());
-    breakStart = breakDura + value;
-
-    treeSelect->select(intTreeModel->indexFromItem(nextBreak),QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
-    breakDura = this->get_timesec(intTreeModel->data(treeSelect->selectedRows(4).at(0)).toString());
-    breakStop = this->get_timesec(intTreeModel->data(treeSelect->selectedRows(5).at(0)).toString());
-
-    if((breakStop-breakStart)+breakDura >= 0)
+    if(intIndex.sibling(intIndex.row()+1,0).isValid())
     {
-        breakDura = breakDura + (breakStop-breakStart);
-    }
-    else
-    {
-        breakDura = 0;
-    }
+        QStandardItem *nextBreak = intTreeModel->item(intIndex.row()+1);
+        int breakStart,breakStop,breakDura;
 
-    intTreeModel->setData(treeSelect->selectedRows(4).at(0),this->set_time(breakDura));
-    intTreeModel->setData(treeSelect->selectedRows(5).at(0),this->set_time(breakStart));
+        breakDura = this->get_timesec(intTreeModel->data(treeSelect->selectedRows(5).at(0)).toString());
+        breakStart = breakDura + value;
+
+        treeSelect->select(intTreeModel->indexFromItem(nextBreak),QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+        breakDura = this->get_timesec(intTreeModel->data(treeSelect->selectedRows(4).at(0)).toString());
+        breakStop = this->get_timesec(intTreeModel->data(treeSelect->selectedRows(5).at(0)).toString());
+
+        if((breakStop-breakStart)+breakDura >= 0)
+        {
+            breakDura = breakDura + (breakStop-breakStart);
+        }
+        else
+        {
+            breakDura = 0;
+        }
+
+        intTreeModel->setData(treeSelect->selectedRows(4).at(0),this->set_time(breakDura));
+        intTreeModel->setData(treeSelect->selectedRows(5).at(0),this->set_time(breakStart));
+    }
 
     treeSelect->clearSelection();
 }
