@@ -254,6 +254,7 @@ void Activity::prepareData()
 
         xdataModel->clear();
 
+        selItemModel->setVerticalHeaderLabels(itemHeader.value(0));
         avgValues.resize(4);
         avgModel->setVerticalHeaderLabels(avgHeader.value(0));
 
