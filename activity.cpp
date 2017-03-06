@@ -924,10 +924,10 @@ void Activity::updateSwimLap()
 
         levelTime = paceTimeInZone.value(newLevel);
         paceTimeInZone.insert(newLevel,levelTime + newTime);
-
-        levelTime = (oldTime - newTime) + paceTimeInZone.value(breakName);
-        paceTimeInZone.insert(breakName,levelTime);
     }
+
+    levelTime = (oldTime - newTime) + paceTimeInZone.value(breakName);
+    paceTimeInZone.insert(breakName,levelTime);
     this->swimhfTimeInZone(true);
 }
 
@@ -1306,20 +1306,20 @@ void Activity::swimhfTimeInZone(bool recalc)
     }
 
     int hfAvg = 0;
-    double worktime = this->get_timesec(ride_info.value("Duration"));
+    double workoutTime = this->get_timesec(ride_info.value("Duration"));
 
     for(QHash<QString,int>::const_iterator it = hfZoneAvg.cbegin(), end = hfZoneAvg.cend(); it != end; ++it)
     {
-        hfAvg = hfAvg + ceil((it.value() * hfTimeInZone.value(it.key())) / worktime);
+        hfAvg = hfAvg + ceil((it.value() * hfTimeInZone.value(it.key())) / workoutTime);
     }
 
     //Calc Total Work and Calories
-    int move_time = this->get_moveTime();
-    double swim_pace = ceil(static_cast<double>(move_time) / (ride_info.value("Distance").toDouble()*10));
+    int moveTime = this->get_moveTime();
+    double swim_pace = ceil(static_cast<double>(moveTime) / (ride_info.value("Distance").toDouble()*10));
     double goal = sqrt(pow(static_cast<double>(swim_pace),3.0))/10;
     double swim_sri = static_cast<double>(swimPace_cv) / goal;
 
-    double totalWork = ceil(this->calc_totalWork(tagData.value("Weight").toDouble(),hfAvg,move_time) * swim_sri);
+    double totalWork = ceil(this->calc_totalWork(tagData.value("Weight").toDouble(),hfAvg,moveTime) * swim_sri);
     double totalCal = ceil((totalWork*4)/4.184);
 
     ride_info.insert("Total Cal",QString::number(totalCal));
