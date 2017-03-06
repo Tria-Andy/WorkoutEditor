@@ -105,14 +105,16 @@ public:
         const QAbstractItemModel *model = index.model();
         cFont.setPixelSize(12);
 
-        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
+        QRect rectText(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
         levelName = model->data(model->index(index.row(),0,QModelIndex())).toString().trimmed();
         indexData = index.data().toString();
+        QColor rectColor = settings::get_itemColor(levelName).toHsv();
+        rectColor.setAlpha(175);
 
         painter->setPen(Qt::black);
-        painter->fillRect(option.rect,QBrush(settings::get_itemColor(levelName)));
+        painter->fillRect(option.rect,rectColor);
         painter->setFont(cFont);
-        painter->drawText(rect_text,indexData,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+        painter->drawText(rectText,indexData,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->restore();
     }
 };
