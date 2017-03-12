@@ -924,30 +924,35 @@ void Dialog_workCreator::on_toolButton_update_clicked()
     this->control_editPanel(false);
     this->set_itemData(currentItem);
     this->set_plotModel();
+    ui->treeWidget_intervall->setCurrentItem(currentItem);
 }
 
 void Dialog_workCreator::on_toolButton_remove_clicked()
 {
+    QTreeWidgetItem *deleteItem = currentItem;
+
     if(ui->treeWidget_intervall->topLevelItemCount() == 1)
     {
         this->clearIntTree();
     }
     else
     {
-        if(currentItem->childCount() > 0)
+        if(deleteItem->childCount() > 0)
         {
-            while(currentItem->childCount() > 0)
+            while(deleteItem->childCount() > 0)
             {
-                for(int i = 0; i < currentItem->childCount(); ++i)
+                for(int i = 0; i < deleteItem->childCount(); ++i)
                 {
-                    delete currentItem->child(i);
+                    delete deleteItem->child(i);
                 }
             }
         }
-        delete currentItem;
-        this->show_editItem(ui->treeWidget_intervall->currentItem());
+        delete deleteItem;
+        currentItem = ui->treeWidget_intervall->currentItem();
     }
     this->set_plotModel();
+    this->show_editItem(currentItem);
+    ui->treeWidget_intervall->setCurrentItem(currentItem);
 }
 
 QTreeWidgetItem* Dialog_workCreator::move_item(bool up, QTreeWidgetItem *currentItem)
