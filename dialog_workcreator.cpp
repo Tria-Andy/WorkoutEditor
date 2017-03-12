@@ -6,6 +6,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     ui(new Ui::Dialog_workCreator)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     listModel = new QStandardItemModel;
     plotModel = new QStandardItemModel;
     valueModel = new QStandardItemModel;
@@ -51,6 +52,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     ui->toolButton_update->setStyleSheet(buttonStyle);
     ui->toolButton_down->setStyleSheet(buttonStyle);
     ui->toolButton_up->setStyleSheet(buttonStyle);
+    ui->pushButton_clear->setEnabled(false);
 
     ui->treeWidget_intervall->setStyleSheet(viewBackground);
     ui->listWidget_group->setStyleSheet(viewBackground);
@@ -79,11 +81,6 @@ Dialog_workCreator::~Dialog_workCreator()
     delete valueModel;
     delete listModel;
     delete ui;
-}
-
-void Dialog_workCreator::on_pushButton_close_clicked()
-{
-    reject();
 }
 
 void Dialog_workCreator::get_workouts(QString sport)
@@ -218,6 +215,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     ui->treeWidget_intervall->expandAll();
     this->set_plotModel();
     clearFlag = false;
+    ui->pushButton_clear->setEnabled(true);
 }
 void Dialog_workCreator::save_workout()
 {
@@ -377,6 +375,7 @@ void Dialog_workCreator::on_treeWidget_intervall_itemChanged(QTreeWidgetItem *it
             this->set_defaultData(item,true);
         }
     }
+    ui->pushButton_clear->setEnabled(true);
 }
 
 void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
@@ -535,6 +534,7 @@ void Dialog_workCreator::clearIntTree()
     ui->lineEdit_workoutname->clear();
     ui->comboBox_code->setCurrentIndex(0);
     ui->checkBox_timebased->setChecked(false);
+    ui->pushButton_clear->setEnabled(false);
     this->control_editPanel(false);
     this->resetAxis();
 }
@@ -949,10 +949,10 @@ void Dialog_workCreator::on_toolButton_remove_clicked()
         }
         delete deleteItem;
         currentItem = ui->treeWidget_intervall->currentItem();
+        this->show_editItem(currentItem);
+        ui->treeWidget_intervall->setCurrentItem(currentItem);
     }
     this->set_plotModel();
-    this->show_editItem(currentItem);
-    ui->treeWidget_intervall->setCurrentItem(currentItem);
 }
 
 QTreeWidgetItem* Dialog_workCreator::move_item(bool up, QTreeWidgetItem *currentItem)
@@ -1133,4 +1133,9 @@ void Dialog_workCreator::on_lineEdit_workoutname_textChanged(const QString &valu
             }
         }
     }
+}
+
+void Dialog_workCreator::on_toolButton_close_clicked()
+{
+    reject();
 }

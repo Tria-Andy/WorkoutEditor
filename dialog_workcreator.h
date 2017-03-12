@@ -26,7 +26,6 @@ public:
     ~Dialog_workCreator();
 
 private slots:
-    void on_pushButton_close_clicked();
     void on_treeWidget_intervall_itemChanged(QTreeWidgetItem *item, int column);
     void on_treeWidget_intervall_itemClicked(QTreeWidgetItem *item, int column);
     void on_comboBox_sport_currentTextChanged(const QString &arg1);
@@ -41,6 +40,7 @@ private slots:
     void on_toolButton_copy_clicked();
     void on_toolButton_delete_clicked();
     void on_lineEdit_workoutname_textChanged(const QString &arg1);
+    void on_toolButton_close_clicked();
 
 private:
     Ui::Dialog_workCreator *ui;
