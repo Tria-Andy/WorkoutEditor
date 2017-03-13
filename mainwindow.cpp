@@ -1023,11 +1023,11 @@ void MainWindow::init_editorViews()
     connect(treeSelection,SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(setSelectedIntRow(QModelIndex)));
 
     ui->tableView_selectInt->setModel(curr_activity->selItemModel);
-    ui->tableView_selectInt->setEditTriggers(QAbstractItemView::CurrentChanged);
+    ui->tableView_selectInt->setEditTriggers(QAbstractItemView::AllEditTriggers);
     ui->tableView_selectInt->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_selectInt->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->tableView_selectInt->verticalHeader()->setFixedWidth(100);
-    //ui->tableView_selectInt->verticalHeader()->setMinimumSectionSize(20);
+    ui->tableView_selectInt->verticalHeader()->setMaximumSectionSize(25);
     ui->tableView_selectInt->verticalHeader()->setSectionsClickable(false);
     ui->tableView_selectInt->horizontalHeader()->setVisible(false);
     ui->tableView_selectInt->hideColumn(1);
@@ -1038,6 +1038,7 @@ void MainWindow::init_editorViews()
     ui->tableView_avgValues->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_avgValues->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->tableView_avgValues->verticalHeader()->setFixedWidth(100);
+    ui->tableView_avgValues->verticalHeader()->setMaximumSectionSize(25);
     ui->tableView_avgValues->verticalHeader()->setSectionsClickable(false);
     ui->tableView_avgValues->horizontalHeader()->setVisible(false);
     ui->tableView_avgValues->setItemDelegate(&avgSelect_del);
@@ -1113,16 +1114,6 @@ void MainWindow::setSelectedIntRow(QModelIndex index)
     if(curr_activity->intTreeModel->itemFromIndex(index)->parent() == nullptr)
     {
         this->set_speedValues(index.row());
-    }
-
-    if(isInt)
-    {
-        ui->tableView_selectInt->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-        ui->tableView_selectInt->verticalHeader()->setMinimumSectionSize(20);
-    }
-    else
-    {
-        ui->tableView_selectInt->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     }
 
     intSelect_del.intType = isInt;

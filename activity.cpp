@@ -689,7 +689,7 @@ void Activity::set_editRow(QString lapIdent,bool isInt)
             }
             else
             {
-                editRow << 1 << 1 << 0 << 1 << 0 << 0 << 1;
+                editRow << 1 << 1 << 1 << 1 << 0 << 0 << 1;
             }
         }
     }
@@ -809,7 +809,7 @@ void Activity::addRow_intTree(QItemSelectionModel *treeSelect)
         QList<QStandardItem*> intItems;
         int intStart = this->get_timesec(intTreeModel->data(intTreeModel->index(treeSelect->currentIndex().row(),4)).toString())+this->get_timesec(intTreeModel->data(intTreeModel->index(treeSelect->currentIndex().row(),5)).toString())+1;
 
-        intItems << new QStandardItem("New Int");
+        intItems << new QStandardItem("New_Lap");
         intItems << new QStandardItem(swimType.at(0));
         intItems << new QStandardItem("0");
         intItems << new QStandardItem("0");
@@ -879,6 +879,7 @@ void Activity::updateInterval()
         intTreeModel->setData(selItem.value(5),selItemModel->data(selItemModel->index(1,0)));
         intTreeModel->setData(selItem.value(6),selItemModel->data(selItemModel->index(4,0)));
         intTreeModel->setData(selItem.value(7),0);
+        intTreeModel->setData(selItem.value(8),"");
     }
     else
     {
@@ -1024,7 +1025,6 @@ void Activity::updateXDataModel()
             do
             {
                 xdataModel->insertRow(xdataRow,QModelIndex());
-
                 lapName = intTreeModel->item(row,0)->child(child,0)->text();
                 swimStyle = swimType.indexOf(intTreeModel->item(row,0)->child(child,1)->text());
                 lapTime = this->get_timesec(intTreeModel->item(row,0)->child(child,4)->text());
@@ -1049,7 +1049,6 @@ void Activity::updateXDataModel()
         else
         {
             xdataModel->insertRow(xdataRow,QModelIndex());
-
             lapName = intTreeModel->item(row,0)->text();
             swimStyle = swimType.indexOf(intTreeModel->item(row,1)->text());
             lapTime = this->get_timesec(intTreeModel->item(row,4)->text());
