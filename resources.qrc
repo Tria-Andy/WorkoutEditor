@@ -3,13 +3,10 @@
         <file>icons/Exit.png</file>
         <file>icons/Close.png</file>
         <file>icons/Save.png</file>
-        <file>icons/Add.png</file>
         <file>icons/Create.png</file>
         <file>icons/Upload.png</file>
         <file>icons/Folder.png</file>
         <file>icons/Copy.png</file>
-        <file>icons/Calculator.png</file>
-        <file>icons/Yes.png</file>
         <file>icons/No.png</file>
         <file>icons/Download.png</file>
         <file>icons/Refresh.png</file>
@@ -17,7 +14,6 @@
         <file>icons/Report.png</file>
         <file>icons/Sync.png</file>
         <file>icons/Erase.png</file>
-        <file>icons/Table.png</file>
         <file>icons/Application.png</file>
         <file>icons/Save_Exit.png</file>
         <file>icons/OK.png</file>
@@ -29,17 +25,21 @@
         <file>icons/Modify.png</file>
         <file>icons/3d bar chart.png</file>
         <file>icons/workouteditor.png</file>
-        <file>icons/Stock graph.png</file>
-        <file>icons/Bubble.png</file>
-        <file>icons/Bubble_No.png</file>
-        <file>icons/Calendar.png</file>
-        <file>icons/Previous.png</file>
         <file>icons/Expand.png</file>
         <file>icons/Delete.png</file>
-        <file>icons/Globe.png</file>
         <file>icons/Back.png</file>
         <file>icons/First.png</file>
         <file>icons/JumpForward.png</file>
         <file>icons/Forward.png</file>
+        <file>icons/Calculator.png</file>
+        <file>icons/Date.png</file>
+        <file>icons/DateTime.png</file>
+        <file>icons/Editor.png</file>
+        <file>icons/Cancel.png</file>
+        <file>icons/PMC.png</file>
+        <file>icons/Comment-add.png</file>
+        <file>icons/Comment-delete.png</file>
+        <file>icons/AddAvg.png</file>
+        <file>icons/MinAvg.png</file>
     </qresource>
 </RCC>

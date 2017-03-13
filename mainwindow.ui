@@ -1738,7 +1738,7 @@
   <action name="actionEditor">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Table.png</normaloff>:/images/icons/Table.png</iconset>
+     <normaloff>:/images/icons/Editor.png</normaloff>:/images/icons/Editor.png</iconset>
    </property>
    <property name="text">
     <string>Editor</string>
@@ -1750,7 +1750,7 @@
   <action name="actionPlaner">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Calendar.png</normaloff>:/images/icons/Calendar.png</iconset>
+     <normaloff>:/images/icons/DateTime.png</normaloff>:/images/icons/DateTime.png</iconset>
    </property>
    <property name="text">
     <string>Planer</string>
@@ -1816,7 +1816,7 @@
   <action name="actionPMC">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Stock graph.png</normaloff>:/images/icons/Stock graph.png</iconset>
+     <normaloff>:/images/icons/PMC.png</normaloff>:/images/icons/PMC.png</iconset>
    </property>
    <property name="text">
     <string>PMC</string>

@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
     appMode = new QToolButton(this);
     appMode->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    appMode->setIcon(QIcon(":/images/icons/Table.png"));
+    appMode->setIcon(QIcon(":/images/icons/Editor.png"));
     appMode->setText("Editor");
     appMode->setProperty("Mode",0);
     appMode->setToolTip("Change Mode");
@@ -212,7 +212,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     {
         ui->actionPlaner->setEnabled(mEditor);
         ui->actionEditor->setEnabled(mPlaner);
-        appMode->setIcon(QIcon(":/images/icons/Calendar.png"));
+        appMode->setIcon(QIcon(":/images/icons/DateTime.png"));
         appMode->setText("Planer");
 
     }
@@ -220,7 +220,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     {
         ui->actionEditor->setEnabled(mPlaner);
         ui->actionPlaner->setEnabled(mEditor);
-        appMode->setIcon(QIcon(":/images/icons/Table.png"));
+        appMode->setIcon(QIcon(":/images/icons/Editor.png"));
         appMode->setText("Editor");
     }
 
@@ -1047,7 +1047,7 @@ void MainWindow::init_editorViews()
 
 void MainWindow::init_controlStyleSheets()
 {
-    QString buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00ff00, stop: 0.5 #00d300,stop: 1 #009800)}";
+    QString buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
     QString viewBackground = "background-color: #e6e6e6";
 
     ui->tableView_selectInt->setStyleSheet(viewBackground);
@@ -1131,6 +1131,7 @@ void MainWindow::selectAvgValues(QModelIndex index, int avgCol)
     if(checkAvg == false)
     {
         curr_activity->avgItems.insert(index.row(),index);
+        //curr_activity->intTreeModel->setData(index,QIcon(":/images/icons/AddAvg.png"),Qt::DecorationRole);
         curr_activity->intTreeModel->setData(index,"+");
         curr_activity->intTreeModel->setData(index,1,Qt::UserRole+1);
         curr_activity->set_avgValues(++avgCounter,1);
@@ -1138,6 +1139,7 @@ void MainWindow::selectAvgValues(QModelIndex index, int avgCol)
     else
     {
         curr_activity->avgItems.remove(index.row());
+        //curr_activity->intTreeModel->setData(index,QIcon(":/images/icons/MinAvg.png"),Qt::DecorationRole);
         curr_activity->intTreeModel->setData(index,"-");
         curr_activity->intTreeModel->setData(index,0,Qt::UserRole+1);
         curr_activity->set_avgValues(--avgCounter,-1);

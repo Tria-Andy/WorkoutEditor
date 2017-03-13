@@ -23,16 +23,16 @@
     <number>4</number>
    </property>
    <property name="leftMargin">
-    <number>5</number>
+    <number>2</number>
    </property>
    <property name="topMargin">
-    <number>5</number>
+    <number>2</number>
    </property>
    <property name="rightMargin">
-    <number>5</number>
+    <number>2</number>
    </property>
    <property name="bottomMargin">
-    <number>5</number>
+    <number>2</number>
    </property>
    <item>
     <widget class="QFrame" name="frame_header">
@@ -582,9 +582,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QCustomPlot" name="widget_plot" native="true">
-               <zorder>frame_values</zorder>
-              </widget>
+              <widget class="QCustomPlot" name="widget_plot" native="true"/>
              </item>
             </layout>
            </widget>
@@ -745,7 +743,7 @@
                      </property>
                      <layout class="QHBoxLayout" name="horizontalLayout_4">
                       <property name="spacing">
-                       <number>4</number>
+                       <number>1</number>
                       </property>
                       <property name="leftMargin">
                        <number>1</number>
@@ -763,18 +761,28 @@
                        <widget class="QToolButton" name="toolButton_update">
                         <property name="minimumSize">
                          <size>
-                          <width>50</width>
+                          <width>30</width>
                           <height>24</height>
                          </size>
                         </property>
                         <property name="maximumSize">
                          <size>
-                          <width>50</width>
+                          <width>30</width>
                           <height>24</height>
                          </size>
                         </property>
                         <property name="text">
-                         <string>Update</string>
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resources.qrc">
+                          <normaloff>:/images/icons/Refresh.png</normaloff>:/images/icons/Refresh.png</iconset>
+                        </property>
+                        <property name="iconSize">
+                         <size>
+                          <width>18</width>
+                          <height>18</height>
+                         </size>
                         </property>
                         <property name="autoRaise">
                          <bool>true</bool>
@@ -789,21 +797,70 @@
                        </widget>
                       </item>
                       <item>
-                       <widget class="QToolButton" name="toolButton_remove">
+                       <widget class="QToolButton" name="toolButton_cancel">
                         <property name="minimumSize">
                          <size>
-                          <width>50</width>
+                          <width>30</width>
                           <height>24</height>
                          </size>
                         </property>
                         <property name="maximumSize">
                          <size>
-                          <width>50</width>
+                          <width>30</width>
                           <height>24</height>
                          </size>
                         </property>
                         <property name="text">
-                         <string>Remove</string>
+                         <string>...</string>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resources.qrc">
+                          <normaloff>:/images/icons/Cancel.png</normaloff>:/images/icons/Cancel.png</iconset>
+                        </property>
+                        <property name="iconSize">
+                         <size>
+                          <width>18</width>
+                          <height>18</height>
+                         </size>
+                        </property>
+                        <property name="autoRaise">
+                         <bool>true</bool>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="Line" name="line_8">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QToolButton" name="toolButton_remove">
+                        <property name="minimumSize">
+                         <size>
+                          <width>30</width>
+                          <height>24</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>30</width>
+                          <height>24</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resources.qrc">
+                          <normaloff>:/images/icons/Delete.png</normaloff>:/images/icons/Delete.png</iconset>
+                        </property>
+                        <property name="iconSize">
+                         <size>
+                          <width>18</width>
+                          <height>18</height>
+                         </size>
                         </property>
                         <property name="autoRaise">
                          <bool>true</bool>

@@ -447,7 +447,7 @@
                   </property>
                   <property name="icon">
                    <iconset resource="resources.qrc">
-                    <normaloff>:/images/icons/Yes.png</normaloff>:/images/icons/Yes.png</iconset>
+                    <normaloff>:/images/icons/OK.png</normaloff>:/images/icons/OK.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>

@@ -46,10 +46,11 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     ui->label_head->setText("Add Phase");
 
     viewBackground = "background-color: #e6e6e6";
-    buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00ff00, stop: 0.5 #00d300,stop: 1 #009800)}";
+    buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
 
     ui->toolButton_remove->setStyleSheet(buttonStyle);
     ui->toolButton_update->setStyleSheet(buttonStyle);
+    ui->toolButton_cancel->setStyleSheet(buttonStyle);
     ui->toolButton_down->setStyleSheet(buttonStyle);
     ui->toolButton_up->setStyleSheet(buttonStyle);
     ui->pushButton_clear->setEnabled(false);
@@ -923,6 +924,13 @@ void Dialog_workCreator::on_toolButton_update_clicked()
 {
     this->control_editPanel(false);
     this->set_itemData(currentItem);
+    this->set_plotModel();
+    ui->treeWidget_intervall->setCurrentItem(currentItem);
+}
+
+void Dialog_workCreator::on_toolButton_cancel_clicked()
+{
+    this->control_editPanel(false);
     this->set_plotModel();
     ui->treeWidget_intervall->setCurrentItem(currentItem);
 }
