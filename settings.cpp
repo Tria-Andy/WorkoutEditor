@@ -133,8 +133,6 @@ QColor settings::get_colorRGB(QString colorValue,bool trans)
     return color;
 }
 
-
-
 void settings::loadSettings()
 {
     header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes";
@@ -229,7 +227,6 @@ void settings::loadSettings()
             updateList.clear();
         myvalues->endGroup();
 
-
         myvalues->beginGroup("Keylist");
             updateList = myvalues->value("keys").toString().split(splitter);
             if(!updateList.contains("Misc"))
@@ -244,7 +241,6 @@ void settings::loadSettings()
             }
             updateList.clear();
         myvalues->endGroup();
-
 
         myvalues->beginGroup("Phase");
             myvalues->remove("empty");
@@ -269,6 +265,15 @@ void settings::loadSettings()
             updateList.clear();
         myvalues->endGroup();
 
+        myvalues->beginGroup("IntEditor");
+            updateString = myvalues->value("swimstyle").toString();
+            if(updateString.isEmpty())
+            {
+                updateList << "Break"<<"Freestyle"<<"Backstroke"<<"Breaststroke"<<"Butterfly"<<"Drill"<<"Mixed"<<"IM";
+                myvalues->setValue("sportuse",settings::setSettingString(updateList));
+            }
+            updateList.clear();
+        myvalues->endGroup();
 
         myvalues->beginGroup("Threshold");
             updateString = myvalues->value("pace").toString();
@@ -289,8 +294,8 @@ void settings::loadSettings()
                 myvalues->setValue("hfmax",updateList.at(1));
                 myvalues->remove("hf");
             }
+            updateList.clear();
         myvalues->endGroup();
-        updateList.clear();
 
         myvalues->beginGroup("Misc");
             if(myvalues->value("sum").toString().isEmpty())
@@ -301,6 +306,10 @@ void settings::loadSettings()
                 myvalues->setValue("emptycolor","125-125-200");
                 myvalues->setValue("breakname","Break");
                 myvalues->setValue("breakcolor","125-125-125");
+            }
+            if(myvalues->value("filecount").toString().isEmpty())
+            {
+                myvalues->setValue("filecount","30");
             }
         myvalues->endGroup();
 //###########################Upgrade values ini done####################################
@@ -643,7 +652,6 @@ QString settings::set_colorString(QColor color)
 {
     return QString::number(color.red())+"-"+QString::number(color.green())+"-"+QString::number(color.blue());;
 }
-
 
 QStringList settings::get_int_header(QString vSport)
 {
