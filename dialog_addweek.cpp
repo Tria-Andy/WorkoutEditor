@@ -71,6 +71,7 @@ void Dialog_addweek::fill_values(QString selWeek)
     weekModel->setHorizontalHeaderLabels(weekHeader);
     ui->tableView_sportValues->setModel(weekModel);
     ui->tableView_sportValues->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_sportValues->horizontalHeader()->setSectionsClickable(false);
     ui->tableView_sportValues->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_sportValues->verticalHeader()->hide();
     ui->tableView_sportValues->setItemDelegate(&week_del);
@@ -192,6 +193,7 @@ void Dialog_addweek::on_dateEdit_selectDate_dateChanged(const QDate &date)
 
 void Dialog_addweek::on_toolButton_update_clicked()
 {
+    ui->dateEdit_selectDate->setFocus();
     this->store_values();
 
     if(update)
