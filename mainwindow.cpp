@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     stress_sum.resize(sportCounter);
     isWeekMode = true;
 
+    buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
     ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
     appMode = new QToolButton(this);
     appMode->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -103,6 +104,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(workSchedule->workout_schedule,SIGNAL(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)),this,SLOT(refresh_model()));
     connect(workSchedule->workout_schedule,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_model()));
     connect(workSchedule->workout_schedule,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SLOT(refresh_model()));
+    connect(workSchedule->week_meta,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
+    connect(workSchedule->week_content,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
 
 
     //UI
@@ -641,6 +644,7 @@ void MainWindow::set_phaseButtons()
         pButton->setFixedWidth(50);
         pButton->setAutoRaise(true);
         pButton->setCheckable(true);
+        pButton->setStyleSheet(buttonStyle);
         QFrame *sline = new QFrame();
         sline->setFrameShape(QFrame::VLine);
         sline->setFrameShadow(QFrame::Sunken);
@@ -803,10 +807,8 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
             new_week.setModal(true);
             int dialog_code = new_week.exec();
 
-            if(dialog_code == QDialog::Accepted)
+            if(dialog_code == QDialog::Rejected)
             {
-                this->workout_calendar();
-                this->summery_view();
                 ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
             }
         }
@@ -1047,7 +1049,6 @@ void MainWindow::init_editorViews()
 
 void MainWindow::init_controlStyleSheets()
 {
-    QString buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
     QString viewBackground = "background-color: #e6e6e6";
 
     ui->tableView_selectInt->setStyleSheet(viewBackground);
@@ -1064,6 +1065,7 @@ void MainWindow::init_controlStyleSheets()
     ui->toolButton_update->setStyleSheet(buttonStyle);
     ui->toolButton_downInt->setStyleSheet(buttonStyle);
     ui->toolButton_upInt->setStyleSheet(buttonStyle);
+    planMode->setStyleSheet(buttonStyle);
 }
 
 void MainWindow::update_infoModel()

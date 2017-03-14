@@ -24,6 +24,7 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
     ui(new Ui::Dialog_addweek)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     workSched = p_sched;
     metaProxy = new QSortFilterProxyModel();
     metaProxy->setSourceModel(p_sched->week_meta);
@@ -47,8 +48,7 @@ Dialog_addweek::~Dialog_addweek()
     delete ui;
     delete weekModel;
 }
-
-void Dialog_addweek::on_pushButton_cancel_clicked()
+void Dialog_addweek::on_toolButton_close_clicked()
 {
     reject();
 }
@@ -190,7 +190,7 @@ void Dialog_addweek::on_dateEdit_selectDate_dateChanged(const QDate &date)
     selYear = QString::number(date.year());
 }
 
-void Dialog_addweek::on_pushButton_ok_clicked()
+void Dialog_addweek::on_toolButton_update_clicked()
 {
     this->store_values();
 
@@ -239,5 +239,4 @@ void Dialog_addweek::on_pushButton_ok_clicked()
         }
     }
     workSched->set_isUpdated(true);
-    accept();
 }

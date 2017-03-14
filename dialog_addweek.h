@@ -38,9 +38,9 @@ public:
     ~Dialog_addweek();
 
 private slots:
-    void on_pushButton_cancel_clicked();    
-    void on_pushButton_ok_clicked();
     void on_dateEdit_selectDate_dateChanged(const QDate &date);
+    void on_toolButton_update_clicked();
+    void on_toolButton_close_clicked();
 
 private:
     Ui::Dialog_addweek *ui;

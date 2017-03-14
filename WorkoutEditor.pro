@@ -86,7 +86,8 @@ HEADERS  += mainwindow.h \
     filereader.h \
     del_filelist.h \
     del_daypop.h \
-    del_workcreatoredit.h
+    del_workcreatoredit.h \
+    del_mousehover.h
 
 FORMS    += mainwindow.ui \
     dialog_export.ui \
@@ -100,7 +101,8 @@ FORMS    += mainwindow.ui \
     dialog_week_copy.ui \
     dialog_version.ui \
     stress_popup.ui \
-    dialog_workcreator.ui
+    dialog_workcreator.ui \
+    dialog_addweek.ui
 
 RESOURCES += \
     resources.qrc
