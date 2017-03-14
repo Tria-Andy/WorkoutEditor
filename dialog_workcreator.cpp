@@ -24,7 +24,9 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     groupList << isGroup << isSeries;
     levelList = settings::get_listValues("Level");
     ui->listWidget_group->addItems(groupList);
+    ui->listWidget_group->setItemDelegate(&mousehover_del);
     ui->listWidget_phases->addItems(settings::get_listValues("IntEditor"));
+    ui->listWidget_phases->setItemDelegate(&mousehover_del);
     ui->comboBox_sport->addItems(settings::get_listValues("Sport"));
     ui->comboBox_code->addItems(settings::get_listValues("WorkoutCode"));
     clearFlag = false;
@@ -112,6 +114,7 @@ void Dialog_workCreator::get_workouts(QString sport)
 
     ui->listView_workouts->setModel(listModel);
     ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->listView_workouts->setItemDelegate(&mousehover_del);
 
     QColor sportColor = settings::get_itemColor(sport);
     QString sportBack = "rgb("+QString::number(sportColor.red())+","+QString::number(sportColor.green())+","+QString::number(sportColor.blue())+",35%)";
@@ -537,6 +540,9 @@ void Dialog_workCreator::clearIntTree()
     ui->checkBox_timebased->setChecked(false);
     ui->pushButton_clear->setEnabled(false);
     this->control_editPanel(false);
+    ui->listView_workouts->clearSelection();
+    ui->listWidget_group->clearSelection();
+    ui->listWidget_phases->clearSelection();
     this->resetAxis();
 }
 
@@ -958,9 +964,9 @@ void Dialog_workCreator::on_toolButton_remove_clicked()
         delete deleteItem;
         currentItem = ui->treeWidget_intervall->currentItem();
         this->show_editItem(currentItem);
-        ui->treeWidget_intervall->setCurrentItem(currentItem);
     }
     this->set_plotModel();
+    ui->treeWidget_intervall->setCurrentItem(currentItem);
 }
 
 QTreeWidgetItem* Dialog_workCreator::move_item(bool up, QTreeWidgetItem *currentItem)

@@ -59,6 +59,11 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->comboBox_thresSport->addItems(sportList);
     ui->pushButton_save->setEnabled(false);
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
+
+    ui->listWidget_selection->setItemDelegate(&mousehover_del);
+    ui->listWidget_useIn->setItemDelegate(&mousehover_del);
+    ui->listWidget_stressValue->setItemDelegate(&mousehover_del);
+
     this->checkSetup();
 }
 

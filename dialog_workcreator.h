@@ -11,6 +11,7 @@
 #include "standardworkouts.h"
 #include "del_workcreator.h"
 #include "del_workcreatoredit.h"
+#include "del_mousehover.h"
 #include "calculation.h"
 
 namespace Ui {
@@ -56,6 +57,7 @@ private:
     QTreeWidgetItem *currentItem;
     del_workcreator workTree_del;
     del_workcreatoredit edit_del;
+    del_mousehover mousehover_del;
     double time_sum,dist_sum,stress_sum;
     int currThres,threshold_pace,current_pace,threshold_power,current_power;
     QVector<bool> editRow;
