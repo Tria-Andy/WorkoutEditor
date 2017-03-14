@@ -81,11 +81,12 @@ void stress_popup::set_graph()
 
     ui->widget_stressPlot->axisRect()->setRangeDragAxes(xaxisList,yaxisList);
     ui->widget_stressPlot->axisRect()->setRangeZoomAxes(xaxisList,yaxisList);
-    ui->widget_stressPlot->addLayer("TSB",ui->widget_stressPlot->layer(0),QCustomPlot::limAbove);
-    ui->widget_stressPlot->addLayer("STS",ui->widget_stressPlot->layer(1),QCustomPlot::limAbove);
-    ui->widget_stressPlot->addLayer("LTS",ui->widget_stressPlot->layer(2),QCustomPlot::limAbove);
-    ui->widget_stressPlot->xAxis->grid()->setLayer("TSB");
-    ui->widget_stressPlot->yAxis->grid()->setLayer("TSB");
+    ui->widget_stressPlot->addLayer("GRID",ui->widget_stressPlot->layer(0),QCustomPlot::limAbove);
+    ui->widget_stressPlot->addLayer("TSB",ui->widget_stressPlot->layer(1),QCustomPlot::limAbove);
+    ui->widget_stressPlot->addLayer("STS",ui->widget_stressPlot->layer(2),QCustomPlot::limAbove);
+    ui->widget_stressPlot->addLayer("LTS",ui->widget_stressPlot->layer(3),QCustomPlot::limAbove);
+    ui->widget_stressPlot->xAxis->grid()->setLayer("GRID");
+    ui->widget_stressPlot->yAxis->grid()->setLayer("GRID");
     this->set_stressValues(ui->dateEdit_start->date(),ui->dateEdit_end->date());
 }
 
