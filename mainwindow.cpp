@@ -49,10 +49,11 @@ MainWindow::MainWindow(QWidget *parent) :
     stress_sum.resize(sportCounter);
     isWeekMode = true;
 
+    buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
     ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
     appMode = new QToolButton(this);
     appMode->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    appMode->setIcon(QIcon(":/images/icons/Table.png"));
+    appMode->setIcon(QIcon(":/images/icons/Editor.png"));
     appMode->setText("Editor");
     appMode->setProperty("Mode",0);
     appMode->setToolTip("Change Mode");
@@ -103,6 +104,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(workSchedule->workout_schedule,SIGNAL(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)),this,SLOT(refresh_model()));
     connect(workSchedule->workout_schedule,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_model()));
     connect(workSchedule->workout_schedule,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SLOT(refresh_model()));
+    connect(workSchedule->week_meta,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
+    connect(workSchedule->week_content,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
 
 
     //UI
@@ -153,11 +156,14 @@ void MainWindow::freeMem()
 void MainWindow::read_activityFiles()
 {
     fileModel->clear();
+    ui->progressBar_fileState->setValue(20);
     QStandardItem *rootItem = fileModel->invisibleRootItem();
     actFileReader = new fileReader(fileModel,rootItem);
+    ui->progressBar_fileState->setValue(75);
     this->loadfile(fileModel->data(fileModel->index(0,4)).toString());
     actLoaded = true;
     delete actFileReader;
+    ui->progressBar_fileState->setValue(100);
 }
 
 void MainWindow::clearActivtiy()
@@ -209,7 +215,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     {
         ui->actionPlaner->setEnabled(mEditor);
         ui->actionEditor->setEnabled(mPlaner);
-        appMode->setIcon(QIcon(":/images/icons/Calendar.png"));
+        appMode->setIcon(QIcon(":/images/icons/DateTime.png"));
         appMode->setText("Planer");
 
     }
@@ -217,7 +223,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     {
         ui->actionEditor->setEnabled(mPlaner);
         ui->actionPlaner->setEnabled(mEditor);
-        appMode->setIcon(QIcon(":/images/icons/Table.png"));
+        appMode->setIcon(QIcon(":/images/icons/Editor.png"));
         appMode->setText("Editor");
     }
 
@@ -638,6 +644,7 @@ void MainWindow::set_phaseButtons()
         pButton->setFixedWidth(50);
         pButton->setAutoRaise(true);
         pButton->setCheckable(true);
+        pButton->setStyleSheet(buttonStyle);
         QFrame *sline = new QFrame();
         sline->setFrameShape(QFrame::VLine);
         sline->setFrameShadow(QFrame::Sunken);
@@ -710,6 +717,7 @@ void MainWindow::on_actionSave_Workout_Schedule_triggered()
 
 void MainWindow::on_actionSave_to_GoldenCheetah_triggered()
 {
+    ui->progressBar_fileState->setValue(10);
     QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this,
                                       tr("Save File"),
@@ -726,8 +734,11 @@ void MainWindow::on_actionSave_to_GoldenCheetah_triggered()
         {
             curr_activity->updateIntModel(2,1);
         }
+        ui->progressBar_fileState->setValue(25);
         curr_activity->writeChangedData();
+        ui->progressBar_fileState->setValue(75);
     }
+    ui->progressBar_fileState->setValue(100);
 }
 
 void MainWindow::on_calendarWidget_clicked(const QDate &date)
@@ -796,10 +807,8 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
             new_week.setModal(true);
             int dialog_code = new_week.exec();
 
-            if(dialog_code == QDialog::Accepted)
+            if(dialog_code == QDialog::Rejected)
             {
-                this->workout_calendar();
-                this->summery_view();
                 ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
             }
         }
@@ -1016,11 +1025,11 @@ void MainWindow::init_editorViews()
     connect(treeSelection,SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(setSelectedIntRow(QModelIndex)));
 
     ui->tableView_selectInt->setModel(curr_activity->selItemModel);
-    ui->tableView_selectInt->setEditTriggers(QAbstractItemView::CurrentChanged);
+    ui->tableView_selectInt->setEditTriggers(QAbstractItemView::AllEditTriggers);
     ui->tableView_selectInt->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_selectInt->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->tableView_selectInt->verticalHeader()->setFixedWidth(100);
-    //ui->tableView_selectInt->verticalHeader()->setMinimumSectionSize(20);
+    ui->tableView_selectInt->verticalHeader()->setMaximumSectionSize(25);
     ui->tableView_selectInt->verticalHeader()->setSectionsClickable(false);
     ui->tableView_selectInt->horizontalHeader()->setVisible(false);
     ui->tableView_selectInt->hideColumn(1);
@@ -1031,6 +1040,7 @@ void MainWindow::init_editorViews()
     ui->tableView_avgValues->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_avgValues->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->tableView_avgValues->verticalHeader()->setFixedWidth(100);
+    ui->tableView_avgValues->verticalHeader()->setMaximumSectionSize(25);
     ui->tableView_avgValues->verticalHeader()->setSectionsClickable(false);
     ui->tableView_avgValues->horizontalHeader()->setVisible(false);
     ui->tableView_avgValues->setItemDelegate(&avgSelect_del);
@@ -1039,7 +1049,6 @@ void MainWindow::init_editorViews()
 
 void MainWindow::init_controlStyleSheets()
 {
-    QString buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00ff00, stop: 0.5 #00d300,stop: 1 #009800)}";
     QString viewBackground = "background-color: #e6e6e6";
 
     ui->tableView_selectInt->setStyleSheet(viewBackground);
@@ -1056,6 +1065,7 @@ void MainWindow::init_controlStyleSheets()
     ui->toolButton_update->setStyleSheet(buttonStyle);
     ui->toolButton_downInt->setStyleSheet(buttonStyle);
     ui->toolButton_upInt->setStyleSheet(buttonStyle);
+    planMode->setStyleSheet(buttonStyle);
 }
 
 void MainWindow::update_infoModel()
@@ -1108,16 +1118,6 @@ void MainWindow::setSelectedIntRow(QModelIndex index)
         this->set_speedValues(index.row());
     }
 
-    if(isInt)
-    {
-        ui->tableView_selectInt->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-        ui->tableView_selectInt->verticalHeader()->setMinimumSectionSize(20);
-    }
-    else
-    {
-        ui->tableView_selectInt->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    }
-
     intSelect_del.intType = isInt;
     ui->label_lapType->setText(intLabel.at(isInt));
     ui->tableView_selectInt->setCurrentIndex(curr_activity->selItemModel->index(0,0));
@@ -1133,6 +1133,7 @@ void MainWindow::selectAvgValues(QModelIndex index, int avgCol)
     if(checkAvg == false)
     {
         curr_activity->avgItems.insert(index.row(),index);
+        //curr_activity->intTreeModel->setData(index,QIcon(":/images/icons/AddAvg.png"),Qt::DecorationRole);
         curr_activity->intTreeModel->setData(index,"+");
         curr_activity->intTreeModel->setData(index,1,Qt::UserRole+1);
         curr_activity->set_avgValues(++avgCounter,1);
@@ -1140,6 +1141,7 @@ void MainWindow::selectAvgValues(QModelIndex index, int avgCol)
     else
     {
         curr_activity->avgItems.remove(index.row());
+        //curr_activity->intTreeModel->setData(index,QIcon(":/images/icons/MinAvg.png"),Qt::DecorationRole);
         curr_activity->intTreeModel->setData(index,"-");
         curr_activity->intTreeModel->setData(index,0,Qt::UserRole+1);
         curr_activity->set_avgValues(--avgCounter,-1);
@@ -1582,6 +1584,7 @@ void MainWindow::on_actionSelect_File_triggered()
 void MainWindow::on_actionReset_triggered()
 {
     this->clearActivtiy();
+    avgSelect_del.sport = QString();
     actLoaded = false;
 }
 
@@ -1800,5 +1803,7 @@ void MainWindow::on_treeView_files_clicked(const QModelIndex &index)
 
 void MainWindow::on_actionRefresh_Filelist_triggered()
 {
+    ui->progressBar_fileState->setValue(10);
     this->read_activityFiles();
+    ui->progressBar_fileState->setValue(100);
 }

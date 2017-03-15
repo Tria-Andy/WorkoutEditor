@@ -31,6 +31,9 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(220, 220, 220)</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>2</number>
@@ -125,7 +128,7 @@
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">
-          <normaloff>:/images/icons/Globe.png</normaloff>:/images/icons/Globe.png</iconset>
+          <normaloff>:/images/icons/Date.png</normaloff>:/images/icons/Date.png</iconset>
         </property>
         <property name="iconSize">
          <size>

@@ -24,6 +24,7 @@
 #include <QListWidget>
 #include <QStandardItemModel>
 #include "del_level.h"
+#include "del_mousehover.h"
 #include "schedule.h"
 #include "settings.h"
 #include "calculation.h"
@@ -90,6 +91,7 @@ private:
     QHash<QString,QColor> colorMapCache;
     QStringList keyList,extkeyList,sportList,model_header;
     del_level level_del;
+    del_mousehover mousehover_del;
     double thresPower,thresPace,sportFactor;
     QString getDirectory(QString);
     bool useColor,stressEdit;

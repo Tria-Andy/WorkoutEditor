@@ -95,7 +95,7 @@ private:
 
     int avgCounter,sportUse;
     QDate selectedDate,firstdayofweek;
-    QString weeknumber,phaseFilter;
+    QString weeknumber,phaseFilter,buttonStyle;
     QVector<int> work_sum,dur_sum,stress_sum;
     QVector<double> dist_sum;
     int weekRange,weekpos;

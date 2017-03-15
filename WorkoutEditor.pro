@@ -14,8 +14,8 @@ TEMPLATE = app
 
 #Application version
 VERSION_MAJOR = 1
-VERSION_MINOR = 2
-VERSION_BUILD = 10
+VERSION_MINOR = 3
+VERSION_BUILD = 0
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
        "VERSION_BUILD=$$VERSION_BUILD"
@@ -86,7 +86,8 @@ HEADERS  += mainwindow.h \
     filereader.h \
     del_filelist.h \
     del_daypop.h \
-    del_workcreatoredit.h
+    del_workcreatoredit.h \
+    del_mousehover.h
 
 FORMS    += mainwindow.ui \
     dialog_export.ui \
@@ -100,7 +101,8 @@ FORMS    += mainwindow.ui \
     dialog_week_copy.ui \
     dialog_version.ui \
     stress_popup.ui \
-    dialog_workcreator.ui
+    dialog_workcreator.ui \
+    dialog_addweek.ui
 
 RESOURCES += \
     resources.qrc

@@ -11,6 +11,7 @@
 #include "standardworkouts.h"
 #include "del_workcreator.h"
 #include "del_workcreatoredit.h"
+#include "del_mousehover.h"
 #include "calculation.h"
 
 namespace Ui {
@@ -26,7 +27,6 @@ public:
     ~Dialog_workCreator();
 
 private slots:
-    void on_pushButton_close_clicked();
     void on_treeWidget_intervall_itemChanged(QTreeWidgetItem *item, int column);
     void on_treeWidget_intervall_itemClicked(QTreeWidgetItem *item, int column);
     void on_comboBox_sport_currentTextChanged(const QString &arg1);
@@ -41,6 +41,9 @@ private slots:
     void on_toolButton_copy_clicked();
     void on_toolButton_delete_clicked();
     void on_lineEdit_workoutname_textChanged(const QString &arg1);
+    void on_toolButton_close_clicked();
+
+    void on_toolButton_cancel_clicked();
 
 private:
     Ui::Dialog_workCreator *ui;
@@ -54,6 +57,7 @@ private:
     QTreeWidgetItem *currentItem;
     del_workcreator workTree_del;
     del_workcreatoredit edit_del;
+    del_mousehover mousehover_del;
     double time_sum,dist_sum,stress_sum;
     int currThres,threshold_pace,current_pace,threshold_power,current_power;
     QVector<bool> editRow;

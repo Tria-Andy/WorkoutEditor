@@ -15,6 +15,40 @@ class del_addweek : public QStyledItemDelegate, public calculation
 public:
     explicit del_addweek(QObject *parent = 0) : QStyledItemDelegate(parent) {}
 
+    void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
+    {
+        painter->save();
+        QFont cFont;
+        QString sportname,indexData;
+        QStringList sportuse = settings::get_listValues("Sportuse");
+        const QAbstractItemModel *model = index.model();
+        cFont.setPixelSize(12);
+
+        QColor rectColor;
+        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
+        sportname = model->data(model->index(index.row(),0,QModelIndex())).toString().trimmed();
+        indexData = index.data().toString();
+        painter->setPen(Qt::black);
+
+        if(index.row() == sportuse.count())
+        {
+            rectColor = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
+            //painter->fillRect(option.rect,QBrush(settings::get_itemColor(settings::get_generalValue("sum"))));
+            cFont.setBold(true);
+        }
+        else
+        {
+            rectColor = settings::get_itemColor(sportname).toHsv();
+            //painter->fillRect(option.rect,QBrush(settings::get_itemColor(sportname)));
+            cFont.setBold(false);
+        }
+        rectColor.setAlpha(175);
+        painter->fillRect(option.rect,rectColor);
+        painter->setFont(cFont);
+        painter->drawText(rect_text,indexData,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+        painter->restore();
+    }
+
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         Q_UNUSED(option)
@@ -130,36 +164,6 @@ public:
     {
         Q_UNUSED(index)
         editor->setGeometry(option.rect);
-    }
-
-    void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
-    {
-        painter->save();
-        QFont cFont;
-        QString sportname,indexData;
-        QStringList sportuse = settings::get_listValues("Sportuse");
-        const QAbstractItemModel *model = index.model();
-        cFont.setPixelSize(12);
-
-        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width(),option.rect.height());
-        sportname = model->data(model->index(index.row(),0,QModelIndex())).toString().trimmed();
-        indexData = index.data().toString();
-        painter->setPen(Qt::black);
-
-        if(index.row() == sportuse.count())
-        {
-            painter->fillRect(option.rect,QBrush(settings::get_itemColor(settings::get_generalValue("sum"))));
-            cFont.setBold(true);
-        }
-        else
-        {
-            painter->fillRect(option.rect,QBrush(settings::get_itemColor(sportname)));
-            cFont.setBold(false);
-        }
-
-        painter->setFont(cFont);
-        painter->drawText(rect_text,indexData,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
-        painter->restore();
     }
 
     int get_timeMin(QTime time) const

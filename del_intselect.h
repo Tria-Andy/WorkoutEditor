@@ -79,6 +79,14 @@ public:
                 editor->setFrame(true);
                 return editor;
             }
+            if(index.row() == 2 && setEdit)
+            {
+                QSpinBox *editor = new QSpinBox(parent);
+                editor->setMinimum(0);
+                editor->setMaximum(50);
+                editor->setFrame(true);
+                return editor;
+            }
             if((index.row() == 3 || index.row() == 6) && setEdit)
             {
                 QSpinBox *editor = new QSpinBox(parent);
@@ -128,6 +136,11 @@ public:
                 comboBox->addItems(settings::get_listValues("SwimStyle"));
                 comboBox->setCurrentText(value);
             }
+            if(index.row() == 2)
+            {
+                QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
+                spinBox->setValue(index.data().toInt());
+            }
             if(index.row() == 3 || index.row() == 6)
             {
                 QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
@@ -157,7 +170,7 @@ public:
             model->setData(index,value);
             if(value.contains(settings::get_generalValue("breakname")))
             {
-                model->setData(model->index(3,0),"00:30");
+                model->setData(model->index(3,0),"00:20");
                 model->setData(model->index(2,0),0);
             }
         }
@@ -168,6 +181,13 @@ public:
             {
                 QComboBox *comboBox = static_cast<QComboBox*>(editor);
                 model->setData(index,comboBox->currentText());
+            }
+            if(index.row() == 2)
+            {
+                QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
+                int value = spinBox->value();
+                spinBox->interpretText();
+                model->setData(index,value);
             }
             if(index.row() == 3 || index.row() == 6)
             {

@@ -6,6 +6,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     ui(new Ui::Dialog_workCreator)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     listModel = new QStandardItemModel;
     plotModel = new QStandardItemModel;
     valueModel = new QStandardItemModel;
@@ -23,7 +24,9 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     groupList << isGroup << isSeries;
     levelList = settings::get_listValues("Level");
     ui->listWidget_group->addItems(groupList);
+    ui->listWidget_group->setItemDelegate(&mousehover_del);
     ui->listWidget_phases->addItems(settings::get_listValues("IntEditor"));
+    ui->listWidget_phases->setItemDelegate(&mousehover_del);
     ui->comboBox_sport->addItems(settings::get_listValues("Sport"));
     ui->comboBox_code->addItems(settings::get_listValues("WorkoutCode"));
     clearFlag = false;
@@ -45,12 +48,14 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     ui->label_head->setText("Add Phase");
 
     viewBackground = "background-color: #e6e6e6";
-    buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00ff00, stop: 0.5 #00d300,stop: 1 #009800)}";
+    buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
 
     ui->toolButton_remove->setStyleSheet(buttonStyle);
     ui->toolButton_update->setStyleSheet(buttonStyle);
+    ui->toolButton_cancel->setStyleSheet(buttonStyle);
     ui->toolButton_down->setStyleSheet(buttonStyle);
     ui->toolButton_up->setStyleSheet(buttonStyle);
+    ui->pushButton_clear->setEnabled(false);
 
     ui->treeWidget_intervall->setStyleSheet(viewBackground);
     ui->listWidget_group->setStyleSheet(viewBackground);
@@ -81,11 +86,6 @@ Dialog_workCreator::~Dialog_workCreator()
     delete ui;
 }
 
-void Dialog_workCreator::on_pushButton_close_clicked()
-{
-    reject();
-}
-
 void Dialog_workCreator::get_workouts(QString sport)
 {
     QString workID,workTitle,listString;
@@ -114,6 +114,7 @@ void Dialog_workCreator::get_workouts(QString sport)
 
     ui->listView_workouts->setModel(listModel);
     ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->listView_workouts->setItemDelegate(&mousehover_del);
 
     QColor sportColor = settings::get_itemColor(sport);
     QString sportBack = "rgb("+QString::number(sportColor.red())+","+QString::number(sportColor.green())+","+QString::number(sportColor.blue())+",35%)";
@@ -218,6 +219,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     ui->treeWidget_intervall->expandAll();
     this->set_plotModel();
     clearFlag = false;
+    ui->pushButton_clear->setEnabled(true);
 }
 void Dialog_workCreator::save_workout()
 {
@@ -280,7 +282,7 @@ void Dialog_workCreator::save_workout()
                   << worktime
                   << QString::number(dist_sum)
                   << QString::number(round(stress_sum))
-                  << QString::number(ui->checkBox_timebased->isEnabled());
+                  << QString::number(ui->checkBox_timebased->isChecked());
 
      workModel = this->workouts_meta;
      this->save_workout_values(workoutValues,workModel);
@@ -377,6 +379,7 @@ void Dialog_workCreator::on_treeWidget_intervall_itemChanged(QTreeWidgetItem *it
             this->set_defaultData(item,true);
         }
     }
+    ui->pushButton_clear->setEnabled(true);
 }
 
 void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
@@ -535,7 +538,11 @@ void Dialog_workCreator::clearIntTree()
     ui->lineEdit_workoutname->clear();
     ui->comboBox_code->setCurrentIndex(0);
     ui->checkBox_timebased->setChecked(false);
+    ui->pushButton_clear->setEnabled(false);
     this->control_editPanel(false);
+    ui->listView_workouts->clearSelection();
+    ui->listWidget_group->clearSelection();
+    ui->listWidget_phases->clearSelection();
     this->resetAxis();
 }
 
@@ -924,30 +931,42 @@ void Dialog_workCreator::on_toolButton_update_clicked()
     this->control_editPanel(false);
     this->set_itemData(currentItem);
     this->set_plotModel();
+    ui->treeWidget_intervall->setCurrentItem(currentItem);
+}
+
+void Dialog_workCreator::on_toolButton_cancel_clicked()
+{
+    this->control_editPanel(false);
+    this->set_plotModel();
+    ui->treeWidget_intervall->setCurrentItem(currentItem);
 }
 
 void Dialog_workCreator::on_toolButton_remove_clicked()
 {
+    QTreeWidgetItem *deleteItem = currentItem;
+
     if(ui->treeWidget_intervall->topLevelItemCount() == 1)
     {
         this->clearIntTree();
     }
     else
     {
-        if(currentItem->childCount() > 0)
+        if(deleteItem->childCount() > 0)
         {
-            while(currentItem->childCount() > 0)
+            while(deleteItem->childCount() > 0)
             {
-                for(int i = 0; i < currentItem->childCount(); ++i)
+                for(int i = 0; i < deleteItem->childCount(); ++i)
                 {
-                    delete currentItem->child(i);
+                    delete deleteItem->child(i);
                 }
             }
         }
-        delete currentItem;
-        this->show_editItem(ui->treeWidget_intervall->currentItem());
+        delete deleteItem;
+        currentItem = ui->treeWidget_intervall->currentItem();
+        this->show_editItem(currentItem);
     }
     this->set_plotModel();
+    ui->treeWidget_intervall->setCurrentItem(currentItem);
 }
 
 QTreeWidgetItem* Dialog_workCreator::move_item(bool up, QTreeWidgetItem *currentItem)
@@ -1128,4 +1147,9 @@ void Dialog_workCreator::on_lineEdit_workoutname_textChanged(const QString &valu
             }
         }
     }
+}
+
+void Dialog_workCreator::on_toolButton_close_clicked()
+{
+    reject();
 }

@@ -31,7 +31,14 @@ public:
         rectValue.addRoundedRect(rectBack,1,1);
         QRect rectText(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
 
-        rectColor = settings::get_itemColor(sport).toHsv();
+        if(sport.isEmpty())
+        {
+            rectColor.setHsv(0,0,220,200);
+        }
+        else
+        {
+            rectColor = settings::get_itemColor(sport).toHsv();
+        }
         painter->setPen(Qt::black);
 
         rectGradient.setColorAt(0,rectColor);

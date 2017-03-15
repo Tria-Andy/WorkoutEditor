@@ -16,8 +16,8 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched) :
     lastSTS = settings::get_ltsValue("laststs");
     firstDayofWeek = QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek());
     dateRange = 6;
-    showNum = QIcon(":/images/icons/Bubble.png");
-    hideNum = QIcon(":/images/icons/Bubble_No.png");
+    showNum = QIcon(":/images/icons/Comment-add.png");
+    hideNum = QIcon(":/images/icons/Comment-delete.png");
     ui->dateEdit_start->setDateRange(firstDayofWeek,stressMap->lastKey().addDays(-dateRange));
     ui->dateEdit_start->setDate(firstDayofWeek);
     ui->dateEdit_end->setDateRange(firstDayofWeek.addDays(dateRange),stressMap->lastKey());
@@ -81,11 +81,12 @@ void stress_popup::set_graph()
 
     ui->widget_stressPlot->axisRect()->setRangeDragAxes(xaxisList,yaxisList);
     ui->widget_stressPlot->axisRect()->setRangeZoomAxes(xaxisList,yaxisList);
-    ui->widget_stressPlot->addLayer("TSB",ui->widget_stressPlot->layer(0),QCustomPlot::limAbove);
-    ui->widget_stressPlot->addLayer("STS",ui->widget_stressPlot->layer(1),QCustomPlot::limAbove);
-    ui->widget_stressPlot->addLayer("LTS",ui->widget_stressPlot->layer(2),QCustomPlot::limAbove);
-    ui->widget_stressPlot->xAxis->grid()->setLayer("TSB");
-    ui->widget_stressPlot->yAxis->grid()->setLayer("TSB");
+    ui->widget_stressPlot->addLayer("GRID",ui->widget_stressPlot->layer(0),QCustomPlot::limAbove);
+    ui->widget_stressPlot->addLayer("TSB",ui->widget_stressPlot->layer(1),QCustomPlot::limAbove);
+    ui->widget_stressPlot->addLayer("STS",ui->widget_stressPlot->layer(2),QCustomPlot::limAbove);
+    ui->widget_stressPlot->addLayer("LTS",ui->widget_stressPlot->layer(3),QCustomPlot::limAbove);
+    ui->widget_stressPlot->xAxis->grid()->setLayer("GRID");
+    ui->widget_stressPlot->yAxis->grid()->setLayer("GRID");
     this->set_stressValues(ui->dateEdit_start->date(),ui->dateEdit_end->date());
 }
 
@@ -130,7 +131,7 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     wTime.fromString("00:00:00","hh:mm:ss");
     startDate.setDate(rangeStart);
     startDate.setTime(wTime);
-    startDate.setTimeSpec(Qt::UTC);
+    startDate.setTimeSpec(Qt::LocalTime);
 
     for(int i = 0; i < dayCount; ++i)
     {
@@ -239,8 +240,10 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     QTime time(0,0,0);
     QDateTime rStart(rangeStart);
     rStart.setTime(time);
+    rStart.setTimeSpec(Qt::LocalTime);
     QDateTime rStop(rangeEnd);
     rStop.setTime(time);
+    rStop.setTimeSpec(Qt::LocalTime);
 
     QCPRange xRange(QCPAxisTickerDateTime::dateTimeToKey(rangeStart.addDays(-1)),QCPAxisTickerDateTime::dateTimeToKey(rangeEnd.addDays(1)));
 
@@ -271,7 +274,7 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     }
 
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
-    dateTicker->setDateTimeSpec(Qt::UTC);
+    dateTicker->setDateTimeSpec(Qt::LocalTime);
     dateTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
     dateTicker->setDateTimeFormat("dd.MM");
 
