@@ -41,5 +41,7 @@
         <file>icons/Comment-delete.png</file>
         <file>icons/AddAvg.png</file>
         <file>icons/MinAvg.png</file>
+        <file>icons/Clear.png</file>
+        <file>icons/ExitButton.png</file>
     </qresource>
 </RCC>

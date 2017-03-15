@@ -21,6 +21,21 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout_19">
+    <property name="spacing">
+     <number>4</number>
+    </property>
+    <property name="leftMargin">
+     <number>5</number>
+    </property>
+    <property name="topMargin">
+     <number>5</number>
+    </property>
+    <property name="rightMargin">
+     <number>5</number>
+    </property>
+    <property name="bottomMargin">
+     <number>5</number>
+    </property>
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="sizePolicy">
@@ -810,6 +825,12 @@
            <enum>Qt::Vertical</enum>
           </property>
           <widget class="QSplitter" name="splitter_interval">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>805</height>
+            </size>
+           </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -872,7 +893,7 @@
              </property>
              <property name="maximumSize">
               <size>
-               <width>400</width>
+               <width>300</width>
                <height>400</height>
               </size>
              </property>
@@ -1143,7 +1164,7 @@
              </property>
              <property name="maximumSize">
               <size>
-               <width>400</width>
+               <width>300</width>
                <height>400</height>
               </size>
              </property>
@@ -1302,7 +1323,7 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>250</height>
+             <height>300</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -1660,7 +1681,7 @@
   <action name="actionReset">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Erase.png</normaloff>:/images/icons/Erase.png</iconset>
+     <normaloff>:/images/icons/Clear.png</normaloff>:/images/icons/Clear.png</iconset>
    </property>
    <property name="text">
     <string>Reset</string>
@@ -1699,7 +1720,7 @@
   <action name="actionExit">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Exit.png</normaloff>:/images/icons/Exit.png</iconset>
+     <normaloff>:/images/icons/ExitButton.png</normaloff>:/images/icons/ExitButton.png</iconset>
    </property>
    <property name="text">
     <string>Exit</string>
