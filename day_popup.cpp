@@ -36,12 +36,14 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
     addIcon = QIcon(":/images/icons/Create.png");
     ui->toolButton_editMove->setIcon(editIcon);
     ui->toolButton_editMove->setToolTip("Edit/Move");
+    ui->lineEdit_selected->setReadOnly(true);
+    ui->lineEdit_workoutInfo->setReadOnly(true);
 
     workListHeader << "Time" << "Sport" << "Code" << "Title" << "Duration" << "Distance" << "Stress" << "Pace";
     dayModel = new QStandardItemModel();
 
     this->init_dayWorkouts(popupDate);
-    ui->label_workoutInfo->setText(workSched->get_weekPhase(w_date)+" - Week: "+ QString::number(w_date.weekNumber()));
+    ui->lineEdit_workoutInfo->setText(workSched->get_weekPhase(w_date)+" - Week: "+ QString::number(w_date.weekNumber()));
 
     connect(ui->tableView_day->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(load_workoutData(int)));
     connect(ui->dateEdit_workDate,SIGNAL(dateChanged(QDate)),this,SLOT(edit_workoutDate(QDate)));
@@ -179,7 +181,7 @@ void day_popup::load_workoutData(int workout)
     this->set_controlButtons(true);
     disconnect(ui->tableView_day->itemDelegate(),SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)),this,SLOT(setNextEditRow()));
     ui->tableView_day->clearSelection();
-    ui->label_selected->setFocus();
+    ui->lineEdit_selected->setFocus();
 
     editMode = true;
     QModelIndex workIndex = dayModel->index(0,workout);
@@ -236,57 +238,37 @@ void day_popup::update_workValues()
         }
 
         workSched->itemList.insert(selIndex,valueList);
-        ui->label_selected->setText(ui->tableView_day->model()->headerData(selWorkout,Qt::Horizontal).toString()+" - "+dayModel->data(dayModel->index(1,selWorkout)).toString());
+        ui->lineEdit_selected->setText(ui->tableView_day->model()->headerData(selWorkout,Qt::Horizontal).toString()+" - "+dayModel->data(dayModel->index(1,selWorkout)).toString());
         ui->timeEdit_time->setTime(QTime::fromString(dayModel->data(dayModel->index(0,selWorkout)).toString(),"hh:mm"));
     }
 }
 
-void day_popup::set_result(QString resultText,int resultCode)
+void day_popup::set_result(int resultCode)
 {
-    QString stMessage;
-    bool completeDay = ui->toolButton_dayEdit->isChecked();
-    QMessageBox::StandardButton reply = QMessageBox::No;
-
-    if(completeDay)
+    if(resultCode == ADD || resultCode == EDIT || resultCode == COPY)
     {
-        stMessage = " Complete Day";
+        workSched->set_workoutData(resultCode);
     }
-    else
+    if(resultCode == DEL)
     {
-        stMessage = " Workout";
-    }
-
-    if(resultCode == ADD)reply = QMessageBox::question(this,resultText + stMessage,resultText + stMessage+"?",QMessageBox::Yes|QMessageBox::No);
-    if(resultCode == EDIT)reply = QMessageBox::warning(this,resultText + stMessage,resultText + stMessage+"?",QMessageBox::Yes|QMessageBox::No);
-    if(resultCode == COPY)reply = QMessageBox::question(this,resultText + stMessage,resultText + stMessage+"?",QMessageBox::Yes|QMessageBox::No);
-    if(resultCode == DEL) reply = QMessageBox::critical(this,resultText + stMessage,resultText + stMessage+"?",QMessageBox::Yes|QMessageBox::No);
-
-    if (reply == QMessageBox::Yes)
-    {
-        if(resultCode == ADD || resultCode == EDIT || resultCode == COPY)
+        if(ui->toolButton_dayEdit->isChecked())
         {
-            workSched->set_workoutData(resultCode);
-        }
-        if(resultCode == DEL)
-        {
-            if(completeDay)
+            QString deleteDate = scheduleProxy->data(scheduleProxy->index(0,1)).toString();
+            QList<QStandardItem*> deleteList = workSched->workout_schedule->findItems(deleteDate,Qt::MatchExactly,1);
+            for(int i = 0; i < deleteList.count();++i)
             {
-                QString deleteDate = scheduleProxy->data(scheduleProxy->index(0,1)).toString();
-                QList<QStandardItem*> deleteList = workSched->workout_schedule->findItems(deleteDate,Qt::MatchExactly,1);
-                for(int i = 0; i < deleteList.count();++i)
-                {
-                    workSched->delete_workout(workSched->workout_schedule->indexFromItem(deleteList.at(i)));
-                }
-            }
-            else
-            {
-                workSched->delete_workout(selIndex);
+                workSched->delete_workout(workSched->workout_schedule->indexFromItem(deleteList.at(i)));
             }
         }
+        else
+        {
+            workSched->delete_workout(selIndex);
+        }
     }
+
     editMode = false;
     this->set_controlButtons(false);
-    ui->label_selected->setText("-");
+    ui->lineEdit_selected->setText("-");
     ui->timeEdit_time->setTime(QTime::fromString("00:00","mm:ss"));
     this->init_dayWorkouts(popupDate);
 }
@@ -294,7 +276,7 @@ void day_popup::set_result(QString resultText,int resultCode)
 void day_popup::edit_workoutDate(QDate workDate)
 {
     newDate = workDate;
-    ui->label_workoutInfo->setText(workSched->get_weekPhase(workDate)+" - Week: "+ QString::number(workDate.weekNumber()));
+    ui->lineEdit_workoutInfo->setText(workSched->get_weekPhase(workDate)+" - Week: "+ QString::number(workDate.weekNumber()));
 
     if(ui->toolButton_dayEdit->isChecked())
     {
@@ -322,7 +304,7 @@ void day_popup::setNextEditRow()
     if(ui->toolButton_dayEdit->isChecked())
     {
         ui->tableView_day->clearSelection();
-        ui->label_selected->setFocus();
+        ui->lineEdit_selected->setFocus();
     }
     else
     {
@@ -343,27 +325,27 @@ void day_popup::on_toolButton_editMove_clicked()
 
     if(addWorkout)
     {
-        this->set_result("Add",ADD);
+        this->set_result(ADD);
     }
     else
     {
-        this->set_result("Edit",EDIT);
+        this->set_result(EDIT);
     }
 }
 
 void day_popup::on_toolButton_copy_clicked()
 {
-    this->set_result("Copy",COPY);
+    this->set_result(COPY);
 }
 
 void day_popup::on_toolButton_delete_clicked()
 {
-    this->set_result("Delete",DEL);
+    this->set_result(DEL);
 }
 
 void day_popup::on_toolButton_stdwork_clicked()
 {
-    Dialog_workouts stdWorkouts(this,ui->label_selected->text().split(" - ").last());
+    Dialog_workouts stdWorkouts(this,ui->lineEdit_selected->text().split(" - ").last());
     stdWorkouts.setModal(true);
     int returnCode = stdWorkouts.exec();
     if(returnCode == QDialog::Accepted)
@@ -393,27 +375,34 @@ void day_popup::on_tableView_day_clicked(const QModelIndex &index)
 
 void day_popup::on_toolButton_dayEdit_clicked(bool checked)
 {
+    QPalette selectBox;
+
     if(checked)
     {
-        ui->label_selected->setText("Day");
+        ui->lineEdit_selected->setText("COMPLETE DAY");
         ui->tableView_day->setEditTriggers(QAbstractItemView::NoEditTriggers);
         ui->tableView_day->setSelectionMode(QAbstractItemView::NoSelection);
         ui->tableView_day->horizontalHeader()->setSectionsClickable(!checked);
         ui->timeEdit_time->setTime(QTime::fromString("00:00","mm:ss"));
         ui->timeEdit_time->setEnabled(false);
+        selectBox.setColor(QPalette::Base,Qt::red);
+        selectBox.setColor(QPalette::Text,Qt::white);
         this->set_controlButtons(false);
         ui->toolButton_delete->setEnabled(checked);
     }
     else
     {
-       ui->label_selected->setText("-");
+       ui->lineEdit_selected->setText("-");
        ui->tableView_day->setEditTriggers(QAbstractItemView::AllEditTriggers);
        ui->tableView_day->horizontalHeader()->setSectionsClickable(!checked);
        ui->tableView_day->horizontalHeader()->setSelectionMode(QAbstractItemView::SingleSelection);
+       selectBox.setColor(QPalette::NoRole,Qt::NoBrush);
+       selectBox.setColor(QPalette::Text,Qt::black);
        ui->timeEdit_time->setEnabled(true);
        ui->toolButton_stdwork->setEnabled(true);
        this->set_controlButtons(checked);
     }
+    ui->lineEdit_selected->setPalette(selectBox);
     ui->tableView_day->clearSelection();
-    ui->label_selected->setFocus();
+    ui->lineEdit_selected->setFocus();
 }

@@ -102,7 +102,6 @@ double stress_popup::calc_stress(double pastStress, double currStress,double pDa
 
 void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
 {
-    ui->pushButton_values->setIcon(hideNum);
     double pastStress,currStress,startStress,calcStress = 0;
     int ltsStart = -ltsDays;
     int stsStart = -stsDays;
@@ -182,8 +181,7 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
         yTSB[i] = yLTS[i-1] - ySTS[i-1];
     }
 
-    this->set_stressplot(rangeStart,rangeEnd,true);
-    ui->pushButton_values->setChecked(true);
+    this->set_stressplot(rangeStart,rangeEnd,ui->pushButton_values->isChecked());
 }
 
 QCPGraph *stress_popup::get_QCPLine(QString name,QColor gColor,QVector<double> &ydata, bool secondAxis)
@@ -262,7 +260,7 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
         this->set_itemTracer("STS",stsLine,Qt::red,i);
         this->set_itemTracer("TSB",tsbLine,QColor(255,170,0),i);
 
-        if(showValues)
+        if(!showValues)
         {
             this->set_itemText("LTS",lineFont,yLTS,i,false);
             this->set_itemText("STS",lineFont,ySTS,i,false);
@@ -354,14 +352,14 @@ void stress_popup::on_pushButton_values_toggled(bool checked)
 {
     if(checked)
     {
-        ui->pushButton_values->setIcon(hideNum);
-        this->set_stressplot(ui->dateEdit_start->date(),ui->dateEdit_end->date(),checked);
+        ui->pushButton_values->setIcon(showNum);
     }
     else
     {
-        ui->pushButton_values->setIcon(showNum);
-        this->set_stressplot(ui->dateEdit_start->date(),ui->dateEdit_end->date(),checked);
+        ui->pushButton_values->setIcon(hideNum);
+
     }
+    this->set_stressplot(ui->dateEdit_start->date(),ui->dateEdit_end->date(),checked);
 }
 
 void stress_popup::on_pushButton_reset_clicked()
