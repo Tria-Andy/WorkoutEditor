@@ -71,7 +71,7 @@ private:
     void init_dayWorkouts(QDate);   
     void set_controlButtons(bool);
     void set_dayData(bool);
-    void set_result(QString,int);
+    void set_result(int);
 
 };
 
