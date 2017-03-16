@@ -270,7 +270,7 @@ void settings::loadSettings()
             if(updateString.isEmpty())
             {
                 updateList << "Break"<<"Freestyle"<<"Backstroke"<<"Breaststroke"<<"Butterfly"<<"Drill"<<"Mixed"<<"IM";
-                myvalues->setValue("sportuse",settings::setSettingString(updateList));
+                myvalues->setValue("swimstyle",settings::setSettingString(updateList));
             }
             updateList.clear();
         myvalues->endGroup();
