@@ -16,6 +16,7 @@
  * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <QKeyEvent>
 #include "day_popup.h"
 #include "ui_day_popup.h"
 
@@ -179,7 +180,7 @@ void day_popup::set_dayData(bool completeDay)
 void day_popup::load_workoutData(int workout)
 {
     this->set_controlButtons(true);
-    disconnect(ui->tableView_day->itemDelegate(),SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)),this,SLOT(setNextEditRow()));
+    daypop_del.blockSignals(true);
     ui->tableView_day->clearSelection();
     ui->lineEdit_selected->setFocus();
 
@@ -218,7 +219,7 @@ void day_popup::load_workoutData(int workout)
     ui->tableView_day->edit(workIndex);
     ui->tableView_day->setCurrentIndex(workIndex);
 
-    connect(ui->tableView_day->itemDelegate(),SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)),this,SLOT(setNextEditRow()));
+    daypop_del.blockSignals(false);
     this->update_workValues();
 }
 
@@ -303,7 +304,6 @@ void day_popup::setNextEditRow()
 {
     if(ui->toolButton_dayEdit->isChecked())
     {
-        ui->tableView_day->clearSelection();
         ui->lineEdit_selected->setFocus();
     }
     else
@@ -321,7 +321,7 @@ void day_popup::on_toolButton_close_clicked()
 
 void day_popup::on_toolButton_editMove_clicked()
 {
-    ui->tableView_day->clearSelection();
+    ui->lineEdit_workoutInfo->setFocus();
 
     if(addWorkout)
     {
@@ -405,4 +405,14 @@ void day_popup::on_toolButton_dayEdit_clicked(bool checked)
     ui->lineEdit_selected->setPalette(selectBox);
     ui->tableView_day->clearSelection();
     ui->lineEdit_selected->setFocus();
+}
+
+void day_popup::keyPressEvent(QKeyEvent *event)
+{
+    qDebug() << event->key();
+
+    if(event->key() == Qt::Key_Tab)
+    {
+        qDebug() << "Tab";
+    }
 }
