@@ -353,11 +353,12 @@ void stress_popup::on_pushButton_values_toggled(bool checked)
     if(checked)
     {
         ui->pushButton_values->setIcon(showNum);
+        ui->pushButton_values->setToolTip("Show Values");
     }
     else
     {
         ui->pushButton_values->setIcon(hideNum);
-
+        ui->pushButton_values->setToolTip("Hide Values");
     }
     this->set_stressplot(ui->dateEdit_start->date(),ui->dateEdit_end->date(),checked);
 }
