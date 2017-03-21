@@ -406,13 +406,3 @@ void day_popup::on_toolButton_dayEdit_clicked(bool checked)
     ui->tableView_day->clearSelection();
     ui->lineEdit_selected->setFocus();
 }
-
-void day_popup::keyPressEvent(QKeyEvent *event)
-{
-    qDebug() << event->key();
-
-    if(event->key() == Qt::Key_Tab)
-    {
-        qDebug() << "Tab";
-    }
-}
