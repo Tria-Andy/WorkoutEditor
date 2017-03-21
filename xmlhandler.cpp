@@ -1,4 +1,5 @@
 #include "xmlhandler.h"
+#include <QMessageBox>
 
 xmlHandler::xmlHandler()
 {
@@ -37,6 +38,11 @@ QDomDocument xmlHandler::load_XMLFile(QString path,QString fileName)
 
 void xmlHandler::write_XMLFile(QString path,QDomDocument *xmlDoc,QString fileName)
 {
+    QMessageBox infoBox;
+    infoBox.setText("Save XML File");
+    infoBox.addButton(QMessageBox::Ok);
+    infoBox.exec();
+
     QFile xmlFile(path + QDir::separator() + fileName);
 
     if(!xmlFile.open(QIODevice::WriteOnly | QIODevice::Text))

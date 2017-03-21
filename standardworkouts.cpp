@@ -17,6 +17,7 @@
  */
 
 #include "standardworkouts.h"
+#include <QMessageBox>
 
 standardWorkouts::standardWorkouts()
 {
@@ -76,6 +77,11 @@ void standardWorkouts::read_standard_workouts(QDomDocument meta_doc,QDomDocument
 
 void standardWorkouts::write_standard_workouts()
 {
+    QMessageBox infoBox;
+    infoBox.setText("Save Workout");
+    infoBox.addButton(QMessageBox::Ok);
+    infoBox.exec();
+
     if(save_workouts)
     {
         QModelIndex index;
