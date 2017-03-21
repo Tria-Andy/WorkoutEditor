@@ -54,9 +54,6 @@ private slots:
     void on_tableView_day_clicked(const QModelIndex &index);
     void on_toolButton_dayEdit_clicked(bool checked);
 
-protected:
-    void keyPressEvent(QKeyEvent*);
-
 private:
     Ui::day_popup *ui;
     schedule *workSched;
@@ -70,7 +67,6 @@ private:
     QIcon editIcon,addIcon;
     int selWorkout;
     bool editMode,addWorkout;
-
 
     void init_dayWorkouts(QDate);   
     void set_controlButtons(bool);

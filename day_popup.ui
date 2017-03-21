@@ -323,12 +323,9 @@
          </property>
          <item>
           <widget class="QLineEdit" name="lineEdit_selected">
-<<<<<<< HEAD
            <property name="enabled">
             <bool>true</bool>
            </property>
-=======
->>>>>>> refs/remotes/origin/develop
            <property name="minimumSize">
             <size>
              <width>100</width>

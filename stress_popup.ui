@@ -197,12 +197,9 @@
         </property>
         <property name="checked">
          <bool>false</bool>
-<<<<<<< HEAD
         </property>
         <property name="flat">
          <bool>false</bool>
-=======
->>>>>>> refs/remotes/origin/develop
         </property>
        </widget>
       </item>
