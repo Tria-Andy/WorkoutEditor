@@ -17,13 +17,11 @@ public:
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
-
         const QAbstractItemModel *model = index.model();
         QString lapName;
         QString breakName = settings::get_generalValue("breakname");
         QStringList levels = settings::get_listValues("Level");
         QString levelName = breakName;
-
 
         if(index.parent().isValid())
         {

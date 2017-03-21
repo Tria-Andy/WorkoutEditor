@@ -16,6 +16,7 @@
  * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <QKeyEvent>
 #include "day_popup.h"
 #include "ui_day_popup.h"
 
@@ -179,7 +180,7 @@ void day_popup::set_dayData(bool completeDay)
 void day_popup::load_workoutData(int workout)
 {
     this->set_controlButtons(true);
-    disconnect(ui->tableView_day->itemDelegate(),SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)),this,SLOT(setNextEditRow()));
+    daypop_del.blockSignals(true);
     ui->tableView_day->clearSelection();
     ui->lineEdit_selected->setFocus();
 
@@ -218,7 +219,7 @@ void day_popup::load_workoutData(int workout)
     ui->tableView_day->edit(workIndex);
     ui->tableView_day->setCurrentIndex(workIndex);
 
-    connect(ui->tableView_day->itemDelegate(),SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)),this,SLOT(setNextEditRow()));
+    daypop_del.blockSignals(false);
     this->update_workValues();
 }
 
@@ -245,15 +246,22 @@ void day_popup::update_workValues()
 
 void day_popup::set_result(int resultCode)
 {
+<<<<<<< HEAD
     bool completeDay = ui->toolButton_dayEdit->isChecked();
 
+=======
+>>>>>>> refs/remotes/origin/develop
     if(resultCode == ADD || resultCode == EDIT || resultCode == COPY)
     {
         workSched->set_workoutData(resultCode);
     }
     if(resultCode == DEL)
     {
+<<<<<<< HEAD
         if(completeDay)
+=======
+        if(ui->toolButton_dayEdit->isChecked())
+>>>>>>> refs/remotes/origin/develop
         {
             QString deleteDate = scheduleProxy->data(scheduleProxy->index(0,1)).toString();
             QList<QStandardItem*> deleteList = workSched->workout_schedule->findItems(deleteDate,Qt::MatchExactly,1);
@@ -305,7 +313,10 @@ void day_popup::setNextEditRow()
 {
     if(ui->toolButton_dayEdit->isChecked())
     {
+<<<<<<< HEAD
         ui->tableView_day->clearSelection();
+=======
+>>>>>>> refs/remotes/origin/develop
         ui->lineEdit_selected->setFocus();
     }
     else
@@ -323,8 +334,12 @@ void day_popup::on_toolButton_close_clicked()
 
 void day_popup::on_toolButton_editMove_clicked()
 {
+<<<<<<< HEAD
     ui->tableView_day->clearSelection();
     ui->dateEdit_workDate->setFocus();
+=======
+    ui->lineEdit_workoutInfo->setFocus();
+>>>>>>> refs/remotes/origin/develop
 
     if(addWorkout)
     {
@@ -408,4 +423,17 @@ void day_popup::on_toolButton_dayEdit_clicked(bool checked)
     ui->lineEdit_selected->setPalette(selectBox);
     ui->tableView_day->clearSelection();
     ui->lineEdit_selected->setFocus();
+<<<<<<< HEAD
+=======
+}
+
+void day_popup::keyPressEvent(QKeyEvent *event)
+{
+    qDebug() << event->key();
+
+    if(event->key() == Qt::Key_Tab)
+    {
+        qDebug() << "Tab";
+    }
+>>>>>>> refs/remotes/origin/develop
 }

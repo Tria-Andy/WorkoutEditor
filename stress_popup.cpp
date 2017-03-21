@@ -102,7 +102,10 @@ double stress_popup::calc_stress(double pastStress, double currStress,double pDa
 
 void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
 {
+<<<<<<< HEAD
     //ui->pushButton_values->setIcon(hideNum);
+=======
+>>>>>>> refs/remotes/origin/develop
     double pastStress,currStress,startStress,calcStress = 0;
     int ltsStart = -ltsDays;
     int stsStart = -stsDays;
@@ -354,10 +357,18 @@ void stress_popup::on_pushButton_values_toggled(bool checked)
     if(checked)
     {
         ui->pushButton_values->setIcon(showNum);
+<<<<<<< HEAD
+=======
+        ui->pushButton_values->setToolTip("Show Values");
+>>>>>>> refs/remotes/origin/develop
     }
     else
     {
         ui->pushButton_values->setIcon(hideNum);
+<<<<<<< HEAD
+=======
+        ui->pushButton_values->setToolTip("Hide Values");
+>>>>>>> refs/remotes/origin/develop
     }
     this->set_stressplot(ui->dateEdit_start->date(),ui->dateEdit_end->date(),checked);
 }

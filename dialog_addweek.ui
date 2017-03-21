@@ -26,7 +26,7 @@
    <string>Edit Week Workouts</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(220, 220, 220)</string>
+   <string notr="true"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
