@@ -30,7 +30,6 @@ public:
     standardWorkouts();
     QStandardItemModel *workouts_meta, *workouts_steps;
 
-    void set_saveFlag(bool isSave) {save_workouts = isSave;}
     void delete_stdWorkout(QString,bool);
     QStringList get_workoutIds() {return workoutIDs;}
 
@@ -40,7 +39,6 @@ protected:
 private:
     QStringList meta_tags,step_tags,workoutIDs;
     QString workoutPath,metaFile,stepFile;
-    bool save_workouts;
     void check_workoutFiles();
     void read_standard_workouts(QDomDocument,QDomDocument);
     void set_workoutIds();
