@@ -11,7 +11,6 @@
         <file>icons/Download.png</file>
         <file>icons/Refresh.png</file>
         <file>icons/List.png</file>
-        <file>icons/Report.png</file>
         <file>icons/Sync.png</file>
         <file>icons/Erase.png</file>
         <file>icons/Application.png</file>
@@ -43,5 +42,6 @@
         <file>icons/MinAvg.png</file>
         <file>icons/Clear.png</file>
         <file>icons/ExitButton.png</file>
+        <file>icons/Update.png</file>
     </qresource>
 </RCC>
