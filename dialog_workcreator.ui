@@ -780,12 +780,15 @@
                           <height>24</height>
                          </size>
                         </property>
+                        <property name="toolTip">
+                         <string>Update</string>
+                        </property>
                         <property name="text">
                          <string/>
                         </property>
                         <property name="icon">
                          <iconset resource="resources.qrc">
-                          <normaloff>:/images/icons/Refresh.png</normaloff>:/images/icons/Refresh.png</iconset>
+                          <normaloff>:/images/icons/Update.png</normaloff>:/images/icons/Update.png</iconset>
                         </property>
                         <property name="iconSize">
                          <size>
@@ -818,6 +821,9 @@
                           <width>30</width>
                           <height>24</height>
                          </size>
+                        </property>
+                        <property name="toolTip">
+                         <string>Cancel</string>
                         </property>
                         <property name="text">
                          <string>...</string>
@@ -857,6 +863,9 @@
                           <width>30</width>
                           <height>24</height>
                          </size>
+                        </property>
+                        <property name="toolTip">
+                         <string>Delete</string>
                         </property>
                         <property name="text">
                          <string/>

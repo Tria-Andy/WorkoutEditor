@@ -347,12 +347,11 @@ void Dialog_workCreator::save_workout()
                          this->save_workout_values(workoutValues,workModel);
                      }
                  }
-
              }
          }
      }
      this->get_workouts(currentSport);
-     this->save_stdWorkouts();
+     this->write_standard_workouts();
 }
 
 void Dialog_workCreator::save_workout_values(QStringList values, QStandardItemModel *model)
@@ -403,7 +402,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
         }
         else
         {
-            defaultDist = 100;
+            defaultDist = 0.1;
             defaultTime = this->calc_duration(currentSport,defaultDist,threshold);
         }
     }

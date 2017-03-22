@@ -17,6 +17,7 @@
  */
 
 #include "standardworkouts.h"
+#include <QMessageBox>
 
 standardWorkouts::standardWorkouts()
 {
@@ -76,49 +77,46 @@ void standardWorkouts::read_standard_workouts(QDomDocument meta_doc,QDomDocument
 
 void standardWorkouts::write_standard_workouts()
 {
-    if(save_workouts)
+    QModelIndex index;
+    QDomDocument xmlDoc;
+
+    QDomElement xmlRoot,xmlElement;
+    xmlRoot = xmlDoc.createElement("workouts");
+    xmlDoc.appendChild(xmlRoot);
+
+    //Meta
+    for(int i = 0; i < workouts_meta->rowCount(); ++i)
     {
-        QModelIndex index;
-        QDomDocument xmlDoc;
+        index = workouts_meta->index(i,2,QModelIndex());
+        xmlElement = xmlDoc.createElement("workout");
 
-        QDomElement xmlRoot,xmlElement;
-        xmlRoot = xmlDoc.createElement("workouts");
-        xmlDoc.appendChild(xmlRoot);
-
-        //Meta
-        for(int i = 0; i < workouts_meta->rowCount(); ++i)
+        for(int x = 0; x < workouts_meta->columnCount(); ++x)
         {
-            index = workouts_meta->index(i,2,QModelIndex());
-            xmlElement = xmlDoc.createElement("workout");
-
-            for(int x = 0; x < workouts_meta->columnCount(); ++x)
-            {
-                index = workouts_meta->index(i,x,QModelIndex());
-                xmlElement.setAttribute(meta_tags.at(x),workouts_meta->data(index,Qt::DisplayRole).toString());
-            }
-            xmlRoot.appendChild(xmlElement);
+            index = workouts_meta->index(i,x,QModelIndex());
+            xmlElement.setAttribute(meta_tags.at(x),workouts_meta->data(index,Qt::DisplayRole).toString());
         }
-        this->write_XMLFile(workoutPath,&xmlDoc,metaFile);
-        xmlDoc.clear();
-
-        //Steps
-        xmlRoot = xmlDoc.createElement("steps");
-        xmlDoc.appendChild(xmlRoot);
-
-        for(int i = 0; i < workouts_steps->rowCount(); ++i)
-        {
-            index = workouts_steps->index(i,2,QModelIndex());
-            xmlElement = xmlDoc.createElement("step");
-
-            for(int x = 0; x < workouts_steps->columnCount(); ++x)
-            {
-                index = workouts_steps->index(i,x,QModelIndex());
-                xmlElement.setAttribute(step_tags.at(x),workouts_steps->data(index,Qt::DisplayRole).toString());
-            }
-            xmlRoot.appendChild(xmlElement);
-        }
-        this->write_XMLFile(workoutPath,&xmlDoc,stepFile);
+        xmlRoot.appendChild(xmlElement);
     }
+    this->write_XMLFile(workoutPath,&xmlDoc,metaFile);
+    xmlDoc.clear();
+
+    //Steps
+    xmlRoot = xmlDoc.createElement("steps");
+    xmlDoc.appendChild(xmlRoot);
+
+    for(int i = 0; i < workouts_steps->rowCount(); ++i)
+    {
+        index = workouts_steps->index(i,2,QModelIndex());
+        xmlElement = xmlDoc.createElement("step");
+
+        for(int x = 0; x < workouts_steps->columnCount(); ++x)
+        {
+            index = workouts_steps->index(i,x,QModelIndex());
+            xmlElement.setAttribute(step_tags.at(x),workouts_steps->data(index,Qt::DisplayRole).toString());
+        }
+        xmlRoot.appendChild(xmlElement);
+    }
+    this->write_XMLFile(workoutPath,&xmlDoc,stepFile);
 }
 
 void standardWorkouts::set_workoutIds()

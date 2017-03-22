@@ -1,4 +1,5 @@
 #include "xmlhandler.h"
+#include <QMessageBox>
 
 xmlHandler::xmlHandler()
 {
