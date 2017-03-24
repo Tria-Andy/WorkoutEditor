@@ -1689,6 +1689,7 @@ void MainWindow::set_phaseFilter(int phaseID)
         ui->toolButton_weekFour->setEnabled(false);
         ui->toolButton_weekPlus->setEnabled(false);
         phaseFilter = settings::get_listValues("Phase").at(phaseID-2);
+        weekpos = 0;
     }
 
     this->workout_calendar();
