@@ -48,7 +48,7 @@ private slots:
 private:
     Ui::Dialog_workCreator *ui;
 
-    QString isSeries,isGroup,current_sport,current_workID,isBreak,buttonStyle,viewBackground;
+    QString isSeries,isGroup,currentSport,currentWorkID,isBreak,buttonStyle,viewBackground;
     QStandardItemModel *plotModel,*valueModel,*listModel;
     QSortFilterProxyModel *metaProxy,*stepProxy;
     QMap<QString,QString> workoutMap;
@@ -58,8 +58,8 @@ private:
     del_workcreator workTree_del;
     del_workcreatoredit edit_del;
     del_mousehover mousehover_del;
-    double time_sum,dist_sum,stress_sum;
-    int currThres,threshold_pace,current_pace,threshold_power,current_power;
+    double timeSum,distSum,stressSum;
+    int currThres,thresPace,thresPower;
     QVector<bool> editRow;
 
     bool clearFlag;

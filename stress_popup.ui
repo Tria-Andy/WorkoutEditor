@@ -31,7 +31,7 @@
    <string>Dialog</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(220, 220, 220)</string>
+   <string notr="true"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -181,7 +181,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Show Values</string>
+         <string/>
         </property>
         <property name="text">
          <string/>
@@ -196,7 +196,7 @@
          <bool>true</bool>
         </property>
         <property name="checked">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>

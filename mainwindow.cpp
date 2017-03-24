@@ -1127,13 +1127,13 @@ void MainWindow::selectAvgValues(QModelIndex index, int avgCol)
 {
     treeSelection->select(index,QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
     QStandardItem *avgItem = curr_activity->intTreeModel->itemFromIndex(treeSelection->selectedRows(avgCol).at(0));
+
     bool checkAvg = avgItem->data().toBool();
     curr_activity->set_selectedItem(treeSelection);
 
     if(checkAvg == false)
     {
         curr_activity->avgItems.insert(index.row(),index);
-        //curr_activity->intTreeModel->setData(index,QIcon(":/images/icons/AddAvg.png"),Qt::DecorationRole);
         curr_activity->intTreeModel->setData(index,"+");
         curr_activity->intTreeModel->setData(index,1,Qt::UserRole+1);
         curr_activity->set_avgValues(++avgCounter,1);
@@ -1141,7 +1141,6 @@ void MainWindow::selectAvgValues(QModelIndex index, int avgCol)
     else
     {
         curr_activity->avgItems.remove(index.row());
-        //curr_activity->intTreeModel->setData(index,QIcon(":/images/icons/MinAvg.png"),Qt::DecorationRole);
         curr_activity->intTreeModel->setData(index,"-");
         curr_activity->intTreeModel->setData(index,0,Qt::UserRole+1);
         curr_activity->set_avgValues(--avgCounter,-1);
@@ -1690,6 +1689,7 @@ void MainWindow::set_phaseFilter(int phaseID)
         ui->toolButton_weekFour->setEnabled(false);
         ui->toolButton_weekPlus->setEnabled(false);
         phaseFilter = settings::get_listValues("Phase").at(phaseID-2);
+        weekpos = 0;
     }
 
     this->workout_calendar();

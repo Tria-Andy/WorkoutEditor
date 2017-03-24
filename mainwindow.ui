@@ -870,6 +870,12 @@
             <property name="defaultDropAction">
              <enum>Qt::MoveAction</enum>
             </property>
+            <property name="iconSize">
+             <size>
+              <width>6</width>
+              <height>6</height>
+             </size>
+            </property>
             <attribute name="headerCascadingSectionResizes">
              <bool>true</bool>
             </attribute>
