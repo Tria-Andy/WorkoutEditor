@@ -133,9 +133,7 @@ void day_popup::init_dayWorkouts(QDate workDate)
     if(workCount == 0)
     {
         this->set_controlButtons(true);
-        this->load_workoutData(0);
         ui->toolButton_dayEdit->setEnabled(false);
-
     }
     else
     {
@@ -246,6 +244,8 @@ void day_popup::update_workValues()
 
 void day_popup::set_result(int resultCode)
 {
+    editMode = false;
+
     if(resultCode == ADD || resultCode == EDIT || resultCode == COPY)
     {
         workSched->set_workoutData(resultCode);
@@ -266,8 +266,7 @@ void day_popup::set_result(int resultCode)
             workSched->delete_workout(selIndex);
         }
     }
-
-    editMode = false;
+    workSched->itemList.clear();
     this->set_controlButtons(false);
     ui->lineEdit_selected->setText("-");
     ui->timeEdit_time->setTime(QTime::fromString("00:00","mm:ss"));
@@ -315,7 +314,6 @@ void day_popup::setNextEditRow()
 
 void day_popup::on_toolButton_close_clicked()
 {
-    workSched->itemList.clear();
     reject();
 }
 
