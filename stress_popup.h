@@ -32,7 +32,7 @@ private:
     QIcon showNum,hideNum;
     double ltsDays,stsDays,lastLTS,lastSTS,stressMax;
     QMap<QDate,double> *stressMap;
-    QVector<double> xDate,yLTS,ySTS,yTSB;
+    QVector<double> xDate,yLTS,ySTS,yTSB,yStress;
     QVector<double> tsbMinMax;
     int dateRange;
     bool isLoad;
