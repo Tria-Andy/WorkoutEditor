@@ -272,7 +272,7 @@ void jsonHandler::write_jsonFile()
     rideFile["RIDE"] = activityItem;
     jsonDoc.setObject(rideFile);
 
-    QFile file(settings::get_gcInfo("gcpath") + QDir::separator() + fileName);
+    QFile file(settings::get_gcInfo("actpath") + QDir::separator() + fileName);
     //QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName); //Test
     if(!file.open(QFile::WriteOnly))
     {

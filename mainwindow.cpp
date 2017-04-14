@@ -935,7 +935,7 @@ void MainWindow::select_activityFile()
     QString filename = QFileDialog::getOpenFileName(
                 this,
                 tr("Select GC JSON File"),
-                settings::get_gcInfo("gcpath"),
+                settings::get_gcInfo("actpath"),
                 "JSON Files (*.json)"
                 );
 

@@ -107,6 +107,8 @@ void Activity::prepareData()
     intLabel = "_Int_";
     sampSpeed.resize(sampCount);
 
+    actWeight = settings::get_weightforDate(QDateTime::fromString(ride_info.value("Date"),"yyyy/MM/dd hh:mm:ss UTC").addSecs(QDateTime::currentDateTime().offsetFromUtc()));
+
     for(int i = 0; i < sampCount; ++i)
     {
         sampSpeed[i] = sampleModel->data(sampleModel->index(i,2,QModelIndex())).toDouble();
@@ -116,7 +118,7 @@ void Activity::prepareData()
     if(isRun)
     {
         avgHF = (avgHF / sampCount);
-        double totalWork = ceil(this->calc_totalWork(tagData.value("Weight").toDouble(),avgHF,sampCount));
+        double totalWork = ceil(this->calc_totalWork(actWeight,avgHF,sampCount));
         overrideData.insert("total_work",QString::number(totalWork));
         ride_info.insert("Total Cal",QString::number(totalWork));
         ride_info.insert("Total Work",QString::number(totalWork));
@@ -1318,7 +1320,7 @@ void Activity::swimhfTimeInZone(bool recalc)
     double goal = sqrt(pow(static_cast<double>(swim_pace),3.0))/10;
     double swim_sri = static_cast<double>(swimPace_cv) / goal;
 
-    double totalWork = ceil(this->calc_totalWork(tagData.value("Weight").toDouble(),hfAvg,moveTime) * swim_sri);
+    double totalWork = ceil(this->calc_totalWork(actWeight,hfAvg,moveTime) * swim_sri);
     double totalCal = ceil((totalWork*4)/4.184);
 
     ride_info.insert("Total Cal",QString::number(totalCal));

@@ -38,6 +38,7 @@ private:
     static QHash<QString,QStringList> listMap;
     static QMap<int,QString> sampList,intList;
     static QHash<QString,QString> generalMap,gcInfo,saisonInfo;
+    static QHash<int,double> weightMap;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,double> thresholdMap,ltsMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
@@ -47,6 +48,7 @@ private:
     //Getter
     static QColor get_colorRGB(QString,bool);
     static QStringList get_colorStringList(QStringList*);
+
 
     //Setter
     static void fill_mapList(QMap<int,QString>*,QString*);
@@ -88,6 +90,7 @@ public:
 
     //common functions
     static int get_timesec(QString time);
+    static double get_weightforDate(QDateTime);
     static QStringList get_int_header(QString);
     static QStringList get_time_header() {return header_int_time;}
     static QStringList get_swimtime_header(){return header_swim_time;}

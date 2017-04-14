@@ -51,6 +51,7 @@ QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
 QHash<QString,double> settings::thresholdMap;
 QHash<QString,double> settings::ltsMap;
+QHash<int,double> settings::weightMap;
 QHash<QString,QString> settings::swimRange;
 QHash<QString,QString> settings::bikeRange;
 QHash<QString,QString> settings::runRange;
@@ -152,6 +153,7 @@ void settings::loadSettings()
             gcInfo.insert("athlete",mysettings->value("athlete").toString());
             gcInfo.insert("yob",mysettings->value("yob").toString());
             gcInfo.insert("folder",mysettings->value("folder").toString());
+            gcInfo.insert("conf",mysettings->value("conf").toString());
             gcInfo.insert("gcpath",mysettings->value("gcpath").toString());
         mysettings->endGroup();
 
@@ -162,12 +164,34 @@ void settings::loadSettings()
             QString gcPath = gc_dir + QDir::separator() + gcInfo.value("athlete") + QDir::separator() + gcInfo.value("folder");
             gcInfo.insert("gcpath",QDir::toNativeSeparators(gcPath));
         }
+        else
+        {
+            gcInfo.insert("actpath",gcInfo.value("gcpath") + QDir::separator() + gcInfo.value("athlete")+ QDir::separator() + gcInfo.value("folder"));
+            gcInfo.insert("confpath",gcInfo.value("gcpath") + QDir::separator() + gcInfo.value("athlete")+ QDir::separator() + gcInfo.value("conf"));
+        }
+
         mysettings->beginGroup("Filepath");
             gcInfo.insert("schedule",mysettings->value("schedule").toString());
             gcInfo.insert("workouts",mysettings->value("workouts").toString());
             gcInfo.insert("valuefile",mysettings->value("valuefile").toString());
             valueFile = mysettings->value("valuefile").toString();
         mysettings->endGroup();
+
+
+        QFile file(gcInfo.value("confpath") + QDir::separator() + "bodymeasures.json");
+        if (!file.open(QFile::ReadOnly | QFile::Text)) return;
+        QString jsonFile = file.readAll();
+        QJsonDocument d = QJsonDocument::fromJson(jsonFile.toUtf8());
+        QJsonObject jsonobj = d.object();
+        QJsonArray bodyWeight = jsonobj["measures"].toArray();
+        file.close();
+
+        QJsonObject weightInfo;
+        for(int i = 0; i < bodyWeight.count(); ++i)
+        {
+            weightInfo = bodyWeight.at(i).toObject();
+            weightMap.insert(weightInfo.value("when").toInt(),weightInfo.value("weightkg").toDouble());
+        }
 
         //Sport Value Settings
         if(gcInfo.value("schedule").isEmpty())
@@ -179,140 +203,6 @@ void settings::loadSettings()
             valueFilePath = gcInfo.value("workouts") + QDir::separator() + valueFile;
         }
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
-
-//###########################Upgrade values ini####################################
-        QMap<QString,QString> updateMap;
-        QStringList updateList,updateList2;
-        QString updateString;
-
-        myvalues->beginGroup("Common");
-            updateMap.insert("ltsdays",myvalues->value("ltsdays").toString());
-            updateMap.insert("stsdays",myvalues->value("stsdays").toString());
-            updateMap.insert("lastlts",myvalues->value("lastlts").toString());
-            updateMap.insert("laststs",myvalues->value("laststs").toString());
-            updateString = myvalues->value("ltsdays").toString();
-            if(updateString.isEmpty()) myvalues->setValue("ltsdays","42");
-            updateString = myvalues->value("stsdays").toString();
-            if(updateString.isEmpty()) myvalues->setValue("stsdays","7");
-            updateString = myvalues->value("lastlts").toString();
-            if(updateString.isEmpty()) myvalues->setValue("lastlts","0");
-            updateString = myvalues->value("laststs").toString();
-            if(updateString.isEmpty()) myvalues->setValue("laststs","0");
-        myvalues->endGroup();
-
-        myvalues->remove("Common");
-
-        myvalues->beginGroup("Stressterm");
-            if(myvalues->value("ltsdays").toString().isEmpty())
-            {
-                for(QMap<QString,QString>::const_iterator it = updateMap.cbegin(), end = updateMap.cend(); it != end; ++it)
-                {
-                   myvalues->setValue(it.key(),it.value());
-                }
-            }
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Level");
-            updateList = myvalues->value("levels").toString().split(splitter);
-            updateString = myvalues->value("color").toString();
-            if(updateList.count() > 0 && updateString.isEmpty())
-            {
-                for(int i = 0; i < updateList.count();++i)
-                {
-                    updateList2.insert(i,"230-230-230");
-                }
-                myvalues->setValue("color",settings::setSettingString(updateList2));
-            }
-            myvalues->remove("breakname");
-            updateList.clear();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Keylist");
-            updateList = myvalues->value("keys").toString().split(splitter);
-            if(!updateList.contains("Misc"))
-            {
-                updateList << "Misc";
-                myvalues->setValue("keys",settings::setSettingString(updateList));
-            }
-            updateString = myvalues->value("extkeys").toString();
-            if(updateString.isEmpty())
-            {
-                myvalues->setValue("extkeys","Sportuse");
-            }
-            updateList.clear();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Phase");
-            myvalues->remove("empty");
-            myvalues->remove("emptycolor");
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Sport");
-            updateString = myvalues->value("sportuse").toString();
-            if(updateString.isEmpty())
-            {
-                updateList = myvalues->value("sports").toString().split(splitter);
-                if(updateList.count() > 5)
-                {
-                    for(int i = 5; i < updateList.count();++i)
-                    {
-                        updateList.removeAt(i);
-                    }
-                    updateList.removeLast();
-                }
-                myvalues->setValue("sportuse",settings::setSettingString(updateList));
-            }
-            updateList.clear();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("IntEditor");
-            updateString = myvalues->value("swimstyle").toString();
-            if(updateString.isEmpty())
-            {
-                updateList << "Break"<<"Freestyle"<<"Backstroke"<<"Breaststroke"<<"Butterfly"<<"Drill"<<"Mixed"<<"IM";
-                myvalues->setValue("swimstyle",settings::setSettingString(updateList));
-            }
-            updateList.clear();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Threshold");
-            updateString = myvalues->value("pace").toString();
-            if(!updateString.isEmpty())
-            {
-                updateList << updateString.split(splitter);
-                myvalues->setValue("swimpace",QString::number(settings::get_timesec(updateList.at(0))));
-                myvalues->setValue("bikepace",QString::number(settings::get_timesec(updateList.at(1))));
-                myvalues->setValue("runpace",QString::number(settings::get_timesec(updateList.at(2))));
-                myvalues->remove("pace");
-            }
-            updateList.clear();
-            updateString = myvalues->value("hf").toString();
-            if(!updateString.isEmpty())
-            {
-                updateList << updateString.split(splitter);
-                myvalues->setValue("hfthres",updateList.at(0));
-                myvalues->setValue("hfmax",updateList.at(1));
-                myvalues->remove("hf");
-            }
-            updateList.clear();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Misc");
-            if(myvalues->value("sum").toString().isEmpty())
-            {
-                myvalues->setValue("sum","Summery");
-                myvalues->setValue("sumcolor","0-255-255");
-                myvalues->setValue("empty","No_Phase");
-                myvalues->setValue("emptycolor","125-125-200");
-                myvalues->setValue("breakname","Break");
-                myvalues->setValue("breakcolor","125-125-125");
-            }
-            if(myvalues->value("filecount").toString().isEmpty())
-            {
-                myvalues->setValue("filecount","30");
-            }
-        myvalues->endGroup();
-//###########################Upgrade values ini done####################################
 
         QStringList settingList;
         QString settingString;
@@ -470,6 +360,23 @@ void settings::loadSettings()
         delete mysettings;
         delete myvalues;
     }
+}
+
+double settings::get_weightforDate(QDateTime actDate)
+{
+    QDateTime weightDate;
+    double weight = 0.0;
+
+    for(QHash<int,double>::const_iterator it = weightMap.cbegin(), end = weightMap.cend(); it != end; ++it)
+    {
+        weightDate.setTime_t(it.key());
+
+        if(actDate > weightDate)
+        {
+            weight = it.value();
+        }
+    }
+    return weight;
 }
 
 QString settings::get_rangeValue(QString map, QString key)
