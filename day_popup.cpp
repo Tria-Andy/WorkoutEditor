@@ -152,29 +152,6 @@ void day_popup::set_controlButtons(bool active)
     ui->toolButton_stdwork->setEnabled(active);
 }
 
-void day_popup::set_dayData(bool completeDay)
-{
-    QString weekNumber = QString::number(newDate.weekNumber());
-    weekNumber = weekNumber+"_"+QString::number(newDate.addDays(1 - ui->dateEdit_workDate->date().dayOfWeek()).year());
-    QHash<int,QString> valueList;
-    QModelIndex modIndex;
-
-    if(completeDay)
-    {
-        for(int row = 0; row < scheduleProxy->rowCount(); ++row)
-        {
-            valueList.insert(0,weekNumber);
-            valueList.insert(1,newDate.toString("dd.MM.yyyy"));
-            modIndex = scheduleProxy->mapToSource(scheduleProxy->index(row,0));
-            for(int col = 2; col < scheduleProxy->columnCount(); ++col)
-            {
-                valueList.insert(col,scheduleProxy->data(scheduleProxy->index(row,col)).toString());
-            }
-            workSched->itemList.insert(modIndex,valueList);
-        }
-    }
-}
-
 void day_popup::load_workoutData(int workout)
 {
     this->set_controlButtons(true);
@@ -278,9 +255,27 @@ void day_popup::edit_workoutDate(QDate workDate)
     newDate = workDate;
     ui->lineEdit_workoutInfo->setText(workSched->get_weekPhase(workDate)+" - Week: "+ QString::number(workDate.weekNumber()));
 
+    workSched->itemList.clear();
+
     if(ui->toolButton_dayEdit->isChecked())
     {
-        this->set_dayData(true);
+        QString weekNumber = QString::number(newDate.weekNumber());
+        weekNumber = weekNumber+"_"+QString::number(newDate.addDays(1 - ui->dateEdit_workDate->date().dayOfWeek()).year());
+        QHash<int,QString> valueList;
+        QModelIndex modIndex;
+
+        for(int row = 0; row < scheduleProxy->rowCount(); ++row)
+        {
+            valueList.insert(0,weekNumber);
+            valueList.insert(1,newDate.toString("dd.MM.yyyy"));
+            modIndex = scheduleProxy->mapToSource(scheduleProxy->index(row,0));
+            for(int col = 2; col < scheduleProxy->columnCount(); ++col)
+            {
+                valueList.insert(col,scheduleProxy->data(scheduleProxy->index(row,col)).toString());
+            }
+            workSched->itemList.insert(modIndex,valueList);
+        }
+
         if(newDate != popupDate)
         {
             this->set_controlButtons(true);
