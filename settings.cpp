@@ -49,9 +49,9 @@ QString settings::isOther;
 QHash<QString,QStringList> settings::listMap;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
+QMap<int,double> settings::weightMap;
 QHash<QString,double> settings::thresholdMap;
 QHash<QString,double> settings::ltsMap;
-QHash<int,double> settings::weightMap;
 QHash<QString,QString> settings::swimRange;
 QHash<QString,QString> settings::bikeRange;
 QHash<QString,QString> settings::runRange;
@@ -367,7 +367,7 @@ double settings::get_weightforDate(QDateTime actDate)
     QDateTime weightDate;
     double weight = 0.0;
 
-    for(QHash<int,double>::const_iterator it = weightMap.cbegin(), end = weightMap.cend(); it != end; ++it)
+    for(QMap<int,double>::const_iterator it = weightMap.cbegin(), end = weightMap.cend(); it != end; ++it)
     {
         weightDate.setTime_t(it.key());
 

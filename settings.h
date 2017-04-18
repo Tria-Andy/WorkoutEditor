@@ -38,7 +38,7 @@ private:
     static QHash<QString,QStringList> listMap;
     static QMap<int,QString> sampList,intList;
     static QHash<QString,QString> generalMap,gcInfo,saisonInfo;
-    static QHash<int,double> weightMap;
+    static QMap<int,double> weightMap;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,double> thresholdMap,ltsMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
