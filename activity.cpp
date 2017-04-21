@@ -1367,46 +1367,6 @@ int Activity::get_zone_values(double value, int max, bool ispace)
     return 0;
 }
 
-double Activity::get_workFactor(double speedFactor, int styleID)
-{
-    double workFactor = 0.0;
-
-    if(styleID == 0)
-    {
-        workFactor = 2.0;
-    }
-    else if(styleID == 1) //Freestyle
-    {
-        workFactor = 10.0;
-    }
-    else if(styleID == 2) //Backstroke
-    {
-        workFactor = 11.5;
-    }
-    else if(styleID == 3) //Breaststroke
-    {
-        workFactor = 12.0;
-    }
-    else if(styleID == 4) //Butterfly
-    {
-        workFactor = 15.0;
-    }
-    else if(styleID == 5) //Drill
-    {
-        workFactor = 9.0;
-    }
-    else if(styleID == 6) //Mix
-    {
-        workFactor = 11.0;
-    }
-    else if(styleID == 7) //IM
-    {
-        workFactor = 14.0;
-    }
-
-    return workFactor * speedFactor;
-}
-
 double Activity::get_speedFactor(double sri)
 {
     double speedFactor = 0.0;
@@ -1439,15 +1399,14 @@ double Activity::get_speedFactor(double sri)
 double Activity::get_workValue(double time,int lapPace,int styleID)
 {
     double speedFactor = 1;
+    QString workFactor = settings::get_listValues("StyleFactor").at(styleID);
 
     if(styleID != 0)
     {
         speedFactor = this->get_speedFactor(sqrt((pow(swimThresPace/lapPace,3.0))));
     }
 
-    double workFactor = this->get_workFactor(speedFactor,styleID);
-
-    return workFactor * 3.5 * actWeight / 200 * (time/60.0);
+    return (workFactor.toDouble()*speedFactor) * 3.5 * actWeight / 200 * (time/60.0);
 }
 
 int Activity::get_int_duration(int row)

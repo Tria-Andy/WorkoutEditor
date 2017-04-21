@@ -300,6 +300,9 @@ void settings::loadSettings()
             settingList = myvalues->value("swimstyle").toString().split(splitter);
             listMap.insert("SwimStyle",settingList);
             settingList.clear();
+            settingList = myvalues->value("styleFactor").toString().split(splitter);
+            listMap.insert("StyleFactor",settingList);
+            settingList.clear();
         myvalues->endGroup();
 
         myvalues->beginGroup("Misc");
