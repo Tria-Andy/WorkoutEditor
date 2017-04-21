@@ -136,7 +136,7 @@ QColor settings::get_colorRGB(QString colorValue,bool trans)
 
 void settings::loadSettings()
 {
-    header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes";
+    header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes" << "Work";
     header_bike << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD";
     header_run << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed";
     header_other << "Interval" << "Duration" << "Start" << "Distance";
