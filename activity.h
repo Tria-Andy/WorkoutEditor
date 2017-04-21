@@ -70,7 +70,6 @@ private:
     double get_workFactor(double,int);
     double get_speedFactor(double);
     double get_workValue(double,int,int);
-    int get_moveTime();
 
 public:
     explicit Activity(QString jsonfile = QString(),bool intAct = false);

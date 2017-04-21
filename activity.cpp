@@ -1450,21 +1450,6 @@ double Activity::get_workValue(double time,int lapPace,int styleID)
     return workFactor * 3.5 * actWeight / 200 * (time/60.0);
 }
 
-int Activity::get_moveTime()
-{
-    int moveTime = 0;
-
-    for(QHash<QString,int>::const_iterator it = paceTimeInZone.cbegin(), end = paceTimeInZone.cend(); it != end; ++it)
-    {
-        if(it.key() != breakName)
-        {
-            moveTime = moveTime + it.value();
-        }
-    }
-
-    return moveTime;
-}
-
 int Activity::get_int_duration(int row)
 {
     int duration;
