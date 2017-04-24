@@ -177,7 +177,7 @@ void Activity::prepareData()
             }
         }
 
-        QVector<double> hf_factor = {0.50,0.35,0.10,0.05};
+        QVector<double> hf_factor = {0.45,0.40,0.10,0.05};
         QVector<double> hFactor(zoneCount);
         hFactor.fill(0);
 
@@ -254,7 +254,7 @@ void Activity::prepareData()
         swimProxy = new QSortFilterProxyModel;
         swimProxy->setSourceModel(swimModel);
 
-        xdataModel->clear();
+        if(hasXdata) xdataModel->clear();
 
         selItemModel->setVerticalHeaderLabels(itemHeader.value(0));
         avgValues.resize(4);
