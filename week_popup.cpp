@@ -73,7 +73,7 @@ void week_popup::set_plotValues()
         tempDate = QDate::fromString(workProxy->data(workProxy->index(0,1)).toString(),"dd.MM.yyyy");
         weekStart.setDate(tempDate.addDays(1 - tempDate.dayOfWeek()));
         weekStart.setTime(wTime);
-        weekStart.setTimeSpec(Qt::UTC);
+        weekStart.setTimeSpec(Qt::LocalTime);
         firstDay = weekStart.date();
 
         for(int i = 0; i < dayCount; ++i)
@@ -127,7 +127,7 @@ void week_popup::set_plotValues()
         {
             workoutDate = QDateTime::fromString(workProxy->data(workProxy->index(i,1,QModelIndex())).toString(),"dd.MM.yyyy");
             workoutDate.setTime(wTime);
-            workoutDate.setTimeSpec(Qt::UTC);
+            workoutDate.setTimeSpec(Qt::LocalTime);
 
             stress = workProxy->data(workProxy->index(i,8,QModelIndex())).toDouble();
             dura = static_cast<double>(this->get_timesec(workProxy->data(workProxy->index(i,6,QModelIndex())).toString())) / 60;
@@ -329,7 +329,7 @@ void week_popup::set_weekPlot(int yValue)
     }
 
     QSharedPointer<QCPAxisTickerDateTime> dateTimeTicker(new QCPAxisTickerDateTime);
-    dateTimeTicker->setDateTimeSpec(Qt::UTC);
+    dateTimeTicker->setDateTimeSpec(Qt::LocalTime);
     dateTimeTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
     dateTimeTicker->setDateTimeFormat("dd.MM");
     dateTimeTicker->setTickCount(dayCount);
