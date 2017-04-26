@@ -42,6 +42,7 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
 
     workListHeader << "Time" << "Sport" << "Code" << "Title" << "Duration" << "Distance" << "Stress" << "Pace";
     dayModel = new QStandardItemModel();
+    workSched->itemList.clear();
 
     this->init_dayWorkouts(popupDate);
     ui->lineEdit_workoutInfo->setText(workSched->get_weekPhase(w_date)+" - Week: "+ QString::number(w_date.weekNumber()));
@@ -309,6 +310,7 @@ void day_popup::setNextEditRow()
 
 void day_popup::on_toolButton_close_clicked()
 {
+
     reject();
 }
 
