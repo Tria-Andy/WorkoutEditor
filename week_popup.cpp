@@ -74,7 +74,7 @@ void week_popup::set_plotValues()
         weekStart.setDate(tempDate.addDays(1 - tempDate.dayOfWeek()));
         weekStart.setTime(wTime);
         weekStart.setTimeSpec(Qt::LocalTime);
-        firstDay = weekStart.date();
+        firstDay = weekStart;
 
         for(int i = 0; i < dayCount; ++i)
         {
@@ -105,7 +105,7 @@ void week_popup::set_plotValues()
         for(int i = 0; i < dayCount; ++i)
         {
             pastStress = startLTS;
-            dateValue = weekDates.at(i).toTime_t();
+            dateValue = weekDates.at(i).toTime_t() + 3600;
             xStress[i] = dateValue;
             xBar[i] = dateValue;
             xWorks[i] = dateValue;
@@ -186,7 +186,6 @@ void week_popup::set_graph()
     ui->widget_plot->plotLayout()->addElement(1,0,subLayout);
     subLayout->setMargins(QMargins(dayCount*10,0,dayCount*10,5));
     subLayout->addElement(0,0,ui->widget_plot->legend);
-
 
     ui->widget_plot->addLayer("abovemain", ui->widget_plot->layer("main"), QCustomPlot::limAbove);
     ui->widget_plot->addLayer("belowmain", ui->widget_plot->layer("main"), QCustomPlot::limBelow);

@@ -137,7 +137,7 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     for(int i = 0; i < dayCount; ++i)
     {
         pastStress = startStress;
-        dateValue = startDate.addDays(i).toTime_t();
+        dateValue = startDate.addDays(i).toTime_t() + 3600;
         xDate[i] = dateValue;
         yStress[i] = stressMap->value(startDate.date().addDays(i));
         if(stressMax < yStress[i]) stressMax = yStress[i];

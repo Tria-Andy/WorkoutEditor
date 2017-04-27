@@ -47,7 +47,7 @@ private:
     QStringList week_info,barSelection;
     QSortFilterProxyModel *workProxy;
     schedule *workSched;
-    QDate firstDay;
+    QDateTime firstDay;
     bool isLoad;
     QList<QDateTime> weekDates;
     QVector<double> xStress,xLTS,xBar,xWorks,maxValues;
