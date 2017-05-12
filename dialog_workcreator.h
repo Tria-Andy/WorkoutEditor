@@ -42,8 +42,8 @@ private slots:
     void on_toolButton_delete_clicked();
     void on_lineEdit_workoutname_textChanged(const QString &arg1);
     void on_toolButton_close_clicked();
-
     void on_toolButton_cancel_clicked();
+    void set_controlButtons(bool);
 
 private:
     Ui::Dialog_workCreator *ui;
