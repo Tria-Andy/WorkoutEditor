@@ -58,6 +58,7 @@ void Activity::readJsonFile(QString jsonfile,bool intAct)
 
         sampleModel = new QStandardItemModel;
         mapValues = settings::get_sampList();
+
         this->init_actModel("SAMPLES",&mapValues,sampleModel,&sampList,0);
 
         if(hasXdata)
@@ -284,6 +285,10 @@ void Activity::prepareData()
             avgModel->setVerticalHeaderLabels(avgHeader.value(0));
             selItemModel->setVerticalHeaderLabels(itemHeader.value(1));
         }
+        else if(isTria)
+        {
+            isTimeBased = false;
+        }
         else
         {
             isTimeBased = true;
@@ -324,6 +329,13 @@ void Activity::build_intTree()
         }
     }
     else if(isBike || isRun)
+    {
+        for(int i = 0; i < intModel->rowCount(); ++i)
+        {
+            rootItem->appendRow(setIntRow(i));
+        }
+    }
+    else if(isTria)
     {
         for(int i = 0; i < intModel->rowCount(); ++i)
         {
@@ -376,9 +388,17 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
         intItems << new QStandardItem(QString::number(watts));
         intItems << new QStandardItem(QString::number(round(this->get_int_value(pInt,3))));
     }
-    else
+    else if(isRun)
     {
         lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(lapPace);
+    }
+    else if(isTria)
+    {
+        if(pInt == 0) lapName = settings::isSwim;
+        else if(pInt == 1) lapName = "T1";
+        else if(pInt == 2) lapName = settings::isBike;
+        else if(pInt == 3) lapName = "T2";
+        else if(pInt == 4) lapName = settings::isRun;
     }
 
     lapName = this->build_lapName(lapName,lapTime,lapDist);
@@ -1150,10 +1170,6 @@ void Activity::updateSampleModel(int rowcount)
         lowLimit = this->get_speed(QTime::fromString(this->set_time(sportpace),"mm:ss"),0,curr_sport,true);
         lowLimit = lowLimit - (lowLimit*limitFactor);
     }
-    if(isTria)
-    {
-        lowLimit = 1.0;
-    }
 
     if(isSwim)
     {
@@ -1252,6 +1268,43 @@ void Activity::updateSampleModel(int rowcount)
                     }
                 }
             }
+            else if(isTria)
+            {
+                for(int intSec = intStart;intSec <= intStop; ++intSec)
+                {
+                    if(intSec == 0)
+                    {
+                        new_dist[0] = 0.0000;
+                    }
+                    else
+                    {
+                        new_dist[intSec] = new_dist[intSec-1] + msec;
+                    }
+
+                    if(intRow == 0)
+                    {
+                        sportpace = settings::get_thresValue("swimpace");
+                        limitFactor = 0.15;
+                        lowLimit = this->get_speed(QTime::fromString(this->set_time(sportpace),"mm:ss"),0,settings::isSwim,true);
+                        lowLimit = lowLimit - (lowLimit*limitFactor);
+                        calc_speed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
+                    }
+                    else if(intRow == 4)
+                    {
+                        sportpace = settings::get_thresValue("runpace");
+                        limitFactor = 0.20;
+                        lowLimit = this->get_speed(QTime::fromString(this->set_time(sportpace),"mm:ss"),0,settings::isRun,true);
+                        lowLimit = lowLimit - (lowLimit*limitFactor);
+                        calc_speed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
+                    }
+                    else
+                    {
+                        calc_speed[intSec] = sampleModel->data(sampleModel->index(intSec,2,QModelIndex())).toDouble();
+                    }
+                    if(intRow == 2) calc_cadence[intSec] = sampleModel->data(sampleModel->index(intSec,3,QModelIndex())).toDouble();
+                }
+            }
+
         }
     }
 
@@ -1511,6 +1564,10 @@ double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double fact
     if(curr_sport == settings::isBike)
     {
         randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) / (currSpeed/((factor*1000)+1.0)));
+    }
+    if(curr_sport == settings::isTria)
+    {
+        randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) / (currSpeed/((0.025*100)+1.0)));
     }
 
     double avgLow = avgSpeed-(avgSpeed*factor);

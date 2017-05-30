@@ -32,7 +32,7 @@ private:
     static QString set_colorString(QColor);
 
     static QString settingFile,valueFile,valueFilePath,splitter;
-    static QStringList table_header,header_swim,header_bike,header_run,header_other;
+    static QStringList table_header,header_swim,header_bike,header_run,headerTria,header_other;
     static QStringList keyList,extkeyList,header_int_time,header_swim_time;
 
     static QHash<QString,QStringList> listMap;

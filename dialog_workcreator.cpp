@@ -196,7 +196,8 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             }
             else if(isSwim)
             {
-                currDist = round(currDist*10.0)/100;
+                currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
+                //currDist = round(currDist*10.0)/100;
                 if(!partName.contains(isBreak)) stepTime = this->calc_duration(currentSport,currDist,thresValue);
             }
 

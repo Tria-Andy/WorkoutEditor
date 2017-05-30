@@ -1108,7 +1108,14 @@ void MainWindow::setSelectedIntRow(QModelIndex index)
     }
     else
     {
-        ui->horizontalSlider_factor->setEnabled(true);
+        if(curr_activity->get_sport() == settings::isTria)
+        {
+            ui->horizontalSlider_factor->setEnabled(false);
+        }
+        else
+        {
+            ui->horizontalSlider_factor->setEnabled(true);
+        }
         curr_activity->set_editRow(lapIdent,isInt);
         curr_activity->showInterval(true);
     }

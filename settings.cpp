@@ -65,6 +65,7 @@ QStringList settings::table_header;
 QStringList settings::header_swim;
 QStringList settings::header_bike;
 QStringList settings::header_run;
+QStringList settings::headerTria;
 QStringList settings::header_other;
 
 QStringList settings::header_int_time;
@@ -139,6 +140,7 @@ void settings::loadSettings()
     header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes" << "Work";
     header_bike << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD";
     header_run << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed";
+    headerTria << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD";
     header_other << "Interval" << "Duration" << "Start" << "Distance";
 
     settingFile = QApplication::applicationDirPath() + QDir::separator() +"WorkoutEditor.ini";
@@ -578,6 +580,10 @@ QStringList settings::get_int_header(QString vSport)
     else if(vSport == isRun)
     {
         return table_header << header_run << avg;
+    }
+    else if(vSport == isTria)
+    {
+        return table_header << headerTria << avg;
     }
     else
     {
