@@ -42,6 +42,7 @@ Dialog_stresscalc::~Dialog_stresscalc()
 void Dialog_stresscalc::estimateStress()
 {
     double stressScore,current;
+    QString xPace;
 
     if(sport == settings::isSwim)
     {
@@ -57,8 +58,8 @@ void Dialog_stresscalc::estimateStress()
     }
     if(sport == settings::isRun)
     {
-        current = this->get_timesec(ui->lineEdit_goal_power->text());
-        current = thresPace / current;
+        xPace = ui->lineEdit_goal_power->text();
+        current = this->calc_lnp(get_speed(QTime::fromString(xPace,"mm:ss"),0,sport,true)/3.6,settings::get_athleteValue("height"),settings::get_athleteValue("weight")) / thresPower;
         ui->lineEdit_intensity->setText(QString::number(current));
     }
     stressScore = this->estimate_stress(sport,ui->lineEdit_goal_power->text(),this->get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")));

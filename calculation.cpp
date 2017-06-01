@@ -236,6 +236,16 @@ QString calculation::calc_duration(QString sport,double dist, QString pace)
     return 0;
 }
 
+double calculation::calc_lnp(double speed,double athleteHeight,double athleteWeight)
+{
+    double athleteF = (0.2025*pow(athleteHeight,0.725)*pow(athleteWeight,0.425))*0.266;
+    double cAero = 0.5*1.2*0.9*athleteF*pow(speed,2)/athleteWeight;
+    double athleteEff = (0.25+0.054*speed)*(1 - 0.5*speed/8.33);
+
+    return (cAero+3.6*athleteEff)*speed*athleteWeight;
+}
+
+
 double calculation::estimate_stress(QString sport, QString p_goal, int duration)
 {
     double goal = 0;
@@ -284,10 +294,7 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
         if(sport == settings::isRun)
         {
             thresPower = settings::get_thresValue("runpower");
-            double athleteF = (0.2025*pow(athleteHeight,0.725)*pow(athleteWeight,0.425))*0.266;
-            double cAero = 0.5*1.2*0.9*athleteF*pow(goal,2)/athleteWeight;
-            double athleteEff = (0.25+0.054*goal)*(1 - 0.5*goal/8.33);
-            est_power = (cAero+3.6*athleteEff)*goal*athleteWeight;
+            est_power = calc_lnp(goal,athleteHeight,athleteWeight);
             raw_effort = est_power * duration * (est_power / thresPower);
             cv_effort = thresPower * 3600;
         }

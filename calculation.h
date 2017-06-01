@@ -30,6 +30,7 @@ protected:
     static double get_thresPercent(QString,QString,bool);
     static double calc_distance(QString, double);
     static double estimate_stress(QString,QString,int);
+    static double calc_lnp(double,double,double);
 };
 
 #endif // CALCULATION_H
