@@ -52,6 +52,7 @@ QMap<int,QString> settings::intList;
 QMap<int,double> settings::weightMap;
 QHash<QString,double> settings::thresholdMap;
 QHash<QString,double> settings::ltsMap;
+QHash<QString,double> settings::athleteMap;
 QHash<QString,QString> settings::swimRange;
 QHash<QString,QString> settings::bikeRange;
 QHash<QString,QString> settings::runRange;
@@ -187,12 +188,17 @@ void settings::loadSettings()
         QJsonObject jsonobj = d.object();
         QJsonArray bodyWeight = jsonobj["measures"].toArray();
         file.close();
+        athleteMap.insert("height",1.73);
+        athleteMap.insert("weight",0.0);
 
         QJsonObject weightInfo;
+        double currWeight = 0.0;
         for(int i = 0; i < bodyWeight.count(); ++i)
         {
             weightInfo = bodyWeight.at(i).toObject();
-            weightMap.insert(weightInfo.value("when").toInt(),weightInfo.value("weightkg").toDouble());
+            currWeight = weightInfo.value("weightkg").toDouble();
+            weightMap.insert(weightInfo.value("when").toInt(),currWeight);
+            if(athleteMap.value("weight") < currWeight) athleteMap.insert("weight",currWeight);
         }
 
         //Sport Value Settings

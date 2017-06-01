@@ -244,6 +244,9 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
     double raw_effort = 0;
     double cv_effort = 0;
     double thresPower = 0;
+    double athleteWeight = settings::get_athleteValue("weight");
+    double athleteHeight = settings::get_athleteValue("height");
+
     if(sport == settings::isSwim)
     {
         goal = get_timesec(p_goal);
@@ -254,7 +257,7 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
     }
     if(sport == settings::isRun)
     {
-        goal = get_timesec(p_goal);
+        goal = get_speed(QTime::fromString(p_goal,"mm:ss"),0,settings::isRun,true)/3.6;
     }
     if(sport == settings::isStrength)
     {
@@ -283,8 +286,11 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
         if(sport == settings::isRun)
         {
             thresPower = settings::get_thresValue("runpower");
-            est_power = thresPower * (settings::get_thresValue("runpace")/goal);
-            raw_effort = (duration * est_power) * (est_power / thresPower);
+            double athleteF = (0.2025*pow(athleteHeight,0.725)*pow(athleteWeight,0.425))*0.266;
+            double cAero = 0.5*1.2*0.9*athleteF*pow(goal,2)/athleteWeight;
+            double athleteEff = (0.25+0.054*goal)*(1 - 0.5*goal/8.33);
+            est_power = (cAero+3.6*athleteEff)*goal*athleteWeight;
+            raw_effort = est_power * duration * (est_power / thresPower);
             cv_effort = thresPower * 3600;
         }
         if(sport == settings::isStrength)

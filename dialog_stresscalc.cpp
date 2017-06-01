@@ -58,7 +58,8 @@ void Dialog_stresscalc::estimateStress()
     if(sport == settings::isRun)
     {
         current = this->get_timesec(ui->lineEdit_goal_power->text());
-        ui->lineEdit_intensity->setText(QString::number(thresPace / current));
+        current = thresPace / current;
+        ui->lineEdit_intensity->setText(QString::number(current));
     }
     stressScore = this->estimate_stress(sport,ui->lineEdit_goal_power->text(),this->get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")));
     ui->lineEdit_stressScore->setText(QString::number(stressScore));

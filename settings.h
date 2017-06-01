@@ -40,7 +40,7 @@ private:
     static QHash<QString,QString> generalMap,gcInfo,saisonInfo;
     static QMap<int,double> weightMap;
     static QHash<QString,QColor> colorMap;
-    static QHash<QString,double> thresholdMap,ltsMap;
+    static QHash<QString,double> thresholdMap,ltsMap,athleteMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
     static QHash<QString,int> fontMap;
     static int swimLaplen;
@@ -70,6 +70,7 @@ public:
     static QHash<QString,QColor> get_colorMap() {return colorMap;}
     static QString get_rangeValue(QString,QString);
     static double get_thresValue(QString key) {return thresholdMap.value(key);}
+    static double get_athleteValue(QString key) {return athleteMap.value(key);}
     static double get_ltsValue(QString key) {return ltsMap.value(key);}
     static QString get_generalValue(QString key) {return generalMap.value(key);}
     static int get_fontValue(QString key) {return fontMap.value(key);}
