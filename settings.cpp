@@ -188,7 +188,7 @@ void settings::loadSettings()
         QJsonObject jsonobj = d.object();
         QJsonArray bodyWeight = jsonobj["measures"].toArray();
         file.close();
-        athleteMap.insert("height",1.73);
+
         athleteMap.insert("weight",0.0);
 
         QJsonObject weightInfo;
@@ -210,10 +210,15 @@ void settings::loadSettings()
         {
             valueFilePath = gcInfo.value("workouts") + QDir::separator() + valueFile;
         }
-        QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
+
+        QSettings *myPref = new QSettings(gcInfo.value("confpath") + QDir::separator() + "athlete-preferences.ini",QSettings::IniFormat);
+        athleteMap.insert("height",myPref->value("height").toDouble());
+        delete myPref;
 
         QStringList settingList;
         QString settingString;
+
+        QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
 
         myvalues->beginGroup("Stressterm");
             ltsMap.insert("ltsdays",myvalues->value("ltsdays").toDouble());

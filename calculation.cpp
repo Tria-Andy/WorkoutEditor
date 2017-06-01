@@ -264,7 +264,6 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
         goal = p_goal.toDouble();
     }
 
-
     if(goal > 0)
     {
         if(sport == settings::isSwim)
@@ -275,7 +274,6 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
             est_power = thresPower * goal;
             raw_effort = (duration * est_power) * (est_power / thresPower);
             cv_effort = thresPower * 3600;
-
         }
         if(sport == settings::isBike)
         {
