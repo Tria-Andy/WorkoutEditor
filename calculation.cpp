@@ -245,6 +245,29 @@ double calculation::calc_lnp(double speed,double athleteHeight,double athleteWei
     return (cAero+3.6*athleteEff)*speed*athleteWeight;
 }
 
+double calculation::calc_swim_xpower(double distance,double pace,double time,double athleteWeight)
+{
+    double K = 2 + 0.35 * athleteWeight;
+    double velo = distance / pace;
+    double alpha = 2.0 /10;
+    QVector<double> rawEWMA(time);
+    double xPower = (K/0.6)*pow(velo,3);
+    double xPowerSum = 0.0;
+
+    for(int i = 0; i < rawEWMA.count(); ++i)
+    {
+        if(i == 0)
+        {
+            rawEWMA[i] = alpha*xPower+(1-alpha)*i;
+        }
+        else
+        {
+            rawEWMA[i] = alpha*xPower+(1-alpha)*rawEWMA[i-1];
+        }
+        xPowerSum += pow(rawEWMA[i],3);
+    }
+    return pow(xPowerSum / time,0.33);
+}
 
 double calculation::estimate_stress(QString sport, QString p_goal, int duration)
 {
@@ -279,31 +302,26 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
         if(sport == settings::isSwim)
         {
             thresPower = settings::get_thresValue("swimpower");
-            goal = settings::get_thresValue("swimpace") / goal;
-            goal = pow(goal,3.0);
-            est_power = thresPower * goal;
-            raw_effort = (duration * est_power) * (est_power / thresPower);
-            cv_effort = thresPower * 3600;
+            est_power = calc_swim_xpower(100,goal,duration,athleteWeight);
+            raw_effort = (duration * est_power) * (est_power / thresPower);         
         }
         if(sport == settings::isBike)
         {
             thresPower = settings::get_thresValue("bikepower");
             raw_effort = (duration * goal) * (goal / thresPower);
-            cv_effort = thresPower * 3600;
         }
         if(sport == settings::isRun)
         {
             thresPower = settings::get_thresValue("runpower");
             est_power = calc_lnp(goal,athleteHeight,athleteWeight);
             raw_effort = est_power * duration * (est_power / thresPower);
-            cv_effort = thresPower * 3600;
         }
         if(sport == settings::isStrength)
         {
             thresPower = settings::get_thresValue("stgpower");
             raw_effort = (duration * goal) * (goal / thresPower);
-            cv_effort = thresPower * 3600;
         }
+        cv_effort = thresPower * 3600;
         est_stress = (raw_effort / cv_effort) * 100;
         return set_doubleValue(est_stress,false);
     }
