@@ -92,6 +92,9 @@
              <property name="text">
               <string>GCPath:</string>
              </property>
+             <property name="buddy">
+              <cstring>lineEdit_gcpath</cstring>
+             </property>
             </widget>
            </item>
            <item row="0" column="1">
@@ -105,6 +108,9 @@
             <widget class="QLabel" name="label_19">
              <property name="text">
               <string>Athlete YoB:</string>
+             </property>
+             <property name="buddy">
+              <cstring>lineEdit_yob</cstring>
              </property>
             </widget>
            </item>
@@ -120,12 +126,18 @@
              <property name="text">
               <string>Athlete Folder:</string>
              </property>
+             <property name="buddy">
+              <cstring>lineEdit_athlete</cstring>
+             </property>
             </widget>
            </item>
            <item row="3" column="0">
             <widget class="QLabel" name="label_4">
              <property name="text">
               <string>Activity Folder:</string>
+             </property>
+             <property name="buddy">
+              <cstring>lineEdit_activity</cstring>
              </property>
             </widget>
            </item>
@@ -178,6 +190,9 @@
              <property name="text">
               <string>Standard-Workouts:</string>
              </property>
+             <property name="buddy">
+              <cstring>lineEdit_standard</cstring>
+             </property>
             </widget>
            </item>
            <item row="1" column="1">
@@ -195,12 +210,18 @@
              <property name="text">
               <string>Workout-Schedule:</string>
              </property>
+             <property name="buddy">
+              <cstring>lineEdit_schedule</cstring>
+             </property>
             </widget>
            </item>
            <item row="2" column="0">
             <widget class="QLabel" name="label_2">
              <property name="text">
               <string>Config File:</string>
+             </property>
+             <property name="buddy">
+              <cstring>lineEdit_configfile</cstring>
              </property>
             </widget>
            </item>
@@ -1161,6 +1182,226 @@
           </item>
          </layout>
         </widget>
+        <widget class="QWidget" name="tab_bodyfat">
+         <attribute name="title">
+          <string>BodyFat</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QGroupBox" name="groupBox_8">
+            <property name="title">
+             <string>Body Fat Calculation</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_4">
+             <item row="7" column="1">
+              <widget class="QSpinBox" name="spinBox_trizeps"/>
+             </item>
+             <item row="8" column="1">
+              <widget class="QSpinBox" name="spinBox_back"/>
+             </item>
+             <item row="8" column="0">
+              <widget class="QLabel" name="label_32">
+               <property name="text">
+                <string>Back:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="0">
+              <widget class="QLabel" name="label_31">
+               <property name="text">
+                <string>Trizeps:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_33">
+               <property name="text">
+                <string>Age:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="lineEdit_age">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_28">
+               <property name="text">
+                <string>Leg:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="label_30">
+               <property name="text">
+                <string>Armpit:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QSpinBox" name="spinBox_leg"/>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_26">
+               <property name="text">
+                <string>Breast:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QSpinBox" name="spinBox_armpit"/>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_27">
+               <property name="text">
+                <string>Stomach:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QSpinBox" name="spinBox_hip"/>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="label_29">
+               <property name="text">
+                <string>Hip:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSpinBox" name="spinBox_breast"/>
+             </item>
+             <item row="3" column="1">
+              <widget class="QSpinBox" name="spinBox_stomach"/>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_34">
+               <property name="text">
+                <string>Weight (Kg):</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="lineEdit_weight">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QLabel" name="label_39">
+               <property name="text">
+                <string>Bone Mass (Kg):</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QLabel" name="label_40">
+               <property name="text">
+                <string>Muscles (Kg):</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_bone"/>
+             </item>
+             <item row="1" column="3">
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_muscle"/>
+             </item>
+             <item row="5" column="2">
+              <widget class="QLabel" name="label_35">
+               <property name="text">
+                <string>Fat Free Weight (Kg):</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="3">
+              <widget class="QLineEdit" name="lineEdit_fatfree"/>
+             </item>
+             <item row="6" column="2">
+              <widget class="QLabel" name="label_36">
+               <property name="text">
+                <string>Fat Weight (Kg):</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="3">
+              <widget class="QLineEdit" name="lineEdit_fatweight"/>
+             </item>
+             <item row="7" column="2">
+              <widget class="QLabel" name="label_37">
+               <property name="text">
+                <string>Body Fat %:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="3">
+              <widget class="QLineEdit" name="lineEdit_fatpercent"/>
+             </item>
+             <item row="8" column="2">
+              <widget class="QLabel" name="label_38">
+               <property name="text">
+                <string>Comment:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="3">
+              <widget class="QLineEdit" name="lineEdit_comment"/>
+             </item>
+             <item row="3" column="2">
+              <widget class="QPushButton" name="pushButton_calcFat">
+               <property name="text">
+                <string>Calc</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="3">
+              <widget class="QPushButton" name="pushButton_clearFat">
+               <property name="text">
+                <string>Clear</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+            <zorder>spinBox_leg</zorder>
+            <zorder>spinBox_stomach</zorder>
+            <zorder>label_27</zorder>
+            <zorder>label_28</zorder>
+            <zorder>label_30</zorder>
+            <zorder>label_32</zorder>
+            <zorder>label_29</zorder>
+            <zorder>label_31</zorder>
+            <zorder>spinBox_trizeps</zorder>
+            <zorder>spinBox_hip</zorder>
+            <zorder>spinBox_breast</zorder>
+            <zorder>spinBox_armpit</zorder>
+            <zorder>label_26</zorder>
+            <zorder>spinBox_back</zorder>
+            <zorder>label_33</zorder>
+            <zorder>lineEdit_age</zorder>
+            <zorder>label_34</zorder>
+            <zorder>lineEdit_weight</zorder>
+            <zorder>label_39</zorder>
+            <zorder>label_40</zorder>
+            <zorder>doubleSpinBox_bone</zorder>
+            <zorder>doubleSpinBox_muscle</zorder>
+            <zorder>label_35</zorder>
+            <zorder>lineEdit_fatfree</zorder>
+            <zorder>label_36</zorder>
+            <zorder>lineEdit_fatweight</zorder>
+            <zorder>label_37</zorder>
+            <zorder>lineEdit_fatpercent</zorder>
+            <zorder>label_38</zorder>
+            <zorder>lineEdit_comment</zorder>
+            <zorder>pushButton_calcFat</zorder>
+            <zorder>pushButton_clearFat</zorder>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -1223,6 +1464,53 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>listWidget_useIn</tabstop>
+  <tabstop>spinBox_thresPower</tabstop>
+  <tabstop>timeEdit_thresPace</tabstop>
+  <tabstop>lineEdit_speed</tabstop>
+  <tabstop>doubleSpinBox_factor</tabstop>
+  <tabstop>spinBox_hfThres</tabstop>
+  <tabstop>spinBox_hfMax</tabstop>
+  <tabstop>lineEdit_saison</tabstop>
+  <tabstop>dateEdit_saisonStart</tabstop>
+  <tabstop>lineEdit_startWeek</tabstop>
+  <tabstop>dateEdit_saisonEnd</tabstop>
+  <tabstop>lineEdit_saisonWeeks</tabstop>
+  <tabstop>spinBox_ltsDays</tabstop>
+  <tabstop>spinBox_lastLTS</tabstop>
+  <tabstop>spinBox_stsDays</tabstop>
+  <tabstop>spinBox_lastSTS</tabstop>
+  <tabstop>dateEdit_stress</tabstop>
+  <tabstop>spinBox_stress</tabstop>
+  <tabstop>pushButton_stressEdit</tabstop>
+  <tabstop>listWidget_stressValue</tabstop>
+  <tabstop>lineEdit_age</tabstop>
+  <tabstop>lineEdit_weight</tabstop>
+  <tabstop>spinBox_breast</tabstop>
+  <tabstop>spinBox_stomach</tabstop>
+  <tabstop>spinBox_leg</tabstop>
+  <tabstop>spinBox_hip</tabstop>
+  <tabstop>spinBox_armpit</tabstop>
+  <tabstop>spinBox_trizeps</tabstop>
+  <tabstop>spinBox_back</tabstop>
+  <tabstop>doubleSpinBox_bone</tabstop>
+  <tabstop>doubleSpinBox_muscle</tabstop>
+  <tabstop>pushButton_calcFat</tabstop>
+  <tabstop>pushButton_clearFat</tabstop>
+  <tabstop>lineEdit_fatfree</tabstop>
+  <tabstop>lineEdit_fatweight</tabstop>
+  <tabstop>lineEdit_fatpercent</tabstop>
+  <tabstop>lineEdit_comment</tabstop>
+  <tabstop>toolButton_schedulePath</tabstop>
+  <tabstop>tableView_hf</tabstop>
+  <tabstop>pushButton_up</tabstop>
+  <tabstop>toolButton_gcPath</tabstop>
+  <tabstop>pushButton_down</tabstop>
+  <tabstop>pushButton_save</tabstop>
+  <tabstop>comboBox_thresSport</tabstop>
+  <tabstop>tableView_level</tabstop>
+  <tabstop>toolButton_workoutsPath</tabstop>
+  <tabstop>pushButton_cancel</tabstop>
   <tabstop>tabWidget</tabstop>
   <tabstop>lineEdit_gcpath</tabstop>
   <tabstop>lineEdit_athlete</tabstop>
@@ -1231,23 +1519,13 @@
   <tabstop>lineEdit_schedule</tabstop>
   <tabstop>lineEdit_standard</tabstop>
   <tabstop>lineEdit_configfile</tabstop>
-  <tabstop>pushButton_save</tabstop>
-  <tabstop>pushButton_cancel</tabstop>
   <tabstop>comboBox_selInfo</tabstop>
-  <tabstop>pushButton_down</tabstop>
-  <tabstop>pushButton_up</tabstop>
-  <tabstop>tableView_level</tabstop>
-  <tabstop>comboBox_thresSport</tabstop>
-  <tabstop>lineEdit_speed</tabstop>
-  <tabstop>listWidget_selection</tabstop>
-  <tabstop>doubleSpinBox_factor</tabstop>
-  <tabstop>tableView_hf</tabstop>
-  <tabstop>lineEdit_saisonWeeks</tabstop>
-  <tabstop>lineEdit_saison</tabstop>
-  <tabstop>dateEdit_saisonStart</tabstop>
-  <tabstop>dateEdit_saisonEnd</tabstop>
-  <tabstop>lineEdit_startWeek</tabstop>
   <tabstop>lineEdit_addedit</tabstop>
+  <tabstop>toolButton_color</tabstop>
+  <tabstop>toolButton_add</tabstop>
+  <tabstop>toolButton_delete</tabstop>
+  <tabstop>toolButton_edit</tabstop>
+  <tabstop>listWidget_selection</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>
