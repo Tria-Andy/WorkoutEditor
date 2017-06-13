@@ -43,6 +43,17 @@ void jsonHandler::fill_keyList(QStringList *targetList,QMap<int, QString> *map, 
         {
             targetList->insert(i,map->value(i));
         }
+        else
+        {
+            if(map->value(i) == "KM")
+            {
+               targetList->insert(i,"KM");
+            }
+            if(map->value(i) == "KPH")
+            {
+               targetList->insert(i,"KPH");
+            }
+        }
     }
     for(int x = 0; x < list->count();++x)
     {
