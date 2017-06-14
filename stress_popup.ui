@@ -198,6 +198,9 @@
         <property name="checked">
          <bool>false</bool>
         </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item>

@@ -935,7 +935,7 @@ void MainWindow::select_activityFile()
     QString filename = QFileDialog::getOpenFileName(
                 this,
                 tr("Select GC JSON File"),
-                settings::get_gcInfo("gcpath"),
+                settings::get_gcInfo("actpath"),
                 "JSON Files (*.json)"
                 );
 
@@ -1108,7 +1108,14 @@ void MainWindow::setSelectedIntRow(QModelIndex index)
     }
     else
     {
-        ui->horizontalSlider_factor->setEnabled(true);
+        if(curr_activity->get_sport() == settings::isTria)
+        {
+            ui->horizontalSlider_factor->setEnabled(false);
+        }
+        else
+        {
+            ui->horizontalSlider_factor->setEnabled(true);
+        }
         curr_activity->set_editRow(lapIdent,isInt);
         curr_activity->showInterval(true);
     }

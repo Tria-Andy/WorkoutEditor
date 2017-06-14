@@ -60,6 +60,11 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->pushButton_save->setEnabled(false);
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
 
+    ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - settings::get_gcInfo("yob").toInt()));
+    ui->lineEdit_weight->setText(QString::number(settings::get_athleteValue("weight")));
+    ui->doubleSpinBox_bone->setValue(3.0);
+    ui->doubleSpinBox_muscle->setValue(48.0);
+
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
     ui->listWidget_stressValue->setItemDelegate(&mousehover_del);
@@ -775,4 +780,62 @@ void Dialog_settings::on_tabWidget_tabBarClicked(int index)
         level_del.thresSelect = "HF";
         level_del.threshold = ui->spinBox_hfThres->value();
     }
+}
+
+void Dialog_settings::on_pushButton_calcFat_clicked()
+{
+    int age = ui->lineEdit_age->text().toInt();
+    double weight = ui->lineEdit_weight->text().toDouble();
+    double sum7 = 0;
+    double k0 = 1.112;
+    double k1 = - 0.00043499;
+    double k2 = 0.00000055;
+    double ka = - 0.00028826 * age;
+    double fatCalc = 0.0;
+    double fatPercent;
+    double bodyFreeFat;
+    QString fatComment;
+
+    sum7 = ui->spinBox_breast->value() * 1.0
+         + ui->spinBox_back->value() * 1.0
+         + ui->spinBox_armpit->value() * 1.0
+         + ui->spinBox_hip->value() * 1.0
+         + ui->spinBox_leg->value() * 1.0
+         + ui->spinBox_stomach->value() * 1.0
+         + ui->spinBox_trizeps->value() * 1.0;
+
+    fatPercent = k0 + k1*sum7 + k2*sum7*sum7 + ka;
+    fatPercent = 495 / fatPercent - 450;
+
+    fatCalc = (fatPercent * weight) / 100;
+    bodyFreeFat = weight - fatCalc;
+
+    ui->lineEdit_fatfree->setText(QString::number(set_doubleValue(bodyFreeFat,false)));
+    ui->lineEdit_fatweight->setText(QString::number(set_doubleValue(fatCalc,false)));
+    ui->lineEdit_fatpercent->setText(QString::number(set_doubleValue(fatPercent,false)));
+
+    fatComment = QString::number(ui->spinBox_breast->value())+"-"+
+                 QString::number(ui->spinBox_stomach->value())+"-"+
+                 QString::number(ui->spinBox_leg->value())+"-"+
+                 QString::number(ui->spinBox_hip->value())+"-"+
+                 QString::number(ui->spinBox_armpit->value())+"-"+
+                 QString::number(ui->spinBox_trizeps->value())+"-"+
+                 QString::number(ui->spinBox_back->value());
+
+    ui->lineEdit_comment->setText(fatComment);
+}
+
+void Dialog_settings::on_pushButton_clearFat_clicked()
+{
+    ui->spinBox_breast->clear();
+    ui->spinBox_back->clear();
+    ui->spinBox_armpit->clear();
+    ui->spinBox_hip->clear();
+    ui->spinBox_leg->clear();
+    ui->spinBox_stomach->clear();
+    ui->spinBox_trizeps->clear();
+    ui->lineEdit_fatfree->clear();
+    ui->lineEdit_fatweight->clear();
+    ui->lineEdit_fatpercent->clear();
+
 }

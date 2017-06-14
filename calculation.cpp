@@ -236,6 +236,39 @@ QString calculation::calc_duration(QString sport,double dist, QString pace)
     return 0;
 }
 
+double calculation::calc_lnp(double speed,double athleteHeight,double athleteWeight)
+{
+    double athleteF = (0.2025*pow(athleteHeight,0.725)*pow(athleteWeight,0.425))*0.266;
+    double cAero = 0.5*1.2*0.9*athleteF*pow(speed,2)/athleteWeight;
+    double athleteEff = (0.25+0.054*speed)*(1 - 0.5*speed/8.33);
+
+    return (cAero+3.6*athleteEff)*speed*athleteWeight;
+}
+
+double calculation::calc_swim_xpower(double distance,double pace,double time,double athleteWeight)
+{
+    double K = 2 + 0.35 * athleteWeight;
+    double velo = distance / pace;
+    double alpha = 2.0 /10;
+    QVector<double> rawEWMA(time);
+    double xPower = (K/0.6)*pow(velo,3);
+    double xPowerSum = 0.0;
+
+    for(int i = 0; i < rawEWMA.count(); ++i)
+    {
+        if(i == 0)
+        {
+            rawEWMA[i] = alpha*xPower+(1-alpha)*i;
+        }
+        else
+        {
+            rawEWMA[i] = alpha*xPower+(1-alpha)*rawEWMA[i-1];
+        }
+        xPowerSum += pow(rawEWMA[i],3);
+    }
+    return pow(xPowerSum / time,0.33);
+}
+
 double calculation::estimate_stress(QString sport, QString p_goal, int duration)
 {
     double goal = 0;
@@ -244,6 +277,9 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
     double raw_effort = 0;
     double cv_effort = 0;
     double thresPower = 0;
+    double athleteWeight = settings::get_athleteValue("weight");
+    double athleteHeight = settings::get_athleteValue("height");
+
     if(sport == settings::isSwim)
     {
         goal = get_timesec(p_goal);
@@ -254,45 +290,38 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
     }
     if(sport == settings::isRun)
     {
-        goal = get_timesec(p_goal);
+        goal = get_speed(QTime::fromString(p_goal,"mm:ss"),0,settings::isRun,true)/3.6;
     }
     if(sport == settings::isStrength)
     {
         goal = p_goal.toDouble();
     }
 
-
     if(goal > 0)
     {
         if(sport == settings::isSwim)
         {
             thresPower = settings::get_thresValue("swimpower");
-            goal = settings::get_thresValue("swimpace") / goal;
-            goal = pow(goal,3.0);
-            est_power = thresPower * goal;
-            raw_effort = (duration * est_power) * (est_power / thresPower);
-            cv_effort = thresPower * 3600;
-
+            est_power = calc_swim_xpower(100,goal,duration,athleteWeight);
+            raw_effort = (duration * est_power) * (est_power / thresPower);         
         }
         if(sport == settings::isBike)
         {
             thresPower = settings::get_thresValue("bikepower");
             raw_effort = (duration * goal) * (goal / thresPower);
-            cv_effort = thresPower * 3600;
         }
         if(sport == settings::isRun)
         {
             thresPower = settings::get_thresValue("runpower");
-            est_power = thresPower * (settings::get_thresValue("runpace")/goal);
-            raw_effort = (duration * est_power) * (est_power / thresPower);
-            cv_effort = thresPower * 3600;
+            est_power = calc_lnp(goal,athleteHeight,athleteWeight);
+            raw_effort = est_power * duration * (est_power / thresPower);
         }
         if(sport == settings::isStrength)
         {
             thresPower = settings::get_thresValue("stgpower");
             raw_effort = (duration * goal) * (goal / thresPower);
-            cv_effort = thresPower * 3600;
         }
+        cv_effort = thresPower * 3600;
         est_stress = (raw_effort / cv_effort) * 100;
         return set_doubleValue(est_stress,false);
     }

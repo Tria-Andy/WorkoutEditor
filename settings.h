@@ -32,14 +32,15 @@ private:
     static QString set_colorString(QColor);
 
     static QString settingFile,valueFile,valueFilePath,splitter;
-    static QStringList table_header,header_swim,header_bike,header_run,header_other;
+    static QStringList table_header,header_swim,header_bike,header_run,headerTria,header_other;
     static QStringList keyList,extkeyList,header_int_time,header_swim_time;
 
     static QHash<QString,QStringList> listMap;
     static QMap<int,QString> sampList,intList;
     static QHash<QString,QString> generalMap,gcInfo,saisonInfo;
+    static QMap<int,double> weightMap;
     static QHash<QString,QColor> colorMap;
-    static QHash<QString,double> thresholdMap,ltsMap;
+    static QHash<QString,double> thresholdMap,ltsMap,athleteMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
     static QHash<QString,int> fontMap;
     static int swimLaplen;
@@ -47,6 +48,7 @@ private:
     //Getter
     static QColor get_colorRGB(QString,bool);
     static QStringList get_colorStringList(QStringList*);
+
 
     //Setter
     static void fill_mapList(QMap<int,QString>*,QString*);
@@ -68,6 +70,7 @@ public:
     static QHash<QString,QColor> get_colorMap() {return colorMap;}
     static QString get_rangeValue(QString,QString);
     static double get_thresValue(QString key) {return thresholdMap.value(key);}
+    static double get_athleteValue(QString key) {return athleteMap.value(key);}
     static double get_ltsValue(QString key) {return ltsMap.value(key);}
     static QString get_generalValue(QString key) {return generalMap.value(key);}
     static int get_fontValue(QString key) {return fontMap.value(key);}
@@ -88,6 +91,7 @@ public:
 
     //common functions
     static int get_timesec(QString time);
+    static double get_weightforDate(QDateTime);
     static QStringList get_int_header(QString);
     static QStringList get_time_header() {return header_int_time;}
     static QStringList get_swimtime_header(){return header_swim_time;}

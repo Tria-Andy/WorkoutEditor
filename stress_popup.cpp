@@ -85,6 +85,7 @@ void stress_popup::set_graph()
     ui->widget_stressPlot->addLayer("TSB",ui->widget_stressPlot->layer(1),QCustomPlot::limAbove);
     ui->widget_stressPlot->addLayer("STS",ui->widget_stressPlot->layer(2),QCustomPlot::limAbove);
     ui->widget_stressPlot->addLayer("LTS",ui->widget_stressPlot->layer(3),QCustomPlot::limAbove);
+    ui->widget_stressPlot->addLayer("StressScore",ui->widget_stressPlot->layer(4),QCustomPlot::limAbove);
     ui->widget_stressPlot->xAxis->grid()->setLayer("GRID");
     ui->widget_stressPlot->yAxis->grid()->setLayer("GRID");
     this->set_stressValues(ui->dateEdit_start->date(),ui->dateEdit_end->date());
@@ -111,6 +112,7 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     yLTS.resize(dayCount);
     ySTS.resize(dayCount);
     yTSB.resize(dayCount);
+    yStress.resize(dayCount);
 
     stressMax = 0;
     tsbMinMax.resize(2);
@@ -135,8 +137,11 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     for(int i = 0; i < dayCount; ++i)
     {
         pastStress = startStress;
-        dateValue = startDate.addDays(i).toTime_t();
+        dateValue = startDate.addDays(i).toTime_t() + 3600;
         xDate[i] = dateValue;
+        yStress[i] = stressMap->value(startDate.date().addDays(i));
+        if(stressMax < yStress[i]) stressMax = yStress[i];
+
         dayDate = startDate.date().addDays(i);
 
         for(int x = ltsStart; x <= 0; ++x)
@@ -251,6 +256,7 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     double dayCount = rangeStart.daysTo(rangeEnd)+2;
     QCPGraph *ltsLine = this->get_QCPLine("LTS",QColor(0,255,0),yLTS,false);
     QCPGraph *stsLine = this->get_QCPLine("STS",QColor(255,0,0),ySTS,false);
+    QCPGraph *stressLine = this->get_QCPLine("StressScore",QColor(225,150,0),yStress,false);
     QCPGraph *tsbLine = this->get_QCPLine("TSB",QColor(255,170,0),yTSB,true);
     tsbLine->setBrush(QBrush(QColor(255,170,0,50)));
 
@@ -258,12 +264,14 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     {
         this->set_itemTracer("LTS",ltsLine,Qt::green,i);
         this->set_itemTracer("STS",stsLine,Qt::red,i);
+        this->set_itemTracer("StressScore",stressLine,QColor(225,150,0),i);
         this->set_itemTracer("TSB",tsbLine,QColor(255,170,0),i);
 
         if(!showValues)
         {
             this->set_itemText("LTS",lineFont,yLTS,i,false);
             this->set_itemText("STS",lineFont,ySTS,i,false);
+            this->set_itemText("StressScore",lineFont,yStress,i,false);
             this->set_itemText("TSB",lineFont,yTSB,i,true);
         }
 

@@ -43,6 +43,17 @@ void jsonHandler::fill_keyList(QStringList *targetList,QMap<int, QString> *map, 
         {
             targetList->insert(i,map->value(i));
         }
+        else
+        {
+            if(map->value(i) == "KM")
+            {
+               targetList->insert(i,"KM");
+            }
+            if(map->value(i) == "KPH")
+            {
+               targetList->insert(i,"KPH");
+            }
+        }
     }
     for(int x = 0; x < list->count();++x)
     {
@@ -272,7 +283,7 @@ void jsonHandler::write_jsonFile()
     rideFile["RIDE"] = activityItem;
     jsonDoc.setObject(rideFile);
 
-    QFile file(settings::get_gcInfo("gcpath") + QDir::separator() + fileName);
+    QFile file(settings::get_gcInfo("actpath") + QDir::separator() + fileName);
     //QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName); //Test
     if(!file.open(QFile::WriteOnly))
     {

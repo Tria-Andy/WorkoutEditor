@@ -369,8 +369,8 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset>
-             <normaloff>:/images/icons/Add.png</normaloff>:/images/icons/Add.png</iconset>
+            <iconset resource="resources.qrc">
+             <normaloff>:/images/icons/Create.png</normaloff>:/images/icons/Create.png</iconset>
            </property>
            <property name="autoRaise">
             <bool>true</bool>

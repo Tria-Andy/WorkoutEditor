@@ -55,7 +55,8 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     ui->toolButton_cancel->setStyleSheet(buttonStyle);
     ui->toolButton_down->setStyleSheet(buttonStyle);
     ui->toolButton_up->setStyleSheet(buttonStyle);
-    ui->pushButton_clear->setEnabled(false);
+    ui->toolButton_copy->setEnabled(false);
+    this->set_controlButtons(false);
 
     ui->treeWidget_intervall->setStyleSheet(viewBackground);
     ui->listWidget_group->setStyleSheet(viewBackground);
@@ -84,6 +85,14 @@ Dialog_workCreator::~Dialog_workCreator()
     delete valueModel;
     delete listModel;
     delete ui;
+}
+
+void Dialog_workCreator::set_controlButtons(bool setButton)
+{
+    ui->pushButton_clear->setEnabled(setButton);
+    ui->toolButton_save->setEnabled(setButton);
+    ui->toolButton_delete->setEnabled(setButton);
+    ui->comboBox_code->setEnabled(setButton);
 }
 
 void Dialog_workCreator::get_workouts(QString sport)
@@ -187,7 +196,8 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             }
             else if(isSwim)
             {
-                currDist = round(currDist*10.0)/100;
+                currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
+                //currDist = round(currDist*10.0)/100;
                 if(!partName.contains(isBreak)) stepTime = this->calc_duration(currentSport,currDist,thresValue);
             }
 
@@ -219,7 +229,8 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     ui->treeWidget_intervall->expandAll();
     this->set_plotModel();
     clearFlag = false;
-    ui->pushButton_clear->setEnabled(true);
+    this->set_controlButtons(true);
+    ui->toolButton_copy->setEnabled(false);
     ui->treeWidget_intervall->setCurrentItem(ui->treeWidget_intervall->topLevelItem(0));
 }
 void Dialog_workCreator::save_workout()
@@ -379,7 +390,8 @@ void Dialog_workCreator::on_treeWidget_intervall_itemChanged(QTreeWidgetItem *it
             this->set_defaultData(item,true);
         }
     }
-    ui->pushButton_clear->setEnabled(true);
+    //ui->pushButton_clear->setEnabled(true);
+    this->set_controlButtons(true);
 }
 
 void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
@@ -538,7 +550,7 @@ void Dialog_workCreator::clearIntTree()
     ui->lineEdit_workoutname->clear();
     ui->comboBox_code->setCurrentIndex(0);
     ui->checkBox_timebased->setChecked(false);
-    ui->pushButton_clear->setEnabled(false);
+    this->set_controlButtons(false);
     this->control_editPanel(false);
     ui->listView_workouts->clearSelection();
     ui->listWidget_group->clearSelection();
@@ -930,6 +942,7 @@ void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
 void Dialog_workCreator::on_pushButton_clear_clicked()
 {
     this->clearIntTree();
+    this->set_controlButtons(false);
 }
 
 void Dialog_workCreator::on_toolButton_update_clicked()
@@ -1103,14 +1116,15 @@ void Dialog_workCreator::control_editPanel(bool setedit)
 void Dialog_workCreator::on_toolButton_save_clicked()
 {
     this->save_workout();
-    ui->toolButton_copy->setEnabled(true);
     ui->toolButton_delete->setEnabled(true);
+    ui->toolButton_save->setEnabled(false);
 }
 
 void Dialog_workCreator::on_toolButton_copy_clicked()
 {
     currentWorkID = QString();
     this->save_workout();
+    ui->toolButton_copy->setEnabled(false);
 }
 
 void Dialog_workCreator::on_toolButton_delete_clicked()
