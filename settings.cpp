@@ -154,7 +154,6 @@ void settings::loadSettings()
             gcInfo.insert("regPath",mysettings->value("regPath").toString());
             gcInfo.insert("dir",mysettings->value("dir").toString());
             gcInfo.insert("athlete",mysettings->value("athlete").toString());
-            gcInfo.insert("yob",mysettings->value("yob").toString());
             gcInfo.insert("folder",mysettings->value("folder").toString());
             gcInfo.insert("conf",mysettings->value("conf").toString());
             gcInfo.insert("gcpath",mysettings->value("gcpath").toString());
@@ -193,12 +192,22 @@ void settings::loadSettings()
 
         QJsonObject weightInfo;
         double currWeight = 0.0;
+        double currBone = 0.0;
+        double currMuscle = 0.0;
         for(int i = 0; i < bodyWeight.count(); ++i)
         {
             weightInfo = bodyWeight.at(i).toObject();
             currWeight = weightInfo.value("weightkg").toDouble();
+            currBone = weightInfo.value("boneskg").toDouble();
+            currMuscle = weightInfo.value("musclekg").toDouble();
             weightMap.insert(weightInfo.value("when").toInt(),currWeight);
-            if(athleteMap.value("weight") < currWeight) athleteMap.insert("weight",currWeight);
+
+            if(athleteMap.value("weight") < currWeight)
+            {
+                athleteMap.insert("weight",currWeight);
+                athleteMap.insert("boneskg",currBone);
+                athleteMap.insert("musclekg",currMuscle);
+            }
         }
 
         //Sport Value Settings
@@ -212,6 +221,7 @@ void settings::loadSettings()
         }
 
         QSettings *myPref = new QSettings(gcInfo.value("confpath") + QDir::separator() + "athlete-preferences.ini",QSettings::IniFormat);
+        athleteMap.insert("yob",myPref->value("dob").toDate().year());
         athleteMap.insert("height",myPref->value("height").toDouble());
         delete myPref;
 

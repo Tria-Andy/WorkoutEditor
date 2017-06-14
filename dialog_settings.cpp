@@ -40,7 +40,6 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->lineEdit_gcpath->setText(settings::get_gcInfo("gcpath"));
     ui->lineEdit_gcpath->setEnabled(false);
     ui->lineEdit_athlete->setText(settings::get_gcInfo("athlete"));
-    ui->lineEdit_yob->setText(settings::get_gcInfo("yob"));
     ui->lineEdit_activity->setText(settings::get_gcInfo("folder"));
     ui->lineEdit_schedule->setText(settings::get_gcInfo("schedule"));
     ui->lineEdit_standard->setText(settings::get_gcInfo("workouts"));
@@ -60,10 +59,10 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->pushButton_save->setEnabled(false);
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
 
-    ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - settings::get_gcInfo("yob").toInt()));
+    ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - settings::get_athleteValue("yob")));
     ui->lineEdit_weight->setText(QString::number(settings::get_athleteValue("weight")));
-    ui->doubleSpinBox_bone->setValue(3.0);
-    ui->doubleSpinBox_muscle->setValue(48.0);
+    ui->doubleSpinBox_bone->setValue(settings::get_athleteValue("boneskg"));
+    ui->doubleSpinBox_muscle->setValue(settings::get_athleteValue("musclekg"));
 
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
@@ -209,7 +208,6 @@ void Dialog_settings::writeChangedValues()
 
     settings::set_gcInfo("gcpath",ui->lineEdit_gcpath->text());
     settings::set_gcInfo("athlete",ui->lineEdit_athlete->text());
-    settings::set_gcInfo("yob",ui->lineEdit_yob->text());
     settings::set_gcInfo("folder",ui->lineEdit_activity->text());
     settings::set_gcInfo("schedule",ui->lineEdit_schedule->text());
     settings::set_gcInfo("workouts",ui->lineEdit_standard->text());
