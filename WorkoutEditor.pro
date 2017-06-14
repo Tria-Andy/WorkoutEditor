@@ -80,13 +80,11 @@ HEADERS  += mainwindow.h \
     calculation.h \
     xmlhandler.h \
     dialog_workcreator.h \
-    del_workcreator.h \
     del_treeview.h \
     del_avgselect.h \
     filereader.h \
     del_filelist.h \
     del_daypop.h \
-    del_workcreatoredit.h \
     del_mousehover.h
 
 FORMS    += mainwindow.ui \
