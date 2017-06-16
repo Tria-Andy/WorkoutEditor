@@ -22,8 +22,161 @@
 #include <QDialog>
 #include <QtCore>
 #include <QStandardItemModel>
+#include <QStyledItemDelegate>
+#include <QDoubleSpinBox>
+#include <QSpinBox>
+#include <QTimeEdit>
 #include "settings.h"
 #include "calculation.h"
+
+class del_racecalc : public QStyledItemDelegate, public calculation
+{
+    const QString trans = "T";
+
+    void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
+    {
+        painter->save();
+        QFont cFont;
+        QString sportname,indexData;
+        const QAbstractItemModel *model = index.model();
+        cFont.setPixelSize(12);
+
+        QColor rectColor;
+        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
+        sportname = model->data(model->index(index.row(),0,QModelIndex())).toString().trimmed();
+        indexData = index.data().toString();
+        painter->setPen(Qt::black);
+
+        if(index.row() == model->rowCount()-1 && model->rowCount() > 1)
+        {
+            rectColor = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
+            cFont.setBold(true);
+        }
+        else
+        {
+            if(!sportname.contains(trans))
+            {
+                rectColor = settings::get_itemColor(sportname).toHsv();
+            }
+            else
+            {
+                rectColor.setHsv(0,0,180,200);
+            }
+            cFont.setBold(false);
+        }
+        rectColor.setAlpha(175);
+        painter->fillRect(option.rect,rectColor);
+        painter->setFont(cFont);
+        painter->drawText(rect_text,indexData,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+        painter->restore();
+    }
+
+    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        Q_UNUSED(option)
+        QString lapName = index.model()->data(index.model()->index(index.row(),0)).toString();
+
+        if((index.column() == 1 || index.column() == 3) && !lapName.contains(trans))
+        {
+            QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
+            editor->setFrame(false);
+            editor->setDecimals(2);
+            editor->setMinimum(0.0);
+            editor->setMaximum(500.0);
+            return editor;
+        }
+        else if(index.column() == 2 && !lapName.contains(trans))
+        {
+            QTimeEdit *editor = new QTimeEdit(parent);
+            editor->setDisplayFormat("mm:ss");
+            editor->setFrame(false);
+            return editor;
+        }
+        else if(index.column() == 4 && lapName.contains(trans))
+        {
+            QTimeEdit *editor = new QTimeEdit(parent);
+            editor->setDisplayFormat("mm:ss");
+            editor->setFrame(false);
+            return editor;
+        }
+
+
+        return 0;
+    }
+
+    void setEditorData(QWidget *editor, const QModelIndex &index) const
+    {
+
+        if(index.column() == 1 || index.column() == 3)
+        {
+            double dist = index.model()->data(index, Qt::EditRole).toDouble();
+            QDoubleSpinBox *doublespinBox = static_cast<QDoubleSpinBox*>(editor);
+            doublespinBox->setValue(dist);
+        }
+        else if(index.column() == 2 || index.column() == 4)
+        {
+            QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
+            timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"mm:ss"));
+        }
+    }
+
+    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+    {
+        if(index.column() == 1 || index.column() == 3)
+        {
+            QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
+            spinBox->interpretText();
+            double dist = spinBox->value();
+            model->setData(index, dist, Qt::EditRole);
+            setLapData(index.column(),model,index);
+        }
+        else if(index.column() == 2 || index.column() == 4)
+        {
+            QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
+            QTime value = timeEdit->time();
+            timeEdit->interpretText();
+            model->setData(index,value.toString("mm:ss"), Qt::EditRole);
+            setLapData(index.column(),model,index);
+        }
+    }
+
+    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        Q_UNUSED(index)
+        editor->setGeometry(option.rect);
+    }
+
+    void setLapData(int col,QAbstractItemModel *model, const QModelIndex &index) const
+    {
+        QString sport = model->data(model->index(index.row(),0)).toString();
+        QString sPace = model->data(model->index(index.row(),2)).toString();
+        QTime pace =  QTime::fromString(sPace,"mm:ss");
+        double dist = model->data(model->index(index.row(),1)).toDouble();
+        //double speed = model->data(model->index(index.row(),3)).toDouble();
+        QString duration = calc_duration(sport,dist,sPace);
+
+        if(col == 2 && col != model->columnCount()-1)
+        {
+            model->setData(model->index(index.row(),3),get_speed(pace,0,sport,true));
+            model->setData(model->index(index.row(),4),duration);
+        }
+        else
+        {
+            model->setData(model->index(index.row(),4),duration);
+            model->setData(model->index(index.row(),2),calc_lapPace(sport,get_timesec(duration),dist));
+        }
+
+        QTime sumTime;
+        sumTime.setHMS(0,0,0);
+
+        for(int i = 0; i < model->rowCount()-1; ++i)
+        {
+            sumTime = sumTime.addSecs(get_timesec(model->data(model->index(i,4,QModelIndex())).toString()));
+
+        }
+        model->setData(model->index(model->rowCount()-1,4),sumTime.toString("hh:mm:ss"));
+    }
+};
 
 namespace Ui {
 class Dialog_paceCalc;
@@ -48,15 +201,22 @@ private slots:
     void on_pushButton_clicked();
     void on_toolButton_copy_clicked();
 
+    void on_comboBox_race_currentIndexChanged(int index);
+
 private:
     Ui::Dialog_paceCalc *ui;
-    QStringList sportList,model_header;
-    QStandardItemModel *pace_model;
-    QVector<double> dist;
+    QStringList sportList,model_header,race_header,triaDist,runRaces;
+    QStandardItemModel *paceModel;
+    QStandardItemModel *raceModel;
+    QHash<QString,QString> triathlonMap;
+    QVector<double> dist,raceDist;
+    del_racecalc race_del;
     int distFactor;
     void init_paceView();
     void set_pace();
     void set_freeField(int);
+    void set_raceTable(QString);
 };
+
 
 #endif // DIALOG_PACECALC_H

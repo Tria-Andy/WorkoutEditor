@@ -33,11 +33,11 @@ private:
 
     static QString settingFile,valueFile,valueFilePath,splitter;
     static QStringList table_header,header_swim,header_bike,header_run,headerTria,header_other;
-    static QStringList keyList,extkeyList,header_int_time,header_swim_time;
+    static QStringList keyList,extkeyList,header_int_time,header_swim_time,triaDistance;
 
     static QHash<QString,QStringList> listMap;
     static QMap<int,QString> sampList,intList;
-    static QHash<QString,QString> generalMap,gcInfo,saisonInfo;
+    static QHash<QString,QString> generalMap,gcInfo,saisonInfo,triaMap;
     static QMap<int,double> weightMap;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,double> thresholdMap,ltsMap,athleteMap;
@@ -69,6 +69,7 @@ public:
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
     static QHash<QString,QColor> get_colorMap() {return colorMap;}
     static QString get_rangeValue(QString,QString);
+    static QHash<QString,QString> get_triaMap() {return triaMap;}
     static double get_thresValue(QString key) {return thresholdMap.value(key);}
     static double get_athleteValue(QString key) {return athleteMap.value(key);}
     static double get_ltsValue(QString key) {return ltsMap.value(key);}
@@ -95,6 +96,7 @@ public:
     static QStringList get_int_header(QString);
     static QStringList get_time_header() {return header_int_time;}
     static QStringList get_swimtime_header(){return header_swim_time;}
+    static QStringList get_triaDistance() {return triaDistance;}
     static void writeListValues(QHash<QString,QStringList> *plist);
     static void autoSave() {settings::saveSettings();}
 };

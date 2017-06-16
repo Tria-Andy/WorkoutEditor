@@ -58,6 +58,7 @@ QHash<QString,QString> settings::bikeRange;
 QHash<QString,QString> settings::runRange;
 QHash<QString,QString> settings::stgRange;
 QHash<QString,QString> settings::hfRange;
+QHash<QString,QString> settings::triaMap;
 
 QStringList settings::keyList;
 QStringList settings::extkeyList;
@@ -68,7 +69,7 @@ QStringList settings::header_bike;
 QStringList settings::header_run;
 QStringList settings::headerTria;
 QStringList settings::header_other;
-
+QStringList settings::triaDistance;
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
 
@@ -344,7 +345,14 @@ void settings::loadSettings()
             settingList.clear();
         myvalues->endGroup();
 
-        myvalues->beginGroup("Sport");
+        myvalues->beginGroup("Sport");            
+            triaDistance << myvalues->value("triathlon").toString().split(splitter);
+            settingList << myvalues->value("triaDist").toString().split(splitter);
+            for(int i = 0; i < settingList.count(); i++)
+            {
+                triaMap.insert(triaDistance.at(i),settingList.at(i));
+            }
+            settingList.clear();
             settingList <<  myvalues->value("sports").toString().split(splitter);
             listMap.insert("Sport",myvalues->value("sports").toString().split(splitter));
             listMap.insert("Sportuse",myvalues->value("sportuse").toString().split(splitter));
