@@ -148,33 +148,44 @@ class del_racecalc : public QStyledItemDelegate, public calculation
 
     void setLapData(int col,QAbstractItemModel *model, const QModelIndex &index) const
     {
+        QString sPace;
+        QTime pace;
         QString sport = model->data(model->index(index.row(),0)).toString();
-        QString sPace = model->data(model->index(index.row(),2)).toString();
-        QTime pace =  QTime::fromString(sPace,"mm:ss");
         double dist = model->data(model->index(index.row(),1)).toDouble();
-        //double speed = model->data(model->index(index.row(),3)).toDouble();
-        QString duration = calc_duration(sport,dist,sPace);
+        double factor = 1.0;
+
+        if(sport == settings::isSwim) factor = 1000.0;
 
         if(col == 2 && col != model->columnCount()-1)
         {
-            model->setData(model->index(index.row(),3),get_speed(pace,0,sport,true));
-            model->setData(model->index(index.row(),4),duration);
+            sPace = model->data(model->index(index.row(),2)).toString();
+            pace =  QTime::fromString(sPace,"mm:ss");
+            model->setData(model->index(index.row(),3),set_doubleValue(get_speed(pace,0,sport,true),false));
         }
         else
         {
-            model->setData(model->index(index.row(),4),duration);
-            model->setData(model->index(index.row(),2),calc_lapPace(sport,get_timesec(duration),dist));
+            double speed = model->data(model->index(index.row(),3)).toDouble();
+            int calcTime = dist / speed * 60*60;
+            model->setData(model->index(index.row(),2),set_time(calc_lapPace(sport,calcTime,dist*factor)));
+            sPace = model->data(model->index(index.row(),2)).toString();
         }
 
-        QTime sumTime;
-        sumTime.setHMS(0,0,0);
+        if(col != 4)
+        {
+            model->setData(model->index(index.row(),4),calc_duration(sport,dist,sPace));
+        }
+
+        QTime timeSum;
+        double distSum = 0;
+        timeSum.setHMS(0,0,0);
 
         for(int i = 0; i < model->rowCount()-1; ++i)
         {
-            sumTime = sumTime.addSecs(get_timesec(model->data(model->index(i,4,QModelIndex())).toString()));
-
+            timeSum = timeSum.addSecs(get_timesec(model->data(model->index(i,4,QModelIndex())).toString()));
+            distSum += model->data(model->index(i,1)).toDouble();
         }
-        model->setData(model->index(model->rowCount()-1,4),sumTime.toString("hh:mm:ss"));
+        model->setData(model->index(model->rowCount()-1,4),timeSum.toString("hh:mm:ss"));
+        model->setData(model->index(model->rowCount()-1,1),distSum);
     }
 };
 
