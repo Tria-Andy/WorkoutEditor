@@ -72,6 +72,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mainToolBar->addWidget(menuSpacer);
     ui->mainToolBar->addWidget(planerMode);
     ui->mainToolBar->addWidget(planMode);
+    ui->calendarWidget->setVisible(true);
+    ui->frame_YearAvg->setVisible(false);
     ui->toolButton_weekCurrent->setEnabled(false);
     ui->toolButton_weekMinus->setEnabled(false);
     calendar_model = new QStandardItemModel();
@@ -1784,6 +1786,8 @@ void MainWindow::toolButton_planMode(bool checked)
             this->set_buttons(true);
         }
     }
+    ui->calendarWidget->setVisible(!checked);
+    ui->frame_YearAvg->setVisible(checked);
     ui->frame_phases->setVisible(checked);
     ui->label_month->setText("Week " + this->get_weekRange());
     this->workout_calendar();

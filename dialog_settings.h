@@ -54,7 +54,6 @@ private slots:
     void on_lineEdit_schedule_textChanged(const QString &arg1);
     void on_lineEdit_standard_textChanged(const QString &arg1);
     void on_lineEdit_athlete_textChanged(const QString &arg1);
-    void on_lineEdit_yob_textChanged(const QString &arg1);
     void on_lineEdit_addedit_textChanged(const QString &arg1);
     void on_tableView_level_doubleClicked(const QModelIndex &index);
     void on_tableView_hf_doubleClicked(const QModelIndex &index);

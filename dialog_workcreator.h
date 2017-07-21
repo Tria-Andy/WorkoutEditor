@@ -14,8 +14,6 @@
 #include <QWidget>
 #include "settings.h"
 #include "standardworkouts.h"
-//#include "del_workcreator.h"
-//#include "del_workcreatoredit.h"
 #include "del_mousehover.h"
 #include "calculation.h"
 

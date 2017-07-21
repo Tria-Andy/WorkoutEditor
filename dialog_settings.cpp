@@ -60,7 +60,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
 
     ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - settings::get_athleteValue("yob")));
-    ui->lineEdit_weight->setText(QString::number(settings::get_athleteValue("weight")));
+    ui->lineEdit_weight->setText(QString::number(settings::get_weightforDate(QDateTime::currentDateTime())));
     ui->doubleSpinBox_bone->setValue(settings::get_athleteValue("boneskg"));
     ui->doubleSpinBox_muscle->setValue(settings::get_athleteValue("musclekg"));
 
@@ -565,12 +565,6 @@ void Dialog_settings::on_lineEdit_athlete_textChanged(const QString &value)
     this->enableSavebutton();
 }
 
-void Dialog_settings::on_lineEdit_yob_textChanged(const QString &value)
-{
-    Q_UNUSED(value)
-    this->enableSavebutton();
-}
-
 void Dialog_settings::on_lineEdit_addedit_textChanged(const QString &value)
 {
     if(!value.isEmpty())
@@ -835,5 +829,6 @@ void Dialog_settings::on_pushButton_clearFat_clicked()
     ui->lineEdit_fatfree->clear();
     ui->lineEdit_fatweight->clear();
     ui->lineEdit_fatpercent->clear();
+    ui->lineEdit_comment->clear();
 
 }
