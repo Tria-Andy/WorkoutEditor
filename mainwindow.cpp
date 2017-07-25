@@ -76,8 +76,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->frame_YearAvg->setVisible(false);
     ui->toolButton_weekCurrent->setEnabled(false);
     ui->toolButton_weekMinus->setEnabled(false);
-    calendar_model = new QStandardItemModel();
-    sum_model = new QStandardItemModel();
+    calendarModel = new QStandardItemModel();
+    sumModel = new QStandardItemModel();
+    avgModel = new QStandardItemModel();
     scheduleProxy = new QSortFilterProxyModel();
     scheduleProxy->setSourceModel(workSchedule->workout_schedule);
     metaProxy = new QSortFilterProxyModel();
@@ -91,6 +92,7 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         cal_header << QDate::longDayName(d);
     }
+    avgHeader << "Sport" << "Workouts" << "Duration" << "Distance";
 
     //Editor Mode
     avgCounter = 0;
@@ -117,10 +119,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidget->setGeometry(5,5,0,0);
     this->summery_view();
     ui->tableView_cal->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableView_cal->setModel(calendar_model);
+    ui->tableView_cal->setModel(calendarModel);
     ui->tableView_cal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_cal->horizontalHeader()->setSectionsClickable(false);
     ui->tableView_cal->verticalHeader()->hide();
+    ui->tableView_yearAvg->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableView_yearAvg->setModel(avgModel);
+    ui->tableView_yearAvg->setItemDelegate(&avgweek_del);
+    ui->tableView_yearAvg->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_yearAvg->horizontalHeader()->setSectionsClickable(false);
+    ui->tableView_yearAvg->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_yearAvg->verticalHeader()->hide();
     ui->toolButton_addSelect->setEnabled(false);
     ui->toolButton_clearSelect->setEnabled(false);
     ui->toolButton_clearContent->setEnabled(false);
@@ -146,10 +155,11 @@ void MainWindow::freeMem()
     if(userSetup)
     {
         workSchedule->freeMem();
-        calendar_model->clear();
+        calendarModel->clear();
         delete workSchedule;
-        delete sum_model;
-        delete calendar_model;
+        delete sumModel;
+        delete calendarModel;
+        delete avgModel;
         delete scheduleProxy;
         delete metaProxy;
     }
@@ -324,9 +334,9 @@ void MainWindow::set_summeryInfo()
 
 void MainWindow::summery_view()
 {
-    sum_model->clear();
-    sum_model->setColumnCount(1);
-    ui->tableView_summery->setModel(sum_model);
+    sumModel->clear();
+    sumModel->setColumnCount(1);
+    ui->tableView_summery->setModel(sumModel);
     ui->tableView_summery->verticalHeader()->resetDefaultSectionSize();
     ui->tableView_summery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_summery->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
@@ -378,6 +388,13 @@ void MainWindow::summery_view()
     else
     {
         QString work,dura,dist,stress;
+        int sportUseSum = sportUse+1;
+        avgModel->clear();
+        avgModel->setColumnCount(3);
+        avgModel->setRowCount(sportUseSum);
+        avgModel->setHorizontalHeaderLabels(avgHeader);
+
+        int metaRowCount = 0;
 
         if(phaseFilterID > 1)
         {
@@ -385,14 +402,15 @@ void MainWindow::summery_view()
           metaProxy->setFilterKeyColumn(2);
         }
         metaProxy->sort(0);
+        metaRowCount = metaProxy->rowCount();
 
-        for(int row = 0; row < metaProxy->rowCount(); ++row)
+        for(int row = 0; row < metaRowCount; ++row)
         {
             weekID = metaProxy->data(metaProxy->index(row,1)).toString();
             contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
             contentProxy->setFilterKeyColumn(1);
 
-            for(int col = 0; col < sportUse+1; ++col)
+            for(int col = 0; col < sportUseSum; ++col)
             {
                 sumValues = contentProxy->data(contentProxy->index(0,col+2)).toString().split("-");
                 work = sumValues.at(0);
@@ -408,9 +426,22 @@ void MainWindow::summery_view()
             contentProxy->setFilterRegExp("");
             sumValues.clear();
         }
+
+        for(int i = 0; i < sportUse; ++i)
+        {
+            avgModel->setData(avgModel->index(i,0,QModelIndex()),sportList.at(i));
+            avgModel->setData(avgModel->index(i,1,QModelIndex()),set_doubleValue(work_sum[i]/metaRowCount,false));
+            avgModel->setData(avgModel->index(i,2,QModelIndex()),set_time(dur_sum[i]/60/metaRowCount));
+            avgModel->setData(avgModel->index(i,3,QModelIndex()),set_doubleValue(dist_sum[i]/metaRowCount,false));
+        }
+        avgModel->setData(avgModel->index(sportUse,0,QModelIndex()),"Phase");
+        avgModel->setData(avgModel->index(sportUse,1,QModelIndex()),set_doubleValue(work_sum[sportUse]/metaRowCount,false));
+        avgModel->setData(avgModel->index(sportUse,2,QModelIndex()),set_time(dur_sum[sportUse]/60/metaRowCount));
+        avgModel->setData(avgModel->index(sportUse,3,QModelIndex()),set_doubleValue(dist_sum[sportUse]/metaRowCount,false));
+
         sumValues << this->set_summeryString(0,isWeekMode);
 
-        for(int i = 1; i < sportUse+1; ++i)
+        for(int i = 1; i < sportUseSum; ++i)
         {
             sumValues << this->set_summeryString(i,isWeekMode);
         }
@@ -418,9 +449,9 @@ void MainWindow::summery_view()
 
     for(int i = 0; i < sumValues.count(); ++i)
     {
-        rowcount = sum_model->rowCount();
-        sum_model->insertRow(rowcount,QModelIndex());
-        sum_model->setData(sum_model->index(i,0,QModelIndex()),sumValues.at(i));
+        rowcount = sumModel->rowCount();
+        sumModel->insertRow(rowcount,QModelIndex());
+        sumModel->setData(sumModel->index(i,0,QModelIndex()),sumValues.at(i));
     }
     this->set_summeryInfo();
 }
@@ -436,13 +467,13 @@ void MainWindow::workout_calendar()
     int dayofweek = currentdate.dayOfWeek();
     int rowcount;
     QStringList sportuseList = settings::get_listValues("Sportuse");
-    calendar_model->clear();
+    calendarModel->clear();
     metaProxy->setFilterRegExp("");
     scheduleProxy->setFilterFixedString("");
 
     if(isWeekMode)
     {
-        calendar_model->setHorizontalHeaderLabels(cal_header);
+        calendarModel->setHorizontalHeaderLabels(cal_header);
         ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_cal->setItemDelegate(&calender_del);
         scheduleProxy->sort(2);
@@ -450,8 +481,8 @@ void MainWindow::workout_calendar()
 
         for(int week = 0; week < weekRange; ++week)
         {
-            rowcount = calendar_model->rowCount();
-            calendar_model->insertRow(rowcount,QModelIndex());
+            rowcount = calendarModel->rowCount();
+            calendarModel->insertRow(rowcount,QModelIndex());
             weekValue = QString::number(currentdate.addDays(offset).weekNumber()) +"_"+ QString::number(currentdate.addDays(offset).year());
             metaProxy->setFilterRegExp("\\b"+weekValue+"\\b");
             metaProxy->setFilterKeyColumn(1);
@@ -476,7 +507,7 @@ void MainWindow::workout_calendar()
                         cal_value = QString();
                     }
                 }
-                cal_index = calendar_model->index(week,day,QModelIndex());
+                cal_index = calendarModel->index(week,day,QModelIndex());
 
                 if(day == 0)
                 {
@@ -488,11 +519,11 @@ void MainWindow::workout_calendar()
                     {
                         phase_value = settings::get_generalValue("empty");
                     }
-                    calendar_model->setData(cal_index,weekValue + delimiter + phase_value);
+                    calendarModel->setData(cal_index,weekValue + delimiter + phase_value);
                 }
                 else
                 {
-                    calendar_model->setData(cal_index,workout_date.toString("dd MMM yy") + delimiter + cal_value);
+                    calendarModel->setData(cal_index,workout_date.toString("dd MMM yy") + delimiter + cal_value);
                     ++offset;
                 }
                 cal_value = phase_value = QString();
@@ -510,7 +541,7 @@ void MainWindow::workout_calendar()
             year_header << temp.toUpper();
         }
         year_header << settings::get_generalValue("sum");
-        calendar_model->setHorizontalHeaderLabels(year_header);
+        calendarModel->setHorizontalHeaderLabels(year_header);
         ui->tableView_cal->setItemDelegate(&week_del);
         QString weekInfo,weekID;
         QString empty = "0-0-00:00:00-0";
@@ -534,15 +565,15 @@ void MainWindow::workout_calendar()
 
           for(int week = weekpos,i=0; week < weekpos+weekoffset;++week,++i)
           {
-              rowcount = calendar_model->rowCount();
-              calendar_model->insertRow(rowcount,QModelIndex());
+              rowcount = calendarModel->rowCount();
+              calendarModel->insertRow(rowcount,QModelIndex());
               weekID = metaProxy->data(metaProxy->index(week,1)).toString();
               contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
               contentProxy->setFilterKeyColumn(1);
 
               for(int col = 0; col < sportUse+2;++col)
               {
-                  cal_index = calendar_model->index(i,col,QModelIndex());
+                  cal_index = calendarModel->index(i,col,QModelIndex());
                   if(contentProxy->rowCount() > 0)
                   {
                       if(col == 0)
@@ -561,7 +592,7 @@ void MainWindow::workout_calendar()
                   {
                     weekInfo = empty;
                   }
-                  calendar_model->setData(cal_index,weekInfo);
+                  calendarModel->setData(cal_index,weekInfo);
               }
               contentProxy->setFilterRegExp("");
           }
@@ -756,7 +787,7 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
     {
         if(index.column() != 0)
         {
-            QString getdate = calendar_model->data(index,Qt::DisplayRole).toString().left(9);
+            QString getdate = calendarModel->data(index,Qt::DisplayRole).toString().left(9);
             QDate selectDate = QDate::fromString(getdate,"dd MMM yy").addYears(100);
             day_popup day_pop(this,selectDate,workSchedule);
             day_pop.setModal(true);
@@ -768,7 +799,7 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
         }
         else
         {
-            QString selected_week =  calendar_model->data(index,Qt::DisplayRole).toString();
+            QString selected_week =  calendarModel->data(index,Qt::DisplayRole).toString();
             weeknumber = selected_week.split("#").at(0);
 
             this->summery_view();
@@ -803,7 +834,7 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
     {
         if(index.column() == 0)
         {
-            QString selected_week = calendar_model->data(index,Qt::DisplayRole).toString();
+            QString selected_week = calendarModel->data(index,Qt::DisplayRole).toString();
 
             Dialog_addweek new_week(this,selected_week,workSchedule);
             new_week.setModal(true);
@@ -1649,7 +1680,7 @@ void MainWindow::on_tableView_summery_clicked(const QModelIndex &index)
     if(!isWeekMode)
     {
         int dialog_code;
-        year_popup year_pop(this,sum_model->data(index,Qt::DisplayRole).toString(),index.row(),workSchedule,phaseFilter,phaseFilterID-1);
+        year_popup year_pop(this,sumModel->data(index,Qt::DisplayRole).toString(),index.row(),workSchedule,phaseFilter,phaseFilterID-1);
         year_pop.setModal(true);
         dialog_code = year_pop.exec();
         if(dialog_code == QDialog::Rejected)

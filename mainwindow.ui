@@ -251,12 +251,12 @@
                  <enum>QFrame::Raised</enum>
                 </property>
                 <property name="text">
-                 <string>Averages:</string>
+                 <string>Averages per Week:</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QTableView" name="tableView"/>
+               <widget class="QTableView" name="tableView_yearAvg"/>
               </item>
              </layout>
             </widget>

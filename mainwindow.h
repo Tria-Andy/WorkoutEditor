@@ -843,6 +843,44 @@ public:
         model->data(model->index(1,0)).toInt();
     }
 };
+class del_avgweek : public QStyledItemDelegate
+{
+    Q_OBJECT
+public:
+    explicit del_avgweek(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+
+    void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
+    {
+        painter->save();
+        QFont cFont;
+        QString sportname,indexData;
+        QStringList sportuse = settings::get_listValues("Sportuse");
+        const QAbstractItemModel *model = index.model();
+        cFont.setPixelSize(12);
+
+        QColor rectColor;
+        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
+        sportname = model->data(model->index(index.row(),0,QModelIndex())).toString().trimmed();
+        indexData = index.data().toString();
+        painter->setPen(Qt::black);
+
+        if(index.row() == sportuse.count())
+        {
+            rectColor = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
+            cFont.setBold(true);
+        }
+        else
+        {
+            rectColor = settings::get_itemColor(sportname).toHsv();
+            cFont.setBold(false);
+        }
+        rectColor.setAlpha(175);
+        painter->fillRect(option.rect,rectColor);
+        painter->setFont(cFont);
+        painter->drawText(rect_text,indexData,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+        painter->restore();
+    }
+};
 
 namespace Ui {
 class MainWindow;
@@ -868,10 +906,11 @@ private:
     del_intselect intSelect_del;
     del_avgselect avgSelect_del;
     del_level level_del;
-    QStandardItemModel *calendar_model,*sum_model,*fileModel,*infoModel;
+    del_avgweek avgweek_del;
+    QStandardItemModel *calendarModel,*sumModel,*fileModel,*infoModel,*avgModel;
     QItemSelectionModel *treeSelection;
     QSortFilterProxyModel *scheduleProxy,*metaProxy,*contentProxy;
-    QStringList modus_list,cal_header,year_header,schedMode;
+    QStringList modus_list,cal_header,year_header,avgHeader,schedMode;
     QLabel *planerMode;
     QToolButton *planMode,*appMode;
     QWidget *menuSpacer;
@@ -888,7 +927,7 @@ private:
     int avgCounter,sportUse;
     QDate selectedDate,firstdayofweek;
     QString weeknumber,phaseFilter,buttonStyle;
-    QVector<int> work_sum,dur_sum,stress_sum;
+    QVector<double> work_sum,dur_sum,stress_sum;
     QVector<double> dist_sum;
     int weekRange,weekpos;
     int saisonWeeks,weekDays;
