@@ -35,15 +35,23 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     useColor = false;
     stressEdit = false;
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
+    saisonXML = "saison.xml";
+    contestsPath = settings::get_gcInfo("contests");
+    contestTags << "date" << "sport" << "name" << "distance" << "stress";
     level_model = new QStandardItemModel();
     hf_model = new QStandardItemModel();
+    contestModel = new QStandardItemModel();
+    ui->treeView_contest->setModel(contestModel);
+    ui->treeView_contest->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->treeView_contest->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->treeView_contest->header()->setVisible(false);
     ui->lineEdit_gcpath->setText(settings::get_gcInfo("gcpath"));
     ui->lineEdit_gcpath->setEnabled(false);
     ui->lineEdit_athlete->setText(settings::get_gcInfo("athlete"));
-    ui->lineEdit_yob->setText(settings::get_gcInfo("yob"));
     ui->lineEdit_activity->setText(settings::get_gcInfo("folder"));
     ui->lineEdit_schedule->setText(settings::get_gcInfo("schedule"));
     ui->lineEdit_standard->setText(settings::get_gcInfo("workouts"));
+    ui->lineEdit_contestsFile->setText(contestsPath);
     ui->lineEdit_configfile->setText(settings::get_gcInfo("valuefile"));
     ui->spinBox_hfThres->setValue(settings::get_thresValue("hfthres"));
     ui->spinBox_hfMax->setValue(settings::get_thresValue("hfmax"));
@@ -57,13 +65,15 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->spinBox_lastLTS->setValue(settings::get_ltsValue("lastlts"));
     ui->spinBox_lastSTS->setValue(settings::get_ltsValue("laststs"));
     ui->comboBox_thresSport->addItems(sportList);
+    ui->dateEdit_contest->setDate(QDate::currentDate());
+    ui->comboBox_contestsport->addItems(settings::get_listValues("Sport"));
     ui->pushButton_save->setEnabled(false);
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
 
-    ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - settings::get_gcInfo("yob").toInt()));
-    ui->lineEdit_weight->setText(QString::number(settings::get_athleteValue("weight")));
-    ui->doubleSpinBox_bone->setValue(3.0);
-    ui->doubleSpinBox_muscle->setValue(48.0);
+    ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - settings::get_athleteValue("yob")));
+    ui->lineEdit_weight->setText(QString::number(settings::get_weightforDate(QDateTime::currentDateTime())));
+    ui->doubleSpinBox_bone->setValue(settings::get_athleteValue("boneskg"));
+    ui->doubleSpinBox_muscle->setValue(settings::get_athleteValue("musclekg"));
 
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
@@ -103,6 +113,31 @@ void Dialog_settings::checkSetup()
     this->set_thresholdModel(ui->comboBox_thresSport->currentText());
     this->set_hfmodel(ui->spinBox_hfThres->value());
     this->set_ltsList();
+
+    this->check_File(contestsPath,saisonXML);
+
+    QDomDocument saisonDoc = this->load_XMLFile(contestsPath,saisonXML);
+    QDomElement rootTag;
+    QDomNodeList xmlList;
+    QDomElement xmlElement;
+    QStandardItem *rootItem = contestModel->invisibleRootItem();
+    QList<QStandardItem *> contestItems;
+
+    rootTag = saisonDoc.firstChildElement();
+    xmlList = rootTag.elementsByTagName("contest");
+
+    for(int row = 0; row < xmlList.count(); ++row)
+    {
+        xmlElement = xmlList.at(row).toElement();
+        for(int col = 0; col < contestTags.count(); ++col)
+        {
+            contestItems << new QStandardItem(xmlElement.attribute(contestTags.at(col)));
+        }
+        rootItem->appendRow(contestItems);
+        contestItems.clear();
+        contestModel->setData(contestModel->index(row,0),QDate::fromString(contestModel->data(contestModel->index(row,0)).toString(),"yyyy-MM-dd"));
+    }
+    contestModel->sort(0);
 }
 
 void Dialog_settings::set_SelectControls(QString selection)
@@ -209,7 +244,6 @@ void Dialog_settings::writeChangedValues()
 
     settings::set_gcInfo("gcpath",ui->lineEdit_gcpath->text());
     settings::set_gcInfo("athlete",ui->lineEdit_athlete->text());
-    settings::set_gcInfo("yob",ui->lineEdit_yob->text());
     settings::set_gcInfo("folder",ui->lineEdit_activity->text());
     settings::set_gcInfo("schedule",ui->lineEdit_schedule->text());
     settings::set_gcInfo("workouts",ui->lineEdit_standard->text());
@@ -567,12 +601,6 @@ void Dialog_settings::on_lineEdit_athlete_textChanged(const QString &value)
     this->enableSavebutton();
 }
 
-void Dialog_settings::on_lineEdit_yob_textChanged(const QString &value)
-{
-    Q_UNUSED(value)
-    this->enableSavebutton();
-}
-
 void Dialog_settings::on_lineEdit_addedit_textChanged(const QString &value)
 {
     if(!value.isEmpty())
@@ -837,5 +865,79 @@ void Dialog_settings::on_pushButton_clearFat_clicked()
     ui->lineEdit_fatfree->clear();
     ui->lineEdit_fatweight->clear();
     ui->lineEdit_fatpercent->clear();
+    ui->lineEdit_comment->clear();
 
+}
+
+void Dialog_settings::saveContestFile()
+{
+    contestModel->sort(0);
+
+    QDomDocument xmlDoc;
+    QDomElement xmlRoot,xmlElement;
+    xmlRoot = xmlDoc.createElement("Saison");
+    xmlDoc.appendChild(xmlRoot);
+
+    for(int row = 0; row < contestModel->rowCount();++row)
+    {
+        xmlElement = xmlDoc.createElement("contest");
+        xmlElement.setAttribute("id",row);
+        for(int tags = 0; tags < contestTags.count(); ++tags)
+        {
+            xmlElement.setAttribute(contestTags.at(tags),contestModel->data(contestModel->index(row,tags)).toString());
+        }
+        xmlRoot.appendChild(xmlElement);
+    }
+    this->write_XMLFile(contestsPath,&xmlDoc,saisonXML);
+}
+
+
+void Dialog_settings::on_pushButton_addContest_clicked()
+{
+    QModelIndex listIndex = ui->treeView_contest->currentIndex();
+
+    if(listIndex.isValid())
+    {
+        contestModel->setData(contestModel->index(listIndex.row(),0),ui->dateEdit_contest->date());
+        contestModel->setData(contestModel->index(listIndex.row(),1),ui->comboBox_contestsport->currentText());
+        contestModel->setData(contestModel->index(listIndex.row(),2),ui->lineEdit_contest->text());
+        contestModel->setData(contestModel->index(listIndex.row(),3),ui->doubleSpinBox_contest->value());
+        contestModel->setData(contestModel->index(listIndex.row(),4),ui->spinBox_contestStress->value());
+    }
+    else
+    {
+        int rowCount = contestModel->rowCount();
+        contestModel->insertRow(rowCount);
+        contestModel->setData(contestModel->index(rowCount,0),ui->dateEdit_contest->date());
+        contestModel->setData(contestModel->index(rowCount,1),ui->comboBox_contestsport->currentText());
+        contestModel->setData(contestModel->index(rowCount,2),ui->lineEdit_contest->text());
+        contestModel->setData(contestModel->index(rowCount,3),ui->doubleSpinBox_contest->value());
+        contestModel->setData(contestModel->index(rowCount,4),ui->spinBox_contestStress->value());
+    }
+    ui->treeView_contest->clearSelection();
+    this->saveContestFile();
+
+}
+
+void Dialog_settings::on_pushButton_delContest_clicked()
+{
+    contestModel->removeRow(ui->treeView_contest->currentIndex().row());
+
+    ui->dateEdit_contest->setDate(QDate::currentDate());
+    ui->comboBox_contestsport->setCurrentIndex(0);
+    ui->lineEdit_contest->clear();
+    ui->doubleSpinBox_contest->setValue(0);
+    ui->spinBox_contestStress->setValue(0);
+
+    ui->treeView_contest->clearSelection();
+    this->saveContestFile();
+}
+
+void Dialog_settings::on_treeView_contest_clicked(const QModelIndex &index)
+{
+    ui->dateEdit_contest->setDate(QDate::fromString(contestModel->data(contestModel->index(index.row(),0)).toString(),"dd.MM.yyyy"));
+    ui->comboBox_contestsport->setCurrentText(contestModel->data(contestModel->index(index.row(),1)).toString());
+    ui->lineEdit_contest->setText(contestModel->data(contestModel->index(index.row(),2)).toString());
+    ui->doubleSpinBox_contest->setValue(contestModel->data(contestModel->index(index.row(),3)).toDouble());
+    ui->spinBox_contestStress->setValue(contestModel->data(contestModel->index(index.row(),4)).toInt());
 }

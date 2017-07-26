@@ -15,7 +15,7 @@ TEMPLATE = app
 #Application version
 VERSION_MAJOR = 1
 VERSION_MINOR = 3
-VERSION_BUILD = 8
+VERSION_BUILD = 10
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
        "VERSION_BUILD=$$VERSION_BUILD"
@@ -51,12 +51,10 @@ SOURCES += main.cpp\
     filereader.cpp
 
 HEADERS  += mainwindow.h \
-    calendar_delegate.h \
     settings.h \
     dialog_export.h \
     dialog_workouts.h \
     activity.h \
-    del_spinbox_int.h \
     dialog_stresscalc.h \
     qcustomplot.h \
     week_popup.h \
@@ -65,28 +63,18 @@ HEADERS  += mainwindow.h \
     dialog_pacecalc.h \
     standardworkouts.h \
     dialog_addweek.h \
-    week_delegate.h \
-    summery_delegate.h \
     year_popup.h \
     schedule.h \
     dialog_week_copy.h \
     dialog_version.h \
-    del_intselect.h \
     jsonhandler.h \
     logger.h \
     del_level.h \
-    del_addweek.h \
     stress_popup.h \
     calculation.h \
     xmlhandler.h \
     dialog_workcreator.h \
-    del_workcreator.h \
-    del_treeview.h \
-    del_avgselect.h \
     filereader.h \
-    del_filelist.h \
-    del_daypop.h \
-    del_workcreatoredit.h \
     del_mousehover.h
 
 FORMS    += mainwindow.ui \

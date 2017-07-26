@@ -58,6 +58,7 @@ QHash<QString,QString> settings::bikeRange;
 QHash<QString,QString> settings::runRange;
 QHash<QString,QString> settings::stgRange;
 QHash<QString,QString> settings::hfRange;
+QHash<QString,QString> settings::triaMap;
 
 QStringList settings::keyList;
 QStringList settings::extkeyList;
@@ -68,7 +69,7 @@ QStringList settings::header_bike;
 QStringList settings::header_run;
 QStringList settings::headerTria;
 QStringList settings::header_other;
-
+QStringList settings::triaDistance;
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
 
@@ -154,7 +155,6 @@ void settings::loadSettings()
             gcInfo.insert("regPath",mysettings->value("regPath").toString());
             gcInfo.insert("dir",mysettings->value("dir").toString());
             gcInfo.insert("athlete",mysettings->value("athlete").toString());
-            gcInfo.insert("yob",mysettings->value("yob").toString());
             gcInfo.insert("folder",mysettings->value("folder").toString());
             gcInfo.insert("conf",mysettings->value("conf").toString());
             gcInfo.insert("gcpath",mysettings->value("gcpath").toString());
@@ -176,6 +176,7 @@ void settings::loadSettings()
         mysettings->beginGroup("Filepath");
             gcInfo.insert("schedule",mysettings->value("schedule").toString());
             gcInfo.insert("workouts",mysettings->value("workouts").toString());
+            gcInfo.insert("contests",mysettings->value("contests").toString());
             gcInfo.insert("valuefile",mysettings->value("valuefile").toString());
             valueFile = mysettings->value("valuefile").toString();
         mysettings->endGroup();
@@ -193,12 +194,22 @@ void settings::loadSettings()
 
         QJsonObject weightInfo;
         double currWeight = 0.0;
+        double currBone = 0.0;
+        double currMuscle = 0.0;
         for(int i = 0; i < bodyWeight.count(); ++i)
         {
             weightInfo = bodyWeight.at(i).toObject();
             currWeight = weightInfo.value("weightkg").toDouble();
+            currBone = weightInfo.value("boneskg").toDouble();
+            currMuscle = weightInfo.value("musclekg").toDouble();
             weightMap.insert(weightInfo.value("when").toInt(),currWeight);
-            if(athleteMap.value("weight") < currWeight) athleteMap.insert("weight",currWeight);
+
+            if(athleteMap.value("weight") < currWeight)
+            {
+                athleteMap.insert("weight",currWeight);
+                athleteMap.insert("boneskg",currBone);
+                athleteMap.insert("musclekg",currMuscle);
+            }
         }
 
         //Sport Value Settings
@@ -212,6 +223,7 @@ void settings::loadSettings()
         }
 
         QSettings *myPref = new QSettings(gcInfo.value("confpath") + QDir::separator() + "athlete-preferences.ini",QSettings::IniFormat);
+        athleteMap.insert("yob",myPref->value("dob").toDate().year());
         athleteMap.insert("height",myPref->value("height").toDouble());
         delete myPref;
 
@@ -334,7 +346,14 @@ void settings::loadSettings()
             settingList.clear();
         myvalues->endGroup();
 
-        myvalues->beginGroup("Sport");
+        myvalues->beginGroup("Sport");            
+            triaDistance << myvalues->value("triathlon").toString().split(splitter);
+            settingList << myvalues->value("triaDist").toString().split(splitter);
+            for(int i = 0; i < settingList.count(); i++)
+            {
+                triaMap.insert(triaDistance.at(i),settingList.at(i));
+            }
+            settingList.clear();
             settingList <<  myvalues->value("sports").toString().split(splitter);
             listMap.insert("Sport",myvalues->value("sports").toString().split(splitter));
             listMap.insert("Sportuse",myvalues->value("sportuse").toString().split(splitter));

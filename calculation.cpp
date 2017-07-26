@@ -185,7 +185,7 @@ int calculation::get_hfvalue(QString percent)
 
 double calculation::calc_totalWork(double weight,double avgHF, double moveTime)
 {
-    int age = QDate::currentDate().year() - settings::get_gcInfo("yob").toInt();
+    int age = QDate::currentDate().year() - settings::get_athleteValue("yob");
 
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
 }

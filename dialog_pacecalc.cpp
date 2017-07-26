@@ -28,11 +28,27 @@ Dialog_paceCalc::Dialog_paceCalc(QWidget *parent) :
     ui->setupUi(this);
     sportList << settings::isSwim << settings::isBike << settings::isRun;
     model_header << "Distance" << "Duration";
+    race_header << "Lap" << "Distance" << "Pace" << "Speed" << "Duration";
     dist <<25<<50<<100<<200<<300<<400<<500<<600<<800<<1000;
     distFactor = 1;
-    pace_model = new QStandardItemModel();
+    paceModel = new QStandardItemModel();
+    raceModel = new QStandardItemModel();
+    triathlonMap = settings::get_triaMap();
+    triaDist = settings::get_triaDistance();
     this->init_paceView();
+    runRaces << "5K" << "10K" << "HM" << "M";
+    raceDist << 5.0 << 10.0 << 21.1 << 42.2;
     ui->comboBox_sport->addItems(sportList);
+    ui->comboBox_race->addItem("---");
+    for(int i = 0; i < runRaces.count(); ++i)
+    {
+        ui->comboBox_race->addItem(settings::isRun +" "+runRaces.at(i));
+    }
+    for(int i = 0; i < triaDist.count(); ++i)
+    {
+        ui->comboBox_race->addItem(settings::isTria +" "+triaDist.at(i)+ ": "+triathlonMap.value(triaDist.at(i)));
+    }
+    ui->tableView_raceCalc->setItemDelegate(&race_del);
 }
 
 Dialog_paceCalc::~Dialog_paceCalc()
@@ -42,14 +58,15 @@ Dialog_paceCalc::~Dialog_paceCalc()
 
 void Dialog_paceCalc::on_pushButton_close_clicked()
 {
-    delete pace_model;
+    delete paceModel;
+    delete raceModel;
     reject();
 }
 
 void Dialog_paceCalc::init_paceView()
 {
-    pace_model->setHorizontalHeaderLabels(model_header);
-    ui->tableView_pace->setModel(pace_model);
+    paceModel->setHorizontalHeaderLabels(model_header);
+    ui->tableView_pace->setModel(paceModel);
     ui->tableView_pace->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_pace->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_pace->verticalHeader()->hide();
@@ -57,8 +74,8 @@ void Dialog_paceCalc::init_paceView()
 
     for(int i = 0; i < 10; ++i)
     {
-        pace_model->insertRows(i,1,QModelIndex());
-        pace_model->setData(pace_model->index(i,0,QModelIndex()),dist[i]);
+        paceModel->insertRows(i,1,QModelIndex());
+        paceModel->setData(paceModel->index(i,0,QModelIndex()),dist[i]);
     }
 }
 
@@ -70,13 +87,13 @@ void Dialog_paceCalc::set_pace()
     {
         if(ui->comboBox_sport->currentText() == settings::isSwim)
         {
-            pace_model->setData(pace_model->index(i,0,QModelIndex()),dist[i]*distFactor);
-            pace_model->setData(pace_model->index(i,1,QModelIndex()),this->set_time(static_cast<int>(round(pace * (dist[i]*distFactor)/100))));
+            paceModel->setData(paceModel->index(i,0,QModelIndex()),dist[i]*distFactor);
+            paceModel->setData(paceModel->index(i,1,QModelIndex()),this->set_time(static_cast<int>(round(pace * (dist[i]*distFactor)/100))));
         }
         else
         {
-            pace_model->setData(pace_model->index(i,0,QModelIndex()),dist[i]*distFactor);
-            pace_model->setData(pace_model->index(i,1,QModelIndex()),this->set_time(static_cast<int>(round(pace * (dist[i]*distFactor)/1000))));
+            paceModel->setData(paceModel->index(i,0,QModelIndex()),dist[i]*distFactor);
+            paceModel->setData(paceModel->index(i,1,QModelIndex()),this->set_time(static_cast<int>(round(pace * (dist[i]*distFactor)/1000))));
         }
     }
 }
@@ -166,4 +183,96 @@ void Dialog_paceCalc::on_toolButton_copy_clicked()
     }
     mimeData->setData("text/plain",speedArray);
     clipboard->setMimeData(mimeData);
+}
+
+void Dialog_paceCalc::set_raceTable(QString label)
+{
+    if(label.contains(settings::isSwim))
+    {
+
+    }
+    else if(label.contains(settings::isBike))
+    {
+
+    }
+    else if(label.contains(settings::isRun))
+    {
+        raceModel->insertRow(0,QModelIndex());
+        raceModel->setData(raceModel->index(0,0,QModelIndex()),settings::isRun);
+        int raceIndex = runRaces.indexOf(label.split(" ").at(1));
+        raceModel->setData(raceModel->index(0,1,QModelIndex()),raceDist[raceIndex]);
+    }
+    else if(label.contains(settings::isTria))
+    {
+        QString vtria = label.split(" ").at(1);
+        QStringList triaDistance;
+        triaDistance << triathlonMap.value(vtria.remove(":")).split("-");
+
+        raceModel->insertRows(0,5,QModelIndex());
+        raceModel->setData(raceModel->index(0,0,QModelIndex()),settings::isSwim);
+        raceModel->setData(raceModel->index(0,1,QModelIndex()),triaDistance.at(0));
+        raceModel->setData(raceModel->index(1,0,QModelIndex()),"T1");
+        raceModel->setData(raceModel->index(1,1,QModelIndex()),0.0);
+        raceModel->setData(raceModel->index(2,0,QModelIndex()),settings::isBike);
+        raceModel->setData(raceModel->index(2,1,QModelIndex()),triaDistance.at(1));
+        raceModel->setData(raceModel->index(3,0,QModelIndex()),"T2");
+        raceModel->setData(raceModel->index(3,1,QModelIndex()),0.0);
+        raceModel->setData(raceModel->index(4,0,QModelIndex()),settings::isRun);
+        raceModel->setData(raceModel->index(4,1,QModelIndex()),triaDistance.at(2));
+
+    }
+}
+
+void Dialog_paceCalc::on_comboBox_race_currentIndexChanged(int index)
+{
+    raceModel->clear();
+    raceModel->setHorizontalHeaderLabels(race_header);
+    ui->tableView_raceCalc->setModel(raceModel);
+    ui->tableView_raceCalc->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_raceCalc->verticalHeader()->hide();
+
+    int rowCount = 0;
+
+    if(index != 0)
+    {
+        this->set_raceTable(ui->comboBox_race->currentText());
+
+        rowCount = raceModel->rowCount();
+
+        if(rowCount > 1)
+        {
+            double sum  = 0.0;
+            raceModel->insertRow(rowCount,QModelIndex());
+            for(int i = 0; i < rowCount;++i)
+            {
+                sum += raceModel->data(raceModel->index(i,1)).toDouble();
+            }
+            raceModel->setData(raceModel->index(rowCount,0,QModelIndex()),"Sum");
+            raceModel->setData(raceModel->index(rowCount,1,QModelIndex()),sum);
+            raceModel->setData(raceModel->index(rowCount,2,QModelIndex()),0);
+            raceModel->setData(raceModel->index(rowCount,3,QModelIndex()),0);
+            rowCount = raceModel->rowCount();
+        }
+        if(rowCount > 3)
+        {
+            ui->tableView_raceCalc->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        }
+        else
+        {
+            ui->tableView_raceCalc->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+        }
+
+        for(int i = 0; i < rowCount; ++i)
+        {
+            for(int x = 2; x < raceModel->columnCount(); ++x)
+            {
+                raceModel->setData(raceModel->index(i,x,QModelIndex()),"00:00");
+            }
+            raceModel->setData(raceModel->index(i,3,QModelIndex()),0.0);
+        }
+    }
+    else
+    {
+        raceModel->clear();
+    }
 }
