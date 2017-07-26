@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>365</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
     <width>500</width>
-    <height>365</height>
+    <height>400</height>
    </size>
   </property>
   <property name="font">
@@ -72,6 +72,12 @@
             <width>441</width>
             <height>131</height>
            </rect>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
           </property>
           <property name="title">
            <string>General</string>
@@ -146,10 +152,16 @@
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>148</y>
+            <y>158</y>
             <width>441</width>
-            <height>111</height>
+            <height>131</height>
            </rect>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
           </property>
           <property name="title">
            <string>FilePath</string>
@@ -158,33 +170,13 @@
            <property name="horizontalSpacing">
             <number>5</number>
            </property>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEdit_schedule">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="toolTip">
-              <string>Insert where the schedule files should be stored. Please insert the complete Path.</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_6">
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>Standard-Workouts:</string>
+              <string>Config File:</string>
              </property>
              <property name="buddy">
-              <cstring>lineEdit_standard</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_standard">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="toolTip">
-              <string>Insert where the Standard Workout files should be stored. Please insert the complete Path.</string>
+              <cstring>lineEdit_configfile</cstring>
              </property>
             </widget>
            </item>
@@ -198,18 +190,18 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_2">
+           <item row="3" column="1">
+            <widget class="QLineEdit" name="lineEdit_configfile"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_6">
              <property name="text">
-              <string>Config File:</string>
+              <string>Standard-Workouts:</string>
              </property>
              <property name="buddy">
-              <cstring>lineEdit_configfile</cstring>
+              <cstring>lineEdit_standard</cstring>
              </property>
             </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QLineEdit" name="lineEdit_configfile"/>
            </item>
            <item row="0" column="2">
             <widget class="QToolButton" name="toolButton_schedulePath">
@@ -240,6 +232,40 @@
              </property>
             </widget>
            </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="lineEdit_schedule">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Insert where the schedule files should be stored. Please insert the complete Path.</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="lineEdit_standard">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Insert where the Standard Workout files should be stored. Please insert the complete Path.</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_45">
+             <property name="text">
+              <string>Saison Contests:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="lineEdit_contestsFile">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </widget>
@@ -255,6 +281,12 @@
               <horstretch>2</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>125</width>
+              <height>0</height>
+             </size>
             </property>
             <property name="maximumSize">
              <size>
@@ -685,7 +717,7 @@
            <widget class="QGroupBox" name="groupBox_4">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>1</horstretch>
+              <horstretch>2</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
@@ -868,198 +900,329 @@
          <attribute name="title">
           <string>Saison</string>
          </attribute>
-         <layout class="QHBoxLayout" name="horizontalLayout_10">
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <property name="spacing">
+           <number>2</number>
+          </property>
           <item>
-           <widget class="QGroupBox" name="groupBox_5">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <widget class="QFrame" name="frame_saisonInfos">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
             </property>
-            <property name="title">
-             <string>Saison Info</string>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QFormLayout" name="formLayout_5">
-             <property name="horizontalSpacing">
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <property name="spacing">
               <number>5</number>
              </property>
-             <item row="4" column="0">
-              <widget class="QLabel" name="label_13">
-               <property name="text">
-                <string>Saison Weeks:</string>
+             <property name="leftMargin">
+              <number>1</number>
+             </property>
+             <property name="topMargin">
+              <number>1</number>
+             </property>
+             <property name="rightMargin">
+              <number>1</number>
+             </property>
+             <property name="bottomMargin">
+              <number>1</number>
+             </property>
+             <item>
+              <widget class="QGroupBox" name="groupBox_5">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="title">
+                <string>Saison Info</string>
+               </property>
+               <layout class="QFormLayout" name="formLayout_5">
+                <property name="horizontalSpacing">
+                 <number>4</number>
+                </property>
+                <property name="leftMargin">
+                 <number>4</number>
+                </property>
+                <property name="topMargin">
+                 <number>4</number>
+                </property>
+                <property name="rightMargin">
+                 <number>4</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>4</number>
+                </property>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="label_13">
+                  <property name="text">
+                   <string>Saison Weeks:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QLineEdit" name="lineEdit_saisonWeeks">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label_15">
+                  <property name="text">
+                   <string>Saison:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QLineEdit" name="lineEdit_saison">
+                  <property name="inputMask">
+                   <string>0000-0000</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_14">
+                  <property name="text">
+                   <string>Saison Start:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QDateEdit" name="dateEdit_saisonStart">
+                  <property name="calendarPopup">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="label_18">
+                  <property name="text">
+                   <string>Expected End:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QDateEdit" name="dateEdit_saisonEnd">
+                  <property name="calendarPopup">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_16">
+                  <property name="text">
+                   <string>Start Week:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QLineEdit" name="lineEdit_startWeek">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
-             <item row="4" column="1">
-              <widget class="QLineEdit" name="lineEdit_saisonWeeks">
-               <property name="enabled">
-                <bool>false</bool>
+             <item>
+              <widget class="QGroupBox" name="groupBox_contest">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_15">
-               <property name="text">
-                <string>Saison:</string>
+               <property name="title">
+                <string>Contests</string>
                </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="lineEdit_saison">
-               <property name="inputMask">
-                <string>0000-0000</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_14">
-               <property name="text">
-                <string>Saison Start:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QDateEdit" name="dateEdit_saisonStart">
-               <property name="calendarPopup">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_18">
-               <property name="text">
-                <string>Expected End:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QDateEdit" name="dateEdit_saisonEnd">
-               <property name="calendarPopup">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_16">
-               <property name="text">
-                <string>Start Week:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="lineEdit_startWeek">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_5">
+                <property name="spacing">
+                 <number>4</number>
+                </property>
+                <property name="leftMargin">
+                 <number>4</number>
+                </property>
+                <property name="topMargin">
+                 <number>4</number>
+                </property>
+                <property name="rightMargin">
+                 <number>4</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>4</number>
+                </property>
+                <item>
+                 <widget class="QFrame" name="frame_4">
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QFormLayout" name="formLayout_6">
+                   <property name="horizontalSpacing">
+                    <number>2</number>
+                   </property>
+                   <property name="verticalSpacing">
+                    <number>2</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>2</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>2</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>2</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>2</number>
+                   </property>
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_41">
+                     <property name="text">
+                      <string>Date:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QDateEdit" name="dateEdit_contest">
+                     <property name="calendarPopup">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="label_42">
+                     <property name="text">
+                      <string>Sport:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QComboBox" name="comboBox_contestsport"/>
+                   </item>
+                   <item row="2" column="0">
+                    <widget class="QLabel" name="label_19">
+                     <property name="text">
+                      <string>Event:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="1">
+                    <widget class="QLineEdit" name="lineEdit_contest"/>
+                   </item>
+                   <item row="3" column="0">
+                    <widget class="QLabel" name="label_43">
+                     <property name="text">
+                      <string>Distance:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="1">
+                    <widget class="QDoubleSpinBox" name="doubleSpinBox_contest">
+                     <property name="maximum">
+                      <double>999.990000000000009</double>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="0">
+                    <widget class="QLabel" name="label_44">
+                     <property name="text">
+                      <string>Est-Stress:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="1">
+                    <widget class="QSpinBox" name="spinBox_contestStress">
+                     <property name="maximum">
+                      <number>500</number>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="frame_8">
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_11">
+                   <property name="spacing">
+                    <number>5</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>60</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>1</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>1</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>1</number>
+                   </property>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_addContest">
+                     <property name="text">
+                      <string>Add/Edit</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_delContest">
+                     <property name="text">
+                      <string>Delete</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
             </layout>
            </widget>
           </item>
           <item>
-           <widget class="QGroupBox" name="groupBox_contest">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <widget class="QFrame" name="frame_9">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
             </property>
-            <property name="title">
-             <string>Contests</string>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_5">
-             <property name="spacing">
-              <number>4</number>
-             </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_12">
              <property name="leftMargin">
               <number>4</number>
              </property>
              <property name="topMargin">
-              <number>4</number>
+              <number>1</number>
              </property>
              <property name="rightMargin">
               <number>4</number>
              </property>
              <property name="bottomMargin">
-              <number>4</number>
+              <number>1</number>
              </property>
              <item>
-              <widget class="QFrame" name="frame_4">
-               <property name="frameShape">
-                <enum>QFrame::StyledPanel</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Raised</enum>
-               </property>
-               <layout class="QFormLayout" name="formLayout_6">
-                <property name="horizontalSpacing">
-                 <number>2</number>
-                </property>
-                <property name="verticalSpacing">
-                 <number>2</number>
-                </property>
-                <property name="leftMargin">
-                 <number>2</number>
-                </property>
-                <property name="topMargin">
-                 <number>2</number>
-                </property>
-                <property name="rightMargin">
-                 <number>2</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>2</number>
-                </property>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="label_19">
-                  <property name="text">
-                   <string>Event:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QLineEdit" name="lineEdit_contest"/>
-                </item>
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label_41">
-                  <property name="text">
-                   <string>Date:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QDateEdit" name="dateEdit_contest">
-                  <property name="calendarPopup">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QComboBox" name="comboBox_contestsport"/>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QLabel" name="label_42">
-                  <property name="text">
-                   <string>Sport:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="0">
-                 <widget class="QLabel" name="label_43">
-                  <property name="text">
-                   <string>Distance:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="1">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox_contest"/>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QTableView" name="tableView"/>
+              <widget class="QTreeView" name="treeView_contest"/>
              </item>
             </layout>
            </widget>

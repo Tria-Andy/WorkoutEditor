@@ -176,6 +176,7 @@ void settings::loadSettings()
         mysettings->beginGroup("Filepath");
             gcInfo.insert("schedule",mysettings->value("schedule").toString());
             gcInfo.insert("workouts",mysettings->value("workouts").toString());
+            gcInfo.insert("contests",mysettings->value("contests").toString());
             gcInfo.insert("valuefile",mysettings->value("valuefile").toString());
             valueFile = mysettings->value("valuefile").toString();
         mysettings->endGroup();

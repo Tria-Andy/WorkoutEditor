@@ -935,7 +935,6 @@ private:
     bool userSetup,isWeekMode,graphLoaded,actLoaded;
 
     void openPreferences();
-    void set_summeryInfo();
     void summery_view();
     void week_summery(int,int);
     QString set_summeryString(int,bool);
