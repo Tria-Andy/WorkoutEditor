@@ -715,7 +715,7 @@ void Dialog_workCreator::set_plotGraphic(int dataPoints)
         for (int data=0 ;  data < dataPoints; ++data)
         {
              y_thres[data] = plotModel->data(plotModel->index(data,0,QModelIndex())).toDouble();
-             x_time[data] = plotModel->data(plotModel->index(data,1,QModelIndex())).toDouble();
+             x_time[data] = plotModel->data(plotModel->index(data,1,QModelIndex())).toDouble()/60;
              x_dist[data] = plotModel->data(plotModel->index(data,2,QModelIndex())).toDouble();
              if(y_thres[data] > thres_high)
              {
@@ -723,7 +723,7 @@ void Dialog_workCreator::set_plotGraphic(int dataPoints)
              }
         }
 
-        timeSum = plotModel->data(plotModel->index(dataPoints-1,1,QModelIndex())).toDouble();
+        timeSum = plotModel->data(plotModel->index(dataPoints-1,1,QModelIndex())).toDouble()/60;
         distSum = plotModel->data(plotModel->index(dataPoints-1,2,QModelIndex())).toDouble();
         stressSum = plotModel->data(plotModel->index(dataPoints-1,3,QModelIndex())).toDouble();
 
@@ -741,7 +741,7 @@ void Dialog_workCreator::set_plotGraphic(int dataPoints)
     }
 
     ui->widget_plot->replot();
-    ui->label_duration->setText("Time: " + this->set_time(static_cast<int>(timeSum)) + " - " + "Distance: " + QString::number(distSum) + " - " + "Stress: " + QString::number(round(stressSum)));
+    ui->label_duration->setText("Time: " + this->set_time(static_cast<int>(timeSum*60)) + " - " + "Distance: " + QString::number(distSum) + " - " + "Stress: " + QString::number(round(stressSum)));
 }
 
 void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
