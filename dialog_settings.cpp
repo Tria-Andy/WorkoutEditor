@@ -94,6 +94,7 @@ void Dialog_settings::on_pushButton_cancel_clicked()
 {
     delete level_model;
     delete hf_model;
+    delete contestModel;
     reject();
 }
 
@@ -866,7 +867,6 @@ void Dialog_settings::on_pushButton_clearFat_clicked()
     ui->lineEdit_fatweight->clear();
     ui->lineEdit_fatpercent->clear();
     ui->lineEdit_comment->clear();
-
 }
 
 void Dialog_settings::saveContestFile()
@@ -935,7 +935,7 @@ void Dialog_settings::on_pushButton_delContest_clicked()
 
 void Dialog_settings::on_treeView_contest_clicked(const QModelIndex &index)
 {
-    ui->dateEdit_contest->setDate(QDate::fromString(contestModel->data(contestModel->index(index.row(),0)).toString(),"dd.MM.yyyy"));
+    ui->dateEdit_contest->setDate(contestModel->data(contestModel->index(index.row(),0)).toDate());
     ui->comboBox_contestsport->setCurrentText(contestModel->data(contestModel->index(index.row(),1)).toString());
     ui->lineEdit_contest->setText(contestModel->data(contestModel->index(index.row(),2)).toString());
     ui->doubleSpinBox_contest->setValue(contestModel->data(contestModel->index(index.row(),3)).toDouble());
