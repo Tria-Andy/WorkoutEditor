@@ -20,7 +20,7 @@
 
 schedule::schedule()
 {
-    workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress";
+    workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj";
     metaTags << "id" << "week" << "name" << "fdw";
     contentTags << "id" << "week";
     for(int i = 0; i < settings::get_listValues("Sportuse").count();++i)
@@ -70,7 +70,7 @@ void schedule::read_dayWorkouts(QDomDocument workouts)
         workout_list = root_workouts.elementsByTagName("workout");
     }
 
-    workout_schedule = new QStandardItemModel(workout_list.count(),9);
+    workout_schedule = new QStandardItemModel(workout_list.count(),workoutTags.count());
     QDate workDate;
     int stress = 0;
     if(!workout_list.isEmpty())
@@ -517,6 +517,7 @@ void schedule::set_workoutData(int mode)
             for(QHash<int,QString>::const_iterator vStart = it.value().cbegin(), vEnd = it.value().cend(); vStart != vEnd; ++vStart,++col)
             {
                 workout_schedule->setData(workout_schedule->index(rowCount,col,QModelIndex()),it.value().value(col));
+
             }
             workout_date = it.value().value(1);
             workoutStress = it.value().value(8);

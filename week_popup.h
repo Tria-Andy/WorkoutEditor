@@ -51,7 +51,7 @@ private:
     bool isLoad;
     QList<QDateTime> weekDates;
     QVector<double> xStress,xLTS,xBar,xWorks,maxValues;
-    QVector<double> yStress,yLTS,yDura,yDist,yWorks,yWorkCount,yValues;
+    QVector<double> yStress,yLTS,yDura,yDist,yWorkKj,yWorks,yWorkCount,yValues;
     int dayCount;
     QCPGraph *get_QCPLine(QString,QColor,QVector<double> &xdata,QVector<double> &ydata,bool);
     QCPBars *get_QCPBar(QColor,int,bool);

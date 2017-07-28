@@ -26,7 +26,7 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    this->setFixedHeight(325);
+    this->setFixedHeight(340);
     editMode = false;
     addWorkout = false;
     popupDate = newDate = w_date;
@@ -40,7 +40,7 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
     ui->lineEdit_selected->setReadOnly(true);
     ui->lineEdit_workoutInfo->setReadOnly(true);
 
-    workListHeader << "Time" << "Sport" << "Code" << "Title" << "Duration" << "Distance" << "Stress" << "Pace";
+    workListHeader << "Time" << "Sport" << "Code" << "Title" << "Duration" << "Distance" << "Stress" << "Work(kj)" << "Pace";
     dayModel = new QStandardItemModel();
     workSched->itemList.clear();
 
@@ -50,7 +50,6 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
     connect(ui->tableView_day->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(load_workoutData(int)));
     connect(ui->dateEdit_workDate,SIGNAL(dateChanged(QDate)),this,SLOT(edit_workoutDate(QDate)));
     connect(ui->tableView_day->itemDelegate(),SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)),this,SLOT(setNextEditRow()));
-
 }
 
 enum {ADD,EDIT,COPY,DEL};
@@ -122,7 +121,7 @@ void day_popup::init_dayWorkouts(QDate workDate)
         for(int row = 0; row < workListHeader.count(); ++row)
         {
             dayModel->setData(dayModel->index(row,col,QModelIndex()),scheduleProxy->data(scheduleProxy->index(col,row+2)).toString());
-            if(row == 7)
+            if(row == 8)
             {
                 dayModel->setData(dayModel->index(row,col,QModelIndex()),this->get_workout_pace(scheduleProxy->data(scheduleProxy->index(col,7)).toDouble(),
                                                                                                 QTime::fromString(scheduleProxy->data(scheduleProxy->index(col,6)).toString(),"hh:mm:ss"),
@@ -174,7 +173,8 @@ void day_popup::load_workoutData(int workout)
         dayModel->setData(dayModel->index(4,workout),"00:00:00");
         dayModel->setData(dayModel->index(5,workout),"0.0");
         dayModel->setData(dayModel->index(6,workout),"0");
-        dayModel->setData(dayModel->index(7,workout),"-");
+        dayModel->setData(dayModel->index(7,workout),"0");
+        dayModel->setData(dayModel->index(8,workout),"-");
         ui->toolButton_editMove->setIcon(addIcon);
         ui->toolButton_editMove->setToolTip("Add Workout");
         ui->toolButton_copy->setEnabled(false);
@@ -208,7 +208,6 @@ void day_popup::update_workValues()
         QHash<int,QString> valueList;
         valueList.insert(0,weekNumber);
         valueList.insert(1,newDate.toString("dd.MM.yyyy"));
-
         for(int i = 2; i < dayModel->rowCount()+1; ++i)
         {
             valueList.insert(i,dayModel->data(dayModel->index(i-2,selWorkout)).toString());
@@ -351,7 +350,7 @@ void day_popup::on_toolButton_stdwork_clicked()
        }
     }
 
-    dayModel->setData(dayModel->index(7,selWorkout),this->get_workout_pace(dayModel->data(dayModel->index(5,selWorkout)).toDouble(),QTime::fromString(dayModel->data(dayModel->index(4,selWorkout)).toString(),"hh:mm:ss"),dayModel->data(dayModel->index(1,selWorkout)).toString(),true));
+    dayModel->setData(dayModel->index(8,selWorkout),this->get_workout_pace(dayModel->data(dayModel->index(5,selWorkout)).toDouble(),QTime::fromString(dayModel->data(dayModel->index(4,selWorkout)).toString(),"hh:mm:ss"),dayModel->data(dayModel->index(1,selWorkout)).toString(),true));
 }
 
 void day_popup::on_tableView_day_clicked(const QModelIndex &index)
