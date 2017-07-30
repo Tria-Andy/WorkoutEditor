@@ -13,7 +13,8 @@ private:
 
 
 protected:
-    double calc_totalWork(double,double,double);
+    double calc_totalCal(double,double,double);
+    double calc_totalWork(QString,double,double);
     int get_hfvalue(QString);
 
     static QString set_time(int);

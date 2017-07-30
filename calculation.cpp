@@ -183,11 +183,42 @@ int calculation::get_hfvalue(QString percent)
     return static_cast<int>(round(settings::get_thresValue("hfthres") * (value / 100.0)));
 }
 
-double calculation::calc_totalWork(double weight,double avgHF, double moveTime)
+double calculation::calc_totalCal(double weight,double avgHF, double moveTime)
 {
     int age = QDate::currentDate().year() - settings::get_athleteValue("yob");
 
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
+}
+
+double calculation::calc_totalWork(QString sport, double pValue, double dura)
+{
+    double factor = 1000.0;
+    double grav = 9.81;
+    double weight = settings::get_weightforDate(QDateTime::currentDateTime());
+    double mSec = pValue*1000/3600.0;
+
+    if(sport == settings::isSwim)
+    {
+
+    }
+    if(sport == settings::isBike)
+    {
+        return round(dura * pValue / factor);
+    }
+    if(sport == settings::isRun)
+    {
+        return round((weight * grav * mSec * 0.1) * dura / factor);
+    }
+    if(sport == settings::isStrength)
+    {
+        return round((weight * grav * mSec * 0.2) * dura / factor);
+    }
+    if(sport == settings::isAlt)
+    {
+        return round((weight * grav * mSec * 0.15) * dura / factor);
+    }
+
+    return 0;
 }
 
 QString calculation::threstopace(double thresPace, double percent)
