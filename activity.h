@@ -24,7 +24,6 @@
 #include <QStandardItemModel>
 #include "settings.h"
 #include "jsonhandler.h"
-#include "calculation.h"
 
 class Activity : public jsonHandler
 {

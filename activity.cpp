@@ -119,7 +119,7 @@ void Activity::prepareData()
     if(isRun)
     {
         avgHF = (avgHF / sampCount);
-        double totalWork = ceil(this->calc_totalWork(actWeight,avgHF,sampCount));
+        double totalWork = ceil(this->calc_totalCal(actWeight,avgHF,sampCount));
         overrideData.insert("total_work",QString::number(totalWork));
         ride_info.insert("Total Cal",QString::number(totalWork));
         ride_info.insert("Total Work",QString::number(totalWork));

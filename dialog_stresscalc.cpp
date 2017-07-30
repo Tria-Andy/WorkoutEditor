@@ -41,7 +41,8 @@ Dialog_stresscalc::~Dialog_stresscalc()
 
 void Dialog_stresscalc::estimateStress()
 {
-    double stressScore,current;
+    double stressScore,speed,totalWork,pValue,current;
+    int timeSec = 0;
     QString xPace;
 
     if(sport == settings::isSwim)
@@ -54,16 +55,22 @@ void Dialog_stresscalc::estimateStress()
     if(sport == settings::isBike)
     {   
         current = ui->lineEdit_goal_power->text().toDouble();
+        pValue = current;
         ui->lineEdit_intensity->setText(QString::number(current / thresPower));
     }
     if(sport == settings::isRun)
     {
         xPace = ui->lineEdit_goal_power->text();
-        current = this->calc_lnp(get_speed(QTime::fromString(xPace,"mm:ss"),0,sport,true)/3.6,settings::get_athleteValue("height"),settings::get_athleteValue("weight")) / thresPower;
+        speed = this->get_speed(QTime::fromString(xPace,"mm:ss"),0,sport,true);
+        pValue = speed;
+        current = this->calc_lnp(speed/3.6,settings::get_athleteValue("height"),settings::get_athleteValue("weight")) / thresPower;
         ui->lineEdit_intensity->setText(QString::number(current));
     }
-    stressScore = this->estimate_stress(sport,ui->lineEdit_goal_power->text(),this->get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")));
+    timeSec = this->get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss"));
+    stressScore = this->estimate_stress(sport,ui->lineEdit_goal_power->text(),timeSec);
+    totalWork = this->calc_totalWork(sport,pValue,timeSec);
     ui->lineEdit_stressScore->setText(QString::number(stressScore));
+    ui->lineEdit_work->setText(QString::number(totalWork));
 
 }
 
