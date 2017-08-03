@@ -109,6 +109,29 @@
             <number>4</number>
            </property>
            <item>
+            <widget class="QComboBox" name="comboBox_saisonName">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>26</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>26</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QCalendarWidget" name="calendarWidget">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1659,7 +1682,6 @@
     <addaction name="actionEdit_Week"/>
     <addaction name="actionExport_to_Golden_Cheetah"/>
     <addaction name="separator"/>
-    <addaction name="actionSwitch_Year"/>
    </widget>
    <widget class="QMenu" name="menuModus">
     <property name="title">

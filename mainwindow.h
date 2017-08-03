@@ -27,6 +27,7 @@
 #include <QDebug>
 #include "del_level.h"
 #include "schedule.h"
+#include "saisons.h"
 #include "dialog_addweek.h"
 #include "dialog_version.h"
 #include "day_popup.h"
@@ -894,6 +895,7 @@ private:
     Ui::MainWindow *ui;
 
     schedule *workSchedule;
+    saisons *saisonList;
     Activity *curr_activity;
     jsonHandler *jsonhandler;
     fileReader *actFileReader;
@@ -909,7 +911,7 @@ private:
     del_avgweek avgweek_del;
     QStandardItemModel *calendarModel,*sumModel,*fileModel,*infoModel,*avgModel;
     QItemSelectionModel *treeSelection;
-    QSortFilterProxyModel *scheduleProxy,*metaProxy,*contentProxy;
+    QSortFilterProxyModel *scheduleProxy,*metaProxy,*metaProxyFilter,*contentProxy;
     QStringList modus_list,cal_header,year_header,avgHeader,schedMode;
     QLabel *planerMode;
     QToolButton *planMode,*appMode;
@@ -979,7 +981,6 @@ private slots:
     void on_actionIntervall_Editor_triggered();
     void on_actionPreferences_triggered();
     void on_actionPace_Calculator_triggered();
-    void on_actionSwitch_Year_triggered();
     void on_actionVersion_triggered();
     void on_actionPMC_triggered();
 

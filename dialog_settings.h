@@ -26,6 +26,7 @@
 #include "del_level.h"
 #include "del_mousehover.h"
 #include "schedule.h"
+#include "saisons.h"
 #include "settings.h"
 #include "calculation.h"
 #include "xmlhandler.h"
@@ -39,7 +40,7 @@ class Dialog_settings : public QDialog, public calculation, public xmlHandler
     Q_OBJECT
 
 public:
-    explicit Dialog_settings(QWidget *parent = 0,schedule *psched = 0);
+    explicit Dialog_settings(QWidget *parent = 0,schedule *psched = 0,saisons *psaison = 0);
     ~Dialog_settings();
 
 private slots:
@@ -86,15 +87,20 @@ private slots:
     void on_pushButton_addContest_clicked();
     void on_pushButton_delContest_clicked();
     void on_treeView_contest_clicked(const QModelIndex &index);
+    void on_toolButton_addSaison_clicked();
+    void on_comboBox_saisons_currentIndexChanged(const QString &arg1);
+    void on_comboBox_saisons_editTextChanged(const QString &arg1);
+    void on_toolButton_updateSaison_clicked();
 
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model,*contestModel;
+    QSortFilterProxyModel *saisonProxy,*contestProxy;
     schedule *schedule_ptr;
+    saisons *saisons_ptr;
     QHash<QString,QStringList> listMap;
     QHash<QString,QColor> colorMapCache;
     QStringList keyList,extkeyList,sportList,model_header,contestTags;
-    QString contestsPath,saisonXML;
     del_level level_del;
     del_mousehover mousehover_del;
     double thresPower,thresPace,sportFactor;
@@ -113,7 +119,8 @@ private:
     void updateListMap(int,bool);
     void writeChangedValues();
     void writeRangeValues(QString);
-    void saveContestFile();
+    void updateContest(bool,int);
+    void set_saisonInfo(QString);
 };
 
 

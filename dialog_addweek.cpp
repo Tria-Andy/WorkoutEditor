@@ -57,9 +57,11 @@ void Dialog_addweek::fill_values(QString selWeek)
 {
     QStringList weekInfo = selWeek.split("-");
     metaProxy->setFilterRegExp("\\b"+weekInfo.at(1)+"\\b");
-    metaProxy->setFilterKeyColumn(1);
+    metaProxy->setFilterKeyColumn(2);
     contentProxy->setFilterRegExp("\\b"+weekInfo.at(1)+"\\b");
     contentProxy->setFilterKeyColumn(1);
+
+    ui->label_header->setText(ui->label_header->text()+ " " + metaProxy->data(metaProxy->index(0,0)).toString());
 
     QTime duration;
     QString value,work,dura,dist,stress;
@@ -81,7 +83,7 @@ void Dialog_addweek::fill_values(QString selWeek)
     if(metaProxy->rowCount() > 0)
     {
         openID = weekInfo.at(1);
-        ui->dateEdit_selectDate->setDate(QDate::fromString(metaProxy->data(metaProxy->index(0,3)).toString(),"dd.MM.yyyy"));
+        ui->dateEdit_selectDate->setDate(QDate::fromString(metaProxy->data(metaProxy->index(0,4)).toString(),"dd.MM.yyyy"));
         ui->lineEdit_week->setText(QString::number(ui->dateEdit_selectDate->date().weekNumber()));
         value = weekInfo.at(3);
         ui->comboBox_phase->setCurrentText(value.split("_").first());

@@ -21,7 +21,7 @@
 schedule::schedule()
 {
     workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj";
-    metaTags << "id" << "week" << "name" << "fdw";
+    metaTags << "saison" << "id" << "week" << "name" << "fdw";
     contentTags << "id" << "week";
     for(int i = 0; i < settings::get_listValues("Sportuse").count();++i)
     {
@@ -138,7 +138,7 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
     meta_list = root_meta.elementsByTagName("phase");
     content_list = root_content.elementsByTagName("content");
 
-    week_meta = new QStandardItemModel(meta_list.count(),4);
+    week_meta = new QStandardItemModel(meta_list.count(),metaTags.count());
     week_content = new QStandardItemModel(content_list.count(),contentTags.count());
 
     //fill week_meta
@@ -153,10 +153,11 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
         for(int week = 0,id = 1; week < saisonWeeks; ++week,++id)
         {
             weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
-            week_meta->setData(week_meta->index(week,0,QModelIndex()),id);
-            week_meta->setData(week_meta->index(week,1,QModelIndex()),weekid);
-            week_meta->setData(week_meta->index(week,2,QModelIndex()),noPhase);
-            week_meta->setData(week_meta->index(week,3,QModelIndex()),startDate.addDays(week*7).toString("dd.MM.yyyy"));
+            week_meta->setData(week_meta->index(week,0,QModelIndex()),"NoSaison");
+            week_meta->setData(week_meta->index(week,1,QModelIndex()),id);
+            week_meta->setData(week_meta->index(week,2,QModelIndex()),weekid);
+            week_meta->setData(week_meta->index(week,3,QModelIndex()),noPhase);
+            week_meta->setData(week_meta->index(week,4,QModelIndex()),startDate.addDays(week*7).toString("dd.MM.yyyy"));
         }
         this->save_weekPlan();
     }
@@ -169,7 +170,7 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
             meta_element = meta_node.toElement();
             for(int col = 0; col < week_meta->columnCount(); ++col)
             {
-                if(col == 0)
+                if(col == 1)
                 {
                     week_meta->setData(week_meta->index(i,col,QModelIndex()),meta_element.attribute(metaTags.at(col)).toInt());
                 }
@@ -180,7 +181,7 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
             }
         }
     }
-    week_meta->sort(0);
+    week_meta->sort(1);
 
     //fill week_content
     if(content_list.count() == 0)
@@ -449,9 +450,9 @@ QString schedule::get_weekPhase(QDate currDate)
     metaProxy->setSourceModel(week_meta);
     QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.addDays(1 - currDate.dayOfWeek()).year());
     metaProxy->setFilterRegExp("\\b"+weekID+"\\b");
-    metaProxy->setFilterKeyColumn(1);
+    metaProxy->setFilterKeyColumn(2);
 
-    if(metaProxy->rowCount() == 1) return metaProxy->data(metaProxy->index(0,2)).toString();
+    if(metaProxy->rowCount() == 1) return metaProxy->data(metaProxy->index(0,3)).toString();
 
     return 0;
 }

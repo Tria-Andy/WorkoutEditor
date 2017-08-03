@@ -48,7 +48,8 @@ SOURCES += main.cpp\
     calculation.cpp \
     xmlhandler.cpp \
     dialog_workcreator.cpp \
-    filereader.cpp
+    filereader.cpp \
+    saisons.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
@@ -75,7 +76,8 @@ HEADERS  += mainwindow.h \
     xmlhandler.h \
     dialog_workcreator.h \
     filereader.h \
-    del_mousehover.h
+    del_mousehover.h \
+    saisons.h
 
 FORMS    += mainwindow.ui \
     dialog_export.ui \

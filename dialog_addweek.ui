@@ -84,7 +84,7 @@
        <number>2</number>
       </property>
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="label_header">
         <property name="font">
          <font>
           <family>Segoe UI</family>
@@ -94,7 +94,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Edit Year Schedule</string>
+         <string>Edit Year Schedule Saison:</string>
         </property>
        </widget>
       </item>

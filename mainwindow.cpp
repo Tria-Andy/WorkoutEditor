@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //Planning Mode
     graphLoaded = false;
     workSchedule = new schedule();
+    saisonList = new saisons();
     schedMode << "Week" << "Year";    
     selectedDate = QDate::currentDate();
     firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
@@ -83,6 +84,8 @@ MainWindow::MainWindow(QWidget *parent) :
     scheduleProxy->setSourceModel(workSchedule->workout_schedule);
     metaProxy = new QSortFilterProxyModel();
     metaProxy->setSourceModel(workSchedule->week_meta);
+    metaProxyFilter = new QSortFilterProxyModel();
+    metaProxyFilter->setSourceModel(metaProxy);
     contentProxy = new QSortFilterProxyModel();
     contentProxy->setSourceModel(workSchedule->week_content);
     this->set_phaseButtons();
@@ -93,6 +96,12 @@ MainWindow::MainWindow(QWidget *parent) :
         cal_header << QDate::longDayName(d);
     }
     avgHeader << "Sport" << "Workouts" << "Duration" << "Distance";
+
+    for(int i = 0; i < saisonList->saisonsModel->rowCount(); ++i)
+    {
+        ui->comboBox_saisonName->addItem(saisonList->saisonsModel->data(saisonList->saisonsModel->index(i,0)).toString());
+    }
+    ui->comboBox_saisonName->setEnabled(false);
 
     //Editor Mode
     avgCounter = 0;
@@ -162,6 +171,8 @@ void MainWindow::freeMem()
         delete avgModel;
         delete scheduleProxy;
         delete metaProxy;
+        delete metaProxyFilter;
+        delete contentProxy;
     }
 }
 
@@ -335,6 +346,7 @@ void MainWindow::summery_view()
     stress_sum.fill(0);
 
     QStringList sportList = settings::get_listValues("Sport");
+    QString selSaison = ui->comboBox_saisonName->currentText();
 
     if(isWeekMode)
     {
@@ -381,15 +393,17 @@ void MainWindow::summery_view()
 
         if(phaseFilterID > 1)
         {
-          metaProxy->setFilterFixedString(phaseFilter);
-          metaProxy->setFilterKeyColumn(2);
+            metaProxy->setFilterFixedString(selSaison);
+            metaProxy->setFilterKeyColumn(0);
+            metaProxyFilter->setFilterFixedString(phaseFilter);
+            metaProxyFilter->setFilterKeyColumn(3);
         }
-        metaProxy->sort(0);
-        metaRowCount = metaProxy->rowCount();
+        metaProxyFilter->sort(1);
+        metaRowCount = metaProxyFilter->rowCount();
 
         for(int row = 0; row < metaRowCount; ++row)
         {
-            weekID = metaProxy->data(metaProxy->index(row,1)).toString();
+            weekID = metaProxyFilter->data(metaProxyFilter->index(row,2)).toString();
             contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
             contentProxy->setFilterKeyColumn(1);
 
@@ -431,7 +445,7 @@ void MainWindow::summery_view()
 
         if(phaseFilterID == 1)
         {
-            ui->label_selWeek->setText("All Phases " +settings::get_saisonInfo("saison")+ " - Weeks: "+QString::number(metaRowCount));
+            ui->label_selWeek->setText("All Phases - Weeks: "+QString::number(metaRowCount));
         }
         else
         {
@@ -460,6 +474,7 @@ void MainWindow::workout_calendar()
     QStringList sportuseList = settings::get_listValues("Sportuse");
     calendarModel->clear();
     metaProxy->setFilterRegExp("");
+    metaProxyFilter->setFilterFixedString("");
     scheduleProxy->setFilterFixedString("");
 
     if(isWeekMode)
@@ -476,7 +491,7 @@ void MainWindow::workout_calendar()
             calendarModel->insertRow(rowcount,QModelIndex());
             weekValue = QString::number(currentdate.addDays(offset).weekNumber()) +"_"+ QString::number(currentdate.addDays(offset).year());
             metaProxy->setFilterRegExp("\\b"+weekValue+"\\b");
-            metaProxy->setFilterKeyColumn(1);
+            metaProxy->setFilterKeyColumn(2);
 
             for(int day = 0; day < 8 ; ++day)
             {
@@ -535,6 +550,7 @@ void MainWindow::workout_calendar()
         calendarModel->setHorizontalHeaderLabels(year_header);
         ui->tableView_cal->setItemDelegate(&week_del);
         QString weekInfo,weekID;
+        QString selSaison = ui->comboBox_saisonName->currentText();
         QString empty = "0-0-00:00:00-0";
         int weekoffset;
 
@@ -548,17 +564,20 @@ void MainWindow::workout_calendar()
             ui->tableView_cal->verticalHeader()->resetDefaultSectionSize();
             ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
             ui->tableView_cal->verticalHeader()->setDefaultSectionSize(ui->tableView_cal->verticalHeader()->defaultSectionSize()*2.5);
-            metaProxy->setFilterFixedString(phaseFilter);
-            metaProxy->setFilterKeyColumn(2);
-            weekoffset = metaProxy->rowCount();
+
+            metaProxy->setFilterFixedString(selSaison);
+            metaProxy->setFilterKeyColumn(0);
+            metaProxyFilter->setFilterFixedString(phaseFilter);
+            metaProxyFilter->setFilterKeyColumn(3);
+            weekoffset = metaProxyFilter->rowCount();
           }
-          metaProxy->sort(0);
+          metaProxyFilter->sort(1);
 
           for(int week = weekpos,i=0; week < weekpos+weekoffset;++week,++i)
           {
               rowcount = calendarModel->rowCount();
               calendarModel->insertRow(rowcount,QModelIndex());
-              weekID = metaProxy->data(metaProxy->index(week,1)).toString();
+              weekID = metaProxyFilter->data(metaProxyFilter->index(week,2)).toString();
               contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
               contentProxy->setFilterKeyColumn(1);
 
@@ -569,10 +588,10 @@ void MainWindow::workout_calendar()
                   {
                       if(col == 0)
                       {
-                        weekInfo = metaProxy->data(metaProxy->index(week,0)).toString() +"-"+
-                                   metaProxy->data(metaProxy->index(week,1)).toString() +"-"+
-                                   metaProxy->data(metaProxy->index(week,3)).toString() +"-"+
-                                   metaProxy->data(metaProxy->index(week,2)).toString();
+                        weekInfo = metaProxyFilter->data(metaProxyFilter->index(week,1)).toString() +"-"+
+                                   metaProxyFilter->data(metaProxyFilter->index(week,2)).toString() +"-"+
+                                   metaProxyFilter->data(metaProxyFilter->index(week,4)).toString() +"-"+
+                                   metaProxyFilter->data(metaProxyFilter->index(week,3)).toString();
                       }
                       else
                       {
@@ -1633,7 +1652,7 @@ void MainWindow::on_actionIntervall_Editor_triggered()
 void MainWindow::on_actionPreferences_triggered()
 {
     int dialog_code;
-    Dialog_settings dia_settings(this,workSchedule);
+    Dialog_settings dia_settings(this,workSchedule,saisonList);
     dia_settings.setModal(true);
     dialog_code = dia_settings.exec();
     if(dialog_code == QDialog::Rejected)
@@ -1677,28 +1696,6 @@ void MainWindow::on_tableView_summery_clicked(const QModelIndex &index)
         if(dialog_code == QDialog::Rejected)
         {
             this->set_calender();
-        }
-    }
-}
-
-void MainWindow::on_actionSwitch_Year_triggered()
-{
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this,
-                                  tr("Change Year Schedule"),
-                                  "Change to new Year Schedule?",
-                                  QMessageBox::Yes|QMessageBox::No
-                                  );
-    if (reply == QMessageBox::Yes)
-    {
-        if(QDate::currentDate() >= QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy"))
-        {
-            workSchedule->changeYear();
-            this->workout_calendar();
-        }
-        else
-        {
-            QMessageBox::warning(this,"Season not finished","Season Schedule can not be changed!",QMessageBox::Ok);
         }
     }
 }
@@ -1810,6 +1807,7 @@ void MainWindow::toolButton_planMode(bool checked)
         }
         this->set_phaseFilter(phaseGroup->checkedId());
     }
+    ui->comboBox_saisonName->setEnabled(checked);
     ui->calendarWidget->setVisible(!checked);
     ui->frame_YearAvg->setVisible(checked);
     ui->frame_phases->setVisible(checked);
