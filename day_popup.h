@@ -30,6 +30,7 @@
 #include <QStyledItemDelegate>
 #include <QDoubleSpinBox>
 #include <QSpinBox>
+#include <QLineEdit>
 #include <QComboBox>
 #include <QTimeEdit>
 #include <QDebug>
@@ -235,7 +236,7 @@ public:
             QTime value = timeEdit->time();
             timeEdit->interpretText();
             model->setData(index,value.toString("hh:mm:ss"), Qt::EditRole);
-            model->setData(model->index(7,col),get_workout_pace(model->data(model->index(5,col)).toDouble(),value,model->data(model->index(1,col)).toString(),true));
+            model->setData(model->index(8,col),get_workout_pace(model->data(model->index(5,col)).toDouble(),value,model->data(model->index(1,col)).toString(),true));
         }
         if(index.row() == 5) //Distance
         {
@@ -243,7 +244,7 @@ public:
             spinBox->interpretText();
             double value = spinBox->value();
             model->setData(index, value, Qt::EditRole);
-            model->setData(model->index(7,col),get_workout_pace(value,QTime::fromString(model->data(model->index(4,col)).toString(),"hh:mm:ss"),model->data(model->index(1,col)).toString(),true));
+            model->setData(model->index(8,col),get_workout_pace(value,QTime::fromString(model->data(model->index(4,col)).toString(),"hh:mm:ss"),model->data(model->index(1,col)).toString(),true));
         }
         if(index.row() == 6 || index.row() == 7) //Stress && Work(kj)
         {
