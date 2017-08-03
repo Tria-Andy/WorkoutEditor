@@ -66,8 +66,6 @@ private:
     QString checkRangeLevel(double);
     int get_swim_laps(int);
     int get_zone_values(double,int,bool);
-    double get_speedFactor(double);
-    double get_workValue(double,int,int);
 
 public:
     explicit Activity(QString jsonfile = QString(),bool intAct = false);

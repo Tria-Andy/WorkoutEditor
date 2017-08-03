@@ -41,13 +41,15 @@ Dialog_stresscalc::~Dialog_stresscalc()
 
 void Dialog_stresscalc::estimateStress()
 {
-    double stressScore,speed,totalWork,pValue,current;
+    double stressScore,speed,totalWork,current;
+    double pValue = 0.0;
     int timeSec = 0;
     QString xPace;
 
     if(sport == settings::isSwim)
     {
         current = this->get_timesec(ui->lineEdit_goal_power->text());
+        pValue = current;
         current = thresPace / current;
         current = pow(current,3.0);
         ui->lineEdit_intensity->setText(QString::number(current));
@@ -68,10 +70,9 @@ void Dialog_stresscalc::estimateStress()
     }
     timeSec = this->get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss"));
     stressScore = this->estimate_stress(sport,ui->lineEdit_goal_power->text(),timeSec);
-    totalWork = this->calc_totalWork(sport,pValue,timeSec);
+    totalWork = round(this->calc_totalWork(sport,pValue,timeSec,0.0,6));
     ui->lineEdit_stressScore->setText(QString::number(stressScore));
     ui->lineEdit_work->setText(QString::number(totalWork));
-
 }
 
 void Dialog_stresscalc::set_sport_threshold()
@@ -118,6 +119,7 @@ void Dialog_stresscalc::reset_calc()
     ui->lineEdit_stressScore->clear();
     ui->lineEdit_goal_power->clear();
     ui->lineEdit_intensity->clear();
+    ui->lineEdit_work->clear();
 }
 
 void Dialog_stresscalc::on_pushButton_calc_clicked()

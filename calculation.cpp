@@ -190,7 +190,7 @@ double calculation::calc_totalCal(double weight,double avgHF, double moveTime)
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
 }
 
-double calculation::calc_totalWork(QString sport, double pValue, double dura)
+double calculation::calc_totalWork(QString sport, double pValue, double dura, double trackLen,int tempID)
 {
     double factor = 1000.0;
     double grav = 9.81;
@@ -199,23 +199,32 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura)
 
     if(sport == settings::isSwim)
     {
+        double speedFactor = 1;
+        double swimPace = settings::get_thresValue("swimpace");
+        QString workFactor = settings::get_listValues("StyleFactor").at(tempID);
 
+        if(tempID != 0)
+        {
+            speedFactor = get_swim_speedFactor(sqrt((pow(swimPace/pValue,3.0))),trackLen);
+        }
+
+        return (workFactor.toDouble()*speedFactor) * 3.5 * weight / 200 * (dura/60.0);
     }
     if(sport == settings::isBike)
     {
-        return round(dura * pValue / factor);
+        return dura * pValue / factor;
     }
     if(sport == settings::isRun)
     {
-        return round((weight * grav * mSec * 0.1) * dura / factor);
+        return (weight * grav * mSec * 0.1) * dura / factor;
     }
     if(sport == settings::isStrength)
     {
-        return round((weight * grav * mSec * 0.2) * dura / factor);
+        return (weight * grav * mSec * 0.2) * dura / factor;
     }
     if(sport == settings::isAlt)
     {
-        return round((weight * grav * mSec * 0.15) * dura / factor);
+        return (weight * grav * mSec * 0.15) * dura / factor;
     }
 
     return 0;
@@ -298,6 +307,35 @@ double calculation::calc_swim_xpower(double distance,double pace,double time,dou
         xPowerSum += pow(rawEWMA[i],3);
     }
     return pow(xPowerSum / time,0.33);
+}
+
+double calculation::get_swim_speedFactor(double sri, double trackLen)
+{
+    double speedFactor = 0.0;
+
+    if(trackLen == 25.0)
+    {
+        speedFactor = 1.05;
+    }
+    else if(trackLen == 50.0)
+    {
+        speedFactor = 1.1;
+    }
+    else
+    {
+        speedFactor = 1.0;
+    }
+
+    if(sri > 0.0)
+    {
+        return speedFactor * sri;
+    }
+    else
+    {
+        return 1;
+    }
+
+    return 0;
 }
 
 double calculation::estimate_stress(QString sport, QString p_goal, int duration)
