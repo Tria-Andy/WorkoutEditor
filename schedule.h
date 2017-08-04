@@ -23,9 +23,9 @@
 #include <QtXml>
 #include <QMessageBox>
 #include "settings.h"
-#include "xmlhandler.h"
+#include "saisons.h"
 
-class schedule : public xmlHandler
+class schedule : public saisons
 {
 
 public:
@@ -37,7 +37,6 @@ public:
     void save_weekPlan();
     void save_ltsFile(double);
     int check_workouts(QDate);
-    void changeYear();
     QString get_weekPhase(QDate);
     void copyWeek(QString,QString);
     void deleteWeek(QString);

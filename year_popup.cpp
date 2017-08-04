@@ -58,19 +58,24 @@ year_popup::~year_popup()
 
 void year_popup::set_plotValues()
 {
-    QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel;
-    proxyModel->setSourceModel(workSched->week_meta);
+    QString selSaison = workSched->get_selSaison();
+    QSortFilterProxyModel *metaProxy = new QSortFilterProxyModel;
+    metaProxy->setSourceModel(workSched->week_meta);
+    metaProxy->setFilterFixedString(selSaison);
+    metaProxy->setFilterKeyColumn(0);
+    QSortFilterProxyModel *proxyFilter = new QSortFilterProxyModel;
+    proxyFilter->setSourceModel(metaProxy);
     QString weekID;
 
     if(phaseindex == 0)
     {
-        weekcount = settings::get_saisonInfo("weeks").toInt();
+        weekcount = workSched->get_saisonInfo(selSaison,"weeks").toInt();
     }
     else
     {
-        proxyModel->setFilterFixedString(phase);
-        proxyModel->setFilterKeyColumn(2);
-        weekcount = proxyModel->rowCount();
+        proxyFilter->setFilterFixedString(phase);
+        proxyFilter->setFilterKeyColumn(3);
+        weekcount = proxyFilter->rowCount();
     }
 
     if(weekcount > 40)
@@ -148,9 +153,9 @@ void year_popup::set_plotValues()
     }
     else
     {
-        for(int week = 0; week < proxyModel->rowCount(); ++week)
+        for(int week = 0; week < proxyFilter->rowCount(); ++week)
         {
-            weekID = proxyModel->data(proxyModel->index(week,1)).toString();
+            weekID = proxyFilter->data(proxyFilter->index(week,2)).toString();
 
             for(int i = 0; i < workSched->week_content->rowCount(); ++i)
             {

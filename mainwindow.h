@@ -27,7 +27,6 @@
 #include <QDebug>
 #include "del_level.h"
 #include "schedule.h"
-#include "saisons.h"
 #include "dialog_addweek.h"
 #include "dialog_version.h"
 #include "day_popup.h"
@@ -895,7 +894,6 @@ private:
     Ui::MainWindow *ui;
 
     schedule *workSchedule;
-    saisons *saisonList;
     Activity *curr_activity;
     jsonHandler *jsonhandler;
     fileReader *actFileReader;
@@ -1015,6 +1013,7 @@ private slots:
     void on_toolButton_clearSelect_clicked();
     void on_treeView_files_clicked(const QModelIndex &index);
     void on_actionRefresh_Filelist_triggered();
+    void on_comboBox_saisonName_currentIndexChanged(const QString &arg1);
 };
 
 #endif // MAINWINDOW_H

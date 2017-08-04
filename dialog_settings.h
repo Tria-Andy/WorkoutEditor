@@ -26,7 +26,6 @@
 #include "del_level.h"
 #include "del_mousehover.h"
 #include "schedule.h"
-#include "saisons.h"
 #include "settings.h"
 #include "calculation.h"
 #include "xmlhandler.h"
@@ -40,7 +39,7 @@ class Dialog_settings : public QDialog, public calculation, public xmlHandler
     Q_OBJECT
 
 public:
-    explicit Dialog_settings(QWidget *parent = 0,schedule *psched = 0,saisons *psaison = 0);
+    explicit Dialog_settings(QWidget *parent = 0,schedule *psched = 0);
     ~Dialog_settings();
 
 private slots:
@@ -94,7 +93,7 @@ private slots:
 
 private:
     Ui::Dialog_settings *ui;
-    QStandardItemModel *level_model,*hf_model,*contestModel;
+    QStandardItemModel *level_model,*hf_model,*contestTreeModel;
     QSortFilterProxyModel *saisonProxy,*contestProxy;
     schedule *schedule_ptr;
     saisons *saisons_ptr;
@@ -121,6 +120,7 @@ private:
     void writeRangeValues(QString);
     void updateContest(bool,int);
     void set_saisonInfo(QString);
+    void refresh_contestTree(QString);
 };
 
 

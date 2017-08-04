@@ -33,7 +33,6 @@ QHash<QString,QString> settings::gcInfo;
 QHash<QString,QString> settings::generalMap;
 QHash<QString,QColor> settings::colorMap;
 QHash<QString,int> settings::fontMap;
-QHash<QString,QString> settings::saisonInfo;
 
 QString settings::valueFile;
 QString settings::valueFilePath;
@@ -253,14 +252,6 @@ void settings::loadSettings()
         myvalues->beginGroup("Keylist");
             keyList << myvalues->value("keys").toString().split(splitter);
             extkeyList << myvalues->value("extkeys").toString().split(splitter);
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Saisoninfo");
-            saisonInfo.insert("saison",myvalues->value("saison").toString());
-            saisonInfo.insert("startDate",myvalues->value("startDate").toString());
-            saisonInfo.insert("startkw",myvalues->value("startkw").toString());
-            saisonInfo.insert("endDate",myvalues->value("endDate").toString());
-            saisonInfo.insert("weeks",myvalues->value("weeks").toString());
         myvalues->endGroup();
 
         myvalues->beginGroup("Threshold");
@@ -508,14 +499,6 @@ void settings::saveSettings()
         myvalues->setValue("stgpower",QString::number(thresholdMap.value("stgpower")));
         myvalues->setValue("hfthres",QString::number(thresholdMap.value("hfthres")));
         myvalues->setValue("hfmax",QString::number(thresholdMap.value("hfmax")));
-    myvalues->endGroup();
-
-    myvalues->beginGroup("Saisoninfo");
-        myvalues->setValue("saison",saisonInfo.value("saison"));
-        myvalues->setValue("weeks",saisonInfo.value("weeks"));
-        myvalues->setValue("startkw",saisonInfo.value("startkw"));
-        myvalues->setValue("startDate",saisonInfo.value("startDate"));
-        myvalues->setValue("endDate",saisonInfo.value("endDate"));
     myvalues->endGroup();
 
     myvalues->beginGroup("Sport");

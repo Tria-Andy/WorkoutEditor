@@ -29,7 +29,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //Settings
     settings::loadSettings();
     userSetup = true;
-    saisonWeeks = settings::get_saisonInfo("weeks").toInt();
     sportCounter = settings::get_listValues("Sport").count();
     sportUse = settings::get_listValues("Sportuse").count();
     weekRange = settings::get_fontValue("weekRange");
@@ -37,7 +36,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //Planning Mode
     graphLoaded = false;
     workSchedule = new schedule();
-    saisonList = new saisons();
     schedMode << "Week" << "Year";    
     selectedDate = QDate::currentDate();
     firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
@@ -49,7 +47,6 @@ MainWindow::MainWindow(QWidget *parent) :
     dist_sum.resize(sportCounter);
     stress_sum.resize(sportCounter);
     isWeekMode = true;
-
     buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
     ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
     appMode = new QToolButton(this);
@@ -97,11 +94,12 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     avgHeader << "Sport" << "Workouts" << "Duration" << "Distance";
 
-    for(int i = 0; i < saisonList->saisonsModel->rowCount(); ++i)
+    for(int i = 0; i < workSchedule->saisonsModel->rowCount(); ++i)
     {
-        ui->comboBox_saisonName->addItem(saisonList->saisonsModel->data(saisonList->saisonsModel->index(i,0)).toString());
+        ui->comboBox_saisonName->addItem(workSchedule->saisonsModel->data(workSchedule->saisonsModel->index(i,0)).toString());
     }
     ui->comboBox_saisonName->setEnabled(false);
+    saisonWeeks = workSchedule->get_saisonInfo(ui->comboBox_saisonName->currentText(),"weeks").toInt();
 
     //Editor Mode
     avgCounter = 0;
@@ -119,7 +117,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(workSchedule->workout_schedule,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SLOT(refresh_model()));
     connect(workSchedule->week_meta,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
     connect(workSchedule->week_content,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
-
 
     //UI
     ui->actionSave_Workout_Schedule->setEnabled(false);
@@ -378,6 +375,7 @@ void MainWindow::summery_view()
         QDate firstday,calcDay;
         calcDay.setDate(year.toInt(),1,1);
         firstday = calcDay.addDays(week.toInt()*7).addDays(1 - calcDay.dayOfWeek());
+        ui->comboBox_saisonName->setCurrentText(workSchedule->saison_atDate(firstday));
         ui->label_selWeek->setText("Week: "+weeknumber+" - Phase: " +workSchedule->get_weekPhase(firstday));
     }
     else
@@ -1652,7 +1650,7 @@ void MainWindow::on_actionIntervall_Editor_triggered()
 void MainWindow::on_actionPreferences_triggered()
 {
     int dialog_code;
-    Dialog_settings dia_settings(this,workSchedule,saisonList);
+    Dialog_settings dia_settings(this,workSchedule);
     dia_settings.setModal(true);
     dialog_code = dia_settings.exec();
     if(dialog_code == QDialog::Rejected)
@@ -1839,4 +1837,9 @@ void MainWindow::on_actionRefresh_Filelist_triggered()
     ui->progressBar_fileState->setValue(10);
     this->read_activityFiles();
     ui->progressBar_fileState->setValue(100);
+}
+
+void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value)
+{
+    workSchedule->set_selSaison(value);
 }

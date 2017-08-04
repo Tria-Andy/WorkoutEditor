@@ -22,18 +22,17 @@
 #include <QColorDialog>
 #include <QFileDialog>
 
-Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,saisons *psaison) :
+Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     QDialog(parent),
     ui(new Ui::Dialog_settings)
 {
     ui->setupUi(this);
     schedule_ptr = psched;
-    saisons_ptr= psaison;
     saisonProxy = new QSortFilterProxyModel;
-    saisonProxy->setSourceModel(saisons_ptr->saisonsModel);
+    saisonProxy->setSourceModel(schedule_ptr->saisonsModel);
     contestProxy = new QSortFilterProxyModel;
-    contestProxy->setSourceModel(saisons_ptr->contestModel);
-    contestModel = new QStandardItemModel;
+    contestProxy->setSourceModel(schedule_ptr->contestModel);
+    contestTreeModel = new QStandardItemModel;
     sportList << settings::isSwim << settings::isBike << settings::isRun;
     keyList = settings::get_keyList();
     extkeyList = settings::get_extkeyList();
@@ -43,8 +42,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,saisons *psais
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
     level_model = new QStandardItemModel();
     hf_model = new QStandardItemModel();
-    contestModel = new QStandardItemModel();
-    ui->treeView_contest->setModel(contestModel);
+    ui->treeView_contest->setModel(contestTreeModel);
     ui->treeView_contest->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->treeView_contest->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->treeView_contest->header()->setVisible(false);
@@ -100,7 +98,9 @@ void Dialog_settings::on_pushButton_cancel_clicked()
 {
     delete level_model;
     delete hf_model;
-    delete contestModel;
+    delete contestTreeModel;
+    delete saisonProxy;
+    delete contestProxy;
     reject();
 }
 
@@ -134,27 +134,31 @@ void Dialog_settings::set_saisonInfo(QString saisonName)
     ui->lineEdit_startWeek->setText(QString::number(ui->dateEdit_saisonStart->date().weekNumber()));
     ui->lineEdit_saisonWeeks->setText(QString::number(saisonProxy->data(saisonProxy->index(0,3)).toInt()));
 
+    this->refresh_contestTree(saisonName);
+}
+
+void Dialog_settings::refresh_contestTree(QString saisonName)
+{
     contestProxy->invalidate();
     contestProxy->setFilterFixedString(saisonName);
     contestProxy->setFilterKeyColumn(1);
 
     int contestCount = contestProxy->rowCount();
-
-    contestModel->clear();
-    QStandardItem *rootItem = contestModel->invisibleRootItem();
+    contestTreeModel->clear();
+    QStandardItem *rootItem = contestTreeModel->invisibleRootItem();
     QList<QStandardItem *> contestItems;
 
     for(int contest = 0; contest < contestCount; ++contest)
     {
-        for(int col = 1; col < contestCount; ++col)
+        for(int col = 1; col < contestProxy->columnCount(); ++col)
         {
             contestItems << new QStandardItem(contestProxy->data(contestProxy->index(contest,col)).toString());
         }
         rootItem->appendRow(contestItems);
         contestItems.clear();
-        contestModel->setData(contestModel->index(contest,1),QDate::fromString(contestModel->data(contestModel->index(contest,1)).toString(),"yyyy-MM-dd"));
+        contestTreeModel->setData(contestTreeModel->index(contest,1),QDate::fromString(contestTreeModel->data(contestTreeModel->index(contest,1)).toString(),"yyyy-MM-dd"));
     }
-    contestModel->sort(1);
+    contestTreeModel->sort(1);
 }
 
 
@@ -282,6 +286,8 @@ void Dialog_settings::writeChangedValues()
     }
 
     settings::writeListValues(&listMap);
+
+    schedule_ptr->write_saisonInfo();
 
     if(stressEdit) schedule_ptr->save_ltsFile(ui->spinBox_ltsDays->value());
 
@@ -880,59 +886,43 @@ void Dialog_settings::on_pushButton_clearFat_clicked()
     ui->lineEdit_comment->clear();
 }
 
-void Dialog_settings::updateContest(bool add,int index)
-{
-    int row;
-
-    if(add)
-    {
-        row = contestProxy->rowCount();
-        contestProxy->insertRow(row,QModelIndex());
-        contestProxy->setData(contestProxy->index(row,0),row-1);
-    }
-    else
-    {
-        row = index;
-    }
-
-    contestProxy->setData(contestProxy->index(row,1),ui->comboBox_saisons->currentText());
-    contestProxy->setData(contestProxy->index(row,2),ui->dateEdit_contest->date());
-    contestProxy->setData(contestProxy->index(row,3),ui->comboBox_contestsport->currentText());
-    contestProxy->setData(contestProxy->index(row,4),ui->lineEdit_contest->text());
-    contestProxy->setData(contestProxy->index(row,5),ui->doubleSpinBox_contest->value());
-    contestProxy->setData(contestProxy->index(row,6),ui->spinBox_contestStress->value());
-}
-
 void Dialog_settings::on_pushButton_addContest_clicked()
 {
     QModelIndex listIndex = ui->treeView_contest->currentIndex();
+    int row,newID;
 
     if(listIndex.isValid())
     {
-        contestModel->setData(contestModel->index(listIndex.row(),0),ui->dateEdit_contest->date());
-        contestModel->setData(contestModel->index(listIndex.row(),1),ui->comboBox_contestsport->currentText());
-        contestModel->setData(contestModel->index(listIndex.row(),2),ui->lineEdit_contest->text());
-        contestModel->setData(contestModel->index(listIndex.row(),3),ui->doubleSpinBox_contest->value());
-        contestModel->setData(contestModel->index(listIndex.row(),4),ui->spinBox_contestStress->value());
-        this->updateContest(false,ui->treeView_contest->currentIndex().row());
+        row = ui->treeView_contest->currentIndex().row();
     }
     else
     {
-        int rowCount = contestModel->rowCount();
-        contestModel->insertRow(rowCount);
-        contestModel->setData(contestModel->index(rowCount,0),ui->dateEdit_contest->date());
-        contestModel->setData(contestModel->index(rowCount,1),ui->comboBox_contestsport->currentText());
-        contestModel->setData(contestModel->index(rowCount,2),ui->lineEdit_contest->text());
-        contestModel->setData(contestModel->index(rowCount,3),ui->doubleSpinBox_contest->value());
-        contestModel->setData(contestModel->index(rowCount,4),ui->spinBox_contestStress->value());
-        this->updateContest(true,0);
+        newID = contestProxy->rowCount();
+        row = schedule_ptr->contestModel->rowCount();
+        schedule_ptr->contestModel->insertRow(row,QModelIndex());
+        schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,0),newID);
     }
+
+    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,1),ui->comboBox_saisons->currentText());
+    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,2),ui->dateEdit_contest->date());
+    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,3),ui->comboBox_contestsport->currentText());
+    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,4),ui->lineEdit_contest->text());
+    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,5),ui->doubleSpinBox_contest->value());
+    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,6),ui->spinBox_contestStress->value());
+
+    for(int i = 0; i < schedule_ptr->contestModel->columnCount(); ++i)
+    {
+        qDebug() << schedule_ptr->contestModel->data(schedule_ptr->contestModel->index(row,i)).toString();
+    }
+
+
     ui->treeView_contest->clearSelection();
+    this->refresh_contestTree(ui->comboBox_saisons->currentText());
 }
 
 void Dialog_settings::on_pushButton_delContest_clicked()
 {
-    contestModel->removeRow(ui->treeView_contest->currentIndex().row());
+    contestTreeModel->removeRow(ui->treeView_contest->currentIndex().row());
     contestProxy->removeRow(ui->treeView_contest->currentIndex().row());
 
     ui->dateEdit_contest->setDate(QDate::currentDate());
@@ -946,23 +936,20 @@ void Dialog_settings::on_pushButton_delContest_clicked()
 
 void Dialog_settings::on_treeView_contest_clicked(const QModelIndex &index)
 {
-    ui->dateEdit_contest->setDate(contestModel->data(contestModel->index(index.row(),1)).toDate());
-    ui->comboBox_contestsport->setCurrentText(contestModel->data(contestModel->index(index.row(),2)).toString());
-    ui->lineEdit_contest->setText(contestModel->data(contestModel->index(index.row(),3)).toString());
-    ui->doubleSpinBox_contest->setValue(contestModel->data(contestModel->index(index.row(),4)).toDouble());
-    ui->spinBox_contestStress->setValue(contestModel->data(contestModel->index(index.row(),5)).toInt());
+    ui->dateEdit_contest->setDate(contestTreeModel->data(contestTreeModel->index(index.row(),1)).toDate());
+    ui->comboBox_contestsport->setCurrentText(contestTreeModel->data(contestTreeModel->index(index.row(),2)).toString());
+    ui->lineEdit_contest->setText(contestTreeModel->data(contestTreeModel->index(index.row(),3)).toString());
+    ui->doubleSpinBox_contest->setValue(contestTreeModel->data(contestTreeModel->index(index.row(),4)).toDouble());
+    ui->spinBox_contestStress->setValue(contestTreeModel->data(contestTreeModel->index(index.row(),5)).toInt());
 }
 
 void Dialog_settings::on_toolButton_addSaison_clicked()
 {
-    QString newSaison = "New-Saison";
-    QDate newStart(QDate().currentDate().year(),1,1);
-    QDate newEnd(QDate().currentDate().year(),12,31);
-
-    saisons_ptr->add_saison(newSaison,newStart,newEnd,ui->lineEdit_saisonWeeks->text().toInt());
-    ui->comboBox_saisons->insertItem(ui->comboBox_saisons->count(),newSaison);
+    ui->comboBox_saisons->insertItem(ui->comboBox_saisons->count(),"New-Saison");
     ui->comboBox_saisons->setCurrentIndex(ui->comboBox_saisons->count()-1);
-    this->set_saisonInfo(newSaison);
+    ui->dateEdit_saisonStart->setDate(QDate(QDate().currentDate().year(),1,1));
+    ui->dateEdit_saisonEnd->setDate(QDate(QDate().currentDate().year(),12,31));
+    ui->toolButton_addSaison->setEnabled(false);
 }
 
 void Dialog_settings::on_comboBox_saisons_currentIndexChanged(const QString &value)
@@ -977,5 +964,13 @@ void Dialog_settings::on_comboBox_saisons_editTextChanged(const QString &value)
 
 void Dialog_settings::on_toolButton_updateSaison_clicked()
 {
-
+    schedule_ptr->update_saison(!ui->toolButton_addSaison->isEnabled(),
+                                ui->comboBox_saisons->currentIndex(),
+                                ui->comboBox_saisons->currentText(),
+                                ui->dateEdit_saisonStart->date(),
+                                ui->dateEdit_saisonEnd->date(),
+                                ui->lineEdit_saisonWeeks->text().toInt()
+                );
+    ui->toolButton_addSaison->setEnabled(true);
+    this->set_saisonInfo(ui->comboBox_saisons->currentText());
 }

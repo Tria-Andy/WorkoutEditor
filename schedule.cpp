@@ -132,6 +132,10 @@ void schedule::save_dayWorkouts()
 void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
 {
     QString contentString;
+    QString currentSaison = this->get_currSaison();
+    QDate startDate = this->get_saisonInfo(currentSaison,"start").toDate();
+    int saisonWeeks = this->get_saisonInfo(currentSaison,"weeks").toInt();
+
     QDomElement root_meta = weekMeta.firstChildElement();
     QDomElement root_content = weekContent.firstChildElement();
     QDomNodeList meta_list,content_list;
@@ -144,16 +148,14 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
     //fill week_meta
     if(meta_list.count() == 0)
     {
-        QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
         QString weekid;
         QString noPhase = settings::get_generalValue("empty");
-        int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
 
         week_meta->setRowCount(saisonWeeks);
         for(int week = 0,id = 1; week < saisonWeeks; ++week,++id)
         {
             weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
-            week_meta->setData(week_meta->index(week,0,QModelIndex()),"NoSaison");
+            week_meta->setData(week_meta->index(week,0,QModelIndex()),currentSaison);
             week_meta->setData(week_meta->index(week,1,QModelIndex()),id);
             week_meta->setData(week_meta->index(week,2,QModelIndex()),weekid);
             week_meta->setData(week_meta->index(week,3,QModelIndex()),noPhase);
@@ -186,11 +188,9 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
     //fill week_content
     if(content_list.count() == 0)
     {
-        QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
         QString weekid;
-        int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
-
         week_content->setRowCount(saisonWeeks);
+
         for(int week = 0,id = 1; week < saisonWeeks; ++week,++id)
         {
             weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
@@ -455,36 +455,6 @@ QString schedule::get_weekPhase(QDate currDate)
     if(metaProxy->rowCount() == 1) return metaProxy->data(metaProxy->index(0,3)).toString();
 
     return 0;
-}
-
-void schedule::changeYear()
-{
-    QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
-    QString weekid;
-    int id = 0;
-    int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
-
-    week_meta->sort(0);
-    week_content->sort(0);
-
-    for(int week = 0; week < saisonWeeks; ++week)
-    {
-        id = week_meta->data(week_meta->index(week,0,QModelIndex())).toInt();
-
-        if(id == week+1)
-        {
-            weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
-            week_meta->setData(week_meta->index(week,1,QModelIndex()),weekid);
-            week_meta->setData(week_meta->index(week,3,QModelIndex()),startDate.addDays(week*7).toString("dd.MM.yyyy"));
-            week_content->setData(week_content->index(week,1,QModelIndex()),weekid);
-        }
-    }
-    if(week_meta->rowCount() > saisonWeeks)
-    {
-        week_meta->removeRow(week_meta->rowCount()-1,QModelIndex());
-        week_content->removeRow(week_content->rowCount()-1,QModelIndex());
-    }
-    this->save_weekPlan();
 }
 
 void schedule::set_workoutData(int mode)
