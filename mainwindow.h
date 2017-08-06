@@ -943,6 +943,7 @@ private:
     void set_buttons(bool);
     void set_calender();
     void set_phaseButtons();
+    void refresh_saisonInfo();
 
     //Editor
     void select_activityFile();

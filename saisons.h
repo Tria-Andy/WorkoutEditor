@@ -12,6 +12,8 @@ class saisons : public xmlHandler
 public:
     saisons();
     QStandardItemModel *saisonsModel,*contestModel;
+    bool newSaison;
+
     void update_saison(bool,int,QString,QDate,QDate,int);
     void remove_saison(int);
     QString get_currSaison() {return currSaison;}

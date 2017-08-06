@@ -955,6 +955,7 @@ void Dialog_settings::on_toolButton_addSaison_clicked()
 void Dialog_settings::on_comboBox_saisons_currentIndexChanged(const QString &value)
 {
     this->set_saisonInfo(value);
+    schedule_ptr->newSaison = true;
 }
 
 void Dialog_settings::on_comboBox_saisons_editTextChanged(const QString &value)
@@ -964,13 +965,30 @@ void Dialog_settings::on_comboBox_saisons_editTextChanged(const QString &value)
 
 void Dialog_settings::on_toolButton_updateSaison_clicked()
 {
-    schedule_ptr->update_saison(!ui->toolButton_addSaison->isEnabled(),
+    schedule_ptr->update_saison(schedule_ptr->newSaison,
                                 ui->comboBox_saisons->currentIndex(),
                                 ui->comboBox_saisons->currentText(),
                                 ui->dateEdit_saisonStart->date(),
                                 ui->dateEdit_saisonEnd->date(),
                                 ui->lineEdit_saisonWeeks->text().toInt()
                 );
+
+    if(schedule_ptr->newSaison)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this,
+                                      tr("New Saison"),
+                                      "Create and Save new Saison?",
+                                      QMessageBox::Yes|QMessageBox::No
+                                      );
+        if (reply == QMessageBox::Yes)
+        {
+            schedule_ptr->add_newSaison(ui->comboBox_saisons->currentText());
+            schedule_ptr->write_saisonInfo();
+            schedule_ptr->save_weekPlan();
+        }
+    }
+
     ui->toolButton_addSaison->setEnabled(true);
     this->set_saisonInfo(ui->comboBox_saisons->currentText());
 }

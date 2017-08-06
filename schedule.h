@@ -44,6 +44,7 @@ public:
     void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
     void updateStress(QString,double,bool);
     bool get_isUpdated() {return isUpdated;}
+    void add_newSaison(QString);
 
 //Workout
     //Setter

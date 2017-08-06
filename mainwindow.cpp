@@ -94,12 +94,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     avgHeader << "Sport" << "Workouts" << "Duration" << "Distance";
 
-    for(int i = 0; i < workSchedule->saisonsModel->rowCount(); ++i)
-    {
-        ui->comboBox_saisonName->addItem(workSchedule->saisonsModel->data(workSchedule->saisonsModel->index(i,0)).toString());
-    }
-    ui->comboBox_saisonName->setEnabled(false);
-    saisonWeeks = workSchedule->get_saisonInfo(ui->comboBox_saisonName->currentText(),"weeks").toInt();
+    this->refresh_saisonInfo();
 
     //Editor Mode
     avgCounter = 0;
@@ -388,51 +383,62 @@ void MainWindow::summery_view()
         avgModel->setHorizontalHeaderLabels(avgHeader);
 
         int metaRowCount = 0;
+        int phaseWeeks = 0;
+
+        metaProxy->setFilterFixedString(selSaison);
+        metaProxy->setFilterKeyColumn(0);
 
         if(phaseFilterID > 1)
         {
-            metaProxy->setFilterFixedString(selSaison);
-            metaProxy->setFilterKeyColumn(0);
+
             metaProxyFilter->setFilterFixedString(phaseFilter);
             metaProxyFilter->setFilterKeyColumn(3);
         }
         metaProxyFilter->sort(1);
         metaRowCount = metaProxyFilter->rowCount();
 
-        for(int row = 0; row < metaRowCount; ++row)
+        if(metaRowCount > 0)
         {
-            weekID = metaProxyFilter->data(metaProxyFilter->index(row,2)).toString();
-            contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
-            contentProxy->setFilterKeyColumn(1);
-
-            for(int col = 0; col < sportUseSum; ++col)
+            phaseWeeks = metaRowCount;
+            for(int row = 0; row < metaRowCount; ++row)
             {
-                sumValues = contentProxy->data(contentProxy->index(0,col+2)).toString().split("-");
-                work = sumValues.at(0);
-                dist = sumValues.at(1);
-                dura = sumValues.at(2);
-                stress = sumValues.at(3);
+                weekID = metaProxyFilter->data(metaProxyFilter->index(row,2)).toString();
+                contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
+                contentProxy->setFilterKeyColumn(1);
 
-                work_sum[col] = work_sum[col] + work.toInt();
-                dur_sum[col] = dur_sum[col] + (this->get_timesec(dura)*60);
-                dist_sum[col] = dist_sum[col] + dist.toDouble();
-                stress_sum[col] = stress_sum[col] + stress.toInt();
+                for(int col = 0; col < sportUseSum; ++col)
+                {
+                    sumValues = contentProxy->data(contentProxy->index(0,col+2)).toString().split("-");
+                    work = sumValues.at(0);
+                    dist = sumValues.at(1);
+                    dura = sumValues.at(2);
+                    stress = sumValues.at(3);
+
+                    work_sum[col] = work_sum[col] + work.toInt();
+                    dur_sum[col] = dur_sum[col] + (this->get_timesec(dura)*60);
+                    dist_sum[col] = dist_sum[col] + dist.toDouble();
+                    stress_sum[col] = stress_sum[col] + stress.toInt();
+                }
+                contentProxy->setFilterRegExp("");
+                sumValues.clear();
             }
-            contentProxy->setFilterRegExp("");
-            sumValues.clear();
+        }
+        else
+        {
+            phaseWeeks = 1;
         }
 
         for(int i = 0; i < sportUse; ++i)
         {
             avgModel->setData(avgModel->index(i,0,QModelIndex()),sportList.at(i));
-            avgModel->setData(avgModel->index(i,1,QModelIndex()),set_doubleValue(work_sum[i]/metaRowCount,false));
-            avgModel->setData(avgModel->index(i,2,QModelIndex()),set_time(dur_sum[i]/60/metaRowCount));
-            avgModel->setData(avgModel->index(i,3,QModelIndex()),set_doubleValue(dist_sum[i]/metaRowCount,false));
+            avgModel->setData(avgModel->index(i,1,QModelIndex()),set_doubleValue(work_sum[i]/phaseWeeks,false));
+            avgModel->setData(avgModel->index(i,2,QModelIndex()),set_time(dur_sum[i]/60/phaseWeeks));
+            avgModel->setData(avgModel->index(i,3,QModelIndex()),set_doubleValue(dist_sum[i]/phaseWeeks,false));
         }
         avgModel->setData(avgModel->index(sportUse,0,QModelIndex()),"Phase");
-        avgModel->setData(avgModel->index(sportUse,1,QModelIndex()),set_doubleValue(work_sum[sportUse]/metaRowCount,false));
-        avgModel->setData(avgModel->index(sportUse,2,QModelIndex()),set_time(dur_sum[sportUse]/60/metaRowCount));
-        avgModel->setData(avgModel->index(sportUse,3,QModelIndex()),set_doubleValue(dist_sum[sportUse]/metaRowCount,false));
+        avgModel->setData(avgModel->index(sportUse,1,QModelIndex()),set_doubleValue(work_sum[sportUse]/phaseWeeks,false));
+        avgModel->setData(avgModel->index(sportUse,2,QModelIndex()),set_time(dur_sum[sportUse]/60/phaseWeeks));
+        avgModel->setData(avgModel->index(sportUse,3,QModelIndex()),set_doubleValue(dist_sum[sportUse]/phaseWeeks,false));
 
         sumValues << this->set_summeryString(0,isWeekMode);
 
@@ -472,7 +478,7 @@ void MainWindow::workout_calendar()
     QStringList sportuseList = settings::get_listValues("Sportuse");
     calendarModel->clear();
     metaProxy->setFilterRegExp("");
-    metaProxyFilter->setFilterFixedString("");
+    metaProxyFilter->setFilterRegExp("");
     scheduleProxy->setFilterFixedString("");
 
     if(isWeekMode)
@@ -552,58 +558,58 @@ void MainWindow::workout_calendar()
         QString empty = "0-0-00:00:00-0";
         int weekoffset;
 
-          if(phaseFilterID == 1)
-          {
+        metaProxy->setFilterFixedString(selSaison);
+        metaProxy->setFilterKeyColumn(0);
+
+        if(phaseFilterID == 1)
+        {
             ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
             weekoffset = settings::get_fontValue("weekOffSet");
-          }
-          else
-          {
+        }
+        else
+        {
             ui->tableView_cal->verticalHeader()->resetDefaultSectionSize();
             ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
             ui->tableView_cal->verticalHeader()->setDefaultSectionSize(ui->tableView_cal->verticalHeader()->defaultSectionSize()*2.5);
-
-            metaProxy->setFilterFixedString(selSaison);
-            metaProxy->setFilterKeyColumn(0);
             metaProxyFilter->setFilterFixedString(phaseFilter);
             metaProxyFilter->setFilterKeyColumn(3);
             weekoffset = metaProxyFilter->rowCount();
-          }
-          metaProxyFilter->sort(1);
+        }
+        metaProxyFilter->sort(1);
 
-          for(int week = weekpos,i=0; week < weekpos+weekoffset;++week,++i)
+        for(int week = weekpos,i=0; week < weekpos+weekoffset;++week,++i)
+        {
+          rowcount = calendarModel->rowCount();
+          calendarModel->insertRow(rowcount,QModelIndex());
+          weekID = metaProxyFilter->data(metaProxyFilter->index(week,2)).toString();
+          contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
+          contentProxy->setFilterKeyColumn(1);
+
+          for(int col = 0; col < sportUse+2;++col)
           {
-              rowcount = calendarModel->rowCount();
-              calendarModel->insertRow(rowcount,QModelIndex());
-              weekID = metaProxyFilter->data(metaProxyFilter->index(week,2)).toString();
-              contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
-              contentProxy->setFilterKeyColumn(1);
-
-              for(int col = 0; col < sportUse+2;++col)
+              cal_index = calendarModel->index(i,col,QModelIndex());
+              if(contentProxy->rowCount() > 0)
               {
-                  cal_index = calendarModel->index(i,col,QModelIndex());
-                  if(contentProxy->rowCount() > 0)
+                  if(col == 0)
                   {
-                      if(col == 0)
-                      {
-                        weekInfo = metaProxyFilter->data(metaProxyFilter->index(week,1)).toString() +"-"+
-                                   metaProxyFilter->data(metaProxyFilter->index(week,2)).toString() +"-"+
-                                   metaProxyFilter->data(metaProxyFilter->index(week,4)).toString() +"-"+
-                                   metaProxyFilter->data(metaProxyFilter->index(week,3)).toString();
-                      }
-                      else
-                      {
-                        weekInfo = contentProxy->data(contentProxy->index(0,col+1)).toString();
-                      }
+                    weekInfo = metaProxyFilter->data(metaProxyFilter->index(week,1)).toString() +"-"+
+                               metaProxyFilter->data(metaProxyFilter->index(week,2)).toString() +"-"+
+                               metaProxyFilter->data(metaProxyFilter->index(week,4)).toString() +"-"+
+                               metaProxyFilter->data(metaProxyFilter->index(week,3)).toString();
                   }
                   else
                   {
-                    weekInfo = empty;
+                    weekInfo = contentProxy->data(contentProxy->index(0,col+1)).toString();
                   }
-                  calendarModel->setData(cal_index,weekInfo);
               }
-              contentProxy->setFilterRegExp("");
+              else
+              {
+                weekInfo = empty;
+              }
+              calendarModel->setData(cal_index,weekInfo);
           }
+          contentProxy->setFilterRegExp("");
+        }
      }
 }
 
@@ -694,6 +700,18 @@ void MainWindow::set_phaseButtons()
         phaseGroup->addButton(pButton,i+1);
     }
     phaseGroup->button(1)->setChecked(true);
+}
+
+void MainWindow::refresh_saisonInfo()
+{
+    ui->comboBox_saisonName->clear();
+
+    for(int i = 0; i < workSchedule->saisonsModel->rowCount(); ++i)
+    {
+        ui->comboBox_saisonName->addItem(workSchedule->saisonsModel->data(workSchedule->saisonsModel->index(i,0)).toString());
+    }
+    ui->comboBox_saisonName->setEnabled(false);
+    saisonWeeks = workSchedule->get_saisonInfo(ui->comboBox_saisonName->currentText(),"weeks").toInt();
 }
 
 //ACTIONS**********************************************************************
@@ -1674,6 +1692,11 @@ void MainWindow::on_actionPreferences_triggered()
         this->summery_view();
         this->workout_calendar();
     }
+
+    if(workSchedule->newSaison)
+    {
+        this->refresh_saisonInfo();
+    }
 }
 
 void MainWindow::on_actionPace_Calculator_triggered()
@@ -1841,5 +1864,14 @@ void MainWindow::on_actionRefresh_Filelist_triggered()
 
 void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value)
 {
-    workSchedule->set_selSaison(value);
+    if(isWeekMode)
+    {
+        workSchedule->set_selSaison(value);
+    }
+    else
+    {
+        workSchedule->set_selSaison(value);
+        this->summery_view();
+        this->workout_calendar();
+    }
 }

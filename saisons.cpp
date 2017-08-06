@@ -38,7 +38,6 @@ void saisons::read_saisonInfo(QDomDocument xmldoc)
 
         childList = xmlElement.childNodes();
         contestCount = childList.count();
-
         contestModel->insertRows(contestModel->rowCount(),contestCount);
 
         for(int contest = 0; contest < contestCount; ++contest,++rowCount)

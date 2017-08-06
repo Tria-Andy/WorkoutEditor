@@ -267,6 +267,41 @@ void schedule::save_weekPlan()
     this->write_XMLFile(schedulePath,&xmlDoc,contentFile);
 }
 
+void schedule::add_newSaison(QString saisonName)
+{
+    int saisonWeeks = this->get_saisonInfo(saisonName,"weeks").toInt();
+    QDate startDay = this->get_saisonInfo(saisonName,"start").toDate();
+    QDate firstDay;
+    QString phase = settings::get_generalValue("empty");
+    QString weekID;
+    QString emptyContent = "0-0-00:00-0";
+    int rowCount;
+
+    for(int i = 0; i < saisonWeeks; ++i)
+    {
+        firstDay = startDay.addDays(i*7);
+        weekID = QString::number(firstDay.weekNumber())+"_"+QString::number(firstDay.year());
+        rowCount = week_meta->rowCount();
+
+        week_meta->insertRow(rowCount,QModelIndex());
+        week_meta->setData(week_meta->index(rowCount,0),saisonName);
+        week_meta->setData(week_meta->index(rowCount,1),i+1);
+        week_meta->setData(week_meta->index(rowCount,2),weekID);
+        week_meta->setData(week_meta->index(rowCount,3),phase);
+        week_meta->setData(week_meta->index(rowCount,4),firstDay.toString("dd.MM.yyyy"));
+
+        week_content->insertRow(rowCount,QModelIndex());
+        week_content->setData(week_content->index(rowCount,0),i+1);
+        week_content->setData(week_content->index(rowCount,1),weekID);
+
+        for(int col = 2; col < contentTags.count(); ++col)
+        {
+            week_content->setData(week_content->index(rowCount,col),emptyContent);
+        }
+    }
+}
+
+
 void schedule::read_ltsFile(QDomDocument stressContent)
 {
     int ltsDays = settings::get_ltsValue("ltsdays");

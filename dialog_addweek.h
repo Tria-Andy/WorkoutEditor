@@ -272,7 +272,7 @@ private:
     schedule *workSched;
     del_addweek week_del;
     QStandardItemModel *weekModel;
-    QSortFilterProxyModel *metaProxy,*contentProxy;
+    QSortFilterProxyModel *metaProxy,*metaProxyFilter,*contentProxy;
     QString openID,selYear,weekID,timeFormat,empty;
     QStringList sportuseList,weekHeader,weekMeta,weekContent;
     bool update;
