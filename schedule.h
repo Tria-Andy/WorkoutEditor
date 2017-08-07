@@ -45,6 +45,7 @@ public:
     void updateStress(QString,double,bool);
     bool get_isUpdated() {return isUpdated;}
     void add_newSaison(QString);
+    QHash<int,QString> get_weekList();
 
 //Workout
     //Setter
@@ -61,6 +62,7 @@ private:
     QString schedulePath,workoutFile,metaFile,contentFile,ltsFile;
     QDate firstdayofweek;
     QMap<QDate,double> stressValues;
+    QHash<int,QString> weekList;
     bool fileCreated,isUpdated;
     void read_dayWorkouts(QDomDocument);
     void read_weekPlan(QDomDocument,QDomDocument);

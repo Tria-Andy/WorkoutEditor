@@ -27,7 +27,7 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
     workSched = p_sched;
     for(int i = 0; i < workSched->week_meta->rowCount(); ++i)
     {
-        weekList << workSched->week_meta->data(workSched->week_meta->index(i,1,QModelIndex())).toString();
+        weekList << workSched->week_meta->data(workSched->week_meta->index(i,2,QModelIndex())).toString();
     }
     fixWeek = hasWeek;
     isSaveWeek = false;
@@ -55,7 +55,7 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
     editMode = 0;
     saveweekFile = "workout_saveweek.xml";
     schedulePath = settings::get_gcInfo("schedule");
-    weekTags << "id" << "weekday" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress";
+    weekTags << "id" << "weekday" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj";
     saveWeekModel = new QStandardItemModel();
     listModel = new QStandardItemModel();
     saveWeekModel->setColumnCount(10);

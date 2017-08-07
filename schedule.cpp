@@ -22,6 +22,7 @@ schedule::schedule()
 {
     workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj";
     metaTags << "saison" << "id" << "week" << "name" << "fdw";
+    //metaTags << "id" << "saison" << "week" << "weekid" << "phase" << "fdw";
     contentTags << "id" << "week";
     for(int i = 0; i < settings::get_listValues("Sportuse").count();++i)
     {
@@ -299,6 +300,15 @@ void schedule::add_newSaison(QString saisonName)
             week_content->setData(week_content->index(rowCount,col),emptyContent);
         }
     }
+}
+
+QHash<int, QString> schedule::get_weekList()
+{
+    QSortFilterProxyModel *metaProxy = new QSortFilterProxyModel;
+    metaProxy->setSourceModel(week_meta);
+    metaProxy->sort(1);
+
+    return weekList;
 }
 
 
