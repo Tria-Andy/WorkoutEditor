@@ -37,11 +37,13 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
 
     ui->comboBox_phase->addItems(settings::get_listValues("Phase"));
     ui->comboBox_cycle->addItems(settings::get_listValues("Cycle"));
-    ui->dateEdit_selectDate->setDate(QDate().currentDate());
+    //ui->dateEdit_selectDate->setDate(QDate().currentDate());
     timeFormat = "hh:mm:ss";
     empty = "0-0-00:00-0";
     weekHeader << "Sport" << "Workouts" << "Duration" << "%" << "Distance" << "Pace" << "Stress";
     sportuseList = settings::get_listValues("Sportuse");
+    weekModel = new QStandardItemModel();
+
     this->setFixedHeight(100+(35*(sportuseList.count()+1)));
     this->setFixedWidth(650);
     this->fill_values(sel_week);
@@ -62,12 +64,15 @@ void Dialog_addweek::on_toolButton_close_clicked()
 
 void Dialog_addweek::fill_values(QString selWeek)
 {
+    ui->dateEdit_selectDate->blockSignals(true);
     QStringList weekInfo = selWeek.split("-");
+    metaProxyFilter->invalidate();
     metaProxyFilter->setFilterRegExp("\\b"+weekInfo.at(1)+"\\b");
     metaProxyFilter->setFilterKeyColumn(2);
     contentProxy->setFilterRegExp("\\b"+weekInfo.at(1)+"\\b");
     contentProxy->setFilterKeyColumn(1);
 
+    ui->label_header->clear();
     ui->label_header->setText(ui->label_header->text()+ " " + metaProxy->data(metaProxy->index(0,0)).toString());
 
     QTime duration;
@@ -76,7 +81,9 @@ void Dialog_addweek::fill_values(QString selWeek)
     QStringList values;
     int listCount = sportuseList.count();
 
-    weekModel = new QStandardItemModel(sportuseList.count()+1,7);
+    weekModel->clear();
+    weekModel->setRowCount(sportuseList.count()+1);
+    weekModel->setColumnCount(weekHeader.count());
     weekModel->setHorizontalHeaderLabels(weekHeader);
     ui->tableView_sportValues->setModel(weekModel);
     ui->tableView_sportValues->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -149,6 +156,7 @@ void Dialog_addweek::fill_values(QString selWeek)
     week_del.calc_percent(&sportuseList,ab_model);
     metaProxyFilter->setFilterRegExp("");
     contentProxy->setFilterRegExp("");
+    ui->dateEdit_selectDate->blockSignals(false);
 }
 
 void Dialog_addweek::store_values()
@@ -197,6 +205,17 @@ QStringList Dialog_addweek::create_values()
 
 void Dialog_addweek::on_dateEdit_selectDate_dateChanged(const QDate &date)
 {
+    QString firstDay = date.toString("dd.MM.yyyy");
+    QString weekString;
+    metaProxyFilter->invalidate();
+    metaProxyFilter->setFilterFixedString(firstDay);
+    metaProxyFilter->setFilterKeyColumn(4);
+
+    weekString = metaProxyFilter->data(metaProxyFilter->index(0,1)).toString() +"-"+
+                metaProxyFilter->data(metaProxyFilter->index(0,2)).toString() +"-"+
+                metaProxyFilter->data(metaProxyFilter->index(0,4)).toString() +"-"+
+                metaProxyFilter->data(metaProxyFilter->index(0,3)).toString();
+    this->fill_values(weekString);
     ui->lineEdit_week->setText(QString::number(date.weekNumber()));
     selYear = QString::number(date.year());
 }
