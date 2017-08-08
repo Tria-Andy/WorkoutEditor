@@ -41,7 +41,7 @@ private:
     static QMap<int,double> weightMap;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,double> thresholdMap,ltsMap,athleteMap;
-    static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
+    static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,altRange,hfRange;
     static QHash<QString,int> fontMap;
     static int swimLaplen;
 

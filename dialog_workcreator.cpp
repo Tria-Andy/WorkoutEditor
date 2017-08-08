@@ -143,9 +143,12 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     double percent;
     double currDist;
     double pValue = 0;
-    bool isBike = false;
     bool isSwim = false;
+    bool isBike = false;
     bool isRun = false;
+    bool isStrength = false;
+    bool isAlt = false;
+
     bool timeBase = ui->checkBox_timebased->isChecked();
     stepProxy->setFilterRegExp("\\b"+workID+"\\b");
     stepProxy->setFilterKeyColumn(0);
@@ -153,6 +156,8 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     if(currentSport == settings::isSwim) isSwim = true;
     if(currentSport == settings::isBike) isBike = true;
     if(currentSport == settings::isRun) isRun = true;
+    if(currentSport == settings::isStrength) isStrength = true;
+    if(currentSport == settings::isAlt) isAlt = true;
 
     for(int i = 0; i < stepProxy->rowCount();++i)
     {
@@ -215,6 +220,19 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                     pValue = 0.0;
                 }
             }
+            else if(isStrength)
+            {
+                pValue = 4.0;
+            }
+            else if(isAlt)
+            {
+                pValue = percent / 10.0;
+            }
+            else
+            {
+
+            }
+
 
             valueList << stepProxy->data(stepProxy->index(i,2)).toString()
                       << stepProxy->data(stepProxy->index(i,3)).toString()
@@ -418,7 +436,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
     int level = 1;
     int tempID = 0;
     double pValue = 0;
-    double defaultDist;
+    double defaultDist = 0.0;
     double percent = this->get_thresPercent(currentSport,levelList.at(level),false);
     QString threshold = this->calc_threshold(currentSport,currThres,percent);
 
@@ -443,7 +461,10 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
     }
     else
     {
-        defaultDist = this->calc_distance(defaultTime,static_cast<double>(this->get_timesec(threstopace(thresPace,percent))));
+        if(currentSport == settings::isRun || currentSport == settings::isBike)
+        {
+            defaultDist = this->calc_distance(defaultTime,static_cast<double>(this->get_timesec(threstopace(thresPace,percent))));
+        }
     }
 
     if(hasValues)
@@ -907,6 +928,12 @@ void Dialog_workCreator::set_editRow(QString sport)
         editRow[4] = 1;
         editRow[7] = 0;
     }
+    else if(sport == settings::isAlt)
+    {
+        editRow[2] = 1;
+        editRow[4] = 1;
+        editRow[7] = 0;
+    }
     else
     {
         editRow[2] = 0;
@@ -917,7 +944,7 @@ void Dialog_workCreator::set_editRow(QString sport)
 
 void Dialog_workCreator::set_sport_threshold(QString sport)
 {
-    if(sport == settings::isAlt || sport == settings::isOther)
+    if(sport == settings::isOther)
     {
         thresPace = 0;
         thresPower = 0.0;
@@ -948,6 +975,13 @@ void Dialog_workCreator::set_sport_threshold(QString sport)
     if(sport == settings::isStrength)
     {
        thresPower = settings::get_thresValue("stgpower");
+       thresPace = 0;
+       ui->label_threshold->setText(QString::number(thresPower) + " Watt");
+       currThres = thresPower;
+    }
+    if(sport == settings::isAlt)
+    {
+       thresPower = settings::get_thresValue("runpower");
        thresPace = 0;
        ui->label_threshold->setText(QString::number(thresPower) + " Watt");
        currThres = thresPower;

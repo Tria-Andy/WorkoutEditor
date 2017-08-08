@@ -224,7 +224,7 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura, do
     }
     if(sport == settings::isAlt)
     {
-        return (weight * grav * mSec * 0.15) * dura / factor;
+        return (weight * grav * mSec * 0.14) * dura / factor;
     }
 
     return 0;
@@ -245,7 +245,7 @@ QString calculation::calc_threshold(QString sport,double threshold,double percen
         {
             thresValue = set_time(static_cast<int>(round(threshold / (percent/100.0))));
         }
-        if(sport == settings::isBike || sport == settings::isStrength)
+        if(sport == settings::isBike || sport == settings::isStrength || sport == settings::isAlt)
         {
             thresValue = QString::number(threshold * (percent/100));
         }
@@ -365,6 +365,10 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
     {
         goal = p_goal.toDouble();
     }
+    if(sport == settings::isAlt)
+    {
+        goal = p_goal.toDouble();
+    }
 
     if(goal > 0)
     {
@@ -388,6 +392,11 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
         if(sport == settings::isStrength)
         {
             thresPower = settings::get_thresValue("stgpower");
+            raw_effort = (duration * goal) * (goal / thresPower);
+        }
+        if(sport == settings::isAlt)
+        {
+            thresPower = settings::get_thresValue("runpower");
             raw_effort = (duration * goal) * (goal / thresPower);
         }
         cv_effort = thresPower * 3600;
@@ -425,5 +434,4 @@ double calculation::get_thresPercent(QString sport, QString level, bool max)
         value = range.split("-").first();
         return value.toDouble();
     }
-
 }

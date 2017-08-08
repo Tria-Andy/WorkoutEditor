@@ -56,6 +56,7 @@ QHash<QString,QString> settings::swimRange;
 QHash<QString,QString> settings::bikeRange;
 QHash<QString,QString> settings::runRange;
 QHash<QString,QString> settings::stgRange;
+QHash<QString,QString> settings::altRange;
 QHash<QString,QString> settings::hfRange;
 QHash<QString,QString> settings::triaMap;
 
@@ -286,6 +287,8 @@ void settings::loadSettings()
             settings::fill_mapRange(&runRange,&settingString);
             settingString = myvalues->value("strength").toString();
             settings::fill_mapRange(&stgRange,&settingString);
+            settingString = myvalues->value("alternative").toString();
+            settings::fill_mapRange(&altRange,&settingString);
             settingString = myvalues->value("hf").toString();
             settings::fill_mapRange(&hfRange,&settingString);
         myvalues->endGroup();
@@ -359,7 +362,7 @@ void settings::loadSettings()
             else if(settingList.at(i) == "Bike") isBike = settingList.at(i);
             else if(settingList.at(i) == "Run") isRun = settingList.at(i);
             else if(settingList.at(i) == "Strength" || settingList.at(i) == "Power") isStrength = settingList.at(i);
-            else if(settingList.at(i) == "Alt" || settingList.at(i) == "Alternativ") isAlt = settingList.at(i);
+            else if(settingList.at(i) == "Alt" || settingList.at(i) == "Alternative") isAlt = settingList.at(i);
             else if(settingList.at(i) == "Tria" || settingList.at(i) == "Triathlon") isTria = settingList.at(i);
             else if(settingList.at(i) == "Other") isOther = settingList.at(i);
         }
@@ -412,6 +415,7 @@ QString settings::get_rangeValue(QString map, QString key)
     if(map == settings::isBike) return bikeRange.value(key);
     if(map == settings::isRun) return runRange.value(key);
     if(map == settings::isStrength) return stgRange.value(key);
+    if(map == settings::isAlt) return altRange.value(key);
     if(map == "HF") return hfRange.value(key);
 
     return 0;
