@@ -90,6 +90,7 @@ private slots:
     void on_comboBox_saisons_currentIndexChanged(const QString &arg1);
     void on_comboBox_saisons_editTextChanged(const QString &arg1);
     void on_toolButton_updateSaison_clicked();
+    void on_toolButton_deleteSaison_clicked();
 
 private:
     Ui::Dialog_settings *ui;

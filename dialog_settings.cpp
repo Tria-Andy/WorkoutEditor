@@ -992,3 +992,23 @@ void Dialog_settings::on_toolButton_updateSaison_clicked()
     ui->toolButton_addSaison->setEnabled(true);
     this->set_saisonInfo(ui->comboBox_saisons->currentText());
 }
+
+void Dialog_settings::on_toolButton_deleteSaison_clicked()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this,
+                                  tr("Delete Saison"),
+                                  "Delete selected Saison? All Saison Information will be removed!",
+                                  QMessageBox::Yes|QMessageBox::No
+                                  );
+    if (reply == QMessageBox::Yes)
+    {
+        schedule_ptr->remove_saison(ui->comboBox_saisons->currentIndex());
+        schedule_ptr->delete_Saison(ui->comboBox_saisons->currentText());
+        schedule_ptr->write_saisonInfo();
+        schedule_ptr->save_weekPlan();
+        ui->comboBox_saisons->setCurrentIndex(0);
+        this->set_saisonInfo(ui->comboBox_saisons->currentText());
+
+    }
+}

@@ -31,6 +31,7 @@ class schedule : public saisons
 public:
     schedule();
     QStandardItemModel *workout_schedule,*week_meta,*week_content;
+    QSortFilterProxyModel *metaProxy,*contentProxy;
     QHash<QModelIndex,QHash<int,QString>> itemList;
     void freeMem();
     void save_dayWorkouts();
@@ -45,6 +46,7 @@ public:
     void updateStress(QString,double,bool);
     bool get_isUpdated() {return isUpdated;}
     void add_newSaison(QString);
+    void delete_Saison(QString);
     QHash<int,QString> get_weekList();
 
 //Workout

@@ -144,7 +144,11 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
     content_list = root_content.elementsByTagName("content");
 
     week_meta = new QStandardItemModel(meta_list.count(),metaTags.count());
+    metaProxy = new QSortFilterProxyModel;
+    metaProxy->setSourceModel(week_meta);
     week_content = new QStandardItemModel(content_list.count(),contentTags.count());
+    contentProxy = new QSortFilterProxyModel;
+    contentProxy->setSourceModel(week_content);
 
     //fill week_meta
     if(meta_list.count() == 0)
@@ -302,10 +306,24 @@ void schedule::add_newSaison(QString saisonName)
     }
 }
 
+void schedule::delete_Saison(QString saisonName)
+{
+   metaProxy->setFilterFixedString(saisonName);
+   metaProxy->setFilterKeyColumn(0);
+   contentProxy->setFilterKeyColumn(1);
+   QString weekID;
+
+   for(int i = 0; i < metaProxy->rowCount(); ++i)
+   {
+       weekID = metaProxy->data(metaProxy->index(i,2)).toString();
+       contentProxy->setFilterFixedString(weekID);
+       metaProxy->removeRow(i);
+       contentProxy->removeRow(0);
+   }
+}
+
 QHash<int, QString> schedule::get_weekList()
 {
-    QSortFilterProxyModel *metaProxy = new QSortFilterProxyModel;
-    metaProxy->setSourceModel(week_meta);
     metaProxy->sort(1);
 
     return weekList;
@@ -533,7 +551,6 @@ void schedule::set_workoutData(int mode)
             for(QHash<int,QString>::const_iterator vStart = it.value().cbegin(), vEnd = it.value().cend(); vStart != vEnd; ++vStart,++col)
             {
                 workout_schedule->setData(workout_schedule->index(rowCount,col,QModelIndex()),it.value().value(col));
-
             }
             workout_date = it.value().value(1);
             workoutStress = it.value().value(8);
