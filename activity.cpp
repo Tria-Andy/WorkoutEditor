@@ -647,6 +647,7 @@ void Activity::recalcIntTree()
         double totalCal = ceil((totalWork*4)/4.184);
         ride_info.insert("Total Cal",QString::number(totalCal));
         overrideData.insert("total_kcalories",QString::number(totalCal));
+        this->hasOverride = true;
     }
     else
     {
@@ -676,13 +677,11 @@ void Activity::recalcIntTree()
            else if(isRun)
            {
                totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,7)).toDouble();
-               overrideData.insert("total_work",QString::number(ceil(totalWork)));
                this->hasOverride = true;
            }
            else if(isTria)
            {
                totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,8)).toDouble();
-               overrideData.insert("total_work",QString::number(ceil(totalWork)));
                this->hasOverride = true;
            }
 
@@ -693,6 +692,7 @@ void Activity::recalcIntTree()
     }
 
     ride_info.insert("Total Work",QString::number(ceil(totalWork)));
+    overrideData.insert("total_work",QString::number(ceil(totalWork)));
     ride_info.insert("Distance",QString::number(workDist/distFactor));
 }
 
