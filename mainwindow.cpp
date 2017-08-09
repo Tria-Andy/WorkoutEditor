@@ -403,7 +403,7 @@ void MainWindow::summery_view()
             for(int row = 0; row < metaRowCount; ++row)
             {
                 weekID = metaProxyFilter->data(metaProxyFilter->index(row,2)).toString();
-                contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
+                contentProxy->setFilterFixedString(weekID);
                 contentProxy->setFilterKeyColumn(1);
 
                 for(int col = 0; col < sportUseSum; ++col)
@@ -419,7 +419,7 @@ void MainWindow::summery_view()
                     dist_sum[col] = dist_sum[col] + dist.toDouble();
                     stress_sum[col] = stress_sum[col] + stress.toInt();
                 }
-                contentProxy->setFilterRegExp("");
+                contentProxy->invalidate();
                 sumValues.clear();
             }
         }
@@ -861,7 +861,6 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
         if(index.column() == 0)
         {
             QString selected_week = calendarModel->data(index,Qt::DisplayRole).toString();
-
             Dialog_addweek new_week(this,selected_week,workSchedule);
             new_week.setModal(true);
             int dialog_code = new_week.exec();
