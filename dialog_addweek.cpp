@@ -66,7 +66,6 @@ void Dialog_addweek::fill_values(QString selWeek)
     ui->dateEdit_selectDate->blockSignals(true);
     QStringList weekInfo = selWeek.split("-");
     QString selWeekID = weekInfo.at(1);
-    qDebug() << selWeekID;
     metaProxyFilter->invalidate();
     metaProxyFilter->setFilterFixedString(selWeekID);
     metaProxyFilter->setFilterKeyColumn(2);
@@ -98,7 +97,6 @@ void Dialog_addweek::fill_values(QString selWeek)
     if(metaProxyFilter->rowCount() > 0)
     {
         editWeekID = selWeekID;
-        qDebug() << editWeekID;
         ui->dateEdit_selectDate->setDate(QDate::fromString(metaProxyFilter->data(metaProxyFilter->index(0,4)).toString(),"dd.MM.yyyy"));
         ui->lineEdit_week->setText(QString::number(ui->dateEdit_selectDate->date().weekNumber()));
         value = weekInfo.at(3);
