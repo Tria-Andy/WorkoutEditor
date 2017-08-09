@@ -471,7 +471,6 @@ void settings::saveSettings()
     mysettings->beginGroup("GoldenCheetah");
         mysettings->setValue("dir",gcInfo.value("dir"));
         mysettings->setValue("athlete",gcInfo.value("athlete"));
-        mysettings->setValue("yob",gcInfo.value("yob"));
         mysettings->setValue("folder",gcInfo.value("folder"));
         mysettings->setValue("gcpath",gcInfo.value("gcpath"));
     mysettings->endGroup();
@@ -479,6 +478,7 @@ void settings::saveSettings()
     mysettings->beginGroup("Filepath");
         mysettings->setValue("schedule",gcInfo.value("schedule"));
         mysettings->setValue("workouts",gcInfo.value("workouts"));
+        mysettings->setValue("saisons",gcInfo.value("saisons"));
     mysettings->endGroup();
 
     QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
