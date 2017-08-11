@@ -73,7 +73,7 @@ void Dialog_addweek::fill_values(QString selWeek)
     contentProxy->setFilterKeyColumn(1);
 
     ui->label_header->clear();
-    ui->label_header->setText(selWeekID+ " " + metaProxy->data(metaProxy->index(0,0)).toString());
+    ui->label_header->setText("Saison: "+metaProxy->data(metaProxy->index(0,0)).toString()+" - Week: "+ weekInfo.at(0)+" ("+selWeekID +") - Phase: "+weekInfo.at(3));
 
     QTime duration;
     QString value,work,dura,dist,stress;
