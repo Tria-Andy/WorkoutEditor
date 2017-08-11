@@ -505,7 +505,6 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
         currType = swimProxy->data(swimProxy->index(0,3)).toInt();
         intItems.at(1)->setData(swimType.at(currType),Qt::EditRole);
         intItems.at(8)->setData(swimProxy->data(swimProxy->index(0,8)).toString(),Qt::EditRole);
-        //intItems.at(9)->setData(this->set_doubleValue(this->get_workValue(intTime,intPace,currType),false),Qt::EditRole);
         intItems.at(9)->setData(this->set_doubleValue(this->calc_totalWork(curr_sport,intPace,intTime,swimTrack,currType),false),Qt::EditRole);
     }
 
@@ -615,6 +614,7 @@ void Activity::recalcIntTree()
     int intTime = 0;
     double workDist = 0;
     double totalWork = 0.0;
+    double totalCal = 0.0;
     int rowCount = intTreeModel->rowCount();
     QString lapName,level;
 
@@ -644,7 +644,7 @@ void Activity::recalcIntTree()
            startTime = startTime+intTime;
         }
 
-        double totalCal = ceil((totalWork*4)/4.184);
+        totalCal = ceil((totalWork*4)/4.184);
         ride_info.insert("Total Cal",QString::number(totalCal));
         overrideData.insert("total_kcalories",QString::number(totalCal));
         this->hasOverride = true;
@@ -677,6 +677,8 @@ void Activity::recalcIntTree()
            else if(isRun)
            {
                totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,7)).toDouble();
+               totalCal = ceil((totalWork*4)/4.184);
+               ride_info.insert("Total Cal",QString::number(totalCal));
                this->hasOverride = true;
            }
            else if(isTria)
@@ -986,7 +988,6 @@ void Activity::updateInterval()
 
         if(isRun)
         {
-            qDebug() << lapSpeed << lapTime;
             intTreeModel->setData(selItem.value(7),this->set_doubleValue(this->calc_totalWork(curr_sport,lapSpeed,lapTime,0.0,0),false));
         }
     }
@@ -1012,7 +1013,6 @@ void Activity::updateSwimLap()
     intTreeModel->setData(selItem.value(6),selItemModel->data(selItemModel->index(4,0)));
     intTreeModel->setData(selItem.value(7),this->set_doubleValue(selItemModel->data(selItemModel->index(5,0)).toDouble(),true));
     intTreeModel->setData(selItem.value(8),selItemModel->data(selItemModel->index(6,0)));
-    //intTreeModel->setData(selItem.value(9),this->set_doubleValue(this->get_workValue(newTime,newPace,newStyle),false));
     intTreeModel->setData(selItem.value(9),this->set_doubleValue(this->calc_totalWork(curr_sport,newPace,newTime,swimTrack,newStyle),false));
 
     if(oldLevel != newLevel)
@@ -1097,7 +1097,6 @@ void Activity::updateSwimBreak(QModelIndex intIndex,QItemSelectionModel *treeSel
 
         intTreeModel->setData(treeSelect->selectedRows(4).at(0),this->set_time(breakDura));
         intTreeModel->setData(treeSelect->selectedRows(5).at(0),this->set_time(breakStart));
-        //intTreeModel->setData(treeSelect->selectedRows(9).at(0),this->set_doubleValue(this->get_workValue(breakDura,0,0),false));
         intTreeModel->setData(treeSelect->selectedRows(9).at(0),this->set_doubleValue(this->calc_totalWork(curr_sport,0.0,breakDura,swimTrack,0),false));
     }
 
