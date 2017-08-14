@@ -2,7 +2,7 @@
 #include "ui_stress_popup.h"
 #include <cmath>
 
-stress_popup::stress_popup(QWidget *parent,schedule *p_sched) :
+stress_popup::stress_popup(QWidget *parent,schedule *p_sched,const QDate startDate) :
     QDialog(parent),
     ui(new Ui::stress_popup)
 {
@@ -14,7 +14,8 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched) :
     stsDays = settings::get_ltsValue("stsdays");
     lastLTS = settings::get_ltsValue("lastlts");
     lastSTS = settings::get_ltsValue("laststs");
-    firstDayofWeek = QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek());
+    //firstDayofWeek = QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek());
+    firstDayofWeek = startDate;
     dateRange = 6;
     showNum = QIcon(":/images/icons/Comment-add.png");
     hideNum = QIcon(":/images/icons/Comment-delete.png");

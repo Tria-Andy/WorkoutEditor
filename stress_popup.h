@@ -15,7 +15,7 @@ class stress_popup : public QDialog
     Q_OBJECT
 
 public:
-    explicit stress_popup(QWidget *parent = 0,schedule *p_sched = 0);
+    explicit stress_popup(QWidget *parent = 0,schedule *p_sched = 0,const QDate startDate = QDate());
     ~stress_popup();
 
 private slots:

@@ -1778,7 +1778,7 @@ void MainWindow::on_toolButton_clearContent_clicked()
 
 void MainWindow::on_actionPMC_triggered()
 {
-    stress_popup stressPop(this,workSchedule);
+    stress_popup stressPop(this,workSchedule,ui->calendarWidget->selectedDate());
     stressPop.setModal(true);
     stressPop.exec();
 }
