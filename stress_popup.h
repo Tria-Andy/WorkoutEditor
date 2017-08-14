@@ -31,12 +31,13 @@ private:
     QDate firstDayofWeek;
     QIcon showNum,hideNum;
     double ltsDays,stsDays,lastLTS,lastSTS,stressMax;
-    QMap<QDate,double> *stressMap;
+    QMap<QDate,QPair<double,double> > *stressMap;
     QVector<double> xDate,yLTS,ySTS,yTSB,yStress,yDura;
     QVector<double> tsbMinMax;
     int dateRange;
     bool isLoad;
     QCPGraph *get_QCPLine(QString,QColor,QVector<double> &ydata,bool);
+    QCPBars *get_QCPBar(QColor,int,bool);
     void set_itemTracer(QString,QCPGraph*,QColor,int);
     void set_itemText(QString,QFont,QVector<double> &ydata,int,bool);
     double calc_stress(double,double,double);

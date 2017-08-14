@@ -113,15 +113,15 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     ySTS.resize(dayCount);
     yTSB.resize(dayCount);
     yStress.resize(dayCount);
-    yDura.reserve(dayCount);
+    yDura.resize(dayCount);
 
     stressMax = 0;
     tsbMinMax.resize(2);
     tsbMinMax.fill(0);
 
-    for(QMap<QDate,double>::const_iterator it = stressMap->cbegin(), end = stressMap->find(rangeStart.addDays(ltsStart)); it != end; ++it)
+    for(QMap<QDate,QPair<double,double>>::const_iterator it = stressMap->cbegin(), end = stressMap->find(rangeStart.addDays(ltsStart)); it != end; ++it)
     {
-        calcStress = calc_stress(pastStress,it.value(),ltsDays);
+        calcStress = calc_stress(pastStress,it.value().first,ltsDays);
         pastStress = calcStress;
     }
     startStress = pastStress;
@@ -140,7 +140,8 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
         pastStress = startStress;
         dateValue = startDate.addDays(i).toTime_t() + 3600;
         xDate[i] = dateValue;
-        yStress[i] = stressMap->value(startDate.date().addDays(i));
+        yStress[i] = stressMap->value(startDate.date().addDays(i)).first;
+        yDura[i] = stressMap->value(startDate.date().addDays(i)).second;
         if(stressMax < yStress[i]) stressMax = yStress[i];
 
         dayDate = startDate.date().addDays(i);
@@ -148,7 +149,7 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
         for(int x = ltsStart; x <= 0; ++x)
         {
             if(i == 0 && x == 0) yTSB[0] = round(pastStress);
-            currStress = stressMap->value(dayDate.addDays(x));
+            currStress = stressMap->value(dayDate.addDays(x)).first;
             calcStress = calc_stress(pastStress,currStress,ltsDays);
             pastStress = calcStress;
             if(x == ltsStart) startStress = calcStress;
@@ -158,9 +159,9 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     }
     pastStress = lastSTS;
 
-    for(QMap<QDate,double>::const_iterator it = stressMap->cbegin(), end = stressMap->find(rangeStart.addDays(stsStart)); it != end; ++it)
+    for(QMap<QDate,QPair<double,double>>::const_iterator it = stressMap->cbegin(), end = stressMap->find(rangeStart.addDays(stsStart)); it != end; ++it)
     {
-        calcStress = calc_stress(pastStress,it.value(),stsDays);
+        calcStress = calc_stress(pastStress,it.value().first,stsDays);
         pastStress = calcStress;
     }
     startStress = pastStress;
@@ -173,7 +174,7 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
         for(int x = ltsStart; x <= 0; ++x)
         {
             if(i == 0 && x == 0) yTSB[0] = round(yTSB[0]-pastStress);
-            currStress = stressMap->value(dayDate.addDays(x));
+            currStress = stressMap->value(dayDate.addDays(x)).first;
             calcStress = calc_stress(pastStress,currStress,stsDays);
             pastStress = calcStress;
             if(x == ltsStart) startStress = calcStress;
@@ -248,7 +249,7 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     QDateTime rStop(rangeEnd);
     rStop.setTime(time);
     rStop.setTimeSpec(Qt::LocalTime);
-
+    QColor duraColor(0,85,255);
     QCPRange xRange(QCPAxisTickerDateTime::dateTimeToKey(rangeStart.addDays(-1)),QCPAxisTickerDateTime::dateTimeToKey(rangeEnd.addDays(1)));
 
     QFont lineFont;
@@ -260,6 +261,15 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     QCPGraph *stressLine = this->get_QCPLine("StressScore",QColor(225,150,0),yStress,false);
     QCPGraph *tsbLine = this->get_QCPLine("TSB",QColor(255,170,0),yTSB,true);
     tsbLine->setBrush(QBrush(QColor(255,170,0,50)));
+    QCPBars *duraBars = new QCPBars(ui->widget_stressPlot->xAxis,ui->widget_stressPlot->yAxis);
+    duraBars->setName("Duration");
+    duraBars->setWidth(250000.0/dayCount);
+    duraBars->setAntialiased(true);
+    duraBars->setPen(QPen(duraColor));
+    duraColor.setAlpha(80);
+    duraBars->setBrush(QBrush(duraColor));
+    duraBars->setLayer("StressScore");
+    duraBars->setData(xDate,yDura);
 
     for(int i = 0; i < xDate.count(); ++i)
     {
@@ -274,6 +284,13 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
             this->set_itemText("STS",lineFont,ySTS,i,false);
             this->set_itemText("StressScore",lineFont,yStress,i,false);
             this->set_itemText("TSB",lineFont,yTSB,i,true);
+
+            QCPItemText *barText = new QCPItemText(ui->widget_stressPlot);
+            barText->position->setType(QCPItemPosition::ptPlotCoords);
+            barText->position->setCoords(xDate[i],20.0);
+            barText->setText(QString::number(yDura[i]));
+            barText->setFont(lineFont);
+            barText->setLayer("StressScore");
         }
 
         if(tsbMinMax[0] > yTSB[i]) tsbMinMax[0] = yTSB[i];

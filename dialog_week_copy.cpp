@@ -169,7 +169,7 @@ void Dialog_week_copy::addWeek()
     workProxy->sort(1);
     int workCount = workProxy->rowCount();
     int schedCount = schedModel->rowCount();
-    double addStress = 0;
+    QPair<double,double> stressMap;
     QString setDate;
     QModelIndex index = workSched->week_meta->findItems(sourceWeek,Qt::MatchExactly,1).at(0)->index();
 
@@ -181,7 +181,8 @@ void Dialog_week_copy::addWeek()
     for(int work = 0; work < workCount; ++work)
     {
         dayofweek = workProxy->data(workProxy->index(work,2)).toInt();
-        addStress = workProxy->data(workProxy->index(work,9)).toDouble();
+        stressMap.first = workProxy->data(workProxy->index(work,9)).toDouble();
+        stressMap.second = get_timesec(workProxy->data(workProxy->index(work,6)).toString())/60.0;
         setDate = sourceFirstDay.addDays(dayofweek-1).toString("dd.MM.yyyy");
 
         schedModel->setData(schedModel->index(schedCount+work,0),sourceWeek);
@@ -191,7 +192,7 @@ void Dialog_week_copy::addWeek()
         {
             schedModel->setData(schedModel->index(schedCount+work,col-1),workProxy->data(workProxy->index(work,col)));
         }
-        workSched->updateStress(setDate,addStress,true);
+        workSched->updateStress(setDate,stressMap,0);
     }
 }
 

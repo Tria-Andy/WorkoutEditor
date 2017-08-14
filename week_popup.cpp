@@ -91,12 +91,12 @@ void week_popup::set_plotValues()
         double lte = (double)exp(-1.0/ltsDays);
         int ltsStart = -ltsDays;
         double ltsStress = 0,currStress = 0,pastStress = 0,startLTS = 0;
-        QMap<QDate,double> *stressMap = workSched->get_StressMap();
+        QMap<QDate,QPair<double,double> > *stressMap = workSched->get_StressMap();
         pastStress = settings::get_ltsValue("lastlts");
 
-        for(QMap<QDate,double>::const_iterator it = stressMap->cbegin(), end = stressMap->find(weekDates.at(0).date().addDays(ltsStart)); it != end; ++it)
+        for(QMap<QDate,QPair<double,double> >::const_iterator it = stressMap->cbegin(), end = stressMap->find(weekDates.at(0).date().addDays(ltsStart)); it != end; ++it)
         {
-            currStress = it.value();
+            currStress = it.value().first;
             ltsStress = (currStress * (1.0 - lte)) + (pastStress * lte);
             pastStress = ltsStress;
         }
@@ -115,7 +115,7 @@ void week_popup::set_plotValues()
             for(int x = ltsStart; x <= 0; ++x)
             {
                 if(i == 0 && x == 0) yLTS[0] = round(pastStress);
-                currStress = stressMap->value(weekDates.at(i).date().addDays(x));
+                currStress = stressMap->value(weekDates.at(i).date().addDays(x)).first;
                 ltsStress = (currStress * (1.0 - lte)) + (pastStress * lte);
                 pastStress = ltsStress;
                 if(x == ltsStart) startLTS = ltsStress;

@@ -394,13 +394,13 @@ void Dialog_settings::set_hfmodel(double hfThres)
 
 void Dialog_settings::set_ltsList()
 {
-    QMap<QDate,double> *map = schedule_ptr->get_StressMap();
+    QMap<QDate,QPair<double,double> > *map = schedule_ptr->get_StressMap();
     QString itemValue;
     ui->listWidget_stressValue->clear();
 
-    for(QMap<QDate,double>::const_iterator it =  map->cbegin(), end = map->cend(); it != end; ++it)
+    for(QMap<QDate,QPair<double,double>>::const_iterator it =  map->cbegin(), end = map->cend(); it != end; ++it)
     {
-        itemValue = it.key().toString("dd.MM.yyyy") +" - "+QString::number(it.value());
+        itemValue = it.key().toString("dd.MM.yyyy") +" - "+QString::number(it.value().first);
         ui->listWidget_stressValue->addItem(itemValue);
     }
 }
@@ -737,12 +737,16 @@ void Dialog_settings::on_spinBox_hfMax_valueChanged(int value)
 
 void Dialog_settings::on_dateEdit_stress_dateChanged(const QDate &date)
 {
-    ui->spinBox_stress->setValue(schedule_ptr->get_StressMap()->value(date));
+    ui->spinBox_stress->setValue(schedule_ptr->get_StressMap()->value(date).first);
 }
 
 void Dialog_settings::on_pushButton_stressEdit_clicked()
 {
-    schedule_ptr->set_stressMap(ui->dateEdit_stress->date(),ui->spinBox_stress->value());
+    QPair<double,double> stressMap;
+    //schedule_ptr->set_stressMap(ui->dateEdit_stress->date(),ui->spinBox_stress->value());
+    stressMap.first = ui->spinBox_stress->value();
+    stressMap.second = 0.0;
+    schedule_ptr->updateStress(ui->dateEdit_stress->date().toString("dd.MM.yyyy"),stressMap,1);
     stressEdit = true;
     this->set_ltsList();
     this->enableSavebutton();

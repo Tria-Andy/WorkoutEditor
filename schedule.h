@@ -24,8 +24,9 @@
 #include <QMessageBox>
 #include "settings.h"
 #include "saisons.h"
+#include "calculation.h"
 
-class schedule : public saisons
+class schedule : public saisons, public calculation
 {
 
 public:
@@ -41,9 +42,9 @@ public:
     QString get_weekPhase(QDate);
     void copyWeek(QString,QString);
     void deleteWeek(QString);
-    QMap<QDate,double> *get_StressMap() {return &stressValues;}
-    void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
-    void updateStress(QString,double,bool);
+    QMap<QDate,QPair<double,double> > *get_StressMap() {return &stressValues;}
+    //void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
+    void updateStress(QString,QPair<double,double>,int);
     bool get_isUpdated() {return isUpdated;}
     void add_newSaison(QString);
     void delete_Saison(QString);
@@ -63,7 +64,7 @@ private:
     QStringList workoutTags,metaTags,contentTags;
     QString schedulePath,workoutFile,metaFile,contentFile,ltsFile;
     QDate firstdayofweek;
-    QMap<QDate,double> stressValues;
+    QMap<QDate,QPair<double,double> > stressValues;
     QHash<int,QString> weekList;
     bool fileCreated,isUpdated;
     void read_dayWorkouts(QDomDocument);

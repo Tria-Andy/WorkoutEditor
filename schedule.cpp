@@ -63,6 +63,7 @@ void schedule::freeMem()
 
 void schedule::read_dayWorkouts(QDomDocument workouts)
 {
+    QPair<double,double> tempValues;
 
     QDomElement root_workouts = workouts.firstChildElement();
     QDomNodeList workout_list;
@@ -73,7 +74,7 @@ void schedule::read_dayWorkouts(QDomDocument workouts)
 
     workout_schedule = new QStandardItemModel(workout_list.count(),workoutTags.count());
     QDate workDate;
-    int stress = 0;
+
     if(!workout_list.isEmpty())
     {
         for(int i = 0; i < workout_list.count(); ++i)
@@ -87,16 +88,18 @@ void schedule::read_dayWorkouts(QDomDocument workouts)
                 workout_schedule->setData(workout_schedule->index(i,col,QModelIndex()),workout_element.attribute(workoutTags.at(col)));
             }
             workDate = QDate::fromString(workout_element.attribute("date"),"dd.MM.yyyy");
-            stress = workout_element.attribute("stress").toInt();
+            tempValues.first = workout_element.attribute("stress").toInt();
+            tempValues.second = this->get_timesec(workout_element.attribute("duration"))/60.0;
 
             if(stressValues.contains(workDate))
             {
-                stress = stress + stressValues.value(workDate);
-                stressValues.insert(workDate,stress);
+                tempValues.first = tempValues.first + stressValues.value(workDate).first;
+                tempValues.second = tempValues.second + stressValues.value(workDate).second;
+                stressValues.insert(workDate,tempValues);
             }
             else
             {
-                stressValues.insert(workDate,stress);
+                stressValues.insert(workDate,tempValues);
             }
         }
         workout_schedule->sort(2);
@@ -336,6 +339,7 @@ void schedule::read_ltsFile(QDomDocument stressContent)
     QDomElement root_lts = stressContent.firstChildElement();
     QDomNodeList lts_list;
     QDate wDate;
+
     if(stressContent.hasChildNodes())
     {
         lts_list = root_lts.elementsByTagName("StressLTS");
@@ -353,7 +357,7 @@ void schedule::read_ltsFile(QDomDocument stressContent)
 
             if(!stressValues.contains(wDate))
             {
-                stressValues.insert(wDate,stress_element.attribute("stress").toDouble());
+                stressValues.insert(wDate,qMakePair(stress_element.attribute("stress").toDouble(),0.0));
             }
         }
 
@@ -365,14 +369,14 @@ void schedule::read_ltsFile(QDomDocument stressContent)
         {
             if(!stressValues.contains(firstWork.addDays(row)))
             {
-                stressValues.insert(firstWork.addDays(row),0);
+                stressValues.insert(firstWork.addDays(row),qMakePair(0,0));
             }
         }
         if(QDate::currentDate() == firstdayofweek && stressValues.firstKey() < firstdayofweek.addDays(-ltsDays)) this->save_ltsValues();
     }
     else
     {
-        stressValues.insert(firstdayofweek,0);
+        stressValues.insert(firstdayofweek,qMakePair(0,0));
     }
 }
 
@@ -383,11 +387,11 @@ void schedule::save_ltsFile(double ltsDays)
     xmlRoot = xmlDoc.createElement("Stress");
     xmlDoc.appendChild(xmlRoot);
 
-    for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays(-ltsDays)), end = stressValues.find(firstdayofweek); it != end; ++it)
+    for(QMap<QDate,QPair<double,double>>::const_iterator it = stressValues.find(firstdayofweek.addDays(-ltsDays)), end = stressValues.find(firstdayofweek); it != end; ++it)
     {
         xmlElement = xmlDoc.createElement("StressLTS");
         xmlElement.setAttribute("day",it.key().toString("dd.MM.yyyy"));
-        xmlElement.setAttribute("stress",QString::number(it.value()));
+        xmlElement.setAttribute("stress",QString::number(it.value().first));
         xmlRoot.appendChild(xmlElement);
     }
     this->write_XMLFile(schedulePath,&xmlDoc,ltsFile);
@@ -413,9 +417,9 @@ void schedule::save_ltsValues()
     double factor = (double)exp(-1.0/ltsDays);
     pastStress = startLTS;
 
-    for(QMap<QDate,double>::const_iterator it = stressValues.cbegin(), end = stressValues.find(firstdayofweek.addDays(-ltsDays)); it != end; ++it)
+    for(QMap<QDate,QPair<double,double>>::const_iterator it = stressValues.cbegin(), end = stressValues.find(firstdayofweek.addDays(-ltsDays)); it != end; ++it)
     {
-        currStress = it.value();
+        currStress = it.value().first;
         stress = (currStress * (1.0 - factor)) + (pastStress * factor);
         pastStress = stress;
     }
@@ -426,9 +430,9 @@ void schedule::save_ltsValues()
     factor = (double)exp(-1.0/stsDays);
     pastStress = startLTS;
 
-    for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays((-stsDays)-7)), end = stressValues.find(firstdayofweek.addDays((-stsDays))); it != end; ++it)
+    for(QMap<QDate,QPair<double,double>>::const_iterator it = stressValues.find(firstdayofweek.addDays((-stsDays)-7)), end = stressValues.find(firstdayofweek.addDays((-stsDays))); it != end; ++it)
     {
-        currStress = it.value();
+        currStress = it.value().first;
         stress = (currStress * (1.0 - factor)) + (pastStress * factor);
         pastStress = stress;
     }
@@ -492,10 +496,12 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
 
 void schedule::delete_workout(QModelIndex index)
 {
+    QPair<double,double> stressMap;
     QString wDate = workout_schedule->data(workout_schedule->index(index.row(),1)).toString();
-    double stress = workout_schedule->data(workout_schedule->index(index.row(),8)).toDouble();
+    stressMap.first = workout_schedule->data(workout_schedule->index(index.row(),8)).toDouble();
+    stressMap.second = get_timesec(workout_schedule->data(workout_schedule->index(index.row(),8)).toString())/60.0;
     workout_schedule->removeRow(index.row(),QModelIndex());
-    this->updateStress(wDate,stress,false);
+    this->updateStress(wDate,stressMap,3);
 }
 
 void schedule::deleteWeek(QString deleteWeek)
@@ -523,7 +529,9 @@ QString schedule::get_weekPhase(QDate currDate)
 void schedule::set_workoutData(int mode)
 {
     QString workoutStress;
+    QPair<double,double> stressMap;
     double currStress = 0;
+    double currDura = 0;
     int row = 0;
     int col = 0;
     if(mode == EDIT) //EDIT
@@ -532,13 +540,18 @@ void schedule::set_workoutData(int mode)
         {
             row = it.key().row();
             currStress = workout_schedule->data(workout_schedule->index(row,8)).toDouble();
+            currDura = get_timesec(workout_schedule->data(workout_schedule->index(row,6)).toString())/60.0;
+
             for(QHash<int,QString>::const_iterator vStart = it.value().cbegin(), vEnd = it.value().cend(); vStart != vEnd; ++vStart,++col)
             {
                 workout_schedule->setData(workout_schedule->index(row,col,QModelIndex()),it.value().value(col));
             }
+
             workout_date = it.value().value(1);
             workoutStress = it.value().value(8);
-            this->updateStress(workout_date,workoutStress.toDouble()-currStress,true);
+            stressMap.first = workoutStress.toDouble()-currStress;
+            stressMap.second = (get_timesec(it.value().value(6))/60.0)-currDura;
+            this->updateStress(workout_date,stressMap,0);
         }
     }
     else if(mode == ADD || mode == COPY) //ADD and COPY
@@ -554,41 +567,53 @@ void schedule::set_workoutData(int mode)
             }
             workout_date = it.value().value(1);
             workoutStress = it.value().value(8);
-            this->updateStress(workout_date,workoutStress.toDouble(),true);
+            stressMap.first = workoutStress.toDouble();
+            stressMap.second = get_timesec(it.value().value(6))/60.0;
+            this->updateStress(workout_date,stressMap,0);
             col = 0;
         }
     }
     itemList.clear();
 }
 
-void schedule::updateStress(QString date,double addStress,bool add)
+void schedule::updateStress(QString date,QPair<double,double> stressMap,int mode)
 {
     double stressValue = 0;
+    double duraValue = 0;
     QDate wDate = QDate::fromString(date,"dd.MM.yyyy");
 
-    if(add)
+    if(mode == ADD)
     {
         if(stressValues.contains(wDate))
         {
-            stressValue = stressValues.value(wDate);
-            stressValues.insert(wDate,stressValue+addStress);
+            stressValue = stressValues.value(wDate).first;
+            duraValue = stressValues.value(wDate).second;
+            stressValues.insert(wDate,qMakePair(stressValue+stressMap.first,duraValue+stressMap.second));
         }
         else
         {
-            stressValues.insert(wDate,addStress);
+            stressValues.insert(wDate,qMakePair(stressMap.first,stressMap.second));
         }
     }
-    else
+    else if(mode == EDIT)
     {
-        stressValue = stressValues.value(wDate);
-        if(stressValue - addStress == 0)
+        stressValues.insert(wDate,qMakePair(stressMap.first,stressMap.second));
+    }
+    else if(mode == DEL)
+    {
+        stressValue = stressValues.value(wDate).first;
+        duraValue = stressValues.value(wDate).second;
+        if(stressValue - stressMap.first == 0)
         {
-            stressValues.insert(wDate,0);
+            stressValues.insert(wDate,qMakePair(0,0));
         }
         else
         {
-            stressValues.insert(wDate,stressValue -addStress);
+            stressValues.insert(wDate,qMakePair(stressValue -stressMap.first,duraValue - stressMap.second));
         }
     }
+
+
+
     isUpdated = true;
 }
