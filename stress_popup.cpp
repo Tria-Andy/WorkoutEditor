@@ -113,6 +113,7 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     ySTS.resize(dayCount);
     yTSB.resize(dayCount);
     yStress.resize(dayCount);
+    yDura.reserve(dayCount);
 
     stressMax = 0;
     tsbMinMax.resize(2);
