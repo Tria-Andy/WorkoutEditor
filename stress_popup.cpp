@@ -14,8 +14,7 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched,const QDate startDa
     stsDays = settings::get_ltsValue("stsdays");
     lastLTS = settings::get_ltsValue("lastlts");
     lastSTS = settings::get_ltsValue("laststs");
-    //firstDayofWeek = QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek());
-    firstDayofWeek = startDate;
+    firstDayofWeek = startDate.addDays(1-QDate::currentDate().dayOfWeek());
     dateRange = 6;
     showNum = QIcon(":/images/icons/Comment-add.png");
     hideNum = QIcon(":/images/icons/Comment-delete.png");
