@@ -32,7 +32,7 @@ protected:
     static double calc_distance(QString, double);
     static double estimate_stress(QString,QString,int);
     static double calc_swim_xpower(double,double,double,double);
-    static double get_swim_speedFactor(double,double);
+    static double get_swim_speedFactor(double,int);
     static double calc_lnp(double,double,double);
 };
 

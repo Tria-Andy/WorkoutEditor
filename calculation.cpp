@@ -195,20 +195,32 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura, do
     double factor = 1000.0;
     double grav = 9.81;
     double weight = settings::get_weightforDate(QDateTime::currentDateTime());
+    double height = settings::get_athleteValue("height");
     double mSec = pValue*1000/3600.0;
 
     if(sport == settings::isSwim)
     {
-        double speedFactor = 1;
-        double swimPace = settings::get_thresValue("swimpace");
-        QString workFactor = settings::get_listValues("StyleFactor").at(tempID);
+        double styleFactor = 1;
+        double speedFactor = 0;
+        double distFactor = 0;
 
-        if(tempID != 0)
+        if(trackLen == 25.0)
         {
-            speedFactor = get_swim_speedFactor(sqrt((pow(swimPace/pValue,3.0))),trackLen);
+            distFactor = 27.3403325;
+        }
+        else if(trackLen == 50.0)
+        {
+            distFactor = 54.6806649;
+        }
+        else
+        {
+            distFactor = 25.0;
         }
 
-        return (workFactor.toDouble()*speedFactor) * 3.5 * weight / 200 * (dura/60.0);
+        speedFactor = (trackLen * distFactor) / 25.0 / dura;
+
+        styleFactor = get_swim_speedFactor(speedFactor,tempID);
+        return (styleFactor * 3.5 * weight / 200) * (dura/60.0);
     }
     if(sport == settings::isBike)
     {
@@ -216,7 +228,8 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura, do
     }
     if(sport == settings::isRun)
     {
-        return (weight * grav * mSec * 0.1) * dura / factor;
+        double bodyHub = (height * 0.0515) + (((3600/settings::get_thresValue("runpace")) / pValue) / 100.0);
+        return (weight * grav * mSec * bodyHub) * dura / factor;
     }
     if(sport == settings::isStrength)
     {
@@ -309,33 +322,32 @@ double calculation::calc_swim_xpower(double distance,double pace,double time,dou
     return pow(xPowerSum / time,0.33);
 }
 
-double calculation::get_swim_speedFactor(double sri, double trackLen)
+double calculation::get_swim_speedFactor(double distFactor, int style)
 {
-    double speedFactor = 0.0;
+    QString factor = settings::get_listValues("StyleFactor").at(style);
+    double speedFactor = factor.toDouble();
 
-    if(trackLen == 25.0)
+    if(style == 0)
     {
-        speedFactor = 1.05;
-    }
-    else if(trackLen == 50.0)
-    {
-        speedFactor = 1.1;
+        return speedFactor;
     }
     else
     {
-        speedFactor = 1.0;
+        if(distFactor > 2.5)
+        {
+            return speedFactor;
+        }
+        else if(distFactor < 2.5 && distFactor> 1.5)
+        {
+            return speedFactor - 2.0;
+        }
+        else
+        {
+            return speedFactor - 4.0;
+        }
     }
 
-    if(sri > 0.0)
-    {
-        return speedFactor * sri;
-    }
-    else
-    {
-        return 1;
-    }
-
-    return 0;
+    return 10;
 }
 
 double calculation::estimate_stress(QString sport, QString p_goal, int duration)
