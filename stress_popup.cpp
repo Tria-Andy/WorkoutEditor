@@ -14,14 +14,15 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched,const QDate startDa
     stsDays = settings::get_ltsValue("stsdays");
     lastLTS = settings::get_ltsValue("lastlts");
     lastSTS = settings::get_ltsValue("laststs");
-    firstDayofWeek = startDate.addDays(1-QDate::currentDate().dayOfWeek());
+    startDay = startDate.addDays(1-startDate.dayOfWeek());
+    firstDay = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
     dateRange = 6;
     showNum = QIcon(":/images/icons/Comment-add.png");
     hideNum = QIcon(":/images/icons/Comment-delete.png");
-    ui->dateEdit_start->setDateRange(firstDayofWeek,stressMap->lastKey().addDays(-dateRange));
-    ui->dateEdit_start->setDate(firstDayofWeek);
-    ui->dateEdit_end->setDateRange(firstDayofWeek.addDays(dateRange),stressMap->lastKey());
-    ui->dateEdit_end->setDate(firstDayofWeek.addDays(dateRange));
+    ui->dateEdit_start->setDateRange(firstDay,stressMap->lastKey().addDays(-dateRange));
+    ui->dateEdit_start->setDate(startDay);
+    ui->dateEdit_end->setDateRange(startDay.addDays(dateRange),stressMap->lastKey());
+    ui->dateEdit_end->setDate(startDay.addDays(dateRange));
     ui->pushButton_values->setIcon(hideNum);
 
     connect(ui->widget_stressPlot,SIGNAL(selectionChangedByUser()),this,SLOT(selectionChanged()));
