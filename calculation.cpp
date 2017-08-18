@@ -190,7 +190,7 @@ double calculation::calc_totalCal(double weight,double avgHF, double moveTime)
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
 }
 
-double calculation::calc_totalWork(QString sport, double pValue, double dura, double trackLen,int tempID)
+double calculation::calc_totalWork(QString sport, double pValue, double dura, double dist,int tempID)
 {
     double factor = 1000.0;
     double grav = 9.81;
@@ -204,11 +204,11 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura, do
         double speedFactor = 0;
         double distFactor = 0;
 
-        if(trackLen == 25.0)
+        if(pValue == 25.0)
         {
             distFactor = 27.3403325;
         }
-        else if(trackLen == 50.0)
+        else if(pValue == 50.0)
         {
             distFactor = 54.6806649;
         }
@@ -217,8 +217,7 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura, do
             distFactor = 25.0;
         }
 
-        speedFactor = (trackLen * distFactor) / 25.0 / dura;
-
+        speedFactor = (dist * distFactor) / 25.0 / dura;
         styleFactor = get_swim_speedFactor(speedFactor,tempID);
         return (styleFactor * 3.5 * weight / 200) * (dura/60.0);
     }

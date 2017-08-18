@@ -142,6 +142,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     int tempID = 0;
     double percent;
     double currDist;
+    double lapLen = 0;
     double pValue = 0;
     bool isSwim = false;
     bool isBike = false;
@@ -208,11 +209,12 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             else if(isSwim)
             {
                 currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
+                lapLen = currDist * 1000;
                 if(!partName.contains(isBreak))
                 {
                     tempID = 6;
                     stepTime = this->calc_duration(currentSport,currDist,thresValue);
-                    pValue = this->get_timesec(thresValue);
+                    pValue = 50.0;
                 }
                 else
                 {
@@ -240,7 +242,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                       << thresValue
                       << stepTime
                       << QString::number(this->estimate_stress(ui->comboBox_sport->currentText(),thresValue,this->get_timesec(stepTime)))
-                      << QString::number(this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(stepTime),0.0,tempID),false))
+                      << QString::number(this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(stepTime),lapLen,tempID),false))
                       << QString::number(this->set_doubleValue(currDist,true))
                       << stepProxy->data(stepProxy->index(i,7)).toString();
         }

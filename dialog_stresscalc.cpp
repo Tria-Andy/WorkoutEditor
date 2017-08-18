@@ -49,7 +49,7 @@ void Dialog_stresscalc::estimateStress()
     if(sport == settings::isSwim)
     {
         current = this->get_timesec(ui->lineEdit_goal_power->text());
-        pValue = current;
+        pValue = 50.0;
         current = thresPace / current;
         current = pow(current,3.0);
         ui->lineEdit_intensity->setText(QString::number(current));

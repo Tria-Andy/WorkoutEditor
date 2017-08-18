@@ -474,7 +474,7 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
             currType = swimProxy->data(swimProxy->index(i,3)).toInt();
             lapType = currType == lastType ? currType : 6;
             strokeCount = strokeCount+swimProxy->data(swimProxy->index(i,8)).toInt();
-            lapWork = this->calc_totalWork(curr_sport,lapPace,lapTime,swimTrack,currType);
+            lapWork = this->calc_totalWork(curr_sport,swimTrack,lapTime,swimTrack,currType);
             moveTime = moveTime + lapTime;
 
             subItems << new QStandardItem(swimProxy->data(swimProxy->index(i,0)).toString());
@@ -505,7 +505,7 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
         currType = swimProxy->data(swimProxy->index(0,3)).toInt();
         intItems.at(1)->setData(swimType.at(currType),Qt::EditRole);
         intItems.at(8)->setData(swimProxy->data(swimProxy->index(0,8)).toString(),Qt::EditRole);
-        intItems.at(9)->setData(this->set_doubleValue(this->calc_totalWork(curr_sport,intPace,intTime,swimTrack,currType),false),Qt::EditRole);
+        intItems.at(9)->setData(this->set_doubleValue(this->calc_totalWork(curr_sport,swimTrack,intTime,swimTrack,currType),false),Qt::EditRole);
     }
 
     return intItems;
@@ -1013,7 +1013,7 @@ void Activity::updateSwimLap()
     intTreeModel->setData(selItem.value(6),selItemModel->data(selItemModel->index(4,0)));
     intTreeModel->setData(selItem.value(7),this->set_doubleValue(selItemModel->data(selItemModel->index(5,0)).toDouble(),true));
     intTreeModel->setData(selItem.value(8),selItemModel->data(selItemModel->index(6,0)));
-    intTreeModel->setData(selItem.value(9),this->set_doubleValue(this->calc_totalWork(curr_sport,newPace,newTime,swimTrack,newStyle),false));
+    intTreeModel->setData(selItem.value(9),this->set_doubleValue(this->calc_totalWork(curr_sport,swimTrack,newTime,swimTrack,newStyle),false));
 
     if(oldLevel != newLevel)
     {
@@ -1097,7 +1097,7 @@ void Activity::updateSwimBreak(QModelIndex intIndex,QItemSelectionModel *treeSel
 
         intTreeModel->setData(treeSelect->selectedRows(4).at(0),this->set_time(breakDura));
         intTreeModel->setData(treeSelect->selectedRows(5).at(0),this->set_time(breakStart));
-        intTreeModel->setData(treeSelect->selectedRows(9).at(0),this->set_doubleValue(this->calc_totalWork(curr_sport,0.0,breakDura,swimTrack,0),false));
+        intTreeModel->setData(treeSelect->selectedRows(9).at(0),this->set_doubleValue(this->calc_totalWork(curr_sport,swimTrack,breakDura,0,0),false));
     }
 
     treeSelect->clearSelection();
