@@ -396,7 +396,7 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
         {
             lapName = settings::isSwim;
             intItems << new QStandardItem("-");
-            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,lapPace/10.0,lapTime,0.0,8),false)));
+            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,lapDist*1000,lapTime,lapDist*1000,8),false)));
         }
         else if(pInt == 1)
         {

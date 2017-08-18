@@ -212,11 +212,15 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura, do
         {
             distFactor = 54.6806649;
         }
+        else if(pValue > 100.0)
+        {
+            distFactor = 109.373298 * (dist/10);
+        }
         else
         {
             distFactor = 25.0;
         }
-
+        qDebug() << pValue << distFactor << dist << dura;
         speedFactor = (dist * distFactor) / 25.0 / dura;
         styleFactor = get_swim_speedFactor(speedFactor,tempID);
         return (styleFactor * 3.5 * weight / 200) * (dura/60.0);
@@ -236,7 +240,7 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura, do
     }
     if(sport == settings::isAlt)
     {
-        return (weight * grav * mSec * 0.14) * dura / factor;
+        return (weight * grav * mSec * 0.148) * dura / factor;
     }
 
     return 0;
