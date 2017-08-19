@@ -142,7 +142,6 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     int tempID = 0;
     double percent;
     double currDist;
-    double lapLen = 0;
     double pValue = 0;
     bool isSwim = false;
     bool isBike = false;
@@ -209,7 +208,6 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             else if(isSwim)
             {
                 currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
-                lapLen = currDist * 1000;
                 if(!partName.contains(isBreak))
                 {
                     tempID = 6;
@@ -242,7 +240,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                       << thresValue
                       << stepTime
                       << QString::number(this->estimate_stress(ui->comboBox_sport->currentText(),thresValue,this->get_timesec(stepTime)))
-                      << QString::number(this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(stepTime),lapLen,tempID),false))
+                      << QString::number(this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(stepTime),currDist,tempID),false))
                       << QString::number(this->set_doubleValue(currDist,true))
                       << stepProxy->data(stepProxy->index(i,7)).toString();
         }
@@ -476,7 +474,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
         item->setData(3,Qt::EditRole,threshold);
         item->setData(4,Qt::EditRole,defaultTime);
         item->setData(5,Qt::EditRole,this->estimate_stress(currentSport,threshold,this->get_timesec(defaultTime)));
-        item->setData(6,Qt::EditRole,this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(defaultTime),0.0,tempID),false));
+        item->setData(6,Qt::EditRole,this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(defaultTime),defaultDist,tempID),false));
         item->setData(7,Qt::EditRole,defaultDist);
         item->setData(8,Qt::EditRole,"");
     }

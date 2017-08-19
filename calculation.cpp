@@ -190,13 +190,13 @@ double calculation::calc_totalCal(double weight,double avgHF, double moveTime)
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
 }
 
-double calculation::calc_totalWork(QString sport, double pValue, double dura, double dist,int tempID)
+double calculation::calc_totalWork(QString sport, double pValue, double dura,double dist,int tempID)
 {
     double factor = 1000.0;
     double grav = 9.81;
     double weight = settings::get_weightforDate(QDateTime::currentDateTime());
     double height = settings::get_athleteValue("height");
-    double mSec = pValue*1000/3600.0;
+    double mSec = pValue*factor/3600.0;
 
     if(sport == settings::isSwim)
     {
@@ -212,16 +212,15 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura, do
         {
             distFactor = 54.6806649;
         }
-        else if(pValue > 100.0)
+        else if(pValue < 25.0 && tempID == 8)
         {
-            distFactor = 109.373298 * (dist/10);
+            distFactor = 109.373298 * (dist*10);
         }
         else
         {
             distFactor = 25.0;
         }
-        qDebug() << pValue << distFactor << dist << dura;
-        speedFactor = (dist * distFactor) / 25.0 / dura;
+        speedFactor = ((dist*factor) * distFactor) / 25.0 / dura;
         styleFactor = get_swim_speedFactor(speedFactor,tempID);
         return (styleFactor * 3.5 * weight / 200) * (dura/60.0);
     }

@@ -70,7 +70,7 @@ void Dialog_stresscalc::estimateStress()
     }
     timeSec = this->get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss"));
     stressScore = this->estimate_stress(sport,ui->lineEdit_goal_power->text(),timeSec);
-    totalWork = round(this->calc_totalWork(sport,pValue,timeSec,0.0,6));
+    totalWork = round(this->calc_totalWork(sport,pValue,timeSec,0,6));
     ui->lineEdit_stressScore->setText(QString::number(stressScore));
     ui->lineEdit_work->setText(QString::number(totalWork));
 }

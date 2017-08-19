@@ -396,7 +396,7 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
         {
             lapName = settings::isSwim;
             intItems << new QStandardItem("-");
-            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,lapDist*1000,lapTime,lapDist*1000,8),false)));
+            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,lapDist,lapTime,lapDist,8),false)));
         }
         else if(pInt == 1)
         {
@@ -474,7 +474,7 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
             currType = swimProxy->data(swimProxy->index(i,3)).toInt();
             lapType = currType == lastType ? currType : 6;
             strokeCount = strokeCount+swimProxy->data(swimProxy->index(i,8)).toInt();
-            lapWork = this->calc_totalWork(curr_sport,swimTrack,lapTime,swimTrack,currType);
+            lapWork = this->calc_totalWork(curr_sport,swimTrack,lapTime,swimTrack/1000.0,currType);
             moveTime = moveTime + lapTime;
 
             subItems << new QStandardItem(swimProxy->data(swimProxy->index(i,0)).toString());
@@ -505,7 +505,7 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
         currType = swimProxy->data(swimProxy->index(0,3)).toInt();
         intItems.at(1)->setData(swimType.at(currType),Qt::EditRole);
         intItems.at(8)->setData(swimProxy->data(swimProxy->index(0,8)).toString(),Qt::EditRole);
-        intItems.at(9)->setData(this->set_doubleValue(this->calc_totalWork(curr_sport,swimTrack,intTime,swimTrack,currType),false),Qt::EditRole);
+        intItems.at(9)->setData(this->set_doubleValue(this->calc_totalWork(curr_sport,swimTrack,intTime,0,currType),false),Qt::EditRole);
     }
 
     return intItems;
@@ -988,7 +988,7 @@ void Activity::updateInterval()
 
         if(isRun)
         {
-            intTreeModel->setData(selItem.value(7),this->set_doubleValue(this->calc_totalWork(curr_sport,lapSpeed,lapTime,0.0,0),false));
+            intTreeModel->setData(selItem.value(7),this->set_doubleValue(this->calc_totalWork(curr_sport,lapSpeed,lapTime,0,0),false));
         }
     }
     this->recalcIntTree();
@@ -1013,7 +1013,7 @@ void Activity::updateSwimLap()
     intTreeModel->setData(selItem.value(6),selItemModel->data(selItemModel->index(4,0)));
     intTreeModel->setData(selItem.value(7),this->set_doubleValue(selItemModel->data(selItemModel->index(5,0)).toDouble(),true));
     intTreeModel->setData(selItem.value(8),selItemModel->data(selItemModel->index(6,0)));
-    intTreeModel->setData(selItem.value(9),this->set_doubleValue(this->calc_totalWork(curr_sport,swimTrack,newTime,swimTrack,newStyle),false));
+    intTreeModel->setData(selItem.value(9),this->set_doubleValue(this->calc_totalWork(curr_sport,swimTrack,newTime,swimTrack/1000.0,newStyle),false));
 
     if(oldLevel != newLevel)
     {
