@@ -28,16 +28,21 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
     workSched = p_sched;
     metaProxy = new QSortFilterProxyModel();
     metaProxy->setSourceModel(p_sched->week_meta);
+    metaProxy->setFilterFixedString(workSched->get_selSaison());
+    metaProxy->setFilterKeyColumn(0);
+    metaProxyFilter = new QSortFilterProxyModel();
+    metaProxyFilter->setSourceModel(metaProxy);
     contentProxy = new QSortFilterProxyModel();
     contentProxy->setSourceModel(p_sched->week_content);
 
     ui->comboBox_phase->addItems(settings::get_listValues("Phase"));
     ui->comboBox_cycle->addItems(settings::get_listValues("Cycle"));
-    ui->dateEdit_selectDate->setDate(QDate().currentDate());
     timeFormat = "hh:mm:ss";
     empty = "0-0-00:00-0";
     weekHeader << "Sport" << "Workouts" << "Duration" << "%" << "Distance" << "Pace" << "Stress";
     sportuseList = settings::get_listValues("Sportuse");
+    weekModel = new QStandardItemModel();
+
     this->setFixedHeight(100+(35*(sportuseList.count()+1)));
     this->setFixedWidth(650);
     this->fill_values(sel_week);
@@ -47,6 +52,9 @@ Dialog_addweek::~Dialog_addweek()
 {
     delete ui;
     delete weekModel;
+    delete metaProxy;
+    delete metaProxyFilter;
+    delete contentProxy;
 }
 void Dialog_addweek::on_toolButton_close_clicked()
 {
@@ -55,11 +63,17 @@ void Dialog_addweek::on_toolButton_close_clicked()
 
 void Dialog_addweek::fill_values(QString selWeek)
 {
+    ui->dateEdit_selectDate->blockSignals(true);
     QStringList weekInfo = selWeek.split("-");
-    metaProxy->setFilterRegExp("\\b"+weekInfo.at(1)+"\\b");
-    metaProxy->setFilterKeyColumn(1);
-    contentProxy->setFilterRegExp("\\b"+weekInfo.at(1)+"\\b");
+    QString selWeekID = weekInfo.at(1);
+    metaProxyFilter->invalidate();
+    metaProxyFilter->setFilterFixedString(selWeekID);
+    metaProxyFilter->setFilterKeyColumn(2);
+    contentProxy->setFilterFixedString(selWeekID);
     contentProxy->setFilterKeyColumn(1);
+
+    ui->label_header->clear();
+    ui->label_header->setText("Saison: "+metaProxy->data(metaProxy->index(0,0)).toString()+" - Week: "+ weekInfo.at(0)+" ("+selWeekID +") - Phase: "+weekInfo.at(3));
 
     QTime duration;
     QString value,work,dura,dist,stress;
@@ -67,7 +81,9 @@ void Dialog_addweek::fill_values(QString selWeek)
     QStringList values;
     int listCount = sportuseList.count();
 
-    weekModel = new QStandardItemModel(sportuseList.count()+1,7);
+    weekModel->clear();
+    weekModel->setRowCount(sportuseList.count()+1);
+    weekModel->setColumnCount(weekHeader.count());
     weekModel->setHorizontalHeaderLabels(weekHeader);
     ui->tableView_sportValues->setModel(weekModel);
     ui->tableView_sportValues->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -78,10 +94,10 @@ void Dialog_addweek::fill_values(QString selWeek)
 
     QAbstractItemModel *ab_model = ui->tableView_sportValues->model();
 
-    if(metaProxy->rowCount() > 0)
+    if(metaProxyFilter->rowCount() > 0)
     {
-        openID = weekInfo.at(1);
-        ui->dateEdit_selectDate->setDate(QDate::fromString(metaProxy->data(metaProxy->index(0,3)).toString(),"dd.MM.yyyy"));
+        editWeekID = selWeekID;
+        ui->dateEdit_selectDate->setDate(QDate::fromString(metaProxyFilter->data(metaProxyFilter->index(0,4)).toString(),"dd.MM.yyyy"));
         ui->lineEdit_week->setText(QString::number(ui->dateEdit_selectDate->date().weekNumber()));
         value = weekInfo.at(3);
         ui->comboBox_phase->setCurrentText(value.split("_").first());
@@ -138,35 +154,9 @@ void Dialog_addweek::fill_values(QString selWeek)
     }
 
     week_del.calc_percent(&sportuseList,ab_model);
-    metaProxy->setFilterRegExp("");
-    contentProxy->setFilterRegExp("");
-}
-
-void Dialog_addweek::store_values()
-{
-    weekMeta = QStringList();
-    weekID = ui->lineEdit_week->text()+"_"+selYear;
-    int currID = metaProxy->rowCount()+1;
-    if(update)
-    {
-        weekMeta << weekID
-                 << ui->comboBox_phase->currentText()+"_"+ui->comboBox_cycle->currentText()
-                 << ui->dateEdit_selectDate->date().toString("dd.MM.yyyy");
-
-        weekContent << weekID
-                    << this->create_values();
-    }
-    else
-    {
-        weekMeta << QString::number(currID)
-                 << weekID
-                 << ui->comboBox_phase->currentText()+"_"+ui->comboBox_cycle->currentText()
-                 << ui->dateEdit_selectDate->date().toString("dd.MM.yyyy");
-
-        weekContent << QString::number(currID)
-                    << weekID
-                    << this->create_values();
-    }
+    metaProxyFilter->invalidate();
+    contentProxy->invalidate();
+    ui->dateEdit_selectDate->blockSignals(false);
 }
 
 QStringList Dialog_addweek::create_values()
@@ -187,27 +177,59 @@ QStringList Dialog_addweek::create_values()
 
 void Dialog_addweek::on_dateEdit_selectDate_dateChanged(const QDate &date)
 {
+    QString firstDay = date.toString("dd.MM.yyyy");
+    QString weekString;
+    metaProxyFilter->invalidate();
+    metaProxyFilter->setFilterFixedString(firstDay);
+    metaProxyFilter->setFilterKeyColumn(4);
+
+    weekString = metaProxyFilter->data(metaProxyFilter->index(0,1)).toString() +"-"+
+                metaProxyFilter->data(metaProxyFilter->index(0,2)).toString() +"-"+
+                metaProxyFilter->data(metaProxyFilter->index(0,4)).toString() +"-"+
+                metaProxyFilter->data(metaProxyFilter->index(0,3)).toString();
+    this->fill_values(weekString);
     ui->lineEdit_week->setText(QString::number(date.weekNumber()));
-    selYear = QString::number(date.year());
 }
 
 void Dialog_addweek::on_toolButton_update_clicked()
 {
     ui->dateEdit_selectDate->setFocus();
-    this->store_values();
+    QStringList weekMeta,weekContent;
+    int currID = metaProxyFilter->rowCount()+1;
 
     if(update)
     {
-        metaProxy->setFilterRegExp("\\b"+openID+"\\b");
-        metaProxy->setFilterKeyColumn(1);
-        contentProxy->setFilterRegExp("\\b"+openID+"\\b");
+        weekMeta << editWeekID
+                 << ui->comboBox_phase->currentText()+"_"+ui->comboBox_cycle->currentText()
+                 << ui->dateEdit_selectDate->date().toString("dd.MM.yyyy");
+
+        weekContent << editWeekID
+                    << this->create_values();
+    }
+    else
+    {
+        weekMeta << QString::number(currID)
+                 << editWeekID
+                 << ui->comboBox_phase->currentText()+"_"+ui->comboBox_cycle->currentText()
+                 << ui->dateEdit_selectDate->date().toString("dd.MM.yyyy");
+
+        weekContent << QString::number(currID)
+                    << editWeekID
+                    << this->create_values();
+    }
+
+    if(update)
+    {
+        metaProxyFilter->setFilterFixedString(editWeekID);
+        metaProxyFilter->setFilterKeyColumn(2);
+        contentProxy->setFilterFixedString(editWeekID);
         contentProxy->setFilterKeyColumn(1);
 
-        if(metaProxy->rowCount() > 0)
+        if(metaProxyFilter->rowCount() > 0)
         {
-            for(int i = 0; i < weekMeta.count(); ++i)
+            for(int col = 2,pos = 0; col < workSched->week_meta->columnCount(); ++col,++pos)
             {
-                metaProxy->setData(metaProxy->index(0,i+1),weekMeta.at(i));
+                metaProxyFilter->setData(metaProxyFilter->index(0,col),weekMeta.at(pos));
             }
         }
 
@@ -218,18 +240,18 @@ void Dialog_addweek::on_toolButton_update_clicked()
                 contentProxy->setData(contentProxy->index(0,i),weekContent.at(i-1));
             }
         }
-        metaProxy->setFilterRegExp("");
-        contentProxy->setFilterRegExp("");
+        metaProxyFilter->invalidate();
+        contentProxy->invalidate();
     }
     else
     {
         int rowcount;
         rowcount = metaProxy->rowCount();
-        metaProxy->insertRow(rowcount,QModelIndex());
+        metaProxyFilter->insertRow(rowcount,QModelIndex());
 
         for(int i = 0; i < weekMeta.count(); ++i)
         {
-            metaProxy->setData(metaProxy->index(rowcount,i,QModelIndex()),weekMeta.at(i));
+            metaProxyFilter->setData(metaProxyFilter->index(rowcount,i,QModelIndex()),weekMeta.at(i));
         }
 
         rowcount = contentProxy->rowCount();

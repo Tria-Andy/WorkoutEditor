@@ -154,7 +154,7 @@ public:
                 editor->setFont(eFont);
                 return editor;
             }
-            if(index.row() == 6 && setEdit)
+            if(index.row() == 7 && setEdit)
             {
                 QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
                 editor->setFrame(true);
@@ -226,7 +226,7 @@ public:
                 QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
                 timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"mm:ss"));
             }
-            if(index.row() == 6)
+            if(index.row() == 7)
             {
                 QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
                 spinBox->setValue(index.data(Qt::DisplayRole).toDouble());
@@ -292,8 +292,9 @@ public:
                     model->setData(model->index(4,0),value.toString("mm:ss"), Qt::EditRole);
                     set_distance(model,value);
                     set_stressValue(model);
+                    set_work(model);
             }
-            if(index.row() == 6) //Distance
+            if(index.row() == 7) //Distance
             {
                 QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
                 spinBox->interpretText();
@@ -301,6 +302,7 @@ public:
                 model->setData(index, value, Qt::EditRole);
                 set_duration(model);
                 set_stressValue(model);
+                set_work(model);
             }
         }
         else
@@ -348,13 +350,14 @@ public:
         }
 
         set_stressValue(model);
+        set_work(model);
     }
 
     void set_duration(QAbstractItemModel *model) const
     {
         if(sport == settings::isSwim || sport == settings::isRun)
         {
-            model->setData(model->index(4,0),calc_duration(sport,model->data(model->index(6,0)).toDouble(),model->data(model->index(3,0)).toString()));
+            model->setData(model->index(4,0),calc_duration(sport,model->data(model->index(7,0)).toDouble(),model->data(model->index(3,0)).toString()));
         }
     }
 
@@ -368,18 +371,40 @@ public:
         if(sport == settings::isBike)
         {
             int pace = get_timesec(threstopace(thresPace,model->data(model->index(2,0)).toDouble()));
-            model->setData(model->index(6,0),calc_distance(value.toString("mm:ss"),pace));
+            model->setData(model->index(7,0),calc_distance(value.toString("mm:ss"),pace));
             set_speed(model,static_cast<double>(pace));
         }
         else if(sport == settings::isBike || sport == settings::isRun)
         {
-            model->setData(model->index(6,0),calc_distance(value.toString("mm:ss"),get_timesec(model->data(model->index(3,0)).toString())));
+            model->setData(model->index(7,0),calc_distance(value.toString("mm:ss"),get_timesec(model->data(model->index(3,0)).toString())));
         }
     }
 
     void set_speed(QAbstractItemModel *model,double sec) const
     {
-        model->setData(model->index(7,0),calc_lapSpeed(sport,sec));
+        model->setData(model->index(8,0),calc_lapSpeed(sport,sec));
+    }
+
+    void set_work(QAbstractItemModel *model) const
+    {
+        double pValue = 0;
+        double dura = get_timesec(model->data(model->index(4,0)).toString());
+        double dist = model->data(model->index(7,0)).toDouble();
+
+        if(sport == settings::isSwim) pValue = 50.0;
+        if(sport == settings::isBike) pValue = model->data(model->index(3,0)).toDouble();
+        if(sport == settings::isRun) pValue = get_speed(QTime::fromString(model->data(model->index(3,0)).toString(),"mm:ss"),0,sport,true);
+        if(sport == settings::isStrength) pValue = 4.0;
+        if(sport == settings::isAlt) pValue = model->data(model->index(2,0)).toDouble() / 10.0;
+
+        if(model->data(model->index(0,0)).toString().contains(settings::get_generalValue("breakname")) && sport == settings::isSwim)
+        {
+            model->setData(model->index(6,0),set_doubleValue(calc_totalWork(sport,pValue,dura,dist,0),false));
+        }
+        else
+        {
+            model->setData(model->index(6,0),set_doubleValue(calc_totalWork(sport,pValue,dura,dist,6),false));
+        }
     }
 };
 
@@ -427,18 +452,16 @@ private:
     del_workcreator workTree_del;
     del_workcreatoredit edit_del;
     del_mousehover mousehover_del;
-    double timeSum,distSum,stressSum;
+    double timeSum,distSum,stressSum,workSum;
     int currThres,thresPace,thresPower;
     QVector<bool> editRow;
-
+    bool isSwim,isBike,isRun,isStrength,isAlt,isOther;
     bool clearFlag;
 
     QString get_treeValue(int,int,int,int,int);
 
     void control_editPanel(bool);
     void resetAxis();
-    void set_editRow(QString);
-    void set_sport_threshold(QString);
     void set_itemData(QTreeWidgetItem *item);
     void show_editItem(QTreeWidgetItem *item);
     void set_selectData(QTreeWidgetItem *item);

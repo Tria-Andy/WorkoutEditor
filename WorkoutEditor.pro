@@ -15,7 +15,7 @@ TEMPLATE = app
 #Application version
 VERSION_MAJOR = 1
 VERSION_MINOR = 3
-VERSION_BUILD = 10
+VERSION_BUILD = 15
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
        "VERSION_BUILD=$$VERSION_BUILD"
@@ -48,7 +48,8 @@ SOURCES += main.cpp\
     calculation.cpp \
     xmlhandler.cpp \
     dialog_workcreator.cpp \
-    filereader.cpp
+    filereader.cpp \
+    saisons.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
@@ -75,7 +76,8 @@ HEADERS  += mainwindow.h \
     xmlhandler.h \
     dialog_workcreator.h \
     filereader.h \
-    del_mousehover.h
+    del_mousehover.h \
+    saisons.h
 
 FORMS    += mainwindow.ui \
     dialog_export.ui \

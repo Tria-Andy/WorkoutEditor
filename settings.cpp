@@ -33,7 +33,6 @@ QHash<QString,QString> settings::gcInfo;
 QHash<QString,QString> settings::generalMap;
 QHash<QString,QColor> settings::colorMap;
 QHash<QString,int> settings::fontMap;
-QHash<QString,QString> settings::saisonInfo;
 
 QString settings::valueFile;
 QString settings::valueFilePath;
@@ -57,6 +56,7 @@ QHash<QString,QString> settings::swimRange;
 QHash<QString,QString> settings::bikeRange;
 QHash<QString,QString> settings::runRange;
 QHash<QString,QString> settings::stgRange;
+QHash<QString,QString> settings::altRange;
 QHash<QString,QString> settings::hfRange;
 QHash<QString,QString> settings::triaMap;
 
@@ -140,10 +140,10 @@ QColor settings::get_colorRGB(QString colorValue,bool trans)
 void settings::loadSettings()
 {
     header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes" << "Work";
-    header_bike << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD";
-    header_run << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed";
-    headerTria << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD";
-    header_other << "Interval" << "Duration" << "Start" << "Distance";
+    header_bike << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD" << "Work";
+    header_run << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Work";
+    headerTria << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "Work";
+    header_other << "Interval" << "Duration" << "Start" << "Distance" << "Work";
 
     settingFile = QApplication::applicationDirPath() + QDir::separator() +"WorkoutEditor.ini";
 
@@ -177,6 +177,7 @@ void settings::loadSettings()
             gcInfo.insert("schedule",mysettings->value("schedule").toString());
             gcInfo.insert("workouts",mysettings->value("workouts").toString());
             gcInfo.insert("contests",mysettings->value("contests").toString());
+            gcInfo.insert("saisons",mysettings->value("saisons").toString());
             gcInfo.insert("valuefile",mysettings->value("valuefile").toString());
             valueFile = mysettings->value("valuefile").toString();
         mysettings->endGroup();
@@ -254,14 +255,6 @@ void settings::loadSettings()
             extkeyList << myvalues->value("extkeys").toString().split(splitter);
         myvalues->endGroup();
 
-        myvalues->beginGroup("Saisoninfo");
-            saisonInfo.insert("saison",myvalues->value("saison").toString());
-            saisonInfo.insert("startDate",myvalues->value("startDate").toString());
-            saisonInfo.insert("startkw",myvalues->value("startkw").toString());
-            saisonInfo.insert("endDate",myvalues->value("endDate").toString());
-            saisonInfo.insert("weeks",myvalues->value("weeks").toString());
-        myvalues->endGroup();
-
         myvalues->beginGroup("Threshold");
             thresholdMap.insert("swimpower",myvalues->value("swimpower").toDouble());
             thresholdMap.insert("bikepower",myvalues->value("bikepower").toDouble());
@@ -294,6 +287,8 @@ void settings::loadSettings()
             settings::fill_mapRange(&runRange,&settingString);
             settingString = myvalues->value("strength").toString();
             settings::fill_mapRange(&stgRange,&settingString);
+            settingString = myvalues->value("alternative").toString();
+            settings::fill_mapRange(&altRange,&settingString);
             settingString = myvalues->value("hf").toString();
             settings::fill_mapRange(&hfRange,&settingString);
         myvalues->endGroup();
@@ -367,7 +362,7 @@ void settings::loadSettings()
             else if(settingList.at(i) == "Bike") isBike = settingList.at(i);
             else if(settingList.at(i) == "Run") isRun = settingList.at(i);
             else if(settingList.at(i) == "Strength" || settingList.at(i) == "Power") isStrength = settingList.at(i);
-            else if(settingList.at(i) == "Alt" || settingList.at(i) == "Alternativ") isAlt = settingList.at(i);
+            else if(settingList.at(i) == "Alt" || settingList.at(i) == "Alternative") isAlt = settingList.at(i);
             else if(settingList.at(i) == "Tria" || settingList.at(i) == "Triathlon") isTria = settingList.at(i);
             else if(settingList.at(i) == "Other") isOther = settingList.at(i);
         }
@@ -420,6 +415,7 @@ QString settings::get_rangeValue(QString map, QString key)
     if(map == settings::isBike) return bikeRange.value(key);
     if(map == settings::isRun) return runRange.value(key);
     if(map == settings::isStrength) return stgRange.value(key);
+    if(map == settings::isAlt) return altRange.value(key);
     if(map == "HF") return hfRange.value(key);
 
     return 0;
@@ -475,7 +471,6 @@ void settings::saveSettings()
     mysettings->beginGroup("GoldenCheetah");
         mysettings->setValue("dir",gcInfo.value("dir"));
         mysettings->setValue("athlete",gcInfo.value("athlete"));
-        mysettings->setValue("yob",gcInfo.value("yob"));
         mysettings->setValue("folder",gcInfo.value("folder"));
         mysettings->setValue("gcpath",gcInfo.value("gcpath"));
     mysettings->endGroup();
@@ -483,6 +478,7 @@ void settings::saveSettings()
     mysettings->beginGroup("Filepath");
         mysettings->setValue("schedule",gcInfo.value("schedule"));
         mysettings->setValue("workouts",gcInfo.value("workouts"));
+        mysettings->setValue("saisons",gcInfo.value("saisons"));
     mysettings->endGroup();
 
     QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
@@ -507,14 +503,6 @@ void settings::saveSettings()
         myvalues->setValue("stgpower",QString::number(thresholdMap.value("stgpower")));
         myvalues->setValue("hfthres",QString::number(thresholdMap.value("hfthres")));
         myvalues->setValue("hfmax",QString::number(thresholdMap.value("hfmax")));
-    myvalues->endGroup();
-
-    myvalues->beginGroup("Saisoninfo");
-        myvalues->setValue("saison",saisonInfo.value("saison"));
-        myvalues->setValue("weeks",saisonInfo.value("weeks"));
-        myvalues->setValue("startkw",saisonInfo.value("startkw"));
-        myvalues->setValue("startDate",saisonInfo.value("startDate"));
-        myvalues->setValue("endDate",saisonInfo.value("endDate"));
     myvalues->endGroup();
 
     myvalues->beginGroup("Sport");

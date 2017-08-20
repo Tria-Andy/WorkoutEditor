@@ -23,28 +23,32 @@
 #include <QtXml>
 #include <QMessageBox>
 #include "settings.h"
-#include "xmlhandler.h"
+#include "saisons.h"
+#include "calculation.h"
 
-class schedule : public xmlHandler
+class schedule : public saisons, public calculation
 {
 
 public:
     schedule();
     QStandardItemModel *workout_schedule,*week_meta,*week_content;
+    QSortFilterProxyModel *metaProxy,*contentProxy;
     QHash<QModelIndex,QHash<int,QString>> itemList;
     void freeMem();
     void save_dayWorkouts();
     void save_weekPlan();
     void save_ltsFile(double);
     int check_workouts(QDate);
-    void changeYear();
     QString get_weekPhase(QDate);
     void copyWeek(QString,QString);
     void deleteWeek(QString);
-    QMap<QDate,double> *get_StressMap() {return &stressValues;}
-    void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
-    void updateStress(QString,double,bool);
+    QMap<QDate,QPair<double,double> > *get_StressMap() {return &stressValues;}
+    //void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
+    void updateStress(QString,QPair<double,double>,int);
     bool get_isUpdated() {return isUpdated;}
+    void add_newSaison(QString);
+    void delete_Saison(QString);
+    QHash<int,QString> get_weekList();
 
 //Workout
     //Setter
@@ -60,7 +64,8 @@ private:
     QStringList workoutTags,metaTags,contentTags;
     QString schedulePath,workoutFile,metaFile,contentFile,ltsFile;
     QDate firstdayofweek;
-    QMap<QDate,double> stressValues;
+    QMap<QDate,QPair<double,double> > stressValues;
+    QHash<int,QString> weekList;
     bool fileCreated,isUpdated;
     void read_dayWorkouts(QDomDocument);
     void read_weekPlan(QDomDocument,QDomDocument);

@@ -27,7 +27,7 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
     workSched = p_sched;
     for(int i = 0; i < workSched->week_meta->rowCount(); ++i)
     {
-        weekList << workSched->week_meta->data(workSched->week_meta->index(i,1,QModelIndex())).toString();
+        weekList << workSched->week_meta->data(workSched->week_meta->index(i,2,QModelIndex())).toString();
     }
     fixWeek = hasWeek;
     isSaveWeek = false;
@@ -55,7 +55,7 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
     editMode = 0;
     saveweekFile = "workout_saveweek.xml";
     schedulePath = settings::get_gcInfo("schedule");
-    weekTags << "id" << "weekday" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress";
+    weekTags << "id" << "weekday" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj";
     saveWeekModel = new QStandardItemModel();
     listModel = new QStandardItemModel();
     saveWeekModel->setColumnCount(10);
@@ -169,7 +169,7 @@ void Dialog_week_copy::addWeek()
     workProxy->sort(1);
     int workCount = workProxy->rowCount();
     int schedCount = schedModel->rowCount();
-    double addStress = 0;
+    QPair<double,double> stressMap;
     QString setDate;
     QModelIndex index = workSched->week_meta->findItems(sourceWeek,Qt::MatchExactly,1).at(0)->index();
 
@@ -181,7 +181,8 @@ void Dialog_week_copy::addWeek()
     for(int work = 0; work < workCount; ++work)
     {
         dayofweek = workProxy->data(workProxy->index(work,2)).toInt();
-        addStress = workProxy->data(workProxy->index(work,9)).toDouble();
+        stressMap.first = workProxy->data(workProxy->index(work,9)).toDouble();
+        stressMap.second = get_timesec(workProxy->data(workProxy->index(work,6)).toString())/60.0;
         setDate = sourceFirstDay.addDays(dayofweek-1).toString("dd.MM.yyyy");
 
         schedModel->setData(schedModel->index(schedCount+work,0),sourceWeek);
@@ -191,7 +192,7 @@ void Dialog_week_copy::addWeek()
         {
             schedModel->setData(schedModel->index(schedCount+work,col-1),workProxy->data(workProxy->index(work,col)));
         }
-        workSched->updateStress(setDate,addStress,true);
+        workSched->updateStress(setDate,stressMap,0);
     }
 }
 

@@ -86,15 +86,21 @@ private slots:
     void on_pushButton_addContest_clicked();
     void on_pushButton_delContest_clicked();
     void on_treeView_contest_clicked(const QModelIndex &index);
+    void on_toolButton_addSaison_clicked();
+    void on_comboBox_saisons_currentIndexChanged(const QString &arg1);
+    void on_comboBox_saisons_editTextChanged(const QString &arg1);
+    void on_toolButton_updateSaison_clicked();
+    void on_toolButton_deleteSaison_clicked();
 
 private:
     Ui::Dialog_settings *ui;
-    QStandardItemModel *level_model,*hf_model,*contestModel;
+    QStandardItemModel *level_model,*hf_model,*contestTreeModel;
+    QSortFilterProxyModel *saisonProxy,*contestProxy;
     schedule *schedule_ptr;
+    saisons *saisons_ptr;
     QHash<QString,QStringList> listMap;
     QHash<QString,QColor> colorMapCache;
     QStringList keyList,extkeyList,sportList,model_header,contestTags;
-    QString contestsPath,saisonXML;
     del_level level_del;
     del_mousehover mousehover_del;
     double thresPower,thresPace,sportFactor;
@@ -113,7 +119,9 @@ private:
     void updateListMap(int,bool);
     void writeChangedValues();
     void writeRangeValues(QString);
-    void saveContestFile();
+    void updateContest(bool,int);
+    void set_saisonInfo(QString);
+    void refresh_contestTree(QString);
 };
 
 

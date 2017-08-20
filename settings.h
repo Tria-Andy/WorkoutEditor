@@ -37,11 +37,11 @@ private:
 
     static QHash<QString,QStringList> listMap;
     static QMap<int,QString> sampList,intList;
-    static QHash<QString,QString> generalMap,gcInfo,saisonInfo,triaMap;
+    static QHash<QString,QString> generalMap,gcInfo,triaMap;
     static QMap<int,double> weightMap;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,double> thresholdMap,ltsMap,athleteMap;
-    static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,hfRange;
+    static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,altRange,hfRange;
     static QHash<QString,int> fontMap;
     static int swimLaplen;
 
@@ -64,7 +64,6 @@ public:
     static QHash<QString,QStringList> get_listMap() {return listMap;}
     static QMap<int,QString> get_sampList() {return sampList;}
     static QMap<int,QString> get_intList() {return intList;}
-    static QString get_saisonInfo(QString key) {return saisonInfo.value(key);}
     static QString get_gcInfo(QString key) {return gcInfo.value(key);}
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
     static QHash<QString,QColor> get_colorMap() {return colorMap;}
@@ -77,7 +76,6 @@ public:
     static int get_fontValue(QString key) {return fontMap.value(key);}
 
     //QMap/QHash Setter
-    static void set_saisonInfos(QString key, QString value){saisonInfo.insert(key,value);}
     static void set_gcInfo(QString key, QString value){gcInfo.insert(key,value);}
     static void set_itemColor(QString key,QColor value) {colorMap.insert(key,value);}
     static void set_thresValue(QString key,double value) {thresholdMap.insert(key,value);}

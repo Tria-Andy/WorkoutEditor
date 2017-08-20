@@ -58,19 +58,26 @@ year_popup::~year_popup()
 
 void year_popup::set_plotValues()
 {
-    QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel;
-    proxyModel->setSourceModel(workSched->week_meta);
+    QString selSaison = workSched->get_selSaison();
+    QSortFilterProxyModel *metaProxy = new QSortFilterProxyModel;
+    metaProxy->setSourceModel(workSched->week_meta);
+    metaProxy->setFilterFixedString(selSaison);
+    metaProxy->setFilterKeyColumn(0);
+    QSortFilterProxyModel *proxyFilter = new QSortFilterProxyModel;
+    proxyFilter->setSourceModel(metaProxy);
+    QSortFilterProxyModel *contentProxy = new QSortFilterProxyModel;
+    contentProxy->setSourceModel(workSched->week_content);
     QString weekID;
 
     if(phaseindex == 0)
     {
-        weekcount = settings::get_saisonInfo("weeks").toInt();
+        weekcount = workSched->get_saisonInfo(selSaison,"weeks").toInt();
     }
     else
     {
-        proxyModel->setFilterFixedString(phase);
-        proxyModel->setFilterKeyColumn(2);
-        weekcount = proxyModel->rowCount();
+        proxyFilter->setFilterFixedString(phase);
+        proxyFilter->setFilterKeyColumn(3);
+        weekcount = proxyFilter->rowCount();
     }
 
     if(weekcount > 40)
@@ -121,62 +128,33 @@ void year_popup::set_plotValues()
 
     QString sumValue,stress,duration,distance,workouts;
     QStringList sumValues;
-    workSched->week_content->sort(0);
     max_stress = 0.0;
 
-    if(phaseindex == 0)
+    for(int week = 0; week < proxyFilter->rowCount(); ++week)
     {
-        for(int week = 0; week < workSched->week_content->rowCount(); ++week)
-        {
-            sumValue = workSched->week_content->data(workSched->week_content->index(week,col,QModelIndex())).toString();
-            sumValues = sumValue.split("-");
-            workouts = sumValues.at(0);
-            distance = sumValues.at(1);
-            duration = sumValues.at(2);
-            stress = sumValues.at(3);
+        weekID = proxyFilter->data(proxyFilter->index(week,2)).toString();
+        contentProxy->setFilterFixedString(weekID);
+        contentProxy->setFilterKeyColumn(1);
 
-            yStress[week] = stress.toDouble();
-            if(max_stress < yStress[week]) max_stress = yStress[week];
+        sumValue = contentProxy->data(contentProxy->index(0,col)).toString();
+        sumValues = sumValue.split("-");
+        workouts = sumValues.at(0);
+        distance = sumValues.at(1);
+        duration = sumValues.at(2);
+        stress = sumValues.at(3);
 
-            yDura[week] = this->set_doubleValue(static_cast<double>(this->get_timesec(duration) / 60.0),false);
-            if(maxValues[0] < yDura[week]) maxValues[0] = yDura[week];
-            yDist[week] = this->set_doubleValue(distance.toDouble(),false);
-            if(maxValues[1] < yDist[week]) maxValues[1] = yDist[week];
-            yWorks[week] = workouts.toDouble();
-            if(maxValues[2] < yWorks[week]) maxValues[2] = yWorks[week];
-        }
+        yStress[week] = stress.toDouble();
+        if(max_stress < yStress[week]) max_stress = yStress[week];
+
+        yDura[week] = this->set_doubleValue(static_cast<double>(this->get_timesec(duration) / 60.0),false);
+        if(maxValues[0] < yDura[week]) maxValues[0] = yDura[week];
+        yDist[week] = this->set_doubleValue(distance.toDouble(),false);
+        if(maxValues[1] < yDist[week]) maxValues[1] = yDist[week];
+        yWorks[week] = workouts.toDouble();
+        if(maxValues[2] < yWorks[week]) maxValues[2] = yWorks[week];
+        if(phaseindex != 0) weekList << weekID;
     }
-    else
-    {
-        for(int week = 0; week < proxyModel->rowCount(); ++week)
-        {
-            weekID = proxyModel->data(proxyModel->index(week,1)).toString();
 
-            for(int i = 0; i < workSched->week_content->rowCount(); ++i)
-            {
-                if(weekID == workSched->week_content->data(workSched->week_content->index(i,1,QModelIndex())).toString())
-                {
-                    sumValue = workSched->week_content->data(workSched->week_content->index(i,col,QModelIndex())).toString();
-                    sumValues = sumValue.split("-");
-                    workouts = sumValues.at(0);
-                    distance = sumValues.at(1);
-                    duration = sumValues.at(2);
-                    stress = sumValues.at(3);
-
-                    yStress[week] = stress.toDouble();
-                    if(max_stress < yStress[week]) max_stress = yStress[week];
-
-                    yDura[week] = this->set_doubleValue(static_cast<double>(this->get_timesec(duration) / 60.0),false);
-                    if(maxValues[0] < yDura[week]) maxValues[0] = yDura[week];
-                    yDist[week] = this->set_doubleValue(distance.toDouble(),false);
-                    if(maxValues[1] < yDist[week]) maxValues[1] = yDist[week];
-                    yWorks[week] = workouts.toDouble();
-                    if(maxValues[2] < yWorks[week]) maxValues[2] = yWorks[week];
-                    weekList << weekID;
-                }
-            }
-        }
-    }
     this->set_graph();
 }
 

@@ -16,7 +16,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     stepProxy = new QSortFilterProxyModel;
     stepProxy->setSourceModel(this->workouts_steps);
 
-    editRow <<1<<1<<1<<0<<1<<0<<1<<0;
+    editRow <<1<<1<<1<<0<<1<<0<<0<<0<<0;
 
     isSeries = "Series";
     isGroup = "Group";
@@ -31,7 +31,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     ui->comboBox_code->addItems(settings::get_listValues("WorkoutCode"));
     clearFlag = false;
 
-    modelHeader << "Phase" << "Level" << "Threshold %" << "Value" << "Time" << "TSS" << "Distance" << "Repeats";
+    modelHeader << "Phase" << "Level" << "Threshold %" << "Value" << "Time" << "TSS" << "Work" << "Distance" << "Repeats";
     ui->treeWidget_intervall->setHeaderLabels(modelHeader);
     ui->treeWidget_intervall->header()->setSectionResizeMode(QHeaderView::Stretch);
     ui->treeWidget_intervall->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
@@ -113,7 +113,7 @@ void Dialog_workCreator::get_workouts(QString sport)
         workID = metaProxy->data(metaProxy->index(i,1)).toString();
         workTitle = metaProxy->data(metaProxy->index(i,3)).toString();
         listString = metaProxy->data(metaProxy->index(i,2)).toString() + " - " + workTitle;
-        timeBased = metaProxy->data(metaProxy->index(i,7)).toBool();
+        timeBased = metaProxy->data(metaProxy->index(i,8)).toBool();
         listModel->setData(listModel->index(i,0,QModelIndex()),listString);
         listModel->setData(listModel->index(i,1,QModelIndex()),workID);
         listModel->setData(listModel->index(i,2,QModelIndex()),timeBased);
@@ -139,18 +139,14 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
 
     QStringList valueList;
     QString parentItem,partName,thresValue,stepTime,empty = "";
+    int tempID = 0;
     double percent;
     double currDist;
-    bool isBike = false;
-    bool isSwim = false;
-    bool isRun = false;
+    double pValue = 0;
+
     bool timeBase = ui->checkBox_timebased->isChecked();
     stepProxy->setFilterRegExp("\\b"+workID+"\\b");
     stepProxy->setFilterKeyColumn(0);
-
-    if(currentSport == settings::isSwim) isSwim = true;
-    if(currentSport == settings::isBike) isBike = true;
-    if(currentSport == settings::isRun) isRun = true;
 
     for(int i = 0; i < stepProxy->rowCount();++i)
     {
@@ -159,6 +155,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
         if(partName.contains(isGroup) || partName.contains(isSeries))
         {
             valueList << stepProxy->data(stepProxy->index(i,2)).toString()
+                      << empty
                       << empty
                       << empty
                       << empty
@@ -176,6 +173,8 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
 
             if(isBike)
             {
+                pValue = currThres * (percent/100.0);
+
                 if(timeBase)
                 {
                     currDist = this->calc_distance(stepTime,this->get_timesec(this->threstopace(thresPace,percent)));
@@ -193,13 +192,36 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                     currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
                     stepTime = this->calc_duration(currentSport,currDist,thresValue);
                 }
+                pValue = 3600.0 / this->get_timesec(thresValue);
             }
             else if(isSwim)
             {
                 currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
-                //currDist = round(currDist*10.0)/100;
-                if(!partName.contains(isBreak)) stepTime = this->calc_duration(currentSport,currDist,thresValue);
+                if(!partName.contains(isBreak))
+                {
+                    tempID = 6;
+                    stepTime = this->calc_duration(currentSport,currDist,thresValue);
+                    pValue = 50.0;
+                }
+                else
+                {
+                    tempID = 0;
+                    pValue = 0.0;
+                }
             }
+            else if(isStrength)
+            {
+                pValue = 4.0;
+            }
+            else if(isAlt)
+            {
+                pValue = percent / 10.0;
+            }
+            else
+            {
+
+            }
+
 
             valueList << stepProxy->data(stepProxy->index(i,2)).toString()
                       << stepProxy->data(stepProxy->index(i,3)).toString()
@@ -207,6 +229,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                       << thresValue
                       << stepTime
                       << QString::number(this->estimate_stress(ui->comboBox_sport->currentText(),thresValue,this->get_timesec(stepTime)))
+                      << QString::number(this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(stepTime),currDist,tempID),false))
                       << QString::number(this->set_doubleValue(currDist,true))
                       << stepProxy->data(stepProxy->index(i,7)).toString();
         }
@@ -294,6 +317,7 @@ void Dialog_workCreator::save_workout()
                   << worktime
                   << QString::number(distSum)
                   << QString::number(round(stressSum))
+                  << QString::number(round(workSum))
                   << QString::number(ui->checkBox_timebased->isChecked());
 
      workModel = this->workouts_meta;
@@ -315,8 +339,8 @@ void Dialog_workCreator::save_workout()
                   << get_treeValue(c_item,0,0,1,0)   //level
                   << get_treeValue(c_item,0,0,2,0)   //threshold
                   << get_treeValue(c_item,0,0,4,0)   //time
-                  << get_treeValue(c_item,0,0,6,0)   //dist
-                  << get_treeValue(c_item,0,0,7,0)   //repeats
+                  << get_treeValue(c_item,0,0,7,0)   //dist
+                  << get_treeValue(c_item,0,0,8,0)   //repeats
                   << "-";
          this->save_workout_values(workoutValues,workModel);
 
@@ -332,8 +356,8 @@ void Dialog_workCreator::save_workout()
                           << get_treeValue(c_item,c_child,0,1,1)
                           << get_treeValue(c_item,c_child,0,2,1)
                           << get_treeValue(c_item,c_child,0,4,1)
-                          << get_treeValue(c_item,c_child,0,6,1)
                           << get_treeValue(c_item,c_child,0,7,1)
+                          << get_treeValue(c_item,c_child,0,8,1)
                           << phase;
 
                  this->save_workout_values(workoutValues,workModel);
@@ -351,8 +375,8 @@ void Dialog_workCreator::save_workout()
                                   << get_treeValue(c_item,c_child,subchild,1,2)
                                   << get_treeValue(c_item,c_child,subchild,2,2)
                                   << get_treeValue(c_item,c_child,subchild,4,2)
-                                  << get_treeValue(c_item,c_child,subchild,6,2)
                                   << get_treeValue(c_item,c_child,subchild,7,2)
+                                  << get_treeValue(c_item,c_child,subchild,8,2)
                                   << subphase;
 
                          this->save_workout_values(workoutValues,workModel);
@@ -399,11 +423,13 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
     currentItem = item;
     QString defaultTime = "05:00";
     int level = 1;
-    double defaultDist;
+    int tempID = 0;
+    double pValue = 0;
+    double defaultDist = 0.0;
     double percent = this->get_thresPercent(currentSport,levelList.at(level),false);
     QString threshold = this->calc_threshold(currentSport,currThres,percent);
 
-    if(currentSport == settings::isSwim)
+    if(isSwim)
     {
         if(item->data(0,Qt::DisplayRole).toString() == isBreak)
         {
@@ -411,16 +437,22 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
             threshold = "00:00";
             defaultTime = "00:30";
             level = 0;
+            tempID = 0;
+            pValue = 0;
         }
         else
         {
             defaultDist = 0.1;
             defaultTime = this->calc_duration(currentSport,defaultDist,threshold);
+            tempID = 6;
+            pValue = this->get_timesec(threshold);
         }
     }
-    else
+    else if (isBike || isRun)
     {
         defaultDist = this->calc_distance(defaultTime,static_cast<double>(this->get_timesec(threstopace(thresPace,percent))));
+        if(isBike) pValue = threshold.toDouble();
+        if(isRun) pValue = get_speed(QTime::fromString(threshold,"mm:ss"),0,currentSport,true);
     }
 
     if(hasValues)
@@ -430,8 +462,9 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
         item->setData(3,Qt::EditRole,threshold);
         item->setData(4,Qt::EditRole,defaultTime);
         item->setData(5,Qt::EditRole,this->estimate_stress(currentSport,threshold,this->get_timesec(defaultTime)));
-        item->setData(6,Qt::EditRole,defaultDist);
-        item->setData(7,Qt::EditRole,"");
+        item->setData(6,Qt::EditRole,this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(defaultTime),defaultDist,tempID),false));
+        item->setData(7,Qt::EditRole,defaultDist);
+        item->setData(8,Qt::EditRole,"");
     }
     else
     {
@@ -439,7 +472,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
         QList<QTreeWidgetItem*> groupCount = ui->treeWidget_intervall->findItems(itemName,Qt::MatchRecursive | Qt::MatchContains,0);
         itemName = itemName +"-"+QString::number(groupCount.count());
         item->setData(0,Qt::EditRole,itemName);
-        item->setData(7,Qt::EditRole,2);
+        item->setData(8,Qt::EditRole,2);
     }
     ui->treeWidget_intervall->expandAll();
     ui->treeWidget_intervall->setTreePosition(-1);
@@ -460,12 +493,12 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
         edit_del.hasValue = false;
         valueModel->setData(valueModel->index(0,0,QModelIndex()),item->data(0,Qt::DisplayRole));
         valueModel->setData(valueModel->index(0,2,QModelIndex()),true);
-        valueModel->setData(valueModel->index(1,0,QModelIndex()),item->data(7,Qt::DisplayRole));
+        valueModel->setData(valueModel->index(1,0,QModelIndex()),item->data(8,Qt::DisplayRole));
         valueModel->setData(valueModel->index(1,2,QModelIndex()),true);
     }
     else
     {
-        valueModel->setRowCount(8);
+        valueModel->setRowCount(editRow.count());
         for(int i = 0; i < item->columnCount();++i)
         {
             valueModel->setData(valueModel->index(i,0,QModelIndex()),item->data(i,Qt::DisplayRole));
@@ -475,23 +508,23 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
 
         valueModel->setData(valueModel->index(2,1,QModelIndex()),levelList.indexOf(valueModel->data(valueModel->index(1,0)).toString()));
 
-        if(currentSport == settings::isBike)
+        if(isBike)
         {
-            valueModel->setData(valueModel->index(7,0,QModelIndex()),this->calc_lapSpeed(currentSport,get_timesec(threstopace(thresPace,item->data(2,Qt::DisplayRole).toDouble()))));
+            valueModel->setData(valueModel->index(8,0,QModelIndex()),this->calc_lapSpeed(currentSport,get_timesec(threstopace(thresPace,item->data(2,Qt::DisplayRole).toDouble()))));
         }
         else
         {
             if(item->data(2,Qt::DisplayRole).toInt() > 0)
             {
-                valueModel->setData(valueModel->index(7,0,QModelIndex()),this->calc_lapSpeed(currentSport,static_cast<double>(this->get_timesec(item->data(3,Qt::DisplayRole).toString()))));
+                valueModel->setData(valueModel->index(8,0,QModelIndex()),this->calc_lapSpeed(currentSport,static_cast<double>(this->get_timesec(item->data(3,Qt::DisplayRole).toString()))));
             }
             else
             {
-                if(currentSport == settings::isSwim && item->data(0,Qt::DisplayRole) == settings::get_generalValue("breakname"))
+                if(isSwim && item->data(0,Qt::DisplayRole) == settings::get_generalValue("breakname"))
                 {
                     valueModel->setData(valueModel->index(4,2),true);
                 }
-                valueModel->setData(valueModel->index(7,0,QModelIndex()),"0 km/h");
+                valueModel->setData(valueModel->index(8,0,QModelIndex()),"0 km/h");
             }
         }
         edit_del.hasValue = true;
@@ -506,7 +539,7 @@ void Dialog_workCreator::set_itemData(QTreeWidgetItem *item)
     if(itemIdent.contains(isGroup) || itemIdent.contains(isSeries))
     {
         item->setData(0,Qt::EditRole,valueModel->data(valueModel->index(0,0)));
-        item->setData(7,Qt::EditRole,valueModel->data(valueModel->index(1,0)));
+        item->setData(8,Qt::EditRole,valueModel->data(valueModel->index(1,0)));
     }
     else
     {
@@ -514,6 +547,7 @@ void Dialog_workCreator::set_itemData(QTreeWidgetItem *item)
         {
             item->setData(i,Qt::EditRole,valueModel->data(valueModel->index(i,0)));
         }
+        item->setData(8,Qt::EditRole,"");
     }
 }
 
@@ -561,7 +595,7 @@ void Dialog_workCreator::clearIntTree()
 void Dialog_workCreator::set_plotModel()
 {
     plotModel->clear();
-    plotModel->setColumnCount(6);
+    plotModel->setColumnCount(7);
     QTreeWidget *intTree = ui->treeWidget_intervall;
     int groupReps = 0;
     int seriesReps = 0;
@@ -585,7 +619,7 @@ void Dialog_workCreator::set_plotModel()
         {
             if(phase.contains(isGroup))
             {
-                groupReps = topItem->data(7,Qt::DisplayRole).toInt();
+                groupReps = topItem->data(8,Qt::DisplayRole).toInt();
 
                 for(int repeat = 0; repeat < groupReps; ++repeat)
                 {
@@ -601,7 +635,7 @@ void Dialog_workCreator::set_plotModel()
                         {
                             if(subphase.contains(isSeries))
                             {
-                                seriesReps = childItem->data(7,Qt::DisplayRole).toInt();
+                                seriesReps = childItem->data(8,Qt::DisplayRole).toInt();
                                 for(int repeat = 0; repeat < seriesReps; ++repeat)
                                 {
                                     for(int subChild = 0; subChild < subchildCount; ++subChild)
@@ -623,7 +657,7 @@ void Dialog_workCreator::set_plotModel()
             }
             else if(phase.contains(isSeries))
             {
-                seriesReps = topItem->data(7,Qt::DisplayRole).toInt();
+                seriesReps = topItem->data(8,Qt::DisplayRole).toInt();
 
                 for(int repeat = 0; repeat < seriesReps; ++repeat)
                 {
@@ -655,6 +689,7 @@ void Dialog_workCreator::add_to_plot(QTreeWidgetItem *item,int currIndex)
     double timeSum = 0;
     double distSum = 0;
     double stressSum = 0.0;
+    double workSum = 0;
     int row = plotModel->rowCount();
 
     if(row != 0)
@@ -662,6 +697,7 @@ void Dialog_workCreator::add_to_plot(QTreeWidgetItem *item,int currIndex)
         timeSum = plotModel->data(plotModel->index(row-1,1,QModelIndex())).toDouble();
         distSum = plotModel->data(plotModel->index(row-1,2,QModelIndex())).toDouble();
         stressSum = plotModel->data(plotModel->index(row-1,3,QModelIndex())).toDouble();
+        workSum = plotModel->data(plotModel->index(row-1,4,QModelIndex())).toDouble();
     }
 
     plotModel->insertRows(row,2,QModelIndex());
@@ -669,24 +705,26 @@ void Dialog_workCreator::add_to_plot(QTreeWidgetItem *item,int currIndex)
     plotModel->setData(plotModel->index(row,1,QModelIndex()),timeSum);
     plotModel->setData(plotModel->index(row,2,QModelIndex()),distSum);
     plotModel->setData(plotModel->index(row,3,QModelIndex()),0);
+    plotModel->setData(plotModel->index(row,4,QModelIndex()),workSum);
 
     plotModel->setData(plotModel->index(row+1,0,QModelIndex()),item->data(2,Qt::DisplayRole).toDouble());
     plotModel->setData(plotModel->index(row+1,1,QModelIndex()),timeSum + (this->get_timesec(item->data(4,Qt::DisplayRole).toString())));
-    plotModel->setData(plotModel->index(row+1,2,QModelIndex()),distSum + item->data(6,Qt::DisplayRole).toDouble());
+    plotModel->setData(plotModel->index(row+1,2,QModelIndex()),distSum + item->data(7,Qt::DisplayRole).toDouble());
     plotModel->setData(plotModel->index(row+1,3,QModelIndex()),stressSum + item->data(5,Qt::DisplayRole).toDouble());
+    plotModel->setData(plotModel->index(row+1,4,QModelIndex()),workSum + item->data(6,Qt::DisplayRole).toDouble());
 
     if(item->parent() == nullptr)
     {
-        plotModel->setData(plotModel->index(row,4,QModelIndex()),item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
-        plotModel->setData(plotModel->index(row+1,4,QModelIndex()),item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
+        plotModel->setData(plotModel->index(row,5,QModelIndex()),item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
+        plotModel->setData(plotModel->index(row+1,5,QModelIndex()),item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
     }
     else
     {
-        plotModel->setData(plotModel->index(row,4,QModelIndex()),item->parent()->data(0,Qt::DisplayRole).toString()+"#"+item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
-        plotModel->setData(plotModel->index(row+1,4,QModelIndex()),item->parent()->data(0,Qt::DisplayRole).toString()+"#"+item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
+        plotModel->setData(plotModel->index(row,5,QModelIndex()),item->parent()->data(0,Qt::DisplayRole).toString()+"#"+item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
+        plotModel->setData(plotModel->index(row+1,5,QModelIndex()),item->parent()->data(0,Qt::DisplayRole).toString()+"#"+item->data(0,Qt::DisplayRole).toString()+":"+QString::number(currIndex));
     }
-    plotModel->setData(plotModel->index(row,5,QModelIndex()),row);
-    plotModel->setData(plotModel->index(row+1,5,QModelIndex()),row+1);
+    plotModel->setData(plotModel->index(row,6,QModelIndex()),row);
+    plotModel->setData(plotModel->index(row+1,6,QModelIndex()),row+1);
 }
 
 void Dialog_workCreator::set_plotGraphic(int dataPoints)
@@ -696,6 +734,7 @@ void Dialog_workCreator::set_plotGraphic(int dataPoints)
     timeSum = 0.0;
     distSum = 0.0;
     stressSum = 0.0;
+    workSum = 0.0;
     double thres_high = 0.0;
 
     ui->widget_plot->setInteractions(QCP::iSelectPlottables | QCP::iMultiSelect);
@@ -715,7 +754,7 @@ void Dialog_workCreator::set_plotGraphic(int dataPoints)
         for (int data=0 ;  data < dataPoints; ++data)
         {
              y_thres[data] = plotModel->data(plotModel->index(data,0,QModelIndex())).toDouble();
-             x_time[data] = plotModel->data(plotModel->index(data,1,QModelIndex())).toDouble();
+             x_time[data] = plotModel->data(plotModel->index(data,1,QModelIndex())).toDouble()/60;
              x_dist[data] = plotModel->data(plotModel->index(data,2,QModelIndex())).toDouble();
              if(y_thres[data] > thres_high)
              {
@@ -723,9 +762,10 @@ void Dialog_workCreator::set_plotGraphic(int dataPoints)
              }
         }
 
-        timeSum = plotModel->data(plotModel->index(dataPoints-1,1,QModelIndex())).toDouble();
+        timeSum = plotModel->data(plotModel->index(dataPoints-1,1,QModelIndex())).toDouble()/60;
         distSum = plotModel->data(plotModel->index(dataPoints-1,2,QModelIndex())).toDouble();
         stressSum = plotModel->data(plotModel->index(dataPoints-1,3,QModelIndex())).toDouble();
+        workSum = plotModel->data(plotModel->index(dataPoints-1,4,QModelIndex())).toDouble();
 
         workout_line->setData(x_time,y_thres,true);
 
@@ -735,13 +775,13 @@ void Dialog_workCreator::set_plotGraphic(int dataPoints)
         ui->widget_plot->yAxis2->setRange(0,thres_high+20.0);
     }
 
-    if(currentSport != settings::isSwim)
+    if(!isSwim)
     {
         distSum = this->set_doubleValue(ceil(distSum*10.0)/10,false);
     }
 
     ui->widget_plot->replot();
-    ui->label_duration->setText("Time: " + this->set_time(static_cast<int>(timeSum)) + " - " + "Distance: " + QString::number(distSum) + " - " + "Stress: " + QString::number(round(stressSum)));
+    ui->label_duration->setText("Time: " + this->set_time(static_cast<int>(timeSum*60)) + " - " + "Distance: " + QString::number(distSum) + " - " + "Stress: " + QString::number(round(stressSum))+ " - " + "Work: "+QString::number(round(workSum)));
 }
 
 void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
@@ -768,7 +808,7 @@ void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
         {
             groupRange = true;
             int childCount,groupCount;
-            dataCount = groupCount = item->data(7,Qt::DisplayRole).toInt()*2;
+            dataCount = groupCount = item->data(8,Qt::DisplayRole).toInt()*2;
             childCount = item->childCount();
             if(childCount > 0)
             {
@@ -778,7 +818,7 @@ void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
                     if(item->child(i)->childCount() > 0)
                     {
                         int subCount = item->child(i)->childCount();
-                        dataCount = dataCount*(subCount*item->child(i)->data(7,Qt::DisplayRole).toInt());
+                        dataCount = dataCount*(subCount*item->child(i)->data(8,Qt::DisplayRole).toInt());
                     }
                     else
                     {
@@ -799,8 +839,8 @@ void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
         }     
     }
     plotProxy->setFilterRegExp("^"+itemIdent);
-    plotProxy->setFilterKeyColumn(4);
-    plotProxy->sort(5);
+    plotProxy->setFilterKeyColumn(5);
+    plotProxy->sort(6);
 
     QCPDataSelection selection;
 
@@ -808,12 +848,12 @@ void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
     {
         if(groupRange)
         {
-            int dataStart = plotProxy->data(plotProxy->index(0,5)).toInt();
+            int dataStart = plotProxy->data(plotProxy->index(0,6)).toInt();
             selection.addDataRange(QCPDataRange(dataStart,dataStart+dataCount));
         }
         else
         {
-            selection.addDataRange(QCPDataRange(plotProxy->data(plotProxy->index(0,5)).toInt(),plotProxy->data(plotProxy->index(plotProxy->rowCount()-1,5)).toInt()+1));
+            selection.addDataRange(QCPDataRange(plotProxy->data(plotProxy->index(0,6)).toInt(),plotProxy->data(plotProxy->index(plotProxy->rowCount()-1,6)).toInt()+1));
         }
     }
 
@@ -821,7 +861,7 @@ void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
     {
         for(int i = 0; i < plotProxy->rowCount(); ++i)
         {
-            selection.addDataRange(QCPDataRange(plotProxy->data(plotProxy->index(i,5)).toInt(),plotProxy->data(plotProxy->index(i,5)).toInt()+1),false);
+            selection.addDataRange(QCPDataRange(plotProxy->data(plotProxy->index(i,6)).toInt(),plotProxy->data(plotProxy->index(i,6)).toInt()+1),false);
         }
     }
 
@@ -850,80 +890,90 @@ void Dialog_workCreator::on_treeWidget_intervall_itemClicked(QTreeWidgetItem *it
 void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &sport)
 {
     currentSport = sport;
+
+    isSwim = isBike = isRun = isStrength = isAlt = isOther = false;
+
+    if(currentSport == settings::isSwim) isSwim = true;
+    if(currentSport == settings::isBike) isBike = true;
+    if(currentSport == settings::isRun) isRun = true;
+    if(currentSport == settings::isStrength) isStrength = true;
+    if(currentSport == settings::isAlt) isAlt = true;
+    if(currentSport == settings::isOther) isOther = true;
+
     edit_del.sport = sport;
     this->clearIntTree();
-    this->get_workouts(sport);
-    this->set_sport_threshold(sport);
-}
 
-void Dialog_workCreator::set_editRow(QString sport)
-{
-    if(sport == settings::isSwim)
-    {
-        editRow[2] = 1;
-        editRow[4] = 0;
-        editRow[6] = 1;
-    }
-    else if(sport == settings::isBike || sport == settings::isRun)
-    {
-        editRow[2] = 1;
-        editRow[4] = 1;
-        editRow[6] = 1;
-    }
-    else if(sport == settings::isStrength)
-    {
-        editRow[2] = 1;
-        editRow[4] = 1;
-        editRow[6] = 0;
-    }
-    else
-    {
-        editRow[2] = 0;
-        editRow[4] = 1;
-        editRow[6] = 1;
-    }
-}
-
-void Dialog_workCreator::set_sport_threshold(QString sport)
-{
-    if(sport == settings::isAlt || sport == settings::isOther)
+    if(isOther)
     {
         thresPace = 0;
         thresPower = 0.0;
         ui->label_threshold->setText("-");
         currThres = thresPower;
+
+        editRow[2] = 0;
+        editRow[4] = 1;
+        editRow[7] = 1;
     }
-    if(sport == settings::isSwim)
+    if(isSwim)
     {
        thresPower = settings::get_thresValue("swimpower");
        thresPace = settings::get_thresValue("swimpace");
        ui->label_threshold->setText(this->set_time(thresPace) + " /100m");
        currThres = thresPace;
+
+       editRow[2] = 1;
+       editRow[4] = 0;
+       editRow[7] = 1;
     }
-    if(sport == settings::isBike)
+    if(isBike)
     {
        thresPower = settings::get_thresValue("bikepower");
        thresPace = settings::get_thresValue("bikepace");
        ui->label_threshold->setText(QString::number(thresPower) + " Watt");
        currThres = thresPower;
+
+       editRow[2] = 1;
+       editRow[4] = 1;
+       editRow[7] = 1;
     }
-    if(sport == settings::isRun)
+    if(isRun)
     {
        thresPower = settings::get_thresValue("runpower");
        thresPace = settings::get_thresValue("runpace");
        ui->label_threshold->setText(this->set_time(thresPace) + " /km");
        currThres = thresPace;
+
+       editRow[2] = 1;
+       editRow[4] = 1;
+       editRow[7] = 1;
     }
-    if(sport == settings::isStrength)
+    if(isStrength)
     {
        thresPower = settings::get_thresValue("stgpower");
        thresPace = 0;
        ui->label_threshold->setText(QString::number(thresPower) + " Watt");
        currThres = thresPower;
+
+       editRow[2] = 0;
+       editRow[4] = 1;
+       editRow[7] = 1;
     }
+    if(isAlt)
+    {
+       thresPower = settings::get_thresValue("runpower");
+       thresPace = 0;
+       ui->label_threshold->setText(QString::number(thresPower) + " Watt");
+       currThres = thresPower;
+
+       editRow[2] = 1;
+       editRow[4] = 1;
+       editRow[7] = 0;
+    }
+
     edit_del.currThres = currThres;
     edit_del.thresPace = thresPace;
-    this->set_editRow(sport);
+
+    this->get_workouts(sport);
 }
 
 void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
@@ -936,6 +986,7 @@ void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
     ui->comboBox_code->setCurrentText(workCode.replace(" ",""));
     ui->lineEdit_workoutname->setText(workTitle.replace(" ",""));
     ui->checkBox_timebased->setChecked(listModel->data(listModel->index(index.row(),2)).toBool());
+    this->control_editPanel(false);
     this->open_stdWorkout(workoutID);
 }
 

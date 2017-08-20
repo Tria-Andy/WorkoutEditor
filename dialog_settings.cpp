@@ -28,6 +28,11 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
 {
     ui->setupUi(this);
     schedule_ptr = psched;
+    saisonProxy = new QSortFilterProxyModel;
+    saisonProxy->setSourceModel(schedule_ptr->saisonsModel);
+    contestProxy = new QSortFilterProxyModel;
+    contestProxy->setSourceModel(schedule_ptr->contestModel);
+    contestTreeModel = new QStandardItemModel;
     sportList << settings::isSwim << settings::isBike << settings::isRun;
     keyList = settings::get_keyList();
     extkeyList = settings::get_extkeyList();
@@ -35,13 +40,9 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     useColor = false;
     stressEdit = false;
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
-    saisonXML = "saison.xml";
-    contestsPath = settings::get_gcInfo("contests");
-    contestTags << "date" << "sport" << "name" << "distance" << "stress";
     level_model = new QStandardItemModel();
     hf_model = new QStandardItemModel();
-    contestModel = new QStandardItemModel();
-    ui->treeView_contest->setModel(contestModel);
+    ui->treeView_contest->setModel(contestTreeModel);
     ui->treeView_contest->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->treeView_contest->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->treeView_contest->header()->setVisible(false);
@@ -51,15 +52,10 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->lineEdit_activity->setText(settings::get_gcInfo("folder"));
     ui->lineEdit_schedule->setText(settings::get_gcInfo("schedule"));
     ui->lineEdit_standard->setText(settings::get_gcInfo("workouts"));
-    ui->lineEdit_contestsFile->setText(contestsPath);
+    ui->lineEdit_saisonFile->setText(settings::get_gcInfo("saisons"));
     ui->lineEdit_configfile->setText(settings::get_gcInfo("valuefile"));
     ui->spinBox_hfThres->setValue(settings::get_thresValue("hfthres"));
     ui->spinBox_hfMax->setValue(settings::get_thresValue("hfmax"));
-    ui->lineEdit_saison->setText(settings::get_saisonInfo("saison"));
-    ui->lineEdit_saisonWeeks->setText(settings::get_saisonInfo("weeks"));
-    ui->dateEdit_saisonStart->setDate(QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy"));
-    ui->lineEdit_startWeek->setText(settings::get_saisonInfo("startkw"));
-    ui->dateEdit_saisonEnd->setDate(QDate::fromString(settings::get_saisonInfo("endDate"),"dd.MM.yyyy"));
     ui->spinBox_ltsDays->setValue(settings::get_ltsValue("ltsdays"));
     ui->spinBox_stsDays->setValue(settings::get_ltsValue("stsdays"));
     ui->spinBox_lastLTS->setValue(settings::get_ltsValue("lastlts"));
@@ -74,6 +70,14 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->lineEdit_weight->setText(QString::number(settings::get_weightforDate(QDateTime::currentDateTime())));
     ui->doubleSpinBox_bone->setValue(settings::get_athleteValue("boneskg"));
     ui->doubleSpinBox_muscle->setValue(settings::get_athleteValue("musclekg"));
+
+    disconnect(ui->comboBox_saisons,SIGNAL(currentIndexChanged(QString)),this,SLOT(on_comboBox_saisons_currentIndexChanged(QString)));
+    for(int i = 0; i < saisonProxy->rowCount(); ++i)
+    {
+        ui->comboBox_saisons->addItem(saisonProxy->data(saisonProxy->index(i,0)).toString());
+    }
+    ui->comboBox_saisons->setEditable(true);
+    connect(ui->comboBox_saisons,SIGNAL(currentIndexChanged(QString)),this,SLOT(on_comboBox_saisons_currentIndexChanged(QString)));
 
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
@@ -94,7 +98,9 @@ void Dialog_settings::on_pushButton_cancel_clicked()
 {
     delete level_model;
     delete hf_model;
-    delete contestModel;
+    delete contestTreeModel;
+    delete saisonProxy;
+    delete contestProxy;
     reject();
 }
 
@@ -114,32 +120,47 @@ void Dialog_settings::checkSetup()
     this->set_thresholdModel(ui->comboBox_thresSport->currentText());
     this->set_hfmodel(ui->spinBox_hfThres->value());
     this->set_ltsList();
+    this->set_saisonInfo(ui->comboBox_saisons->currentText());
+}
 
-    this->check_File(contestsPath,saisonXML);
+void Dialog_settings::set_saisonInfo(QString saisonName)
+{
+    saisonProxy->invalidate();
+    saisonProxy->setFilterFixedString(saisonName);
+    saisonProxy->setFilterKeyColumn(0);
 
-    QDomDocument saisonDoc = this->load_XMLFile(contestsPath,saisonXML);
-    QDomElement rootTag;
-    QDomNodeList xmlList;
-    QDomElement xmlElement;
-    QStandardItem *rootItem = contestModel->invisibleRootItem();
+    ui->dateEdit_saisonStart->setDate(saisonProxy->data(saisonProxy->index(0,1)).toDate());
+    ui->dateEdit_saisonEnd->setDate(saisonProxy->data(saisonProxy->index(0,2)).toDate());
+    ui->lineEdit_startWeek->setText(QString::number(ui->dateEdit_saisonStart->date().weekNumber()));
+    ui->lineEdit_saisonWeeks->setText(QString::number(saisonProxy->data(saisonProxy->index(0,3)).toInt()));
+
+    this->refresh_contestTree(saisonName);
+}
+
+void Dialog_settings::refresh_contestTree(QString saisonName)
+{
+    contestProxy->invalidate();
+    contestProxy->setFilterFixedString(saisonName);
+    contestProxy->setFilterKeyColumn(1);
+
+    int contestCount = contestProxy->rowCount();
+    contestTreeModel->clear();
+    QStandardItem *rootItem = contestTreeModel->invisibleRootItem();
     QList<QStandardItem *> contestItems;
 
-    rootTag = saisonDoc.firstChildElement();
-    xmlList = rootTag.elementsByTagName("contest");
-
-    for(int row = 0; row < xmlList.count(); ++row)
+    for(int contest = 0; contest < contestCount; ++contest)
     {
-        xmlElement = xmlList.at(row).toElement();
-        for(int col = 0; col < contestTags.count(); ++col)
+        for(int col = 1; col < contestProxy->columnCount(); ++col)
         {
-            contestItems << new QStandardItem(xmlElement.attribute(contestTags.at(col)));
+            contestItems << new QStandardItem(contestProxy->data(contestProxy->index(contest,col)).toString());
         }
         rootItem->appendRow(contestItems);
         contestItems.clear();
-        contestModel->setData(contestModel->index(row,0),QDate::fromString(contestModel->data(contestModel->index(row,0)).toString(),"yyyy-MM-dd"));
+        contestTreeModel->setData(contestTreeModel->index(contest,1),QDate::fromString(contestTreeModel->data(contestTreeModel->index(contest,1)).toString(),"yyyy-MM-dd"));
     }
-    contestModel->sort(0);
+    contestTreeModel->sort(1);
 }
+
 
 void Dialog_settings::set_SelectControls(QString selection)
 {
@@ -250,12 +271,6 @@ void Dialog_settings::writeChangedValues()
     settings::set_gcInfo("workouts",ui->lineEdit_standard->text());
     settings::set_gcInfo("valuefile",ui->lineEdit_configfile->text());
 
-    settings::set_saisonInfos("saison",ui->lineEdit_saison->text());
-    settings::set_saisonInfos("startDate",ui->dateEdit_saisonStart->date().toString("dd.MM.yyyy"));
-    settings::set_saisonInfos("startkw",ui->lineEdit_startWeek->text());
-    settings::set_saisonInfos("endDate",ui->dateEdit_saisonEnd->date().toString("dd.MM.yyyy"));
-    settings::set_saisonInfos("weeks",ui->lineEdit_saisonWeeks->text());
-
     settings::set_ltsValue("ltsdays",ui->spinBox_ltsDays->value());
     settings::set_ltsValue("stsdays",ui->spinBox_stsDays->value());
     settings::set_ltsValue("lastlts",ui->spinBox_lastLTS->value());
@@ -271,6 +286,8 @@ void Dialog_settings::writeChangedValues()
     }
 
     settings::writeListValues(&listMap);
+
+    schedule_ptr->write_saisonInfo();
 
     if(stressEdit) schedule_ptr->save_ltsFile(ui->spinBox_ltsDays->value());
 
@@ -377,13 +394,13 @@ void Dialog_settings::set_hfmodel(double hfThres)
 
 void Dialog_settings::set_ltsList()
 {
-    QMap<QDate,double> *map = schedule_ptr->get_StressMap();
+    QMap<QDate,QPair<double,double> > *map = schedule_ptr->get_StressMap();
     QString itemValue;
     ui->listWidget_stressValue->clear();
 
-    for(QMap<QDate,double>::const_iterator it =  map->cbegin(), end = map->cend(); it != end; ++it)
+    for(QMap<QDate,QPair<double,double>>::const_iterator it =  map->cbegin(), end = map->cend(); it != end; ++it)
     {
-        itemValue = it.key().toString("dd.MM.yyyy") +" - "+QString::number(it.value());
+        itemValue = it.key().toString("dd.MM.yyyy") +" - "+QString::number(it.value().first);
         ui->listWidget_stressValue->addItem(itemValue);
     }
 }
@@ -720,12 +737,16 @@ void Dialog_settings::on_spinBox_hfMax_valueChanged(int value)
 
 void Dialog_settings::on_dateEdit_stress_dateChanged(const QDate &date)
 {
-    ui->spinBox_stress->setValue(schedule_ptr->get_StressMap()->value(date));
+    ui->spinBox_stress->setValue(schedule_ptr->get_StressMap()->value(date).first);
 }
 
 void Dialog_settings::on_pushButton_stressEdit_clicked()
 {
-    schedule_ptr->set_stressMap(ui->dateEdit_stress->date(),ui->spinBox_stress->value());
+    QPair<double,double> stressMap;
+    //schedule_ptr->set_stressMap(ui->dateEdit_stress->date(),ui->spinBox_stress->value());
+    stressMap.first = ui->spinBox_stress->value();
+    stressMap.second = 0.0;
+    schedule_ptr->updateStress(ui->dateEdit_stress->date().toString("dd.MM.yyyy"),stressMap,1);
     stressEdit = true;
     this->set_ltsList();
     this->enableSavebutton();
@@ -869,59 +890,44 @@ void Dialog_settings::on_pushButton_clearFat_clicked()
     ui->lineEdit_comment->clear();
 }
 
-void Dialog_settings::saveContestFile()
-{
-    contestModel->sort(0);
-
-    QDomDocument xmlDoc;
-    QDomElement xmlRoot,xmlElement;
-    xmlRoot = xmlDoc.createElement("Saison");
-    xmlDoc.appendChild(xmlRoot);
-
-    for(int row = 0; row < contestModel->rowCount();++row)
-    {
-        xmlElement = xmlDoc.createElement("contest");
-        xmlElement.setAttribute("id",row);
-        for(int tags = 0; tags < contestTags.count(); ++tags)
-        {
-            xmlElement.setAttribute(contestTags.at(tags),contestModel->data(contestModel->index(row,tags)).toString());
-        }
-        xmlRoot.appendChild(xmlElement);
-    }
-    this->write_XMLFile(contestsPath,&xmlDoc,saisonXML);
-}
-
-
 void Dialog_settings::on_pushButton_addContest_clicked()
 {
     QModelIndex listIndex = ui->treeView_contest->currentIndex();
+    int row,newID;
 
     if(listIndex.isValid())
     {
-        contestModel->setData(contestModel->index(listIndex.row(),0),ui->dateEdit_contest->date());
-        contestModel->setData(contestModel->index(listIndex.row(),1),ui->comboBox_contestsport->currentText());
-        contestModel->setData(contestModel->index(listIndex.row(),2),ui->lineEdit_contest->text());
-        contestModel->setData(contestModel->index(listIndex.row(),3),ui->doubleSpinBox_contest->value());
-        contestModel->setData(contestModel->index(listIndex.row(),4),ui->spinBox_contestStress->value());
+        row = ui->treeView_contest->currentIndex().row();
     }
     else
     {
-        int rowCount = contestModel->rowCount();
-        contestModel->insertRow(rowCount);
-        contestModel->setData(contestModel->index(rowCount,0),ui->dateEdit_contest->date());
-        contestModel->setData(contestModel->index(rowCount,1),ui->comboBox_contestsport->currentText());
-        contestModel->setData(contestModel->index(rowCount,2),ui->lineEdit_contest->text());
-        contestModel->setData(contestModel->index(rowCount,3),ui->doubleSpinBox_contest->value());
-        contestModel->setData(contestModel->index(rowCount,4),ui->spinBox_contestStress->value());
+        newID = contestProxy->rowCount();
+        row = schedule_ptr->contestModel->rowCount();
+        schedule_ptr->contestModel->insertRow(row,QModelIndex());
+        schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,0),newID);
     }
-    ui->treeView_contest->clearSelection();
-    this->saveContestFile();
 
+    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,1),ui->comboBox_saisons->currentText());
+    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,2),ui->dateEdit_contest->date());
+    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,3),ui->comboBox_contestsport->currentText());
+    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,4),ui->lineEdit_contest->text());
+    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,5),ui->doubleSpinBox_contest->value());
+    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,6),ui->spinBox_contestStress->value());
+
+    for(int i = 0; i < schedule_ptr->contestModel->columnCount(); ++i)
+    {
+        qDebug() << schedule_ptr->contestModel->data(schedule_ptr->contestModel->index(row,i)).toString();
+    }
+
+
+    ui->treeView_contest->clearSelection();
+    this->refresh_contestTree(ui->comboBox_saisons->currentText());
 }
 
 void Dialog_settings::on_pushButton_delContest_clicked()
 {
-    contestModel->removeRow(ui->treeView_contest->currentIndex().row());
+    contestTreeModel->removeRow(ui->treeView_contest->currentIndex().row());
+    contestProxy->removeRow(ui->treeView_contest->currentIndex().row());
 
     ui->dateEdit_contest->setDate(QDate::currentDate());
     ui->comboBox_contestsport->setCurrentIndex(0);
@@ -930,14 +936,83 @@ void Dialog_settings::on_pushButton_delContest_clicked()
     ui->spinBox_contestStress->setValue(0);
 
     ui->treeView_contest->clearSelection();
-    this->saveContestFile();
 }
 
 void Dialog_settings::on_treeView_contest_clicked(const QModelIndex &index)
 {
-    ui->dateEdit_contest->setDate(contestModel->data(contestModel->index(index.row(),0)).toDate());
-    ui->comboBox_contestsport->setCurrentText(contestModel->data(contestModel->index(index.row(),1)).toString());
-    ui->lineEdit_contest->setText(contestModel->data(contestModel->index(index.row(),2)).toString());
-    ui->doubleSpinBox_contest->setValue(contestModel->data(contestModel->index(index.row(),3)).toDouble());
-    ui->spinBox_contestStress->setValue(contestModel->data(contestModel->index(index.row(),4)).toInt());
+    ui->dateEdit_contest->setDate(contestTreeModel->data(contestTreeModel->index(index.row(),1)).toDate());
+    ui->comboBox_contestsport->setCurrentText(contestTreeModel->data(contestTreeModel->index(index.row(),2)).toString());
+    ui->lineEdit_contest->setText(contestTreeModel->data(contestTreeModel->index(index.row(),3)).toString());
+    ui->doubleSpinBox_contest->setValue(contestTreeModel->data(contestTreeModel->index(index.row(),4)).toDouble());
+    ui->spinBox_contestStress->setValue(contestTreeModel->data(contestTreeModel->index(index.row(),5)).toInt());
+}
+
+void Dialog_settings::on_toolButton_addSaison_clicked()
+{
+    ui->comboBox_saisons->insertItem(ui->comboBox_saisons->count(),"New-Saison");
+    ui->comboBox_saisons->setCurrentIndex(ui->comboBox_saisons->count()-1);
+    ui->dateEdit_saisonStart->setDate(QDate(QDate().currentDate().year(),1,1));
+    ui->dateEdit_saisonEnd->setDate(QDate(QDate().currentDate().year(),12,31));
+    ui->toolButton_addSaison->setEnabled(false);
+}
+
+void Dialog_settings::on_comboBox_saisons_currentIndexChanged(const QString &value)
+{
+    this->set_saisonInfo(value);
+    schedule_ptr->newSaison = true;
+}
+
+void Dialog_settings::on_comboBox_saisons_editTextChanged(const QString &value)
+{
+    ui->comboBox_saisons->setItemText(ui->comboBox_saisons->currentIndex(),value);
+}
+
+void Dialog_settings::on_toolButton_updateSaison_clicked()
+{
+    schedule_ptr->update_saison(schedule_ptr->newSaison,
+                                ui->comboBox_saisons->currentIndex(),
+                                ui->comboBox_saisons->currentText(),
+                                ui->dateEdit_saisonStart->date(),
+                                ui->dateEdit_saisonEnd->date(),
+                                ui->lineEdit_saisonWeeks->text().toInt()
+                );
+
+    if(schedule_ptr->newSaison)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this,
+                                      tr("New Saison"),
+                                      "Create and Save new Saison?",
+                                      QMessageBox::Yes|QMessageBox::No
+                                      );
+        if (reply == QMessageBox::Yes)
+        {
+            schedule_ptr->add_newSaison(ui->comboBox_saisons->currentText());
+            schedule_ptr->write_saisonInfo();
+            schedule_ptr->save_weekPlan();
+        }
+    }
+
+    ui->toolButton_addSaison->setEnabled(true);
+    this->set_saisonInfo(ui->comboBox_saisons->currentText());
+}
+
+void Dialog_settings::on_toolButton_deleteSaison_clicked()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this,
+                                  tr("Delete Saison"),
+                                  "Delete selected Saison? All Saison Information will be removed!",
+                                  QMessageBox::Yes|QMessageBox::No
+                                  );
+    if (reply == QMessageBox::Yes)
+    {
+        schedule_ptr->remove_saison(ui->comboBox_saisons->currentIndex());
+        schedule_ptr->delete_Saison(ui->comboBox_saisons->currentText());
+        schedule_ptr->write_saisonInfo();
+        schedule_ptr->save_weekPlan();
+        ui->comboBox_saisons->setCurrentIndex(0);
+        this->set_saisonInfo(ui->comboBox_saisons->currentText());
+
+    }
 }

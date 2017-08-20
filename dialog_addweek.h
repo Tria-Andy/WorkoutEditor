@@ -272,14 +272,13 @@ private:
     schedule *workSched;
     del_addweek week_del;
     QStandardItemModel *weekModel;
-    QSortFilterProxyModel *metaProxy,*contentProxy;
-    QString openID,selYear,weekID,timeFormat,empty;
-    QStringList sportuseList,weekHeader,weekMeta,weekContent;
+    QSortFilterProxyModel *metaProxy,*metaProxyFilter,*contentProxy;
+    QString editWeekID,timeFormat,empty;
+    QStringList sportuseList,weekHeader;
     bool update;
 
     void fill_values(QString);
     QStringList create_values();
-    void store_values();
 };
 
 #endif // DIALOG_ADDWEEK_H

@@ -80,12 +80,12 @@ void Dialog_workouts::on_listView_workouts_clicked(const QModelIndex &index)
     metaProxy->setFilterRegExp("\\b"+workoutID+"\\b");
     metaProxy->setFilterKeyColumn(1);
 
-    //"sport" << "id" << "code" << "title" << "duration" << "distance" << "stress";
+    //"sport" << "id" << "code" << "title" << "duration" << "distance" << "stress" << "work";
     for(int i = 0; i < metaProxy->columnCount()-1; ++i)
     {
         workData.insert(i,metaProxy->data(metaProxy->index(0,i+1)).toString());
     }
 
-    ui->label_selected->setText(workoutTitle + " - " + workData.value(3) + " - " + workData.value(4) + " - " + workData.value(5));
+    ui->label_selected->setText(workoutTitle + " - " + workData.value(3) + " - " + workData.value(4) + " - " + workData.value(5) + " - " + workData.value(6));
     ui->pushButton_ok->setEnabled(true);
 }

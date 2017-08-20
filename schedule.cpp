@@ -20,8 +20,9 @@
 
 schedule::schedule()
 {
-    workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress";
-    metaTags << "id" << "week" << "name" << "fdw";
+    workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj";
+    metaTags << "saison" << "id" << "week" << "name" << "fdw";
+    //metaTags << "id" << "saison" << "week" << "weekid" << "phase" << "fdw";
     contentTags << "id" << "week";
     for(int i = 0; i < settings::get_listValues("Sportuse").count();++i)
     {
@@ -62,6 +63,7 @@ void schedule::freeMem()
 
 void schedule::read_dayWorkouts(QDomDocument workouts)
 {
+    QPair<double,double> tempValues;
 
     QDomElement root_workouts = workouts.firstChildElement();
     QDomNodeList workout_list;
@@ -70,9 +72,9 @@ void schedule::read_dayWorkouts(QDomDocument workouts)
         workout_list = root_workouts.elementsByTagName("workout");
     }
 
-    workout_schedule = new QStandardItemModel(workout_list.count(),9);
+    workout_schedule = new QStandardItemModel(workout_list.count(),workoutTags.count());
     QDate workDate;
-    int stress = 0;
+
     if(!workout_list.isEmpty())
     {
         for(int i = 0; i < workout_list.count(); ++i)
@@ -86,16 +88,18 @@ void schedule::read_dayWorkouts(QDomDocument workouts)
                 workout_schedule->setData(workout_schedule->index(i,col,QModelIndex()),workout_element.attribute(workoutTags.at(col)));
             }
             workDate = QDate::fromString(workout_element.attribute("date"),"dd.MM.yyyy");
-            stress = workout_element.attribute("stress").toInt();
+            tempValues.first = workout_element.attribute("stress").toInt();
+            tempValues.second = this->get_timesec(workout_element.attribute("duration"))/60.0;
 
             if(stressValues.contains(workDate))
             {
-                stress = stress + stressValues.value(workDate);
-                stressValues.insert(workDate,stress);
+                tempValues.first = tempValues.first + stressValues.value(workDate).first;
+                tempValues.second = tempValues.second + stressValues.value(workDate).second;
+                stressValues.insert(workDate,tempValues);
             }
             else
             {
-                stressValues.insert(workDate,stress);
+                stressValues.insert(workDate,tempValues);
             }
         }
         workout_schedule->sort(2);
@@ -132,31 +136,38 @@ void schedule::save_dayWorkouts()
 void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
 {
     QString contentString;
+    QString currentSaison = this->get_currSaison();
+    QDate startDate = this->get_saisonInfo(currentSaison,"start").toDate();
+    int saisonWeeks = this->get_saisonInfo(currentSaison,"weeks").toInt();
+
     QDomElement root_meta = weekMeta.firstChildElement();
     QDomElement root_content = weekContent.firstChildElement();
     QDomNodeList meta_list,content_list;
     meta_list = root_meta.elementsByTagName("phase");
     content_list = root_content.elementsByTagName("content");
 
-    week_meta = new QStandardItemModel(meta_list.count(),4);
+    week_meta = new QStandardItemModel(meta_list.count(),metaTags.count());
+    metaProxy = new QSortFilterProxyModel;
+    metaProxy->setSourceModel(week_meta);
     week_content = new QStandardItemModel(content_list.count(),contentTags.count());
+    contentProxy = new QSortFilterProxyModel;
+    contentProxy->setSourceModel(week_content);
 
     //fill week_meta
     if(meta_list.count() == 0)
     {
-        QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
         QString weekid;
         QString noPhase = settings::get_generalValue("empty");
-        int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
 
         week_meta->setRowCount(saisonWeeks);
         for(int week = 0,id = 1; week < saisonWeeks; ++week,++id)
         {
             weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
-            week_meta->setData(week_meta->index(week,0,QModelIndex()),id);
-            week_meta->setData(week_meta->index(week,1,QModelIndex()),weekid);
-            week_meta->setData(week_meta->index(week,2,QModelIndex()),noPhase);
-            week_meta->setData(week_meta->index(week,3,QModelIndex()),startDate.addDays(week*7).toString("dd.MM.yyyy"));
+            week_meta->setData(week_meta->index(week,0,QModelIndex()),currentSaison);
+            week_meta->setData(week_meta->index(week,1,QModelIndex()),id);
+            week_meta->setData(week_meta->index(week,2,QModelIndex()),weekid);
+            week_meta->setData(week_meta->index(week,3,QModelIndex()),noPhase);
+            week_meta->setData(week_meta->index(week,4,QModelIndex()),startDate.addDays(week*7).toString("dd.MM.yyyy"));
         }
         this->save_weekPlan();
     }
@@ -169,7 +180,7 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
             meta_element = meta_node.toElement();
             for(int col = 0; col < week_meta->columnCount(); ++col)
             {
-                if(col == 0)
+                if(col == 1)
                 {
                     week_meta->setData(week_meta->index(i,col,QModelIndex()),meta_element.attribute(metaTags.at(col)).toInt());
                 }
@@ -180,16 +191,14 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
             }
         }
     }
-    week_meta->sort(0);
+    week_meta->sort(1);
 
     //fill week_content
     if(content_list.count() == 0)
     {
-        QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
         QString weekid;
-        int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
-
         week_content->setRowCount(saisonWeeks);
+
         for(int week = 0,id = 1; week < saisonWeeks; ++week,++id)
         {
             weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
@@ -266,12 +275,71 @@ void schedule::save_weekPlan()
     this->write_XMLFile(schedulePath,&xmlDoc,contentFile);
 }
 
+void schedule::add_newSaison(QString saisonName)
+{
+    int saisonWeeks = this->get_saisonInfo(saisonName,"weeks").toInt();
+    QDate startDay = this->get_saisonInfo(saisonName,"start").toDate();
+    QDate firstDay;
+    QString phase = settings::get_generalValue("empty");
+    QString weekID;
+    QString emptyContent = "0-0-00:00-0";
+    int rowCount;
+
+    for(int i = 0; i < saisonWeeks; ++i)
+    {
+        firstDay = startDay.addDays(i*7);
+        weekID = QString::number(firstDay.weekNumber())+"_"+QString::number(firstDay.year());
+        rowCount = week_meta->rowCount();
+
+        week_meta->insertRow(rowCount,QModelIndex());
+        week_meta->setData(week_meta->index(rowCount,0),saisonName);
+        week_meta->setData(week_meta->index(rowCount,1),i+1);
+        week_meta->setData(week_meta->index(rowCount,2),weekID);
+        week_meta->setData(week_meta->index(rowCount,3),phase);
+        week_meta->setData(week_meta->index(rowCount,4),firstDay.toString("dd.MM.yyyy"));
+
+        week_content->insertRow(rowCount,QModelIndex());
+        week_content->setData(week_content->index(rowCount,0),i+1);
+        week_content->setData(week_content->index(rowCount,1),weekID);
+
+        for(int col = 2; col < contentTags.count(); ++col)
+        {
+            week_content->setData(week_content->index(rowCount,col),emptyContent);
+        }
+    }
+}
+
+void schedule::delete_Saison(QString saisonName)
+{
+   metaProxy->setFilterFixedString(saisonName);
+   metaProxy->setFilterKeyColumn(0);
+   contentProxy->setFilterKeyColumn(1);
+   QString weekID;
+
+   for(int i = 0; i < metaProxy->rowCount(); ++i)
+   {
+       weekID = metaProxy->data(metaProxy->index(i,2)).toString();
+       contentProxy->setFilterFixedString(weekID);
+       metaProxy->removeRow(i);
+       contentProxy->removeRow(0);
+   }
+}
+
+QHash<int, QString> schedule::get_weekList()
+{
+    metaProxy->sort(1);
+
+    return weekList;
+}
+
+
 void schedule::read_ltsFile(QDomDocument stressContent)
 {
     int ltsDays = settings::get_ltsValue("ltsdays");
     QDomElement root_lts = stressContent.firstChildElement();
     QDomNodeList lts_list;
     QDate wDate;
+
     if(stressContent.hasChildNodes())
     {
         lts_list = root_lts.elementsByTagName("StressLTS");
@@ -289,7 +357,7 @@ void schedule::read_ltsFile(QDomDocument stressContent)
 
             if(!stressValues.contains(wDate))
             {
-                stressValues.insert(wDate,stress_element.attribute("stress").toDouble());
+                stressValues.insert(wDate,qMakePair(stress_element.attribute("stress").toDouble(),0.0));
             }
         }
 
@@ -301,14 +369,14 @@ void schedule::read_ltsFile(QDomDocument stressContent)
         {
             if(!stressValues.contains(firstWork.addDays(row)))
             {
-                stressValues.insert(firstWork.addDays(row),0);
+                stressValues.insert(firstWork.addDays(row),qMakePair(0,0));
             }
         }
         if(QDate::currentDate() == firstdayofweek && stressValues.firstKey() < firstdayofweek.addDays(-ltsDays)) this->save_ltsValues();
     }
     else
     {
-        stressValues.insert(firstdayofweek,0);
+        stressValues.insert(firstdayofweek,qMakePair(0,0));
     }
 }
 
@@ -319,11 +387,11 @@ void schedule::save_ltsFile(double ltsDays)
     xmlRoot = xmlDoc.createElement("Stress");
     xmlDoc.appendChild(xmlRoot);
 
-    for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays(-ltsDays)), end = stressValues.find(firstdayofweek); it != end; ++it)
+    for(QMap<QDate,QPair<double,double>>::const_iterator it = stressValues.find(firstdayofweek.addDays(-ltsDays)), end = stressValues.find(firstdayofweek); it != end; ++it)
     {
         xmlElement = xmlDoc.createElement("StressLTS");
         xmlElement.setAttribute("day",it.key().toString("dd.MM.yyyy"));
-        xmlElement.setAttribute("stress",QString::number(it.value()));
+        xmlElement.setAttribute("stress",QString::number(it.value().first));
         xmlRoot.appendChild(xmlElement);
     }
     this->write_XMLFile(schedulePath,&xmlDoc,ltsFile);
@@ -349,9 +417,9 @@ void schedule::save_ltsValues()
     double factor = (double)exp(-1.0/ltsDays);
     pastStress = startLTS;
 
-    for(QMap<QDate,double>::const_iterator it = stressValues.cbegin(), end = stressValues.find(firstdayofweek.addDays(-ltsDays)); it != end; ++it)
+    for(QMap<QDate,QPair<double,double>>::const_iterator it = stressValues.cbegin(), end = stressValues.find(firstdayofweek.addDays(-ltsDays)); it != end; ++it)
     {
-        currStress = it.value();
+        currStress = it.value().first;
         stress = (currStress * (1.0 - factor)) + (pastStress * factor);
         pastStress = stress;
     }
@@ -362,9 +430,9 @@ void schedule::save_ltsValues()
     factor = (double)exp(-1.0/stsDays);
     pastStress = startLTS;
 
-    for(QMap<QDate,double>::const_iterator it = stressValues.find(firstdayofweek.addDays((-stsDays)-7)), end = stressValues.find(firstdayofweek.addDays((-stsDays))); it != end; ++it)
+    for(QMap<QDate,QPair<double,double>>::const_iterator it = stressValues.find(firstdayofweek.addDays((-stsDays)-7)), end = stressValues.find(firstdayofweek.addDays((-stsDays))); it != end; ++it)
     {
-        currStress = it.value();
+        currStress = it.value().first;
         stress = (currStress * (1.0 - factor)) + (pastStress * factor);
         pastStress = stress;
     }
@@ -428,10 +496,12 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
 
 void schedule::delete_workout(QModelIndex index)
 {
+    QPair<double,double> stressMap;
     QString wDate = workout_schedule->data(workout_schedule->index(index.row(),1)).toString();
-    double stress = workout_schedule->data(workout_schedule->index(index.row(),8)).toDouble();
+    stressMap.first = workout_schedule->data(workout_schedule->index(index.row(),8)).toDouble();
+    stressMap.second = get_timesec(workout_schedule->data(workout_schedule->index(index.row(),8)).toString())/60.0;
     workout_schedule->removeRow(index.row(),QModelIndex());
-    this->updateStress(wDate,stress,false);
+    this->updateStress(wDate,stressMap,3);
 }
 
 void schedule::deleteWeek(QString deleteWeek)
@@ -449,47 +519,19 @@ QString schedule::get_weekPhase(QDate currDate)
     metaProxy->setSourceModel(week_meta);
     QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.addDays(1 - currDate.dayOfWeek()).year());
     metaProxy->setFilterRegExp("\\b"+weekID+"\\b");
-    metaProxy->setFilterKeyColumn(1);
+    metaProxy->setFilterKeyColumn(2);
 
-    if(metaProxy->rowCount() == 1) return metaProxy->data(metaProxy->index(0,2)).toString();
+    if(metaProxy->rowCount() == 1) return metaProxy->data(metaProxy->index(0,3)).toString();
 
     return 0;
-}
-
-void schedule::changeYear()
-{
-    QDate startDate = QDate::fromString(settings::get_saisonInfo("startDate"),"dd.MM.yyyy");
-    QString weekid;
-    int id = 0;
-    int saisonWeeks = settings::get_saisonInfo("weeks").toInt();
-
-    week_meta->sort(0);
-    week_content->sort(0);
-
-    for(int week = 0; week < saisonWeeks; ++week)
-    {
-        id = week_meta->data(week_meta->index(week,0,QModelIndex())).toInt();
-
-        if(id == week+1)
-        {
-            weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
-            week_meta->setData(week_meta->index(week,1,QModelIndex()),weekid);
-            week_meta->setData(week_meta->index(week,3,QModelIndex()),startDate.addDays(week*7).toString("dd.MM.yyyy"));
-            week_content->setData(week_content->index(week,1,QModelIndex()),weekid);
-        }
-    }
-    if(week_meta->rowCount() > saisonWeeks)
-    {
-        week_meta->removeRow(week_meta->rowCount()-1,QModelIndex());
-        week_content->removeRow(week_content->rowCount()-1,QModelIndex());
-    }
-    this->save_weekPlan();
 }
 
 void schedule::set_workoutData(int mode)
 {
     QString workoutStress;
+    QPair<double,double> stressMap;
     double currStress = 0;
+    double currDura = 0;
     int row = 0;
     int col = 0;
     if(mode == EDIT) //EDIT
@@ -498,13 +540,18 @@ void schedule::set_workoutData(int mode)
         {
             row = it.key().row();
             currStress = workout_schedule->data(workout_schedule->index(row,8)).toDouble();
+            currDura = get_timesec(workout_schedule->data(workout_schedule->index(row,6)).toString())/60.0;
+
             for(QHash<int,QString>::const_iterator vStart = it.value().cbegin(), vEnd = it.value().cend(); vStart != vEnd; ++vStart,++col)
             {
                 workout_schedule->setData(workout_schedule->index(row,col,QModelIndex()),it.value().value(col));
             }
+
             workout_date = it.value().value(1);
             workoutStress = it.value().value(8);
-            this->updateStress(workout_date,workoutStress.toDouble()-currStress,true);
+            stressMap.first = workoutStress.toDouble()-currStress;
+            stressMap.second = (get_timesec(it.value().value(6))/60.0)-currDura;
+            this->updateStress(workout_date,stressMap,0);
         }
     }
     else if(mode == ADD || mode == COPY) //ADD and COPY
@@ -520,41 +567,53 @@ void schedule::set_workoutData(int mode)
             }
             workout_date = it.value().value(1);
             workoutStress = it.value().value(8);
-            this->updateStress(workout_date,workoutStress.toDouble(),true);
+            stressMap.first = workoutStress.toDouble();
+            stressMap.second = get_timesec(it.value().value(6))/60.0;
+            this->updateStress(workout_date,stressMap,0);
             col = 0;
         }
     }
     itemList.clear();
 }
 
-void schedule::updateStress(QString date,double addStress,bool add)
+void schedule::updateStress(QString date,QPair<double,double> stressMap,int mode)
 {
     double stressValue = 0;
+    double duraValue = 0;
     QDate wDate = QDate::fromString(date,"dd.MM.yyyy");
 
-    if(add)
+    if(mode == ADD)
     {
         if(stressValues.contains(wDate))
         {
-            stressValue = stressValues.value(wDate);
-            stressValues.insert(wDate,stressValue+addStress);
+            stressValue = stressValues.value(wDate).first;
+            duraValue = stressValues.value(wDate).second;
+            stressValues.insert(wDate,qMakePair(stressValue+stressMap.first,duraValue+stressMap.second));
         }
         else
         {
-            stressValues.insert(wDate,addStress);
+            stressValues.insert(wDate,qMakePair(stressMap.first,stressMap.second));
         }
     }
-    else
+    else if(mode == EDIT)
     {
-        stressValue = stressValues.value(wDate);
-        if(stressValue - addStress == 0)
+        stressValues.insert(wDate,qMakePair(stressMap.first,stressMap.second));
+    }
+    else if(mode == DEL)
+    {
+        stressValue = stressValues.value(wDate).first;
+        duraValue = stressValues.value(wDate).second;
+        if(stressValue - stressMap.first == 0)
         {
-            stressValues.insert(wDate,0);
+            stressValues.insert(wDate,qMakePair(0,0));
         }
         else
         {
-            stressValues.insert(wDate,stressValue -addStress);
+            stressValues.insert(wDate,qMakePair(stressValue -stressMap.first,duraValue - stressMap.second));
         }
     }
+
+
+
     isUpdated = true;
 }

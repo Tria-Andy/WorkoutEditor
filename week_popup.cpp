@@ -31,7 +31,7 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
     week_info << weekinfo.split("#");
     workProxy = new QSortFilterProxyModel;
     workProxy->setSourceModel(workSched->workout_schedule);
-    barSelection << "Duration" << "Distance";
+    barSelection << "Duration" << "Distance" << "Work(kj)";
     ui->comboBox_yValue->addItems(barSelection);
     xStress.resize(dayCount);
     xLTS.resize(dayCount+1);
@@ -40,16 +40,17 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
     xBar.resize(dayCount);
     yDura.resize(dayCount);
     yDist.resize(dayCount);
+    yWorkKj.resize(dayCount);
     xWorks.resize(dayCount);
     yWorks.resize(dayCount);
     yWorkCount.resize(dayCount);
     yValues.resize(dayCount);
-    maxValues.resize(3);
+    maxValues.resize(4);
     maxValues.fill(0);
     this->set_plotValues();
 }
 
-enum {DURATION,DISTANCE};
+enum {DURATION,DISTANCE,KJ};
 
 week_popup::~week_popup()
 {
@@ -81,7 +82,7 @@ void week_popup::set_plotValues()
             weekDates.insert(i,weekStart.addDays(i));
         }
 
-        double stress,dura,dist;
+        double stress,dura,dist,workkj;
 
         ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(proxyCount));
 
@@ -90,12 +91,12 @@ void week_popup::set_plotValues()
         double lte = (double)exp(-1.0/ltsDays);
         int ltsStart = -ltsDays;
         double ltsStress = 0,currStress = 0,pastStress = 0,startLTS = 0;
-        QMap<QDate,double> *stressMap = workSched->get_StressMap();
+        QMap<QDate,QPair<double,double> > *stressMap = workSched->get_StressMap();
         pastStress = settings::get_ltsValue("lastlts");
 
-        for(QMap<QDate,double>::const_iterator it = stressMap->cbegin(), end = stressMap->find(weekDates.at(0).date().addDays(ltsStart)); it != end; ++it)
+        for(QMap<QDate,QPair<double,double> >::const_iterator it = stressMap->cbegin(), end = stressMap->find(weekDates.at(0).date().addDays(ltsStart)); it != end; ++it)
         {
-            currStress = it.value();
+            currStress = it.value().first;
             ltsStress = (currStress * (1.0 - lte)) + (pastStress * lte);
             pastStress = ltsStress;
         }
@@ -114,7 +115,7 @@ void week_popup::set_plotValues()
             for(int x = ltsStart; x <= 0; ++x)
             {
                 if(i == 0 && x == 0) yLTS[0] = round(pastStress);
-                currStress = stressMap->value(weekDates.at(i).date().addDays(x));
+                currStress = stressMap->value(weekDates.at(i).date().addDays(x)).first;
                 ltsStress = (currStress * (1.0 - lte)) + (pastStress * lte);
                 pastStress = ltsStress;
                 if(x == ltsStart) startLTS = ltsStress;
@@ -132,6 +133,7 @@ void week_popup::set_plotValues()
             stress = workProxy->data(workProxy->index(i,8,QModelIndex())).toDouble();
             dura = static_cast<double>(this->get_timesec(workProxy->data(workProxy->index(i,6,QModelIndex())).toString())) / 60;
             dist = workProxy->data(workProxy->index(i,7,QModelIndex())).toDouble();
+            workkj = workProxy->data(workProxy->index(i,9,QModelIndex())).toDouble();
 
             for( ; day < weekDates.count(); ++day)
             {
@@ -140,11 +142,13 @@ void week_popup::set_plotValues()
                     yStress[day] = yStress[day] + stress;
                     yDura[day] = yDura[day] + this->set_doubleValue(dura,false);
                     yDist[day] = yDist[day] + dist;
+                    yWorkKj[day] = yWorkKj[day] + workkj;
                     yWorkCount[day] = yWorkCount[day]+1;
                 }
                 if(maxValues[0] < yStress[day]) maxValues[0] = yStress[day];
                 if(maxValues[1] < yDura[day]) maxValues[1] = yDura[day];
                 if(maxValues[2] < yDist[day]) maxValues[2] = yDist[day];
+                if(maxValues[3] < yWorkKj[day]) maxValues[3] = yWorkKj[day];
             }
             day = 0;
         }
@@ -311,6 +315,14 @@ void week_popup::set_weekPlot(int yValue)
         scaleBars->setData(xBar,yValues);
         ui->widget_plot->yAxis2->setRange(0,maxValues[2]+(maxValues[2]*0.1));
         ui->widget_plot->yAxis2->setLabel(barSelection.at(1)+"(Km)");
+    }
+    if(yValue == KJ)
+    {
+        qCopy(yWorkKj.begin(),yWorkKj.end(),yValues.begin());
+        scaleBars->setName(barSelection.at(2));
+        scaleBars->setData(xBar,yValues);
+        ui->widget_plot->yAxis2->setRange(0,maxValues[3]+(maxValues[3]*0.1));
+        ui->widget_plot->yAxis2->setLabel(barSelection.at(2));
     }
 
     for(int i = 0; i < dayCount; ++i)

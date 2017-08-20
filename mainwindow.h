@@ -909,7 +909,7 @@ private:
     del_avgweek avgweek_del;
     QStandardItemModel *calendarModel,*sumModel,*fileModel,*infoModel,*avgModel;
     QItemSelectionModel *treeSelection;
-    QSortFilterProxyModel *scheduleProxy,*metaProxy,*contentProxy;
+    QSortFilterProxyModel *scheduleProxy,*metaProxy,*metaProxyFilter,*contentProxy;
     QStringList modus_list,cal_header,year_header,avgHeader,schedMode;
     QLabel *planerMode;
     QToolButton *planMode,*appMode;
@@ -943,6 +943,7 @@ private:
     void set_buttons(bool);
     void set_calender();
     void set_phaseButtons();
+    void refresh_saisonInfo();
 
     //Editor
     void select_activityFile();
@@ -979,7 +980,6 @@ private slots:
     void on_actionIntervall_Editor_triggered();
     void on_actionPreferences_triggered();
     void on_actionPace_Calculator_triggered();
-    void on_actionSwitch_Year_triggered();
     void on_actionVersion_triggered();
     void on_actionPMC_triggered();
 
@@ -1014,6 +1014,7 @@ private slots:
     void on_toolButton_clearSelect_clicked();
     void on_treeView_files_clicked(const QModelIndex &index);
     void on_actionRefresh_Filelist_triggered();
+    void on_comboBox_saisonName_currentIndexChanged(const QString &arg1);
 };
 
 #endif // MAINWINDOW_H

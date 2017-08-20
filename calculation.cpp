@@ -183,11 +183,66 @@ int calculation::get_hfvalue(QString percent)
     return static_cast<int>(round(settings::get_thresValue("hfthres") * (value / 100.0)));
 }
 
-double calculation::calc_totalWork(double weight,double avgHF, double moveTime)
+double calculation::calc_totalCal(double weight,double avgHF, double moveTime)
 {
     int age = QDate::currentDate().year() - settings::get_athleteValue("yob");
 
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
+}
+
+double calculation::calc_totalWork(QString sport, double pValue, double dura,double dist,int tempID)
+{
+    double factor = 1000.0;
+    double grav = 9.81;
+    double weight = settings::get_weightforDate(QDateTime::currentDateTime());
+    double height = settings::get_athleteValue("height");
+    double mSec = pValue*factor/3600.0;
+
+    if(sport == settings::isSwim)
+    {
+        double styleFactor = 1;
+        double speedFactor = 0;
+        double distFactor = 0;
+
+        if(pValue == 25.0)
+        {
+            distFactor = 27.3403325;
+        }
+        else if(pValue == 50.0)
+        {
+            distFactor = 54.6806649;
+        }
+        else if(pValue < 25.0 && tempID == 8)
+        {
+            distFactor = 109.373298 * (dist*10);
+        }
+        else
+        {
+            distFactor = 25.0;
+        }
+        speedFactor = (((dist*factor) * distFactor) / 25.0) / dura;
+        styleFactor = get_swim_speedFactor(speedFactor,tempID);
+        return (styleFactor * 3.5 * weight / 200) * (dura/60.0);
+    }
+    if(sport == settings::isBike)
+    {
+        return dura * pValue / factor;
+    }
+    if(sport == settings::isRun)
+    {
+        double bodyHub = (height * 0.0515) + (((3600/settings::get_thresValue("runpace")) / pValue) / 100.0);
+        return (weight * grav * mSec * bodyHub) * dura / factor;
+    }
+    if(sport == settings::isStrength)
+    {
+        return (weight * grav * mSec * 0.2) * dura / factor;
+    }
+    if(sport == settings::isAlt)
+    {
+        return (weight * grav * mSec * 0.148) * dura / factor;
+    }
+
+    return 0;
 }
 
 QString calculation::threstopace(double thresPace, double percent)
@@ -205,7 +260,7 @@ QString calculation::calc_threshold(QString sport,double threshold,double percen
         {
             thresValue = set_time(static_cast<int>(round(threshold / (percent/100.0))));
         }
-        if(sport == settings::isBike || sport == settings::isStrength)
+        if(sport == settings::isBike || sport == settings::isStrength || sport == settings::isAlt)
         {
             thresValue = QString::number(threshold * (percent/100));
         }
@@ -269,6 +324,34 @@ double calculation::calc_swim_xpower(double distance,double pace,double time,dou
     return pow(xPowerSum / time,0.33);
 }
 
+double calculation::get_swim_speedFactor(double distFactor, int style)
+{
+    QString factor = settings::get_listValues("StyleFactor").at(style);
+    double speedFactor = factor.toDouble();
+
+    if(style == 0)
+    {
+        return speedFactor;
+    }
+    else
+    {
+        if(distFactor > 2.5)
+        {
+            return speedFactor;
+        }
+        else if(distFactor < 2.5 && distFactor> 1.5)
+        {
+            return speedFactor - 2.0;
+        }
+        else
+        {
+            return speedFactor - 4.0;
+        }
+    }
+
+    return 10;
+}
+
 double calculation::estimate_stress(QString sport, QString p_goal, int duration)
 {
     double goal = 0;
@@ -296,6 +379,10 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
     {
         goal = p_goal.toDouble();
     }
+    if(sport == settings::isAlt)
+    {
+        goal = p_goal.toDouble();
+    }
 
     if(goal > 0)
     {
@@ -319,6 +406,11 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
         if(sport == settings::isStrength)
         {
             thresPower = settings::get_thresValue("stgpower");
+            raw_effort = (duration * goal) * (goal / thresPower);
+        }
+        if(sport == settings::isAlt)
+        {
+            thresPower = settings::get_thresValue("runpower");
             raw_effort = (duration * goal) * (goal / thresPower);
         }
         cv_effort = thresPower * 3600;
@@ -356,5 +448,4 @@ double calculation::get_thresPercent(QString sport, QString level, bool max)
         value = range.split("-").first();
         return value.toDouble();
     }
-
 }

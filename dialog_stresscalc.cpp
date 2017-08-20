@@ -41,12 +41,15 @@ Dialog_stresscalc::~Dialog_stresscalc()
 
 void Dialog_stresscalc::estimateStress()
 {
-    double stressScore,current;
+    double stressScore,speed,totalWork,current;
+    double pValue = 0.0;
+    int timeSec = 0;
     QString xPace;
 
     if(sport == settings::isSwim)
     {
         current = this->get_timesec(ui->lineEdit_goal_power->text());
+        pValue = 50.0;
         current = thresPace / current;
         current = pow(current,3.0);
         ui->lineEdit_intensity->setText(QString::number(current));
@@ -54,17 +57,22 @@ void Dialog_stresscalc::estimateStress()
     if(sport == settings::isBike)
     {   
         current = ui->lineEdit_goal_power->text().toDouble();
+        pValue = current;
         ui->lineEdit_intensity->setText(QString::number(current / thresPower));
     }
     if(sport == settings::isRun)
     {
         xPace = ui->lineEdit_goal_power->text();
-        current = this->calc_lnp(get_speed(QTime::fromString(xPace,"mm:ss"),0,sport,true)/3.6,settings::get_athleteValue("height"),settings::get_athleteValue("weight")) / thresPower;
+        speed = this->get_speed(QTime::fromString(xPace,"mm:ss"),0,sport,true);
+        pValue = speed;
+        current = this->calc_lnp(speed/3.6,settings::get_athleteValue("height"),settings::get_athleteValue("weight")) / thresPower;
         ui->lineEdit_intensity->setText(QString::number(current));
     }
-    stressScore = this->estimate_stress(sport,ui->lineEdit_goal_power->text(),this->get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss")));
+    timeSec = this->get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss"));
+    stressScore = this->estimate_stress(sport,ui->lineEdit_goal_power->text(),timeSec);
+    totalWork = round(this->calc_totalWork(sport,pValue,timeSec,0,6));
     ui->lineEdit_stressScore->setText(QString::number(stressScore));
-
+    ui->lineEdit_work->setText(QString::number(totalWork));
 }
 
 void Dialog_stresscalc::set_sport_threshold()
@@ -111,6 +119,7 @@ void Dialog_stresscalc::reset_calc()
     ui->lineEdit_stressScore->clear();
     ui->lineEdit_goal_power->clear();
     ui->lineEdit_intensity->clear();
+    ui->lineEdit_work->clear();
 }
 
 void Dialog_stresscalc::on_pushButton_calc_clicked()

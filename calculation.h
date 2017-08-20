@@ -13,7 +13,8 @@ private:
 
 
 protected:
-    double calc_totalWork(double,double,double);
+    double calc_totalCal(double,double,double);
+    static double calc_totalWork(QString,double,double,double,int);
     int get_hfvalue(QString);
 
     static QString set_time(int);
@@ -31,6 +32,7 @@ protected:
     static double calc_distance(QString, double);
     static double estimate_stress(QString,QString,int);
     static double calc_swim_xpower(double,double,double,double);
+    static double get_swim_speedFactor(double,int);
     static double calc_lnp(double,double,double);
 };
 
