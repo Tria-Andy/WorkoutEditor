@@ -459,7 +459,7 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
     intItems << new QStandardItem("cal");
     intItems << new QStandardItem("-");
 
-    if(lapCount > 1)
+    if(lapCount >= 1)
     {
         intTime = 0;
         int lapTime = 0;
@@ -1036,6 +1036,7 @@ void Activity::updateSwimInt(QModelIndex parentIndex,QItemSelectionModel *treeSe
     QString lapName,level;
     int swimLap = 0;
     int lapPace;
+
     if(intTreeModel->itemFromIndex(parentIndex)->hasChildren())
     {
         swimLap = 0;

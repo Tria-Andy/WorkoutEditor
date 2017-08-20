@@ -455,15 +455,13 @@ private:
     double timeSum,distSum,stressSum,workSum;
     int currThres,thresPace,thresPower;
     QVector<bool> editRow;
-
+    bool isSwim,isBike,isRun,isStrength,isAlt,isOther;
     bool clearFlag;
 
     QString get_treeValue(int,int,int,int,int);
 
     void control_editPanel(bool);
     void resetAxis();
-    void set_editRow(QString);
-    void set_sport_threshold(QString);
     void set_itemData(QTreeWidgetItem *item);
     void show_editItem(QTreeWidgetItem *item);
     void set_selectData(QTreeWidgetItem *item);

@@ -220,7 +220,7 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,dou
         {
             distFactor = 25.0;
         }
-        speedFactor = ((dist*factor) * distFactor) / 25.0 / dura;
+        speedFactor = (((dist*factor) * distFactor) / 25.0) / dura;
         styleFactor = get_swim_speedFactor(speedFactor,tempID);
         return (styleFactor * 3.5 * weight / 200) * (dura/60.0);
     }
