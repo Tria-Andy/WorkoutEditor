@@ -581,6 +581,7 @@ void Dialog_workCreator::clearIntTree()
     plotModel->clear();
     this->set_plotGraphic(0);
 
+    currentWorkID = QString();
     ui->lineEdit_workoutname->clear();
     ui->comboBox_code->setCurrentIndex(0);
     ui->checkBox_timebased->setChecked(false);
