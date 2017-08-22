@@ -403,7 +403,7 @@ void MainWindow::summery_view()
             for(int row = 0; row < metaRowCount; ++row)
             {
                 weekID = metaProxyFilter->data(metaProxyFilter->index(row,2)).toString();
-                contentProxy->setFilterFixedString(weekID);
+                contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
                 contentProxy->setFilterKeyColumn(1);
 
                 for(int col = 0; col < sportUseSum; ++col)
@@ -622,7 +622,6 @@ void MainWindow::refresh_model()
 QString MainWindow::get_weekRange()
 {
     QString display_weeks;
-
     int phaseStart;
     if(isWeekMode)
     {
@@ -645,10 +644,18 @@ QString MainWindow::get_weekRange()
         }
         else
         {
-            phaseStart = metaProxy->data(metaProxy->index(0,0)).toInt();
-            display_weeks = QString::number(phaseStart) + " - " + QString::number(phaseStart + (metaProxy->rowCount()-1));
+            metaProxy->setFilterRegExp("\\b"+workSchedule->get_currSaison()+"\\b");
+            metaProxy->setFilterKeyColumn(0);
+            metaProxyFilter->setFilterFixedString(phaseFilter);
+            metaProxyFilter->setFilterKeyColumn(3);
+            metaProxy->sort(1);
+            phaseStart = metaProxyFilter->data(metaProxyFilter->index(0,1)).toInt();
+            display_weeks = QString::number(phaseStart) + " - " + QString::number(phaseStart + (metaProxyFilter->rowCount()-1));
+            metaProxyFilter->invalidate();
+            metaProxy->invalidate();
         }
     }
+
     return display_weeks;
 }
 

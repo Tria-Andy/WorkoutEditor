@@ -69,7 +69,7 @@ void Dialog_addweek::fill_values(QString selWeek)
     metaProxyFilter->invalidate();
     metaProxyFilter->setFilterFixedString(selWeekID);
     metaProxyFilter->setFilterKeyColumn(2);
-    contentProxy->setFilterFixedString(selWeekID);
+    contentProxy->setFilterRegExp("\\b"+selWeekID+"\\b");
     contentProxy->setFilterKeyColumn(1);
 
     ui->label_header->clear();
@@ -220,9 +220,9 @@ void Dialog_addweek::on_toolButton_update_clicked()
 
     if(update)
     {
-        metaProxyFilter->setFilterFixedString(editWeekID);
+        metaProxyFilter->setFilterRegExp("\\b"+editWeekID+"\\b");
         metaProxyFilter->setFilterKeyColumn(2);
-        contentProxy->setFilterFixedString(editWeekID);
+        contentProxy->setFilterRegExp("\\b"+editWeekID+"\\b");
         contentProxy->setFilterKeyColumn(1);
 
         if(metaProxyFilter->rowCount() > 0)

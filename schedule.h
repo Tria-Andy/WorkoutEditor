@@ -43,7 +43,6 @@ public:
     void copyWeek(QString,QString);
     void deleteWeek(QString);
     QMap<QDate,QPair<double,double> > *get_StressMap() {return &stressValues;}
-    //void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
     void updateStress(QString,QPair<double,double>,int);
     bool get_isUpdated() {return isUpdated;}
     void add_newSaison(QString);

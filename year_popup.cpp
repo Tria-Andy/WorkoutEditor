@@ -133,7 +133,7 @@ void year_popup::set_plotValues()
     for(int week = 0; week < proxyFilter->rowCount(); ++week)
     {
         weekID = proxyFilter->data(proxyFilter->index(week,2)).toString();
-        contentProxy->setFilterFixedString(weekID);
+        contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
         contentProxy->setFilterKeyColumn(1);
 
         sumValue = contentProxy->data(contentProxy->index(0,col)).toString();
