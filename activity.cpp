@@ -989,6 +989,29 @@ void Activity::updateInterval()
         if(isRun)
         {
             intTreeModel->setData(selItem.value(7),this->set_doubleValue(this->calc_totalWork(curr_sport,lapSpeed,lapTime,0,0),false));
+
+        }
+        if(isTria)
+        {
+            QString pName = selItemModel->data(selItemModel->index(0,0)).toString().split("-").first();
+
+            if(pName == settings::isSwim)
+            {
+                intTreeModel->setData(selItem.value(8),this->set_doubleValue(this->calc_totalWork(settings::isSwim,lapSpeed,lapTime,0,0),false));
+            }
+            else if(pName == "T1" || pName == "T2")
+            {
+                intTreeModel->setData(selItem.value(8),this->set_doubleValue(this->calc_totalWork(settings::isRun,lapSpeed,lapTime,0,0),false));
+            }
+            else if(pName == settings::isBike)
+            {
+                double watts = intTreeModel->data(selItem.value(7)).toDouble();
+                intTreeModel->setData(selItem.value(8),this->set_doubleValue(this->calc_totalWork(settings::isBike,watts,lapTime,0,0),false));
+            }
+            else if(pName == settings::isRun)
+            {
+                intTreeModel->setData(selItem.value(8),this->set_doubleValue(this->calc_totalWork(settings::isRun,lapSpeed,lapTime,0,0),false));
+            }
         }
     }
     this->recalcIntTree();
