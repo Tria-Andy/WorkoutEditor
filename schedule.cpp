@@ -311,18 +311,20 @@ void schedule::add_newSaison(QString saisonName)
 
 void schedule::delete_Saison(QString saisonName)
 {
-   metaProxy->setFilterFixedString(saisonName);
+   week_meta->sort(1);
+   metaProxy->setFilterRegExp("\\b"+saisonName+"\\b");
    metaProxy->setFilterKeyColumn(0);
-   contentProxy->setFilterKeyColumn(1);
    QString weekID;
 
    for(int i = 0; i < metaProxy->rowCount(); ++i)
    {
        weekID = metaProxy->data(metaProxy->index(i,2)).toString();
-       contentProxy->setFilterFixedString(weekID);
-       metaProxy->removeRow(i);
+       contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
+       contentProxy->setFilterKeyColumn(1);
        contentProxy->removeRow(0);
+       contentProxy->invalidate();
    }
+   metaProxy->removeRows(0,metaProxy->rowCount());
 }
 
 QHash<int, QString> schedule::get_weekList()

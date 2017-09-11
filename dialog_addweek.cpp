@@ -67,7 +67,7 @@ void Dialog_addweek::fill_values(QString selWeek)
     QStringList weekInfo = selWeek.split("-");
     QString selWeekID = weekInfo.at(1);
     metaProxyFilter->invalidate();
-    metaProxyFilter->setFilterFixedString(selWeekID);
+    metaProxyFilter->setFilterRegExp("\\b"+selWeekID+"\\b");
     metaProxyFilter->setFilterKeyColumn(2);
     contentProxy->setFilterRegExp("\\b"+selWeekID+"\\b");
     contentProxy->setFilterKeyColumn(1);

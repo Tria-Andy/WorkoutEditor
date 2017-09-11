@@ -120,6 +120,7 @@ private:
     void writeChangedValues();
     void writeRangeValues(QString);
     void updateContest(bool,int);
+    void refresh_saisonCombo();
     void set_saisonInfo(QString);
     void refresh_contestTree(QString);
 };

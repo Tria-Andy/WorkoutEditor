@@ -71,18 +71,11 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->doubleSpinBox_bone->setValue(settings::get_athleteValue("boneskg"));
     ui->doubleSpinBox_muscle->setValue(settings::get_athleteValue("musclekg"));
 
-    disconnect(ui->comboBox_saisons,SIGNAL(currentIndexChanged(QString)),this,SLOT(on_comboBox_saisons_currentIndexChanged(QString)));
-    for(int i = 0; i < saisonProxy->rowCount(); ++i)
-    {
-        ui->comboBox_saisons->addItem(saisonProxy->data(saisonProxy->index(i,0)).toString());
-    }
-    ui->comboBox_saisons->setEditable(true);
-    connect(ui->comboBox_saisons,SIGNAL(currentIndexChanged(QString)),this,SLOT(on_comboBox_saisons_currentIndexChanged(QString)));
-
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
     ui->listWidget_stressValue->setItemDelegate(&mousehover_del);
 
+    this->refresh_saisonCombo();
     this->checkSetup();
 }
 
@@ -320,6 +313,24 @@ void Dialog_settings::writeRangeValues(QString sport)
         max = model->data(model->index(i,3,QModelIndex())).toString();
         settings::set_rangeValue(sport,levels.at(i),min+"-"+max);
     }
+}
+
+void Dialog_settings::refresh_saisonCombo()
+{
+    saisonProxy->setFilterFixedString("");
+    saisonProxy->setFilterKeyColumn(0);
+
+    disconnect(ui->comboBox_saisons,SIGNAL(currentIndexChanged(QString)),this,SLOT(on_comboBox_saisons_currentIndexChanged(QString)));
+
+    ui->comboBox_saisons->clear();
+    for(int i = 0; i < saisonProxy->rowCount(); ++i)
+    {
+        ui->comboBox_saisons->addItem(saisonProxy->data(saisonProxy->index(i,0)).toString());
+    }
+    ui->comboBox_saisons->setEditable(true);
+
+    connect(ui->comboBox_saisons,SIGNAL(currentIndexChanged(QString)),this,SLOT(on_comboBox_saisons_currentIndexChanged(QString)));
+    ui->comboBox_saisons->setCurrentIndex(0);
 }
 
 void Dialog_settings::on_comboBox_selInfo_currentTextChanged(const QString &value)
@@ -1011,8 +1022,7 @@ void Dialog_settings::on_toolButton_deleteSaison_clicked()
         schedule_ptr->delete_Saison(ui->comboBox_saisons->currentText());
         schedule_ptr->write_saisonInfo();
         schedule_ptr->save_weekPlan();
-        ui->comboBox_saisons->setCurrentIndex(0);
+        this->refresh_saisonCombo();
         this->set_saisonInfo(ui->comboBox_saisons->currentText());
-
     }
 }
