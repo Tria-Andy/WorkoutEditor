@@ -68,6 +68,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
 
     ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - settings::get_athleteValue("yob")));
     ui->lineEdit_weight->setText(QString::number(settings::get_weightforDate(QDateTime::currentDateTime())));
+    ui->lineEdit_currDayCal->setText(QString::number(current_dayCalories()));
     ui->doubleSpinBox_bone->setValue(settings::get_athleteValue("boneskg"));
     ui->doubleSpinBox_muscle->setValue(settings::get_athleteValue("musclekg"));
 
@@ -1025,4 +1026,9 @@ void Dialog_settings::on_toolButton_deleteSaison_clicked()
         this->refresh_saisonCombo();
         this->set_saisonInfo(ui->comboBox_saisons->currentText());
     }
+}
+
+void Dialog_settings::on_doubleSpinBox_PALvalue_valueChanged(double value)
+{
+    ui->lineEdit_currDayCal->setText(QString::number(round(current_dayCalories() * value)));
 }

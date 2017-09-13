@@ -92,6 +92,8 @@ private slots:
     void on_toolButton_updateSaison_clicked();
     void on_toolButton_deleteSaison_clicked();
 
+    void on_doubleSpinBox_PALvalue_valueChanged(double arg1);
+
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model,*contestTreeModel;
