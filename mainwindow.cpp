@@ -371,7 +371,7 @@ void MainWindow::summery_view()
         calcDay.setDate(year.toInt(),1,1);
         firstday = calcDay.addDays(week.toInt()*7).addDays(1 - calcDay.dayOfWeek());
         ui->comboBox_saisonName->setCurrentText(workSchedule->saison_atDate(firstday));
-        ui->label_selWeek->setText("Week: "+weeknumber+" - Phase: " +workSchedule->get_weekPhase(firstday));
+        ui->label_selWeek->setText("Week: "+weeknumber+" - Phase: " +workSchedule->get_weekPhase(firstday,false));
     }
     else
     {
@@ -523,7 +523,7 @@ void MainWindow::workout_calendar()
                 {
                     if(metaProxy->rowCount() > 0)
                     {
-                        phase_value = workSchedule->get_weekPhase(workout_date);
+                        phase_value = workSchedule->get_weekPhase(workout_date,true);
                     }
                     else
                     {
@@ -592,10 +592,11 @@ void MainWindow::workout_calendar()
               {
                   if(col == 0)
                   {
-                    weekInfo = metaProxyFilter->data(metaProxyFilter->index(week,1)).toString() +"-"+
-                               metaProxyFilter->data(metaProxyFilter->index(week,2)).toString() +"-"+
-                               metaProxyFilter->data(metaProxyFilter->index(week,4)).toString() +"-"+
-                               metaProxyFilter->data(metaProxyFilter->index(week,3)).toString();
+                    weekInfo = metaProxyFilter->data(metaProxyFilter->index(week,1)).toString() +"#"+
+                               metaProxyFilter->data(metaProxyFilter->index(week,2)).toString() +"#"+
+                               metaProxyFilter->data(metaProxyFilter->index(week,4)).toString() +"#"+
+                               metaProxyFilter->data(metaProxyFilter->index(week,3)).toString() +"#"+
+                               metaProxyFilter->data(metaProxyFilter->index(week,5)).toString();
                   }
                   else
                   {

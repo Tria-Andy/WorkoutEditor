@@ -21,7 +21,7 @@
 schedule::schedule()
 {
     workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj";
-    metaTags << "saison" << "id" << "week" << "name" << "fdw";
+    metaTags << "saison" << "id" << "week" << "name" << "fdw" << "content" << "goal";
     //metaTags << "id" << "saison" << "week" << "weekid" << "phase" << "fdw";
     contentTags << "id" << "week";
     for(int i = 0; i < settings::get_listValues("Sportuse").count();++i)
@@ -515,15 +515,23 @@ void schedule::deleteWeek(QString deleteWeek)
     }
 }
 
-QString schedule::get_weekPhase(QDate currDate)
+QString schedule::get_weekPhase(QDate currDate,bool full)
 {
     QSortFilterProxyModel *metaProxy = new QSortFilterProxyModel();
     metaProxy->setSourceModel(week_meta);
     QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.addDays(1 - currDate.dayOfWeek()).year());
     metaProxy->setFilterRegExp("\\b"+weekID+"\\b");
     metaProxy->setFilterKeyColumn(2);
+    QString phaseString = metaProxy->data(metaProxy->index(0,3)).toString();
 
-    if(metaProxy->rowCount() == 1) return metaProxy->data(metaProxy->index(0,3)).toString();
+    if(metaProxy->rowCount() == 1 && full)
+    {
+        return phaseString +"#"+metaProxy->data(metaProxy->index(0,5)).toString()+"#"+metaProxy->data(metaProxy->index(0,6)).toString();
+    }
+    if(metaProxy->rowCount() == 1 && !full)
+    {
+        return phaseString;
+    }
 
     return 0;
 }
