@@ -389,9 +389,8 @@ public:
     {
         double pValue = 0;
         double dura = get_timesec(model->data(model->index(4,0)).toString());
-        double dist = model->data(model->index(7,0)).toDouble();
 
-        if(sport == settings::isSwim) pValue = 50.0;
+        if(sport == settings::isSwim) pValue = get_timesec(model->data(model->index(3,0)).toString());
         if(sport == settings::isBike) pValue = model->data(model->index(3,0)).toDouble();
         if(sport == settings::isRun) pValue = get_speed(QTime::fromString(model->data(model->index(3,0)).toString(),"mm:ss"),0,sport,true);
         if(sport == settings::isStrength) pValue = 4.0;
@@ -399,11 +398,11 @@ public:
 
         if(model->data(model->index(0,0)).toString().contains(settings::get_generalValue("breakname")) && sport == settings::isSwim)
         {
-            model->setData(model->index(6,0),set_doubleValue(calc_totalWork(sport,pValue,dura,dist,0),false));
+            model->setData(model->index(6,0),set_doubleValue(calc_totalWork(sport,pValue,dura,0),false));
         }
         else
         {
-            model->setData(model->index(6,0),set_doubleValue(calc_totalWork(sport,pValue,dura,dist,6),false));
+            model->setData(model->index(6,0),set_doubleValue(calc_totalWork(sport,pValue,dura,6),false));
         }
     }
 };
