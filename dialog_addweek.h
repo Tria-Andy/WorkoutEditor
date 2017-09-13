@@ -275,6 +275,7 @@ private:
     QSortFilterProxyModel *metaProxy,*metaProxyFilter,*contentProxy;
     QString editWeekID,timeFormat,empty;
     QStringList sportuseList,weekHeader;
+    QString delimiter;
     bool update;
 
     void fill_values(QString);

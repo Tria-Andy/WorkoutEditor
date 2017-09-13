@@ -45,7 +45,7 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
     workSched->itemList.clear();
 
     this->init_dayWorkouts(popupDate);
-    ui->lineEdit_workoutInfo->setText(workSched->get_weekPhase(w_date)+" - Week: "+ QString::number(w_date.weekNumber()));
+    ui->lineEdit_workoutInfo->setText(workSched->get_weekPhase(w_date,false)+" - Week: "+ QString::number(w_date.weekNumber()));
 
     connect(ui->tableView_day->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(load_workoutData(int)));
     connect(ui->dateEdit_workDate,SIGNAL(dateChanged(QDate)),this,SLOT(edit_workoutDate(QDate)));
@@ -99,7 +99,7 @@ void day_popup::init_dayWorkouts(QDate workDate)
         }
     }
 
-    ui->label_weekinfo->setText(workoutDate + " - Phase: " + workSched->get_weekPhase(workDate));
+    ui->label_weekinfo->setText(workoutDate + " - Phase: " + workSched->get_weekPhase(workDate,false));
 
     int worklistCount = workListHeader.count();
     dayModel->setColumnCount(workoutHeader.count());
@@ -253,7 +253,7 @@ void day_popup::set_result(int resultCode)
 void day_popup::edit_workoutDate(QDate workDate)
 {
     newDate = workDate;
-    ui->lineEdit_workoutInfo->setText(workSched->get_weekPhase(workDate)+" - Week: "+ QString::number(workDate.weekNumber()));
+    ui->lineEdit_workoutInfo->setText(workSched->get_weekPhase(workDate,false)+" - Week: "+ QString::number(workDate.weekNumber()));
 
     workSched->itemList.clear();
 
