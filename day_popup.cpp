@@ -155,17 +155,22 @@ void day_popup::set_controlButtons(bool active)
 
 void day_popup::set_exportContent()
 {
-    QMap<int,QString> intLabels,sampLabels;
+    QStringList intLabels,sampLabels;
+    QMap<int,QString> intMap = settings::get_intList();
     int sampCount = get_timesec(workSched->itemList.value(selIndex).value(6));
     intExport = new QStandardItemModel(1,3);
     sampExport = new QStandardItemModel(sampCount,1);
 
-    intLabels = settings::get_intList();
-    intExport->setData(intExport->index(0,0),"Runde 1");
+    intExport->setData(intExport->index(0,0),"Workout");
     intExport->setData(intExport->index(0,1),0);
     intExport->setData(intExport->index(0,2),sampCount);
 
-    sampLabels.insert(0,"SECS");
+    for(int i = 0; i < intMap.count(); ++i)
+    {
+        intLabels << intMap.value(i);
+    }
+
+    sampLabels << "SECS";
     for(int i = 0; i < sampCount; ++i)
     {
        sampExport->setData(sampExport->index(i,0),i);
@@ -173,13 +178,13 @@ void day_popup::set_exportContent()
 
     QTime workoutTime;
     QDateTime workoutDateTime;
-    QString exportFileName,tempDate,tempTime,sport,stressType;
+    QString tempDate,tempTime,sport,stressType;
 
     tempDate = popupDate.toString("dd.MM.yyyy");
     tempTime = workSched->itemList.value(selIndex).value(2);
 
     workoutTime = QTime::fromString(tempTime,"hh:mm");
-    exportFileName = popupDate.toString("yyyy_MM_dd_") + workoutTime.toString("hh_mm_ss") +".json";
+    fileName = popupDate.toString("yyyy_MM_dd_") + workoutTime.toString("hh_mm_ss") +".json";
     workoutDateTime = QDateTime::fromString(tempDate+"T"+tempTime+":00","dd.MM.yyyyThh:mm:ss").toUTC();
 
     sport = workSched->itemList.value(selIndex).value(3);
@@ -190,13 +195,14 @@ void day_popup::set_exportContent()
     if(sport == settings::isAlt || sport == settings::isStrength) stressType = "triscore";
 
     this->rideData.insert("STARTTIME",workoutDateTime.toString("yyyy/MM/dd hh:mm:ss UTC"));
-    this->rideData.insert("RECINTSECS","1");
     this->rideData.insert("DEVICETYPE","Manual Import");
     this->rideData.insert("IDENTIFIER","");
     this->rideData.insert("OVERRIDES","");
 
     this->tagData.insert("Sport",sport);
-    this->tagData.insert("Filename",exportFileName);
+    this->tagData.insert("Athlete",settings::get_gcInfo("athlete"));
+    this->tagData.insert("Filename",fileName);
+    this->tagData.insert("Device","Manual Import");
     this->tagData.insert("Workout Code",workSched->itemList.value(selIndex).value(4));
     this->tagData.insert("Workout Content",workSched->itemList.value(selIndex).value(5));
     this->tagData.insert("Workout Title",workSched->itemList.value(selIndex).value(5));
@@ -210,6 +216,11 @@ void day_popup::set_exportContent()
     overrideData.insert("total_kcalories",workSched->itemList.value(selIndex).value(9));
     overrideData.insert("total_work",workSched->itemList.value(selIndex).value(9));
     overrideData.insert(stressType,workSched->itemList.value(selIndex).value(8));
+
+    this->init_jsonFile();
+    this->write_actModel("INTERVALS",intExport,&intLabels);
+    this->write_actModel("SAMPLES",sampExport,&sampLabels);
+    this->write_jsonFile();
 
     delete intExport;
     delete sampExport;
