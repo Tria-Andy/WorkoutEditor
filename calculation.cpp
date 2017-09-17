@@ -226,11 +226,11 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,int
     }
     if(sport == settings::isStrength)
     {
-        return (weight * grav * mSec * 0.205) * dura / factor;
+        return (weight * grav * mSec * 0.2055) * dura / factor;
     }
     if(sport == settings::isAlt)
     {
-        return (weight * grav * mSec * 0.148) * dura / factor;
+        return (weight * grav * mSec * 0.146) * dura / factor;
     }
 
     return 0;

@@ -149,7 +149,71 @@ void day_popup::set_controlButtons(bool active)
     ui->toolButton_copy->setEnabled(active);
     ui->toolButton_delete->setEnabled(active);
     ui->toolButton_editMove->setEnabled(active);
+    ui->toolButton_upload->setEnabled(active);
     ui->toolButton_stdwork->setEnabled(active);
+}
+
+void day_popup::set_exportContent()
+{
+    QMap<int,QString> intLabels,sampLabels;
+    int sampCount = get_timesec(workSched->itemList.value(selIndex).value(6));
+    intExport = new QStandardItemModel(1,3);
+    sampExport = new QStandardItemModel(sampCount,1);
+
+    intLabels = settings::get_intList();
+    intExport->setData(intExport->index(0,0),"Runde 1");
+    intExport->setData(intExport->index(0,1),0);
+    intExport->setData(intExport->index(0,2),sampCount);
+
+    sampLabels.insert(0,"SECS");
+    for(int i = 0; i < sampCount; ++i)
+    {
+       sampExport->setData(sampExport->index(i,0),i);
+    }
+
+    QTime workoutTime;
+    QDateTime workoutDateTime;
+    QString exportFileName,tempDate,tempTime,sport,stressType;
+
+    tempDate = popupDate.toString("dd.MM.yyyy");
+    tempTime = workSched->itemList.value(selIndex).value(2);
+
+    workoutTime = QTime::fromString(tempTime,"hh:mm");
+    exportFileName = popupDate.toString("yyyy_MM_dd_") + workoutTime.toString("hh_mm_ss") +".json";
+    workoutDateTime = QDateTime::fromString(tempDate+"T"+tempTime+":00","dd.MM.yyyyThh:mm:ss").toUTC();
+
+    sport = workSched->itemList.value(selIndex).value(3);
+
+    if(sport == settings::isSwim) stressType = "swimscore";
+    if(sport == settings::isBike) stressType = "skiba_bike_score";
+    if(sport == settings::isRun) stressType = "govss";
+    if(sport == settings::isAlt || sport == settings::isStrength) stressType = "triscore";
+
+    this->rideData.insert("STARTTIME",workoutDateTime.toString("yyyy/MM/dd hh:mm:ss UTC"));
+    this->rideData.insert("RECINTSECS","1");
+    this->rideData.insert("DEVICETYPE","Manual Import");
+    this->rideData.insert("IDENTIFIER","");
+    this->rideData.insert("OVERRIDES","");
+
+    this->tagData.insert("Sport",sport);
+    this->tagData.insert("Filename",exportFileName);
+    this->tagData.insert("Workout Code",workSched->itemList.value(selIndex).value(4));
+    this->tagData.insert("Workout Content",workSched->itemList.value(selIndex).value(5));
+    this->tagData.insert("Workout Title",workSched->itemList.value(selIndex).value(5));
+    this->tagData.insert("Year",QString::number(popupDate.year()));
+    this->tagData.insert("Month",QDate::longMonthName(popupDate.month()));
+    this->tagData.insert("Weekday",QDate::shortDayName(popupDate.dayOfWeek()));
+
+    this->hasOverride = true;
+    overrideData.insert("time_riding",QString::number(sampCount));
+    overrideData.insert("workout_time",QString::number(sampCount));
+    overrideData.insert("total_kcalories",workSched->itemList.value(selIndex).value(9));
+    overrideData.insert("total_work",workSched->itemList.value(selIndex).value(9));
+    overrideData.insert(stressType,workSched->itemList.value(selIndex).value(8));
+
+    delete intExport;
+    delete sampExport;
+    QMessageBox::information(this,"Export Workout","Workout Informations Exported!",QMessageBox::Ok);
 }
 
 void day_popup::load_workoutData(int workout)
@@ -309,7 +373,6 @@ void day_popup::setNextEditRow()
 
 void day_popup::on_toolButton_close_clicked()
 {
-
     reject();
 }
 
@@ -399,4 +462,16 @@ void day_popup::on_toolButton_dayEdit_clicked(bool checked)
     ui->lineEdit_selected->setPalette(selectBox);
     ui->tableView_day->clearSelection();
     ui->lineEdit_selected->setFocus();
+}
+
+void day_popup::on_toolButton_upload_clicked()
+{
+    QMessageBox::StandardButton reply;
+
+    reply = QMessageBox::question(this,"Export Workout","Export Workout Informations to GC?",QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        this->set_exportContent();
+    }
 }

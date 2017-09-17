@@ -20,9 +20,9 @@
 #define DAY_POPUP_H
 
 #include <dialog_workouts.h>
+#include "jsonhandler.h"
 #include "schedule.h"
 #include "settings.h"
-#include "calculation.h"
 #include <QtGui>
 #include <QDialog>
 #include <QSortFilterProxyModel>
@@ -266,7 +266,7 @@ namespace Ui {
 class day_popup;
 }
 
-class day_popup : public QDialog, public calculation
+class day_popup : public QDialog, public jsonHandler
 {
     Q_OBJECT
 
@@ -287,11 +287,13 @@ private slots:
     void on_tableView_day_clicked(const QModelIndex &index);
     void on_toolButton_dayEdit_clicked(bool checked);
 
+    void on_toolButton_upload_clicked();
+
 private:
     Ui::day_popup *ui;
     schedule *workSched;
     del_daypop daypop_del;
-    QStandardItemModel *dayModel;
+    QStandardItemModel *dayModel, *intExport, *sampExport;
     QSortFilterProxyModel *scheduleProxy;
     QHash<QString,QString> currWorkout;
     QDate popupDate,newDate;
@@ -303,6 +305,7 @@ private:
 
     void init_dayWorkouts(QDate);   
     void set_controlButtons(bool);
+    void set_exportContent();
     void set_result(int);
 
 };
