@@ -90,6 +90,7 @@ void Activity::prepareData()
     else if(curr_sport == settings::isRun) isRun = true;
     else if(curr_sport == settings::isTria) isTria = true;
     else if(curr_sport == settings::isStrength) isStrength = true;
+    else if(curr_sport == settings::isAlt) isAlt = true;
 
     int sampCount = sampleModel->rowCount();
     int intModelCount = intModel->rowCount();
@@ -337,6 +338,22 @@ void Activity::build_intTree()
             rootItem->appendRow(setIntRow(i));
         }
     }
+    else if(isAlt || isStrength)
+    {
+        QString lapName = intModel->data(intModel->index(0,0)).toString();
+        int worktime = sampleModel->rowCount();
+        double pValue = tagData.value("CommonRI").toDouble();
+
+        intItems << new QStandardItem(lapName);
+        intItems << new QStandardItem(this->set_time(worktime));
+        intItems << new QStandardItem(this->set_time(intModel->data(intModel->index(0,1)).toInt()));
+        intItems << new QStandardItem(QString::number(this->set_doubleValue(sampleModel->data(data_index).toDouble(),true)));
+        intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,pValue,worktime,0),false)));
+        intItems << new QStandardItem("-");
+
+        rootItem->appendRow(intItems);
+        intItems.clear();
+    }
     else
     {
         for(int i = 0; i < intModel->rowCount(); ++i)
@@ -349,6 +366,7 @@ void Activity::build_intTree()
             intItems << new QStandardItem(this->set_time(lapTime));
             intItems << new QStandardItem(this->set_time(intModel->data(intModel->index(i,1)).toInt()));
             intItems << new QStandardItem(QString::number(this->set_doubleValue(sampleModel->data(data_index).toDouble(),true)));
+            intItems << new QStandardItem("-");
             intItems << new QStandardItem("-");
 
             rootItem->appendRow(intItems);
@@ -685,6 +703,12 @@ void Activity::recalcIntTree()
            {
                totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,8)).toDouble();
                this->hasOverride = true;
+           }
+           else if(isAlt || isStrength)
+           {
+               totalWork = intTreeModel->data(intTreeModel->index(0,4)).toDouble();
+               ride_info.insert("Total Cal",QString::number(ceil(totalWork)));
+               workDist = 0;
            }
 
            intTreeModel->setData(intTreeModel->index(row,1),this->set_time(intTime));

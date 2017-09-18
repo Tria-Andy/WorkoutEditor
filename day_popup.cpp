@@ -178,7 +178,8 @@ void day_popup::set_exportContent()
 
     QTime workoutTime;
     QDateTime workoutDateTime;
-    QString tempDate,tempTime,sport,stressType;
+    QString tempDate,tempTime,sport,stressType,commonRI;
+    QString totalWork = workSched->itemList.value(selIndex).value(9);
 
     tempDate = popupDate.toString("dd.MM.yyyy");
     tempTime = workSched->itemList.value(selIndex).value(2);
@@ -192,7 +193,12 @@ void day_popup::set_exportContent()
     if(sport == settings::isSwim) stressType = "swimscore";
     if(sport == settings::isBike) stressType = "skiba_bike_score";
     if(sport == settings::isRun) stressType = "govss";
-    if(sport == settings::isAlt || sport == settings::isStrength) stressType = "triscore";
+    if(sport == settings::isAlt || sport == settings::isStrength)
+    {
+        commonRI = QString::number(set_doubleValue(totalWork.toDouble() / this->calc_totalWork(sport,10.0,sampCount,0)*10.0,false));
+        if(sport == settings::isStrength) commonRI = "4.0";
+        stressType = "triscore";
+    }
 
     this->rideData.insert("STARTTIME",workoutDateTime.toString("yyyy/MM/dd hh:mm:ss UTC"));
     this->rideData.insert("DEVICETYPE","Manual Import");
@@ -202,6 +208,7 @@ void day_popup::set_exportContent()
     this->tagData.insert("Sport",sport);
     this->tagData.insert("Athlete",settings::get_gcInfo("athlete"));
     this->tagData.insert("Filename",fileName);
+    this->tagData.insert("CommonRI",commonRI);
     this->tagData.insert("Device","Manual Import");
     this->tagData.insert("Workout Code",workSched->itemList.value(selIndex).value(4));
     this->tagData.insert("Workout Content",workSched->itemList.value(selIndex).value(5));
@@ -213,8 +220,8 @@ void day_popup::set_exportContent()
     this->hasOverride = true;
     overrideData.insert("time_riding",QString::number(sampCount));
     overrideData.insert("workout_time",QString::number(sampCount));
-    overrideData.insert("total_kcalories",workSched->itemList.value(selIndex).value(9));
-    overrideData.insert("total_work",workSched->itemList.value(selIndex).value(9));
+    overrideData.insert("total_kcalories",totalWork);
+    overrideData.insert("total_work",totalWork);
     overrideData.insert(stressType,workSched->itemList.value(selIndex).value(8));
 
     this->init_jsonFile();
