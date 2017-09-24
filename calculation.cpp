@@ -297,7 +297,7 @@ double calculation::current_dayCalories()
     double height = settings::get_athleteValue("height")*100;
     double age = QDate::currentDate().year() - settings::get_athleteValue("yob");
 
-    return round((66.476 + 5.0033*height)+(13.7516*weight)-(6.755*age));
+    return round((10*weight)+(6.25*height)-(5*age)+5);
 }
 
 double calculation::calc_swim_xpower(double distance,double pace,double time,double athleteWeight)
