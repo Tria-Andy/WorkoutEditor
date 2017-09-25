@@ -19,8 +19,8 @@
 #ifndef DAY_POPUP_H
 #define DAY_POPUP_H
 
-#include <dialog_workouts.h>
 #include "jsonhandler.h"
+#include "standardworkouts.h"
 #include "schedule.h"
 #include "settings.h"
 #include <QtGui>
@@ -266,7 +266,7 @@ namespace Ui {
 class day_popup;
 }
 
-class day_popup : public QDialog, public jsonHandler
+class day_popup : public QDialog, public jsonHandler, public standardWorkouts
 {
     Q_OBJECT
 
@@ -279,23 +279,23 @@ private slots:
     void on_toolButton_editMove_clicked();
     void on_toolButton_copy_clicked();
     void on_toolButton_delete_clicked();
-    void on_toolButton_stdwork_clicked();
     void edit_workoutDate(QDate);
     void load_workoutData(int);
     void setNextEditRow();
     void update_workValues();
     void on_tableView_day_clicked(const QModelIndex &index);
     void on_toolButton_dayEdit_clicked(bool checked);
-
     void on_toolButton_upload_clicked();
+    void on_comboBox_stdworkout_currentIndexChanged(int index);
 
 private:
     Ui::day_popup *ui;
     schedule *workSched;
     del_daypop daypop_del;
-    QStandardItemModel *dayModel, *intExport, *sampExport;
-    QSortFilterProxyModel *scheduleProxy;
+    QStandardItemModel *dayModel,*stdlistModel, *intExport, *sampExport;
+    QSortFilterProxyModel *scheduleProxy,*stdProxy;
     QHash<QString,QString> currWorkout;
+    QHash<int,QString> stdworkData;
     QDate popupDate,newDate;
     QModelIndex selIndex;
     QStringList workListHeader;
@@ -303,7 +303,8 @@ private:
     int selWorkout;
     bool editMode,addWorkout;
 
-    void init_dayWorkouts(QDate);   
+    void init_dayWorkouts(QDate);
+    void set_comboWorkouts(QString);
     void set_controlButtons(bool);
     void set_exportContent();
     void set_result(int);
