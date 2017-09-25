@@ -905,32 +905,27 @@ void Dialog_settings::on_pushButton_clearFat_clicked()
 void Dialog_settings::on_pushButton_addContest_clicked()
 {
     QModelIndex listIndex = ui->treeView_contest->currentIndex();
-    int row,newID;
+    int row;
 
     if(listIndex.isValid())
     {
-        row = ui->treeView_contest->currentIndex().row();
+        row = listIndex.row();
     }
     else
     {
-        newID = contestProxy->rowCount();
         row = schedule_ptr->contestModel->rowCount();
         schedule_ptr->contestModel->insertRow(row,QModelIndex());
-        schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,0),newID);
+        schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,0),contestProxy->rowCount());
+        schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,1),ui->comboBox_saisons->currentText());
+        row = contestProxy->rowCount()-1;
     }
 
-    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,1),ui->comboBox_saisons->currentText());
-    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,2),ui->dateEdit_contest->date());
-    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,3),ui->comboBox_contestsport->currentText());
-    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,4),ui->lineEdit_contest->text());
-    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,5),ui->doubleSpinBox_contest->value());
-    schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,6),ui->spinBox_contestStress->value());
-
-    for(int i = 0; i < schedule_ptr->contestModel->columnCount(); ++i)
-    {
-        qDebug() << schedule_ptr->contestModel->data(schedule_ptr->contestModel->index(row,i)).toString();
-    }
-
+    contestProxy->setData(contestProxy->index(row,1),ui->comboBox_saisons->currentText());
+    contestProxy->setData(contestProxy->index(row,2),ui->dateEdit_contest->date());
+    contestProxy->setData(contestProxy->index(row,3),ui->comboBox_contestsport->currentText());
+    contestProxy->setData(contestProxy->index(row,4),ui->lineEdit_contest->text());
+    contestProxy->setData(contestProxy->index(row,5),ui->doubleSpinBox_contest->value());
+    contestProxy->setData(contestProxy->index(row,6),ui->spinBox_contestStress->value());
 
     ui->treeView_contest->clearSelection();
     this->refresh_contestTree(ui->comboBox_saisons->currentText());
