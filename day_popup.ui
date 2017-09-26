@@ -422,13 +422,13 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>25</height>
+          <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>25</height>
+          <height>30</height>
          </size>
         </property>
         <property name="frameShape">
@@ -437,7 +437,7 @@
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QFormLayout" name="formLayout">
+        <layout class="QGridLayout" name="gridLayout">
          <property name="leftMargin">
           <number>6</number>
          </property>
@@ -458,6 +458,12 @@
              <height>0</height>
             </size>
            </property>
+           <property name="maximumSize">
+            <size>
+             <width>55</width>
+             <height>16777215</height>
+            </size>
+           </property>
            <property name="text">
             <string>Std-Work:</string>
            </property>
@@ -467,6 +473,29 @@
           <widget class="QComboBox" name="comboBox_stdworkout">
            <property name="currentIndex">
             <number>-1</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QToolButton" name="toolButton_stdApply">
+           <property name="minimumSize">
+            <size>
+             <width>30</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/images/icons/Update.png</normaloff>:/images/icons/Update.png</iconset>
            </property>
           </widget>
          </item>

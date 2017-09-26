@@ -20,7 +20,7 @@
 
 schedule::schedule()
 {
-    workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj";
+    workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj" << "stdid";
     metaTags << "saison" << "id" << "week" << "name" << "fdw" << "content" << "goal";
     //metaTags << "id" << "saison" << "week" << "weekid" << "phase" << "fdw";
     contentTags << "id" << "week";

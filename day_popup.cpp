@@ -43,7 +43,7 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
     ui->lineEdit_selected->setReadOnly(true);
     ui->lineEdit_workoutInfo->setReadOnly(true);
 
-    workListHeader << "Time" << "Sport" << "Code" << "Title" << "Duration" << "Distance" << "Stress" << "Work(kj)" << "Pace";
+    workListHeader << "Time" << "Sport" << "Code" << "Title" << "Duration" << "Distance" << "Stress" << "Work(kj)" << "StdId" << "Pace";
     dayModel = new QStandardItemModel();
     workSched->itemList.clear();
 
@@ -116,6 +116,7 @@ void day_popup::init_dayWorkouts(QDate workDate)
     ui->tableView_day->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView_day->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_day->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_day->hideRow(worklistCount-2);
     ui->tableView_day->verticalHeader()->setSectionsClickable(false);
     ui->tableView_day->verticalHeader()->setFixedWidth(100);
     ui->tableView_day->setItemDelegate(&daypop_del);
@@ -123,10 +124,10 @@ void day_popup::init_dayWorkouts(QDate workDate)
 
     for(int col = 0; col < workCount; ++col)
     {
-        for(int row = 0; row < workListHeader.count(); ++row)
+        for(int row = 0; row <= workListHeader.count(); ++row)
         {
             dayModel->setData(dayModel->index(row,col,QModelIndex()),scheduleProxy->data(scheduleProxy->index(col,row+2)).toString());
-            if(row == 8)
+            if(row == 9)
             {
                 dayModel->setData(dayModel->index(row,col,QModelIndex()),this->get_workout_pace(scheduleProxy->data(scheduleProxy->index(col,7)).toDouble(),
                                                                                                 QTime::fromString(scheduleProxy->data(scheduleProxy->index(col,6)).toString(),"hh:mm:ss"),
@@ -149,30 +150,46 @@ void day_popup::init_dayWorkouts(QDate workDate)
     ui->dateEdit_workDate->setDate(workDate);
 }
 
-void day_popup::set_comboWorkouts(QString workoutSport)
+void day_popup::set_comboWorkouts(QString workoutSport, QString stdid)
 {
     ui->comboBox_stdworkout->blockSignals(true);
-    QString workID,workTitle,listString;
-    stdProxy->invalidate();
-    stdProxy->setFilterFixedString(workoutSport);
-    stdProxy->setFilterKeyColumn(0);
-    stdlistModel->clear();
+    ui->comboBox_stdworkout->clear();
+    int comboIndex = -1;
 
-    stdlistModel->setRowCount(stdProxy->rowCount());
-    stdlistModel->setColumnCount(2);
-
-    for(int i = 0; i < stdProxy->rowCount(); ++i)
+    if(!workoutSport.isEmpty())
     {
-        workID = stdProxy->data(stdProxy->index(i,1)).toString();
-        workTitle = stdProxy->data(stdProxy->index(i,3)).toString();
-        listString = stdProxy->data(stdProxy->index(i,2)).toString() + " - " + workTitle;
-        stdlistModel->setData(stdlistModel->index(i,0,QModelIndex()),listString);
-        stdlistModel->setData(stdlistModel->index(i,1,QModelIndex()),workID);
+        QString workID,workTitle,listString;
+        stdProxy->invalidate();
+        stdProxy->setFilterFixedString(workoutSport);
+        stdProxy->setFilterKeyColumn(0);
+        stdlistModel->clear();
+
+        stdlistModel->setRowCount(stdProxy->rowCount());
+        stdlistModel->setColumnCount(2);
+
+        for(int i = 0; i < stdProxy->rowCount(); ++i)
+        {
+            workID = stdProxy->data(stdProxy->index(i,1)).toString();
+            workTitle = stdProxy->data(stdProxy->index(i,3)).toString();
+            listString = stdProxy->data(stdProxy->index(i,2)).toString() + " - " + workTitle
+                            + " (" +stdProxy->data(stdProxy->index(i,4)).toString()
+                            + " - " +stdProxy->data(stdProxy->index(i,5)).toString()
+                            + " - " +stdProxy->data(stdProxy->index(i,6)).toString()
+                            + " - " +stdProxy->data(stdProxy->index(i,7)).toString()+")";
+            stdlistModel->setData(stdlistModel->index(i,0,QModelIndex()),listString);
+            stdlistModel->setData(stdlistModel->index(i,1,QModelIndex()),workID);
+        }
+        stdlistModel->sort(0);
+
+        for(int i = 0; i < stdlistModel->rowCount(); ++i)
+        {
+            if(stdlistModel->data(stdlistModel->index(i,1)).toString() == stdid) comboIndex = i;
+        }
+
+        ui->comboBox_stdworkout->setModel(stdlistModel);
+        ui->comboBox_stdworkout->setModelColumn(0);
+        ui->comboBox_stdworkout->setCurrentIndex(comboIndex);
     }
-    stdlistModel->sort(0);
-    ui->comboBox_stdworkout->setModel(stdlistModel);
-    ui->comboBox_stdworkout->setModelColumn(0);
-    ui->comboBox_stdworkout->setCurrentIndex(0);
     ui->comboBox_stdworkout->blockSignals(false);
 }
 
@@ -326,9 +343,10 @@ void day_popup::update_workValues()
             valueList.insert(i,dayModel->data(dayModel->index(i-2,selWorkout)).toString());
         }
         QString sport = dayModel->data(dayModel->index(1,selWorkout)).toString();
+        QString stdid = dayModel->data(dayModel->index(8,selWorkout)).toString();
         workSched->itemList.insert(selIndex,valueList);
         ui->lineEdit_selected->setText(ui->tableView_day->model()->headerData(selWorkout,Qt::Horizontal).toString()+" - "+sport);
-        this->set_comboWorkouts(sport);
+        this->set_comboWorkouts(sport,stdid);
     }
 }
 
@@ -361,6 +379,7 @@ void day_popup::set_result(int resultCode)
     ui->lineEdit_selected->setText("-");
     this->init_dayWorkouts(popupDate);
     ui->toolButton_dayEdit->setChecked(false);
+    this->set_comboWorkouts(QString(),QString());
 }
 
 void day_popup::edit_workoutDate(QDate workDate)
@@ -426,7 +445,7 @@ void day_popup::on_toolButton_close_clicked()
 
 void day_popup::on_toolButton_editMove_clicked()
 {
-    ui->lineEdit_workoutInfo->setFocus();
+    ui->dateEdit_workDate->setFocus();
 
     if(addWorkout)
     {
@@ -512,16 +531,23 @@ void day_popup::on_comboBox_stdworkout_currentIndexChanged(int stdindex)
     stdProxy->setFilterRegExp("\\b"+workoutID+"\\b");
     stdProxy->setFilterKeyColumn(1);
 
-    for(int i = 0; i < stdProxy->columnCount()-1; ++i)
+    for(int i = 1; i < stdProxy->columnCount()-1; ++i)
     {
-        stdworkData.insert(i,stdProxy->data(stdProxy->index(0,i+1)).toString());
+        stdworkData.insert(i,stdProxy->data(stdProxy->index(0,i)).toString());
     }
 
     for(QHash<int,QString>::const_iterator it = stdworkData.cbegin(), end = stdworkData.cend(); it != end; ++it)
     {
-        if(it.key() != 0) dayModel->setData(dayModel->index(it.key()+1,selWorkout),it.value());
+        if(it.key() == 1)
+        {
+            dayModel->setData(dayModel->index(8,selWorkout),it.value());
+        }
+        else
+        {
+            dayModel->setData(dayModel->index(it.key(),selWorkout),it.value());
+        }
     }
 
-    dayModel->setData(dayModel->index(8,selWorkout),this->get_workout_pace(dayModel->data(dayModel->index(5,selWorkout)).toDouble(),QTime::fromString(dayModel->data(dayModel->index(4,selWorkout)).toString(),"hh:mm:ss"),dayModel->data(dayModel->index(1,selWorkout)).toString(),true));
+    dayModel->setData(dayModel->index(9,selWorkout),this->get_workout_pace(dayModel->data(dayModel->index(5,selWorkout)).toDouble(),QTime::fromString(dayModel->data(dayModel->index(4,selWorkout)).toString(),"hh:mm:ss"),dayModel->data(dayModel->index(1,selWorkout)).toString(),true));
     ui->tableView_day->setCurrentIndex(dayModel->index(0,selWorkout));
 }
