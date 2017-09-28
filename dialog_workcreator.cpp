@@ -279,7 +279,14 @@ void Dialog_workCreator::save_workout()
         }
     }
 
-    worktime = this->set_time(static_cast<int>(ceil(timeSum)*60));
+    if(isAlt || isStrength)
+    {
+        worktime = this->set_time(static_cast<int>(timeSum));
+    }
+    else
+    {
+        worktime = this->set_time(static_cast<int>(ceil(timeSum/60.0)*60));
+    }
 
     //Update Workout -> delete first
     if(currentWorkID.isEmpty())
@@ -737,6 +744,7 @@ void Dialog_workCreator::set_plotGraphic(int dataPoints)
     stressSum = 0.0;
     workSum = 0.0;
     double thres_high = 0.0;
+    double timeRange = 0;
 
     ui->widget_plot->setInteractions(QCP::iSelectPlottables | QCP::iMultiSelect);
     QCPSelectionDecorator *lineDec = new QCPSelectionDecorator;
@@ -763,14 +771,14 @@ void Dialog_workCreator::set_plotGraphic(int dataPoints)
              }
         }
 
-        timeSum = plotModel->data(plotModel->index(dataPoints-1,1,QModelIndex())).toDouble()/60;
+        timeSum = plotModel->data(plotModel->index(dataPoints-1,1,QModelIndex())).toDouble();
         distSum = plotModel->data(plotModel->index(dataPoints-1,2,QModelIndex())).toDouble();
         stressSum = plotModel->data(plotModel->index(dataPoints-1,3,QModelIndex())).toDouble();
         workSum = plotModel->data(plotModel->index(dataPoints-1,4,QModelIndex())).toDouble();
 
         workout_line->setData(x_time,y_thres,true);
-
-        ui->widget_plot->xAxis->setRange(0,timeSum+(timeSum*0.015));
+        timeRange = timeSum/60;
+        ui->widget_plot->xAxis->setRange(0,timeRange+(timeRange*0.015));
         ui->widget_plot->xAxis2->setRange(0,distSum+(distSum*0.015));
         ui->widget_plot->yAxis->setRange(0,thres_high+20.0);
         ui->widget_plot->yAxis2->setRange(0,thres_high+20.0);
@@ -782,7 +790,7 @@ void Dialog_workCreator::set_plotGraphic(int dataPoints)
     }
 
     ui->widget_plot->replot();
-    ui->label_duration->setText("Time: " + this->set_time(static_cast<int>(timeSum*60)) + " - " + "Distance: " + QString::number(distSum) + " - " + "Stress: " + QString::number(round(stressSum))+ " - " + "Work: "+QString::number(round(workSum)));
+    ui->label_duration->setText("Time: " + this->set_time(static_cast<int>(timeSum)) + " - " + "Distance: " + QString::number(distSum) + " - " + "Stress: " + QString::number(round(stressSum))+ " - " + "Work: "+QString::number(round(workSum)));
 }
 
 void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)

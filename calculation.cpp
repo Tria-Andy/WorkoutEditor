@@ -6,13 +6,16 @@ calculation::calculation()
 
 QString calculation::set_time(int sec)
 {
+    QTime vTime;
+    vTime.setHMS(0,0,0);
+
     if(sec < 3600)
     {
-        return QDateTime::fromTime_t(sec).toUTC().toString("mm:ss");
+        return vTime.addSecs(sec).toString("mm:ss");
     }
     if(sec >= 3600 && sec < 86400)
     {
-        return QDateTime::fromTime_t(sec).toUTC().toString("hh:mm:ss");
+        return vTime.addSecs(sec).toString("hh:mm:ss");
     }
     if(sec >=86400)
     {
