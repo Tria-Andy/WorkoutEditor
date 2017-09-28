@@ -324,7 +324,7 @@ void Dialog_workCreator::save_workout()
                   << worktime
                   << QString::number(distSum)
                   << QString::number(round(stressSum))
-                  << QString::number(round(workSum))
+                  << QString::number(round(workSum/10.0)*10)
                   << QString::number(ui->checkBox_timebased->isChecked());
 
      workModel = this->workouts_meta;
