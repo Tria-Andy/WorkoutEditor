@@ -123,6 +123,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="label_workouts">
+        <property name="text">
+         <string>-</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -407,6 +414,25 @@
               </widget>
              </item>
              <item>
+              <widget class="QLabel" name="label_connect">
+               <property name="minimumSize">
+                <size>
+                 <width>20</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="Line" name="line">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -542,13 +568,6 @@
                 </size>
                </property>
               </spacer>
-             </item>
-             <item>
-              <widget class="Line" name="line_5">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
              </item>
              <item>
               <widget class="QLabel" name="label_duration">

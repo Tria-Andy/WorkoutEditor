@@ -544,6 +544,7 @@ void schedule::set_workoutData(int mode)
     double currDura = 0;
     int row = 0;
     int col = 0;
+
     if(mode == EDIT) //EDIT
     {
         for(QHash<QModelIndex,QHash<int,QString>>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it)
@@ -622,8 +623,6 @@ void schedule::updateStress(QString date,QPair<double,double> stressMap,int mode
             stressValues.insert(wDate,qMakePair(stressValue -stressMap.first,duraValue - stressMap.second));
         }
     }
-
-
 
     isUpdated = true;
 }

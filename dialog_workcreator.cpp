@@ -131,6 +131,8 @@ void Dialog_workCreator::get_workouts(QString sport)
     }
     listModel->sort(0);
 
+    ui->label_workouts->setText("Workouts: "+QString::number(metaProxy->rowCount()));
+
     ui->listView_workouts->setModel(listModel);
     ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->listView_workouts->setItemDelegate(&mousehover_del);
@@ -1027,6 +1029,7 @@ void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
     proxyFilter->setFilterFixedString(workoutID);
     proxyFilter->setFilterKeyColumn(10);
 
+    ui->label_connect->setText(": "+QString::number(proxyFilter->rowCount()));
     ui->comboBox_code->setCurrentText(workCode.replace(" ",""));
     ui->lineEdit_workoutname->setText(workTitle.replace(" ",""));
     ui->checkBox_timebased->setChecked(listModel->data(listModel->index(index.row(),2)).toBool());
