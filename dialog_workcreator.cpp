@@ -1,7 +1,7 @@
 #include "dialog_workcreator.h"
 #include "ui_dialog_workcreator.h"
 
-Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
+Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     QDialog(parent),
     ui(new Ui::Dialog_workCreator)
 {
@@ -10,11 +10,15 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent) :
     listModel = new QStandardItemModel;
     plotModel = new QStandardItemModel;
     valueModel = new QStandardItemModel;
-
+    worksched = psched;
     metaProxy = new QSortFilterProxyModel;
     metaProxy->setSourceModel(this->workouts_meta);
     stepProxy = new QSortFilterProxyModel;
     stepProxy->setSourceModel(this->workouts_steps);
+    schedProxy = new QSortFilterProxyModel;
+    schedProxy->setSourceModel(worksched->workout_schedule);
+    proxyFilter = new QSortFilterProxyModel;
+    proxyFilter->setSourceModel(schedProxy);
 
     editRow <<1<<1<<1<<0<<1<<0<<0<<0<<0;
 
@@ -81,6 +85,8 @@ Dialog_workCreator::~Dialog_workCreator()
 {
     delete metaProxy;
     delete stepProxy;
+    delete schedProxy;
+    delete proxyFilter;
     delete plotModel;
     delete valueModel;
     delete listModel;
@@ -104,6 +110,10 @@ void Dialog_workCreator::get_workouts(QString sport)
     metaProxy->invalidate();
     metaProxy->setFilterFixedString(sport);
     metaProxy->setFilterKeyColumn(0);
+
+    schedProxy->invalidate();
+    schedProxy->setFilterFixedString(sport);
+    schedProxy->setFilterKeyColumn(3);
 
     listModel->setColumnCount(3);
     listModel->setRowCount(metaProxy->rowCount());
@@ -211,7 +221,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             }
             else if(isStrength)
             {
-                pValue = 4.0;
+                pValue = percent / 25.0;
             }
             else if(isAlt)
             {
@@ -221,7 +231,6 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             {
 
             }
-
 
             valueList << stepProxy->data(stepProxy->index(i,2)).toString()
                       << stepProxy->data(stepProxy->index(i,3)).toString()
@@ -256,7 +265,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     ui->toolButton_copy->setEnabled(false);
     ui->treeWidget_intervall->setCurrentItem(ui->treeWidget_intervall->topLevelItem(0));
 }
-void Dialog_workCreator::save_workout()
+void Dialog_workCreator::save_workout(bool updateSchedule)
 {
     int counter = 1;
     int workcounter;
@@ -329,6 +338,20 @@ void Dialog_workCreator::save_workout()
 
      workModel = this->workouts_meta;
      this->save_workout_values(workoutValues,workModel);
+
+     if(updateSchedule)
+     {
+         worksched->set_isUpdated(updateSchedule);
+         for(int i = 0; i < proxyFilter->rowCount(); ++i)
+         {
+             proxyFilter->setData(proxyFilter->index(i,4),ui->comboBox_code->currentText());        //code
+             proxyFilter->setData(proxyFilter->index(i,5),ui->lineEdit_workoutname->text());        //title
+             proxyFilter->setData(proxyFilter->index(i,6),worktime);                                //duration
+             proxyFilter->setData(proxyFilter->index(i,7),QString::number(distSum));                //distance
+             proxyFilter->setData(proxyFilter->index(i,8),QString::number(round(stressSum)));       //stress
+             proxyFilter->setData(proxyFilter->index(i,9),QString::number(round(workSum/10.0)*10)); //kj
+         }
+     }
 
     //Intervalldaten
      workModel = this->workouts_steps;
@@ -963,7 +986,7 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
        ui->label_threshold->setText(QString::number(thresPower) + " Watt");
        currThres = thresPower;
 
-       editRow[2] = 0;
+       editRow[2] = 1;
        editRow[4] = 1;
        editRow[7] = 1;
     }
@@ -992,6 +1015,10 @@ void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
     QString workCode = workoutTitle.first();
     QString workTitle = workoutTitle.last();
     currentWorkID = workoutID;
+    proxyFilter->invalidate();
+    proxyFilter->setFilterFixedString(workoutID);
+    proxyFilter->setFilterKeyColumn(10);
+
     ui->comboBox_code->setCurrentText(workCode.replace(" ",""));
     ui->lineEdit_workoutname->setText(workTitle.replace(" ",""));
     ui->checkBox_timebased->setChecked(listModel->data(listModel->index(index.row(),2)).toBool());
@@ -1175,7 +1202,28 @@ void Dialog_workCreator::control_editPanel(bool setedit)
 
 void Dialog_workCreator::on_toolButton_save_clicked()
 {
-    this->save_workout();
+    int rowCount = proxyFilter->rowCount();
+
+    if(rowCount > 0)
+    {
+
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this,"Update Workout Schedule","Update "+QString::number(rowCount)+" connected Workouts in schedule?",QMessageBox::Yes|QMessageBox::No);
+
+        if (reply == QMessageBox::Yes)
+        {
+            this->save_workout(true);
+        }
+        else
+        {
+            this->save_workout(false);
+        }
+    }
+    else
+    {
+        this->save_workout(false);
+    }
+
     ui->toolButton_delete->setEnabled(true);
     ui->toolButton_save->setEnabled(false);
 }
@@ -1183,7 +1231,7 @@ void Dialog_workCreator::on_toolButton_save_clicked()
 void Dialog_workCreator::on_toolButton_copy_clicked()
 {
     currentWorkID = QString();
-    this->save_workout();
+    this->save_workout(false);
     ui->toolButton_copy->setEnabled(false);
 }
 
@@ -1231,5 +1279,13 @@ void Dialog_workCreator::on_lineEdit_workoutname_textChanged(const QString &valu
 
 void Dialog_workCreator::on_toolButton_close_clicked()
 {
-    reject();
+    if(worksched->get_isUpdated())
+    {
+        accept();
+    }
+    else
+    {
+        reject();
+    }
+
 }

@@ -1667,9 +1667,17 @@ void MainWindow::on_toolButton_clearSelect_clicked()
 
 void MainWindow::on_actionIntervall_Editor_triggered()
 {
-    Dialog_workCreator workCreator(this);
+    int dialog_code;
+    Dialog_workCreator workCreator(this,workSchedule);
     workCreator.setModal(true);
-    workCreator.exec();
+    dialog_code = workCreator.exec();
+
+    if(dialog_code == QDialog::Accepted)
+    {
+        this->summery_view();
+        this->workout_calendar();
+        ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
+    }
 }
 
 void MainWindow::on_actionPreferences_triggered()
