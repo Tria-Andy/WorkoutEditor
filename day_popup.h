@@ -286,7 +286,7 @@ private slots:
     void on_tableView_day_clicked(const QModelIndex &index);
     void on_toolButton_dayEdit_clicked(bool checked);
     void on_toolButton_upload_clicked();
-    void on_comboBox_stdworkout_currentIndexChanged(int index);
+    void on_comboBox_stdworkout_activated(int index);
 
 private:
     Ui::day_popup *ui;

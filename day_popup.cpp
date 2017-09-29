@@ -523,7 +523,7 @@ void day_popup::on_toolButton_upload_clicked()
     }
 }
 
-void day_popup::on_comboBox_stdworkout_currentIndexChanged(int stdindex)
+void day_popup::on_comboBox_stdworkout_activated(int stdindex)
 {
     ui->tableView_day->setCurrentIndex(dayModel->index(0,selWorkout));
     QString workoutID = ui->comboBox_stdworkout->model()->data(ui->comboBox_stdworkout->model()->index(stdindex,1)).toString();
