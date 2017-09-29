@@ -20,8 +20,8 @@
 
 schedule::schedule()
 {
-    workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj";
-    metaTags << "saison" << "id" << "week" << "name" << "fdw";
+    workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj" << "stdid";
+    metaTags << "saison" << "id" << "week" << "name" << "fdw" << "content" << "goal";
     //metaTags << "id" << "saison" << "week" << "weekid" << "phase" << "fdw";
     contentTags << "id" << "week";
     for(int i = 0; i < settings::get_listValues("Sportuse").count();++i)
@@ -311,18 +311,20 @@ void schedule::add_newSaison(QString saisonName)
 
 void schedule::delete_Saison(QString saisonName)
 {
-   metaProxy->setFilterFixedString(saisonName);
+   week_meta->sort(1);
+   metaProxy->setFilterRegExp("\\b"+saisonName+"\\b");
    metaProxy->setFilterKeyColumn(0);
-   contentProxy->setFilterKeyColumn(1);
    QString weekID;
 
    for(int i = 0; i < metaProxy->rowCount(); ++i)
    {
        weekID = metaProxy->data(metaProxy->index(i,2)).toString();
-       contentProxy->setFilterFixedString(weekID);
-       metaProxy->removeRow(i);
+       contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
+       contentProxy->setFilterKeyColumn(1);
        contentProxy->removeRow(0);
+       contentProxy->invalidate();
    }
+   metaProxy->removeRows(0,metaProxy->rowCount());
 }
 
 QHash<int, QString> schedule::get_weekList()
@@ -513,15 +515,23 @@ void schedule::deleteWeek(QString deleteWeek)
     }
 }
 
-QString schedule::get_weekPhase(QDate currDate)
+QString schedule::get_weekPhase(QDate currDate,bool full)
 {
     QSortFilterProxyModel *metaProxy = new QSortFilterProxyModel();
     metaProxy->setSourceModel(week_meta);
     QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.addDays(1 - currDate.dayOfWeek()).year());
     metaProxy->setFilterRegExp("\\b"+weekID+"\\b");
     metaProxy->setFilterKeyColumn(2);
+    QString phaseString = metaProxy->data(metaProxy->index(0,3)).toString();
 
-    if(metaProxy->rowCount() == 1) return metaProxy->data(metaProxy->index(0,3)).toString();
+    if(metaProxy->rowCount() == 1 && full)
+    {
+        return phaseString +"#"+metaProxy->data(metaProxy->index(0,5)).toString()+"#"+metaProxy->data(metaProxy->index(0,6)).toString();
+    }
+    if(metaProxy->rowCount() == 1 && !full)
+    {
+        return phaseString;
+    }
 
     return 0;
 }

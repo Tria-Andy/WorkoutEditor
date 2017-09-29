@@ -59,7 +59,7 @@ public:
         QPen rectPen;
         rectPen.setColor(Qt::black);
         rectPen.setWidth(1);
-        QFont phase_font,date_font, work_font;
+        QFont phase_font,content_font,date_font, work_font;
         QString temp_value,dayDate;
         QStringList phaseList = settings::get_listValues("Phase");
         QStringList sportList = settings::get_listValues("Sport");
@@ -71,6 +71,8 @@ public:
         int celloffset = 21;
         phase_font.setBold(true);
         phase_font.setPixelSize(settings::get_fontValue("fontBig"));
+        content_font.setBold(false);
+        content_font.setPixelSize(settings::get_fontValue("fontSmall"));
         date_font.setBold(true);
         date_font.setPixelSize(settings::get_fontValue("fontMedium"));
         work_font.setBold(false);
@@ -178,14 +180,19 @@ public:
         else
         {
             QPainterPath rectPhase;
+            temp_value = index.data(Qt::DisplayRole).toString();
+            calendar_values = temp_value.split(delimiter,QString::SkipEmptyParts);
+            int valueCount = calendar_values.count();
+
             QString phase = index.data(Qt::DisplayRole).toString();
             phase = phase.remove(0,phase.indexOf(delimiter)+1);
 
-            if(!phase.isEmpty())
+            if(!temp_value.isEmpty())
             {
+                int height = floor((option.rect.height()- celloffset) / 3);
                 for(int pos = 0; pos < phaseList.count();++pos)
                 {
-                    if(phase.contains(phaseList.at(pos)))
+                    if(temp_value.contains(phaseList.at(pos)))
                     {
                         rectColor = settings::get_itemColor(phaseList.at(pos)).toHsv();
                         break;
@@ -198,7 +205,9 @@ public:
 
                 QRect rect_phase(option.rect.x(),option.rect.y()+celloffset, option.rect.width(),option.rect.height()-celloffset-1);
                 rectPhase.addRoundedRect(rect_phase,4,4);
-                QRect rect_phase_text(option.rect.x()+textMargin,option.rect.y()+celloffset, option.rect.width()-textMargin,option.rect.height()-celloffset-1);
+                QRect rect_phase_name(option.rect.x()+textMargin,option.rect.y()+celloffset, option.rect.width()-textMargin,height-1);
+                QRect rect_phase_content(option.rect.x()+textMargin,option.rect.y()+height+celloffset, option.rect.width()-textMargin,height-1);
+                QRect rect_phase_goal(option.rect.x()+textMargin,option.rect.y()+(height*2)+celloffset, option.rect.width()-textMargin,height-1);
 
                 rectColor.setAlpha(225);
                 rectGradient.setColorAt(0,rectColor);
@@ -209,7 +218,26 @@ public:
                 painter->setBrush(rectGradient);
                 painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
                 painter->drawPath(rectPhase);
-                painter->drawText(rect_phase_text,Qt::AlignVCenter,phase);
+                painter->drawText(rect_phase_name,Qt::AlignVCenter,calendar_values.at(1));
+
+                if(valueCount == 2)
+                {
+                    painter->setFont(content_font);
+                    painter->drawText(rect_phase_content,Qt::AlignVCenter,"");
+                    painter->drawText(rect_phase_goal,Qt::AlignVCenter,"");
+                }
+                else if(valueCount == 3)
+                {
+                    painter->setFont(content_font);
+                    painter->drawText(rect_phase_content,Qt::AlignVCenter,calendar_values.at(2));
+                    painter->drawText(rect_phase_goal,Qt::AlignVCenter,"");
+                }
+                else if(valueCount == 4)
+                {
+                    painter->setFont(content_font);
+                    painter->drawText(rect_phase_content,Qt::AlignVCenter,calendar_values.at(2));
+                    painter->drawText(rect_phase_goal,Qt::AlignVCenter | Qt::TextWordWrap,calendar_values.at(3));
+                }
              }
         }
         painter->restore();
@@ -230,12 +258,11 @@ public:
         QStringList calendar_values;
         QStringList phaseList = settings::get_listValues("Phase");
         QStringList sportList = settings::get_listValues("Sportuse");
-        QString delimiter = "-";
         QColor rectColor,gradColor;
         gradColor.setHsv(0,0,180,200);
         int textMargin = 4;
         int celloffset = 21;
-        QString phase;
+        QString phase,content;
         phase_font.setBold(true);
         phase_font.setPixelSize(settings::get_fontValue("fontBig"));
         date_font.setBold(true);
@@ -247,7 +274,6 @@ public:
         work_font.setStyleHint(QFont::SansSerif);
 
         temp_value = index.data(Qt::DisplayRole).toString();
-        calendar_values = temp_value.split(delimiter);
 
         QLinearGradient rectGradient;
         rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
@@ -255,6 +281,7 @@ public:
 
         if(index.column() == 0)
         {
+            calendar_values = temp_value.split("#");
             headInfo = calendar_values.at(0) + " - " + calendar_values.at(1) + " - " + calendar_values.at(2);
 
             QPainterPath rectHead;
@@ -276,6 +303,7 @@ public:
             painter->drawText(rect_head_text,Qt::AlignLeft | Qt::AlignVCenter,headInfo);
 
             phase = calendar_values.at(3);
+            content = calendar_values.at(4);
 
             for(int pos = 0; pos < phaseList.count();++pos)
             {
@@ -290,10 +318,13 @@ public:
                 }
             }
 
+            int height = floor((option.rect.height()- celloffset) / 2);
+
             QPainterPath rectPhase;
             QRect rect_phase(option.rect.x(),option.rect.y()+celloffset, option.rect.width(),option.rect.height()-celloffset-1);
             rectPhase.addRoundedRect(rect_phase,4,4);
-            QRect rect_phase_text(option.rect.x()+textMargin,option.rect.y()+celloffset, option.rect.width(),option.rect.height()-celloffset-1);
+            QRect rect_phase_name(option.rect.x()+textMargin,option.rect.y()+celloffset, option.rect.width(),height-1);
+            QRect rect_phase_content(option.rect.x()+textMargin,option.rect.y()+height+celloffset, option.rect.width(),height-1);
 
             rectColor.setAlpha(225);
             rectGradient.setColorAt(0,rectColor);
@@ -304,7 +335,9 @@ public:
             painter->setPen(Qt::black);
             painter->drawPath(rectPhase);
             painter->setFont(phase_font);
-            painter->drawText(rect_phase_text,Qt::AlignVCenter,phase);
+            painter->drawText(rect_phase_name,Qt::AlignVCenter,phase);
+            painter->setFont(work_font);
+            painter->drawText(rect_phase_content,Qt::AlignVCenter,content);
         }
         else
         {
@@ -338,6 +371,8 @@ public:
             rectColor.setAlpha(225);
             rectGradient.setColorAt(0,rectColor);
             rectGradient.setColorAt(1,gradColor);
+
+            calendar_values = temp_value.split("-");
 
             if(!calendar_values.isEmpty())
             {

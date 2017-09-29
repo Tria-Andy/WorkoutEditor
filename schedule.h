@@ -39,11 +39,10 @@ public:
     void save_weekPlan();
     void save_ltsFile(double);
     int check_workouts(QDate);
-    QString get_weekPhase(QDate);
+    QString get_weekPhase(QDate,bool);
     void copyWeek(QString,QString);
     void deleteWeek(QString);
     QMap<QDate,QPair<double,double> > *get_StressMap() {return &stressValues;}
-    //void set_stressMap(QDate key,double value) {stressValues.insert(key,value);}
     void updateStress(QString,QPair<double,double>,int);
     bool get_isUpdated() {return isUpdated;}
     void add_newSaison(QString);

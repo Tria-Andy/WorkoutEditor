@@ -371,7 +371,7 @@ void MainWindow::summery_view()
         calcDay.setDate(year.toInt(),1,1);
         firstday = calcDay.addDays(week.toInt()*7).addDays(1 - calcDay.dayOfWeek());
         ui->comboBox_saisonName->setCurrentText(workSchedule->saison_atDate(firstday));
-        ui->label_selWeek->setText("Week: "+weeknumber+" - Phase: " +workSchedule->get_weekPhase(firstday));
+        ui->label_selWeek->setText("Week: "+weeknumber+" - Phase: " +workSchedule->get_weekPhase(firstday,false));
     }
     else
     {
@@ -403,7 +403,7 @@ void MainWindow::summery_view()
             for(int row = 0; row < metaRowCount; ++row)
             {
                 weekID = metaProxyFilter->data(metaProxyFilter->index(row,2)).toString();
-                contentProxy->setFilterFixedString(weekID);
+                contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
                 contentProxy->setFilterKeyColumn(1);
 
                 for(int col = 0; col < sportUseSum; ++col)
@@ -523,7 +523,7 @@ void MainWindow::workout_calendar()
                 {
                     if(metaProxy->rowCount() > 0)
                     {
-                        phase_value = workSchedule->get_weekPhase(workout_date);
+                        phase_value = workSchedule->get_weekPhase(workout_date,true);
                     }
                     else
                     {
@@ -592,10 +592,11 @@ void MainWindow::workout_calendar()
               {
                   if(col == 0)
                   {
-                    weekInfo = metaProxyFilter->data(metaProxyFilter->index(week,1)).toString() +"-"+
-                               metaProxyFilter->data(metaProxyFilter->index(week,2)).toString() +"-"+
-                               metaProxyFilter->data(metaProxyFilter->index(week,4)).toString() +"-"+
-                               metaProxyFilter->data(metaProxyFilter->index(week,3)).toString();
+                    weekInfo = metaProxyFilter->data(metaProxyFilter->index(week,1)).toString() +"#"+
+                               metaProxyFilter->data(metaProxyFilter->index(week,2)).toString() +"#"+
+                               metaProxyFilter->data(metaProxyFilter->index(week,4)).toString() +"#"+
+                               metaProxyFilter->data(metaProxyFilter->index(week,3)).toString() +"#"+
+                               metaProxyFilter->data(metaProxyFilter->index(week,5)).toString();
                   }
                   else
                   {
@@ -622,7 +623,6 @@ void MainWindow::refresh_model()
 QString MainWindow::get_weekRange()
 {
     QString display_weeks;
-
     int phaseStart;
     if(isWeekMode)
     {
@@ -645,10 +645,18 @@ QString MainWindow::get_weekRange()
         }
         else
         {
-            phaseStart = metaProxy->data(metaProxy->index(0,0)).toInt();
-            display_weeks = QString::number(phaseStart) + " - " + QString::number(phaseStart + (metaProxy->rowCount()-1));
+            metaProxy->setFilterRegExp("\\b"+workSchedule->get_currSaison()+"\\b");
+            metaProxy->setFilterKeyColumn(0);
+            metaProxyFilter->setFilterFixedString(phaseFilter);
+            metaProxyFilter->setFilterKeyColumn(3);
+            metaProxy->sort(1);
+            phaseStart = metaProxyFilter->data(metaProxyFilter->index(0,1)).toInt();
+            display_weeks = QString::number(phaseStart) + " - " + QString::number(phaseStart + (metaProxyFilter->rowCount()-1));
+            metaProxyFilter->invalidate();
+            metaProxy->invalidate();
         }
     }
+
     return display_weeks;
 }
 
@@ -1659,9 +1667,17 @@ void MainWindow::on_toolButton_clearSelect_clicked()
 
 void MainWindow::on_actionIntervall_Editor_triggered()
 {
-    Dialog_workCreator workCreator(this);
+    int dialog_code;
+    Dialog_workCreator workCreator(this,workSchedule);
     workCreator.setModal(true);
-    workCreator.exec();
+    dialog_code = workCreator.exec();
+
+    if(dialog_code == QDialog::Accepted)
+    {
+        this->summery_view();
+        this->workout_calendar();
+        ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
+    }
 }
 
 void MainWindow::on_actionPreferences_triggered()

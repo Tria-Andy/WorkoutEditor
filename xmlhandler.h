@@ -13,8 +13,9 @@ public:
 protected:
     void check_File(QString,QString);
     QDomDocument load_XMLFile(QString,QString);
-    void handle_XMLFile(QStandardItemModel*,QStringList*,QStandardItemModel*,QStringList*,bool);
     void write_XMLFile(QString,QDomDocument*,QString);
+    void fileToModel_single(QStandardItemModel*,QStringList*,QString);
+    void fileToModel_multi(QStandardItemModel*,QStringList*,QStandardItemModel*,QStringList*);
 
 private:
 

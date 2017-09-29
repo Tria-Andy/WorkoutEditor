@@ -90,6 +90,7 @@ void Activity::prepareData()
     else if(curr_sport == settings::isRun) isRun = true;
     else if(curr_sport == settings::isTria) isTria = true;
     else if(curr_sport == settings::isStrength) isStrength = true;
+    else if(curr_sport == settings::isAlt) isAlt = true;
 
     int sampCount = sampleModel->rowCount();
     int intModelCount = intModel->rowCount();
@@ -337,6 +338,22 @@ void Activity::build_intTree()
             rootItem->appendRow(setIntRow(i));
         }
     }
+    else if(isAlt || isStrength)
+    {
+        QString lapName = intModel->data(intModel->index(0,0)).toString();
+        int worktime = sampleModel->rowCount();
+        double pValue = tagData.value("CommonRI").toDouble();
+
+        intItems << new QStandardItem(lapName);
+        intItems << new QStandardItem(this->set_time(worktime));
+        intItems << new QStandardItem(this->set_time(intModel->data(intModel->index(0,1)).toInt()));
+        intItems << new QStandardItem(QString::number(this->set_doubleValue(sampleModel->data(data_index).toDouble(),true)));
+        intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,pValue,worktime,0),false)));
+        intItems << new QStandardItem("-");
+
+        rootItem->appendRow(intItems);
+        intItems.clear();
+    }
     else
     {
         for(int i = 0; i < intModel->rowCount(); ++i)
@@ -349,6 +366,7 @@ void Activity::build_intTree()
             intItems << new QStandardItem(this->set_time(lapTime));
             intItems << new QStandardItem(this->set_time(intModel->data(intModel->index(i,1)).toInt()));
             intItems << new QStandardItem(QString::number(this->set_doubleValue(sampleModel->data(data_index).toDouble(),true)));
+            intItems << new QStandardItem("-");
             intItems << new QStandardItem("-");
 
             rootItem->appendRow(intItems);
@@ -383,12 +401,12 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
         lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(watts);
         intItems << new QStandardItem(QString::number(watts));
         intItems << new QStandardItem(QString::number(round(this->get_int_value(pInt,3))));
-        intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,watts,lapTime,0,0),false)));
+        intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,watts,lapTime,0),false)));
     }
     else if(isRun)
     {
         lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(lapPace);
-        intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,lapSpeed,lapTime,0,0),false)));
+        intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,lapSpeed,lapTime,0),false)));
     }
     else if(isTria)
     {
@@ -396,32 +414,32 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
         {
             lapName = settings::isSwim;
             intItems << new QStandardItem("-");
-            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,lapDist,lapTime,lapDist,8),false)));
+            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,lapPace,lapTime,8),false)));
         }
         else if(pInt == 1)
         {
             lapName = "T1";
             intItems << new QStandardItem("-");
-            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(settings::isRun,lapSpeed,lapTime,0,0),false)));
+            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(settings::isRun,lapSpeed,lapTime,0),false)));
         }
         else if(pInt == 2)
         {
             lapName = settings::isBike;
             double watts = round(this->get_int_value(pInt,4));
             intItems << new QStandardItem(QString::number(watts));
-            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,watts,lapTime,0,0),false)));
+            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,watts,lapTime,0),false)));
         }
         else if(pInt == 3)
         {
             lapName = "T2";
             intItems << new QStandardItem("-");
-            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(settings::isRun,lapSpeed,lapTime,0,0),false)));
+            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(settings::isRun,lapSpeed,lapTime,0),false)));
         }
         else if(pInt == 4)
         {
             lapName = settings::isRun;
             intItems << new QStandardItem("-");
-            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,lapSpeed,lapTime,0,0),false)));
+            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,lapSpeed,lapTime,0),false)));
         }
     }
 
@@ -440,6 +458,7 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
     int strokeCount = 0;
     int currType = 0,lastType = 0;
     int lapType = 0;
+    int lapPace = 0;
     int lapCount = intModel->data(intModel->index(pInt,4)).toInt();
     QString lapName = intModel->data(intModel->index(pInt,0)).toString();
     int intPace = this->get_int_pace(pInt,lapName);
@@ -463,7 +482,6 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
     {
         intTime = 0;
         int lapTime = 0;
-        int lapPace = 0;
         double lapWork = 0.0;
         double intWork = 0.0;
 
@@ -474,7 +492,7 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
             currType = swimProxy->data(swimProxy->index(i,3)).toInt();
             lapType = currType == lastType ? currType : 6;
             strokeCount = strokeCount+swimProxy->data(swimProxy->index(i,8)).toInt();
-            lapWork = this->calc_totalWork(curr_sport,swimTrack,lapTime,swimTrack/1000.0,currType);
+            lapWork = this->calc_totalWork(curr_sport,lapPace,lapTime,currType);
             moveTime = moveTime + lapTime;
 
             subItems << new QStandardItem(swimProxy->data(swimProxy->index(i,0)).toString());
@@ -505,7 +523,7 @@ QList<QStandardItem *> Activity::setSwimLap(int pInt,QString intKey)
         currType = swimProxy->data(swimProxy->index(0,3)).toInt();
         intItems.at(1)->setData(swimType.at(currType),Qt::EditRole);
         intItems.at(8)->setData(swimProxy->data(swimProxy->index(0,8)).toString(),Qt::EditRole);
-        intItems.at(9)->setData(this->set_doubleValue(this->calc_totalWork(curr_sport,swimTrack,intTime,0,currType),false),Qt::EditRole);
+        intItems.at(9)->setData(this->set_doubleValue(this->calc_totalWork(curr_sport,lapPace,intTime,currType),false),Qt::EditRole);
     }
 
     return intItems;
@@ -685,6 +703,12 @@ void Activity::recalcIntTree()
            {
                totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,8)).toDouble();
                this->hasOverride = true;
+           }
+           else if(isAlt || isStrength)
+           {
+               totalWork = intTreeModel->data(intTreeModel->index(0,4)).toDouble();
+               ride_info.insert("Total Cal",QString::number(ceil(totalWork)));
+               workDist = 0;
            }
 
            intTreeModel->setData(intTreeModel->index(row,1),this->set_time(intTime));
@@ -988,7 +1012,30 @@ void Activity::updateInterval()
 
         if(isRun)
         {
-            intTreeModel->setData(selItem.value(7),this->set_doubleValue(this->calc_totalWork(curr_sport,lapSpeed,lapTime,0,0),false));
+            intTreeModel->setData(selItem.value(7),this->set_doubleValue(this->calc_totalWork(curr_sport,lapSpeed,lapTime,0),false));
+
+        }
+        if(isTria)
+        {
+            QString pName = selItemModel->data(selItemModel->index(0,0)).toString().split("-").first();
+
+            if(pName == settings::isSwim)
+            {
+                intTreeModel->setData(selItem.value(8),this->set_doubleValue(this->calc_totalWork(settings::isSwim,lapSpeed,lapTime,0),false));
+            }
+            else if(pName == "T1" || pName == "T2")
+            {
+                intTreeModel->setData(selItem.value(8),this->set_doubleValue(this->calc_totalWork(settings::isRun,lapSpeed,lapTime,0),false));
+            }
+            else if(pName == settings::isBike)
+            {
+                double watts = intTreeModel->data(selItem.value(7)).toDouble();
+                intTreeModel->setData(selItem.value(8),this->set_doubleValue(this->calc_totalWork(settings::isBike,watts,lapTime,0),false));
+            }
+            else if(pName == settings::isRun)
+            {
+                intTreeModel->setData(selItem.value(8),this->set_doubleValue(this->calc_totalWork(settings::isRun,lapSpeed,lapTime,0),false));
+            }
         }
     }
     this->recalcIntTree();
@@ -1013,7 +1060,7 @@ void Activity::updateSwimLap()
     intTreeModel->setData(selItem.value(6),selItemModel->data(selItemModel->index(4,0)));
     intTreeModel->setData(selItem.value(7),this->set_doubleValue(selItemModel->data(selItemModel->index(5,0)).toDouble(),true));
     intTreeModel->setData(selItem.value(8),selItemModel->data(selItemModel->index(6,0)));
-    intTreeModel->setData(selItem.value(9),this->set_doubleValue(this->calc_totalWork(curr_sport,swimTrack,newTime,swimTrack/1000.0,newStyle),false));
+    intTreeModel->setData(selItem.value(9),this->set_doubleValue(this->calc_totalWork(curr_sport,newPace,newTime,newStyle),false));
 
     if(oldLevel != newLevel)
     {
@@ -1098,7 +1145,7 @@ void Activity::updateSwimBreak(QModelIndex intIndex,QItemSelectionModel *treeSel
 
         intTreeModel->setData(treeSelect->selectedRows(4).at(0),this->set_time(breakDura));
         intTreeModel->setData(treeSelect->selectedRows(5).at(0),this->set_time(breakStart));
-        intTreeModel->setData(treeSelect->selectedRows(9).at(0),this->set_doubleValue(this->calc_totalWork(curr_sport,swimTrack,breakDura,0,0),false));
+        intTreeModel->setData(treeSelect->selectedRows(9).at(0),this->set_doubleValue(this->calc_totalWork(curr_sport,1,breakDura,0),false));
     }
 
     treeSelect->clearSelection();

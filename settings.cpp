@@ -259,7 +259,7 @@ void settings::loadSettings()
             thresholdMap.insert("swimpower",myvalues->value("swimpower").toDouble());
             thresholdMap.insert("bikepower",myvalues->value("bikepower").toDouble());
             thresholdMap.insert("runpower",myvalues->value("runpower").toDouble());
-            thresholdMap.insert("stgpower",myvalues->value("stgpower").toDouble());
+            thresholdMap.insert("stgpower",athleteMap.value("weight")*4);
             thresholdMap.insert("swimfactor",myvalues->value("swimfactor").toDouble());
             thresholdMap.insert("bikefactor",myvalues->value("bikefactor").toDouble());
             thresholdMap.insert("runfactor",myvalues->value("runfactor").toDouble());
@@ -320,8 +320,8 @@ void settings::loadSettings()
             settingList = myvalues->value("swimstyle").toString().split(splitter);
             listMap.insert("SwimStyle",settingList);
             settingList.clear();
-            settingList = myvalues->value("styleFactor").toString().split(splitter);
-            listMap.insert("StyleFactor",settingList);
+            settingList = myvalues->value("swimMET").toString().split(splitter);
+            listMap.insert("SwimMET",settingList);
             settingList.clear();
         myvalues->endGroup();
 
@@ -500,7 +500,6 @@ void settings::saveSettings()
         myvalues->setValue("runpower",QString::number(thresholdMap.value("runpower")));
         myvalues->setValue("runpace",QString::number(thresholdMap.value("runpace")));
         myvalues->setValue("runfactor",QString::number(thresholdMap.value("runfactor")));
-        myvalues->setValue("stgpower",QString::number(thresholdMap.value("stgpower")));
         myvalues->setValue("hfthres",QString::number(thresholdMap.value("hfthres")));
         myvalues->setValue("hfmax",QString::number(thresholdMap.value("hfmax")));
     myvalues->endGroup();

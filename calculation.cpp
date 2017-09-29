@@ -6,13 +6,16 @@ calculation::calculation()
 
 QString calculation::set_time(int sec)
 {
+    QTime vTime;
+    vTime.setHMS(0,0,0);
+
     if(sec < 3600)
     {
-        return QDateTime::fromTime_t(sec).toUTC().toString("mm:ss");
+        return vTime.addSecs(sec).toString("mm:ss");
     }
     if(sec >= 3600 && sec < 86400)
     {
-        return QDateTime::fromTime_t(sec).toUTC().toString("hh:mm:ss");
+        return vTime.addSecs(sec).toString("hh:mm:ss");
     }
     if(sec >=86400)
     {
@@ -190,7 +193,7 @@ double calculation::calc_totalCal(double weight,double avgHF, double moveTime)
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
 }
 
-double calculation::calc_totalWork(QString sport, double pValue, double dura,double dist,int tempID)
+double calculation::calc_totalWork(QString sport, double pValue, double dura,int tempID)
 {
     double factor = 1000.0;
     double grav = 9.81;
@@ -200,29 +203,20 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,dou
 
     if(sport == settings::isSwim)
     {
-        double styleFactor = 1;
-        double speedFactor = 0;
-        double distFactor = 0;
+        double correctMet = 1;
+        double swimThresPace = settings::get_thresValue("swimpace");
+        double sriFactor = 0;
+        double sri = 0;
 
-        if(pValue == 25.0)
+        if(tempID != 0)
         {
-            distFactor = 27.3403325;
+            sri = pow(swimThresPace/pValue,3.0);
+            sriFactor = sqrt(sri) / 10.0;
+            if(sri < 1.0) sriFactor = sriFactor * -1.0;
         }
-        else if(pValue == 50.0)
-        {
-            distFactor = 54.6806649;
-        }
-        else if(pValue < 25.0 && tempID == 8)
-        {
-            distFactor = 109.373298 * (dist*10);
-        }
-        else
-        {
-            distFactor = 25.0;
-        }
-        speedFactor = (((dist*factor) * distFactor) / 25.0) / dura;
-        styleFactor = get_swim_speedFactor(speedFactor,tempID);
-        return (styleFactor * 3.5 * weight / 200) * (dura/60.0);
+        correctMet = get_corrected_MET(weight,tempID)+sriFactor;
+
+        return (correctMet * 3.5 * weight / 200.0) * (dura/60.0);
     }
     if(sport == settings::isBike)
     {
@@ -230,16 +224,16 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,dou
     }
     if(sport == settings::isRun)
     {
-        double bodyHub = (height * 0.0515) + (((3600/settings::get_thresValue("runpace")) / pValue) / 100.0);
+        double bodyHub = (height * 0.057) + (((3600/settings::get_thresValue("runpace")) / pValue) / 100.0);
         return (weight * grav * mSec * bodyHub) * dura / factor;
     }
     if(sport == settings::isStrength)
     {
-        return (weight * grav * mSec * 0.2) * dura / factor;
+        return (weight * grav * mSec * 0.218) * dura / factor;
     }
     if(sport == settings::isAlt)
     {
-        return (weight * grav * mSec * 0.148) * dura / factor;
+        return (weight * grav * mSec * 0.146) * dura / factor;
     }
 
     return 0;
@@ -300,6 +294,15 @@ double calculation::calc_lnp(double speed,double athleteHeight,double athleteWei
     return (cAero+3.6*athleteEff)*speed*athleteWeight;
 }
 
+double calculation::current_dayCalories()
+{
+    double weight = settings::get_weightforDate(QDateTime::currentDateTime());
+    double height = settings::get_athleteValue("height")*100;
+    double age = QDate::currentDate().year() - settings::get_athleteValue("yob");
+
+    return round((10*weight)+(6.25*height)-(5*age)+5);
+}
+
 double calculation::calc_swim_xpower(double distance,double pace,double time,double athleteWeight)
 {
     double K = 2 + 0.35 * athleteWeight;
@@ -324,29 +327,19 @@ double calculation::calc_swim_xpower(double distance,double pace,double time,dou
     return pow(xPowerSum / time,0.33);
 }
 
-double calculation::get_swim_speedFactor(double distFactor, int style)
+double calculation::get_corrected_MET(double weight, int style)
 {
-    QString factor = settings::get_listValues("StyleFactor").at(style);
-    double speedFactor = factor.toDouble();
+    QString factor = settings::get_listValues("SwimMET").at(style);
+    double swimMET = factor.toDouble();
+    double mlkgmin = (((current_dayCalories()/1440)/5)/weight)*1000.0;
 
     if(style == 0)
     {
-        return speedFactor;
+        return swimMET;
     }
     else
     {
-        if(distFactor > 2.5)
-        {
-            return speedFactor;
-        }
-        else if(distFactor < 2.5 && distFactor> 1.5)
-        {
-            return speedFactor - 2.0;
-        }
-        else
-        {
-            return speedFactor - 4.0;
-        }
+        return swimMET * (3.5/mlkgmin);
     }
 
     return 10;

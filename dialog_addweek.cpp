@@ -34,7 +34,7 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
     metaProxyFilter->setSourceModel(metaProxy);
     contentProxy = new QSortFilterProxyModel();
     contentProxy->setSourceModel(p_sched->week_content);
-
+    delimiter = "#";
     ui->comboBox_phase->addItems(settings::get_listValues("Phase"));
     ui->comboBox_cycle->addItems(settings::get_listValues("Cycle"));
     timeFormat = "hh:mm:ss";
@@ -64,12 +64,12 @@ void Dialog_addweek::on_toolButton_close_clicked()
 void Dialog_addweek::fill_values(QString selWeek)
 {
     ui->dateEdit_selectDate->blockSignals(true);
-    QStringList weekInfo = selWeek.split("-");
+    QStringList weekInfo = selWeek.split(delimiter);
     QString selWeekID = weekInfo.at(1);
     metaProxyFilter->invalidate();
-    metaProxyFilter->setFilterFixedString(selWeekID);
+    metaProxyFilter->setFilterRegExp("\\b"+selWeekID+"\\b");
     metaProxyFilter->setFilterKeyColumn(2);
-    contentProxy->setFilterFixedString(selWeekID);
+    contentProxy->setFilterRegExp("\\b"+selWeekID+"\\b");
     contentProxy->setFilterKeyColumn(1);
 
     ui->label_header->clear();
@@ -102,6 +102,8 @@ void Dialog_addweek::fill_values(QString selWeek)
         value = weekInfo.at(3);
         ui->comboBox_phase->setCurrentText(value.split("_").first());
         ui->comboBox_cycle->setCurrentText(value.split("_").last());
+        ui->lineEdit_weekContent->setText(metaProxyFilter->data(metaProxyFilter->index(0,5)).toString());
+        ui->lineEdit_weekGoals->setText(metaProxyFilter->data(metaProxyFilter->index(0,6)).toString());
         update = true;
     }
     else
@@ -183,10 +185,11 @@ void Dialog_addweek::on_dateEdit_selectDate_dateChanged(const QDate &date)
     metaProxyFilter->setFilterFixedString(firstDay);
     metaProxyFilter->setFilterKeyColumn(4);
 
-    weekString = metaProxyFilter->data(metaProxyFilter->index(0,1)).toString() +"-"+
-                metaProxyFilter->data(metaProxyFilter->index(0,2)).toString() +"-"+
-                metaProxyFilter->data(metaProxyFilter->index(0,4)).toString() +"-"+
-                metaProxyFilter->data(metaProxyFilter->index(0,3)).toString();
+    weekString = metaProxyFilter->data(metaProxyFilter->index(0,1)).toString() +delimiter+
+                metaProxyFilter->data(metaProxyFilter->index(0,2)).toString() +delimiter+
+                metaProxyFilter->data(metaProxyFilter->index(0,4)).toString() +delimiter+
+                metaProxyFilter->data(metaProxyFilter->index(0,3)).toString() +delimiter+
+                metaProxyFilter->data(metaProxyFilter->index(0,5)).toString();
     this->fill_values(weekString);
     ui->lineEdit_week->setText(QString::number(date.weekNumber()));
 }
@@ -201,7 +204,9 @@ void Dialog_addweek::on_toolButton_update_clicked()
     {
         weekMeta << editWeekID
                  << ui->comboBox_phase->currentText()+"_"+ui->comboBox_cycle->currentText()
-                 << ui->dateEdit_selectDate->date().toString("dd.MM.yyyy");
+                 << ui->dateEdit_selectDate->date().toString("dd.MM.yyyy")
+                 << ui->lineEdit_weekContent->text()
+                 << ui->lineEdit_weekGoals->text();
 
         weekContent << editWeekID
                     << this->create_values();
@@ -211,7 +216,9 @@ void Dialog_addweek::on_toolButton_update_clicked()
         weekMeta << QString::number(currID)
                  << editWeekID
                  << ui->comboBox_phase->currentText()+"_"+ui->comboBox_cycle->currentText()
-                 << ui->dateEdit_selectDate->date().toString("dd.MM.yyyy");
+                 << ui->dateEdit_selectDate->date().toString("dd.MM.yyyy")
+                 << ui->lineEdit_weekContent->text()
+                 << ui->lineEdit_weekGoals->text();
 
         weekContent << QString::number(currID)
                     << editWeekID
@@ -220,9 +227,9 @@ void Dialog_addweek::on_toolButton_update_clicked()
 
     if(update)
     {
-        metaProxyFilter->setFilterFixedString(editWeekID);
+        metaProxyFilter->setFilterRegExp("\\b"+editWeekID+"\\b");
         metaProxyFilter->setFilterKeyColumn(2);
-        contentProxy->setFilterFixedString(editWeekID);
+        contentProxy->setFilterRegExp("\\b"+editWeekID+"\\b");
         contentProxy->setFilterKeyColumn(1);
 
         if(metaProxyFilter->rowCount() > 0)

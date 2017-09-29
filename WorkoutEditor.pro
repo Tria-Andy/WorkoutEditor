@@ -15,7 +15,7 @@ TEMPLATE = app
 #Application version
 VERSION_MAJOR = 1
 VERSION_MINOR = 3
-VERSION_BUILD = 15
+VERSION_BUILD = 18
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
        "VERSION_BUILD=$$VERSION_BUILD"
@@ -28,7 +28,6 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
     dialog_export.cpp \
-    dialog_workouts.cpp \
     activity.cpp \
     dialog_stresscalc.cpp \
     qcustomplot.cpp \
@@ -54,7 +53,6 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     settings.h \
     dialog_export.h \
-    dialog_workouts.h \
     activity.h \
     dialog_stresscalc.h \
     qcustomplot.h \
@@ -81,7 +79,6 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     dialog_export.ui \
-    dialog_workouts.ui \
     dialog_stresscalc.ui \
     week_popup.ui \
     day_popup.ui \
