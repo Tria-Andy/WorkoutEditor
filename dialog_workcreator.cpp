@@ -221,7 +221,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             }
             else if(isStrength)
             {
-                pValue = percent / 25.0;
+                pValue = percent / 20.0;
             }
             else if(isAlt)
             {
@@ -483,6 +483,14 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
         defaultDist = this->calc_distance(defaultTime,static_cast<double>(this->get_timesec(threstopace(thresPace,percent))));
         if(isBike) pValue = threshold.toDouble();
         if(isRun) pValue = get_speed(QTime::fromString(threshold,"mm:ss"),0,currentSport,true);
+    }
+    else if(isStrength)
+    {
+        pValue = percent / 20.0;
+    }
+    else if(isAlt)
+    {
+        pValue = percent / 10.0;
     }
 
     if(hasValues)
