@@ -98,6 +98,7 @@ void Dialog_workCreator::set_controlButtons(bool setButton)
     ui->pushButton_clear->setEnabled(setButton);
     ui->toolButton_save->setEnabled(setButton);
     ui->toolButton_delete->setEnabled(setButton);
+    ui->toolButton_workouts->setEnabled(setButton);
     ui->comboBox_code->setEnabled(setButton);
 }
 
@@ -141,6 +142,27 @@ void Dialog_workCreator::get_workouts(QString sport)
     QString sportBack = "rgb("+QString::number(sportColor.red())+","+QString::number(sportColor.green())+","+QString::number(sportColor.blue())+",35%)";
     QString actBackground = "background: "+sportBack;
     ui->listView_workouts->setStyleSheet(actBackground);
+}
+
+QString Dialog_workCreator::get_workoutTime(double time)
+{
+    QString worktime;
+
+    if(isAlt || isStrength)
+    {
+        worktime = this->set_time(static_cast<int>(time));
+    }
+    else
+    {
+        worktime = this->set_time(static_cast<int>(ceil(time/60.0)*60));
+    }
+
+    if(worktime.length() == 5)
+    {
+        worktime = "00:"+worktime;
+    }
+
+    return worktime;
 }
 
 void Dialog_workCreator::open_stdWorkout(QString workID)
@@ -265,13 +287,14 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     clearFlag = false;
     this->set_controlButtons(true);
     ui->toolButton_copy->setEnabled(false);
+    if(proxyFilter->rowCount() == 0) ui->toolButton_workouts->setEnabled(false);
     ui->treeWidget_intervall->setCurrentItem(ui->treeWidget_intervall->topLevelItem(0));
 }
-void Dialog_workCreator::save_workout(bool updateSchedule)
+void Dialog_workCreator::save_workout()
 {
     int counter = 1;
     int workcounter;
-    QString workID,sport,phase,subphase,worktime,currWorkID;
+    QString workID,sport,phase,subphase,currWorkID;
     QStringList workoutValues,existWorkIDs,sportWorkIDs;
     sport = ui->comboBox_sport->currentText();
     QTreeWidgetItem *currentItem;
@@ -288,15 +311,6 @@ void Dialog_workCreator::save_workout(bool updateSchedule)
         {
             sportWorkIDs << currWorkID;
         }
-    }
-
-    if(isAlt || isStrength)
-    {
-        worktime = this->set_time(static_cast<int>(timeSum));
-    }
-    else
-    {
-        worktime = this->set_time(static_cast<int>(ceil(timeSum/60.0)*60));
     }
 
     //Update Workout -> delete first
@@ -322,17 +336,12 @@ void Dialog_workCreator::save_workout(bool updateSchedule)
         workID = currentWorkID;
     }
 
-    if(worktime.length() == 5)
-    {
-        worktime = "00:"+worktime;
-    }
-
     //Metadaten
     workoutValues << currentSport
                   << workID
                   << ui->comboBox_code->currentText()
                   << ui->lineEdit_workoutname->text()
-                  << worktime
+                  << get_workoutTime(timeSum)
                   << QString::number(distSum)
                   << QString::number(round(stressSum))
                   << QString::number(round(workSum/10.0)*10)
@@ -340,20 +349,6 @@ void Dialog_workCreator::save_workout(bool updateSchedule)
 
      workModel = this->workouts_meta;
      this->save_workout_values(workoutValues,workModel);
-
-     if(updateSchedule)
-     {
-         worksched->set_isUpdated(updateSchedule);
-         for(int i = 0; i < proxyFilter->rowCount(); ++i)
-         {
-             proxyFilter->setData(proxyFilter->index(i,4),ui->comboBox_code->currentText());        //code
-             proxyFilter->setData(proxyFilter->index(i,5),ui->lineEdit_workoutname->text());        //title
-             proxyFilter->setData(proxyFilter->index(i,6),worktime);                                //duration
-             proxyFilter->setData(proxyFilter->index(i,7),QString::number(distSum));                //distance
-             proxyFilter->setData(proxyFilter->index(i,8),QString::number(round(stressSum)));       //stress
-             proxyFilter->setData(proxyFilter->index(i,9),QString::number(round(workSum/10.0)*10)); //kj
-         }
-     }
 
     //Intervalldaten
      workModel = this->workouts_steps;
@@ -1029,7 +1024,7 @@ void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
     proxyFilter->setFilterFixedString(workoutID);
     proxyFilter->setFilterKeyColumn(10);
 
-    ui->label_connect->setText(": "+QString::number(proxyFilter->rowCount()));
+    ui->label_connect->setText(QString::number(proxyFilter->rowCount()));
     ui->comboBox_code->setCurrentText(workCode.replace(" ",""));
     ui->lineEdit_workoutname->setText(workTitle.replace(" ",""));
     ui->checkBox_timebased->setChecked(listModel->data(listModel->index(index.row(),2)).toBool());
@@ -1213,27 +1208,8 @@ void Dialog_workCreator::control_editPanel(bool setedit)
 
 void Dialog_workCreator::on_toolButton_save_clicked()
 {
-    int rowCount = proxyFilter->rowCount();
 
-    if(rowCount > 0)
-    {
-
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this,"Update Workout Schedule","Update "+QString::number(rowCount)+" connected Workouts in schedule?",QMessageBox::Yes|QMessageBox::No);
-
-        if (reply == QMessageBox::Yes)
-        {
-            this->save_workout(true);
-        }
-        else
-        {
-            this->save_workout(false);
-        }
-    }
-    else
-    {
-        this->save_workout(false);
-    }
+    this->save_workout();
 
     ui->toolButton_delete->setEnabled(true);
     ui->toolButton_save->setEnabled(false);
@@ -1242,7 +1218,7 @@ void Dialog_workCreator::on_toolButton_save_clicked()
 void Dialog_workCreator::on_toolButton_copy_clicked()
 {
     currentWorkID = QString();
-    this->save_workout(false);
+    this->save_workout();
     ui->toolButton_copy->setEnabled(false);
 }
 
@@ -1299,4 +1275,52 @@ void Dialog_workCreator::on_toolButton_close_clicked()
         reject();
     }
 
+}
+
+void Dialog_workCreator::on_toolButton_workouts_clicked()
+{
+    QDialog *updateDialog = new QDialog;
+    updateDialog->setFixedHeight(200);
+    updateDialog->setFixedWidth(400);
+
+    QGroupBox *radioGroup = new QGroupBox(updateDialog);
+    QHBoxLayout *hBox = new QHBoxLayout;
+    updateAll = new QRadioButton("All Workouts",updateDialog);
+    updateRange = new QRadioButton("Workouts in Range",updateDialog);
+    updateFrom = new QDateEdit(updateDialog);
+    updateTo = new QDateEdit(updateDialog);
+    updateAll->setChecked(true);
+
+    hBox->addWidget(updateAll);
+    hBox->addWidget(updateRange);
+    hBox->addStretch(1);
+    radioGroup->setLayout(hBox);
+
+    updateDialog->exec();
+    delete updateDialog;
+
+    /*
+    QString wDate;
+    QMessageBox::StandardButton reply;
+    QPair<double,double> stressMap;
+    double currStress = 0.0;
+    reply = QMessageBox::question(this,"Update Workout Schedule","Update "+QString::number(proxyFilter->rowCount())+" connected Workouts in schedule?",QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        worksched->set_isUpdated(true);
+        for(int i = 0; i < proxyFilter->rowCount(); ++i)
+        {
+            wDate = proxyFilter->data(proxyFilter->index(i,1)).toString();
+            currStress = worksched->stressValues.value(wDate);
+            stressMap.first = currStress;
+            proxyFilter->setData(proxyFilter->index(i,4),ui->comboBox_code->currentText());        //code
+            proxyFilter->setData(proxyFilter->index(i,5),ui->lineEdit_workoutname->text());        //title
+            proxyFilter->setData(proxyFilter->index(i,6),get_workoutTime(timeSum));                //duration
+            proxyFilter->setData(proxyFilter->index(i,7),QString::number(distSum));                //distance
+            proxyFilter->setData(proxyFilter->index(i,8),QString::number(round(stressSum)));       //stress
+            proxyFilter->setData(proxyFilter->index(i,9),QString::number(round(workSum/10.0)*10)); //kj
+        }
+    }
+    */
 }

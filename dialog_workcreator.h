@@ -15,7 +15,6 @@
 #include "settings.h"
 #include "standardworkouts.h"
 #include "del_mousehover.h"
-//#include "calculation.h"
 #include "schedule.h"
 
 class del_workcreator : public QStyledItemDelegate
@@ -438,6 +437,7 @@ private slots:
     void on_toolButton_close_clicked();
     void on_toolButton_cancel_clicked();
     void set_controlButtons(bool);
+    void on_toolButton_workouts_clicked();
 
 private:
     Ui::Dialog_workCreator *ui;
@@ -459,6 +459,10 @@ private:
     bool isSwim,isBike,isRun,isStrength,isAlt,isOther;
     bool clearFlag;
 
+    QDateTimeEdit *updateFrom,*updateTo;
+    QRadioButton *updateAll, *updateRange;
+    QPushButton *updateOK,*updateCancel;
+
     QString get_treeValue(int,int,int,int,int);
 
     void control_editPanel(bool);
@@ -469,12 +473,13 @@ private:
     QTreeWidgetItem* move_item(bool,QTreeWidgetItem*);
     void set_defaultData(QTreeWidgetItem *item,bool);
     void get_workouts(QString);
+    QString get_workoutTime(double);
     void clearIntTree();
     void open_stdWorkout(QString);
     void set_plotModel();
     void add_to_plot(QTreeWidgetItem *item,int);
     void set_plotGraphic(int);
-    void save_workout(bool);
+    void save_workout();
     void save_workout_values(QStringList,QStandardItemModel *);
 };
 
