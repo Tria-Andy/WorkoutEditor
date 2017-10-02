@@ -472,6 +472,7 @@ void MainWindow::workout_calendar()
     QDate workout_date = currentdate;
     QString delimiter = "#";
     QString w_connect = " - ";
+    QString stdConnect;
     QString weekValue,cal_value,phase_value;
     int dayofweek = currentdate.dayOfWeek();
     int rowcount;
@@ -507,8 +508,9 @@ void MainWindow::workout_calendar()
                 {
                     if(scheduleProxy->rowCount() > 0)
                     {
+                        stdConnect = scheduleProxy->data(scheduleProxy->index(wa,10)).toString().isEmpty() ? "" : "*";
                         cal_value = cal_value + (scheduleProxy->data(scheduleProxy->index(wa,3)).toString() + w_connect);
-                        cal_value = cal_value + (scheduleProxy->data(scheduleProxy->index(wa,4)).toString() + "\n");
+                        cal_value = cal_value + (scheduleProxy->data(scheduleProxy->index(wa,4)).toString() + stdConnect+"\n");
                         cal_value = cal_value + (scheduleProxy->data(scheduleProxy->index(wa,6)).toString().left(5) + w_connect);
                         cal_value = cal_value + (scheduleProxy->data(scheduleProxy->index(wa,7)).toString() + " km" + delimiter);
                     }
