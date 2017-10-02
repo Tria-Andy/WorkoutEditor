@@ -34,6 +34,7 @@ public:
     QStandardItemModel *workout_schedule,*week_meta,*week_content;
     QSortFilterProxyModel *metaProxy,*contentProxy;
     QHash<QModelIndex,QHash<int,QString>> itemList;
+    QMap<QDate,QPair<double,double> > stressValues;
     void freeMem();
     void save_dayWorkouts();
     void save_weekPlan();
@@ -63,7 +64,6 @@ private:
     QStringList workoutTags,metaTags,contentTags;
     QString schedulePath,workoutFile,metaFile,contentFile,ltsFile;
     QDate firstdayofweek;
-    QMap<QDate,QPair<double,double> > stressValues;
     QHash<int,QString> weekList;
     bool fileCreated,isUpdated;
     void read_dayWorkouts(QDomDocument);

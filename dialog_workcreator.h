@@ -438,6 +438,7 @@ private slots:
     void on_toolButton_cancel_clicked();
     void set_controlButtons(bool);
     void on_toolButton_workouts_clicked();
+    void set_updateDates(bool);
 
 private:
     Ui::Dialog_workCreator *ui;
@@ -481,6 +482,7 @@ private:
     void set_plotGraphic(int);
     void save_workout();
     void save_workout_values(QStringList,QStandardItemModel *);
+    void update_workouts(int,QDate,QPair<double,double>);
 };
 
 #endif // DIALOG_WORKCREATOR_H

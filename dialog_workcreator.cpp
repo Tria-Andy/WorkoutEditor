@@ -1274,53 +1274,141 @@ void Dialog_workCreator::on_toolButton_close_clicked()
     {
         reject();
     }
-
 }
 
 void Dialog_workCreator::on_toolButton_workouts_clicked()
 {
+    int diaCode;
+
     QDialog *updateDialog = new QDialog;
-    updateDialog->setFixedHeight(200);
-    updateDialog->setFixedWidth(400);
+    updateDialog->setFixedHeight(150);
+    updateDialog->setFixedWidth(250);
 
-    QGroupBox *radioGroup = new QGroupBox(updateDialog);
-    QHBoxLayout *hBox = new QHBoxLayout;
-    updateAll = new QRadioButton("All Workouts",updateDialog);
-    updateRange = new QRadioButton("Workouts in Range",updateDialog);
-    updateFrom = new QDateEdit(updateDialog);
-    updateTo = new QDateEdit(updateDialog);
+    QVBoxLayout *diaLayout = new QVBoxLayout(updateDialog);
+    diaLayout->setContentsMargins(3,3,3,3);
+    diaLayout->setSpacing(5);
+
+    QFrame *labelFrame = new QFrame(updateDialog);
+    //labelFrame->setFrameStyle(1);
+    labelFrame->setMaximumWidth(updateDialog->width());
+    QHBoxLayout *hLabel = new QHBoxLayout(labelFrame);
+    hLabel->setContentsMargins(5,2,5,2);
+    QLabel *updateLabel = new QLabel(labelFrame);
+    updateLabel->setText("Update connected Workouts in schedule?");
+    hLabel->addWidget(updateLabel);
+    labelFrame->setLayout(hLabel);
+    diaLayout->addWidget(labelFrame);
+
+    QFrame *radioFrame = new QFrame(updateDialog);
+    //radioFrame->setFrameStyle(1);
+    radioFrame->setMaximumWidth(updateDialog->width());
+
+    QHBoxLayout *hRadio = new QHBoxLayout(radioFrame);
+    hRadio->setContentsMargins(5,2,5,2);
+    hRadio->setSpacing(5);
+    updateAll = new QRadioButton("All Workouts",radioFrame);
+    updateRange = new QRadioButton("Workouts in Range",radioFrame);
     updateAll->setChecked(true);
+    hRadio->addWidget(updateAll);
+    hRadio->addStretch();
+    hRadio->addWidget(updateRange);
+    diaLayout->addWidget(radioFrame);
 
-    hBox->addWidget(updateAll);
-    hBox->addWidget(updateRange);
-    hBox->addStretch(1);
-    radioGroup->setLayout(hBox);
+    QFrame *dateFrame = new QFrame(updateDialog);
+    //dateFrame->setFrameStyle(1);
+    dateFrame->setMaximumWidth(updateDialog->width());
+    QHBoxLayout *hDate = new QHBoxLayout(dateFrame);
+    hDate->setContentsMargins(5,2,5,2);
+    hDate->setSpacing(5);
+    updateFrom = new QDateEdit(dateFrame);
+    updateFrom->setEnabled(false);
+    updateFrom->setDate(QDate::currentDate());
+    updateFrom->setCalendarPopup(true);
+    updateTo = new QDateEdit(dateFrame);
+    updateTo->setDate(QDate::currentDate());
+    updateTo->setEnabled(false);
+    updateTo->setCalendarPopup(true);
+    hDate->addWidget(updateFrom);
+    hDate->addStretch();
+    hDate->addWidget(updateTo);
+    dateFrame->setLayout(hDate);
+    diaLayout->addWidget(dateFrame);
 
-    updateDialog->exec();
-    delete updateDialog;
+    QFrame *buttonFrame = new QFrame(updateDialog);
+    //buttonFrame->setFrameStyle(1);
+    buttonFrame->setMaximumWidth(updateDialog->width());
+    QHBoxLayout *hButton = new QHBoxLayout(buttonFrame);
+    hButton->setContentsMargins(5,2,5,2);
+    hButton->setSpacing(5);
+    updateOK = new QPushButton(buttonFrame);
+    updateOK->setText("OK");
+    updateCancel = new QPushButton(buttonFrame);
+    updateCancel->setText("Cancel");
+    hButton->addWidget(updateOK);
+    hDate->addStretch();
+    hButton->addWidget(updateCancel);
+    diaLayout->addWidget(buttonFrame);
 
-    /*
-    QString wDate;
-    QMessageBox::StandardButton reply;
-    QPair<double,double> stressMap;
-    double currStress = 0.0;
-    reply = QMessageBox::question(this,"Update Workout Schedule","Update "+QString::number(proxyFilter->rowCount())+" connected Workouts in schedule?",QMessageBox::Yes|QMessageBox::No);
+    connect(updateCancel,SIGNAL(clicked(bool)),updateDialog,SLOT(reject()));
+    connect(updateOK,SIGNAL(clicked(bool)),updateDialog,SLOT(accept()));
+    connect(updateAll,SIGNAL(toggled(bool)),this,SLOT(set_updateDates(bool)));
 
-    if (reply == QMessageBox::Yes)
+    diaCode = updateDialog->exec();
+
+    if(diaCode == QDialog::Accepted)
     {
-        worksched->set_isUpdated(true);
+        QPair<double,double> stressMap;
+
+        QDate wDate;
+        double stressValue = 0;
+        double duraValue = 0;
+
         for(int i = 0; i < proxyFilter->rowCount(); ++i)
         {
-            wDate = proxyFilter->data(proxyFilter->index(i,1)).toString();
-            currStress = worksched->stressValues.value(wDate);
-            stressMap.first = currStress;
-            proxyFilter->setData(proxyFilter->index(i,4),ui->comboBox_code->currentText());        //code
-            proxyFilter->setData(proxyFilter->index(i,5),ui->lineEdit_workoutname->text());        //title
-            proxyFilter->setData(proxyFilter->index(i,6),get_workoutTime(timeSum));                //duration
-            proxyFilter->setData(proxyFilter->index(i,7),QString::number(distSum));                //distance
-            proxyFilter->setData(proxyFilter->index(i,8),QString::number(round(stressSum)));       //stress
-            proxyFilter->setData(proxyFilter->index(i,9),QString::number(round(workSum/10.0)*10)); //kj
+            wDate = QDate::fromString(proxyFilter->data(proxyFilter->index(i,1)).toString(),"dd.MM.yyyy");
+            if(wDate.operator >(QDate::currentDate()))
+            {
+                stressValue = proxyFilter->data(proxyFilter->index(i,8)).toDouble();
+                duraValue = proxyFilter->data(proxyFilter->index(i,7)).toDouble();
+                stressValue = (worksched->stressValues.value(wDate).first - stressValue)+round(stressSum);
+                duraValue = (worksched->stressValues.value(wDate).second - duraValue)+distSum;
+                stressMap.first = stressValue;
+                stressMap.second = duraValue;
+
+                if(updateAll->isChecked())
+                {
+                    this->update_workouts(i,wDate,stressMap);
+                }
+                else
+                {
+                    if(wDate.operator >=(updateFrom->date()) && wDate.operator <=(updateTo->date()))
+                    {
+                        this->update_workouts(i,wDate,stressMap);
+                    }
+                }
+            }
         }
+        worksched->set_isUpdated(true);
+        QMessageBox::information(this,"Update Workouts","Workouts updated!",QMessageBox::Ok);
     }
-    */
+
+    delete updateDialog;
+}
+
+void Dialog_workCreator::update_workouts(int index,QDate wDate, QPair<double, double> stressMap)
+{
+    worksched->stressValues.insert(wDate,qMakePair(stressMap.first,stressMap.second));
+    proxyFilter->setData(proxyFilter->index(index,4),ui->comboBox_code->currentText());        //code
+    proxyFilter->setData(proxyFilter->index(index,5),ui->lineEdit_workoutname->text());        //title
+    proxyFilter->setData(proxyFilter->index(index,6),get_workoutTime(timeSum));                //duration
+    proxyFilter->setData(proxyFilter->index(index,7),QString::number(distSum));                //distance
+    proxyFilter->setData(proxyFilter->index(index,8),QString::number(round(stressSum)));       //stress
+    proxyFilter->setData(proxyFilter->index(index,9),QString::number(round(workSum/10.0)*10)); //kj
+}
+
+
+void Dialog_workCreator::set_updateDates(bool pAll)
+{
+    updateTo->setEnabled(!pAll);
+    updateFrom->setEnabled(!pAll);
 }
