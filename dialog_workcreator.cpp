@@ -1279,10 +1279,23 @@ void Dialog_workCreator::on_toolButton_close_clicked()
 void Dialog_workCreator::on_toolButton_workouts_clicked()
 {
     int diaCode;
+    int rowcount = proxyFilter->rowCount();
+    QDate workDate;
 
     QDialog *updateDialog = new QDialog;
-    updateDialog->setFixedHeight(150);
+    updateDialog->setFixedHeight(200);
     updateDialog->setFixedWidth(250);
+
+    workoutModel = new QStandardItemModel(rowcount,2,updateDialog);
+
+    for(int i = 0; i < rowcount; ++i)
+    {
+        workDate = QDate::fromString(proxyFilter->data(proxyFilter->index(i,1)).toString(),"dd.MM.yyyy");
+        workoutModel->setData(workoutModel->index(i,0),proxyFilter->data(proxyFilter->index(i,1)).toString()+"-"+
+                                                       proxyFilter->data(proxyFilter->index(i,4)).toString());
+        workoutModel->setData(workoutModel->index(i,1),workDate);
+    }
+    workoutModel->sort(1);
 
     QVBoxLayout *diaLayout = new QVBoxLayout(updateDialog);
     diaLayout->setContentsMargins(3,3,3,3);
@@ -1333,6 +1346,15 @@ void Dialog_workCreator::on_toolButton_workouts_clicked()
     hDate->addWidget(updateTo);
     dateFrame->setLayout(hDate);
     diaLayout->addWidget(dateFrame);
+
+
+    QFrame *viewFrame = new QFrame(updateDialog);
+    viewFrame->setMaximumWidth(updateDialog->width());
+    QVBoxLayout *viewBox = new QVBoxLayout(viewFrame);
+    workoutView = new QListView(viewFrame);
+    workoutView->setModel(workoutModel);
+    viewBox->addWidget(workoutView);
+    diaLayout->addWidget(viewFrame);
 
     QFrame *buttonFrame = new QFrame(updateDialog);
     //buttonFrame->setFrameStyle(1);

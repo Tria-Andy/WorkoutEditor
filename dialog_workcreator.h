@@ -445,7 +445,7 @@ private:
 
     schedule *worksched;
     QString isSeries,isGroup,currentSport,currentWorkID,isBreak,buttonStyle,viewBackground;
-    QStandardItemModel *plotModel,*valueModel,*listModel;
+    QStandardItemModel *plotModel,*valueModel,*listModel,*workoutModel;
     QSortFilterProxyModel *metaProxy,*stepProxy, *schedProxy, *proxyFilter;
     QMap<QString,QString> workoutMap;
     QMap<int,QString> dataPoint;
@@ -463,6 +463,7 @@ private:
     QDateTimeEdit *updateFrom,*updateTo;
     QRadioButton *updateAll, *updateRange;
     QPushButton *updateOK,*updateCancel;
+    QListView *workoutView;
 
     QString get_treeValue(int,int,int,int,int);
 
