@@ -31,11 +31,11 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
     addWorkout = false;
     popupDate = newDate = w_date;
     workSched = p_sched;
-    scheduleProxy = new QSortFilterProxyModel();
+    scheduleProxy = new QSortFilterProxyModel(this);
     scheduleProxy->setSourceModel(workSched->workout_schedule);
-    stdProxy = new QSortFilterProxyModel();
+    stdProxy = new QSortFilterProxyModel(this);
     stdProxy->setSourceModel(workouts_meta);
-    stdlistModel = new QStandardItemModel();
+    stdlistModel = new QStandardItemModel(this);
     editIcon = QIcon(":/images/icons/Modify.png");
     addIcon = QIcon(":/images/icons/Create.png");
     ui->toolButton_editMove->setIcon(editIcon);
@@ -44,7 +44,7 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
     ui->lineEdit_workoutInfo->setReadOnly(true);
 
     workListHeader << "Time" << "Sport" << "Code" << "Title" << "Duration" << "Distance" << "Stress" << "Work(kj)" << "StdId" << "Pace";
-    dayModel = new QStandardItemModel();
+    dayModel = new QStandardItemModel(this);
     workSched->itemList.clear();
 
     this->init_dayWorkouts(popupDate);
@@ -59,10 +59,6 @@ enum {ADD,EDIT,COPY,DEL};
 
 day_popup::~day_popup()
 {
-    delete dayModel;
-    delete stdlistModel;
-    delete scheduleProxy;
-    delete stdProxy;
     delete ui;
 }
 
@@ -207,8 +203,8 @@ void day_popup::set_exportContent()
     QStringList intLabels,sampLabels;
     QMap<int,QString> intMap = settings::get_intList();
     int sampCount = get_timesec(workSched->itemList.value(selIndex).value(6));
-    intExport = new QStandardItemModel(1,3);
-    sampExport = new QStandardItemModel(sampCount,1);
+    intExport = new QStandardItemModel(1,3,this);
+    sampExport = new QStandardItemModel(sampCount,1,this);
 
     intExport->setData(intExport->index(0,0),"Workout");
     intExport->setData(intExport->index(0,1),0);

@@ -56,7 +56,6 @@ enum {ADD,EDIT,COPY,DEL};
 void schedule::freeMem()
 {
     delete scheduleProxy;
-    delete workout_schedule;
     delete week_meta;
     delete week_content;
 }
@@ -147,10 +146,10 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
     content_list = root_content.elementsByTagName("content");
 
     week_meta = new QStandardItemModel(meta_list.count(),metaTags.count());
-    metaProxy = new QSortFilterProxyModel;
+    metaProxy = new QSortFilterProxyModel();
     metaProxy->setSourceModel(week_meta);
     week_content = new QStandardItemModel(content_list.count(),contentTags.count());
-    contentProxy = new QSortFilterProxyModel;
+    contentProxy = new QSortFilterProxyModel();
     contentProxy->setSourceModel(week_content);
 
     //fill week_meta
@@ -533,6 +532,7 @@ QString schedule::get_weekPhase(QDate currDate,bool full)
         return phaseString;
     }
 
+    delete metaProxy;
     return 0;
 }
 

@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
     planMode->setMinimumHeight(25);
     planMode->setMinimumWidth(75);
     planMode->setText(schedMode.at(0));
-    menuSpacer = new QWidget();
+    menuSpacer = new QWidget(this);
     menuSpacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     ui->mainToolBar->addWidget(appMode);
     ui->mainToolBar->addWidget(menuSpacer);
@@ -74,16 +74,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->frame_YearAvg->setVisible(false);
     ui->toolButton_weekCurrent->setEnabled(false);
     ui->toolButton_weekMinus->setEnabled(false);
-    calendarModel = new QStandardItemModel();
-    sumModel = new QStandardItemModel();
-    avgModel = new QStandardItemModel();
-    scheduleProxy = new QSortFilterProxyModel();
+    calendarModel = new QStandardItemModel(this);
+    sumModel = new QStandardItemModel(this);
+    avgModel = new QStandardItemModel(this);
+    scheduleProxy = new QSortFilterProxyModel(this);
     scheduleProxy->setSourceModel(workSchedule->workout_schedule);
-    metaProxy = new QSortFilterProxyModel();
+    metaProxy = new QSortFilterProxyModel(this);
     metaProxy->setSourceModel(workSchedule->week_meta);
-    metaProxyFilter = new QSortFilterProxyModel();
+    metaProxyFilter = new QSortFilterProxyModel(this);
     metaProxyFilter->setSourceModel(metaProxy);
-    contentProxy = new QSortFilterProxyModel();
+    contentProxy = new QSortFilterProxyModel(this);
     contentProxy->setSourceModel(workSchedule->week_content);
     this->set_phaseButtons();
     ui->frame_phases->setVisible(false);
@@ -98,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Editor Mode
     avgCounter = 0;
-    fileModel = new QStandardItemModel;
+    fileModel = new QStandardItemModel(this);
     avgCounter = 0;
     actLoaded = false;
 
@@ -1064,7 +1064,7 @@ void MainWindow::loadfile(const QString &filename)
 void MainWindow::init_editorViews()
 {
     QStringList infoHeader = settings::get_listValues("JsonFile");
-    infoModel = new QStandardItemModel(infoHeader.count(),1);
+    infoModel = new QStandardItemModel(infoHeader.count(),1,this);
     infoModel->setVerticalHeaderLabels(infoHeader);
 
     ui->treeView_files->setModel(fileModel);

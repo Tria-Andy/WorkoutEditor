@@ -52,18 +52,18 @@ void Activity::readJsonFile(QString jsonfile,bool intAct)
     {
         QMap<int,QString> mapValues;
 
-        intModel = new QStandardItemModel;
+        intModel = new QStandardItemModel();
         mapValues = settings::get_intList();
         this->init_actModel("INTERVALS",&mapValues,intModel,&intList,3);
 
-        sampleModel = new QStandardItemModel;
+        sampleModel = new QStandardItemModel();
         mapValues = settings::get_sampList();
 
         this->init_actModel("SAMPLES",&mapValues,sampleModel,&sampList,0);
 
         if(hasXdata)
         {
-            xdataModel = new QStandardItemModel;
+            xdataModel = new QStandardItemModel();
             this->init_xdataModel(curr_sport,xdataModel);
         }
         this->prepareData();
@@ -79,10 +79,10 @@ void Activity::prepareData()
     avgHeader.insert(0,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance:");
     avgHeader.insert(1,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance:" << "Watts:" << "CAD:");
     avgHeader.insert(2,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance");
-    intTreeModel = new QStandardItemModel;
-    selItemModel = new QStandardItemModel;
+    intTreeModel = new QStandardItemModel();
+    selItemModel = new QStandardItemModel();
     selItemModel->setColumnCount(2);
-    avgModel = new QStandardItemModel;
+    avgModel = new QStandardItemModel();
     avgModel->setColumnCount(1);
     moveTime = 0;
     if(curr_sport == settings::isSwim) isSwim = true;
@@ -242,7 +242,7 @@ void Activity::prepareData()
             intModel->setData(intModel->index(row,0),lapName);
         }
 
-        swimProxy = new QSortFilterProxyModel;
+        swimProxy = new QSortFilterProxyModel();
         swimProxy->setSourceModel(swimModel);
 
         if(hasXdata) xdataModel->clear();
