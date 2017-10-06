@@ -82,7 +82,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     //Update Dialog
     updateDialog = new QDialog(this);
     updateDialog->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    updateDialog->setFixedHeight(240);
+    updateDialog->setFixedHeight(260);
     updateDialog->setFixedWidth(280);
 
     workoutModel = new QStandardItemModel(updateDialog);
@@ -93,6 +93,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
 
     QFrame *labelFrame = new QFrame(updateDialog);
     labelFrame->setMaximumWidth(updateDialog->width());
+    labelFrame->setMaximumHeight(20);
     QHBoxLayout *hLabel = new QHBoxLayout(labelFrame);
     hLabel->setContentsMargins(5,2,5,2);
     QLabel *updateLabel = new QLabel(labelFrame);
@@ -104,6 +105,8 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
 
     QGroupBox *selectGroup = new QGroupBox(updateDialog);
     selectGroup->setTitle("Selection");
+    selectGroup->setMaximumHeight(70);
+    selectGroup->setMaximumWidth(updateDialog->width());
     QVBoxLayout *selectBox = new QVBoxLayout(selectGroup);
     selectBox->setContentsMargins(5,2,5,2);
     selectBox->setSpacing(5);
@@ -111,7 +114,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
 
     QFrame *radioFrame = new QFrame(selectGroup);
     radioFrame->setMaximumWidth(updateDialog->width());
-
+    radioFrame->setMaximumHeight(30);
     QHBoxLayout *hRadio = new QHBoxLayout(radioFrame);
     hRadio->setContentsMargins(5,2,5,2);
     hRadio->setSpacing(5);
@@ -124,6 +127,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
 
     QFrame *dateFrame = new QFrame(selectGroup);
     dateFrame->setMaximumWidth(updateDialog->width());
+    dateFrame->setMaximumHeight(30);
     QHBoxLayout *hDate = new QHBoxLayout(dateFrame);
     hDate->setContentsMargins(5,2,5,2);
     hDate->setSpacing(5);
@@ -151,6 +155,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     QFrame *viewFrame = new QFrame(updateDialog);
     viewFrame->setFrameStyle(QFrame::Box | QFrame::Sunken);
     viewFrame->setMaximumWidth(updateDialog->width());
+    viewFrame->setMaximumHeight(140);
     QVBoxLayout *viewBox = new QVBoxLayout(viewFrame);
     viewBox->setContentsMargins(1,1,1,1);
     workoutView = new QListView(viewFrame);
@@ -160,6 +165,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
 
     QFrame *statusFrame = new QFrame(viewFrame);
     statusFrame->setMaximumWidth(updateDialog->width());
+    statusFrame->setMaximumHeight(30);
     QHBoxLayout *statusBox = new QHBoxLayout(statusFrame);
     updateProgess = new QProgressBar(statusFrame);
     updateProgess->setTextVisible(true);
@@ -180,6 +186,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
 
     QFrame *buttonFrame = new QFrame(updateDialog);
     buttonFrame->setMaximumWidth(updateDialog->width());
+    buttonFrame->setMaximumHeight(25);
     QHBoxLayout *hButton = new QHBoxLayout(buttonFrame);
     hButton->setContentsMargins(5,2,5,2);
     hButton->setSpacing(5);
@@ -1134,7 +1141,7 @@ void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
     QString workTitle = workoutTitle.last();
     currentWorkID = workoutID;
     proxyFilter->invalidate();
-    proxyFilter->setFilterFixedString(workoutID);
+    proxyFilter->setFilterRegExp("\\b"+workoutID+"\\b");
     proxyFilter->setFilterKeyColumn(10);
 
     ui->label_connect->setText(QString::number(proxyFilter->rowCount()));
