@@ -439,6 +439,8 @@ private slots:
     void set_controlButtons(bool);
     void on_toolButton_workouts_clicked();
     void set_updateDates(bool);
+    void set_workoutModel(QDate);
+    void update_workouts();
 
 private:
     Ui::Dialog_workCreator *ui;
@@ -460,10 +462,13 @@ private:
     bool isSwim,isBike,isRun,isStrength,isAlt,isOther;
     bool clearFlag;
 
+    QDialog *updateDialog;
     QDateTimeEdit *updateFrom,*updateTo;
     QRadioButton *updateAll, *updateRange;
-    QPushButton *updateOK,*updateCancel;
+    QPushButton *updateClose;
+    QToolButton *updateOk;
     QListView *workoutView;
+    QProgressBar *updateProgess;
 
     QString get_treeValue(int,int,int,int,int);
 
@@ -483,7 +488,7 @@ private:
     void set_plotGraphic(int);
     void save_workout();
     void save_workout_values(QStringList,QStandardItemModel *);
-    void update_workouts(int,QDate,QPair<double,double>);
+    void update_workoutsSchedule(int,QDate,QPair<double,double>,int);
 };
 
 #endif // DIALOG_WORKCREATOR_H

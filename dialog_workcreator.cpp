@@ -7,17 +7,17 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    listModel = new QStandardItemModel;
-    plotModel = new QStandardItemModel;
-    valueModel = new QStandardItemModel;
+    listModel = new QStandardItemModel(this);
+    plotModel = new QStandardItemModel(this);
+    valueModel = new QStandardItemModel(this);
     worksched = psched;
-    metaProxy = new QSortFilterProxyModel;
+    metaProxy = new QSortFilterProxyModel(this);
     metaProxy->setSourceModel(this->workouts_meta);
-    stepProxy = new QSortFilterProxyModel;
+    stepProxy = new QSortFilterProxyModel(this);
     stepProxy->setSourceModel(this->workouts_steps);
-    schedProxy = new QSortFilterProxyModel;
+    schedProxy = new QSortFilterProxyModel(this);
     schedProxy->setSourceModel(worksched->workout_schedule);
-    proxyFilter = new QSortFilterProxyModel;
+    proxyFilter = new QSortFilterProxyModel(this);
     proxyFilter->setSourceModel(schedProxy);
 
     editRow <<1<<1<<1<<0<<1<<0<<0<<0<<0;
@@ -78,18 +78,130 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     ui->widget_plot->xAxis2->setLabel("Distance - KM");
     ui->widget_plot->yAxis2->setVisible(true);
 
+
+    //Update Dialog
+    updateDialog = new QDialog(this);
+    updateDialog->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    updateDialog->setFixedHeight(240);
+    updateDialog->setFixedWidth(280);
+
+    workoutModel = new QStandardItemModel(updateDialog);
+
+    QVBoxLayout *diaLayout = new QVBoxLayout(updateDialog);
+    diaLayout->setContentsMargins(3,3,3,3);
+    diaLayout->setSpacing(5);
+
+    QFrame *labelFrame = new QFrame(updateDialog);
+    labelFrame->setMaximumWidth(updateDialog->width());
+    QHBoxLayout *hLabel = new QHBoxLayout(labelFrame);
+    hLabel->setContentsMargins(5,2,5,2);
+    QLabel *updateLabel = new QLabel(labelFrame);
+    //updateLabel->setFont(QFont().setBold(true));
+    updateLabel->setText("Update future connected Workouts in schedule?");
+    hLabel->addWidget(updateLabel);
+    labelFrame->setLayout(hLabel);
+    diaLayout->addWidget(labelFrame);
+
+    QGroupBox *selectGroup = new QGroupBox(updateDialog);
+    selectGroup->setTitle("Selection");
+    QVBoxLayout *selectBox = new QVBoxLayout(selectGroup);
+    selectBox->setContentsMargins(5,2,5,2);
+    selectBox->setSpacing(5);
+    selectGroup->setLayout(selectBox);
+
+    QFrame *radioFrame = new QFrame(selectGroup);
+    radioFrame->setMaximumWidth(updateDialog->width());
+
+    QHBoxLayout *hRadio = new QHBoxLayout(radioFrame);
+    hRadio->setContentsMargins(5,2,5,2);
+    hRadio->setSpacing(5);
+    updateAll = new QRadioButton("All Workouts",radioFrame);
+    updateRange = new QRadioButton("Workouts in Range",radioFrame);
+    updateAll->setChecked(true);
+    hRadio->addWidget(updateAll);
+    hRadio->addStretch();
+    hRadio->addWidget(updateRange);
+
+    QFrame *dateFrame = new QFrame(selectGroup);
+    dateFrame->setMaximumWidth(updateDialog->width());
+    QHBoxLayout *hDate = new QHBoxLayout(dateFrame);
+    hDate->setContentsMargins(5,2,5,2);
+    hDate->setSpacing(5);
+    QLabel *fromLabel = new QLabel(labelFrame);
+    fromLabel->setText("From:");
+    updateFrom = new QDateEdit(dateFrame);
+    updateFrom->setEnabled(false);
+    updateFrom->setCalendarPopup(true);
+    QLabel *toLabel = new QLabel(labelFrame);
+    toLabel->setText("To:");
+    updateTo = new QDateEdit(dateFrame);
+    updateTo->setEnabled(false);
+    updateTo->setCalendarPopup(true);
+    hDate->addWidget(fromLabel);
+    hDate->addWidget(updateFrom);
+    hDate->addStretch();
+    hDate->addWidget(toLabel);
+    hDate->addWidget(updateTo);
+    dateFrame->setLayout(hDate);
+
+    selectBox->addWidget(radioFrame);
+    selectBox->addWidget(dateFrame);
+    diaLayout->addWidget(selectGroup);
+
+    QFrame *viewFrame = new QFrame(updateDialog);
+    viewFrame->setFrameStyle(QFrame::Box | QFrame::Sunken);
+    viewFrame->setMaximumWidth(updateDialog->width());
+    QVBoxLayout *viewBox = new QVBoxLayout(viewFrame);
+    viewBox->setContentsMargins(1,1,1,1);
+    workoutView = new QListView(viewFrame);
+    workoutView->setModel(workoutModel);
+    workoutView->setSelectionMode(QAbstractItemView::NoSelection);
+    viewBox->addWidget(workoutView);
+
+    QFrame *statusFrame = new QFrame(viewFrame);
+    statusFrame->setMaximumWidth(updateDialog->width());
+    QHBoxLayout *statusBox = new QHBoxLayout(statusFrame);
+    updateProgess = new QProgressBar(statusFrame);
+    updateProgess->setTextVisible(true);
+    updateProgess->setMinimum(0);
+    updateProgess->setValue(0);
+    updateProgess->setFixedHeight(15);
+    updateProgess->setFormat("%v");
+    statusBox->setContentsMargins(2,2,2,2);
+    updateOk = new QToolButton(statusFrame);
+    updateOk->setFixedSize(26,26);
+    updateOk->setIcon(QIcon(":/images/icons/Sync.png"));
+    updateOk->setIconSize(QSize(20,20));
+    updateOk->setAutoRaise(true);
+    statusBox->addWidget(updateProgess);
+    statusBox->addWidget(updateOk);
+    viewBox->addWidget(statusFrame);
+    diaLayout->addWidget(viewFrame);
+
+    QFrame *buttonFrame = new QFrame(updateDialog);
+    buttonFrame->setMaximumWidth(updateDialog->width());
+    QHBoxLayout *hButton = new QHBoxLayout(buttonFrame);
+    hButton->setContentsMargins(5,2,5,2);
+    hButton->setSpacing(5);
+    updateClose = new QPushButton(buttonFrame);
+    updateClose->setText("Close");
+    updateClose->setFixedWidth(100);
+    hButton->addWidget(updateClose);
+    hDate->addStretch();
+    hButton->addWidget(updateClose);
+    diaLayout->addWidget(buttonFrame);
+
+    connect(updateClose,SIGNAL(clicked(bool)),updateDialog,SLOT(reject()));
+    connect(updateAll,SIGNAL(toggled(bool)),this,SLOT(set_updateDates(bool)));
+    connect(updateFrom,SIGNAL(dateChanged(QDate)),this,SLOT(set_workoutModel(QDate)));
+    connect(updateTo,SIGNAL(dateChanged(QDate)),this,SLOT(set_workoutModel(QDate)));
+    connect(updateOk,SIGNAL(clicked(bool)),this,SLOT(update_workouts()));
+
     this->resetAxis();
 }
 
 Dialog_workCreator::~Dialog_workCreator()
 {
-    delete metaProxy;
-    delete stepProxy;
-    delete schedProxy;
-    delete proxyFilter;
-    delete plotModel;
-    delete valueModel;
-    delete listModel;
     delete ui;
 }
 
@@ -775,7 +887,7 @@ void Dialog_workCreator::set_plotGraphic(int dataPoints)
     double timeRange = 0;
 
     ui->widget_plot->setInteractions(QCP::iSelectPlottables | QCP::iMultiSelect);
-    QCPSelectionDecorator *lineDec = new QCPSelectionDecorator;
+    QCPSelectionDecorator *lineDec = new QCPSelectionDecorator();
     lineDec->setPen(QPen(QColor(255,0,0)));
     lineDec->setBrush(QColor(255,0,0,50));
     QCPGraph *workout_line = ui->widget_plot->addGraph();
@@ -902,6 +1014,7 @@ void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
         }
     }
 
+    delete plotProxy;
     graph->setSelection(selection);
     ui->widget_plot->replot();
 }
@@ -1276,148 +1389,99 @@ void Dialog_workCreator::on_toolButton_close_clicked()
     }
 }
 
-void Dialog_workCreator::on_toolButton_workouts_clicked()
+void Dialog_workCreator::set_workoutModel(QDate cDate)
 {
-    int diaCode;
-    int rowcount = proxyFilter->rowCount();
+    Q_UNUSED(cDate)
     QDate workDate;
+    workoutModel->clear();
+    workoutModel->setColumnCount(2);
+    bool dateRange = updateRange->isChecked();
+    int x = 0;
 
-    QDialog *updateDialog = new QDialog;
-    updateDialog->setFixedHeight(200);
-    updateDialog->setFixedWidth(250);
-
-    workoutModel = new QStandardItemModel(rowcount,2,updateDialog);
-
-    for(int i = 0; i < rowcount; ++i)
+    for(int i = 0; i < proxyFilter->rowCount(); ++i)
     {
         workDate = QDate::fromString(proxyFilter->data(proxyFilter->index(i,1)).toString(),"dd.MM.yyyy");
-        workoutModel->setData(workoutModel->index(i,0),proxyFilter->data(proxyFilter->index(i,1)).toString()+"-"+
-                                                       proxyFilter->data(proxyFilter->index(i,4)).toString());
-        workoutModel->setData(workoutModel->index(i,1),workDate);
-    }
-    workoutModel->sort(1);
 
-    QVBoxLayout *diaLayout = new QVBoxLayout(updateDialog);
-    diaLayout->setContentsMargins(3,3,3,3);
-    diaLayout->setSpacing(5);
-
-    QFrame *labelFrame = new QFrame(updateDialog);
-    //labelFrame->setFrameStyle(1);
-    labelFrame->setMaximumWidth(updateDialog->width());
-    QHBoxLayout *hLabel = new QHBoxLayout(labelFrame);
-    hLabel->setContentsMargins(5,2,5,2);
-    QLabel *updateLabel = new QLabel(labelFrame);
-    updateLabel->setText("Update connected Workouts in schedule?");
-    hLabel->addWidget(updateLabel);
-    labelFrame->setLayout(hLabel);
-    diaLayout->addWidget(labelFrame);
-
-    QFrame *radioFrame = new QFrame(updateDialog);
-    //radioFrame->setFrameStyle(1);
-    radioFrame->setMaximumWidth(updateDialog->width());
-
-    QHBoxLayout *hRadio = new QHBoxLayout(radioFrame);
-    hRadio->setContentsMargins(5,2,5,2);
-    hRadio->setSpacing(5);
-    updateAll = new QRadioButton("All Workouts",radioFrame);
-    updateRange = new QRadioButton("Workouts in Range",radioFrame);
-    updateAll->setChecked(true);
-    hRadio->addWidget(updateAll);
-    hRadio->addStretch();
-    hRadio->addWidget(updateRange);
-    diaLayout->addWidget(radioFrame);
-
-    QFrame *dateFrame = new QFrame(updateDialog);
-    //dateFrame->setFrameStyle(1);
-    dateFrame->setMaximumWidth(updateDialog->width());
-    QHBoxLayout *hDate = new QHBoxLayout(dateFrame);
-    hDate->setContentsMargins(5,2,5,2);
-    hDate->setSpacing(5);
-    updateFrom = new QDateEdit(dateFrame);
-    updateFrom->setEnabled(false);
-    updateFrom->setDate(QDate::currentDate());
-    updateFrom->setCalendarPopup(true);
-    updateTo = new QDateEdit(dateFrame);
-    updateTo->setDate(QDate::currentDate());
-    updateTo->setEnabled(false);
-    updateTo->setCalendarPopup(true);
-    hDate->addWidget(updateFrom);
-    hDate->addStretch();
-    hDate->addWidget(updateTo);
-    dateFrame->setLayout(hDate);
-    diaLayout->addWidget(dateFrame);
-
-
-    QFrame *viewFrame = new QFrame(updateDialog);
-    viewFrame->setMaximumWidth(updateDialog->width());
-    QVBoxLayout *viewBox = new QVBoxLayout(viewFrame);
-    workoutView = new QListView(viewFrame);
-    workoutView->setModel(workoutModel);
-    viewBox->addWidget(workoutView);
-    diaLayout->addWidget(viewFrame);
-
-    QFrame *buttonFrame = new QFrame(updateDialog);
-    //buttonFrame->setFrameStyle(1);
-    buttonFrame->setMaximumWidth(updateDialog->width());
-    QHBoxLayout *hButton = new QHBoxLayout(buttonFrame);
-    hButton->setContentsMargins(5,2,5,2);
-    hButton->setSpacing(5);
-    updateOK = new QPushButton(buttonFrame);
-    updateOK->setText("OK");
-    updateCancel = new QPushButton(buttonFrame);
-    updateCancel->setText("Cancel");
-    hButton->addWidget(updateOK);
-    hDate->addStretch();
-    hButton->addWidget(updateCancel);
-    diaLayout->addWidget(buttonFrame);
-
-    connect(updateCancel,SIGNAL(clicked(bool)),updateDialog,SLOT(reject()));
-    connect(updateOK,SIGNAL(clicked(bool)),updateDialog,SLOT(accept()));
-    connect(updateAll,SIGNAL(toggled(bool)),this,SLOT(set_updateDates(bool)));
-
-    diaCode = updateDialog->exec();
-
-    if(diaCode == QDialog::Accepted)
-    {
-        QPair<double,double> stressMap;
-
-        QDate wDate;
-        double stressValue = 0;
-        double duraValue = 0;
-
-        for(int i = 0; i < proxyFilter->rowCount(); ++i)
+        if(workDate.operator >(QDate::currentDate()))
         {
-            wDate = QDate::fromString(proxyFilter->data(proxyFilter->index(i,1)).toString(),"dd.MM.yyyy");
-            if(wDate.operator >(QDate::currentDate()))
+            if(dateRange)
             {
-                stressValue = proxyFilter->data(proxyFilter->index(i,8)).toDouble();
-                duraValue = proxyFilter->data(proxyFilter->index(i,7)).toDouble();
-                stressValue = (worksched->stressValues.value(wDate).first - stressValue)+round(stressSum);
-                duraValue = (worksched->stressValues.value(wDate).second - duraValue)+distSum;
-                stressMap.first = stressValue;
-                stressMap.second = duraValue;
-
-                if(updateAll->isChecked())
+                if(workDate.operator >=(updateFrom->date()) && workDate.operator <=(updateTo->date()))
                 {
-                    this->update_workouts(i,wDate,stressMap);
-                }
-                else
-                {
-                    if(wDate.operator >=(updateFrom->date()) && wDate.operator <=(updateTo->date()))
-                    {
-                        this->update_workouts(i,wDate,stressMap);
-                    }
+                    workoutModel->insertRow(workoutModel->rowCount());
+                    workoutModel->setData(workoutModel->index(x,0),proxyFilter->data(proxyFilter->index(i,1)).toString()+"-"+
+                                                                   proxyFilter->data(proxyFilter->index(i,4)).toString());
+                    workoutModel->setData(workoutModel->index(x,1),workDate);
+                    ++x;
                 }
             }
+            else
+            {
+                workoutModel->insertRow(x);
+                workoutModel->setData(workoutModel->index(x,0),proxyFilter->data(proxyFilter->index(i,1)).toString()+"-"+
+                                                               proxyFilter->data(proxyFilter->index(i,4)).toString());
+                workoutModel->setData(workoutModel->index(x,1),workDate);
+                ++x;
+            }
         }
-        worksched->set_isUpdated(true);
-        QMessageBox::information(this,"Update Workouts","Workouts updated!",QMessageBox::Ok);
     }
-
-    delete updateDialog;
+    workoutModel->sort(1);
+    updateProgess->setMaximum(x);
 }
 
-void Dialog_workCreator::update_workouts(int index,QDate wDate, QPair<double, double> stressMap)
+
+void Dialog_workCreator::on_toolButton_workouts_clicked()
+{
+    this->set_workoutModel(QDate());
+    QDate timeRange = workoutModel->data(workoutModel->index(workoutModel->rowCount()-1,1)).toDate();
+    updateFrom->setDate(QDate::currentDate());
+    updateFrom->setDateRange(QDate::currentDate(),timeRange);
+    updateTo->setDate(timeRange);
+    updateTo->setDateRange(QDate::currentDate(),timeRange);
+
+    updateDialog->exec();
+}
+
+void Dialog_workCreator::update_workouts()
+{
+    QPair<double,double> stressMap;
+
+    QDate wDate;
+    double stressValue = 0;
+    double duraValue = 0;
+    int progress = 0;
+
+    for(int i = 0; i < proxyFilter->rowCount(); ++i)
+    {
+        wDate = QDate::fromString(proxyFilter->data(proxyFilter->index(i,1)).toString(),"dd.MM.yyyy");
+        if(wDate.operator >(QDate::currentDate()))
+        {
+            stressValue = proxyFilter->data(proxyFilter->index(i,8)).toDouble();
+            duraValue = proxyFilter->data(proxyFilter->index(i,7)).toDouble();
+            stressValue = (worksched->stressValues.value(wDate).first - stressValue)+round(stressSum);
+            duraValue = (worksched->stressValues.value(wDate).second - duraValue)+distSum;
+            stressMap.first = stressValue;
+            stressMap.second = duraValue;
+
+            if(updateAll->isChecked())
+            {
+                this->update_workoutsSchedule(i,wDate,stressMap,++progress);
+            }
+            else
+            {
+                if(wDate.operator >=(updateFrom->date()) && wDate.operator <=(updateTo->date()))
+                {
+                    this->update_workoutsSchedule(i,wDate,stressMap,++progress);
+                }
+            }
+
+        }
+    }
+    worksched->set_isUpdated(true);
+}
+
+
+void Dialog_workCreator::update_workoutsSchedule(int index,QDate wDate, QPair<double, double> stressMap,int progress)
 {
     worksched->stressValues.insert(wDate,qMakePair(stressMap.first,stressMap.second));
     proxyFilter->setData(proxyFilter->index(index,4),ui->comboBox_code->currentText());        //code
@@ -1426,6 +1490,7 @@ void Dialog_workCreator::update_workouts(int index,QDate wDate, QPair<double, do
     proxyFilter->setData(proxyFilter->index(index,7),QString::number(distSum));                //distance
     proxyFilter->setData(proxyFilter->index(index,8),QString::number(round(stressSum)));       //stress
     proxyFilter->setData(proxyFilter->index(index,9),QString::number(round(workSum/10.0)*10)); //kj
+    updateProgess->setValue(progress);
 }
 
 
@@ -1433,4 +1498,5 @@ void Dialog_workCreator::set_updateDates(bool pAll)
 {
     updateTo->setEnabled(!pAll);
     updateFrom->setEnabled(!pAll);
+    this->set_workoutModel(QDate());
 }
