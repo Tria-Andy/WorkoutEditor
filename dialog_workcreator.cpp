@@ -209,6 +209,8 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
 
 Dialog_workCreator::~Dialog_workCreator()
 {
+    delete workouts_meta;
+    delete workouts_steps;
     delete ui;
 }
 
@@ -217,7 +219,7 @@ void Dialog_workCreator::set_controlButtons(bool setButton)
     ui->pushButton_clear->setEnabled(setButton);
     ui->toolButton_save->setEnabled(setButton);
     ui->toolButton_delete->setEnabled(setButton);
-    ui->toolButton_workouts->setEnabled(setButton);
+    ui->pushButton_sync->setEnabled(setButton);
     ui->comboBox_code->setEnabled(setButton);
 }
 
@@ -406,7 +408,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     clearFlag = false;
     this->set_controlButtons(true);
     ui->toolButton_copy->setEnabled(false);
-    if(proxyFilter->rowCount() == 0) ui->toolButton_workouts->setEnabled(false);
+    if(proxyFilter->rowCount() == 0) ui->pushButton_sync->setEnabled(false);
     ui->treeWidget_intervall->setCurrentItem(ui->treeWidget_intervall->topLevelItem(0));
 }
 void Dialog_workCreator::save_workout()
@@ -744,6 +746,7 @@ void Dialog_workCreator::clearIntTree()
     ui->listView_workouts->clearSelection();
     ui->listWidget_group->clearSelection();
     ui->listWidget_phases->clearSelection();
+    ui->pushButton_sync->setText(" - 0");
     this->resetAxis();
 }
 
@@ -1144,7 +1147,7 @@ void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
     proxyFilter->setFilterRegExp("\\b"+workoutID+"\\b");
     proxyFilter->setFilterKeyColumn(10);
 
-    ui->label_connect->setText(QString::number(proxyFilter->rowCount()));
+    ui->pushButton_sync->setText(" - "+QString::number(proxyFilter->rowCount()));
     ui->comboBox_code->setCurrentText(workCode.replace(" ",""));
     ui->lineEdit_workoutname->setText(workTitle.replace(" ",""));
     ui->checkBox_timebased->setChecked(listModel->data(listModel->index(index.row(),2)).toBool());
@@ -1436,8 +1439,7 @@ void Dialog_workCreator::set_workoutModel(QDate cDate)
     updateProgess->setMaximum(x);
 }
 
-
-void Dialog_workCreator::on_toolButton_workouts_clicked()
+void Dialog_workCreator::on_pushButton_sync_clicked()
 {
     this->set_workoutModel(QDate());
     QDate timeRange = workoutModel->data(workoutModel->index(workoutModel->rowCount()-1,1)).toDate();

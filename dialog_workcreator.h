@@ -437,10 +437,11 @@ private slots:
     void on_toolButton_close_clicked();
     void on_toolButton_cancel_clicked();
     void set_controlButtons(bool);
-    void on_toolButton_workouts_clicked();
     void set_updateDates(bool);
     void set_workoutModel(QDate);
     void update_workouts();
+
+    void on_pushButton_sync_clicked();
 
 private:
     Ui::Dialog_workCreator *ui;
