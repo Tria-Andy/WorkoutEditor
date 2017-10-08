@@ -27,7 +27,7 @@ Dialog_export::Dialog_export(QWidget *parent, schedule *p_schedule) :
     ui(new Ui::Dialog_export)
 {
     ui->setupUi(this);
-    exportProxy = new QSortFilterProxyModel();
+    exportProxy = new QSortFilterProxyModel(this);
     exportProxy->setSourceModel(p_schedule->week_meta);
     exportProxy->setDynamicSortFilter(true);
 
@@ -55,7 +55,6 @@ enum{ALL,TIME,WEEK};
 
 Dialog_export::~Dialog_export()
 {
-    delete exportProxy;
     delete ui;
 }
 

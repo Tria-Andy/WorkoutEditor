@@ -159,6 +159,7 @@ void MainWindow::freeMem()
         calendarModel->clear();
         delete workSchedule;
         delete sumModel;
+        delete fileModel;
         delete calendarModel;
         delete avgModel;
         delete scheduleProxy;
@@ -194,6 +195,7 @@ void MainWindow::clearActivtiy()
     {
         delete treeSelection;
         curr_activity->reset_avgSelection();
+        delete curr_activity->swimProxy;
         delete curr_activity->intModel;
         delete curr_activity->sampleModel;
         delete curr_activity->intTreeModel;

@@ -26,13 +26,13 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     workSched = p_sched;
-    metaProxy = new QSortFilterProxyModel();
+    metaProxy = new QSortFilterProxyModel(this);
     metaProxy->setSourceModel(p_sched->week_meta);
     metaProxy->setFilterFixedString(workSched->get_selSaison());
     metaProxy->setFilterKeyColumn(0);
-    metaProxyFilter = new QSortFilterProxyModel();
+    metaProxyFilter = new QSortFilterProxyModel(this);
     metaProxyFilter->setSourceModel(metaProxy);
-    contentProxy = new QSortFilterProxyModel();
+    contentProxy = new QSortFilterProxyModel(this);
     contentProxy->setSourceModel(p_sched->week_content);
     delimiter = "#";
     ui->comboBox_phase->addItems(settings::get_listValues("Phase"));
@@ -41,7 +41,7 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
     empty = "0-0-00:00-0";
     weekHeader << "Sport" << "Workouts" << "Duration" << "%" << "Distance" << "Pace" << "Stress";
     sportuseList = settings::get_listValues("Sportuse");
-    weekModel = new QStandardItemModel();
+    weekModel = new QStandardItemModel(this);
 
     this->setFixedHeight(100+(35*(sportuseList.count()+1)));
     this->setFixedWidth(650);
@@ -51,10 +51,6 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
 Dialog_addweek::~Dialog_addweek()
 {
     delete ui;
-    delete weekModel;
-    delete metaProxy;
-    delete metaProxyFilter;
-    delete contentProxy;
 }
 void Dialog_addweek::on_toolButton_close_clicked()
 {

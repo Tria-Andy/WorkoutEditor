@@ -30,7 +30,6 @@ class Activity : public jsonHandler
 private:
     QList<QStandardItem*> setIntRow(int);
     QList<QStandardItem*> setSwimLap(int,QString);
-    QSortFilterProxyModel *swimProxy;
     QString v_date,curr_sport,intLabel,breakName;
     QMap<int,QStringList> itemHeader,avgHeader;
     QHash<QString,int> paceTimeInZone,hfTimeInZone,hfZoneAvg;
@@ -81,6 +80,7 @@ public:
     QHash<int,QModelIndex> selItem,avgItems;
     QHash<QString,int> swimPace,swimHF;
     QStandardItemModel *intModel,*sampleModel,*xdataModel,*swimModel,*intTreeModel,*selItemModel,*avgModel;
+    QSortFilterProxyModel *swimProxy;
     QMap<QString,QString> ride_info;
     QVector<double> sampSpeed,avgValues;
 

@@ -55,6 +55,8 @@ enum {ADD,EDIT,COPY,DEL};
 
 void schedule::freeMem()
 {
+    delete saisonsModel;
+    delete contestModel;
     delete scheduleProxy;
     delete week_meta;
     delete week_content;

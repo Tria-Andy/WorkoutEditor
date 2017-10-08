@@ -44,6 +44,7 @@ private:
     Ui::year_popup *ui;
 
     QStringList partInfo,phaseList,selectList,weekList,sportUseList;
+    QSortFilterProxyModel *metaProxy,*proxyFilter,*contentProxy;
     QString phase;
     int col,phaseindex,widthFactor,heightFactor,weekcount;
     bool isLoad;

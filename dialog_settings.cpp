@@ -28,11 +28,11 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
 {
     ui->setupUi(this);
     schedule_ptr = psched;
-    saisonProxy = new QSortFilterProxyModel;
+    saisonProxy = new QSortFilterProxyModel(this);
     saisonProxy->setSourceModel(schedule_ptr->saisonsModel);
-    contestProxy = new QSortFilterProxyModel;
+    contestProxy = new QSortFilterProxyModel(this);
     contestProxy->setSourceModel(schedule_ptr->contestModel);
-    contestTreeModel = new QStandardItemModel;
+    contestTreeModel = new QStandardItemModel(this);
     sportList << settings::isSwim << settings::isBike << settings::isRun;
     keyList = settings::get_keyList();
     extkeyList = settings::get_extkeyList();
@@ -40,8 +40,8 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     useColor = false;
     stressEdit = false;
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
-    level_model = new QStandardItemModel();
-    hf_model = new QStandardItemModel();
+    level_model = new QStandardItemModel(this);
+    hf_model = new QStandardItemModel(this);
     ui->treeView_contest->setModel(contestTreeModel);
     ui->treeView_contest->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->treeView_contest->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -90,11 +90,6 @@ Dialog_settings::~Dialog_settings()
 
 void Dialog_settings::on_pushButton_cancel_clicked()
 {
-    delete level_model;
-    delete hf_model;
-    delete contestTreeModel;
-    delete saisonProxy;
-    delete contestProxy;
     reject();
 }
 

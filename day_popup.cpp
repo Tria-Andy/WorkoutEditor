@@ -59,6 +59,8 @@ enum {ADD,EDIT,COPY,DEL};
 
 day_popup::~day_popup()
 {
+    delete workouts_meta;
+    delete workouts_steps;
     delete ui;
 }
 

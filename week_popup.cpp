@@ -29,7 +29,7 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
     dayCount = 7;
     workSched = p_sched;
     week_info << weekinfo.split("#");
-    workProxy = new QSortFilterProxyModel;
+    workProxy = new QSortFilterProxyModel(this);
     workProxy->setSourceModel(workSched->workout_schedule);
     barSelection << "Duration" << "Distance" << "Work(kj)";
     ui->comboBox_yValue->addItems(barSelection);
@@ -55,7 +55,6 @@ enum {DURATION,DISTANCE,KJ};
 week_popup::~week_popup()
 {
     delete ui;
-    delete workProxy;
 }
 
 void week_popup::set_plotValues()

@@ -31,8 +31,8 @@ Dialog_paceCalc::Dialog_paceCalc(QWidget *parent) :
     race_header << "Lap" << "Distance" << "Pace" << "Speed" << "Duration";
     dist <<25<<50<<100<<200<<300<<400<<500<<600<<800<<1000;
     distFactor = 1;
-    paceModel = new QStandardItemModel();
-    raceModel = new QStandardItemModel();
+    paceModel = new QStandardItemModel(this);
+    raceModel = new QStandardItemModel(this);
     triathlonMap = settings::get_triaMap();
     triaDist = settings::get_triaDistance();
     this->init_paceView();
@@ -58,8 +58,6 @@ Dialog_paceCalc::~Dialog_paceCalc()
 
 void Dialog_paceCalc::on_pushButton_close_clicked()
 {
-    delete paceModel;
-    delete raceModel;
     reject();
 }
 
