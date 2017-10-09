@@ -1624,7 +1624,7 @@ double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double fact
     }
     if(curr_sport == settings::isBike)
     {
-        randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) / (currSpeed/((factor*1000)+1.0)));
+        randfact = ((static_cast<double>(rand()%(10-1)+1) / static_cast<double>(RAND_MAX)) / (avgSpeed/((factor*10)+1.0)));
     }
     if(curr_sport == settings::isTria)
     {
@@ -1638,14 +1638,17 @@ double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double fact
     {
         if(currSpeed < avgLow)
         {
+            qDebug() << "Low:"<< avgLow << currSpeed << (avgLow+randfact) << "Rand:" << randfact;
             return avgLow+randfact;
         }
         if(currSpeed > avgHigh)
         {
+            qDebug() << "High:"<< avgHigh << currSpeed << (avgHigh-randfact) << "Rand:" << randfact;
             return avgHigh-randfact;
         }
         if(currSpeed > avgLow && currSpeed < avgHigh)
         {
+            qDebug() << currSpeed << "Between";
             return currSpeed;
         }
         return currSpeed + randfact;
