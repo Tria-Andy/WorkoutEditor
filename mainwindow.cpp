@@ -195,13 +195,16 @@ void MainWindow::clearActivtiy()
     {
         delete treeSelection;
         curr_activity->reset_avgSelection();
-        delete curr_activity->swimProxy;
         delete curr_activity->intModel;
         delete curr_activity->sampleModel;
         delete curr_activity->intTreeModel;
         delete curr_activity->avgModel;
         delete curr_activity->selItemModel;
-        if(curr_activity->get_sport() == settings::isSwim) delete curr_activity->swimModel;
+        if(curr_activity->get_sport() == settings::isSwim)
+        {
+            delete curr_activity->swimModel;
+            delete curr_activity->swimProxy;
+        }
         delete curr_activity;
     }
     actLoaded = false;
@@ -1267,6 +1270,7 @@ void MainWindow::set_polishValues(int lap,double factor)
         }
         else
         {
+            qDebug() << i << speedValues[i] << avg << 0.10-factor;
             polishValues[i] = curr_activity->polish_SpeedValues(speedValues[i],avg,0.10-factor,true);
         }
     }
