@@ -49,9 +49,11 @@ MainWindow::MainWindow(QWidget *parent) :
     isWeekMode = true;
     buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
     ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
+    planerIcon.addFile(":/images/icons/DateTime.png");
+    editorIcon.addFile(":/images/icons/Editor.png");
     appMode = new QToolButton(this);
     appMode->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    appMode->setIcon(QIcon(":/images/icons/Editor.png"));
+    appMode->setIcon(editorIcon);
     appMode->setText("Editor");
     appMode->setProperty("Mode",0);
     appMode->setToolTip("Change Mode");
@@ -235,7 +237,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     {
         ui->actionPlaner->setEnabled(mEditor);
         ui->actionEditor->setEnabled(mPlaner);
-        appMode->setIcon(QIcon(":/images/icons/DateTime.png"));
+        appMode->setIcon(planerIcon);
         appMode->setText("Planer");
 
     }
@@ -243,7 +245,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     {
         ui->actionEditor->setEnabled(mPlaner);
         ui->actionPlaner->setEnabled(mEditor);
-        appMode->setIcon(QIcon(":/images/icons/Editor.png"));
+        appMode->setIcon(editorIcon);
         appMode->setText("Editor");
     }
 
@@ -1258,10 +1260,9 @@ void MainWindow::on_treeView_intervall_clicked(const QModelIndex &index)
 }
 
 
-void MainWindow::set_polishValues(int lap,double factor)
+void MainWindow::set_polishValues(int lap,double intDist, double avgSpeed,double factor)
 {
-    double avg = curr_activity->get_int_speed(lap);
-    double intdist = curr_activity->get_int_distance(lap);
+
     for(int i = 0; i < speedValues.count(); ++i)
     {
         if(lap == 0 && i < 5)
@@ -1270,11 +1271,11 @@ void MainWindow::set_polishValues(int lap,double factor)
         }
         else
         {
-            qDebug() << i << speedValues[i] << avg << 0.10-factor;
-            polishValues[i] = curr_activity->polish_SpeedValues(speedValues[i],avg,0.10-factor,true);
+            polishValues[i] = curr_activity->polish_SpeedValues(speedValues[i],avgSpeed,0.10-factor,true);
         }
     }
-    this->set_speedPlot(avg,intdist);
+
+    this->set_speedPlot(avgSpeed,intDist);
 }
 
 void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
@@ -1282,10 +1283,14 @@ void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
     ui->label_factorValue->setText(QString::number(10-value) + "%");
     double factor = static_cast<double>(value)/100;
     curr_activity->set_polishFactor(0.1-factor);
-    int indexRow = ui->treeView_intervall->currentIndex().row();
-    this->set_polishValues(indexRow,factor);
-    rangeMinMax[0] = curr_activity->polish_SpeedValues(1.0,curr_activity->get_int_speed(indexRow),0.1-factor,false);
-    rangeMinMax[1] = curr_activity->polish_SpeedValues(50.0,curr_activity->get_int_speed(indexRow),0.1-factor,false);
+
+    double intSpeed = treeSelection->selectedRows(6).at(0).data().toDouble();
+    double intDist = treeSelection->selectedRows(4).at(0).data().toDouble();
+
+    this->set_polishValues(ui->treeView_intervall->currentIndex().row(),intDist,intSpeed,factor);
+    rangeMinMax[0] = curr_activity->polish_SpeedValues(1.0,intSpeed,0.1-factor,false);
+    rangeMinMax[1] = curr_activity->polish_SpeedValues(50.0,intSpeed,0.1-factor,false);
+
     ui->lineEdit_polMin->setText(QString::number(rangeMinMax[0]));
     ui->lineEdit_polMax->setText(QString::number(rangeMinMax[1]));
 }
@@ -1313,8 +1318,9 @@ void MainWindow::set_speedValues(int index)
 {
     int lapLen;
     double current = 0;
-    double avg = curr_activity->get_int_speed(index);
-    double intdist = curr_activity->get_int_distance(index);
+
+    double intSpeed = treeSelection->selectedRows(6).at(0).data().toDouble();
+    double intDist = treeSelection->selectedRows(4).at(0).data().toDouble();
 
     int start = curr_activity->intModel->data(curr_activity->intModel->index(index,1,QModelIndex())).toInt();
     int stop = curr_activity->intModel->data(curr_activity->intModel->index(index,2,QModelIndex())).toInt();
@@ -1340,10 +1346,10 @@ void MainWindow::set_speedValues(int index)
     if(curr_activity->get_sport() != settings::isSwim)
     {
         double factor = static_cast<double>(ui->horizontalSlider_factor->value())/100;
-        this->set_polishValues(index,factor);
+        this->set_polishValues(index,intDist,intSpeed,factor);
     }
 
-    this->set_speedPlot(avg,intdist);
+    this->set_speedPlot(intSpeed,intDist);
 }
 
 void MainWindow::set_speedgraph()
@@ -1553,6 +1559,7 @@ void MainWindow::on_toolButton_update_clicked()
     curr_activity->updateRow_intTree(treeSelection);
     this->update_infoModel();
     ui->treeView_intervall->setCurrentIndex(treeSelection->currentIndex());
+    this->set_speedValues(treeSelection->currentIndex().row());
 }
 
 void MainWindow::on_toolButton_delete_clicked()

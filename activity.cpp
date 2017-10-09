@@ -18,6 +18,8 @@
 
 #include "activity.h"
 #include <math.h>
+#include <iostream>
+#include <functional>
 #include <QDebug>
 #include <QMessageBox>
 #include <QFile>
@@ -1617,38 +1619,46 @@ double Activity::get_int_speed(int row)
 
 double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double factor,bool setrand)
 {
-    double randfact = 0;
+    double avgLow = avgSpeed-(avgSpeed*factor);
+    double avgHigh = avgSpeed+(avgSpeed*factor);
+    double randNum = 1.0;
+
+    std::mt19937 gen;
+    std::uniform_real_distribution<double> distCurr(1.0,currSpeed);
+
+    if(currSpeed >= 0.0 && currSpeed <= avgLow && setrand)
+    {
+        currSpeed = avgSpeed+distCurr(gen);
+    }
+
     if(curr_sport == settings::isRun)
     {
-        randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) / (currSpeed/((factor*100)+1.0)));
+        randNum = currSpeed / ((factor*100)+1.0);
     }
     if(curr_sport == settings::isBike)
     {
-        randfact = ((static_cast<double>(rand()%(10-1)+1) / static_cast<double>(RAND_MAX)) / (avgSpeed/((factor*10)+1.0)));
+        randNum = currSpeed / ((factor*100)+1.0);
     }
     if(curr_sport == settings::isTria)
     {
-        randfact = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) / (currSpeed/((0.025*100)+1.0)));
+        randNum = currSpeed /((0.025*100)+1.0);
     }
 
-    double avgLow = avgSpeed-(avgSpeed*factor);
-    double avgHigh = avgSpeed+(avgSpeed*factor);
+    std::uniform_real_distribution<double> dist(1.0,randNum);
+    double randfact = (dist(gen) * avgSpeed) / currSpeed;
 
     if(setrand)
     {
         if(currSpeed < avgLow)
         {
-            qDebug() << "Low:"<< avgLow << currSpeed << (avgLow+randfact) << "Rand:" << randfact;
             return avgLow+randfact;
         }
         if(currSpeed > avgHigh)
         {
-            qDebug() << "High:"<< avgHigh << currSpeed << (avgHigh-randfact) << "Rand:" << randfact;
             return avgHigh-randfact;
         }
         if(currSpeed > avgLow && currSpeed < avgHigh)
         {
-            qDebug() << currSpeed << "Between";
             return currSpeed;
         }
         return currSpeed + randfact;
@@ -1694,7 +1704,7 @@ double Activity::interpolate_speed(int row,int sec,double limit)
     double curr_speed = sampSpeed[sec];
     double avg_speed = this->get_int_speed(row);
 
-    if(curr_speed == 0)
+    if(curr_speed >= 0 && curr_speed < limit)
     {
         curr_speed = limit;
     }

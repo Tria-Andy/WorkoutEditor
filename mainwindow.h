@@ -948,6 +948,7 @@ private:
     QStringList modus_list,cal_header,year_header,avgHeader,schedMode;
     QLabel *planerMode;
     QToolButton *planMode,*appMode;
+    QIcon editorIcon,planerIcon;
     QWidget *menuSpacer;
     QButtonGroup *phaseGroup;
 
@@ -956,7 +957,7 @@ private:
     void set_speedValues(int);
     void set_speedgraph();
     void set_speedPlot(double,double);
-    void set_polishValues(int,double);
+    void set_polishValues(int,double,double,double);
     void resetPlot();
 
     int avgCounter,sportUse;
