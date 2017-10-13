@@ -244,6 +244,25 @@ QString calculation::threstopace(double thresPace, double percent)
     return set_time(static_cast<int>(round(thresPace / (percent/100.0))));
 }
 
+double calculation::wattToSpeed(double thresPower,double thresSpeed,double currWatt)
+{
+    double diff = 0;
+    double speedStep = 0.3;
+
+    if(currWatt < thresPower)
+    {
+        diff = thresPower - currWatt;
+        return thresSpeed - ((diff/5.0) * speedStep);
+    }
+    else
+    {
+        diff = currWatt - thresPower;
+        return thresSpeed + ((diff/5.0) * speedStep);
+    }
+
+    return 0;
+}
+
 QString calculation::calc_threshold(QString sport,double threshold,double percent)
 {
     QString thresValue = "00:00";

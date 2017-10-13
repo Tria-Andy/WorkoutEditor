@@ -226,6 +226,8 @@ void settings::loadSettings()
         QSettings *myPref = new QSettings(gcInfo.value("confpath") + QDir::separator() + "athlete-preferences.ini",QSettings::IniFormat);
         athleteMap.insert("yob",myPref->value("dob").toDate().year());
         athleteMap.insert("height",myPref->value("height").toDouble());
+        athleteMap.insert("riderfrg",(athleteMap.value("weight")+9.0)*9.81*0.45);
+        athleteMap.insert("ridercw",0.2279+(athleteMap.value("weight")/(athleteMap.value("height")*750)));
         delete myPref;
 
         QStringList settingList;
@@ -265,6 +267,7 @@ void settings::loadSettings()
             thresholdMap.insert("runfactor",myvalues->value("runfactor").toDouble());
             thresholdMap.insert("swimpace",myvalues->value("swimpace").toDouble());
             thresholdMap.insert("bikepace",myvalues->value("bikepace").toDouble());
+            thresholdMap.insert("bikespeed",myvalues->value("bikespeed").toDouble());
             thresholdMap.insert("runpace",myvalues->value("runpace").toDouble());
             thresholdMap.insert("hfthres",myvalues->value("hfthres").toDouble());
             thresholdMap.insert("hfmax",myvalues->value("hfmax").toDouble());
@@ -495,6 +498,7 @@ void settings::saveSettings()
         myvalues->setValue("swimpace",QString::number(thresholdMap.value("swimpace")));
         myvalues->setValue("swimfactor",QString::number(thresholdMap.value("swimfactor")));
         myvalues->setValue("bikepower",QString::number(thresholdMap.value("bikepower")));
+        myvalues->setValue("bikespeed",QString::number(thresholdMap.value("bikespeed")));
         myvalues->setValue("bikepace",QString::number(thresholdMap.value("bikepace")));
         myvalues->setValue("bikefactor",QString::number(thresholdMap.value("bikefactor")));
         myvalues->setValue("runpower",QString::number(thresholdMap.value("runpower")));

@@ -80,6 +80,7 @@ public:
     QString groupName;
     double currThres;
     double thresPace;
+    double thresSpeed;
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -370,9 +371,9 @@ public:
     {
         if(sport == settings::isBike)
         {
-            int pace = get_timesec(threstopace(thresPace,model->data(model->index(2,0)).toDouble()));
+            double pace = 3600.0/wattToSpeed(currThres,thresSpeed,model->data(model->index(3,0)).toDouble());
             model->setData(model->index(7,0),calc_distance(value.toString("mm:ss"),pace));
-            set_speed(model,static_cast<double>(pace));
+            set_speed(model,pace);
         }
         else if(sport == settings::isBike || sport == settings::isRun)
         {
@@ -457,7 +458,7 @@ private:
     del_workcreator workTree_del;
     del_workcreatoredit edit_del;
     del_mousehover mousehover_del;
-    double timeSum,distSum,stressSum,workSum;
+    double timeSum,distSum,stressSum,workSum,thresSpeed;
     int currThres,thresPace,thresPower;
     QVector<bool> editRow;
     bool isSwim,isBike,isRun,isStrength,isAlt,isOther;

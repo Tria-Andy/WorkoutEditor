@@ -332,7 +332,8 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
 
                 if(timeBase)
                 {
-                    currDist = this->calc_distance(stepTime,this->get_timesec(this->threstopace(thresPace,percent)));
+                    //currDist = this->calc_distance(stepTime,this->get_timesec(this->threstopace(thresPace,percent)));
+                    currDist = this->calc_distance(stepTime,3600.0/this->wattToSpeed(thresPower,thresSpeed,pValue));
                 }
                 else
                 {
@@ -596,11 +597,15 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
             pValue = this->get_timesec(threshold);
         }
     }
-    else if (isBike || isRun)
+    else if (isBike)
+    {
+        pValue = threshold.toDouble();
+        defaultDist = this->calc_distance(defaultTime,3600.0/this->wattToSpeed(thresPower,thresSpeed,pValue));
+    }
+    else if(isRun)
     {
         defaultDist = this->calc_distance(defaultTime,static_cast<double>(this->get_timesec(threstopace(thresPace,percent))));
-        if(isBike) pValue = threshold.toDouble();
-        if(isRun) pValue = get_speed(QTime::fromString(threshold,"mm:ss"),0,currentSport,true);
+        pValue = get_speed(QTime::fromString(threshold,"mm:ss"),0,currentSport,true);
     }
     else if(isStrength)
     {
@@ -666,7 +671,7 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
 
         if(isBike)
         {
-            valueModel->setData(valueModel->index(8,0,QModelIndex()),this->calc_lapSpeed(currentSport,get_timesec(threstopace(thresPace,item->data(2,Qt::DisplayRole).toDouble()))));
+            valueModel->setData(valueModel->index(8,0,QModelIndex()),set_doubleValue(this->wattToSpeed(thresPower,thresSpeed,item->data(3,Qt::DisplayRole).toDouble()),true));
         }
         else
         {
@@ -1089,6 +1094,7 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
     {
        thresPower = settings::get_thresValue("bikepower");
        thresPace = settings::get_thresValue("bikepace");
+       thresSpeed = settings::get_thresValue("bikespeed");
        ui->label_threshold->setText(QString::number(thresPower) + " Watt");
        currThres = thresPower;
 
@@ -1132,6 +1138,7 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
 
     edit_del.currThres = currThres;
     edit_del.thresPace = thresPace;
+    edit_del.thresSpeed = thresSpeed;
 
     this->get_workouts(sport);
 }

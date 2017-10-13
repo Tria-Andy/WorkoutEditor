@@ -238,6 +238,7 @@ void Dialog_settings::writeChangedValues()
     {
         settings::set_thresValue("bikepower",ui->spinBox_thresPower->value());
         settings::set_thresValue("bikepace",paceSec);
+        settings::set_thresValue("bikespeed",this->set_doubleValue(ui->lineEdit_speed->text().toDouble(),true));
         settings::set_thresValue("bikefactor",ui->doubleSpinBox_factor->value());
         this->writeRangeValues(sport);
     }
@@ -353,7 +354,7 @@ void Dialog_settings::set_thresholdView(QString sport)
     }
     if(sport == settings::isBike)
     {
-        ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true)));
+        ui->lineEdit_speed->setText(QString::number(this->set_doubleValue(ui->spinBox_thresPower->value()/settings::get_athleteValue("ridercw")/24.725,true)));
         this->set_thresholdModel(sport);
     }
     if(sport == settings::isRun)
@@ -692,7 +693,7 @@ void Dialog_settings::on_spinBox_thresPower_valueChanged(int value)
     {
         thresPower = value;
         QTime paceTime(0,0,0);
-        paceTime = paceTime.addSecs(static_cast<int>(3600/(round(static_cast<double>(value)/6.5))));
+        paceTime = paceTime.addSecs(static_cast<int>(round(3600/ui->lineEdit_speed->text().toDouble())));
         ui->timeEdit_thresPace->setTime(paceTime);
         this->set_thresholdView(ui->comboBox_thresSport->currentText());
     }

@@ -19,6 +19,7 @@
 #include "activity.h"
 #include <math.h>
 #include <iostream>
+#include <random>
 #include <functional>
 #include <QDebug>
 #include <QMessageBox>
@@ -1621,31 +1622,46 @@ double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double fact
 {
     double avgLow = avgSpeed-(avgSpeed*factor);
     double avgHigh = avgSpeed+(avgSpeed*factor);
-    double randNum = 1.0;
+    double randfact = 0.0;
+    double min = 0.0;
+    double max = 1.0;
 
-    std::mt19937 gen;
-    std::uniform_real_distribution<double> distCurr(1.0,currSpeed);
+    std::random_device seeder;
+    std::mt19937 gen(seeder());
 
-    if(currSpeed >= 0.0 && currSpeed <= avgLow && setrand)
+
+    if(currSpeed < avgLow)
     {
-        currSpeed = avgSpeed+distCurr(gen);
+        min = currSpeed;
+        max = avgLow;
     }
+    else if(currSpeed > avgHigh)
+    {
+        min = avgHigh;
+        max = currSpeed;
+    }
+
+    std::uniform_real_distribution<double> distCurr(min,max);
+
+    if(((currSpeed >= 0.0 && currSpeed <= avgLow) || currSpeed > avgHigh) && setrand)
+    {
+        currSpeed = distCurr(gen);
+    }
+
+    double randNum = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
 
     if(curr_sport == settings::isRun)
     {
-        randNum = currSpeed / ((factor*100)+1.0);
+        randfact = randNum / (currSpeed/((factor*100)+1.0));
     }
     if(curr_sport == settings::isBike)
     {
-        randNum = currSpeed / ((factor*100)+1.0);
+        randfact = randNum / (currSpeed/((factor*1000)+1.0));
     }
     if(curr_sport == settings::isTria)
     {
-        randNum = currSpeed /((0.025*100)+1.0);
+        randfact = randNum / (currSpeed/((0.025*100)+1.0));
     }
-
-    std::uniform_real_distribution<double> dist(1.0,randNum);
-    double randfact = (dist(gen) * avgSpeed) / currSpeed;
 
     if(setrand)
     {
@@ -1657,7 +1673,7 @@ double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double fact
         {
             return avgHigh-randfact;
         }
-        if(currSpeed > avgLow && currSpeed < avgHigh)
+        if(currSpeed >= avgLow && currSpeed <= avgHigh)
         {
             return currSpeed;
         }
