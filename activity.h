@@ -37,7 +37,7 @@ private:
     QHash<QString,QVector<double>> swimHFZoneFactor;
     QStringList ride_items,swimType,levels;
     QVector<double> calc_speed,calc_cadence,swimTime,new_dist;
-    double swimTrack,polishFactor,swimThresPace,hfThreshold,hfMax,actWeight;
+    double thresPower,thresSpeed,thresPace,swimTrack,polishFactor,hfThreshold,hfMax,actWeight;
     int distFactor,avgCounter,zoneCount,moveTime;
     bool isSwim,isBike,isRun,isTria,isStrength,isAlt,changeRowCount,isUpdated,selectInt,isTimeBased;
     QVector<bool> editRow;
@@ -101,6 +101,8 @@ public:
     //Averages
     void reset_avgSelection();
     void set_avgValues(int,int);
+
+    bool isIndoor;
 };
 
 #endif // ACTIVITY_H

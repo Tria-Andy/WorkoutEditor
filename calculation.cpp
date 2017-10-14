@@ -249,7 +249,11 @@ double calculation::wattToSpeed(double thresPower,double thresSpeed,double currW
     double diff = 0;
     double speedStep = 0.3;
 
-    if(currWatt < thresPower)
+    if(currWatt == 0.0)
+    {
+        return 0;
+    }
+    else if(currWatt < thresPower)
     {
         diff = thresPower - currWatt;
         return thresSpeed - ((diff/5.0) * speedStep);

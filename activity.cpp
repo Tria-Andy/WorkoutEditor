@@ -104,8 +104,8 @@ void Activity::prepareData()
     int lapKey = 1;
     int dist = 0;
     int lapIdent = 0;
-    double threshold;
     isTimeBased = true;
+    isIndoor = false;
     levels = settings::get_listValues("Level");
     breakName = settings::get_generalValue("breakname");
     QString lapName;
@@ -114,11 +114,7 @@ void Activity::prepareData()
 
     actWeight = settings::get_weightforDate(QDateTime::fromString(ride_info.value("Date"),"yyyy/MM/dd hh:mm:ss UTC").addSecs(QDateTime::currentDateTime().offsetFromUtc()));
 
-    for(int i = 0; i < sampCount; ++i)
-    {
-        sampSpeed[i] = sampleModel->data(sampleModel->index(i,2,QModelIndex())).toDouble();
-        avgHF = avgHF + sampleModel->data(sampleModel->index(i,posHF,QModelIndex())).toInt();
-    }
+    if(tagData.value("SubSport") == "home trainer") isIndoor = true;
 
     intModel->setData(intModel->index(intModelCount-1,2,QModelIndex()),sampCount-1);
 
@@ -129,7 +125,7 @@ void Activity::prepareData()
     {
         distFactor = 1000;
         swimTrack = tagData.value("Pool Length").toDouble();
-        swimThresPace = settings::get_thresValue("swimpace");
+        thresPace = settings::get_thresValue("swimpace");
         hfThreshold = settings::get_thresValue("hfthres");
         hfMax = settings::get_thresValue("hfmax");
 
@@ -142,8 +138,7 @@ void Activity::prepareData()
         swimType = settings::get_listValues("SwimStyle");
 
         //Read current CV and HF Threshold
-        threshold = settings::get_thresValue("swimpace");
-        this->fillRangeLevel(threshold,true);
+        this->fillRangeLevel(thresPace,true);
 
         QString temp,zone_low,zone_high;
         double zoneLow, zoneHigh;
@@ -260,15 +255,12 @@ void Activity::prepareData()
     {
         distFactor = 1;
 
-        avgHF = (avgHF / sampCount);
-        double totalCal = ceil(this->calc_totalCal(actWeight,avgHF,sampCount));
-        ride_info.insert("Total Cal",QString::number(totalCal));
-        ride_info.insert("AvgHF",QString::number(avgHF));
-
         if(isBike)
         {
-            threshold = settings::get_thresValue("bikepower");
-            this->fillRangeLevel(threshold,false);
+            thresPower = settings::get_thresValue("bikepower");
+            thresPace = settings::get_thresValue("bikepace");
+            thresSpeed = settings::get_thresValue("bikespeed");
+            this->fillRangeLevel(thresPower,false);
             isTimeBased = true;
             avgValues.resize(6);
             avgModel->setVerticalHeaderLabels(avgHeader.value(1));
@@ -276,8 +268,9 @@ void Activity::prepareData()
         }
         else if(isRun)
         {
-            threshold = settings::get_thresValue("runpace");
-            this->fillRangeLevel(threshold,true);
+            thresPower = settings::get_thresValue("runpower");
+            thresPace = settings::get_thresValue("runpace");
+            this->fillRangeLevel(thresPace,true);
             isTimeBased = false;
             avgValues.resize(4);
             avgModel->setVerticalHeaderLabels(avgHeader.value(0));
@@ -303,6 +296,26 @@ void Activity::prepareData()
             intStart = intModel->data(intModel->index(row,1)).toInt();
             intStop = intModel->data(intModel->index(row,1)).toInt();
         }
+
+        for(int i = 0; i < sampCount; ++i)
+        {
+            if(isIndoor)
+            {
+                sampSpeed[i] = this->wattToSpeed(thresPower,thresSpeed,sampleModel->data(sampleModel->index(i,4,QModelIndex())).toDouble());
+            }
+            else
+            {
+                sampSpeed[i] = sampleModel->data(sampleModel->index(i,2,QModelIndex())).toDouble();
+            }
+
+            avgHF = avgHF + sampleModel->data(sampleModel->index(i,posHF,QModelIndex())).toInt();
+        }
+
+
+        avgHF = (avgHF / sampCount);
+        double totalCal = ceil(this->calc_totalCal(actWeight,avgHF,sampCount));
+        ride_info.insert("Total Cal",QString::number(totalCal));
+        ride_info.insert("AvgHF",QString::number(avgHF));
     }
 
     avgModel->setRowCount(avgValues.count());
@@ -405,6 +418,11 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
         intItems << new QStandardItem(QString::number(watts));
         intItems << new QStandardItem(QString::number(round(this->get_int_value(pInt,3))));
         intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,watts,lapTime,0),false)));
+        if(isIndoor)
+        {
+            intItems.at(4)->setData(QString::number(this->calc_distance(this->set_time(lapTime),3600.0/this->wattToSpeed(thresPower,thresSpeed,watts))),Qt::EditRole);
+            intItems.at(6)->setData(QString::number(this->wattToSpeed(thresPower,thresSpeed,watts)),Qt::EditRole);
+        }
     }
     else if(isRun)
     {
@@ -1261,15 +1279,13 @@ void Activity::updateSampleModel(int rowcount)
     {
         if(isBike)
         {
-            sportpace = settings::get_thresValue("bikepace");
             limitFactor = 0.35;
         }
         if(isRun)
         {
-            sportpace = settings::get_thresValue("runpace");
             limitFactor = 0.20;
         }
-        lowLimit = this->get_speed(QTime::fromString(this->set_time(sportpace),"mm:ss"),0,curr_sport,true);
+        lowLimit = this->get_speed(QTime::fromString(this->set_time(thresPace),"mm:ss"),0,curr_sport,true);
         lowLimit = lowLimit - (lowLimit*limitFactor);
     }
 
@@ -1354,7 +1370,30 @@ void Activity::updateSampleModel(int rowcount)
             intStop = intModel->data(intModel->index(intRow,2)).toInt();
             msec = intModel->data(intModel->index(intRow,3)).toDouble() / (intStop-intStart);
 
-            if(isBike || isRun)
+            if(isBike)
+            {
+                for(int intSec = intStart;intSec <= intStop; ++intSec)
+                {
+                    if(intSec == 0)
+                    {
+                        new_dist[0] = 0.0000;
+                    }
+                    else
+                    {
+                        if(isIndoor)
+                        {
+                            calc_speed[intSec] = this->wattToSpeed(thresPower,thresSpeed,sampleModel->data(sampleModel->index(intSec,4,QModelIndex())).toDouble());
+                        }
+                        else
+                        {
+                            calc_speed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
+                        }
+                        new_dist[intSec] = new_dist[intSec-1] + msec;
+                        calc_cadence[intSec] = sampleModel->data(sampleModel->index(intSec,3,QModelIndex())).toDouble();
+                    }
+                }
+            }
+            if(isRun)
             {
                 for(int intSec = intStart;intSec <= intStop; ++intSec)
                 {
@@ -1366,7 +1405,6 @@ void Activity::updateSampleModel(int rowcount)
                     {
                         calc_speed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
                         new_dist[intSec] = new_dist[intSec-1] + msec;
-                        if(isBike) calc_cadence[intSec] = sampleModel->data(sampleModel->index(intSec,3,QModelIndex())).toDouble();
                     }
                 }
             }

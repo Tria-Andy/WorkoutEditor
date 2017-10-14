@@ -264,6 +264,7 @@ void settings::loadSettings()
             thresholdMap.insert("stgpower",athleteMap.value("weight")*4);
             thresholdMap.insert("swimfactor",myvalues->value("swimfactor").toDouble());
             thresholdMap.insert("bikefactor",myvalues->value("bikefactor").toDouble());
+            thresholdMap.insert("wattfactor",myvalues->value("wattfactor").toDouble());
             thresholdMap.insert("runfactor",myvalues->value("runfactor").toDouble());
             thresholdMap.insert("swimpace",myvalues->value("swimpace").toDouble());
             thresholdMap.insert("bikepace",myvalues->value("bikepace").toDouble());

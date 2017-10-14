@@ -332,7 +332,6 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
 
                 if(timeBase)
                 {
-                    //currDist = this->calc_distance(stepTime,this->get_timesec(this->threstopace(thresPace,percent)));
                     currDist = this->calc_distance(stepTime,3600.0/this->wattToSpeed(thresPower,thresSpeed,pValue));
                 }
                 else

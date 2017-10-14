@@ -137,6 +137,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolButton_clearSelect->setEnabled(false);
     ui->toolButton_clearContent->setEnabled(false);
     ui->toolButton_sync->setEnabled(false);
+    ui->horizontalSlider_factor->setEnabled(false);
 
     this->set_speedgraph();
     this->resetPlot();
@@ -1054,15 +1055,6 @@ void MainWindow::loadfile(const QString &filename)
         intSelect_del.sport = avgSelect_del.sport = curr_activity->get_sport();
         this->set_menuItems(true,false);
 
-        if(curr_activity->get_sport() == settings::isRun || curr_activity->get_sport() == settings::isBike)
-        {
-            ui->horizontalSlider_factor->setEnabled(true);
-        }
-        else
-        {
-            ui->horizontalSlider_factor->setEnabled(false);
-        }
-
         this->init_editorViews();
         this->update_infoModel();
      }
@@ -1165,7 +1157,6 @@ void MainWindow::setSelectedIntRow(QModelIndex index)
 
     if(isSwim)
     {
-        ui->horizontalSlider_factor->setEnabled(false);
         if(treeSelection->selectedRows(2).at(0).data().toInt() == 1)
         {
             isInt = false;
@@ -1183,11 +1174,7 @@ void MainWindow::setSelectedIntRow(QModelIndex index)
     }
     else
     {
-        if(curr_activity->get_sport() == settings::isTria)
-        {
-            ui->horizontalSlider_factor->setEnabled(false);
-        }
-        else
+        if(curr_activity->get_sport() != settings::isTria)
         {
             ui->horizontalSlider_factor->setEnabled(true);
         }
@@ -1330,6 +1317,8 @@ void MainWindow::set_speedValues(int index)
     speedMinMax[1] = 0.0;
     lapLen = stop-start;
 
+    polishValues.clear();
+
     speedValues.resize(lapLen+1);
     polishValues.resize(lapLen+1);
     secTicker.resize(lapLen+1);
@@ -1345,8 +1334,16 @@ void MainWindow::set_speedValues(int index)
 
     if(curr_activity->get_sport() != settings::isSwim)
     {
-        double factor = static_cast<double>(ui->horizontalSlider_factor->value())/100;
-        this->set_polishValues(index,intDist,intSpeed,factor);
+        if(curr_activity->get_sport() == settings::isRun)
+        {
+            ui->horizontalSlider_factor->setEnabled(true);
+            double factor = static_cast<double>(ui->horizontalSlider_factor->value())/100;
+            this->set_polishValues(index,intDist,intSpeed,factor);
+        }
+        if(curr_activity->isIndoor)
+        {
+            ui->horizontalSlider_factor->setEnabled(false);
+        }
     }
 
     this->set_speedPlot(intSpeed,intDist);
@@ -1673,6 +1670,7 @@ void MainWindow::on_actionReset_triggered()
     this->clearActivtiy();
     avgSelect_del.sport = QString();
     actLoaded = false;
+    ui->horizontalSlider_factor->setEnabled(false);
 }
 
 void MainWindow::on_toolButton_clearSelect_clicked()
