@@ -247,7 +247,7 @@ QString calculation::threstopace(double thresPace, double percent)
 double calculation::wattToSpeed(double thresPower,double thresSpeed,double currWatt)
 {
     double diff = 0;
-    double speedStep = 0.3;
+    double speedStep = 0.065;
 
     if(currWatt == 0.0)
     {
@@ -256,12 +256,12 @@ double calculation::wattToSpeed(double thresPower,double thresSpeed,double currW
     else if(currWatt < thresPower)
     {
         diff = thresPower - currWatt;
-        return thresSpeed - ((diff/5.0) * speedStep);
+        return thresSpeed - (diff * speedStep);
     }
     else
     {
         diff = currWatt - thresPower;
-        return thresSpeed + ((diff/5.0) * speedStep);
+        return thresSpeed + (diff * speedStep);
     }
 
     return 0;
