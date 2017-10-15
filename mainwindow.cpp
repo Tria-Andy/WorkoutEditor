@@ -1247,7 +1247,7 @@ void MainWindow::on_treeView_intervall_clicked(const QModelIndex &index)
 }
 
 
-void MainWindow::set_polishValues(int lap,double intDist, double avgSpeed,double factor)
+void MainWindow::set_polishValues(int lap,double intDist, double avgSpeed,double factor,int ypos)
 {
 
     for(int i = 0; i < speedValues.count(); ++i)
@@ -1262,7 +1262,7 @@ void MainWindow::set_polishValues(int lap,double intDist, double avgSpeed,double
         }
     }
 
-    this->set_speedPlot(avgSpeed,intDist);
+    this->set_speedPlot(avgSpeed,intDist,ypos);
 }
 
 void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
@@ -1274,7 +1274,7 @@ void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
     double intSpeed = treeSelection->selectedRows(6).at(0).data().toDouble();
     double intDist = treeSelection->selectedRows(4).at(0).data().toDouble();
 
-    this->set_polishValues(ui->treeView_intervall->currentIndex().row(),intDist,intSpeed,factor);
+    this->set_polishValues(ui->treeView_intervall->currentIndex().row(),intDist,intSpeed,factor,0);
     rangeMinMax[0] = curr_activity->polish_SpeedValues(1.0,intSpeed,0.1-factor,false);
     rangeMinMax[1] = curr_activity->polish_SpeedValues(50.0,intSpeed,0.1-factor,false);
 
@@ -1304,32 +1304,42 @@ void MainWindow::resetPlot()
 void MainWindow::set_speedValues(int index)
 {
     int lapLen;
+    int vSize;
     double current = 0;
-
+    double second = 0;
+    int yPos = 0;
     double intSpeed = treeSelection->selectedRows(6).at(0).data().toDouble();
     double intDist = treeSelection->selectedRows(4).at(0).data().toDouble();
 
     int start = curr_activity->intModel->data(curr_activity->intModel->index(index,1,QModelIndex())).toInt();
     int stop = curr_activity->intModel->data(curr_activity->intModel->index(index,2,QModelIndex())).toInt();
     speedMinMax.resize(2);
+    secondMinMax.resize(2);
     rangeMinMax.resize(2);
     speedMinMax[0] = 40.0;
     speedMinMax[1] = 0.0;
+    secondMinMax[0] = 10.0;
+    secondMinMax[1] = 0.0;
     lapLen = stop-start;
-
+    vSize = lapLen+1;
     polishValues.clear();
 
-    speedValues.resize(lapLen+1);
-    polishValues.resize(lapLen+1);
-    secTicker.resize(lapLen+1);
+    speedValues.resize(vSize);
+    secondValues.resize(vSize);
+    polishValues.resize(vSize);
+    secTicker.resize(vSize);
 
     for(int i = start, pos=0; i <= stop; ++i,++pos)
     {
         current = curr_activity->sampSpeed[i];
+        second = curr_activity->sampSecond[i];
         secTicker[pos] = pos;
         speedValues[pos] = current;
+        secondValues[pos] = second;
         if(speedMinMax[0] > current) rangeMinMax[0] = speedMinMax[0] = current;
         if(speedMinMax[1] < current) rangeMinMax[1] = speedMinMax[1] = current;
+        if(secondMinMax[0] > second) secondMinMax[0] = second;
+        if(secondMinMax[1] < second) secondMinMax[1] = second;
     }
 
     if(curr_activity->get_sport() != settings::isSwim)
@@ -1338,15 +1348,16 @@ void MainWindow::set_speedValues(int index)
         {
             ui->horizontalSlider_factor->setEnabled(true);
             double factor = static_cast<double>(ui->horizontalSlider_factor->value())/100;
-            this->set_polishValues(index,intDist,intSpeed,factor);
+            this->set_polishValues(index,intDist,intSpeed,factor,yPos);
         }
         if(curr_activity->isIndoor)
         {
             ui->horizontalSlider_factor->setEnabled(false);
+            yPos = 1;
         }
     }
 
-    this->set_speedPlot(intSpeed,intDist);
+    this->set_speedPlot(intSpeed,intDist,yPos);
 }
 
 void MainWindow::set_speedgraph()
@@ -1354,6 +1365,7 @@ void MainWindow::set_speedgraph()
     QFont plotFont;
     plotFont.setBold(true);
     plotFont.setPointSize(8);
+    y2Label << "HF" << "Watts";
 
     ui->widget_plot->xAxis->setLabel("Seconds");
     ui->widget_plot->xAxis->setLabelFont(plotFont);
@@ -1374,7 +1386,7 @@ void MainWindow::set_speedgraph()
     subLayout->addElement(0,0,ui->widget_plot->legend);
 }
 
-void MainWindow::set_speedPlot(double avgSpeed,double intdist)
+void MainWindow::set_speedPlot(double avgSpeed,double intdist,int yPos)
 {
     ui->widget_plot->clearPlottables();
     ui->widget_plot->clearItems();
@@ -1386,6 +1398,12 @@ void MainWindow::set_speedPlot(double avgSpeed,double intdist)
     speedLine->setLineStyle(QCPGraph::lsLine);
     speedLine->setData(secTicker,speedValues);
     speedLine->setPen(QPen(QColor(0,255,0),2));
+
+    QCPGraph *secondLine = ui->widget_plot->addGraph(ui->widget_plot->xAxis,ui->widget_plot->yAxis2);
+    secondLine->setName(y2Label.at(yPos));
+    secondLine->setLineStyle(QCPGraph::lsLine);
+    secondLine->setData(secTicker,secondValues);
+    secondLine->setPen(QPen(QColor(255,0,0),2));
 
     QCPItemLine *avgLine = new QCPItemLine(ui->widget_plot);
     avgLine->start->setCoords(0,avgSpeed);
@@ -1402,7 +1420,7 @@ void MainWindow::set_speedPlot(double avgSpeed,double intdist)
         polishLine->setName("Polished Speed");
         polishLine->setLineStyle(QCPGraph::lsLine);
         polishLine->setData(secTicker,polishValues);
-        polishLine->setPen(QPen(QColor(255,0,0),2));
+        polishLine->setPen(QPen(QColor(255,200,0),2));
 
         QCPGraph *polishRangeP = ui->widget_plot->addGraph();
         polishRangeP->setName("Polish Range");
@@ -1415,17 +1433,18 @@ void MainWindow::set_speedPlot(double avgSpeed,double intdist)
         polishRange->setBrush(QBrush(QColor(255,255,0,50)));
     }
 
-    double yMin = 0,yMax = 0;
-    if(speedMinMax[0] > 0)
-    {
-        yMin = speedMinMax[0]*0.1;
-    }
+    double yMin = 0,yMax = 0,y2Min = 0, y2Max = 0;
+
+    if(speedMinMax[0] > 0) yMin = speedMinMax[0]*0.1;
     yMax =  speedMinMax[1]*0.1;
+
+    if(secondMinMax[0] > 0) y2Min = secondMinMax[0]*0.1;
+    y2Max = secondMinMax[1]*0.1;
 
     ui->widget_plot->xAxis->setRange(0,speedValues.count());
     ui->widget_plot->xAxis2->setRange(0,intdist);
     ui->widget_plot->yAxis->setRange(speedMinMax[0]-yMin,speedMinMax[1]+yMax);
-    ui->widget_plot->yAxis2->setRange(speedMinMax[0]-yMin,speedMinMax[1]+yMax);
+    ui->widget_plot->yAxis2->setRange(secondMinMax[0]-y2Min,secondMinMax[1]+y2Max);
 
     ui->widget_plot->replot();
 }

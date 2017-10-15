@@ -104,6 +104,7 @@ void Activity::prepareData()
     int lapKey = 1;
     int dist = 0;
     int lapIdent = 0;
+    double secondValue;
     isTimeBased = true;
     isIndoor = false;
     levels = settings::get_listValues("Level");
@@ -111,6 +112,7 @@ void Activity::prepareData()
     QString lapName;
     intLabel = "_Int_";
     sampSpeed.resize(sampCount);
+    sampSecond.resize(sampCount);
 
     actWeight = settings::get_weightforDate(QDateTime::fromString(ride_info.value("Date"),"yyyy/MM/dd hh:mm:ss UTC").addSecs(QDateTime::currentDateTime().offsetFromUtc()));
 
@@ -301,14 +303,18 @@ void Activity::prepareData()
         {
             if(isIndoor)
             {
-                sampSpeed[i] = this->wattToSpeed(thresPower,thresSpeed,sampleModel->data(sampleModel->index(i,4,QModelIndex())).toDouble());
+                secondValue = sampleModel->data(sampleModel->index(i,4,QModelIndex())).toDouble();
+                sampSpeed[i] = this->wattToSpeed(thresPower,thresSpeed,secondValue);
+                sampSecond[i] = secondValue;
             }
             else
             {
+                secondValue = sampleModel->data(sampleModel->index(i,posHF,QModelIndex())).toDouble();
                 sampSpeed[i] = sampleModel->data(sampleModel->index(i,2,QModelIndex())).toDouble();
+                sampSecond[i] = secondValue;
             }
 
-            avgHF = avgHF + sampleModel->data(sampleModel->index(i,posHF,QModelIndex())).toInt();
+            avgHF = avgHF + static_cast<int>(secondValue);
         }
 
 

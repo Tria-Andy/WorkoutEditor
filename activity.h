@@ -82,7 +82,7 @@ public:
     QStandardItemModel *intModel,*sampleModel,*xdataModel,*swimModel,*intTreeModel,*selItemModel,*avgModel;
     QSortFilterProxyModel *swimProxy;
     QMap<QString,QString> ride_info;
-    QVector<double> sampSpeed,avgValues;
+    QVector<double> sampSpeed,sampSecond,avgValues;
 
     //Recalculation
     void updateRow_intTree(QItemSelectionModel *);
