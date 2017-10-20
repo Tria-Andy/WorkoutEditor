@@ -32,7 +32,15 @@ Dialog_version::Dialog_version(QWidget *parent) :
     }
     else
     {
-        appVersion = QString::number(VERSION_MAJOR)+"."+QString::number(VERSION_MINOR)+"."+QString::number(VERSION_BUILD);
+        if(DEV_BUILD == 1)
+        {
+            appVersion = QString::number(VERSION_MAJOR)+"."+QString::number(VERSION_MINOR)+"."+QString::number(VERSION_BUILD)+" DEV";
+        }
+        else
+        {
+            appVersion = QString::number(VERSION_MAJOR)+"."+QString::number(VERSION_MINOR)+"."+QString::number(VERSION_BUILD);
+        }
+
     }
 
     ui->textBrowser_info->setText("<center>"
