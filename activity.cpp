@@ -136,7 +136,6 @@ void Activity::prepareData()
         int breakCounter = 1;
         int swimLap = 0;
 
-        swimModel = new QStandardItemModel(xdataModel->rowCount(),10);
         swimType = settings::get_listValues("SwimStyle");
 
         //Read current CV and HF Threshold
@@ -190,62 +189,73 @@ void Activity::prepareData()
             }
             swimHFZoneFactor.insert(levels.at(i),hFactor);
         }
-
-        for(int row = 0; row < intModelCount; ++row)
+        if(hasXdata)
         {
-            lapCount = this->get_swim_laps(row);
-            dist = lapCount*swimTrack;
-            intModel->setData(intModel->index(row,3),dist);
-            intModel->setData(intModel->index(row,4),lapCount);
+            swimModel = new QStandardItemModel(xdataModel->rowCount(),10);
 
-            intStart = intModel->data(intModel->index(row,1)).toInt();
-            intStop = intModel->data(intModel->index(row,2)).toInt();
+            for(int row = 0; row < intModelCount; ++row)
+            {
+                lapCount = this->get_swim_laps(row);
+                dist = lapCount*swimTrack;
+                intModel->setData(intModel->index(row,3),dist);
+                intModel->setData(intModel->index(row,4),lapCount);
 
-            if(lapCount > 0)
-            {
-                lapIdent = lapCount == 1 ? 1 : 0;
-                intModel->setData(intModel->index(row,5),"Int-"+QString::number(lapKey)+"_"+QString::number(lapIdent));
-            }
-            else
-            {
-                intModel->setData(intModel->index(row,5),breakName+"_"+QString::number(breakCounter));
-                ++lapKey;
-                ++breakCounter;
-            }
+                intStart = intModel->data(intModel->index(row,1)).toInt();
+                intStop = intModel->data(intModel->index(row,2)).toInt();
 
-            if(row == 0)
-            {
-                lapName = QString::number(intCounter)+intLabel+QString::number(dist);
-                swimLap = this->build_swimModel(true,"Int-",intCounter,intStart,intStop,swimLap);
-                ++intCounter;
-            }
-            else if(row != 0 && row < intModelCount-1)
-            {
                 if(lapCount > 0)
+                {
+                    lapIdent = lapCount == 1 ? 1 : 0;
+                    intModel->setData(intModel->index(row,5),"Int-"+QString::number(lapKey)+"_"+QString::number(lapIdent));
+                }
+                else
+                {
+                    intModel->setData(intModel->index(row,5),breakName+"_"+QString::number(breakCounter));
+                    ++lapKey;
+                    ++breakCounter;
+                }
+
+                if(row == 0)
                 {
                     lapName = QString::number(intCounter)+intLabel+QString::number(dist);
                     swimLap = this->build_swimModel(true,"Int-",intCounter,intStart,intStop,swimLap);
                     ++intCounter;
                 }
-                else
+                else if(row != 0 && row < intModelCount-1)
                 {
-                    lapName = breakName;
-                    swimLap = this->build_swimModel(false,breakName,intCounter,intStart,intStop,swimLap);
+                    if(lapCount > 0)
+                    {
+                        lapName = QString::number(intCounter)+intLabel+QString::number(dist);
+                        swimLap = this->build_swimModel(true,"Int-",intCounter,intStart,intStop,swimLap);
+                        ++intCounter;
+                    }
+                    else
+                    {
+                        lapName = breakName;
+                        swimLap = this->build_swimModel(false,breakName,intCounter,intStart,intStop,swimLap);
+                    }
                 }
-            }
-            else if(row == intModelCount-1)
-            {
-                lapName = QString::number(intCounter)+intLabel+QString::number(dist);
-                swimLap = this->build_swimModel(true,"Int-",intCounter,intStart,intStop,swimLap);
-            }
+                else if(row == intModelCount-1)
+                {
+                    lapName = QString::number(intCounter)+intLabel+QString::number(dist);
+                    swimLap = this->build_swimModel(true,"Int-",intCounter,intStart,intStop,swimLap);
+                }
 
-            intModel->setData(intModel->index(row,0),lapName);
+                intModel->setData(intModel->index(row,0),lapName);
+            }
+            xdataModel->clear();
+        }
+        else
+        {
+            swimModel = new QStandardItemModel(1,10);
+
+            intModel->setData(intModel->index(0,3),overrideData.value("total_distance"));
+            intModel->setData(intModel->index(0,4),1);
+            intModel->setData(intModel->index(0,5),"Workout_1");
         }
 
         swimProxy = new QSortFilterProxyModel();
         swimProxy->setSourceModel(swimModel);
-
-        if(hasXdata) xdataModel->clear();
 
         selItemModel->setVerticalHeaderLabels(itemHeader.value(0));
         avgValues.resize(4);
@@ -256,6 +266,7 @@ void Activity::prepareData()
     else
     {
         distFactor = 1;
+        polishFactor = 0.1;
 
         if(isBike)
         {
@@ -293,10 +304,18 @@ void Activity::prepareData()
         for(int row = 0; row < intModelCount; ++row)
         {
             intModel->setData(intModel->index(row,3),this->get_int_distance(row));
-            intModel->setData(intModel->index(row,4),lapCount);
+            intModel->setData(intModel->index(row,4),1);
             intModel->setData(intModel->index(row,5),"Int-"+QString::number(row));
-            intStart = intModel->data(intModel->index(row,1)).toInt();
-            intStop = intModel->data(intModel->index(row,1)).toInt();
+
+            if(row > 0 && row < intModelCount-1)
+            {
+                intStart = intModel->data(intModel->index(row,1)).toInt();
+                intStop = intModel->data(intModel->index(row-1,2)).toInt();
+                if(intStart != intStop+1)
+                {
+                    intModel->setData(intModel->index(row,1),intStop+1);
+                }
+            }
         }
 
         for(int i = 0; i < sampCount; ++i)
@@ -340,11 +359,19 @@ void Activity::build_intTree()
     {
         moveTime = 0;
         QString intKey;
-        for(int i = 0; i < intModel->rowCount(); ++i)
+        if(hasXdata)
         {
-            intKey = intModel->data(intModel->index(i,5)).toString().split("_").first();
-            rootItem->appendRow(setSwimLap(i,intKey));
+            for(int i = 0; i < intModel->rowCount(); ++i)
+            {
+                intKey = intModel->data(intModel->index(i,5)).toString().split("_").first();
+                rootItem->appendRow(setSwimLap(i,intKey));
+            }
         }
+        else
+        {
+            rootItem->appendRow(setIntRow(0));
+        }
+
     }
     else if(isBike || isRun)
     {
@@ -402,17 +429,29 @@ void Activity::build_intTree()
 QList<QStandardItem *> Activity::setIntRow(int pInt)
 {
     QList<QStandardItem*> intItems;
-    QModelIndex data_index = sampleModel->index(intModel->data(intModel->index(pInt,2)).toInt()-1,1);
     QString lapName = intModel->data(intModel->index(pInt,0)).toString();
     int lapPace = this->get_int_pace(pInt,lapName);
     int lapTime = this->get_int_duration(pInt);
     double lapDist = this->set_doubleValue(this->get_int_distance(pInt),true);
     double lapSpeed = this->get_int_speed(pInt);
+    double workDist = 0;
+
+    if(pInt == 0)
+    {
+        workDist = intModel->data(intModel->index(pInt,3)).toDouble();
+    }
+    else
+    {
+        for(int i = 0; i <= pInt; ++i)
+        {
+            workDist = workDist + intModel->data(intModel->index(i,3)).toDouble();
+        }
+    }
 
     intItems << new QStandardItem(lapName);
     intItems << new QStandardItem(this->set_time(lapTime));
     intItems << new QStandardItem(this->set_time(intModel->data(intModel->index(pInt,1)).toInt()));
-    intItems << new QStandardItem(QString::number(this->set_doubleValue(sampleModel->data(data_index).toDouble(),true)));
+    intItems << new QStandardItem(QString::number(this->set_doubleValue(workDist,true)));
     intItems << new QStandardItem(QString::number(lapDist));
     intItems << new QStandardItem(this->set_time(lapPace));
     intItems << new QStandardItem(QString::number(this->set_doubleValue(lapSpeed,false)));
@@ -696,7 +735,7 @@ void Activity::recalcIntTree()
     }
     else
     {
-        double msec = 0;
+        //double msec = 0;
         double lapDist = 0;
         for(int row = 0; row < rowCount; ++row)
         {
@@ -704,6 +743,8 @@ void Activity::recalcIntTree()
            intTime = this->get_timesec(intTreeModel->data(intTreeModel->index(row,1)).toString());
            lapDist = intTreeModel->data(intTreeModel->index(row,4)).toDouble();
 
+           workDist = workDist + lapDist;
+           /*
            msec = lapDist / intTime;
 
            if(row < rowCount-1)
@@ -714,7 +755,7 @@ void Activity::recalcIntTree()
            {
                 workDist = workDist + lapDist;
            }
-
+           */
            if(isBike)
            {
                totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,9)).toDouble();
@@ -1591,13 +1632,12 @@ double Activity::get_int_distance(int row)
     }
     else
     {
-        int_start = intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt();
+        int_start = intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt()-1;
         int_stop = intModel->data(intModel->index(row,2,QModelIndex()),Qt::DisplayRole).toInt();
         dist_start = sampleModel->data(sampleModel->index(int_start,1,QModelIndex()),Qt::DisplayRole).toDouble();
         dist_stop = sampleModel->data(sampleModel->index(int_stop,1,QModelIndex()),Qt::DisplayRole).toDouble();
         dist = dist_stop - dist_start;
     }
-
     return dist;
 }
 

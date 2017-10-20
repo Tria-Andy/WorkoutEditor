@@ -137,7 +137,7 @@ QJsonArray jsonHandler::modelToJson(QStandardItemModel *model, QStringList *list
 
 QString jsonHandler::readJsonContent(QString jsonfile)
 {
-    hasOverride = false;
+    hasOverride = hasXdata = false;
     QJsonObject itemObject;
     QJsonArray itemArray;
 

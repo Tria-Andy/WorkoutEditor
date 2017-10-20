@@ -292,7 +292,7 @@ private:
     Ui::day_popup *ui;
     schedule *workSched;
     del_daypop daypop_del;
-    QStandardItemModel *dayModel,*stdlistModel, *intExport, *sampExport;
+    QStandardItemModel *dayModel,*stdlistModel,*intExport, *sampExport;
     QSortFilterProxyModel *scheduleProxy,*stdProxy;
     QHash<QString,QString> currWorkout;
     QHash<int,QString> stdworkData;

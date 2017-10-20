@@ -336,14 +336,17 @@ void day_popup::update_workValues()
         QHash<int,QString> valueList;
         valueList.insert(0,weekNumber);
         valueList.insert(1,newDate.toString("dd.MM.yyyy"));
+
         for(int i = 2; i < dayModel->rowCount()+1; ++i)
         {
             valueList.insert(i,dayModel->data(dayModel->index(i-2,selWorkout)).toString());
         }
+
         QString sport = dayModel->data(dayModel->index(1,selWorkout)).toString();
         QString stdid = dayModel->data(dayModel->index(8,selWorkout)).toString();
         workSched->itemList.insert(selIndex,valueList);
         ui->lineEdit_selected->setText(ui->tableView_day->model()->headerData(selWorkout,Qt::Horizontal).toString()+" - "+sport);
+
         this->set_comboWorkouts(sport,stdid);
     }
 }
