@@ -52,7 +52,7 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
 
     connect(ui->tableView_day->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(load_workoutData(int)));
     connect(ui->dateEdit_workDate,SIGNAL(dateChanged(QDate)),this,SLOT(edit_workoutDate(QDate)));
-    connect(ui->tableView_day->itemDelegate(),SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)),this,SLOT(setNextEditRow()));
+    connect(ui->tableView_day->itemDelegate(),SIGNAL(closeEditor(QWidget *,QAbstractItemDelegate::EndEditHint)),this,SLOT(setNextEditRow()));
 }
 
 enum {ADD,EDIT,COPY,DEL};
@@ -268,6 +268,7 @@ void day_popup::set_exportContent()
     overrideData.insert("time_riding",QString::number(sampCount));
     overrideData.insert("workout_time",QString::number(sampCount));
     overrideData.insert("total_kcalories",totalWork);
+    overrideData.insert("total_distance",workSched->itemList.value(selIndex).value(7));
     overrideData.insert("total_work",totalWork);
     overrideData.insert(stressType,workSched->itemList.value(selIndex).value(8));
 

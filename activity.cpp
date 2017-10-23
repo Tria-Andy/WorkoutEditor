@@ -359,6 +359,7 @@ void Activity::build_intTree()
     {
         moveTime = 0;
         QString intKey;
+
         if(hasXdata)
         {
             for(int i = 0; i < intModel->rowCount(); ++i)
