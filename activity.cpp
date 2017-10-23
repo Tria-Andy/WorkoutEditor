@@ -328,17 +328,16 @@ void Activity::prepareData()
                 secondValue = sampleModel->data(sampleModel->index(i,4,QModelIndex())).toDouble();
                 sampSpeed[i] = this->wattToSpeed(thresPower,thresSpeed,secondValue);
                 sampSecond[i] = secondValue;
+                avgHF = avgHF + sampleModel->data(sampleModel->index(i,posHF,QModelIndex())).toDouble();
             }
             else
             {
                 secondValue = sampleModel->data(sampleModel->index(i,posHF,QModelIndex())).toDouble();
                 sampSpeed[i] = sampleModel->data(sampleModel->index(i,2,QModelIndex())).toDouble();
                 sampSecond[i] = secondValue;
+                avgHF = avgHF + static_cast<int>(secondValue);
             }
-
-            avgHF = avgHF + static_cast<int>(secondValue);
         }
-
 
         avgHF = (avgHF / sampCount);
         double totalCal = ceil(this->calc_totalCal(actWeight,avgHF,sampCount));
