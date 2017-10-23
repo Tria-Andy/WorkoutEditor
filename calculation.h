@@ -11,12 +11,13 @@ public:
 
 private:
 
-
 protected:
-    double calc_totalCal(double,double,double);
-    static double calc_totalWork(QString,double,double,int);
+    double calc_totalCal(double,double,double);    
     int get_hfvalue(QString);
+    QHash<QString,double> *ltsValues;
+    QHash<QString,QString> *gcValues,*generalValues;
 
+    static double calc_totalWork(QString,double,double,int);
     static QString set_time(int);
     static QString get_workout_pace(double, QTime, QString,bool);
     static double get_speed(QTime,int,QString,bool);
@@ -36,6 +37,8 @@ protected:
     static double get_corrected_MET(double,int);
     static double calc_lnp(double,double,double);
     static double current_dayCalories();
+    static QHash<QString,double> *thresValues, *athleteValues;
+
 };
 
 #endif // CALCULATION_H

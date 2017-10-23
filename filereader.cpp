@@ -11,8 +11,8 @@ void fileReader::readJsonFiles(QStandardItem *rootItem)
 {
     QFile file;
     QString filePath;
-    int jsonMaxFiles = settings::get_generalValue("filecount").toInt();
-    QDir directory(settings::get_gcInfo("actpath"));
+    int jsonMaxFiles = generalValues->value("filecount").toInt();
+    QDir directory(gcValues->value("actpath"));
     directory.setSorting(QDir::Name | QDir::Reversed);
     directory.setFilter(QDir::Files);
     QFileInfoList fileList = directory.entryInfoList();

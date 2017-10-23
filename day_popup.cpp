@@ -203,7 +203,7 @@ void day_popup::set_controlButtons(bool active)
 void day_popup::set_exportContent()
 {
     QStringList intLabels,sampLabels;
-    QMap<int,QString> intMap = settings::get_intList();
+    QMap<int,QString> *intMap = settings::getListMapPointer(settings::lMap::Interval);
     int sampCount = get_timesec(workSched->itemList.value(selIndex).value(6));
     intExport = new QStandardItemModel(1,3,this);
     sampExport = new QStandardItemModel(sampCount,1,this);
@@ -212,9 +212,9 @@ void day_popup::set_exportContent()
     intExport->setData(intExport->index(0,1),0);
     intExport->setData(intExport->index(0,2),sampCount);
 
-    for(int i = 0; i < intMap.count(); ++i)
+    for(int i = 0; i < intMap->count(); ++i)
     {
-        intLabels << intMap.value(i);
+        intLabels << intMap->value(i);
     }
 
     sampLabels << "SECS";
@@ -253,7 +253,7 @@ void day_popup::set_exportContent()
     this->rideData.insert("OVERRIDES","");
 
     this->tagData.insert("Sport",sport);
-    this->tagData.insert("Athlete",settings::get_gcInfo("athlete"));
+    this->tagData.insert("Athlete",gcValues->value("athlete"));
     this->tagData.insert("Filename",fileName);
     this->tagData.insert("CommonRI",commonRI);
     this->tagData.insert("Device","Manual Import");

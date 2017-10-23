@@ -49,7 +49,7 @@ class del_racecalc : public QStyledItemDelegate, public calculation
 
         if(index.row() == model->rowCount()-1 && model->rowCount() > 1)
         {
-            rectColor = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
+            rectColor = settings::get_itemColor(generalValues->value("sum")).toHsv();
             cFont.setBold(true);
         }
         else

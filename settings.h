@@ -60,20 +60,61 @@ public:
     static void loadSettings();
     static QString isAlt,isSwim,isBike,isRun,isTria,isStrength,isOther;
 
+    enum dMap {Threshold,Athlete,LTS};
+    enum stingMap {GC,General};
+    enum lMap {Sample,Interval};
+
     //QMap/QHash Getter
     static QHash<QString,QStringList> get_listMap() {return listMap;}
-    static QMap<int,QString> get_sampList() {return sampList;}
-    static QMap<int,QString> get_intList() {return intList;}
-    static QString get_gcInfo(QString key) {return gcInfo.value(key);}
-    static QColor get_itemColor(QString key) {return colorMap.value(key);}
-    static QHash<QString,QColor> get_colorMap() {return colorMap;}
-    static QString get_rangeValue(QString,QString);
     static QHash<QString,QString> get_triaMap() {return triaMap;}
-    static double get_thresValue(QString key) {return thresholdMap.value(key);}
-    static double get_athleteValue(QString key) {return athleteMap.value(key);}
-    static double get_ltsValue(QString key) {return ltsMap.value(key);}
-    static QString get_generalValue(QString key) {return generalMap.value(key);}
+    static QHash<QString,QColor> get_colorMap() {return colorMap;}
+    static QColor get_itemColor(QString key) {return colorMap.value(key);}
+    static QString get_rangeValue(QString,QString);
     static int get_fontValue(QString key) {return fontMap.value(key);}
+
+    static QMap<int,QString>* getListMapPointer(int map)
+    {
+        if(map == Sample)
+        {
+            return &sampList;
+        }
+        if(map == Interval)
+        {
+            return &intList;
+        }
+        return 0;
+    }
+
+    static QHash<QString,QString>* getStringMapPointer(int map)
+    {
+        if(map == GC)
+        {
+            return &gcInfo;
+        }
+        if(map == General)
+        {
+            return &generalMap;
+        }
+        return 0;
+    }
+
+    static QHash<QString,double>* getdoubleMapPointer(int map)
+    {
+        if(map == Threshold)
+        {
+            return &thresholdMap;
+        }
+        if(map == Athlete)
+        {
+            return &athleteMap;
+        }
+        if(map == LTS)
+        {
+            return &ltsMap;
+        }
+        return 0;
+    }
+
 
     //QMap/QHash Setter
     static void set_gcInfo(QString key, QString value){gcInfo.insert(key,value);}
@@ -82,6 +123,7 @@ public:
     static void set_rangeValue(QString,QString,QString);
     static void set_ltsValue(QString key,double value) {ltsMap.insert(key,value);}
     static void set_generalValue(QString key,QString value) {generalMap.insert(key,value);}
+    static void set_athleteValue(QString key,double value) {athleteMap.insert(key,value);}
 
     //Lists Getter
     static QStringList get_listValues(QString key) {return listMap.value(key);}

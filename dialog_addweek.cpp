@@ -73,7 +73,7 @@ void Dialog_addweek::fill_values(QString selWeek)
 
     QTime duration;
     QString value,work,dura,dist,stress;
-    QString sumString = settings::get_generalValue("sum");
+    QString sumString = generalValues->value("sum");
     QStringList values;
     int listCount = sportuseList.count();
 

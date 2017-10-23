@@ -33,6 +33,8 @@
 
 Activity::Activity(QString jsonfile,bool intAct)
 {
+    //thresValues = settings::getMapPointer(settings::dMap::Threshold);
+
     this->readJsonFile(jsonfile,intAct);
 }
 
@@ -53,16 +55,16 @@ void Activity::readJsonFile(QString jsonfile,bool intAct)
 
     if(intAct)
     {
-        QMap<int,QString> mapValues;
+        QMap<int,QString> *mapValues;
 
         intModel = new QStandardItemModel();
-        mapValues = settings::get_intList();
-        this->init_actModel("INTERVALS",&mapValues,intModel,&intList,3);
+        mapValues = settings::getListMapPointer(settings::lMap::Interval);
+        this->init_actModel("INTERVALS",mapValues,intModel,&intList,3);
 
         sampleModel = new QStandardItemModel();
-        mapValues = settings::get_sampList();
+        mapValues = settings::getListMapPointer(settings::lMap::Sample);
 
-        this->init_actModel("SAMPLES",&mapValues,sampleModel,&sampList,0);
+        this->init_actModel("SAMPLES",mapValues,sampleModel,&sampList,0);
 
         if(hasXdata)
         {
@@ -108,7 +110,7 @@ void Activity::prepareData()
     isTimeBased = true;
     isIndoor = false;
     levels = settings::get_listValues("Level");
-    breakName = settings::get_generalValue("breakname");
+    breakName = generalValues->value("breakname");
     QString lapName;
     intLabel = "_Int_";
     sampSpeed.resize(sampCount);
@@ -127,9 +129,10 @@ void Activity::prepareData()
     {
         distFactor = 1000;
         swimTrack = tagData.value("Pool Length").toDouble();
-        thresPace = settings::get_thresValue("swimpace");
-        hfThreshold = settings::get_thresValue("hfthres");
-        hfMax = settings::get_thresValue("hfmax");
+        thresPace = thresValues->value("swimpace");
+
+        hfThreshold = thresValues->value("hfthres");
+        hfMax = thresValues->value("hfmax");
 
         zoneCount = levels.count();
         int intCounter = 1;
@@ -270,9 +273,9 @@ void Activity::prepareData()
 
         if(isBike)
         {
-            thresPower = settings::get_thresValue("bikepower");
-            thresPace = settings::get_thresValue("bikepace");
-            thresSpeed = settings::get_thresValue("bikespeed");
+            thresPower = thresValues->value("bikepower");
+            thresPace = thresValues->value("bikepace");
+            thresSpeed = thresValues->value("bikespeed");
             this->fillRangeLevel(thresPower,false);
             isTimeBased = true;
             avgValues.resize(6);
@@ -281,8 +284,8 @@ void Activity::prepareData()
         }
         else if(isRun)
         {
-            thresPower = settings::get_thresValue("runpower");
-            thresPace = settings::get_thresValue("runpace");
+            thresPower = thresValues->value("runpower");
+            thresPace = thresValues->value("runpace");
             this->fillRangeLevel(thresPace,true);
             isTimeBased = false;
             avgValues.resize(4);
@@ -1471,7 +1474,7 @@ void Activity::updateSampleModel(int rowcount)
 
                     if(intRow == 0)
                     {
-                        sportpace = settings::get_thresValue("swimpace");
+                        sportpace = thresValues->value("swimpace");
                         limitFactor = 0.15;
                         lowLimit = this->get_speed(QTime::fromString(this->set_time(sportpace),"mm:ss"),0,settings::isSwim,true);
                         lowLimit = lowLimit - (lowLimit*limitFactor);
@@ -1479,7 +1482,7 @@ void Activity::updateSampleModel(int rowcount)
                     }
                     else if(intRow == 4)
                     {
-                        sportpace = settings::get_thresValue("runpace");
+                        sportpace = thresValues->value("runpace");
                         limitFactor = 0.20;
                         lowLimit = this->get_speed(QTime::fromString(this->set_time(sportpace),"mm:ss"),0,settings::isRun,true);
                         lowLimit = lowLimit - (lowLimit*limitFactor);

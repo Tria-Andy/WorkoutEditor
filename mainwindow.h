@@ -46,7 +46,7 @@
 #include "calculation.h"
 #include "logger.h"
 
-class calendar_delegate : public QStyledItemDelegate
+class calendar_delegate : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 
@@ -199,7 +199,7 @@ public:
                     }
                     else
                     {
-                        rectColor = settings::get_itemColor(settings::get_generalValue("empty")).toHsv();
+                        rectColor = settings::get_itemColor(generalValues->value("empty")).toHsv();
                     }
                 }
 
@@ -243,7 +243,7 @@ public:
         painter->restore();
     }
 };
-class week_delegate : public QStyledItemDelegate
+class week_delegate : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 
@@ -314,7 +314,7 @@ public:
                 }
                 else
                 {
-                    rectColor = settings::get_itemColor(settings::get_generalValue("empty")).toHsv();
+                    rectColor = settings::get_itemColor(generalValues->value("empty")).toHsv();
                 }
             }
 
@@ -351,7 +351,7 @@ public:
                     }
                     else
                     {
-                        rectColor = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
+                        rectColor = settings::get_itemColor(generalValues->value("sum")).toHsv();
                     }
                     break;
                 }
@@ -396,7 +396,7 @@ public:
         painter->restore();
     }
 };
-class summery_delegate : public QStyledItemDelegate
+class summery_delegate : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 
@@ -439,7 +439,7 @@ public:
             else
             {
                 //Summery
-                rectColor = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
+                rectColor = settings::get_itemColor(generalValues->value("sum")).toHsv();
             }
         }
 
@@ -497,7 +497,7 @@ public:
         painter->restore();
     }
 };
-class del_treeview : public QStyledItemDelegate
+class del_treeview : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 
@@ -509,7 +509,7 @@ public:
         painter->save();
         const QAbstractItemModel *model = index.model();
         QString lapName;
-        QString breakName = settings::get_generalValue("breakname");
+        QString breakName = generalValues->value("breakname");
         QStringList levels = settings::get_listValues("Level");
         QString levelName = breakName;
 
@@ -803,7 +803,7 @@ public:
             QLineEdit *lineEdit = static_cast<QLineEdit*>(editor);
             QString value = lineEdit->text();
             model->setData(index,value);
-            if(value.contains(settings::get_generalValue("breakname")))
+            if(value.contains(generalValues->value("breakname")))
             {
                 model->setData(model->index(3,0),"00:20");
                 model->setData(model->index(2,0),0);
@@ -878,7 +878,7 @@ public:
         model->data(model->index(1,0)).toInt();
     }
 };
-class del_avgweek : public QStyledItemDelegate
+class del_avgweek : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 public:
@@ -901,7 +901,7 @@ public:
 
         if(index.row() == sportuse.count())
         {
-            rectColor = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
+            rectColor = settings::get_itemColor(generalValues->value("sum")).toHsv();
             cFont.setBold(true);
         }
         else

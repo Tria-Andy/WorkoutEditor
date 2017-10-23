@@ -278,7 +278,7 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
 QString MainWindow::set_summeryString(int pos,bool week)
 {
     QString sumString;
-    QString sum_name = settings::get_generalValue("sum");
+    QString sum_name = generalValues->value("sum");
     QStringList sportList = settings::get_listValues("Sport");
     double percent = 0.0;
     if(week)
@@ -537,7 +537,7 @@ void MainWindow::workout_calendar()
                     }
                     else
                     {
-                        phase_value = settings::get_generalValue("empty");
+                        phase_value = generalValues->value("empty");
                     }
                     calendarModel->setData(cal_index,weekValue + delimiter + phase_value);
                 }
@@ -560,7 +560,7 @@ void MainWindow::workout_calendar()
             temp = sportuseList.at(i);
             year_header << temp.toUpper();
         }
-        year_header << settings::get_generalValue("sum");
+        year_header << generalValues->value("sum");
         calendarModel->setHorizontalHeaderLabels(year_header);
         ui->tableView_cal->setItemDelegate(&week_del);
         QString weekInfo,weekID;
@@ -1011,7 +1011,7 @@ void MainWindow::select_activityFile()
     QString filename = QFileDialog::getOpenFileName(
                 this,
                 tr("Select GC JSON File"),
-                settings::get_gcInfo("actpath"),
+                gcValues->value("actpath"),
                 "JSON Files (*.json)"
                 );
 
@@ -1161,7 +1161,7 @@ void MainWindow::setSelectedIntRow(QModelIndex index)
         {
             isInt = false;
         }
-        else if(curr_activity->intTreeModel->itemFromIndex(index)->parent() == nullptr || lapIdent.contains(settings::get_generalValue("breakname")))
+        else if(curr_activity->intTreeModel->itemFromIndex(index)->parent() == nullptr || lapIdent.contains(generalValues->value("breakname")))
         {
             isInt = true;
         }

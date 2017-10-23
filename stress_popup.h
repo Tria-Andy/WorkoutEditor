@@ -32,6 +32,7 @@ private:
     QIcon showNum,hideNum;
     double ltsDays,stsDays,lastLTS,lastSTS,stressMax;
     QMap<QDate,QPair<double,double> > *stressMap;
+    QHash<QString,double> *ltsValues;
     QVector<double> xDate,yLTS,ySTS,yTSB,yStress,yDura;
     QVector<double> tsbMinMax;
     int dateRange;

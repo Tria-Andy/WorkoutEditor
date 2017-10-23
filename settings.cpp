@@ -345,6 +345,7 @@ void settings::loadSettings()
             generalMap.insert("filecount",settingList.at(3));
             generalMap.insert("workfactor",settingList.at(4));
             settingList.clear();
+            athleteMap.insert("currpal",myvalues->value("currpal").toDouble());
         myvalues->endGroup();
 
         myvalues->beginGroup("Sport");            
@@ -578,6 +579,7 @@ void settings::saveSettings()
         myvalues->setValue("sumcolor",settings::set_colorString(colorMap.value(settingList.at(0))));
         myvalues->setValue("emptycolor",settings::set_colorString(colorMap.value(settingList.at(1))));
         myvalues->setValue("breakcolor",settings::set_colorString(colorMap.value(settingList.at(2))));
+        myvalues->setValue("currpal",athleteMap.value("currpal"));
         settingList.clear();
     myvalues->endGroup();
 

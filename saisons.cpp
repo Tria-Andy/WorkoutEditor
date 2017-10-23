@@ -4,7 +4,7 @@ saisons::saisons()
 {
     saison_tags << "name" << "start" << "end" << "weeks";
     contest_tags << "id" <<"saisonid" <<"date" << "sport" << "name" << "distance" << "stress";
-    saisonPath = settings::get_gcInfo("saisons");
+    saisonPath = settings::getStringMapPointer(settings::stingMap::GC)->value("saisons");
 
     saisonFile = "saisons.xml";
 

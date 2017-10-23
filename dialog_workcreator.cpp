@@ -24,7 +24,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
 
     isSeries = "Series";
     isGroup = "Group";
-    isBreak = settings::get_generalValue("breakname");
+    isBreak = generalValues->value("breakname");
     groupList << isGroup << isSeries;
     levelList = settings::get_listValues("Level");
     ui->listWidget_group->addItems(groupList);
@@ -368,7 +368,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                 if(timeBase)
                 {
                     editRow[4] = 1;
-                    workFactor = settings::get_generalValue("workfactor").toDouble();
+                    workFactor = generalValues->value("workfactor").toDouble();
                 }
             }
             else if(isStrength)
@@ -686,7 +686,7 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
             }
             else
             {
-                if(isSwim && item->data(0,Qt::DisplayRole) == settings::get_generalValue("breakname"))
+                if(isSwim && item->data(0,Qt::DisplayRole) == generalValues->value("breakname"))
                 {
                     valueModel->setData(valueModel->index(4,2),true);
                 }
@@ -1086,8 +1086,8 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
     }
     if(isSwim)
     {
-       thresPower = settings::get_thresValue("swimpower");
-       thresPace = settings::get_thresValue("swimpace");
+       thresPower = thresValues->value("swimpower");
+       thresPace = thresValues->value("swimpace");
        ui->label_threshold->setText(this->set_time(thresPace) + " /100m");
        currThres = thresPace;
 
@@ -1097,9 +1097,9 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
     }
     if(isBike)
     {
-       thresPower = settings::get_thresValue("bikepower");
-       thresPace = settings::get_thresValue("bikepace");
-       thresSpeed = settings::get_thresValue("bikespeed");
+       thresPower = thresValues->value("bikepower");
+       thresPace = thresValues->value("bikepace");
+       thresSpeed = thresValues->value("bikespeed");
        ui->label_threshold->setText(QString::number(thresPower) + " Watt");
        currThres = thresPower;
 
@@ -1109,8 +1109,8 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
     }
     if(isRun)
     {
-       thresPower = settings::get_thresValue("runpower");
-       thresPace = settings::get_thresValue("runpace");
+       thresPower = thresValues->value("runpower");
+       thresPace = thresValues->value("runpace");
        ui->label_threshold->setText(this->set_time(thresPace) + " /km");
        currThres = thresPace;
 
@@ -1120,7 +1120,7 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
     }
     if(isStrength)
     {
-       thresPower = settings::get_thresValue("stgpower");
+       thresPower = thresValues->value("stgpower");
        thresPace = 0;
        ui->label_threshold->setText(QString::number(thresPower) + " Watt");
        currThres = thresPower;
@@ -1131,7 +1131,7 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
     }
     if(isAlt)
     {
-       thresPower = settings::get_thresValue("runpower");
+       thresPower = thresValues->value("runpower");
        thresPace = 0;
        ui->label_threshold->setText(QString::number(thresPower) + " Watt");
        currThres = thresPower;

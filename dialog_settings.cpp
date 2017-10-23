@@ -27,6 +27,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui(new Ui::Dialog_settings)
 {
     ui->setupUi(this);
+
     schedule_ptr = psched;
     saisonProxy = new QSortFilterProxyModel(this);
     saisonProxy->setSourceModel(schedule_ptr->saisonsModel);
@@ -46,32 +47,32 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->treeView_contest->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->treeView_contest->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->treeView_contest->header()->setVisible(false);
-    ui->lineEdit_gcpath->setText(settings::get_gcInfo("gcpath"));
+    ui->lineEdit_gcpath->setText(gcValues->value("gcpath"));
     ui->lineEdit_gcpath->setEnabled(false);
-    ui->lineEdit_athlete->setText(settings::get_gcInfo("athlete"));
-    ui->lineEdit_activity->setText(settings::get_gcInfo("folder"));
-    ui->lineEdit_schedule->setText(settings::get_gcInfo("schedule"));
-    ui->lineEdit_standard->setText(settings::get_gcInfo("workouts"));
-    ui->lineEdit_saisonFile->setText(settings::get_gcInfo("saisons"));
-    ui->lineEdit_configfile->setText(settings::get_gcInfo("valuefile"));
-    ui->spinBox_hfThres->setValue(settings::get_thresValue("hfthres"));
-    ui->spinBox_hfMax->setValue(settings::get_thresValue("hfmax"));
-    ui->spinBox_ltsDays->setValue(settings::get_ltsValue("ltsdays"));
-    ui->spinBox_stsDays->setValue(settings::get_ltsValue("stsdays"));
-    ui->spinBox_lastLTS->setValue(settings::get_ltsValue("lastlts"));
-    ui->spinBox_lastSTS->setValue(settings::get_ltsValue("laststs"));
+    ui->lineEdit_athlete->setText(gcValues->value("athlete"));
+    ui->lineEdit_activity->setText(gcValues->value("folder"));
+    ui->lineEdit_schedule->setText(gcValues->value("schedule"));
+    ui->lineEdit_standard->setText(gcValues->value("workouts"));
+    ui->lineEdit_saisonFile->setText(gcValues->value("saisons"));
+    ui->lineEdit_configfile->setText(gcValues->value("valuefile"));
+    ui->spinBox_hfThres->setValue(thresValues->value("hfthres"));
+    ui->spinBox_hfMax->setValue(thresValues->value("hfmax"));
+    ui->spinBox_ltsDays->setValue(ltsValues->value("ltsdays"));
+    ui->spinBox_stsDays->setValue(ltsValues->value("stsdays"));
+    ui->spinBox_lastLTS->setValue(ltsValues->value("lastlts"));
+    ui->spinBox_lastSTS->setValue(ltsValues->value("laststs"));
     ui->comboBox_thresSport->addItems(sportList);
     ui->dateEdit_contest->setDate(QDate::currentDate());
     ui->comboBox_contestsport->addItems(settings::get_listValues("Sport"));
     ui->pushButton_save->setEnabled(false);
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
 
-    ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - settings::get_athleteValue("yob")));
+    ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - athleteValues->value("yob")));
     ui->lineEdit_weight->setText(QString::number(settings::get_weightforDate(QDateTime::currentDateTime())));
     ui->lineEdit_currDayCal->setText(QString::number(current_dayCalories()));
-    ui->doubleSpinBox_bone->setValue(settings::get_athleteValue("boneskg"));
-    ui->doubleSpinBox_muscle->setValue(settings::get_athleteValue("musclekg"));
-
+    ui->doubleSpinBox_bone->setValue(athleteValues->value("boneskg"));
+    ui->doubleSpinBox_muscle->setValue(athleteValues->value("musclekg"));
+    ui->doubleSpinBox_PALvalue->setValue(athleteValues->value("currpal"));
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
     ui->listWidget_stressValue->setItemDelegate(&mousehover_del);
@@ -266,9 +267,11 @@ void Dialog_settings::writeChangedValues()
     settings::set_ltsValue("lastlts",ui->spinBox_lastLTS->value());
     settings::set_ltsValue("laststs",ui->spinBox_lastSTS->value());
 
-    if(settings::get_generalValue("sum") != listMap.value("Misc").at(0)) settings::set_generalValue("sum",listMap.value("Misc").at(0));
-    if(settings::get_generalValue("empty") != listMap.value("Misc").at(1)) settings::set_generalValue("empty",listMap.value("Misc").at(1));
-    if(settings::get_generalValue("breakname") != listMap.value("Misc").at(2)) settings::set_generalValue("breakname",listMap.value("Misc").at(2));
+    if(generalValues->value("sum") != listMap.value("Misc").at(0)) settings::set_generalValue("sum",listMap.value("Misc").at(0));
+    if(generalValues->value("empty") != listMap.value("Misc").at(1)) settings::set_generalValue("empty",listMap.value("Misc").at(1));
+    if(generalValues->value("breakname") != listMap.value("Misc").at(2)) settings::set_generalValue("breakname",listMap.value("Misc").at(2));
+
+    settings::set_athleteValue("currpal",ui->doubleSpinBox_PALvalue->value());
 
     for(QHash<QString,QColor>::const_iterator it = colorMapCache.cbegin(), end = colorMapCache.cend(); it != end; ++it)
     {
@@ -354,7 +357,7 @@ void Dialog_settings::set_thresholdView(QString sport)
     }
     if(sport == settings::isBike)
     {
-        ui->lineEdit_speed->setText(QString::number(this->set_doubleValue(ui->spinBox_thresPower->value()/settings::get_athleteValue("ridercw")/settings::get_thresValue("wattfactor"),false)));
+        ui->lineEdit_speed->setText(QString::number(this->set_doubleValue(ui->spinBox_thresPower->value()/athleteValues->value("ridercw")/thresValues->value("wattfactor"),false)));
         this->set_thresholdModel(sport);
     }
     if(sport == settings::isRun)
@@ -525,27 +528,27 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
 
     if(value == settings::isSwim)
     {
-        thresPower = settings::get_thresValue("swimpower");
-        thresPace = settings::get_thresValue("swimpace");
-        sportFactor = settings::get_thresValue("swimfactor");
+        thresPower = thresValues->value("swimpower");
+        thresPace = thresValues->value("swimpace");
+        sportFactor = thresValues->value("swimfactor");
         ui->spinBox_thresPower->setPalette(wback);
         ui->timeEdit_thresPace->setPalette(gback);
         level_del.threshold = thresPace;
     }
     if(value == settings::isBike)
     {
-        thresPower = settings::get_thresValue("bikepower");
-        thresPace = settings::get_thresValue("bikepace");
-        sportFactor = settings::get_thresValue("bikefactor");
+        thresPower = thresValues->value("bikepower");
+        thresPace = thresValues->value("bikepace");
+        sportFactor = thresValues->value("bikefactor");
         ui->spinBox_thresPower->setPalette(gback);
         ui->timeEdit_thresPace->setPalette(wback);
         level_del.threshold = thresPower;
     }
     if(value == settings::isRun)
     {
-        thresPower = settings::get_thresValue("runpower");
-        thresPace = settings::get_thresValue("runpace");
-        sportFactor = settings::get_thresValue("runfactor");
+        thresPower = thresValues->value("runpower");
+        thresPace = thresValues->value("runpace");
+        sportFactor = thresValues->value("runfactor");
         ui->spinBox_thresPower->setPalette(wback);
         ui->timeEdit_thresPace->setPalette(gback);
         level_del.threshold = thresPace;

@@ -23,7 +23,7 @@ standardWorkouts::standardWorkouts()
 {
     meta_tags << "sport" << "id" << "code" << "title" << "duration" << "distance" << "stress" << "work" << "timebase";
     step_tags << "sport-id" << "id" << "part" << "level" << "threshold" << "int-time" << "int-dist" << "repeats" << "parent";
-    workoutPath = settings::get_gcInfo("workouts");
+    workoutPath = settings::getStringMapPointer(settings::stingMap::GC)->value("workouts");
 
     metaFile = "standard_workouts_meta.xml";
     stepFile = "standard_workouts_steps.xml";

@@ -64,7 +64,7 @@ void Dialog_stresscalc::estimateStress()
         xPace = ui->lineEdit_goal_power->text();
         speed = this->get_speed(QTime::fromString(xPace,"mm:ss"),0,sport,true);
         pValue = speed;
-        current = this->calc_lnp(speed/3.6,settings::get_athleteValue("height"),settings::get_athleteValue("weight")) / thresPower;
+        current = this->calc_lnp(speed/3.6,athleteValues->value("height"),athleteValues->value("weight")) / thresPower;
         ui->lineEdit_intensity->setText(QString::number(current));
     }
     timeSec = this->get_timesec(ui->timeEdit_duration->time().toString("hh:mm:ss"));
@@ -78,8 +78,8 @@ void Dialog_stresscalc::set_sport_threshold()
 {
     if(sport == settings::isSwim)
     {
-        thresPower = settings::get_thresValue("swimpower");
-        thresPace = settings::get_thresValue("swimpace");
+        thresPower = thresValues->value("swimpower");
+        thresPace = thresValues->value("swimpace");
         ui->label_threshold->setText("Threshold Pace:");
         ui->label_workout_power->setText("Workout Pace:");
         ui->lineEdit_power->setText(this->set_time(thresPace));
@@ -87,7 +87,7 @@ void Dialog_stresscalc::set_sport_threshold()
     }
     if(sport == settings::isBike)
     {
-        thresPower = settings::get_thresValue("bikepower");
+        thresPower = thresValues->value("bikepower");
         ui->label_threshold->setText("Threshold Power:");
         ui->label_workout_power->setText("Workout Power:");
         ui->lineEdit_power->setText(QString::number(thresPower));
@@ -95,8 +95,8 @@ void Dialog_stresscalc::set_sport_threshold()
     }
     if(sport == settings::isRun)
     {
-        thresPower = settings::get_thresValue("runpower");
-        thresPace = settings::get_thresValue("runpace");
+        thresPower = thresValues->value("runpower");
+        thresPace = thresValues->value("runpace");
         ui->label_threshold->setText("Threshold Pace:");
         ui->label_workout_power->setText("Workout Pace:");
         ui->lineEdit_power->setText(this->set_time(thresPace));

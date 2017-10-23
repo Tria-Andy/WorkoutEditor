@@ -32,7 +32,7 @@ schedule::schedule()
     contentTags << "summery";
     workout_sport.clear();
     firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
-    schedulePath = settings::get_gcInfo("schedule");
+    schedulePath = gcValues->value("schedule");
     workoutFile = "workout_schedule.xml";
     metaFile = "workout_phase_meta.xml";
     contentFile = "workout_phase_content.xml";
@@ -158,7 +158,7 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
     if(meta_list.count() == 0)
     {
         QString weekid;
-        QString noPhase = settings::get_generalValue("empty");
+        QString noPhase = generalValues->value("empty");
 
         week_meta->setRowCount(saisonWeeks);
         for(int week = 0,id = 1; week < saisonWeeks; ++week,++id)
@@ -281,7 +281,7 @@ void schedule::add_newSaison(QString saisonName)
     int saisonWeeks = this->get_saisonInfo(saisonName,"weeks").toInt();
     QDate startDay = this->get_saisonInfo(saisonName,"start").toDate();
     QDate firstDay;
-    QString phase = settings::get_generalValue("empty");
+    QString phase = generalValues->value("empty");
     QString weekID;
     QString emptyContent = "0-0-00:00-0";
     int rowCount;
@@ -338,7 +338,7 @@ QHash<int, QString> schedule::get_weekList()
 
 void schedule::read_ltsFile(QDomDocument stressContent)
 {
-    int ltsDays = settings::get_ltsValue("ltsdays");
+    int ltsDays = ltsValues->value("ltsdays");
     QDomElement root_lts = stressContent.firstChildElement();
     QDomNodeList lts_list;
     QDate wDate;
@@ -415,8 +415,8 @@ int schedule::check_workouts(QDate date)
 void schedule::save_ltsValues()
 {
     double stress = 0,currStress = 0,pastStress = 0,startLTS = 0;
-    startLTS = settings::get_ltsValue("lastlts");
-    int ltsDays = settings::get_ltsValue("ltsdays");
+    startLTS = ltsValues->value("lastlts");
+    int ltsDays = ltsValues->value("ltsdays");
     double factor = (double)exp(-1.0/ltsDays);
     pastStress = startLTS;
 
@@ -428,8 +428,8 @@ void schedule::save_ltsValues()
     }
     settings::set_ltsValue("lastlts",round(pastStress));
 
-    startLTS = settings::get_ltsValue("laststs");
-    double stsDays = settings::get_ltsValue("stsdays");
+    startLTS = ltsValues->value("laststs");
+    double stsDays = ltsValues->value("stsdays");
     factor = (double)exp(-1.0/stsDays);
     pastStress = startLTS;
 

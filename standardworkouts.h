@@ -22,6 +22,7 @@
 #include <QStandardItemModel>
 #include <QtXml>
 #include "settings.h"
+#include "calculation.h"
 #include "xmlhandler.h"
 
 class standardWorkouts : public xmlHandler
