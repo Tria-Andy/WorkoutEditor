@@ -325,7 +325,7 @@ void settings::loadSettings()
             listMap.insert("SwimStyle",settingList);
             settingList.clear();
             settingList = myvalues->value("swimMET").toString().split(splitter);
-            listMap.insert("SwimMET",settingList);
+            listMap.insert("SwimMET",settingList);    
             settingList.clear();
         myvalues->endGroup();
 
@@ -334,6 +334,7 @@ void settings::loadSettings()
             settingList << myvalues->value("empty").toString();
             settingList << myvalues->value("breakname").toString();
             settingList << myvalues->value("filecount").toString();
+            settingList << myvalues->value("workfactor").toString();
             listMap.insert("Misc",settingList);
             generalMap.insert("sum", settingList.at(0));
             colorMap.insert(settingList.at(0),settings::get_colorRGB(myvalues->value("sumcolor").toString(),false));
@@ -342,6 +343,7 @@ void settings::loadSettings()
             generalMap.insert("breakname",settingList.at(2));
             colorMap.insert(settingList.at(2),settings::get_colorRGB(myvalues->value("breakcolor").toString(),false));
             generalMap.insert("filecount",settingList.at(3));
+            generalMap.insert("workfactor",settingList.at(4));
             settingList.clear();
         myvalues->endGroup();
 

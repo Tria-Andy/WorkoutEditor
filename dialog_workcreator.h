@@ -75,7 +75,7 @@ class del_workcreatoredit : public QStyledItemDelegate, public calculation
     Q_OBJECT
 public:
     explicit del_workcreatoredit(QObject *parent = 0) : QStyledItemDelegate(parent) {}
-    bool hasValue;
+    bool hasValue,timeBased;
     QString sport;
     QString groupName;
     double currThres;
@@ -389,9 +389,14 @@ public:
     void set_work(QAbstractItemModel *model) const
     {
         double pValue = 0;
+        double workFactor = 1.0;
         double dura = get_timesec(model->data(model->index(4,0)).toString());
 
-        if(sport == settings::isSwim) pValue = get_timesec(model->data(model->index(3,0)).toString());
+        if(sport == settings::isSwim)
+        {
+            pValue = get_timesec(model->data(model->index(3,0)).toString());
+            if(timeBased) workFactor = settings::get_generalValue("workfactor").toDouble();
+        }
         if(sport == settings::isBike) pValue = model->data(model->index(3,0)).toDouble();
         if(sport == settings::isRun) pValue = get_speed(QTime::fromString(model->data(model->index(3,0)).toString(),"mm:ss"),0,sport,true);
         if(sport == settings::isStrength) pValue = model->data(model->index(2,0)).toDouble() / 20.0;
@@ -399,11 +404,11 @@ public:
 
         if(model->data(model->index(0,0)).toString().contains(settings::get_generalValue("breakname")) && sport == settings::isSwim)
         {
-            model->setData(model->index(6,0),set_doubleValue(calc_totalWork(sport,pValue,dura,0),false));
+            model->setData(model->index(6,0),set_doubleValue(calc_totalWork(sport,pValue,dura,0)*workFactor,false));
         }
         else
         {
-            model->setData(model->index(6,0),set_doubleValue(calc_totalWork(sport,pValue,dura,6),false));
+            model->setData(model->index(6,0),set_doubleValue(calc_totalWork(sport,pValue,dura,6)*workFactor,false));
         }
     }
 };
@@ -441,8 +446,8 @@ private slots:
     void set_updateDates(bool);
     void set_workoutModel(QDate);
     void update_workouts();
-
     void on_pushButton_sync_clicked();
+    void on_checkBox_timebased_clicked(bool checked);
 
 private:
     Ui::Dialog_workCreator *ui;

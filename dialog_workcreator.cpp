@@ -298,8 +298,10 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     double percent;
     double currDist;
     double pValue = 0;
+    double workFactor = 1.0;
 
     bool timeBase = ui->checkBox_timebased->isChecked();
+    edit_del.timeBased = timeBase;
     stepProxy->setFilterRegExp("\\b"+workID+"\\b");
     stepProxy->setFilterKeyColumn(0);
 
@@ -355,13 +357,18 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                 if(!partName.contains(isBreak))
                 {
                     tempID = 6;
-                    stepTime = this->calc_duration(currentSport,currDist,thresValue);
+                    if(!timeBase) stepTime = this->calc_duration(currentSport,currDist,thresValue);
                     pValue = this->get_timesec(thresValue);
                 }
                 else
                 {
                     tempID = 0;
                     pValue = 0.0;
+                }
+                if(timeBase)
+                {
+                    editRow[4] = 1;
+                    workFactor = settings::get_generalValue("workfactor").toDouble();
                 }
             }
             else if(isStrength)
@@ -374,7 +381,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             }
             else
             {
-
+                pValue = 1.0;
             }
 
             valueList << stepProxy->data(stepProxy->index(i,2)).toString()
@@ -383,7 +390,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                       << thresValue
                       << stepTime
                       << QString::number(this->estimate_stress(ui->comboBox_sport->currentText(),thresValue,this->get_timesec(stepTime)))
-                      << QString::number(this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(stepTime),tempID),false))
+                      << QString::number(this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(stepTime),tempID)*workFactor,false))
                       << QString::number(this->set_doubleValue(currDist,true))
                       << stepProxy->data(stepProxy->index(i,7)).toString();
         }
@@ -562,7 +569,6 @@ void Dialog_workCreator::on_treeWidget_intervall_itemChanged(QTreeWidgetItem *it
             this->set_defaultData(item,true);
         }
     }
-    //ui->pushButton_clear->setEnabled(true);
     this->set_controlButtons(true);
 }
 
@@ -1514,4 +1520,13 @@ void Dialog_workCreator::set_updateDates(bool pAll)
     updateTo->setEnabled(!pAll);
     updateFrom->setEnabled(!pAll);
     this->set_workoutModel(QDate());
+}
+
+void Dialog_workCreator::on_checkBox_timebased_clicked(bool checked)
+{
+    if(checked)
+    {
+        editRow[4] = 1;
+    }
+    edit_del.timeBased = checked;
 }
