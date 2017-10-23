@@ -219,7 +219,7 @@ private:
     QStringList sportList,model_header,race_header,triaDist,runRaces;
     QStandardItemModel *paceModel;
     QStandardItemModel *raceModel;
-    QHash<QString,QString> triathlonMap;
+    QHash<QString,QString> *triaMap;
     QVector<double> dist,raceDist;
     del_racecalc race_del;
     int distFactor;

@@ -35,8 +35,6 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     contestProxy->setSourceModel(schedule_ptr->contestModel);
     contestTreeModel = new QStandardItemModel(this);
     sportList << settings::isSwim << settings::isBike << settings::isRun;
-    keyList = settings::get_keyList();
-    extkeyList = settings::get_extkeyList();
     colorMapCache = settings::get_colorMap();
     useColor = false;
     stressEdit = false;
@@ -98,7 +96,6 @@ void Dialog_settings::checkSetup()
 {
     if(ui->lineEdit_athlete->text().isEmpty()) ui->pushButton_save->setEnabled(true);
 
-    listMap = settings::get_listMap();
     listMap.insert(extkeyList.at(SPORTUSE),settings::get_listValues("Sportuse"));
 
     ui->comboBox_selInfo->addItems(keyList);
@@ -229,53 +226,53 @@ void Dialog_settings::writeChangedValues()
     double paceSec = (ui->timeEdit_thresPace->time().minute()*60) + ui->timeEdit_thresPace->time().second();
 
     if(sport == settings::isSwim)
-    {
-        settings::set_thresValue("swimpower",ui->spinBox_thresPower->value());
-        settings::set_thresValue("swimpace",paceSec);
-        settings::set_thresValue("swimfactor",ui->doubleSpinBox_factor->value());
+    {        
+        thresholdMap.insert("swimpower",ui->spinBox_thresPower->value());
+        thresholdMap.insert("swimpace",paceSec);
+        thresholdMap.insert("swimfactor",ui->doubleSpinBox_factor->value());
         this->writeRangeValues(sport);
     }
     if(sport == settings::isBike)
     {
-        settings::set_thresValue("bikepower",ui->spinBox_thresPower->value());
-        settings::set_thresValue("bikepace",paceSec);
-        settings::set_thresValue("bikespeed",this->set_doubleValue(ui->lineEdit_speed->text().toDouble(),true));
-        settings::set_thresValue("bikefactor",ui->doubleSpinBox_factor->value());
+        thresholdMap.insert("bikepower",ui->spinBox_thresPower->value());
+        thresholdMap.insert("bikepace",paceSec);
+        thresholdMap.insert("bikespeed",this->set_doubleValue(ui->lineEdit_speed->text().toDouble(),true));
+        thresholdMap.insert("bikefactor",ui->doubleSpinBox_factor->value());
         this->writeRangeValues(sport);
     }
     if(sport == settings::isRun)
     {
-        settings::set_thresValue("runpower",ui->spinBox_thresPower->value());
-        settings::set_thresValue("runpace",paceSec);
-        settings::set_thresValue("runfactor",ui->doubleSpinBox_factor->value());
+        thresholdMap.insert("runpower",ui->spinBox_thresPower->value());
+        thresholdMap.insert("runpace",paceSec);
+        thresholdMap.insert("runfactor",ui->doubleSpinBox_factor->value());
         this->writeRangeValues(sport);
     }
 
-    settings::set_thresValue("hfthres",ui->spinBox_hfThres->value());
-    settings::set_thresValue("hfmax",ui->spinBox_hfMax->value());
+    thresholdMap.insert("hfthres",ui->spinBox_hfThres->value());
+    thresholdMap.insert("hfmax",ui->spinBox_hfMax->value());
     this->writeRangeValues("HF");
 
-    settings::set_gcInfo("gcpath",ui->lineEdit_gcpath->text());
-    settings::set_gcInfo("athlete",ui->lineEdit_athlete->text());
-    settings::set_gcInfo("folder",ui->lineEdit_activity->text());
-    settings::set_gcInfo("schedule",ui->lineEdit_schedule->text());
-    settings::set_gcInfo("workouts",ui->lineEdit_standard->text());
-    settings::set_gcInfo("valuefile",ui->lineEdit_configfile->text());
+    gcInfo.insert("gcpath",ui->lineEdit_gcpath->text());
+    gcInfo.insert("athlete",ui->lineEdit_athlete->text());
+    gcInfo.insert("folder",ui->lineEdit_activity->text());
+    gcInfo.insert("schedule",ui->lineEdit_schedule->text());
+    gcInfo.insert("workouts",ui->lineEdit_standard->text());
+    gcInfo.insert("valuefile",ui->lineEdit_configfile->text());
 
-    settings::set_ltsValue("ltsdays",ui->spinBox_ltsDays->value());
-    settings::set_ltsValue("stsdays",ui->spinBox_stsDays->value());
-    settings::set_ltsValue("lastlts",ui->spinBox_lastLTS->value());
-    settings::set_ltsValue("laststs",ui->spinBox_lastSTS->value());
+    ltsMap.insert("ltsdays",ui->spinBox_ltsDays->value());
+    ltsMap.insert("stsdays",ui->spinBox_stsDays->value());
+    ltsMap.insert("lastlts",ui->spinBox_lastLTS->value());
+    ltsMap.insert("laststs",ui->spinBox_lastSTS->value());
 
-    if(generalValues->value("sum") != listMap.value("Misc").at(0)) settings::set_generalValue("sum",listMap.value("Misc").at(0));
-    if(generalValues->value("empty") != listMap.value("Misc").at(1)) settings::set_generalValue("empty",listMap.value("Misc").at(1));
-    if(generalValues->value("breakname") != listMap.value("Misc").at(2)) settings::set_generalValue("breakname",listMap.value("Misc").at(2));
+    if(generalValues->value("sum") != listMap.value("Misc").at(0)) generalMap.insert("sum",listMap.value("Misc").at(0));
+    if(generalValues->value("empty") != listMap.value("Misc").at(1)) generalMap.insert("empty",listMap.value("Misc").at(1));
+    if(generalValues->value("breakname") != listMap.value("Misc").at(2)) generalMap.insert("breakname",listMap.value("Misc").at(2));
 
-    settings::set_athleteValue("currpal",ui->doubleSpinBox_PALvalue->value());
+    athleteMap.insert("currpal",ui->doubleSpinBox_PALvalue->value());
 
     for(QHash<QString,QColor>::const_iterator it = colorMapCache.cbegin(), end = colorMapCache.cend(); it != end; ++it)
     {
-        settings::set_itemColor(it.key(),it.value());
+        colorMap.insert(it.key(),it.value());
     }
 
     settings::writeListValues(&listMap);

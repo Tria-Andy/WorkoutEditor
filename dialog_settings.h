@@ -34,7 +34,7 @@ namespace Ui {
 class Dialog_settings;
 }
 
-class Dialog_settings : public QDialog, public calculation, public xmlHandler
+class Dialog_settings : public QDialog, public calculation, public xmlHandler, public settings
 {
     Q_OBJECT
 
@@ -100,9 +100,8 @@ private:
     QSortFilterProxyModel *saisonProxy,*contestProxy;
     schedule *schedule_ptr;
     saisons *saisons_ptr;
-    QHash<QString,QStringList> listMap;
     QHash<QString,QColor> colorMapCache;
-    QStringList keyList,extkeyList,sportList,model_header,contestTags;
+    QStringList sportList,model_header,contestTags;
     del_level level_del;
     del_mousehover mousehover_del;
     double thresPower,thresPace,sportFactor;
