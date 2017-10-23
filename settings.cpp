@@ -73,8 +73,6 @@ QStringList settings::triaDistance;
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
 
-int settings::swimLaplen;
-
 enum {SPORT,LEVEL,PHASE,CYCLE,WCODE,JFILE,EDITOR};
 enum {SPORTUSE};
 
