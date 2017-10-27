@@ -43,5 +43,6 @@
         <file>icons/Clear.png</file>
         <file>icons/ExitButton.png</file>
         <file>icons/Update.png</file>
+        <file>icons/Food.png</file>
     </qresource>
 </RCC>

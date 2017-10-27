@@ -176,6 +176,7 @@ void settings::loadSettings()
             gcInfo.insert("workouts",mysettings->value("workouts").toString());
             gcInfo.insert("contests",mysettings->value("contests").toString());
             gcInfo.insert("saisons",mysettings->value("saisons").toString());
+            gcInfo.insert("foodplanner",mysettings->value("foodplanner").toString());
             gcInfo.insert("valuefile",mysettings->value("valuefile").toString());
             valueFile = mysettings->value("valuefile").toString();
         mysettings->endGroup();

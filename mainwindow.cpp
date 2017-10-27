@@ -1922,3 +1922,10 @@ void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value
         this->workout_calendar();
     }
 }
+
+void MainWindow::on_actionFood_Planner_triggered()
+{
+    Dialog_food *diaFood = new Dialog_food(this,workSchedule);
+    diaFood->setModal(true);
+    diaFood->exec();
+}

@@ -39,6 +39,7 @@
 #include "dialog_settings.h"
 #include "dialog_pacecalc.h"
 #include "dialog_week_copy.h"
+#include "dialog_food.h"
 #include "settings.h"
 #include "jsonhandler.h"
 #include "filereader.h"
@@ -870,7 +871,7 @@ public:
     {
         double factor = sport == settings::isSwim ? 1000.0 : 1.0;
         double dist = model->data(model->index(2,0)).toDouble();
-        model->setData(model->index(5,0),set_doubleValue(calcSpeed(sec,dist,factor),true));
+        model->setData(model->index(5,0),set_doubleValue(calc_Speed(sec,dist,factor),true));
     }
 
     void set_duration(QAbstractItemModel *model) const
@@ -1051,6 +1052,7 @@ private slots:
     void on_treeView_files_clicked(const QModelIndex &index);
     void on_actionRefresh_Filelist_triggered();
     void on_comboBox_saisonName_currentIndexChanged(const QString &arg1);
+    void on_actionFood_Planner_triggered();
 };
 
 #endif // MAINWINDOW_H
