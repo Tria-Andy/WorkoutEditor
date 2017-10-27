@@ -133,11 +133,13 @@ void Dialog_food::fill_weekModel(QDate firstday)
     QString weekID = QString::number(firstday.weekNumber())+"_"+QString::number(firstday.year());
     QList<QStandardItem*> week;
     week = weekModel->findItems(weekID,Qt::MatchExactly,0);
-    QStandardItem *item;
+    QStandardItem *item = weekModel->itemFromIndex(weekModel->indexFromItem(week.at(0)));
+
+    qDebug() << item->data() << weekModel->indexFromItem(week.at(0)).data();
 
     for(int row = 0; row < 7; ++row)
     {
-
+        qDebug() << item->child(row,0)->data();
     }
 }
 
