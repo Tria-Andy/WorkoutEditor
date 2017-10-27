@@ -33,8 +33,6 @@
 
 Activity::Activity(QString jsonfile,bool intAct)
 {
-    //thresValues = settings::getMapPointer(settings::dMap::Threshold);
-
     this->readJsonFile(jsonfile,intAct);
 }
 
@@ -310,13 +308,13 @@ void Activity::prepareData()
             intModel->setData(intModel->index(row,4),1);
             intModel->setData(intModel->index(row,5),"Int-"+QString::number(row));
 
-            if(row > 0 && row < intModelCount-1)
+            if(row > 0 && row < intModelCount)
             {
                 intStart = intModel->data(intModel->index(row,1)).toInt();
                 intStop = intModel->data(intModel->index(row-1,2)).toInt();
-                if(intStart != intStop+1)
+                if(intStart != intStop)
                 {
-                    intModel->setData(intModel->index(row,1),intStop+1);
+                    intModel->setData(intModel->index(row,1),intStop);
                 }
             }
         }
@@ -462,14 +460,17 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
     if(isBike)
     {
         double watts = round(this->get_int_value(pInt,4));
+        double wattSpeed = this->wattToSpeed(thresPower,thresSpeed,watts);
         lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(watts);
+
         intItems << new QStandardItem(QString::number(watts));
         intItems << new QStandardItem(QString::number(round(this->get_int_value(pInt,3))));
         intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,watts,lapTime,0),false)));
+
         if(isIndoor)
         {
-            intItems.at(4)->setData(QString::number(this->calc_distance(this->set_time(lapTime),3600.0/this->wattToSpeed(thresPower,thresSpeed,watts))),Qt::EditRole);
-            intItems.at(6)->setData(QString::number(this->wattToSpeed(thresPower,thresSpeed,watts)),Qt::EditRole);
+            intItems.at(4)->setData(QString::number(this->calc_distance(this->set_time(lapTime),3600.0/wattSpeed)),Qt::EditRole);
+            intItems.at(6)->setData(QString::number(wattSpeed),Qt::EditRole);
         }
     }
     else if(isRun)
@@ -660,7 +661,7 @@ int Activity::build_swimModel(bool isInt,QString intName,int intCount,int intSta
 
         if(isInt)
         {
-            lapSpeed = this->calcSpeed(lapTime,swimTrack,distFactor);
+            lapSpeed = this->calc_Speed(lapTime,swimTrack,distFactor);
             swimLapName = QString::number(intCount)+"_"+QString::number(swimlapCount*swimTrack);
             lapKey = intName+QString::number(intCount)+"_"+QString::number(swimlapCount);
             moveTime = moveTime + lapTime;
@@ -1035,7 +1036,7 @@ void Activity::removeRow_intTree(QItemSelectionModel *treeSelect)
 
             intTreeModel->setData(treeSelect->selectedRows(4).at(0),this->set_time(delDura));
             intTreeModel->setData(treeSelect->selectedRows(6).at(0),this->set_time(this->calc_lapPace(curr_sport,delDura,swimTrack)));
-            intTreeModel->setData(treeSelect->selectedRows(7).at(0),this->set_doubleValue(this->calcSpeed(delDura,swimTrack,distFactor),true));
+            intTreeModel->setData(treeSelect->selectedRows(7).at(0),this->set_doubleValue(this->calc_Speed(delDura,swimTrack,distFactor),true));
             intTreeModel->setData(treeSelect->selectedRows(8).at(0),strokes);
 
             this->updateSwimInt(intTreeModel->itemFromIndex(treeSelect->selectedRows(0).at(0))->parent()->index(),treeSelect);
@@ -1316,9 +1317,9 @@ void Activity::set_workoutContent(QString content)
 void Activity::updateSampleModel(int rowcount)
 {
     int sampRowCount = rowcount;
-    new_dist.resize(sampRowCount);
-    calc_speed.resize(sampRowCount);
-    calc_cadence.resize(sampRowCount);
+    newDist.resize(sampRowCount);
+    calcSpeed.resize(sampRowCount);
+    calcCadence.resize(sampRowCount);
     double msec = 0.0;
     int intStart,intStop,sportpace = 0;
     double lowLimit = 0.0,limitFactor = 0.0;
@@ -1333,7 +1334,7 @@ void Activity::updateSampleModel(int rowcount)
         }
         if(isRun)
         {
-            limitFactor = 0.20;
+            limitFactor = 0.40;
         }
         lowLimit = this->get_speed(QTime::fromString(this->set_time(thresPace),"mm:ss"),0,curr_sport,true);
         lowLimit = lowLimit - (lowLimit*limitFactor);
@@ -1381,35 +1382,35 @@ void Activity::updateSampleModel(int rowcount)
             {
                 if(lapsec == 0)
                 {
-                    new_dist[0] = 0.001;
+                    newDist[0] = 0.001;
                 }
                 else
                 {
                     if(lapsec == intStart && isBreak)
                     {
-                        new_dist[lapsec] = overDist;
+                        newDist[lapsec] = overDist;
                     }
                     else
                     {
-                        new_dist[lapsec] = currDist + msec;
+                        newDist[lapsec] = currDist + msec;
                     }
                     if(lapsec == intStop)
                     {
-                        new_dist[intStop] = overDist;
+                        newDist[intStop] = overDist;
                     }
                 }
-                currDist = new_dist[lapsec];
-                calc_speed[lapsec] = swimSpeed;
-                calc_cadence[lapsec] = swimCycle;
+                currDist = newDist[lapsec];
+                calcSpeed[lapsec] = swimSpeed;
+                calcCadence[lapsec] = swimCycle;
             }
         }
 
         for(int row = 0; row < sampRowCount;++row)
         {
             sampleModel->setData(sampleModel->index(row,0,QModelIndex()),row);
-            sampleModel->setData(sampleModel->index(row,1,QModelIndex()),new_dist[row]);
-            sampleModel->setData(sampleModel->index(row,2,QModelIndex()),calc_speed[row]);
-            sampleModel->setData(sampleModel->index(row,3,QModelIndex()),calc_cadence[row]);
+            sampleModel->setData(sampleModel->index(row,1,QModelIndex()),newDist[row]);
+            sampleModel->setData(sampleModel->index(row,2,QModelIndex()),calcSpeed[row]);
+            sampleModel->setData(sampleModel->index(row,3,QModelIndex()),calcCadence[row]);
         }
     }
     else
@@ -1422,41 +1423,44 @@ void Activity::updateSampleModel(int rowcount)
 
             if(isBike)
             {
-                for(int intSec = intStart;intSec <= intStop; ++intSec)
+                for(int intSec = intStart;intSec < intStop; ++intSec)
                 {
                     if(intSec == 0)
                     {
-                        new_dist[0] = 0.0000;
+                        newDist[0] = 0.0000;
                     }
                     else
                     {
                         if(isIndoor)
                         {
-                            calc_speed[intSec] = this->wattToSpeed(thresPower,thresSpeed,sampleModel->data(sampleModel->index(intSec,4,QModelIndex())).toDouble());
+                            calcSpeed[intSec] = this->wattToSpeed(thresPower,thresSpeed,sampleModel->data(sampleModel->index(intSec,4,QModelIndex())).toDouble());
                         }
                         else
                         {
-                            calc_speed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
+                            calcSpeed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
                         }
-                        new_dist[intSec] = new_dist[intSec-1] + msec;
-                        calc_cadence[intSec] = sampleModel->data(sampleModel->index(intSec,3,QModelIndex())).toDouble();
+                        newDist[intSec] = newDist[intSec-1] + msec;
+                        calcCadence[intSec] = sampleModel->data(sampleModel->index(intSec,3,QModelIndex())).toDouble();
                     }
                 }
+                calcSpeed[intStop] = this->wattToSpeed(thresPower,thresSpeed,sampleModel->data(sampleModel->index(intStop,4,QModelIndex())).toDouble());
+                calcCadence[intStop] = sampleModel->data(sampleModel->index(intStop,3,QModelIndex())).toDouble();
             }
             if(isRun)
             {
-                for(int intSec = intStart;intSec <= intStop; ++intSec)
+                for(int intSec = intStart;intSec < intStop; ++intSec)
                 {
                     if(intSec == 0)
                     {
-                        new_dist[0] = 0.0000;
+                        newDist[0] = 0.0000;
                     }
                     else
                     {
-                        calc_speed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
-                        new_dist[intSec] = new_dist[intSec-1] + msec;
+                        calcSpeed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
+                        newDist[intSec] = newDist[intSec-1] + msec;
                     }
                 }
+                calcSpeed[intStop] = calcSpeed[intStop-1];
             }
             else if(isTria)
             {
@@ -1464,11 +1468,11 @@ void Activity::updateSampleModel(int rowcount)
                 {
                     if(intSec == 0)
                     {
-                        new_dist[0] = 0.0000;
+                        newDist[0] = 0.0000;
                     }
                     else
                     {
-                        new_dist[intSec] = new_dist[intSec-1] + msec;
+                        newDist[intSec] = newDist[intSec-1] + msec;
                     }
 
                     if(intRow == 0)
@@ -1477,7 +1481,7 @@ void Activity::updateSampleModel(int rowcount)
                         limitFactor = 0.15;
                         lowLimit = this->get_speed(QTime::fromString(this->set_time(sportpace),"mm:ss"),0,settings::isSwim,true);
                         lowLimit = lowLimit - (lowLimit*limitFactor);
-                        calc_speed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
+                        calcSpeed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
                     }
                     else if(intRow == 4)
                     {
@@ -1485,15 +1489,16 @@ void Activity::updateSampleModel(int rowcount)
                         limitFactor = 0.20;
                         lowLimit = this->get_speed(QTime::fromString(this->set_time(sportpace),"mm:ss"),0,settings::isRun,true);
                         lowLimit = lowLimit - (lowLimit*limitFactor);
-                        calc_speed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
+                        calcSpeed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
                     }
                     else
                     {
-                        calc_speed[intSec] = sampleModel->data(sampleModel->index(intSec,2,QModelIndex())).toDouble();
+                        calcSpeed[intSec] = sampleModel->data(sampleModel->index(intSec,2,QModelIndex())).toDouble();
                     }
-                    if(intRow == 2) calc_cadence[intSec] = sampleModel->data(sampleModel->index(intSec,3,QModelIndex())).toDouble();
+                    if(intRow == 2) calcCadence[intSec] = sampleModel->data(sampleModel->index(intSec,3,QModelIndex())).toDouble();
                 }
             }
+            newDist[intStop] = newDist[intStop-1]+msec;
 
         }
     }
@@ -1503,9 +1508,9 @@ void Activity::updateSampleModel(int rowcount)
         for(int row = 0; row < sampRowCount;++row)
         {
             sampleModel->setData(sampleModel->index(row,0,QModelIndex()),row);
-            sampleModel->setData(sampleModel->index(row,1,QModelIndex()),new_dist[row]);
-            sampleModel->setData(sampleModel->index(row,2,QModelIndex()),calc_speed[row]);
-            sampleModel->setData(sampleModel->index(row,3,QModelIndex()),calc_cadence[row]);
+            sampleModel->setData(sampleModel->index(row,1,QModelIndex()),newDist[row]);
+            sampleModel->setData(sampleModel->index(row,2,QModelIndex()),calcSpeed[row]);
+            sampleModel->setData(sampleModel->index(row,3,QModelIndex()),calcCadence[row]);
         }
     }
 
@@ -1514,8 +1519,8 @@ void Activity::updateSampleModel(int rowcount)
         for(int row = 0; row < sampRowCount;++row)
         {
             sampleModel->setData(sampleModel->index(row,0,QModelIndex()),row);
-            sampleModel->setData(sampleModel->index(row,1,QModelIndex()),new_dist[row]);
-            sampleModel->setData(sampleModel->index(row,2,QModelIndex()),calc_speed[row]);
+            sampleModel->setData(sampleModel->index(row,1,QModelIndex()),newDist[row]);
+            sampleModel->setData(sampleModel->index(row,2,QModelIndex()),calcSpeed[row]);
         }
     }
 
@@ -1526,9 +1531,9 @@ void Activity::updateSampleModel(int rowcount)
         for(int row = 0; row < sampRowCount;++row)
         {
           sampleModel->setData(sampleModel->index(row,0,QModelIndex()),row);
-          sampleModel->setData(sampleModel->index(row,1,QModelIndex()),new_dist[row]);
-          sampleModel->setData(sampleModel->index(row,2,QModelIndex()),calc_speed[row]);
-          sampleModel->setData(sampleModel->index(row,3,QModelIndex()),calc_cadence[row]);
+          sampleModel->setData(sampleModel->index(row,1,QModelIndex()),newDist[row]);
+          sampleModel->setData(sampleModel->index(row,2,QModelIndex()),calcSpeed[row]);
+          sampleModel->setData(sampleModel->index(row,3,QModelIndex()),calcCadence[row]);
         }
         this->hasOverride = true;
         sportValue = round(this->estimate_stress(settings::isSwim,this->set_time(this->get_int_pace(0,settings::isSwim)/10),this->get_int_duration(0)));
@@ -1635,7 +1640,7 @@ double Activity::get_int_distance(int row)
     }
     else
     {
-        int_start = intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt()-1;
+        int_start = intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt();
         int_stop = intModel->data(intModel->index(row,2,QModelIndex()),Qt::DisplayRole).toInt();
         dist_start = sampleModel->data(sampleModel->index(int_start,1,QModelIndex()),Qt::DisplayRole).toDouble();
         dist_stop = sampleModel->data(sampleModel->index(int_stop,1,QModelIndex()),Qt::DisplayRole).toDouble();
