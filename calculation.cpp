@@ -140,7 +140,7 @@ double calculation::get_speed(QTime pace,int dist,QString sport,bool fixdist)
     return 0;
 }
 
-double calculation::calcSpeed(double sec, double dist, double factor)
+double calculation::calc_Speed(double sec, double dist, double factor)
 {
     return 3600.0 / (sec / (dist/factor));
 }
