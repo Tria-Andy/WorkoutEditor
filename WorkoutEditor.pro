@@ -51,7 +51,7 @@ SOURCES += main.cpp\
     dialog_workcreator.cpp \
     filereader.cpp \
     saisons.cpp \
-    dialog_food.cpp
+    foodplanner.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
@@ -79,7 +79,7 @@ HEADERS  += mainwindow.h \
     filereader.h \
     del_mousehover.h \
     saisons.h \
-    dialog_food.h
+    foodplanner.h
 
 FORMS    += mainwindow.ui \
     dialog_export.ui \
@@ -93,8 +93,7 @@ FORMS    += mainwindow.ui \
     dialog_version.ui \
     stress_popup.ui \
     dialog_workcreator.ui \
-    dialog_addweek.ui \
-    dialog_food.ui
+    dialog_addweek.ui
 
 RESOURCES += \
     resources.qrc

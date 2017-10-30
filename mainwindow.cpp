@@ -36,9 +36,12 @@ MainWindow::MainWindow(QWidget *parent) :
     //Planning Mode
     graphLoaded = false;
     workSchedule = new schedule();
+    foodPlan = new foodplanner(workSchedule);
     schedMode << "Week" << "Year";    
     selectedDate = QDate::currentDate();
     firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
+    foodPlan->firstDayofWeek = firstdayofweek;
+    foodPlan->set_headerInfo(firstdayofweek);
     weeknumber = QString::number(selectedDate.weekNumber()) +"_"+QString::number(selectedDate.year()); 
     weekpos = weekCounter = 0;;
     weekDays = 7;
@@ -77,8 +80,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->frame_YearAvg->setVisible(false);
     ui->toolButton_weekCurrent->setEnabled(false);
     ui->toolButton_weekMinus->setEnabled(false);
-    calendarModel = new QStandardItemModel(this);
-    sumModel = new QStandardItemModel(this);
+    calendarModel = new QStandardItemModel(weekRange,8,this);
+    sumModel = new QStandardItemModel(0,1,this);
     avgModel = new QStandardItemModel(this);
     scheduleProxy = new QSortFilterProxyModel(this);
     scheduleProxy->setSourceModel(workSchedule->workout_schedule);
@@ -117,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(workSchedule->week_content,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
 
     //UI
-    ui->actionSave_Workout_Schedule->setEnabled(false);
+    ui->actionSave->setEnabled(false);
     ui->actionEditor->setEnabled(true);
     ui->actionPlaner->setEnabled(false);
     ui->stackedWidget->setGeometry(5,5,0,0);
@@ -140,6 +143,25 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolButton_sync->setEnabled(false);
     ui->horizontalSlider_factor->setEnabled(false);
 
+    ui->comboBox_menu->addItems(settings::get_listValues("dish"));
+    ui->tableView_weekSum->setModel(foodPlan->weekSumModel);
+    ui->tableView_weekSum->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_weekSum->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    ui->tableView_foodweek->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableView_foodweek->setModel(foodPlan->planerModel);
+    ui->tableView_foodweek->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_foodweek->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_foodweek->verticalHeader()->setFixedWidth(100);
+    ui->tableView_foodweek->setItemDelegate(&food_del);
+
+    ui->tableView_daySummery->setModel(foodPlan->daySumModel);
+    ui->tableView_daySummery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_daySummery->horizontalHeader()->hide();
+    ui->tableView_daySummery->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_daySummery->verticalHeader()->setFixedWidth(100);
+    ui->listView_Menu->setModel(foodPlan->mealProxy);
+
     this->set_speedgraph();
     this->resetPlot();
     this->read_activityFiles();
@@ -148,7 +170,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->set_phaseFilter(1);
 }
 
-enum {PLANER,EDITOR};
+enum {PLANER,EDITOR,FOOD};
 
 MainWindow::~MainWindow()
 {
@@ -245,17 +267,13 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     }
 
     //Editor
-    ui->actionSave_Workout_File->setVisible(mEditor);
-    ui->actionSave_to_GoldenCheetah->setVisible(mEditor);
     ui->actionRefresh_Filelist->setVisible(mEditor);
     ui->actionReset->setVisible(mEditor);
     ui->actionSelect_File->setVisible(mEditor);
     ui->actionReset->setEnabled(actLoaded);
-    ui->actionSave_to_GoldenCheetah->setEnabled(actLoaded);
 
     //Schedule
     ui->menuWorkout->setEnabled(mPlaner);
-    ui->actionSave_Workout_Schedule->setVisible(mPlaner);
     ui->actionExport_to_Golden_Cheetah->setVisible(mPlaner);
     ui->actionNew->setVisible(mPlaner);
     planerMode->setEnabled(mPlaner);
@@ -312,8 +330,7 @@ void MainWindow::week_summery(int pos, int dataIndex)
 
 void MainWindow::summery_view()
 {
-    sumModel->clear();
-    sumModel->setColumnCount(1);
+    sumModel->removeRows(0,sumModel->rowCount());
     ui->tableView_summery->setModel(sumModel);
     ui->tableView_summery->verticalHeader()->resetDefaultSectionSize();
     ui->tableView_summery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -475,9 +492,7 @@ void MainWindow::workout_calendar()
     QString stdConnect;
     QString weekValue,cal_value,phase_value;
     int dayofweek = currentdate.dayOfWeek();
-    int rowcount;
     QStringList sportuseList = settings::get_listValues("Sportuse");
-    calendarModel->clear();
     metaProxy->setFilterRegExp("");
     metaProxyFilter->setFilterRegExp("");
     scheduleProxy->setFilterFixedString("");
@@ -492,8 +507,6 @@ void MainWindow::workout_calendar()
 
         for(int week = 0; week < weekRange; ++week)
         {
-            rowcount = calendarModel->rowCount();
-            calendarModel->insertRow(rowcount,QModelIndex());
             weekValue = QString::number(currentdate.addDays(offset).weekNumber()) +"_"+ QString::number(currentdate.addDays(offset).year());
             metaProxy->setFilterRegExp("\\b"+weekValue+"\\b");
             metaProxy->setFilterKeyColumn(2);
@@ -581,8 +594,6 @@ void MainWindow::workout_calendar()
 
         for(int week = weekpos,i=0; week < weekpos+weekoffset;++week,++i)
         {
-          rowcount = calendarModel->rowCount();
-          calendarModel->insertRow(rowcount,QModelIndex());
           weekID = metaProxyFilter->data(metaProxyFilter->index(week,2)).toString();
           contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
           contentProxy->setFilterKeyColumn(1);
@@ -737,7 +748,7 @@ void MainWindow::on_actionNew_triggered()
         dialog_code = day_pop.exec();
         if(dialog_code == QDialog::Rejected)
         {
-            ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
+            ui->actionSave->setEnabled(workSchedule->get_isUpdated());
             ui->actionPMC->setEnabled(true);
         }
     }
@@ -750,64 +761,71 @@ void MainWindow::on_actionStress_Calculator_triggered()
     stressCalc.exec();
 }
 
-void MainWindow::on_actionSave_Workout_Schedule_triggered()
+void MainWindow::on_actionSave_triggered()
 {
-    if(isWeekMode)
+
+    if(selModule == PLANER)
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this,
-                                      tr("Save Workouts"),
-                                      "Save Week Workout Schedule?",
-                                      QMessageBox::Yes|QMessageBox::No
-                                      );
-        if (reply == QMessageBox::Yes)
+        if(isWeekMode)
         {
-            workSchedule->save_dayWorkouts();
-            workSchedule->set_isUpdated(false);
-            ui->actionSave_Workout_Schedule->setEnabled(false);
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this,
+                                          tr("Save Workouts"),
+                                          "Save Week Workout Schedule?",
+                                          QMessageBox::Yes|QMessageBox::No
+                                          );
+            if (reply == QMessageBox::Yes)
+            {
+                workSchedule->save_dayWorkouts();
+                workSchedule->set_isUpdated(false);
+                ui->actionSave->setEnabled(false);
+            }
+        }
+        else
+        {
+            QMessageBox::StandardButton reply;
+                reply = QMessageBox::question(this,
+                                              tr("Save Schedule"),
+                                              "Save Current Year Schedule?",
+                                              QMessageBox::Yes|QMessageBox::No
+                                              );
+            if (reply == QMessageBox::Yes)
+            {
+                workSchedule->save_weekPlan();
+                workSchedule->set_isUpdated(false);
+                ui->actionSave->setEnabled(false);
+            }
         }
     }
-    else
+    else if(selModule == EDITOR)
     {
+        ui->progressBar_fileState->setValue(10);
         QMessageBox::StandardButton reply;
             reply = QMessageBox::question(this,
-                                          tr("Save Schedule"),
-                                          "Save Current Year Schedule?",
+                                          tr("Save File"),
+                                          "Save Changes to Golden Cheetah?",
                                           QMessageBox::Yes|QMessageBox::No
                                           );
         if (reply == QMessageBox::Yes)
         {
-            workSchedule->save_weekPlan();
-            workSchedule->set_isUpdated(false);
-            ui->actionSave_Workout_Schedule->setEnabled(false);
+            if(curr_activity->get_sport() == settings::isSwim)
+            {
+                curr_activity->updateXDataModel();
+            }
+            else
+            {
+                curr_activity->updateIntModel(2,1);
+            }
+            ui->progressBar_fileState->setValue(25);
+            curr_activity->writeChangedData();
+            ui->progressBar_fileState->setValue(75);
         }
+        ui->progressBar_fileState->setValue(100);
     }
-}
-
-void MainWindow::on_actionSave_to_GoldenCheetah_triggered()
-{
-    ui->progressBar_fileState->setValue(10);
-    QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this,
-                                      tr("Save File"),
-                                      "Save Changes to Golden Cheetah?",
-                                      QMessageBox::Yes|QMessageBox::No
-                                      );
-    if (reply == QMessageBox::Yes)
+    else if(selModule == FOOD)
     {
-        if(curr_activity->get_sport() == settings::isSwim)
-        {
-            curr_activity->updateXDataModel();
-        }
-        else
-        {
-            curr_activity->updateIntModel(2,1);
-        }
-        ui->progressBar_fileState->setValue(25);
-        curr_activity->writeChangedData();
-        ui->progressBar_fileState->setValue(75);
+
     }
-    ui->progressBar_fileState->setValue(100);
 }
 
 void MainWindow::on_calendarWidget_clicked(const QDate &date)
@@ -830,7 +848,7 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
             dialog_code = day_pop.exec();
             if(dialog_code == QDialog::Rejected)
             {
-                ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
+                ui->actionSave->setEnabled(workSchedule->get_isUpdated());
             }
         }
         else
@@ -855,7 +873,7 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
                     this->workout_calendar();
                     //weekCounter = 0;
                     this->set_calender();
-                    ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
+                    ui->actionSave->setEnabled(workSchedule->get_isUpdated());
                 }
             }
 
@@ -877,7 +895,7 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
 
             if(dialog_code == QDialog::Rejected)
             {
-                ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
+                ui->actionSave->setEnabled(workSchedule->get_isUpdated());
             }
         }
     }
@@ -1700,7 +1718,7 @@ void MainWindow::on_actionIntervall_Editor_triggered()
     {
         this->summery_view();
         this->workout_calendar();
-        ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
+        ui->actionSave->setEnabled(workSchedule->get_isUpdated());
     }
 }
 
@@ -1826,15 +1844,19 @@ void MainWindow::on_actionPMC_triggered()
 void MainWindow::set_module(int modID)
 {
     ui->stackedWidget->setCurrentIndex(modID);
+    selModule = modID;
 
-    if(modID == 0)
+    if(modID == PLANER)
     {
         this->set_menuItems(false,true);
-
     }
-    else if(modID == 1)
+    else if(modID == EDITOR)
     {
         this->set_menuItems(true,false);
+    }
+    else if(modID == FOOD)
+    {
+        this->set_menuItems(false,false);
     }
 }
 
@@ -1849,7 +1871,7 @@ void MainWindow::on_actionEdit_Week_triggered()
     {
         this->workout_calendar();
         this->set_calender();
-        ui->actionSave_Workout_Schedule->setEnabled(workSchedule->get_isUpdated());
+        ui->actionSave->setEnabled(workSchedule->get_isUpdated());
     }
     if(dialogCode == QDialog::Rejected)
     {
@@ -1916,4 +1938,65 @@ void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value
         this->summery_view();
         this->workout_calendar();
     }
+}
+
+void MainWindow::on_toolButton_nextWeek_clicked()
+{
+    foodPlan->set_headerInfo(foodPlan->firstDayofWeek.addDays(7));
+    ui->label_foodWeek->setText("Kw "+QString::number(foodPlan->firstDayofWeek.weekNumber()));
+}
+
+void MainWindow::on_toolButton_prevWeek_clicked()
+{
+    foodPlan->set_headerInfo(foodPlan->firstDayofWeek.addDays(-7));
+    ui->label_foodWeek->setText("Kw "+QString::number(foodPlan->firstDayofWeek.weekNumber()));
+}
+
+void MainWindow::on_comboBox_menu_currentTextChanged(const QString &value)
+{
+    foodPlan->mealProxy->invalidate();
+    foodPlan->mealProxy->setFilterRegExp("\\b"+value+"\\b");
+    foodPlan->mealProxy->setFilterKeyColumn(2);
+}
+
+void MainWindow::on_tableView_foodweek_clicked(const QModelIndex &index)
+{
+    ui->listWidget_MenuEdit->clear();
+    ui->listWidget_MenuEdit->addItems(foodPlan->planerModel->data(index).toString().split("\n"));
+    ui->label_menuEdit->setText("Edit: "+ foodPlan->planerModel->headerData(index.column(),Qt::Orientation::Horizontal).toString()+" - "+
+                                          foodPlan->planerModel->headerData(index.row(),Qt::Orientation::Vertical).toString());
+}
+
+void MainWindow::on_toolButton_addMenu_clicked()
+{
+    foodPlan->mealModel->insertRow(foodPlan->mealModel->rowCount());
+    foodPlan->mealModel->setData(foodPlan->mealModel->index(foodPlan->mealModel->rowCount()-1,0),"-");
+    foodPlan->mealModel->setData(foodPlan->mealModel->index(foodPlan->mealModel->rowCount()-1,1),foodPlan->mealModel->rowCount());
+    foodPlan->mealModel->setData(foodPlan->mealModel->index(foodPlan->mealModel->rowCount()-1,2),ui->comboBox_menu->currentText());
+    foodPlan->mealModel->setData(foodPlan->mealModel->index(foodPlan->mealModel->rowCount()-1,3),"-");
+}
+
+void MainWindow::on_listWidget_MenuEdit_doubleClicked(const QModelIndex &index)
+{
+    delete ui->listWidget_MenuEdit->takeItem(index.row());
+}
+
+void MainWindow::on_listWidget_MenuEdit_clicked(const QModelIndex &index)
+{
+    QListWidgetItem *item = ui->listWidget_MenuEdit->item(index.row());
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+}
+
+void MainWindow::on_toolButton_menuEdit_clicked()
+{
+    QString setString;
+    QModelIndex index = ui->tableView_foodweek->currentIndex();
+
+    for(int i = 0; i < ui->listWidget_MenuEdit->count(); ++i)
+    {
+        setString = setString + ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString()+"\n";
+    }
+    setString.truncate(setString.count());
+
+    foodPlan->planerModel->setData(index,setString);
 }

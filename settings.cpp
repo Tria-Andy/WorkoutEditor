@@ -328,6 +328,15 @@ void settings::loadSettings()
             settingList.clear();
         myvalues->endGroup();
 
+        myvalues->beginGroup("Foodplanner");
+            settingList = myvalues->value("meals").toString().split(splitter);
+            listMap.insert("meals",settingList);
+            settingList.clear();
+            settingList = myvalues->value("dish").toString().split(splitter);
+            listMap.insert("dish",settingList);
+            settingList.clear();
+        myvalues->endGroup();
+
         myvalues->beginGroup("Misc");
             settingList << myvalues->value("sum").toString();
             settingList << myvalues->value("empty").toString();

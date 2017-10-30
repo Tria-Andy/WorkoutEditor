@@ -27,6 +27,7 @@
 #include <QDebug>
 #include "del_level.h"
 #include "schedule.h"
+#include "foodplanner.h"
 #include "dialog_addweek.h"
 #include "dialog_version.h"
 #include "day_popup.h"
@@ -39,7 +40,6 @@
 #include "dialog_settings.h"
 #include "dialog_pacecalc.h"
 #include "dialog_week_copy.h"
-#include "dialog_food.h"
 #include "settings.h"
 #include "jsonhandler.h"
 #include "filereader.h"
@@ -917,6 +917,46 @@ public:
         painter->restore();
     }
 };
+class del_foodplan : public QStyledItemDelegate
+{
+    Q_OBJECT
+public:
+    explicit del_foodplan(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+
+    void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
+    {
+        painter->save();
+        QLinearGradient itemGradient(option.rect.topLeft(),option.rect.bottomLeft());
+        itemGradient.setSpread(QGradient::ReflectSpread);
+        QColor itemColor,gradColor;
+        QFont foodFont;
+        foodFont.setPixelSize(settings::get_fontValue("fontMedium"));
+        painter->setFont(foodFont);
+
+        gradColor.setHsv(0,0,200,150);
+
+        if(option.state & (QStyle::State_Selected | QStyle::State_MouseOver))
+        {
+            itemColor.setHsv(240,255,255,180);
+            painter->setPen(Qt::white);
+        }
+        else
+        {
+            itemColor.setHsv(255,255,255,0);
+            painter->setPen(Qt::black);
+        }
+
+        itemGradient.setColorAt(0,gradColor);
+        itemGradient.setColorAt(1,itemColor);
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+        painter->fillRect(option.rect,itemGradient);
+
+        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
+        painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+
+        painter->restore();
+    }
+};
 
 namespace Ui {
 class MainWindow;
@@ -931,6 +971,7 @@ private:
 
     schedule *workSchedule;
     Activity *curr_activity;
+    foodplanner *foodPlan;
     jsonHandler *jsonhandler;
     fileReader *actFileReader;
     settings editorSettings;
@@ -943,6 +984,7 @@ private:
     del_avgselect avgSelect_del;
     del_level level_del;
     del_avgweek avgweek_del;
+    del_foodplan food_del;
     QStandardItemModel *calendarModel,*sumModel,*fileModel,*infoModel,*avgModel;
     QItemSelectionModel *treeSelection;
     QSortFilterProxyModel *scheduleProxy,*metaProxy,*metaProxyFilter,*contentProxy;
@@ -967,8 +1009,7 @@ private:
     QString weeknumber,phaseFilter,buttonStyle;
     QVector<double> work_sum,dur_sum,stress_sum;
     QVector<double> dist_sum;
-    int weekRange,weekpos;
-    int saisonWeeks,weekDays;
+    int selModule,weekRange,weekpos,saisonWeeks,weekDays;
     unsigned int weekCounter,sportCounter,phaseFilterID;
     bool userSetup,isWeekMode,graphLoaded,actLoaded;
 
@@ -1011,7 +1052,6 @@ private slots:
     void on_actionNew_triggered();
     void on_actionExport_to_Golden_Cheetah_triggered();
     void on_actionExit_and_Save_triggered();
-    void on_actionSave_Workout_Schedule_triggered();
     void on_actionSelect_File_triggered();
     void on_actionReset_triggered();
     void on_actionStress_Calculator_triggered();
@@ -1040,7 +1080,6 @@ private slots:
     void setSelectedIntRow(QModelIndex);
     void on_horizontalSlider_factor_valueChanged(int value);
     void on_treeView_intervall_clicked(const QModelIndex &index);
-    void on_actionSave_to_GoldenCheetah_triggered();
     void on_lineEdit_workContent_textChanged(const QString &arg1);
     void on_toolButton_sync_clicked();
     void on_toolButton_clearContent_clicked();  
@@ -1054,6 +1093,15 @@ private slots:
     void on_treeView_files_clicked(const QModelIndex &index);
     void on_actionRefresh_Filelist_triggered();
     void on_comboBox_saisonName_currentIndexChanged(const QString &arg1);
+    void on_toolButton_nextWeek_clicked();
+    void on_toolButton_prevWeek_clicked();
+    void on_comboBox_menu_currentTextChanged(const QString &arg1);
+    void on_actionSave_triggered();
+    void on_tableView_foodweek_clicked(const QModelIndex &index);
+    void on_toolButton_addMenu_clicked();
+    void on_listWidget_MenuEdit_doubleClicked(const QModelIndex &index);
+    void on_listWidget_MenuEdit_clicked(const QModelIndex &index);
+    void on_toolButton_menuEdit_clicked();
 };
 
 #endif // MAINWINDOW_H
