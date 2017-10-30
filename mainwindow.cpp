@@ -51,12 +51,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
     planerIcon.addFile(":/images/icons/DateTime.png");
     editorIcon.addFile(":/images/icons/Editor.png");
-    appMode = new QToolButton(this);
-    appMode->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    appMode->setIcon(editorIcon);
-    appMode->setText("Editor");
-    appMode->setProperty("Mode",0);
-    appMode->setToolTip("Change Mode");
+    foodIcon.addFile(":/images/icons/Food.png");
+
+    modules = new QComboBox(this);
+    modules->addItem(planerIcon,"Planner");
+    modules->addItem(editorIcon,"Editor");
+    modules->addItem(foodIcon,"Food");
+    modules->setToolTip("Modules");
 
     planerMode = new QLabel(this);
     planerMode->setText("Planer Mode:");
@@ -68,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
     planMode->setText(schedMode.at(0));
     menuSpacer = new QWidget(this);
     menuSpacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-    ui->mainToolBar->addWidget(appMode);
+    ui->mainToolBar->addWidget(modules);
     ui->mainToolBar->addWidget(menuSpacer);
     ui->mainToolBar->addWidget(planerMode);
     ui->mainToolBar->addWidget(planMode);
@@ -105,9 +106,9 @@ MainWindow::MainWindow(QWidget *parent) :
     actLoaded = false;
 
     connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
-    connect(appMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_appMode(bool)));
     connect(planMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_planMode(bool)));
     connect(phaseGroup,SIGNAL(buttonClicked(int)),this,SLOT(set_phaseFilter(int)));
+    connect(modules,SIGNAL(currentIndexChanged(int)),this,SLOT(set_module(int)));
     connect(workSchedule->workout_schedule,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
     connect(workSchedule->workout_schedule,SIGNAL(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)),this,SLOT(refresh_model()));
     connect(workSchedule->workout_schedule,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_model()));
@@ -232,25 +233,16 @@ void MainWindow::openPreferences()
 
 void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
 {
-    ui->stackedWidget->setCurrentIndex(mEditor);
-
     if(mEditor)
     {
         ui->actionPlaner->setEnabled(mEditor);
         ui->actionEditor->setEnabled(mPlaner);
-        appMode->setIcon(planerIcon);
-        appMode->setText("Planer");
-
     }
     if(mPlaner)
     {
         ui->actionEditor->setEnabled(mPlaner);
         ui->actionPlaner->setEnabled(mEditor);
-        appMode->setIcon(editorIcon);
-        appMode->setText("Editor");
     }
-
-    appMode->setProperty("Mode",mEditor);
 
     //Editor
     ui->actionSave_Workout_File->setVisible(mEditor);
@@ -1831,6 +1823,21 @@ void MainWindow::on_actionPMC_triggered()
     stressPop.exec();
 }
 
+void MainWindow::set_module(int modID)
+{
+    ui->stackedWidget->setCurrentIndex(modID);
+
+    if(modID == 0)
+    {
+        this->set_menuItems(false,true);
+
+    }
+    else if(modID == 1)
+    {
+        this->set_menuItems(true,false);
+    }
+}
+
 void MainWindow::on_actionEdit_Week_triggered()
 {
     int dialogCode;
@@ -1884,18 +1891,6 @@ void MainWindow::toolButton_planMode(bool checked)
     this->summery_view();
 }
 
-void MainWindow::toolButton_appMode(bool toggle)
-{
-    if(appMode->property("Mode").toInt() == 0)
-    {
-        this->set_menuItems(true,toggle);
-    }
-    else
-    {
-        this->set_menuItems(toggle,true);
-    }
-}
-
 void MainWindow::on_treeView_files_clicked(const QModelIndex &index)
 {
     this->clearActivtiy();
@@ -1921,11 +1916,4 @@ void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value
         this->summery_view();
         this->workout_calendar();
     }
-}
-
-void MainWindow::on_actionFood_Planner_triggered()
-{
-    Dialog_food *diaFood = new Dialog_food(this,workSchedule);
-    diaFood->setModal(true);
-    diaFood->exec();
 }

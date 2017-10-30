@@ -24,7 +24,6 @@ public:
     explicit del_workcreator(QObject *parent = 0) : QStyledItemDelegate(parent) {}
     QStringList groupList;
 
-
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();

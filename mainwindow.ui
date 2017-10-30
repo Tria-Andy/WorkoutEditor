@@ -1690,6 +1690,7 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="food"/>
      </widget>
     </item>
    </layout>
@@ -1729,10 +1730,11 @@
    </widget>
    <widget class="QMenu" name="menuModus">
     <property name="title">
-     <string>Mode</string>
+     <string>Module</string>
     </property>
     <addaction name="actionPlaner"/>
     <addaction name="actionEditor"/>
+    <addaction name="actionFood"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
@@ -1748,7 +1750,6 @@
     <addaction name="actionPace_Calculator"/>
     <addaction name="actionStress_Calculator"/>
     <addaction name="actionPMC"/>
-    <addaction name="actionFood_Planner"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -1798,7 +1799,6 @@
    <addaction name="actionPace_Calculator"/>
    <addaction name="actionStress_Calculator"/>
    <addaction name="actionPMC"/>
-   <addaction name="actionFood_Planner"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -1900,6 +1900,9 @@
    <property name="text">
     <string>Editor</string>
    </property>
+   <property name="iconText">
+    <string>Editor</string>
+   </property>
    <property name="toolTip">
     <string>Editor Mode</string>
    </property>
@@ -1997,13 +2000,13 @@
     <string>Refresh Filelist</string>
    </property>
   </action>
-  <action name="actionFood_Planner">
+  <action name="actionFood">
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/images/icons/Food.png</normaloff>:/images/icons/Food.png</iconset>
    </property>
    <property name="text">
-    <string>Food Planner</string>
+    <string>Food</string>
    </property>
   </action>
  </widget>

@@ -948,10 +948,11 @@ private:
     QSortFilterProxyModel *scheduleProxy,*metaProxy,*metaProxyFilter,*contentProxy;
     QStringList modus_list,cal_header,year_header,avgHeader,schedMode,y2Label;
     QLabel *planerMode;
-    QToolButton *planMode,*appMode;
-    QIcon editorIcon,planerIcon;
+    QToolButton *planMode;
+    QIcon editorIcon,planerIcon,foodIcon;
     QWidget *menuSpacer;
     QButtonGroup *phaseGroup;
+    QComboBox *modules;
 
     //Intervall Chart
     QVector<double> secTicker,speedValues,secondValues,polishValues,speedMinMax,secondMinMax,rangeMinMax;
@@ -1019,6 +1020,8 @@ private slots:
     void on_actionPace_Calculator_triggered();
     void on_actionVersion_triggered();
     void on_actionPMC_triggered();
+    void set_module(int);
+
 
     //Planner
     void on_calendarWidget_clicked(const QDate &date);
@@ -1030,7 +1033,6 @@ private slots:
     void on_toolButton_weekPlus_clicked();
     void on_toolButton_weekFour_clicked();
     void toolButton_planMode(bool);
-    void toolButton_appMode(bool);
     void set_phaseFilter(int);
     void refresh_model();
 
@@ -1052,7 +1054,6 @@ private slots:
     void on_treeView_files_clicked(const QModelIndex &index);
     void on_actionRefresh_Filelist_triggered();
     void on_comboBox_saisonName_currentIndexChanged(const QString &arg1);
-    void on_actionFood_Planner_triggered();
 };
 
 #endif // MAINWINDOW_H
