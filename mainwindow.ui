@@ -1751,10 +1751,22 @@
            </property>
            <item>
             <widget class="QCalendarWidget" name="calendarWidget_Food">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>250</width>
                <height>200</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
               </size>
              </property>
              <property name="gridVisible">
@@ -1763,10 +1775,10 @@
             </widget>
            </item>
            <item>
-            <widget class="QTableView" name="tableView_weekSum"/>
+            <widget class="QListWidget" name="listWidget_weekPlans"/>
            </item>
            <item>
-            <widget class="QListView" name="listView_weekPlans"/>
+            <widget class="QTableView" name="tableView_weekSum"/>
            </item>
           </layout>
          </widget>
@@ -1879,6 +1891,13 @@
                       <height>26</height>
                      </size>
                     </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <weight>75</weight>
+                      <bold>true</bold>
+                     </font>
+                    </property>
                     <property name="text">
                      <string>-</string>
                     </property>
@@ -1967,7 +1986,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QTableView" name="tableView_foodweek">
+                <widget class="QTableWidget" name="tableWidget_weekPlan">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                    <horstretch>0</horstretch>

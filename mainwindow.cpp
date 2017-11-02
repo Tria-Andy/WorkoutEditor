@@ -36,12 +36,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //Planning Mode
     graphLoaded = false;
     workSchedule = new schedule();
-    foodPlan = new foodplanner(workSchedule);
+
     schedMode << "Week" << "Year";    
     selectedDate = QDate::currentDate();
     firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
-    foodPlan->firstDayofWeek = firstdayofweek;
-    foodPlan->set_headerInfo(firstdayofweek);
+    foodPlan = new foodplanner(workSchedule,firstdayofweek);
     weeknumber = QString::number(selectedDate.weekNumber()) +"_"+QString::number(selectedDate.year()); 
     weekpos = weekCounter = 0;;
     weekDays = 7;
@@ -144,23 +143,29 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->horizontalSlider_factor->setEnabled(false);
 
     ui->comboBox_menu->addItems(settings::get_listValues("dish"));
+    ui->label_foodWeek->setText("Kw "+QString::number(firstdayofweek.weekNumber()));
     ui->tableView_weekSum->setModel(foodPlan->weekSumModel);
     ui->tableView_weekSum->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_weekSum->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    ui->tableView_foodweek->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableView_foodweek->setModel(foodPlan->planerModel);
-    ui->tableView_foodweek->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_foodweek->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_foodweek->verticalHeader()->setFixedWidth(100);
-    ui->tableView_foodweek->setItemDelegate(&food_del);
+    ui->tableWidget_weekPlan->setRowCount(foodPlan->mealsHeader.count());
+    ui->tableWidget_weekPlan->setColumnCount(foodPlan->dayHeader.count());
+    ui->tableWidget_weekPlan->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_weekPlan->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_weekPlan->setVerticalHeaderLabels(foodPlan->mealsHeader);
+    ui->tableWidget_weekPlan->setHorizontalHeaderLabels(foodPlan->dayHeader);
+    ui->tableWidget_weekPlan->verticalHeader()->setFixedWidth(110);
+    ui->tableWidget_weekPlan->setItemDelegate(&food_del);
+    this->fill_weekTable(QString::number(firstdayofweek.weekNumber())+"_"+QString::number(firstdayofweek.year()));
 
     ui->tableView_daySummery->setModel(foodPlan->daySumModel);
     ui->tableView_daySummery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_daySummery->horizontalHeader()->hide();
     ui->tableView_daySummery->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_daySummery->verticalHeader()->setFixedWidth(100);
+    ui->tableView_daySummery->verticalHeader()->setFixedWidth(110);
     ui->listView_Menu->setModel(foodPlan->mealProxy);
+
+    ui->listWidget_weekPlans->addItems(foodPlan->planList);
 
     this->set_speedgraph();
     this->resetPlot();
@@ -192,6 +197,39 @@ void MainWindow::freeMem()
         delete metaProxy;
         delete metaProxyFilter;
         delete contentProxy;
+    }
+}
+
+void MainWindow::fill_weekTable(QString weekID)
+{
+    foodPlan->planerProxy->invalidate();
+    foodPlan->planerProxy->setFilterRegExp("\\b"+weekID+"\\b");
+    foodPlan->planerProxy->setFilterKeyColumn(0);
+    foodPlan->planerProxy->sort(1);
+    int mealIndex = 0;
+    int dayIndex = 0;
+    QString dayString;
+    QString mealString;
+
+    for(int row = 0; row < foodPlan->planerProxy->rowCount(); ++row)
+    {
+
+        mealIndex = foodPlan->mealsHeader.indexOf(foodPlan->planerProxy->data(foodPlan->planerProxy->index(row,2)).toString());
+        dayIndex = QDate::fromString(foodPlan->planerProxy->data(foodPlan->planerProxy->index(row,1)).toString(),"dd.MM.yyyy").dayOfWeek()-1;
+
+        mealString = foodPlan->planerProxy->data(foodPlan->planerProxy->index(row,2)).toString();
+
+        if(!ui->tableWidget_weekPlan->item(mealIndex,dayIndex))
+        {
+          QTableWidgetItem *item = new QTableWidgetItem;
+          ui->tableWidget_weekPlan->setItem(mealIndex,dayIndex,item);
+        }
+        dayString = ui->tableWidget_weekPlan->item(mealIndex,dayIndex)->data(Qt::DisplayRole).toString() +
+                    foodPlan->planerProxy->data(foodPlan->planerProxy->index(row,3)).toString() +" - "+
+                    foodPlan->planerProxy->data(foodPlan->planerProxy->index(row,4)).toString()+"\n";
+
+
+        ui->tableWidget_weekPlan->item(mealIndex,dayIndex)->setData(Qt::EditRole,dayString);
     }
 }
 
@@ -1942,13 +1980,16 @@ void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value
 
 void MainWindow::on_toolButton_nextWeek_clicked()
 {
-    foodPlan->set_headerInfo(foodPlan->firstDayofWeek.addDays(7));
+    foodPlan->firstDayofWeek = foodPlan->firstDayofWeek.addDays(7);
     ui->label_foodWeek->setText("Kw "+QString::number(foodPlan->firstDayofWeek.weekNumber()));
+    foodPlan->firstDayofWeek = foodPlan->firstDayofWeek.addDays(-7);
+
 }
 
 void MainWindow::on_toolButton_prevWeek_clicked()
 {
-    foodPlan->set_headerInfo(foodPlan->firstDayofWeek.addDays(-7));
+    foodPlan->firstDayofWeek = foodPlan->firstDayofWeek.addDays(-7);
+    foodPlan->fill_plannerModel();
     ui->label_foodWeek->setText("Kw "+QString::number(foodPlan->firstDayofWeek.weekNumber()));
 }
 
@@ -1959,12 +2000,11 @@ void MainWindow::on_comboBox_menu_currentTextChanged(const QString &value)
     foodPlan->mealProxy->setFilterKeyColumn(2);
 }
 
-void MainWindow::on_tableView_foodweek_clicked(const QModelIndex &index)
+void MainWindow::on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item)
 {
     ui->listWidget_MenuEdit->clear();
-    ui->listWidget_MenuEdit->addItems(foodPlan->planerModel->data(index).toString().split("\n"));
-    ui->label_menuEdit->setText("Edit: "+ foodPlan->planerModel->headerData(index.column(),Qt::Orientation::Horizontal).toString()+" - "+
-                                          foodPlan->planerModel->headerData(index.row(),Qt::Orientation::Vertical).toString());
+    ui->listWidget_MenuEdit->addItems(item->data(Qt::DisplayRole).toString().split("\n"));
+    ui->label_menuEdit->setText("Edit: "+ foodPlan->dayHeader.at(item->column()) + " - " + foodPlan->mealsHeader.at(item->row()));
 }
 
 void MainWindow::on_toolButton_addMenu_clicked()
@@ -1990,7 +2030,7 @@ void MainWindow::on_listWidget_MenuEdit_clicked(const QModelIndex &index)
 void MainWindow::on_toolButton_menuEdit_clicked()
 {
     QString setString;
-    QModelIndex index = ui->tableView_foodweek->currentIndex();
+    QModelIndex index = ui->tableWidget_weekPlan->currentIndex();
 
     for(int i = 0; i < ui->listWidget_MenuEdit->count(); ++i)
     {
@@ -1998,5 +2038,8 @@ void MainWindow::on_toolButton_menuEdit_clicked()
     }
     setString.truncate(setString.count());
 
-    foodPlan->planerModel->setData(index,setString);
+    ui->tableWidget_weekPlan->item(index.row(),index.column())->setData(Qt::EditRole,setString);
+
+    foodPlan->update_sumByMenu(foodPlan->firstDayofWeek);
+    ui->listWidget_MenuEdit->clear();
 }

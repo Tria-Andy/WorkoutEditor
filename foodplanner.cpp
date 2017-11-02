@@ -1,14 +1,15 @@
 #include "foodplanner.h"
 
-foodplanner::foodplanner(schedule *ptrSchedule)
+foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
 {
     schedulePtr = ptrSchedule;
-    firstDayofWeek = QDate().currentDate().addDays(1 - QDate().currentDate().dayOfWeek());
+    firstDayofWeek = fd;
 
     dayTags  << "Day" << "Meal" << "Food";
     mealTags << "id" << "section" << "name" << "cal";
     mealsHeader = settings::get_listValues("meals");
     sumHeader << "Calories Food:" << "Conversion Base:" << "Conversion Sport:" << "Summery:" << "Difference:";
+    weekSumHeader << "Week Summery";
 
     dayCalBase = this->current_dayCalories() * athleteValues->value("currpal");
 
@@ -17,20 +18,21 @@ foodplanner::foodplanner(schedule *ptrSchedule)
         dayHeader << QDate::longDayName(d);
     }
 
-    planerModel = new QStandardItemModel(mealsHeader.count(),7);
-    planerModel->setHorizontalHeaderLabels(dayHeader);
-    planerModel->setVerticalHeaderLabels(mealsHeader);
+    planerModel = new QStandardItemModel(0,5);
+    planerProxy = new QSortFilterProxyModel;
+    planerProxy->setSourceModel(planerModel);
     mealModel = new QStandardItemModel();
     mealModel->setColumnCount(mealTags.count()+1);
     mealProxy = new QSortFilterProxyModel;
     mealProxy->setSourceModel(mealModel);
-    weekModel = new QStandardItemModel();
-    weekModel->setColumnCount(2);
+    weekPlansModel = new QStandardItemModel();
+    weekPlansModel->setColumnCount(2);
 
     daySumModel = new QStandardItemModel(sumHeader.count(),dayHeader.count());
     daySumModel->setVerticalHeaderLabels(sumHeader);
     weekSumModel = new QStandardItemModel(sumHeader.count(),1);
     weekSumModel->setVerticalHeaderLabels(sumHeader);
+    weekSumModel->setHorizontalHeaderLabels(weekSumHeader );
 
     filePath = settings::getStringMapPointer(settings::stingMap::GC)->value("foodplanner");
 
@@ -44,27 +46,33 @@ foodplanner::foodplanner(schedule *ptrSchedule)
         this->read_foodPlan(this->load_XMLFile(filePath,planerXML));
         this->read_meals(this->load_XMLFile(filePath,mealXML));
     }
+
+    this->set_Models(fd);
+
 }
 
-void foodplanner::set_headerInfo(QDate firstDay)
+void foodplanner::set_Models(QDate firstDay)
 {
-    this->fill_weekModel(firstDay);
+    this->fill_plannerModel();
+    this->update_sumBySchedule(firstDay);
+    this->update_sumByMenu(firstDay);
 }
-
 
 void foodplanner::read_foodPlan(QDomDocument xmldoc)
 {
-    QStandardItem *rootItem = weekModel->invisibleRootItem();
+    QStandardItem *rootItem = weekPlansModel->invisibleRootItem();
     QDomElement childLevel;
     QDomNodeList xmlList;
-
+    QString weekID;
     xmlList = xmldoc.firstChildElement().elementsByTagName("week");
 
     for(int weeks = 0; weeks < xmlList.count(); ++weeks)
     {
         QList<QStandardItem*> intItems;
         childLevel = xmlList.at(weeks).toElement();
-        intItems << new QStandardItem(childLevel.attribute("id")+"_"+childLevel.attribute("year"));
+        weekID = childLevel.attribute("id")+"_"+childLevel.attribute("year");
+        intItems << new QStandardItem(weekID);
+        planList << weekID;
         rootItem->appendRow(intItems);
         build_weekFoodTree(childLevel,intItems.at(0));
     }
@@ -132,38 +140,113 @@ void foodplanner::build_weekFoodTree(QDomElement element,QStandardItem *parentIt
     }
 }
 
-void foodplanner::fill_weekModel(QDate firstday)
+void foodplanner::fill_plannerModel()
 {
-    QString weekID = QString::number(firstday.weekNumber())+"_"+QString::number(firstday.year());
+    QString weekID = QString::number(firstDayofWeek.weekNumber())+"_"+QString::number(firstDayofWeek.year());
     QList<QStandardItem*> week;
-    week = weekModel->findItems(weekID,Qt::MatchExactly,0);
-    QModelIndex weekIndex = weekModel->indexFromItem(week.at(0));
+    week = weekPlansModel->findItems(weekID,Qt::MatchExactly,0);
+    QModelIndex weekIndex = weekPlansModel->indexFromItem(week.at(0));
     QModelIndex dayIndex;
     QModelIndex mealIndex;
     int foodCount = 0;
-    int dayCalories = 0;
-    QString foodString;
+    int rowCount = 0;
+    int foodRow = 0;
 
     for(int day = 0; day < dayHeader.count(); ++day)
     {
-        dayIndex = weekModel->index(day,0,weekIndex);
-        dayCalories = 0;
+        dayIndex = weekPlansModel->index(day,0,weekIndex);
+
         for(int meal = 0; meal < mealsHeader.count(); ++meal)
         {
-            mealIndex = weekModel->index(meal,0,dayIndex);
-            foodCount = weekModel->itemFromIndex(mealIndex)->rowCount();
-            foodString.clear();
+            mealIndex = weekPlansModel->index(meal,0,dayIndex);
+            foodCount = weekPlansModel->itemFromIndex(mealIndex)->rowCount();
+            planerModel->insertRows(rowCount,foodCount);
 
             for(int food = 0; food < foodCount; ++food)
             {
-                dayCalories = dayCalories + weekModel->data(weekModel->index(food,1,mealIndex)).toInt();
-                foodString = foodString +weekModel->data(weekModel->index(food,0,mealIndex)).toString()+" - "+weekModel->data(weekModel->index(food,1,mealIndex)).toString()+"\n";
+               foodRow =  rowCount+food;
+               planerModel->setData(planerModel->index(foodRow,0),weekID);
+               planerModel->setData(planerModel->index(foodRow,1),firstDayofWeek.addDays(day).toString("dd.MM.yyyy"));
+               planerModel->setData(planerModel->index(foodRow,2),mealsHeader.at(meal));
+               planerModel->setData(planerModel->index(foodRow,3),weekPlansModel->data(weekPlansModel->index(food,0,mealIndex)).toString());
+               planerModel->setData(planerModel->index(foodRow,4),weekPlansModel->data(weekPlansModel->index(food,1,mealIndex)).toInt());
             }
-            foodString.truncate(foodString.count()-1);
-
-            planerModel->setData(planerModel->index(meal,day),foodString);
-            daySumModel->setData(daySumModel->index(0,day),dayCalories);
-            daySumModel->setData(daySumModel->index(1,day),dayCalBase);
+            rowCount = planerModel->rowCount();
         }
     }
+}
+
+void foodplanner::update_daySumModel()
+{
+    int sum = 0;
+    int diff = 0;
+
+    for(int i = 0; i < dayHeader.count(); ++i)
+    {
+        sum = daySumModel->data(daySumModel->index(1,i)).toInt() + daySumModel->data(daySumModel->index(2,i)).toInt();
+        diff = sum - daySumModel->data(daySumModel->index(0,i)).toInt();
+        daySumModel->setData(daySumModel->index(1,i),dayCalBase);
+        daySumModel->setData(daySumModel->index(3,i),sum);
+        daySumModel->setData(daySumModel->index(4,i),diff);
+    }
+    this->update_weekSumModel();
+}
+
+void foodplanner::update_weekSumModel()
+{
+    QVector<int> weekSum(5);
+
+    for(int i = 0; i < dayHeader.count(); ++i)
+    {
+        for(int x = 0; x < daySumModel->rowCount(); ++x)
+        {
+            weekSum[x] = weekSum[x] + daySumModel->data(daySumModel->index(x,i)).toInt();
+        }
+    }
+
+    for(int i = 0; i < weekSum.count(); ++i)
+    {
+        weekSumModel->setData(weekSumModel->index(i,0),weekSum[i]);
+    }
+}
+
+void foodplanner::update_sumBySchedule(QDate firstday)
+{
+    int day = 0;
+    int dayWork = 0;
+    QString weekID = QString::number(firstday.weekNumber())+"_"+QString::number(firstday.year());
+    schedulePtr->scheduleProxy->invalidate();
+    schedulePtr->scheduleProxy->setFilterFixedString(weekID);
+    schedulePtr->scheduleProxy->setFilterKeyColumn(0);
+
+    for(int i = 0; i < schedulePtr->scheduleProxy->rowCount(); ++i)
+    {
+        day = QDate::fromString(schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,1)).toString(),"dd.MM.yyyy").dayOfWeek()-1;
+        dayWork = daySumModel->data(daySumModel->index(2,day)).toInt() + schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,9)).toInt();
+        daySumModel->setData(daySumModel->index(2,day),dayWork);
+    }
+    this->update_daySumModel();
+}
+
+void foodplanner::update_sumByMenu(QDate firstDay)
+{
+    int dayCalories = 0;
+    QDate dateofday;
+    planerProxy->invalidate();
+    planerProxy->setFilterKeyColumn(1);
+
+    for(int day = 0; day < dayHeader.count(); ++day)
+    {
+        dateofday = firstDay.addDays(day);
+        planerProxy->setFilterRegExp("\\b"+dateofday.toString("dd.MM.yyyy")+"\\b");
+
+        for(int row = 0 ; row < planerProxy->rowCount(); ++row)
+        {
+            dayCalories = dayCalories + planerProxy->data(planerProxy->index(row,4)).toInt();
+        }
+
+        daySumModel->setData(daySumModel->index(0,day),dayCalories);
+        dayCalories = 0;
+    }
+    this->update_daySumModel();
 }
