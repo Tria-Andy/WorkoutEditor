@@ -13,27 +13,33 @@ class foodplanner : public xmlHandler, public calculation
 public:
     explicit foodplanner(schedule *ptrSchedule = 0,QDate fd = QDate());
 
-    QStandardItemModel *weekSumModel,*daySumModel,*mealModel;
-    QSortFilterProxyModel *planerProxy,*mealProxy;
+    QStandardItemModel *weekPlansModel,*weekSumModel,*daySumModel,*mealModel;
     QDate firstDayofWeek;
     QStringList planList,mealsHeader,dayHeader;
 
+    QString set_weekID(QDate);
+    void write_foodPlan();
+    void write_meals();
     void fill_plannerModel();
+    bool insert_newWeek(QDate);
+    void update_mealModel(QString,QStringList*);
     void update_sumBySchedule(QDate);
-    void update_sumByMenu(QDate);
+    void update_sumByMenu(QDate,int, QStringList*,bool);
+    QStringList get_mealList(QString);
 
 private:
     schedule *schedulePtr;
-    QStandardItemModel *weekPlansModel,*planerModel;
-    QString filePath,planerXML,mealXML;
-    QStringList dayTags,mealTags,weekHeader,mealList,sumHeader,daySumHeader,weekSumHeader;
+    QString loadedWeek,filePath,planerXML,mealXML;
+    QStringList dayTags,sectionTags,mealTags,weekHeader,sumHeader,daySumHeader,weekSumHeader;
     int dayCalBase;
 
     void read_foodPlan(QDomDocument);
     void read_meals(QDomDocument);
     void build_weekFoodTree(QDomElement,QStandardItem*);
     QStandardItem *create_item(QDomElement,QStandardItem*);
-    void set_Models(QDate);
+
+    int read_dayCalories(QDate);
+    void update_weekPlanModel(QDate,int,QStringList*);
     void update_daySumModel();
     void update_weekSumModel();
 

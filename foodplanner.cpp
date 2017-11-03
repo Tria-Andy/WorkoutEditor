@@ -6,7 +6,7 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     firstDayofWeek = fd;
 
     dayTags  << "Day" << "Meal" << "Food";
-    mealTags << "id" << "section" << "name" << "cal";
+    mealTags << "name" << "cal";
     mealsHeader = settings::get_listValues("meals");
     sumHeader << "Calories Food:" << "Conversion Base:" << "Conversion Sport:" << "Summery:" << "Difference:";
     weekSumHeader << "Week Summery";
@@ -18,13 +18,8 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
         dayHeader << QDate::longDayName(d);
     }
 
-    planerModel = new QStandardItemModel(0,5);
-    planerProxy = new QSortFilterProxyModel;
-    planerProxy->setSourceModel(planerModel);
     mealModel = new QStandardItemModel();
-    mealModel->setColumnCount(mealTags.count()+1);
-    mealProxy = new QSortFilterProxyModel;
-    mealProxy->setSourceModel(mealModel);
+    mealModel->setColumnCount(2);
     weekPlansModel = new QStandardItemModel();
     weekPlansModel->setColumnCount(2);
 
@@ -32,7 +27,7 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     daySumModel->setVerticalHeaderLabels(sumHeader);
     weekSumModel = new QStandardItemModel(sumHeader.count(),1);
     weekSumModel->setVerticalHeaderLabels(sumHeader);
-    weekSumModel->setHorizontalHeaderLabels(weekSumHeader );
+    weekSumModel->setHorizontalHeaderLabels(weekSumHeader);
 
     filePath = settings::getStringMapPointer(settings::stingMap::GC)->value("foodplanner");
 
@@ -47,15 +42,10 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
         this->read_meals(this->load_XMLFile(filePath,mealXML));
     }
 
-    this->set_Models(fd);
+    loadedWeek = set_weekID(firstDayofWeek);
 
-}
-
-void foodplanner::set_Models(QDate firstDay)
-{
-    this->fill_plannerModel();
-    this->update_sumBySchedule(firstDay);
-    this->update_sumByMenu(firstDay);
+    this->update_sumBySchedule(firstDayofWeek);
+    this->update_sumByMenu(firstDayofWeek,0,NULL,false);
 }
 
 void foodplanner::read_foodPlan(QDomDocument xmldoc)
@@ -77,25 +67,77 @@ void foodplanner::read_foodPlan(QDomDocument xmldoc)
         build_weekFoodTree(childLevel,intItems.at(0));
     }
 }
+void foodplanner::write_foodPlan()
+{
+
+}
 
 void foodplanner::read_meals(QDomDocument xmlDoc)
 {
-    QDomNodeList xmlList;
-    QDomElement xmlElement;
+    QStandardItem *rootItem = mealModel->invisibleRootItem();
+    QDomNodeList xmlList,childList;
+    QDomElement xmlElement,childElement;
 
-    xmlList = xmlDoc.firstChildElement().elementsByTagName("meal");
+    xmlList = xmlDoc.firstChildElement().elementsByTagName("section");
 
     for(int i = 0; i < xmlList.count(); ++i)
     {
+        QList<QStandardItem*> secItem;
         xmlElement = xmlList.at(i).toElement();
-        mealModel->insertRow(i);
-        mealModel->setData(mealModel->index(i,0),xmlElement.attribute("name")+" - "+xmlElement.attribute("cal"));
+        secItem << new QStandardItem(xmlElement.attribute("name"));
+        rootItem->appendRow(secItem);
 
-        for(int col = 0; col < mealTags.count(); ++col)
+        if(xmlElement.hasChildNodes())
         {
-            mealModel->setData(mealModel->index(i,col+1),xmlElement.attribute(mealTags.at(col)));
+            childList = xmlElement.childNodes();
+            for(int child = 0; child < childList.count(); ++child)
+            {
+                QList<QStandardItem*> mealItems;
+                childElement = childList.at(child).toElement();
+                mealItems << new QStandardItem(childElement.attribute("name"));
+                mealItems << new QStandardItem(childElement.attribute("cal"));
+                secItem.at(0)->appendRow(mealItems);
+            }
         }
     }
+}
+
+void foodplanner::write_meals()
+{
+    QDomDocument xmlDoc;
+    QDomElement xmlRoot,xmlElement,childElement;
+
+    xmlRoot = xmlDoc.createElement("meals");
+    xmlDoc.appendChild(xmlRoot);
+
+    for(int section = 0; section < mealModel->rowCount(); ++section)
+    {
+        xmlElement = xmlDoc.createElement("section");
+        xmlElement.setAttribute("id",section);
+        xmlElement.setAttribute("name",mealModel->data(mealModel->index(section,0)).toString());
+
+        if(mealModel->item(section,0)->hasChildren())
+        {
+            QModelIndex sectionIndex = mealModel->indexFromItem(mealModel->item(section,0));
+
+            for(int meal = 0; meal < mealModel->item(section,0)->rowCount(); ++meal)
+            {
+                childElement = xmlDoc.createElement("meal");
+                childElement.setAttribute("id",meal);
+
+                for(int att = 0; att < mealTags.count(); ++att)
+                {
+                    childElement.setAttribute(mealTags.at(att),mealModel->data(mealModel->index(meal,att,sectionIndex)).toString());
+                }
+                xmlElement.appendChild(childElement);
+                childElement.clear();
+            }
+        }
+        xmlRoot.appendChild(xmlElement);
+        xmlElement.clear();
+    }
+    this->write_XMLFile(filePath,&xmlDoc,mealXML);
+    xmlDoc.clear();
 }
 
 void foodplanner::build_weekFoodTree(QDomElement element,QStandardItem *parentItem)
@@ -140,40 +182,108 @@ void foodplanner::build_weekFoodTree(QDomElement element,QStandardItem *parentIt
     }
 }
 
-void foodplanner::fill_plannerModel()
+QString foodplanner::set_weekID(QDate vDate)
 {
-    QString weekID = QString::number(firstDayofWeek.weekNumber())+"_"+QString::number(firstDayofWeek.year());
-    QList<QStandardItem*> week;
-    week = weekPlansModel->findItems(weekID,Qt::MatchExactly,0);
-    QModelIndex weekIndex = weekPlansModel->indexFromItem(week.at(0));
+    return QString::number(vDate.weekNumber())+"_"+QString::number(vDate.year());
+}
+
+void foodplanner::update_mealModel(QString section,QStringList *mealList)
+{
+    if(!section.isEmpty())
+    {
+        QString mealString;
+        QList<QStandardItem*> mealSection = mealModel->findItems(section,Qt::MatchExactly,0);
+        QModelIndex sectionIndex = mealModel->indexFromItem(mealSection.at(0));
+
+        if(mealSection.at(0)->hasChildren())
+        {
+            mealModel->removeRows(0,mealSection.at(0)->rowCount(),sectionIndex);
+
+            for(int i = 0; i < mealList->count(); ++i)
+            {
+                mealString = mealList->at(i);
+                QList<QStandardItem*> mealItems;
+                mealItems << new QStandardItem(mealString.split(" - ").first());
+                mealItems << new QStandardItem(mealString.split(" - ").last());
+                mealSection.at(0)->appendRow(mealItems);
+            }
+        }
+    }
+}
+
+void foodplanner::update_weekPlanModel(QDate vDate, int mealID, QStringList *foodList)
+{
+    QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(set_weekID(vDate),Qt::MatchExactly,0).at(0));
     QModelIndex dayIndex;
     QModelIndex mealIndex;
+    QDate dayDate;
+    QString mealString;
+    QString foodString;
     int foodCount = 0;
-    int rowCount = 0;
-    int foodRow = 0;
 
     for(int day = 0; day < dayHeader.count(); ++day)
     {
-        dayIndex = weekPlansModel->index(day,0,weekIndex);
+        dayDate = weekPlansModel->data(weekPlansModel->index(day,0,weekIndex)).toDate();
 
-        for(int meal = 0; meal < mealsHeader.count(); ++meal)
+        if(dayDate == vDate)
         {
-            mealIndex = weekPlansModel->index(meal,0,dayIndex);
-            foodCount = weekPlansModel->itemFromIndex(mealIndex)->rowCount();
-            planerModel->insertRows(rowCount,foodCount);
-
-            for(int food = 0; food < foodCount; ++food)
+            dayIndex = weekPlansModel->index(day,0,weekIndex);
+            for(int meal = 0; meal < mealsHeader.count(); ++meal)
             {
-               foodRow =  rowCount+food;
-               planerModel->setData(planerModel->index(foodRow,0),weekID);
-               planerModel->setData(planerModel->index(foodRow,1),firstDayofWeek.addDays(day).toString("dd.MM.yyyy"));
-               planerModel->setData(planerModel->index(foodRow,2),mealsHeader.at(meal));
-               planerModel->setData(planerModel->index(foodRow,3),weekPlansModel->data(weekPlansModel->index(food,0,mealIndex)).toString());
-               planerModel->setData(planerModel->index(foodRow,4),weekPlansModel->data(weekPlansModel->index(food,1,mealIndex)).toInt());
+                mealIndex = weekPlansModel->index(meal,0,dayIndex);
+                mealString = weekPlansModel->data(weekPlansModel->index(meal,0,dayIndex)).toString();
+
+                if(mealString == mealsHeader.at(mealID))
+                {
+                    foodCount = weekPlansModel->itemFromIndex(mealIndex)->rowCount();
+                    weekPlansModel->removeRows(0,foodCount,mealIndex);
+
+                    for(int food = 0; food < foodList->count(); ++food)
+                    {
+                        foodString = foodList->at(food);
+                        QList<QStandardItem*> intItems;
+                        intItems << new QStandardItem(foodString.split(" - ").first());
+                        intItems << new QStandardItem(foodString.split(" - ").last());
+                        weekPlansModel->itemFromIndex(mealIndex)->appendRow(intItems);
+                    }
+                }
             }
-            rowCount = planerModel->rowCount();
         }
     }
+}
+
+int foodplanner::read_dayCalories(QDate vDate)
+{
+    QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(set_weekID(vDate),Qt::MatchExactly,0).at(0));
+    QModelIndex dayIndex;
+    QModelIndex mealIndex;
+    QDate dayDate;
+    QString mealString;
+    int foodCount = 0;
+    int dayCalories = 0;
+
+    for(int day = 0; day < dayHeader.count(); ++day)
+    {
+        dayDate = weekPlansModel->data(weekPlansModel->index(day,0,weekIndex)).toDate();
+
+        if(dayDate == vDate)
+        {
+            dayIndex = weekPlansModel->index(day,0,weekIndex);
+            for(int meal = 0; meal < mealsHeader.count(); ++meal)
+            {
+                mealIndex = weekPlansModel->index(meal,0,dayIndex);
+                mealString = weekPlansModel->data(weekPlansModel->index(meal,0,dayIndex)).toString();
+
+                foodCount = weekPlansModel->itemFromIndex(mealIndex)->rowCount();
+                for(int food = 0; food < foodCount; ++food)
+                {
+                    dayCalories = dayCalories + weekPlansModel->data(weekPlansModel->index(food,1,mealIndex)).toInt();
+                }
+            }
+        }
+    }
+
+    return dayCalories;
 }
 
 void foodplanner::update_daySumModel()
@@ -214,39 +324,65 @@ void foodplanner::update_sumBySchedule(QDate firstday)
 {
     int day = 0;
     int dayWork = 0;
-    QString weekID = QString::number(firstday.weekNumber())+"_"+QString::number(firstday.year());
-    schedulePtr->scheduleProxy->invalidate();
-    schedulePtr->scheduleProxy->setFilterFixedString(weekID);
-    schedulePtr->scheduleProxy->setFilterKeyColumn(0);
+    QString weekID = set_weekID(firstday);
 
-    for(int i = 0; i < schedulePtr->scheduleProxy->rowCount(); ++i)
+    if(weekID == loadedWeek)
     {
-        day = QDate::fromString(schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,1)).toString(),"dd.MM.yyyy").dayOfWeek()-1;
-        dayWork = daySumModel->data(daySumModel->index(2,day)).toInt() + schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,9)).toInt();
-        daySumModel->setData(daySumModel->index(2,day),dayWork);
+        schedulePtr->scheduleProxy->invalidate();
+        schedulePtr->scheduleProxy->setFilterFixedString(weekID);
+        schedulePtr->scheduleProxy->setFilterKeyColumn(0);
+
+        for(int i = 0; i < dayHeader.count(); ++i)
+        {
+            daySumModel->setData(daySumModel->index(2,i),0);
+        }
+
+        for(int i = 0; i < schedulePtr->scheduleProxy->rowCount(); ++i)
+        {
+            day = QDate::fromString(schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,1)).toString(),"dd.MM.yyyy").dayOfWeek()-1;
+            dayWork = daySumModel->data(daySumModel->index(2,day)).toInt() + schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,9)).toInt();
+            daySumModel->setData(daySumModel->index(2,day),dayWork);
+        }
+        this->update_daySumModel();
     }
+}
+
+void foodplanner::update_sumByMenu(QDate firstDay, int meal, QStringList *foodList, bool isUpdate)
+{
+    if(isUpdate)
+    {
+        this->update_weekPlanModel(firstDay,meal,foodList);
+        daySumModel->setData(daySumModel->index(0,firstDay.dayOfWeek()-1),read_dayCalories(firstDay));
+    }
+    else
+    {
+        for(int day = 0; day < dayHeader.count(); ++day)
+        {
+            daySumModel->setData(daySumModel->index(0,day),read_dayCalories(firstDay.addDays(day)));
+        }
+    }
+
+    loadedWeek = set_weekID(firstDay);
     this->update_daySumModel();
 }
 
-void foodplanner::update_sumByMenu(QDate firstDay)
+QStringList foodplanner::get_mealList(QString section)
 {
-    int dayCalories = 0;
-    QDate dateofday;
-    planerProxy->invalidate();
-    planerProxy->setFilterKeyColumn(1);
+    QStringList mealList;
 
-    for(int day = 0; day < dayHeader.count(); ++day)
+    if(!section.isEmpty())
     {
-        dateofday = firstDay.addDays(day);
-        planerProxy->setFilterRegExp("\\b"+dateofday.toString("dd.MM.yyyy")+"\\b");
+        QList<QStandardItem*> mealSection = mealModel->findItems(section,Qt::MatchExactly,0);
 
-        for(int row = 0 ; row < planerProxy->rowCount(); ++row)
+        QModelIndex sectionIndex = mealModel->indexFromItem(mealSection.at(0));
+
+        if(mealSection.at(0)->hasChildren())
         {
-            dayCalories = dayCalories + planerProxy->data(planerProxy->index(row,4)).toInt();
+            for(int i = 0; i < mealSection.at(0)->rowCount(); ++i)
+            {
+                mealList << mealModel->data(mealModel->index(i,0,sectionIndex)).toString()+ " - "+mealModel->data(mealModel->index(i,1,sectionIndex)).toString();
+            }
         }
-
-        daySumModel->setData(daySumModel->index(0,day),dayCalories);
-        dayCalories = 0;
     }
-    this->update_daySumModel();
+    return mealList;
 }

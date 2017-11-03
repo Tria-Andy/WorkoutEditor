@@ -1041,7 +1041,8 @@ private:
     void freeMem();
 
     //Food
-    void fill_weekTable(QString);
+    void fill_weekTable(QString,bool);
+    void update_foodViews(int);
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -1102,9 +1103,11 @@ private slots:
     void on_actionSave_triggered();
     void on_toolButton_addMenu_clicked();
     void on_listWidget_MenuEdit_doubleClicked(const QModelIndex &index);
-    void on_listWidget_MenuEdit_clicked(const QModelIndex &index);
     void on_toolButton_menuEdit_clicked();
     void on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item);
+    void on_listWidget_Menu_clicked(const QModelIndex &index);
+    void on_listWidget_Menu_doubleClicked(const QModelIndex &index);
+    void on_toolButton_saveMeals_clicked();
 };
 
 #endif // MAINWINDOW_H

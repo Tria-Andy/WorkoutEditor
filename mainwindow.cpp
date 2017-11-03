@@ -142,7 +142,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolButton_sync->setEnabled(false);
     ui->horizontalSlider_factor->setEnabled(false);
 
-    ui->comboBox_menu->addItems(settings::get_listValues("dish"));
     ui->label_foodWeek->setText("Kw "+QString::number(firstdayofweek.weekNumber()));
     ui->tableView_weekSum->setModel(foodPlan->weekSumModel);
     ui->tableView_weekSum->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -156,16 +155,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableWidget_weekPlan->setHorizontalHeaderLabels(foodPlan->dayHeader);
     ui->tableWidget_weekPlan->verticalHeader()->setFixedWidth(110);
     ui->tableWidget_weekPlan->setItemDelegate(&food_del);
-    this->fill_weekTable(QString::number(firstdayofweek.weekNumber())+"_"+QString::number(firstdayofweek.year()));
+    this->fill_weekTable(foodPlan->set_weekID(firstdayofweek),false);
 
     ui->tableView_daySummery->setModel(foodPlan->daySumModel);
     ui->tableView_daySummery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_daySummery->horizontalHeader()->hide();
     ui->tableView_daySummery->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_daySummery->verticalHeader()->setFixedWidth(110);
-    ui->listView_Menu->setModel(foodPlan->mealProxy);
+    ui->listWidget_Menu->addItems(foodPlan->get_mealList(ui->comboBox_menu->currentText()));
 
     ui->listWidget_weekPlans->addItems(foodPlan->planList);
+    ui->comboBox_menu->addItems(settings::get_listValues("dish"));
+    ui->toolButton_saveMeals->setEnabled(false);
 
     this->set_speedgraph();
     this->resetPlot();
@@ -200,36 +201,45 @@ void MainWindow::freeMem()
     }
 }
 
-void MainWindow::fill_weekTable(QString weekID)
+void MainWindow::fill_weekTable(QString weekID,bool reset)
 {
-    foodPlan->planerProxy->invalidate();
-    foodPlan->planerProxy->setFilterRegExp("\\b"+weekID+"\\b");
-    foodPlan->planerProxy->setFilterKeyColumn(0);
-    foodPlan->planerProxy->sort(1);
-    int mealIndex = 0;
-    int dayIndex = 0;
+    if(reset) ui->tableWidget_weekPlan->clearContents();
+
+    QStandardItemModel *model = foodPlan->weekPlansModel;
+    QModelIndex weekIndex = model->indexFromItem(model->findItems(weekID,Qt::MatchExactly,0).at(0));
+    QModelIndex dayIndex;
+    QModelIndex mealIndex;
     QString dayString;
-    QString mealString;
+    int foodCount = 0;
 
-    for(int row = 0; row < foodPlan->planerProxy->rowCount(); ++row)
+    for(int day = 0; day < foodPlan->dayHeader.count(); ++day)
     {
-
-        mealIndex = foodPlan->mealsHeader.indexOf(foodPlan->planerProxy->data(foodPlan->planerProxy->index(row,2)).toString());
-        dayIndex = QDate::fromString(foodPlan->planerProxy->data(foodPlan->planerProxy->index(row,1)).toString(),"dd.MM.yyyy").dayOfWeek()-1;
-
-        mealString = foodPlan->planerProxy->data(foodPlan->planerProxy->index(row,2)).toString();
-
-        if(!ui->tableWidget_weekPlan->item(mealIndex,dayIndex))
+        dayIndex = model->index(day,0,weekIndex);
+        for(int meal = 0; meal < foodPlan->mealsHeader.count(); ++meal)
         {
-          QTableWidgetItem *item = new QTableWidgetItem;
-          ui->tableWidget_weekPlan->setItem(mealIndex,dayIndex,item);
+            if(!ui->tableWidget_weekPlan->item(meal,day))
+            {
+              QTableWidgetItem *item = new QTableWidgetItem;
+              ui->tableWidget_weekPlan->setItem(meal,day,item);
+            }
+
+            mealIndex = model->index(meal,0,dayIndex);
+            foodCount = model->itemFromIndex(mealIndex)->rowCount();
+
+            for(int food = 0; food < foodCount; ++food)
+            {
+                dayString = dayString + ui->tableWidget_weekPlan->item(meal,day)->data(Qt::DisplayRole).toString() + "\n"+
+                            model->data(model->index(food,0,mealIndex)).toString() +" - "+
+                            model->data(model->index(food,1,mealIndex)).toString();
+
+            }
+            if(dayString.startsWith("\n"))
+            {
+                dayString.remove(0,1);
+            }
+            ui->tableWidget_weekPlan->item(meal,day)->setData(Qt::EditRole,dayString);
+            dayString.clear();
         }
-        dayString = ui->tableWidget_weekPlan->item(mealIndex,dayIndex)->data(Qt::DisplayRole).toString() +
-                    foodPlan->planerProxy->data(foodPlan->planerProxy->index(row,3)).toString() +" - "+
-                    foodPlan->planerProxy->data(foodPlan->planerProxy->index(row,4)).toString()+"\n";
-
-
-        ui->tableWidget_weekPlan->item(mealIndex,dayIndex)->setData(Qt::EditRole,dayString);
     }
 }
 
@@ -719,7 +729,6 @@ void MainWindow::set_buttons(bool set_value)
 
 void MainWindow::set_calender()
 {
-
     if(weekCounter == 0)
     {
         ui->calendarWidget->setSelectedDate(QDate::currentDate());
@@ -801,7 +810,6 @@ void MainWindow::on_actionStress_Calculator_triggered()
 
 void MainWindow::on_actionSave_triggered()
 {
-
     if(selModule == PLANER)
     {
         if(isWeekMode)
@@ -862,7 +870,18 @@ void MainWindow::on_actionSave_triggered()
     }
     else if(selModule == FOOD)
     {
-
+        QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this,
+                                          tr("Save Food Plan"),
+                                          "Save Food Plan and Meal List?",
+                                          QMessageBox::Yes|QMessageBox::No
+                                          );
+        if (reply == QMessageBox::Yes)
+        {
+            foodPlan->write_meals();
+            foodPlan->write_foodPlan();
+            ui->actionSave->setEnabled(false);
+        }
     }
 }
 
@@ -875,6 +894,7 @@ void MainWindow::on_calendarWidget_clicked(const QDate &date)
 void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
 {
     int dialog_code;
+
     if(isWeekMode)
     {
         if(index.column() != 0)
@@ -887,6 +907,7 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
             if(dialog_code == QDialog::Rejected)
             {
                 ui->actionSave->setEnabled(workSchedule->get_isUpdated());
+                foodPlan->update_sumBySchedule(selectDate);
             }
         }
         else
@@ -909,7 +930,6 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
                 if(dialog_code == QDialog::Accepted)
                 {
                     this->workout_calendar();
-                    //weekCounter = 0;
                     this->set_calender();
                     ui->actionSave->setEnabled(workSchedule->get_isUpdated());
                 }
@@ -917,7 +937,6 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
 
             if(dialog_code == QDialog::Rejected)
             {
-                //weekCounter = 0;
                 this->set_calender();
             }
         }
@@ -1978,26 +1997,32 @@ void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value
     }
 }
 
+void MainWindow::update_foodViews(int addDay)
+{
+    foodPlan->firstDayofWeek = foodPlan->firstDayofWeek.addDays(addDay);
+    QString weekId = QString::number(foodPlan->firstDayofWeek.weekNumber());
+    this->fill_weekTable(foodPlan->set_weekID(foodPlan->firstDayofWeek),true);
+    foodPlan->update_sumByMenu(foodPlan->firstDayofWeek,0,NULL,false);
+    foodPlan->update_sumBySchedule(foodPlan->firstDayofWeek);
+    ui->label_foodWeek->setText("Kw "+ weekId);
+}
+
+
 void MainWindow::on_toolButton_nextWeek_clicked()
 {
-    foodPlan->firstDayofWeek = foodPlan->firstDayofWeek.addDays(7);
-    ui->label_foodWeek->setText("Kw "+QString::number(foodPlan->firstDayofWeek.weekNumber()));
-    foodPlan->firstDayofWeek = foodPlan->firstDayofWeek.addDays(-7);
-
+    this->update_foodViews(7);
 }
 
 void MainWindow::on_toolButton_prevWeek_clicked()
 {
-    foodPlan->firstDayofWeek = foodPlan->firstDayofWeek.addDays(-7);
-    foodPlan->fill_plannerModel();
-    ui->label_foodWeek->setText("Kw "+QString::number(foodPlan->firstDayofWeek.weekNumber()));
+    this->update_foodViews(-7);
 }
 
 void MainWindow::on_comboBox_menu_currentTextChanged(const QString &value)
 {
-    foodPlan->mealProxy->invalidate();
-    foodPlan->mealProxy->setFilterRegExp("\\b"+value+"\\b");
-    foodPlan->mealProxy->setFilterKeyColumn(2);
+    ui->listWidget_Menu->clear();
+    ui->listWidget_Menu->addItems(foodPlan->get_mealList(value));
+    ui->progressBar_saveMeals->setValue(0);
 }
 
 void MainWindow::on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item)
@@ -2009,11 +2034,13 @@ void MainWindow::on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item)
 
 void MainWindow::on_toolButton_addMenu_clicked()
 {
-    foodPlan->mealModel->insertRow(foodPlan->mealModel->rowCount());
-    foodPlan->mealModel->setData(foodPlan->mealModel->index(foodPlan->mealModel->rowCount()-1,0),"-");
-    foodPlan->mealModel->setData(foodPlan->mealModel->index(foodPlan->mealModel->rowCount()-1,1),foodPlan->mealModel->rowCount());
-    foodPlan->mealModel->setData(foodPlan->mealModel->index(foodPlan->mealModel->rowCount()-1,2),ui->comboBox_menu->currentText());
-    foodPlan->mealModel->setData(foodPlan->mealModel->index(foodPlan->mealModel->rowCount()-1,3),"-");
+    ui->listWidget_Menu->addItem("NewMeal - Calories");
+    ui->toolButton_saveMeals->setEnabled(true);
+}
+
+void MainWindow::on_listWidget_Menu_doubleClicked(const QModelIndex &index)
+{
+    delete ui->listWidget_Menu->takeItem(index.row());
 }
 
 void MainWindow::on_listWidget_MenuEdit_doubleClicked(const QModelIndex &index)
@@ -2021,25 +2048,46 @@ void MainWindow::on_listWidget_MenuEdit_doubleClicked(const QModelIndex &index)
     delete ui->listWidget_MenuEdit->takeItem(index.row());
 }
 
-void MainWindow::on_listWidget_MenuEdit_clicked(const QModelIndex &index)
+void MainWindow::on_listWidget_Menu_clicked(const QModelIndex &index)
 {
-    QListWidgetItem *item = ui->listWidget_MenuEdit->item(index.row());
+    QListWidgetItem *item = ui->listWidget_Menu->item(index.row());
     item->setFlags(item->flags() | Qt::ItemIsEditable);
+    ui->listWidget_Menu->editItem(item);
 }
 
 void MainWindow::on_toolButton_menuEdit_clicked()
 {
     QString setString;
+    QStringList updateList;
     QModelIndex index = ui->tableWidget_weekPlan->currentIndex();
 
     for(int i = 0; i < ui->listWidget_MenuEdit->count(); ++i)
     {
         setString = setString + ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString()+"\n";
+        updateList << ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString();
     }
-    setString.truncate(setString.count());
+    setString.remove(setString.length()-1,1);
 
     ui->tableWidget_weekPlan->item(index.row(),index.column())->setData(Qt::EditRole,setString);
 
-    foodPlan->update_sumByMenu(foodPlan->firstDayofWeek);
+    foodPlan->update_sumByMenu(foodPlan->firstDayofWeek.addDays(index.column()),index.row(),&updateList,true);
     ui->listWidget_MenuEdit->clear();
+    ui->actionSave->setEnabled(true);
+}
+
+void MainWindow::on_toolButton_saveMeals_clicked()
+{
+    QStringList mealList;
+
+    ui->progressBar_saveMeals->setValue(0);
+
+    for(int i = 0; i < ui->listWidget_Menu->count(); ++i)
+    {
+       mealList << ui->listWidget_Menu->item(i)->data(Qt::DisplayRole).toString();
+       ui->progressBar_saveMeals->setValue(i*10);
+    }
+    foodPlan->update_mealModel(ui->comboBox_menu->currentText(),&mealList);
+
+    ui->progressBar_saveMeals->setValue(100);
+    ui->actionSave->setEnabled(true);
 }
