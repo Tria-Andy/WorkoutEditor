@@ -38,6 +38,8 @@ QDomDocument xmlHandler::load_XMLFile(QString path,QString fileName)
 
 void xmlHandler::write_XMLFile(QString path,QDomDocument *xmlDoc,QString fileName)
 {
+    const int IndentSize = 2;
+
     QFile xmlFile(path + QDir::separator() + fileName);
 
     if(!xmlFile.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -45,9 +47,8 @@ void xmlHandler::write_XMLFile(QString path,QDomDocument *xmlDoc,QString fileNam
         qDebug() << fileName+": File not open:"+fileName;
     }
 
-    QTextStream stream(&xmlFile);
-    stream << xmlDoc->toString();
-
+    QTextStream outXML(&xmlFile);
+    xmlDoc->save(outXML,IndentSize);
     xmlFile.close();
 }
     /*

@@ -21,7 +21,7 @@ public:
     void write_foodPlan();
     void write_meals();
     void fill_plannerModel();
-    bool insert_newWeek(QDate);
+    void insert_newWeek(QDate);
     void update_mealModel(QString,QStringList*);
     void update_sumBySchedule(QDate);
     void update_sumByMenu(QDate,int, QStringList*,bool);
@@ -37,6 +37,7 @@ private:
     void read_meals(QDomDocument);
     void build_weekFoodTree(QDomElement,QStandardItem*);
     QStandardItem *create_item(QDomElement,QStandardItem*);
+    void fill_planList(QDate,bool);
 
     int read_dayCalories(QDate);
     void update_weekPlanModel(QDate,int,QStringList*);
