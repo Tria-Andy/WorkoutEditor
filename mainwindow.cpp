@@ -142,10 +142,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolButton_sync->setEnabled(false);
     ui->horizontalSlider_factor->setEnabled(false);
 
-    ui->label_foodWeek->setText("Kw "+QString::number(firstdayofweek.weekNumber()));
     ui->tableView_weekSum->setModel(foodPlan->weekSumModel);
     ui->tableView_weekSum->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_weekSum->horizontalHeader()->hide();
     ui->tableView_weekSum->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_weekSum->setItemDelegate(&foodSumWeek_del);
 
     ui->tableWidget_weekPlan->setRowCount(foodPlan->mealsHeader.count());
     ui->tableWidget_weekPlan->setColumnCount(foodPlan->dayHeader.count());
@@ -162,9 +163,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView_daySummery->horizontalHeader()->hide();
     ui->tableView_daySummery->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_daySummery->verticalHeader()->setFixedWidth(110);
+    ui->tableView_daySummery->setItemDelegate(&foodSum_del);
     ui->listWidget_Menu->addItems(foodPlan->get_mealList(ui->comboBox_menu->currentText()));
 
     ui->listWidget_weekPlans->addItems(foodPlan->planList);
+    ui->listWidget_weekPlans->setItemDelegate(&mousehover_del);
+    ui->listWidget_Menu->setItemDelegate(&mousehover_del);
+    ui->listWidget_MenuEdit->setItemDelegate(&mousehover_del);
+    this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy"));
     ui->comboBox_menu->addItems(settings::get_listValues("dish"));
     ui->toolButton_saveMeals->setEnabled(false);
 
@@ -787,17 +793,26 @@ void MainWindow::refresh_saisonInfo()
 void MainWindow::on_actionNew_triggered()
 {
     int dialog_code;
-
-    if(isWeekMode)
+    if(selModule == PLANER)
     {
-        day_popup day_pop(this,QDate::currentDate(),workSchedule);
-        day_pop.setModal(true);
-        dialog_code = day_pop.exec();
-        if(dialog_code == QDialog::Rejected)
+        if(isWeekMode)
         {
-            ui->actionSave->setEnabled(workSchedule->get_isUpdated());
-            ui->actionPMC->setEnabled(true);
+            day_popup day_pop(this,QDate::currentDate(),workSchedule);
+            day_pop.setModal(true);
+            dialog_code = day_pop.exec();
+            if(dialog_code == QDialog::Rejected)
+            {
+                ui->actionSave->setEnabled(workSchedule->get_isUpdated());
+                ui->actionPMC->setEnabled(true);
+            }
         }
+    }
+    if(selModule == FOOD)
+    {
+        QDate selDate = ui->calendarWidget_Food->selectedDate();
+        foodPlan->insert_newWeek(selDate.addDays(1 - selDate.dayOfWeek()));
+        ui->listWidget_weekPlans->clear();
+        ui->listWidget_weekPlans->addItems(foodPlan->planList);
     }
 }
 
@@ -1208,6 +1223,7 @@ void MainWindow::update_infoModel()
     {
         infoModel->setData(infoModel->index(i,0),curr_activity->ride_info.value(settings::get_listValues("JsonFile").at(i)));
     }
+    ui->actionSave->setEnabled(true);
 }
 
 void MainWindow::setSelectedIntRow(QModelIndex index)
@@ -1914,6 +1930,8 @@ void MainWindow::set_module(int modID)
     else if(modID == FOOD)
     {
         this->set_menuItems(false,false);
+        ui->actionNew->setVisible(true);
+        ui->actionNew->setEnabled(false);
     }
 }
 
@@ -1997,25 +2015,19 @@ void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value
     }
 }
 
-void MainWindow::update_foodViews(int addDay)
+void MainWindow::set_foodWeek(QString weekID)
 {
-    foodPlan->firstDayofWeek = foodPlan->firstDayofWeek.addDays(addDay);
-    QString weekId = QString::number(foodPlan->firstDayofWeek.weekNumber());
-    this->fill_weekTable(foodPlan->set_weekID(foodPlan->firstDayofWeek),true);
+    foodPlan->firstDayofWeek = QDate::fromString(weekID.split(" - ").last(),"dd.MM.yyyy");
+    this->fill_weekTable(weekID.split(" - ").first(),true);
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek,0,NULL,false);
     foodPlan->update_sumBySchedule(foodPlan->firstDayofWeek);
-    ui->label_foodWeek->setText("Kw "+ weekId);
+    ui->label_foodWeek->setText("Kw "+ weekID);
 }
 
-
-void MainWindow::on_toolButton_nextWeek_clicked()
+void MainWindow::on_listWidget_weekPlans_clicked(const QModelIndex &index)
 {
-    this->update_foodViews(7);
-}
-
-void MainWindow::on_toolButton_prevWeek_clicked()
-{
-    this->update_foodViews(-7);
+    QString weekId = index.data(Qt::DisplayRole).toString();
+    this->set_foodWeek(weekId);
 }
 
 void MainWindow::on_comboBox_menu_currentTextChanged(const QString &value)
@@ -2053,6 +2065,7 @@ void MainWindow::on_listWidget_Menu_clicked(const QModelIndex &index)
     QListWidgetItem *item = ui->listWidget_Menu->item(index.row());
     item->setFlags(item->flags() | Qt::ItemIsEditable);
     ui->listWidget_Menu->editItem(item);
+    ui->toolButton_saveMeals->setEnabled(true);
 }
 
 void MainWindow::on_toolButton_menuEdit_clicked()
@@ -2090,4 +2103,10 @@ void MainWindow::on_toolButton_saveMeals_clicked()
 
     ui->progressBar_saveMeals->setValue(100);
     ui->actionSave->setEnabled(true);
+}
+
+void MainWindow::on_calendarWidget_Food_clicked(const QDate &date)
+{
+    ui->label_foodWeekInfo->setText("Add Week: " + QString::number(date.weekNumber())+ " - " +QString::number(date.year()));
+    ui->actionNew->setEnabled(true);
 }

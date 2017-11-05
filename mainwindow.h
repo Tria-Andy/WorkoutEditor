@@ -26,6 +26,7 @@
 #include <QLabel>
 #include <QDebug>
 #include "del_level.h"
+#include "del_mousehover.h"
 #include "schedule.h"
 #include "foodplanner.h"
 #include "dialog_addweek.h"
@@ -957,7 +958,122 @@ public:
         painter->restore();
     }
 };
+class del_foodSummery : public QStyledItemDelegate
+{
+    Q_OBJECT
+public:
+    explicit del_foodSummery(QObject *parent = 0) : QStyledItemDelegate(parent) {}
 
+    void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
+    {
+        painter->save();
+        QLinearGradient itemGradient(option.rect.topLeft(),option.rect.bottomLeft());
+        itemGradient.setSpread(QGradient::ReflectSpread);
+        QColor itemColor,gradColor;
+        QFont foodFont;
+        foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
+        painter->setFont(foodFont);
+
+        gradColor.setHsv(0,0,200,150);
+
+        if(index.row() == 0)
+        {
+            itemColor.setHsv(200,150,255,255);
+            painter->setPen(Qt::black);
+        }
+        else if(index.row() > 0 && index.row() < 4)
+        {
+            itemColor.setHsv(240,255,255,255);
+            painter->setPen(Qt::white);
+        }
+        else if(index.row() == 4)
+        {
+            if(index.data().toInt() > 700)
+            {
+                itemColor.setHsv(120,125,255,255);
+                painter->setPen(Qt::black);
+            }
+            if(index.data().toInt() < 700 && index.data().toInt() > 500)
+            {
+                itemColor.setHsv(60,125,255,255);
+                painter->setPen(Qt::black);
+            }
+            if(index.data().toInt() <= 500)
+            {
+                itemColor.setHsv(0,200,255,255);
+                painter->setPen(Qt::black);
+            }
+        }
+
+        itemGradient.setColorAt(0,gradColor);
+        itemGradient.setColorAt(1,itemColor);
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+        painter->fillRect(option.rect,itemGradient);
+
+        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
+        painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+
+        painter->restore();
+    }
+};
+class del_foodWeekSum : public QStyledItemDelegate
+{
+    Q_OBJECT
+public:
+    explicit del_foodWeekSum(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+
+    void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
+    {
+        painter->save();
+        QLinearGradient itemGradient(option.rect.topLeft(),option.rect.bottomLeft());
+        itemGradient.setSpread(QGradient::ReflectSpread);
+        QColor itemColor,gradColor;
+        QFont foodFont;
+        foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
+        painter->setFont(foodFont);
+
+        gradColor.setHsv(0,0,200,150);
+
+        if(index.row() == 0)
+        {
+            itemColor.setHsv(200,150,255,255);
+            painter->setPen(Qt::black);
+        }
+        else if(index.row() > 0 && index.row() < 4)
+        {
+            itemColor.setHsv(240,255,255,255);
+            painter->setPen(Qt::white);
+        }
+        else if(index.row() == 4)
+        {
+            if(index.data().toInt() > 4000)
+            {
+                itemColor.setHsv(120,125,255,255);
+                painter->setPen(Qt::black);
+            }
+            if(index.data().toInt() <= 4000 && index.data().toInt() > 3500)
+            {
+                itemColor.setHsv(60,125,255,255);
+                painter->setPen(Qt::black);
+            }
+            if(index.data().toInt() <= 3500)
+            {
+                itemColor.setHsv(0,200,255,255);
+                painter->setPen(Qt::black);
+            }
+        }
+
+        itemGradient.setColorAt(0,gradColor);
+        itemGradient.setColorAt(1,itemColor);
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+        painter->fillRect(option.rect,itemGradient);
+
+        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
+        painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+
+        painter->restore();
+    }
+};
 namespace Ui {
 class MainWindow;
 }
@@ -985,6 +1101,9 @@ private:
     del_level level_del;
     del_avgweek avgweek_del;
     del_foodplan food_del;
+    del_foodSummery foodSum_del;
+    del_foodWeekSum foodSumWeek_del;
+    del_mousehover mousehover_del;
     QStandardItemModel *calendarModel,*sumModel,*fileModel,*infoModel,*avgModel;
     QItemSelectionModel *treeSelection;
     QSortFilterProxyModel *scheduleProxy,*metaProxy,*metaProxyFilter,*contentProxy;
@@ -1042,7 +1161,7 @@ private:
 
     //Food
     void fill_weekTable(QString,bool);
-    void update_foodViews(int);
+    void set_foodWeek(QString);
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -1097,8 +1216,6 @@ private slots:
     void on_treeView_files_clicked(const QModelIndex &index);
     void on_actionRefresh_Filelist_triggered();
     void on_comboBox_saisonName_currentIndexChanged(const QString &arg1);
-    void on_toolButton_nextWeek_clicked();
-    void on_toolButton_prevWeek_clicked();
     void on_comboBox_menu_currentTextChanged(const QString &arg1);
     void on_actionSave_triggered();
     void on_toolButton_addMenu_clicked();
@@ -1108,6 +1225,8 @@ private slots:
     void on_listWidget_Menu_clicked(const QModelIndex &index);
     void on_listWidget_Menu_doubleClicked(const QModelIndex &index);
     void on_toolButton_saveMeals_clicked();
+    void on_calendarWidget_Food_clicked(const QDate &date);
+    void on_listWidget_weekPlans_clicked(const QModelIndex &index);
 };
 
 #endif // MAINWINDOW_H
