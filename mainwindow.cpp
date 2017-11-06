@@ -119,9 +119,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(workSchedule->week_content,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
 
     //UI
-    ui->actionSave->setEnabled(false);
-    ui->actionEditor->setEnabled(true);
-    ui->actionPlaner->setEnabled(false);
     ui->stackedWidget->setGeometry(5,5,0,0);
     this->summery_view();
     ui->tableView_cal->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -178,6 +175,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->resetPlot();
     this->read_activityFiles();
 
+    ui->actionSave->setEnabled(false);
     this->set_menuItems(false,true);
     this->set_phaseFilter(1);
 }
@@ -309,17 +307,6 @@ void MainWindow::openPreferences()
 
 void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
 {
-    if(mEditor)
-    {
-        ui->actionPlaner->setEnabled(mEditor);
-        ui->actionEditor->setEnabled(mPlaner);
-    }
-    if(mPlaner)
-    {
-        ui->actionEditor->setEnabled(mPlaner);
-        ui->actionPlaner->setEnabled(mEditor);
-    }
-
     //Editor
     ui->actionRefresh_Filelist->setVisible(mEditor);
     ui->actionReset->setVisible(mEditor);
