@@ -79,7 +79,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->frame_YearAvg->setVisible(false);
     ui->toolButton_weekCurrent->setEnabled(false);
     ui->toolButton_weekMinus->setEnabled(false);
-    calendarModel = new QStandardItemModel(weekRange,8,this);
+    calendarModel = new QStandardItemModel(this);
     sumModel = new QStandardItemModel(0,1,this);
     avgModel = new QStandardItemModel(this);
     scheduleProxy = new QSortFilterProxyModel(this);
@@ -167,9 +167,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->listWidget_weekPlans->setItemDelegate(&mousehover_del);
     ui->listWidget_Menu->setItemDelegate(&mousehover_del);
     ui->listWidget_MenuEdit->setItemDelegate(&mousehover_del);
+    ui->spinBox_calories->setVisible(false);
+    ui->lineEdit_Mealname->setVisible(false);
     this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy"));
     ui->comboBox_menu->addItems(settings::get_listValues("dish"));
     ui->toolButton_saveMeals->setEnabled(false);
+    ui->toolButton_foodUp->setEnabled(false);
+    ui->toolButton_foodDown->setEnabled(false);
+    ui->toolButton_menuEdit->setEnabled(false);
+    selModule = 0;
 
     this->set_speedgraph();
     this->resetPlot();
@@ -258,6 +264,7 @@ void MainWindow::read_activityFiles()
     actLoaded = true;
     delete actFileReader;
     ui->progressBar_fileState->setValue(100);
+    QTimer::singleShot(2000,ui->progressBar_fileState,SLOT(reset()));
 }
 
 void MainWindow::clearActivtiy()
@@ -409,8 +416,11 @@ void MainWindow::summery_view()
             for(int i = 0; i < rowcount; ++i)
             {
                 sport = scheduleProxy->data(scheduleProxy->index(i,3)).toString().trimmed();
-                this->week_summery(0,i);
-                this->week_summery(sportList.indexOf(sport)+1,i);
+                if(!sport.contains(settings::isOther))
+                {
+                    this->week_summery(0,i);
+                    this->week_summery(sportList.indexOf(sport)+1,i);
+                }
             }
 
             for(int i = 0; i < sportList.count(); ++i)
@@ -540,6 +550,8 @@ void MainWindow::workout_calendar()
 
     if(isWeekMode)
     {
+        calendarModel->setRowCount(weekRange);
+        calendarModel->setColumnCount(8);
         calendarModel->setHorizontalHeaderLabels(cal_header);
         ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableView_cal->setItemDelegate(&calender_del);
@@ -607,6 +619,8 @@ void MainWindow::workout_calendar()
             year_header << temp.toUpper();
         }
         year_header << generalValues->value("sum");
+
+        calendarModel->setColumnCount(year_header.count());
         calendarModel->setHorizontalHeaderLabels(year_header);
         ui->tableView_cal->setItemDelegate(&week_del);
         QString weekInfo,weekID;
@@ -621,6 +635,7 @@ void MainWindow::workout_calendar()
         {
             ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
             weekoffset = settings::get_fontValue("weekOffSet");
+            calendarModel->setRowCount(weekRange);
         }
         else
         {
@@ -630,6 +645,7 @@ void MainWindow::workout_calendar()
             metaProxyFilter->setFilterFixedString(phaseFilter);
             metaProxyFilter->setFilterKeyColumn(3);
             weekoffset = metaProxyFilter->rowCount();
+            calendarModel->setRowCount(weekoffset);
         }
         metaProxyFilter->sort(1);
 
@@ -869,6 +885,7 @@ void MainWindow::on_actionSave_triggered()
             ui->progressBar_fileState->setValue(75);
         }
         ui->progressBar_fileState->setValue(100);
+        QTimer::singleShot(2000,ui->progressBar_fileState,SLOT(reset()));
     }
     else if(selModule == FOOD)
     {
@@ -1874,6 +1891,7 @@ void MainWindow::on_lineEdit_workContent_textChanged(const QString &value)
 {
     Q_UNUSED(value)
     ui->toolButton_sync->setEnabled(true);
+    ui->actionSave->setEnabled(true);
 }
 
 void MainWindow::on_toolButton_addSelect_clicked()
@@ -1986,6 +2004,8 @@ void MainWindow::on_actionRefresh_Filelist_triggered()
     ui->progressBar_fileState->setValue(10);
     this->read_activityFiles();
     ui->progressBar_fileState->setValue(100);
+    QTimer::singleShot(2000,ui->progressBar_fileState,SLOT(reset()));
+
 }
 
 void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value)
@@ -2011,6 +2031,27 @@ void MainWindow::set_foodWeek(QString weekID)
     ui->label_foodWeek->setText("Kw "+ weekID);
 }
 
+void MainWindow::calc_foodCalories(int portion,double factor,int calories)
+{
+    if(portion >= 1 && portion < 100)
+    {
+        ui->lineEdit_calories->setText(QString::number(round(calories*(portion*factor))));
+    }
+    else if(portion >= 100)
+    {
+        ui->lineEdit_calories->setText(QString::number(round(calories*(portion*factor)/100)));
+    }
+}
+
+int MainWindow::checkFoodString(QString checkString)
+{
+    QRegExp rxp("\\b([A-Za-zäöü]*\\s){1,3}(\\s?\\-{1}\\s{1}\\d{1,3}){2}\\b");
+    QRegExpValidator rxpVal(rxp,0);
+    int pos = 0;
+
+    return rxpVal.validate(checkString,pos);
+}
+
 void MainWindow::on_listWidget_weekPlans_clicked(const QModelIndex &index)
 {
     QString weekId = index.data(Qt::DisplayRole).toString();
@@ -2029,17 +2070,23 @@ void MainWindow::on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item)
     ui->listWidget_MenuEdit->clear();
     ui->listWidget_MenuEdit->addItems(item->data(Qt::DisplayRole).toString().split("\n"));
     ui->label_menuEdit->setText("Edit: "+ foodPlan->dayHeader.at(item->column()) + " - " + foodPlan->mealsHeader.at(item->row()));
+    ui->toolButton_foodDown->setEnabled(true);
+    ui->toolButton_foodUp->setEnabled(true);
+    ui->toolButton_menuEdit->setEnabled(true);
 }
 
 void MainWindow::on_toolButton_addMenu_clicked()
 {
-    ui->listWidget_Menu->addItem("NewMeal - Calories");
+    ui->listWidget_Menu->addItem("NewMeal - 1 - 1");
     ui->toolButton_saveMeals->setEnabled(true);
 }
 
 void MainWindow::on_listWidget_Menu_doubleClicked(const QModelIndex &index)
 {
-    delete ui->listWidget_Menu->takeItem(index.row());
+    QListWidgetItem *item = ui->listWidget_Menu->item(index.row());
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+    ui->listWidget_Menu->editItem(item);
+    ui->toolButton_saveMeals->setEnabled(true);
 }
 
 void MainWindow::on_listWidget_MenuEdit_doubleClicked(const QModelIndex &index)
@@ -2049,10 +2096,25 @@ void MainWindow::on_listWidget_MenuEdit_doubleClicked(const QModelIndex &index)
 
 void MainWindow::on_listWidget_Menu_clicked(const QModelIndex &index)
 {
-    QListWidgetItem *item = ui->listWidget_Menu->item(index.row());
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-    ui->listWidget_Menu->editItem(item);
-    ui->toolButton_saveMeals->setEnabled(true);
+    int checkID = this->checkFoodString(index.data().toString());
+
+    if(checkID == 2)
+    {
+        QStringList mealValues = index.data().toString().split(" - ");
+        QString mealName = mealValues.at(0);
+        QString portion = mealValues.at(1);
+        QString calories = mealValues.at(2);
+
+        int cal = calories.toInt();
+        int port = portion.toInt();
+
+        ui->lineEdit_Mealname->setText(mealName);
+        ui->spinBox_portion->setValue(port);
+        ui->doubleSpinBox_portion->setValue(1);
+        ui->spinBox_calories->setValue(cal);
+
+        this->calc_foodCalories(port,1.0,cal);
+    }
 }
 
 void MainWindow::on_toolButton_menuEdit_clicked()
@@ -2073,6 +2135,9 @@ void MainWindow::on_toolButton_menuEdit_clicked()
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek.addDays(index.column()),index.row(),&updateList,true);
     ui->listWidget_MenuEdit->clear();
     ui->actionSave->setEnabled(true);
+    ui->toolButton_foodUp->setEnabled(false);
+    ui->toolButton_foodDown->setEnabled(false);
+    ui->toolButton_menuEdit->setEnabled(false);
 }
 
 void MainWindow::on_toolButton_saveMeals_clicked()
@@ -2090,10 +2155,48 @@ void MainWindow::on_toolButton_saveMeals_clicked()
 
     ui->progressBar_saveMeals->setValue(100);
     ui->actionSave->setEnabled(true);
+    QTimer::singleShot(2000,ui->progressBar_saveMeals,SLOT(reset()));
 }
 
 void MainWindow::on_calendarWidget_Food_clicked(const QDate &date)
 {
     ui->label_foodWeekInfo->setText("Add Week: " + QString::number(date.weekNumber())+ " - " +QString::number(date.year()));
     ui->actionNew->setEnabled(true);
+}
+
+void MainWindow::on_toolButton_deleteMenu_clicked()
+{
+    delete ui->listWidget_Menu->takeItem(ui->listWidget_Menu->currentRow());
+    ui->toolButton_saveMeals->setEnabled(true);
+}
+
+void MainWindow::on_doubleSpinBox_portion_valueChanged(double value)
+{
+    this->calc_foodCalories(ui->spinBox_portion->value(),value,ui->spinBox_calories->value());
+}
+
+void MainWindow::on_spinBox_portion_valueChanged(int value)
+{
+    this->calc_foodCalories(value,ui->doubleSpinBox_portion->value(),ui->spinBox_calories->value());
+}
+
+void MainWindow::on_toolButton_addMeal_clicked()
+{
+    ui->listWidget_MenuEdit->addItem(ui->lineEdit_Mealname->text()+" - "+ui->lineEdit_calories->text());
+}
+
+void MainWindow::on_toolButton_foodUp_clicked()
+{
+    int currentindex = ui->listWidget_MenuEdit->currentRow();
+    QListWidgetItem *currentItem = ui->listWidget_MenuEdit->takeItem(currentindex);
+    ui->listWidget_MenuEdit->insertItem(currentindex-1,currentItem);
+    ui->listWidget_MenuEdit->setCurrentRow(currentindex-1);
+}
+
+void MainWindow::on_toolButton_foodDown_clicked()
+{
+    int currentindex = ui->listWidget_MenuEdit->currentRow();
+    QListWidgetItem *currentItem = ui->listWidget_MenuEdit->takeItem(currentindex);
+    ui->listWidget_MenuEdit->insertItem(currentindex+1,currentItem);
+    ui->listWidget_MenuEdit->setCurrentRow(currentindex+1);
 }

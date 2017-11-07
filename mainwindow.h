@@ -1162,6 +1162,8 @@ private:
     //Food
     void fill_weekTable(QString,bool);
     void set_foodWeek(QString);
+    void calc_foodCalories(int,double,int);
+    int checkFoodString(QString);
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -1184,7 +1186,6 @@ private slots:
     void on_actionVersion_triggered();
     void on_actionPMC_triggered();
     void set_module(int);
-
 
     //Planner
     void on_calendarWidget_clicked(const QDate &date);
@@ -1227,6 +1228,12 @@ private slots:
     void on_toolButton_saveMeals_clicked();
     void on_calendarWidget_Food_clicked(const QDate &date);
     void on_listWidget_weekPlans_clicked(const QModelIndex &index);
+    void on_toolButton_deleteMenu_clicked();
+    void on_doubleSpinBox_portion_valueChanged(double arg1);
+    void on_spinBox_portion_valueChanged(int arg1);
+    void on_toolButton_addMeal_clicked();
+    void on_toolButton_foodUp_clicked();
+    void on_toolButton_foodDown_clicked();
 };
 
 #endif // MAINWINDOW_H
