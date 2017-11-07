@@ -16,6 +16,7 @@ public:
     QStandardItemModel *weekPlansModel,*weekSumModel,*daySumModel,*mealModel;
     QDate firstDayofWeek;
     QStringList planList,mealsHeader,dayHeader;
+    QMap<int,QStringList> foodList;
 
     QString set_weekID(QDate);
     void write_foodPlan();
