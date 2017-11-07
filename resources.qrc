@@ -44,5 +44,6 @@
         <file>icons/ExitButton.png</file>
         <file>icons/Update.png</file>
         <file>icons/Food.png</file>
+        <file>icons/Add.png</file>
     </qresource>
 </RCC>
