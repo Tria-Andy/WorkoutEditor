@@ -73,7 +73,14 @@ void jsonHandler::fill_model(QStandardItemModel *model, QJsonArray *jArray, QStr
 
         for(int col = 0; col < list->count(); ++col)
         {
-            model->setData(model->index(row,col,QModelIndex()),objItem[list->at(col)].toVariant());
+            if(objItem[list->at(col)].isNull())
+            {
+                model->setData(model->index(row,col,QModelIndex()),0);
+            }
+            else
+            {
+                model->setData(model->index(row,col,QModelIndex()),objItem[list->at(col)].toVariant());
+            }
         }
     }
 }
