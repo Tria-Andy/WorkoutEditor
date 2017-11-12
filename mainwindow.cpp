@@ -1395,8 +1395,7 @@ void MainWindow::set_speedValues(int index)
     double current = 0;
     double second = 0;
     int yPos = 0;
-    double intSpeed = treeSelection->selectedRows(6).at(0).data().toDouble();
-    double intDist = treeSelection->selectedRows(4).at(0).data().toDouble();
+    double intSpeed,intDist;
 
     int start = curr_activity->intModel->data(curr_activity->intModel->index(index,1,QModelIndex())).toInt();
     int stop = curr_activity->intModel->data(curr_activity->intModel->index(index,2,QModelIndex())).toInt();
@@ -1431,6 +1430,9 @@ void MainWindow::set_speedValues(int index)
 
     if(curr_activity->get_sport() != settings::isSwim)
     {
+        intSpeed = treeSelection->selectedRows(6).at(0).data().toDouble();
+        intDist = treeSelection->selectedRows(4).at(0).data().toDouble();
+
         if(curr_activity->get_sport() == settings::isRun)
         {
             ui->horizontalSlider_factor->setEnabled(true);
@@ -1443,6 +1445,13 @@ void MainWindow::set_speedValues(int index)
             yPos = 1;
         }
     }
+    else
+    {
+        ui->horizontalSlider_factor->setEnabled(false);
+        intSpeed = treeSelection->selectedRows(7).at(0).data().toDouble();
+        intDist = treeSelection->selectedRows(3).at(0).data().toDouble();
+        yPos = 2;
+    }
 
     this->set_speedPlot(intSpeed,intDist,yPos);
 }
@@ -1452,7 +1461,7 @@ void MainWindow::set_speedgraph()
     QFont plotFont;
     plotFont.setBold(true);
     plotFont.setPointSize(8);
-    y2Label << "HF" << "Watts";
+    y2Label << "HF" << "Watts" << "Strokes";
 
     ui->widget_plot->xAxis->setLabel("Seconds");
     ui->widget_plot->xAxis->setLabelFont(plotFont);

@@ -255,6 +255,13 @@ void Activity::prepareData()
             intModel->setData(intModel->index(0,5),"Workout_1");
         }
 
+        for(int i = 0; i < sampCount; ++i)
+        {
+            secondValue = sampleModel->data(sampleModel->index(i,3,QModelIndex())).toDouble();
+            sampSpeed[i] = sampleModel->data(sampleModel->index(i,2,QModelIndex())).toDouble();
+            sampSecond[i] = secondValue;
+        }
+
         swimProxy = new QSortFilterProxyModel();
         swimProxy->setSourceModel(swimModel);
 
