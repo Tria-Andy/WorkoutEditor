@@ -64,6 +64,8 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->comboBox_contestsport->addItems(settings::get_listValues("Sport"));
     ui->pushButton_save->setEnabled(false);
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
+    ui->label_watttospeed->setVisible(false);
+    ui->doubleSpinBox_watttospeed->setVisible(false);
 
     ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - athleteValues->value("yob")));
     ui->lineEdit_weight->setText(QString::number(settings::get_weightforDate(QDateTime::currentDateTime())));
@@ -238,6 +240,7 @@ void Dialog_settings::writeChangedValues()
         thresholdMap.insert("bikepace",paceSec);
         thresholdMap.insert("bikespeed",this->set_doubleValue(ui->lineEdit_speed->text().toDouble(),true));
         thresholdMap.insert("bikefactor",ui->doubleSpinBox_factor->value());
+        thresholdMap.insert("wattfactor",ui->doubleSpinBox_watttospeed->value());
         this->writeRangeValues(sport);
     }
     if(sport == settings::isRun)
@@ -531,15 +534,20 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         ui->spinBox_thresPower->setPalette(wback);
         ui->timeEdit_thresPace->setPalette(gback);
         level_del.threshold = thresPace;
+        ui->label_watttospeed->setVisible(false);
+        ui->doubleSpinBox_watttospeed->setVisible(false);
     }
     if(value == settings::isBike)
     {
         thresPower = thresValues->value("bikepower");
         thresPace = thresValues->value("bikepace");
         sportFactor = thresValues->value("bikefactor");
+        ui->doubleSpinBox_watttospeed->setValue(thresValues->value("wattfactor"));
         ui->spinBox_thresPower->setPalette(gback);
         ui->timeEdit_thresPace->setPalette(wback);
         level_del.threshold = thresPower;
+        ui->label_watttospeed->setVisible(true);
+        ui->doubleSpinBox_watttospeed->setVisible(true);
     }
     if(value == settings::isRun)
     {
@@ -549,6 +557,8 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         ui->spinBox_thresPower->setPalette(wback);
         ui->timeEdit_thresPace->setPalette(gback);
         level_del.threshold = thresPace;
+        ui->label_watttospeed->setVisible(false);
+        ui->doubleSpinBox_watttospeed->setVisible(false);
     }
     paceTime = paceTime.addSecs(static_cast<int>(thresPace));
     ui->spinBox_thresPower->setValue(thresPower);

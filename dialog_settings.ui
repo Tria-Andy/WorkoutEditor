@@ -6,14 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>400</height>
+    <width>550</width>
+    <height>408</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>400</height>
+   </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>500</width>
-    <height>400</height>
+    <width>550</width>
+    <height>408</height>
    </size>
   </property>
   <property name="font">
@@ -322,13 +328,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>125</width>
+              <width>150</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>125</width>
+              <width>150</width>
               <height>16777215</height>
              </size>
             </property>
@@ -761,13 +767,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>125</width>
+              <width>150</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>125</width>
+              <width>150</width>
               <height>16777215</height>
              </size>
             </property>
@@ -857,6 +863,29 @@
                 <item row="3" column="1">
                  <widget class="QDoubleSpinBox" name="doubleSpinBox_factor"/>
                 </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="label_watttospeed">
+                  <property name="text">
+                   <string>WTS:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox_watttospeed">
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.050000000000000</double>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </widget>
              </item>
@@ -884,13 +913,13 @@
            <widget class="QGroupBox" name="groupBox_hfvalues">
             <property name="minimumSize">
              <size>
-              <width>125</width>
+              <width>150</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>125</width>
+              <width>150</width>
               <height>16777215</height>
              </size>
             </property>
