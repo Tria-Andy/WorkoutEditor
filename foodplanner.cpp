@@ -285,6 +285,12 @@ void foodplanner::insert_newWeek(QDate firstday)
     this->fill_planList(firstday,true);
 }
 
+void foodplanner::remove_week(QString weekID)
+{
+    QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(weekID.split(" - ").first(),Qt::MatchExactly,0).at(0));
+    weekPlansModel->removeRow(weekIndex.row());
+}
+
 void foodplanner::fill_planList(QDate firstDate, bool addWeek)
 {
     if(addWeek)

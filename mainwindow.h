@@ -1234,6 +1234,7 @@ private slots:
     void on_toolButton_addMeal_clicked();
     void on_toolButton_foodUp_clicked();
     void on_toolButton_foodDown_clicked();
+    void on_actionDelete_triggered();
 };
 
 #endif // MAINWINDOW_H

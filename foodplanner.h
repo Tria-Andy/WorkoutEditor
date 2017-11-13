@@ -23,6 +23,7 @@ public:
     void write_meals();
     void fill_plannerModel();
     void insert_newWeek(QDate);
+    void remove_week(QString);
     void update_mealModel(QString,QStringList*);
     void update_sumBySchedule(QDate);
     void update_sumByMenu(QDate,int, QStringList*,bool);

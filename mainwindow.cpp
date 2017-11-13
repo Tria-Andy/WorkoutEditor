@@ -328,6 +328,8 @@ void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
     planMode->setEnabled(mPlaner);
     planerMode->setVisible(mPlaner);
 
+    ui->actionDelete->setVisible(false);
+
     if(workSchedule->get_StressMap()->count() == 0) ui->actionPMC->setEnabled(false);
 }
 
@@ -1944,6 +1946,8 @@ void MainWindow::set_module(int modID)
     else if(modID == FOOD)
     {
         this->set_menuItems(false,false);
+        ui->actionDelete->setVisible(true);
+        ui->actionDelete->setEnabled(false);
         ui->actionNew->setVisible(true);
         ui->actionNew->setEnabled(false);
     }
@@ -2065,6 +2069,7 @@ void MainWindow::on_listWidget_weekPlans_clicked(const QModelIndex &index)
 {
     QString weekId = index.data(Qt::DisplayRole).toString();
     this->set_foodWeek(weekId);
+    ui->actionDelete->setEnabled(true);
 }
 
 void MainWindow::on_comboBox_menu_currentTextChanged(const QString &value)
@@ -2208,4 +2213,25 @@ void MainWindow::on_toolButton_foodDown_clicked()
     QListWidgetItem *currentItem = ui->listWidget_MenuEdit->takeItem(currentindex);
     ui->listWidget_MenuEdit->insertItem(currentindex+1,currentItem);
     ui->listWidget_MenuEdit->setCurrentRow(currentindex+1);
+}
+
+void MainWindow::on_actionDelete_triggered()
+{
+    QModelIndex index = ui->listWidget_weekPlans->currentIndex();
+    QString weekID = index.data().toString();
+
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this,
+                                  tr("Delete Week"),
+                                  "Delete selected week "+weekID,
+                                  QMessageBox::Yes|QMessageBox::No
+                                  );
+    if (reply == QMessageBox::Yes)
+    {
+        foodPlan->remove_week(weekID);
+        ui->listWidget_weekPlans->takeItem(index.row());
+        this->set_foodWeek(ui->listWidget_weekPlans->currentItem()->text());
+        ui->actionDelete->setEnabled(false);
+        ui->actionSave->setEnabled(true);
+    }
 }
