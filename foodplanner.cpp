@@ -7,7 +7,7 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
 
     dayTags  << "Day" << "Meal" << "Food";
     mealTags << "name" << "port" << "cal";
-    mealsHeader = settings::get_listValues("meals");
+    mealsHeader = settings::get_listValues("Meals");
     sumHeader << "Calories Food:" << "Conversion Base:" << "Conversion Sport:" << "Summery:" << "Difference:";
     weekSumHeader << "Week Summery";
 

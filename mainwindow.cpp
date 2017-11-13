@@ -170,7 +170,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinBox_calories->setVisible(false);
     ui->lineEdit_Mealname->setVisible(false);
     this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy"));
-    ui->comboBox_menu->addItems(settings::get_listValues("dish"));
+    ui->comboBox_menu->addItems(settings::get_listValues("Dish"));
     ui->toolButton_saveMeals->setEnabled(false);
     ui->toolButton_foodUp->setEnabled(false);
     ui->toolButton_foodDown->setEnabled(false);

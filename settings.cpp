@@ -330,10 +330,10 @@ void settings::loadSettings()
 
         myvalues->beginGroup("Foodplanner");
             settingList = myvalues->value("meals").toString().split(splitter);
-            listMap.insert("meals",settingList);
+            listMap.insert("Meals",settingList);
             settingList.clear();
             settingList = myvalues->value("dish").toString().split(splitter);
-            listMap.insert("dish",settingList);
+            listMap.insert("Dish",settingList);
             settingList.clear();
         myvalues->endGroup();
 
@@ -576,6 +576,15 @@ void settings::saveSettings()
     myvalues->beginGroup("IntEditor");
         settingList = listMap.value("IntEditor");
         myvalues->setValue("parts",settings::setSettingString(settingList));
+        settingList.clear();
+    myvalues->endGroup();
+
+    myvalues->beginGroup("Foodplanner");
+        settingList = listMap.value("Meals");
+        myvalues->setValue("meals",settings::setSettingString(settingList));
+        settingList.clear();
+        settingList = listMap.value("Dish");
+        myvalues->setValue("dish",settings::setSettingString(settingList));
         settingList.clear();
     myvalues->endGroup();
 
