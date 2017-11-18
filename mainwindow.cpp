@@ -239,8 +239,9 @@ void MainWindow::fill_weekTable(QString weekID,bool reset)
             for(int food = 0; food < foodCount; ++food)
             {
                 dayString = dayString + ui->tableWidget_weekPlan->item(meal,day)->data(Qt::DisplayRole).toString() + "\n"+
-                            model->data(model->index(food,0,mealIndex)).toString() +" - "+
-                            model->data(model->index(food,1,mealIndex)).toString();
+                            model->data(model->index(food,0,mealIndex)).toString() + " ("+
+                            model->data(model->index(food,1,mealIndex)).toString()+"-"+
+                            model->data(model->index(food,2,mealIndex)).toString()+")";
 
             }
             if(dayString.startsWith("\n"))
@@ -2196,7 +2197,8 @@ void MainWindow::on_spinBox_portion_valueChanged(int value)
 
 void MainWindow::on_toolButton_addMeal_clicked()
 {
-    ui->listWidget_MenuEdit->addItem(ui->lineEdit_Mealname->text()+" - "+ui->lineEdit_calories->text());
+    QString mealPort = QString::number(ui->spinBox_portion->value()*ui->doubleSpinBox_portion->value());
+    ui->listWidget_MenuEdit->addItem(ui->lineEdit_Mealname->text()+" ("+mealPort+"-"+ui->lineEdit_calories->text()+")");
 }
 
 void MainWindow::on_toolButton_foodUp_clicked()

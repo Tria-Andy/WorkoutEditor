@@ -1992,6 +1992,11 @@
                    <verstretch>3</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>8</pointsize>
+                  </font>
+                 </property>
                  <property name="editTriggers">
                   <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::EditKeyPressed</set>
                  </property>

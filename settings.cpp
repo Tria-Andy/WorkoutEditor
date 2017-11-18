@@ -335,6 +335,7 @@ void settings::loadSettings()
             settingList = myvalues->value("dish").toString().split(splitter);
             listMap.insert("Dish",settingList);
             settingList.clear();
+            generalMap.insert("AddMoving",myvalues->value("addmoving").toString());
         myvalues->endGroup();
 
         myvalues->beginGroup("Misc");

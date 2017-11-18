@@ -931,7 +931,7 @@ public:
         itemGradient.setSpread(QGradient::ReflectSpread);
         QColor itemColor,gradColor;
         QFont foodFont;
-        foodFont.setPixelSize(settings::get_fontValue("fontMedium"));
+        foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
 
         gradColor.setHsv(0,0,200,150);

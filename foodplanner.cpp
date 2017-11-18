@@ -25,7 +25,7 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     mealModel = new QStandardItemModel();
     mealModel->setColumnCount(mealTags.count());
     weekPlansModel = new QStandardItemModel();
-    weekPlansModel->setColumnCount(2);
+    weekPlansModel->setColumnCount(mealTags.count());
 
     daySumModel = new QStandardItemModel(sumHeader.count(),dayHeader.count());
     daySumModel->setVerticalHeaderLabels(sumHeader);
@@ -107,8 +107,10 @@ void foodplanner::build_weekFoodTree(QDomElement element,QStandardItem *parentIt
             else if(childElement.tagName() == "Food")
             {
                 QList<QStandardItem*> intItems;
-                intItems << new QStandardItem(childElement.attribute("name"));
-                intItems << new QStandardItem(childElement.attribute("cal"));
+                for(int i = 0; i < mealTags.count(); ++i)
+                {
+                    intItems << new QStandardItem(childElement.attribute(mealTags.at(i)));
+                }
                 parentItem->appendRow(intItems);
             }
         }
@@ -167,7 +169,8 @@ void foodplanner::write_foodPlan()
                                 foodElement = xmlDoc.createElement("Food");
                                 foodElement.setAttribute("id",food);
                                 foodElement.setAttribute("name",weekPlansModel->data(weekPlansModel->index(food,0,foodIndex)).toString());
-                                foodElement.setAttribute("cal",weekPlansModel->data(weekPlansModel->index(food,1,foodIndex)).toString());
+                                foodElement.setAttribute("port",weekPlansModel->data(weekPlansModel->index(food,1,foodIndex)).toString());
+                                foodElement.setAttribute("cal",weekPlansModel->data(weekPlansModel->index(food,2,foodIndex)).toString());
                                 mealElement.appendChild(foodElement);
                                 foodElement.clear();
                             }
@@ -346,7 +349,9 @@ void foodplanner::update_weekPlanModel(QDate vDate, int mealID, QStringList *foo
     QDate dayDate;
     QString mealString;
     QString foodString;
+    QString port,cal;
     int foodCount = 0;
+    int portPos,calPos;
 
     for(int day = 0; day < dayHeader.count(); ++day)
     {
@@ -368,8 +373,13 @@ void foodplanner::update_weekPlanModel(QDate vDate, int mealID, QStringList *foo
                     {
                         foodString = foodList->at(food);
                         QList<QStandardItem*> intItems;
-                        intItems << new QStandardItem(foodString.split(" - ").first());
-                        intItems << new QStandardItem(foodString.split(" - ").last());
+                        portPos = foodString.indexOf("(")+1;
+                        calPos = foodString.indexOf("-")+1;
+                        port = foodString.mid(portPos,calPos-portPos-1);
+                        cal = foodString.mid(calPos,foodString.indexOf(")")-calPos);
+                        intItems << new QStandardItem(foodString.mid(0,foodString.lastIndexOf(" ")));
+                        intItems << new QStandardItem(port);
+                        intItems << new QStandardItem(cal);
                         weekPlansModel->itemFromIndex(mealIndex)->appendRow(intItems);
                     }
                     break;
@@ -405,7 +415,7 @@ int foodplanner::read_dayCalories(QDate vDate)
                 foodCount = weekPlansModel->itemFromIndex(mealIndex)->rowCount();
                 for(int food = 0; food < foodCount; ++food)
                 {
-                    dayCalories = dayCalories + weekPlansModel->data(weekPlansModel->index(food,1,mealIndex)).toInt();
+                    dayCalories = dayCalories + weekPlansModel->data(weekPlansModel->index(food,2,mealIndex)).toInt();
                 }
             }
         }
@@ -469,6 +479,9 @@ void foodplanner::update_sumBySchedule(QDate firstday)
         {
             day = QDate::fromString(schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,1)).toString(),"dd.MM.yyyy").dayOfWeek()-1;
             dayWork = daySumModel->data(daySumModel->index(2,day)).toInt() + schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,9)).toInt();
+
+            if(schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,3)).toString() == settings::isSwim) dayWork = dayWork + generalValues->value("AddMoving").toInt();
+
             daySumModel->setData(daySumModel->index(2,day),dayWork);
         }
         this->update_daySumModel();
