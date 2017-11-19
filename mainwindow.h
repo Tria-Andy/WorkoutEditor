@@ -1078,7 +1078,7 @@ namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow, public calculation
+class MainWindow : public QMainWindow, public fileReader
 {
     Q_OBJECT
 
@@ -1089,7 +1089,6 @@ private:
     Activity *curr_activity;
     foodplanner *foodPlan;
     jsonHandler *jsonhandler;
-    fileReader *actFileReader;
     settings editorSettings;
     calendar_delegate calender_del;
     week_delegate week_del;
@@ -1168,6 +1167,10 @@ private:
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+    //Foodplanner
+    bool eventFilter(QObject *watched, QEvent *event);
+    void showToolTip(QMouseEvent*);
 
 private slots:
     //Menu

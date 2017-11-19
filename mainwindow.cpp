@@ -153,6 +153,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableWidget_weekPlan->setHorizontalHeaderLabels(foodPlan->dayHeader);
     ui->tableWidget_weekPlan->verticalHeader()->setFixedWidth(110);
     ui->tableWidget_weekPlan->setItemDelegate(&food_del);
+    ui->tableWidget_weekPlan->viewport()->setMouseTracking(true);
+    ui->tableWidget_weekPlan->installEventFilter(this);
+    ui->tableWidget_weekPlan->viewport()->installEventFilter(this);
     this->fill_weekTable(foodPlan->set_weekID(firstdayofweek),false);
 
     ui->tableView_daySummery->setModel(foodPlan->daySumModel);
@@ -193,6 +196,31 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == ui->tableWidget_weekPlan)
+    {
+        if (event->type() == QEvent::MouseMove)
+        {
+
+        }
+    }
+    else if (obj == ui->tableWidget_weekPlan->viewport())
+    {
+        if (event->type() == QEvent::MouseMove)
+        {
+
+        }
+    }
+    return QMainWindow::eventFilter(obj, event);
+}
+
+void MainWindow::showToolTip(QMouseEvent *event)
+{
+    QPoint pos = event->pos();
+    QToolTip::showText(ui->tableWidget_weekPlan->viewport()->mapToGlobal(pos),"Meal Cal");
+}
+
 void MainWindow::freeMem()
 {
     if(userSetup)
@@ -230,6 +258,7 @@ void MainWindow::fill_weekTable(QString weekID,bool reset)
             if(!ui->tableWidget_weekPlan->item(meal,day))
             {
               QTableWidgetItem *item = new QTableWidgetItem;
+              item->setToolTip("Meal Cal");
               ui->tableWidget_weekPlan->setItem(meal,day,item);
             }
 
@@ -259,11 +288,12 @@ void MainWindow::read_activityFiles()
     fileModel->clear();
     ui->progressBar_fileState->setValue(20);
     QStandardItem *rootItem = fileModel->invisibleRootItem();
-    actFileReader = new fileReader(fileModel,rootItem);
+    this->readJsonFiles(rootItem);
+    //actFileReader = new fileReader(fileModel,rootItem);
     ui->progressBar_fileState->setValue(75);
     this->loadfile(fileModel->data(fileModel->index(0,4)).toString());
     actLoaded = true;
-    delete actFileReader;
+    //delete actFileReader;
     ui->progressBar_fileState->setValue(100);
     QTimer::singleShot(2000,ui->progressBar_fileState,SLOT(reset()));
 }
@@ -2137,17 +2167,28 @@ void MainWindow::on_toolButton_menuEdit_clicked()
     QString setString;
     QStringList updateList;
     QModelIndex index = ui->tableWidget_weekPlan->currentIndex();
+    int listCount = ui->listWidget_MenuEdit->count();
 
-    for(int i = 0; i < ui->listWidget_MenuEdit->count(); ++i)
+    if(listCount != 0)
     {
-        setString = setString + ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString()+"\n";
-        updateList << ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString();
+        for(int i = 0; i < listCount; ++i)
+        {
+            setString = setString + ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString()+"\n";
+            updateList << ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString();
+        }
     }
+    else
+    {
+        setString = "No Food\n";
+    }
+
     setString.remove(setString.length()-1,1);
 
     ui->tableWidget_weekPlan->item(index.row(),index.column())->setData(Qt::EditRole,setString);
 
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek.addDays(index.column()),index.row(),&updateList,true);
+
+    ui->label_menuEdit->setText("Edit: -");
     ui->listWidget_MenuEdit->clear();
     ui->actionSave->setEnabled(true);
     ui->toolButton_foodUp->setEnabled(false);
