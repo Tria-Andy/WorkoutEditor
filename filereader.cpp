@@ -1,10 +1,9 @@
 #include "filereader.h"
 #include "settings.h"
 
-fileReader::fileReader(QStandardItemModel *fModel,QStandardItem *froot)
+fileReader::fileReader()
 {
-    fileModel = fModel;
-    this->readJsonFiles(froot);
+
 }
 
 void fileReader::readJsonFiles(QStandardItem *rootItem)
