@@ -281,7 +281,7 @@ void foodplanner::insert_newWeek(QDate firstday)
             dayItem.at(0)->appendRow(mealsItem);
 
             QList<QStandardItem*> foodItem;
-            foodItem << new QStandardItem("Food");
+            foodItem << new QStandardItem("No Food");
             mealsItem.at(0)->appendRow(foodItem);
         }
     }
@@ -314,29 +314,46 @@ QString foodplanner::set_weekID(QDate vDate)
     return QString::number(vDate.weekNumber())+"_"+QString::number(vDate.year());
 }
 
+void foodplanner::addrow_mealModel(QStandardItem *item, QStringList *itemList)
+{
+    QStringList mealString;
+    QString tempString;
+
+    for(int i = 0; i < itemList->count(); ++i)
+    {
+        tempString = itemList->at(i);
+        mealString = tempString.split(" - ");
+        QList<QStandardItem*> mealItems;
+        mealItems << new QStandardItem(mealString.at(0));
+        mealItems << new QStandardItem(mealString.at(1));
+        mealItems << new QStandardItem(mealString.at(2));
+        item->appendRow(mealItems);
+    }
+}
+
+
 void foodplanner::update_mealModel(QString section,QStringList *mealList)
 {
     if(!section.isEmpty())
     {
-        QStringList mealString;
-        QString tempString;
         QList<QStandardItem*> mealSection = mealModel->findItems(section,Qt::MatchExactly,0);
-        QModelIndex sectionIndex = mealModel->indexFromItem(mealSection.at(0));
 
-        if(mealSection.at(0)->hasChildren())
+        if(!mealSection.isEmpty())
         {
-            mealModel->removeRows(0,mealSection.at(0)->rowCount(),sectionIndex);
+            QModelIndex sectionIndex = mealModel->indexFromItem(mealSection.at(0));
 
-            for(int i = 0; i < mealList->count(); ++i)
+            if(mealSection.at(0)->hasChildren())
             {
-                tempString = mealList->at(i);
-                mealString = tempString.split(" - ");
-                QList<QStandardItem*> mealItems;
-                mealItems << new QStandardItem(mealString.at(0));
-                mealItems << new QStandardItem(mealString.at(1));
-                mealItems << new QStandardItem(mealString.at(2));
-                mealSection.at(0)->appendRow(mealItems);
+                mealModel->removeRows(0,mealSection.at(0)->rowCount(),sectionIndex);
+                this->addrow_mealModel(mealSection.at(0),mealList);
             }
+        }
+        else
+        {
+            QStandardItem *root = mealModel->invisibleRootItem();
+            QStandardItem *mealItem = new QStandardItem(section);
+            root->appendRow(mealItem);
+            this->addrow_mealModel(mealItem,mealList);
         }
     }
 }
@@ -513,16 +530,21 @@ QStringList foodplanner::get_mealList(QString section)
 
     if(!section.isEmpty())
     {
-        QList<QStandardItem*> mealSection = mealModel->findItems(section,Qt::MatchExactly,0);
-
-        QModelIndex sectionIndex = mealModel->indexFromItem(mealSection.at(0));
-
-        if(mealSection.at(0)->hasChildren())
+        QList<QStandardItem*> mealSection = mealModel->findItems(section,Qt::MatchExactly,0);      
+        if(!mealSection.isEmpty())
         {
-            for(int i = 0; i < mealSection.at(0)->rowCount(); ++i)
+            QModelIndex sectionIndex = mealModel->indexFromItem(mealSection.at(0));
+            if(mealSection.at(0)->hasChildren())
             {
-                mealList << mealModel->data(mealModel->index(i,0,sectionIndex)).toString()+ " - "+mealModel->data(mealModel->index(i,1,sectionIndex)).toString()+ " - "+mealModel->data(mealModel->index(i,2,sectionIndex)).toString();
+                for(int i = 0; i < mealSection.at(0)->rowCount(); ++i)
+                {
+                    mealList << mealModel->data(mealModel->index(i,0,sectionIndex)).toString()+ " - "+mealModel->data(mealModel->index(i,1,sectionIndex)).toString()+ " - "+mealModel->data(mealModel->index(i,2,sectionIndex)).toString();
+                }
             }
+        }
+        else
+        {
+            mealList << "No Meals";
         }
     }
     return mealList;

@@ -40,6 +40,7 @@ private:
     void build_weekFoodTree(QDomElement,QStandardItem*);
     QStandardItem *create_item(QDomElement,QStandardItem*);
     void fill_planList(QDate,bool);
+    void addrow_mealModel(QStandardItem*,QStringList*);
 
     int read_dayCalories(QDate);
     void update_weekPlanModel(QDate,int,QStringList*);
