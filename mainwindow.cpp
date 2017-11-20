@@ -196,31 +196,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-bool MainWindow::eventFilter(QObject *obj, QEvent *event)
-{
-    if (obj == ui->tableWidget_weekPlan)
-    {
-        if (event->type() == QEvent::MouseMove)
-        {
-
-        }
-    }
-    else if (obj == ui->tableWidget_weekPlan->viewport())
-    {
-        if (event->type() == QEvent::MouseMove)
-        {
-
-        }
-    }
-    return QMainWindow::eventFilter(obj, event);
-}
-
-void MainWindow::showToolTip(QMouseEvent *event)
-{
-    QPoint pos = event->pos();
-    QToolTip::showText(ui->tableWidget_weekPlan->viewport()->mapToGlobal(pos),"Meal Cal");
-}
-
 void MainWindow::freeMem()
 {
     if(userSetup)
@@ -249,21 +224,29 @@ void MainWindow::fill_weekTable(QString weekID,bool reset)
     QModelIndex mealIndex;
     QString dayString;
     int foodCount = 0;
+    int mealCal = 0;
 
     for(int day = 0; day < foodPlan->dayHeader.count(); ++day)
     {
         dayIndex = model->index(day,0,weekIndex);
         for(int meal = 0; meal < foodPlan->mealsHeader.count(); ++meal)
         {
-            if(!ui->tableWidget_weekPlan->item(meal,day))
-            {
-              QTableWidgetItem *item = new QTableWidgetItem;
-              item->setToolTip("Meal Cal");
-              ui->tableWidget_weekPlan->setItem(meal,day,item);
-            }
-
             mealIndex = model->index(meal,0,dayIndex);
             foodCount = model->itemFromIndex(mealIndex)->rowCount();
+
+            if(!ui->tableWidget_weekPlan->item(meal,day))
+            {            
+                QTableWidgetItem *item = new QTableWidgetItem;
+
+                for(int cal = 0; cal < foodCount; ++cal)
+                {
+                    mealCal = mealCal + model->data(model->index(cal,2,mealIndex)).toInt();
+                }
+
+                item->setToolTip("Meal Cal: "+QString::number(mealCal));
+                ui->tableWidget_weekPlan->setItem(meal,day,item);
+            }
+            mealCal = 0;
 
             for(int food = 0; food < foodCount; ++food)
             {
@@ -2164,15 +2147,21 @@ void MainWindow::on_listWidget_Menu_clicked(const QModelIndex &index)
 
 void MainWindow::on_toolButton_menuEdit_clicked()
 {
-    QString setString;
+    QString setString,foodString;
     QStringList updateList;
     QModelIndex index = ui->tableWidget_weekPlan->currentIndex();
+    QTableWidgetItem *selItem = ui->tableWidget_weekPlan->currentItem();
     int listCount = ui->listWidget_MenuEdit->count();
+    int calPos = 0;
+    int mealCal = 0;
 
     if(listCount != 0)
     {
         for(int i = 0; i < listCount; ++i)
         {
+            foodString = ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString();
+            calPos = foodString.indexOf("-")+1;
+            mealCal = mealCal + foodString.mid(calPos,foodString.indexOf(")")-calPos).toInt();
             setString = setString + ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString()+"\n";
             updateList << ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString();
         }
@@ -2184,7 +2173,8 @@ void MainWindow::on_toolButton_menuEdit_clicked()
 
     setString.remove(setString.length()-1,1);
 
-    ui->tableWidget_weekPlan->item(index.row(),index.column())->setData(Qt::EditRole,setString);
+    selItem->setData(Qt::EditRole,setString);
+    selItem->setToolTip("Meal Cal: "+QString::number(mealCal));
 
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek.addDays(index.column()),index.row(),&updateList,true);
 

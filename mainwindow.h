@@ -1168,10 +1168,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    //Foodplanner
-    bool eventFilter(QObject *watched, QEvent *event);
-    void showToolTip(QMouseEvent*);
-
 private slots:
     //Menu
     void on_actionEditor_triggered();
