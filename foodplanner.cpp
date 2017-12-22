@@ -484,7 +484,7 @@ void foodplanner::update_sumBySchedule(QDate firstday)
     if(weekID == loadedWeek)
     {
         schedulePtr->scheduleProxy->invalidate();
-        schedulePtr->scheduleProxy->setFilterFixedString(weekID);
+        schedulePtr->scheduleProxy->setFilterRegExp("\\b"+weekID+"\\b");
         schedulePtr->scheduleProxy->setFilterKeyColumn(0);
 
         for(int i = 0; i < dayHeader.count(); ++i)
