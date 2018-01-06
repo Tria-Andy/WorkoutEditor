@@ -371,11 +371,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                     workFactor = generalValues->value("workfactor").toDouble();
                 }
             }
-            else if(isStrength)
-            {
-                pValue = percent / 20.0;
-            }
-            else if(isAlt)
+            else if(isStrength || isAlt)
             {
                 pValue = percent / 10.0;
             }
@@ -612,11 +608,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
         defaultDist = this->calc_distance(defaultTime,static_cast<double>(this->get_timesec(threstopace(thresPace,percent))));
         pValue = get_speed(QTime::fromString(threshold,"mm:ss"),0,currentSport,true);
     }
-    else if(isStrength)
-    {
-        pValue = percent / 20.0;
-    }
-    else if(isAlt)
+    else if(isStrength || isAlt)
     {
         pValue = percent / 10.0;
     }

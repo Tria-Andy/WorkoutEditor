@@ -28,6 +28,7 @@ settings::settings()
 
 QString settings::settingFile;
 QString settings::splitter = "/";
+bool settings::settingsUpdated;
 
 QHash<QString,QString> settings::gcInfo;
 QHash<QString,QString> settings::generalMap;
@@ -137,6 +138,8 @@ QColor settings::get_colorRGB(QString colorValue,bool trans)
 
 void settings::loadSettings()
 {
+    settingsUpdated = false;
+
     header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes" << "Work";
     header_bike << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD" << "Work";
     header_run << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Work";
@@ -260,7 +263,7 @@ void settings::loadSettings()
             thresholdMap.insert("swimpower",myvalues->value("swimpower").toDouble());
             thresholdMap.insert("bikepower",myvalues->value("bikepower").toDouble());
             thresholdMap.insert("runpower",myvalues->value("runpower").toDouble());
-            thresholdMap.insert("stgpower",athleteMap.value("weight")*4);
+            thresholdMap.insert("stgpower",myvalues->value("stgpower").toDouble());
             thresholdMap.insert("swimfactor",myvalues->value("swimfactor").toDouble());
             thresholdMap.insert("bikefactor",myvalues->value("bikefactor").toDouble());
             thresholdMap.insert("wattfactor",myvalues->value("wattfactor").toDouble());
@@ -602,6 +605,7 @@ void settings::saveSettings()
     myvalues->endGroup();
 
     delete myvalues;
+    settingsUpdated = true;
 }
 
 QString settings::set_colorString(QColor color)

@@ -173,7 +173,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinBox_calories->setVisible(false);
     ui->lineEdit_Mealname->setVisible(false);
     this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy"));
-    ui->comboBox_menu->addItems(settings::get_listValues("Dish"));
+
     ui->toolButton_saveMeals->setEnabled(false);
     ui->toolButton_foodUp->setEnabled(false);
     ui->toolButton_foodDown->setEnabled(false);
@@ -187,6 +187,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionSave->setEnabled(false);
     this->set_menuItems(false,true);
     this->set_phaseFilter(1);
+    this->loadUISettings();
 }
 
 enum {PLANER,EDITOR,FOOD};
@@ -194,6 +195,14 @@ enum {PLANER,EDITOR,FOOD};
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+
+void MainWindow::loadUISettings()
+{
+        ui->comboBox_menu->clear();
+        ui->comboBox_menu->addItems(settings::get_listValues("Dish"));
+        settings::settingsUpdated = false;
 }
 
 void MainWindow::freeMem()
@@ -272,11 +281,9 @@ void MainWindow::read_activityFiles()
     ui->progressBar_fileState->setValue(20);
     QStandardItem *rootItem = fileModel->invisibleRootItem();
     this->readJsonFiles(rootItem);
-    //actFileReader = new fileReader(fileModel,rootItem);
     ui->progressBar_fileState->setValue(75);
     this->loadfile(fileModel->data(fileModel->index(0,4)).toString());
     actLoaded = true;
-    //delete actFileReader;
     ui->progressBar_fileState->setValue(100);
     QTimer::singleShot(2000,ui->progressBar_fileState,SLOT(reset()));
 }
@@ -1850,6 +1857,11 @@ void MainWindow::on_actionPreferences_triggered()
         }
         this->summery_view();
         this->workout_calendar();
+
+        if(settings::settingsUpdated)
+        {
+            this->loadUISettings();
+        }
     }
 
     if(workSchedule->newSaison)

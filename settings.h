@@ -25,6 +25,7 @@
 
 class settings
 {
+
 private:
     static void saveSettings();
     static QString setSettingString(QStringList);
@@ -59,6 +60,7 @@ protected:
 
 public:
     settings();
+    static bool settingsUpdated;
     static void loadSettings();
     static QString isAlt,isSwim,isBike,isRun,isTria,isStrength,isOther;
 

@@ -233,15 +233,16 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,int
         double bodyHub = (height * 0.057) + (((3600/thresValues->value("runpace")) / pValue) / 100.0);
         return (weight * grav * mSec * bodyHub) * dura / factor;
     }
-    if(sport == settings::isStrength)
+    if(sport == settings::isStrength || sport == settings::isAlt)
     {
-        return (weight * grav * mSec * 0.218) * dura / factor;
+        return (weight * grav * mSec * 0.150) * dura / factor;
     }
+    /*
     if(sport == settings::isAlt)
     {
         return (weight * grav * mSec * 0.146) * dura / factor;
     }
-
+    */
     return 0;
 }
 

@@ -988,7 +988,7 @@ public:
         }
         else if(index.row() == 4)
         {
-            if(index.data().toInt() > 700)
+            if(index.data().toInt() >= 700)
             {
                 itemColor.setHsv(120,125,255,255);
                 painter->setPen(Qt::black);
@@ -1141,6 +1141,7 @@ private:
     void set_calender();
     void set_phaseButtons();
     void refresh_saisonInfo();
+    void loadUISettings();
 
     //Editor
     void select_activityFile();
@@ -1169,6 +1170,8 @@ public:
     ~MainWindow();
 
 private slots:
+
+
     //Menu
     void on_actionEditor_triggered();
     void on_actionPlaner_triggered();
