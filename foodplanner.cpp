@@ -497,7 +497,12 @@ void foodplanner::update_sumBySchedule(QDate firstday)
             day = QDate::fromString(schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,1)).toString(),"dd.MM.yyyy").dayOfWeek()-1;
             dayWork = daySumModel->data(daySumModel->index(2,day)).toInt() + schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,9)).toInt();
 
-            if(schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,3)).toString() == settings::isSwim) dayWork = dayWork + generalValues->value("AddMoving").toInt();
+            if(schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,3)).toString() == settings::isSwim &&
+               schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,2)).toString() == "06:00"
+                    )
+            {
+                dayWork = dayWork + generalValues->value("AddMoving").toInt();
+            }
 
             daySumModel->setData(daySumModel->index(2,day),dayWork);
         }
