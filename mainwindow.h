@@ -988,17 +988,24 @@ public:
         }
         else if(index.row() == 4)
         {
-            if(index.data().toInt() > 700)
+            int sumCal = index.model()->data(index.model()->index(3,index.column())).toInt();
+
+            if(index.data().toInt() >= (sumCal*0.25))
             {
-                itemColor.setHsv(120,125,255,255);
+                itemColor.setHsv(0,150,255,255);
                 painter->setPen(Qt::black);
             }
-            if(index.data().toInt() < 700 && index.data().toInt() > 500)
+            if(index.data().toInt() < (sumCal*0.25) && index.data().toInt() > (sumCal*0.20))
             {
                 itemColor.setHsv(60,125,255,255);
                 painter->setPen(Qt::black);
             }
-            if(index.data().toInt() <= 500)
+            if(index.data().toInt() <= (sumCal*0.20) && index.data().toInt() > (sumCal*0.15))
+            {
+                itemColor.setHsv(120,125,255,255);
+                painter->setPen(Qt::black);
+            }
+            if(index.data().toInt() <= (sumCal*0.15))
             {
                 itemColor.setHsv(0,200,255,255);
                 painter->setPen(Qt::black);
@@ -1234,6 +1241,7 @@ private slots:
     void on_toolButton_foodUp_clicked();
     void on_toolButton_foodDown_clicked();
     void on_actionDelete_triggered();
+    void on_tableWidget_weekPlan_itemChanged(QTableWidgetItem *item);
 };
 
 #endif // MAINWINDOW_H
