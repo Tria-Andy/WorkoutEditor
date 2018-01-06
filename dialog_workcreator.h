@@ -398,7 +398,7 @@ public:
         }
         if(sport == settings::isBike) pValue = model->data(model->index(3,0)).toDouble();
         if(sport == settings::isRun) pValue = get_speed(QTime::fromString(model->data(model->index(3,0)).toString(),"mm:ss"),0,sport,true);
-        if(sport == settings::isStrength) pValue = model->data(model->index(2,0)).toDouble() / 20.0;
+        if(sport == settings::isStrength) pValue = model->data(model->index(2,0)).toDouble() / 10.0;
         if(sport == settings::isAlt) pValue = model->data(model->index(2,0)).toDouble() / 10.0;
 
         if(model->data(model->index(0,0)).toString().contains(generalValues->value("breakname")) && sport == settings::isSwim)

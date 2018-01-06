@@ -371,11 +371,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                     workFactor = generalValues->value("workfactor").toDouble();
                 }
             }
-            else if(isStrength)
-            {
-                pValue = percent / 20.0;
-            }
-            else if(isAlt)
+            else if(isStrength || isAlt)
             {
                 pValue = percent / 10.0;
             }
