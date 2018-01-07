@@ -225,6 +225,7 @@ void MainWindow::freeMem()
 
 void MainWindow::fill_weekTable(QString weekID,bool reset)
 {
+    ui->tableWidget_weekPlan->blockSignals(true);
     if(reset) ui->tableWidget_weekPlan->clearContents();
 
     QStandardItemModel *model = foodPlan->weekPlansModel;
@@ -273,6 +274,7 @@ void MainWindow::fill_weekTable(QString weekID,bool reset)
             dayString.clear();
         }
     }
+    ui->tableWidget_weekPlan->blockSignals(false);
 }
 
 void MainWindow::read_activityFiles()
@@ -2279,4 +2281,21 @@ void MainWindow::on_actionDelete_triggered()
         ui->actionDelete->setEnabled(false);
         ui->actionSave->setEnabled(true);
     }
+}
+
+void MainWindow::on_tableWidget_weekPlan_itemChanged(QTableWidgetItem *item)
+{
+    QStringList itemList = item->data(Qt::DisplayRole).toString().split("\n");
+    QString foodString;
+    int calPos = 0;
+    int mealCal = 0;
+
+    for(int i = 0; i < itemList.count(); ++i)
+    {
+        foodString = itemList.at(i);
+        calPos = foodString.indexOf("-")+1;
+        mealCal = mealCal + foodString.mid(calPos,foodString.indexOf(")")-calPos).toInt();
+    }
+
+    foodPlan->update_sumByMenu(foodPlan->firstDayofWeek.addDays(item->column()),item->row(),&itemList,true);
 }
