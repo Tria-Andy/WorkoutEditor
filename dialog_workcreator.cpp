@@ -461,6 +461,22 @@ void Dialog_workCreator::save_workout()
     }
 
     //Metadaten
+
+    int roundNum = static_cast<int>(round(workSum)) % 10;
+
+    if(roundNum < 5)
+    {
+        workSum = round(workSum - roundNum);
+    }
+    else if(roundNum > 5)
+    {
+        workSum = round(workSum + (10-roundNum));
+    }
+    else if(roundNum == 5)
+    {
+        workSum = static_cast<int>(round(workSum));
+    }
+
     workoutValues << currentSport
                   << workID
                   << ui->comboBox_code->currentText()
@@ -468,7 +484,7 @@ void Dialog_workCreator::save_workout()
                   << get_workoutTime(timeSum)
                   << QString::number(distSum)
                   << QString::number(round(stressSum))
-                  << QString::number(round(workSum/10.0)*10)
+                  << QString::number(workSum)
                   << QString::number(ui->checkBox_timebased->isChecked());
 
      workModel = this->workouts_meta;
@@ -1502,7 +1518,7 @@ void Dialog_workCreator::update_workoutsSchedule(int index,QDate wDate, QPair<do
     proxyFilter->setData(proxyFilter->index(index,6),get_workoutTime(timeSum));                //duration
     proxyFilter->setData(proxyFilter->index(index,7),QString::number(distSum));                //distance
     proxyFilter->setData(proxyFilter->index(index,8),QString::number(round(stressSum)));       //stress
-    proxyFilter->setData(proxyFilter->index(index,9),QString::number(round(workSum/10.0)*10)); //kj
+    proxyFilter->setData(proxyFilter->index(index,9),QString::number(workSum));                 //kj
     updateProgess->setValue(progress);
 }
 
