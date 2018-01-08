@@ -974,6 +974,8 @@ public:
         foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
 
+        int dayCal = index.model()->data(index.model()->index(3,index.column())).toInt();
+
         gradColor.setHsv(0,0,200,150);
 
         if(index.row() == 0)
@@ -988,17 +990,22 @@ public:
         }
         else if(index.row() == 4)
         {
-            if(index.data().toInt() >= 700)
+            if(index.data().toInt() >= (dayCal*0.25))
             {
-                itemColor.setHsv(120,125,255,255);
+                itemColor.setHsv(0,150,255,255);
                 painter->setPen(Qt::black);
             }
-            if(index.data().toInt() < 700 && index.data().toInt() > 500)
+            if(index.data().toInt() < (dayCal*0.25) && index.data().toInt() > (dayCal*0.20))
             {
                 itemColor.setHsv(60,125,255,255);
                 painter->setPen(Qt::black);
             }
-            if(index.data().toInt() <= 500)
+            if(index.data().toInt() <= (dayCal*0.20) && index.data().toInt() > (dayCal*0.15))
+            {
+                itemColor.setHsv(120,125,255,255);
+                painter->setPen(Qt::black);
+            }
+            if(index.data().toInt() <= (dayCal*0.15))
             {
                 itemColor.setHsv(0,200,255,255);
                 painter->setPen(Qt::black);
@@ -1032,6 +1039,8 @@ public:
         foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
 
+        int weekCal = index.model()->data(index.model()->index(3,index.column())).toInt();
+
         gradColor.setHsv(0,0,200,150);
 
         if(index.row() == 0)
@@ -1046,17 +1055,22 @@ public:
         }
         else if(index.row() == 4)
         {
-            if(index.data().toInt() > 4000)
+            if(index.data().toInt() >= (weekCal*0.25))
             {
-                itemColor.setHsv(120,125,255,255);
+                itemColor.setHsv(0,150,255,255);
                 painter->setPen(Qt::black);
             }
-            if(index.data().toInt() <= 4000 && index.data().toInt() > 3500)
+            if(index.data().toInt() < (weekCal*0.25) && index.data().toInt() > (weekCal*0.20))
             {
                 itemColor.setHsv(60,125,255,255);
                 painter->setPen(Qt::black);
             }
-            if(index.data().toInt() <= 3500)
+            if(index.data().toInt() <= (weekCal*0.20) && index.data().toInt() > (weekCal*0.15))
+            {
+                itemColor.setHsv(120,125,255,255);
+                painter->setPen(Qt::black);
+            }
+            if(index.data().toInt() <= (weekCal*0.15))
             {
                 itemColor.setHsv(0,200,255,255);
                 painter->setPen(Qt::black);
