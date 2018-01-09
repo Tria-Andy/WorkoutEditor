@@ -2298,4 +2298,5 @@ void MainWindow::on_tableWidget_weekPlan_itemChanged(QTableWidgetItem *item)
     }
 
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek.addDays(item->column()),item->row(),&itemList,true);
+    ui->actionSave->setEnabled(true);
 }
