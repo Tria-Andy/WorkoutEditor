@@ -91,8 +91,12 @@ private slots:
     void on_comboBox_saisons_editTextChanged(const QString &arg1);
     void on_toolButton_updateSaison_clicked();
     void on_toolButton_deleteSaison_clicked();
-
     void on_doubleSpinBox_PALvalue_valueChanged(double arg1);
+    void on_comboBox_weightmode_currentIndexChanged(const QString &arg1);
+    void on_toolButton_colormax_clicked();
+    void on_toolButton_colorhigh_clicked();
+    void on_toolButton_colorlow_clicked();
+    void on_toolButton_colormin_clicked();
 
 private:
     Ui::Dialog_settings *ui;
@@ -106,10 +110,12 @@ private:
     del_mousehover mousehover_del;
     double thresPower,thresPace,sportFactor;
     QString getDirectory(QString);
+    QColor openColor(QColor);
     bool useColor,stressEdit;
     void checkSetup();
     void set_SelectControls(QString);
     void set_color(QColor,QString);
+    void set_bottonColor(QToolButton*,bool changeColor);
     void save_settingsChanges();
     void set_thresholdView(QString);
     void set_thresholdModel(QString);

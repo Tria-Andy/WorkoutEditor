@@ -62,6 +62,8 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->comboBox_thresSport->addItems(sportList);
     ui->dateEdit_contest->setDate(QDate::currentDate());
     ui->comboBox_contestsport->addItems(settings::get_listValues("Sport"));
+    ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
+    ui->comboBox_weightmode->setCurrentText(generalMap.value("WeightMode"));
     ui->pushButton_save->setEnabled(false);
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
     ui->label_watttospeed->setVisible(false);
@@ -73,6 +75,14 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->doubleSpinBox_bone->setValue(athleteValues->value("boneskg"));
     ui->doubleSpinBox_muscle->setValue(athleteValues->value("musclekg"));
     ui->doubleSpinBox_PALvalue->setValue(athleteValues->value("currpal"));
+    ui->doubleSpinBox_max->setValue(settings::doubleMap.value(generalMap.value("WeightMode")).at(0));
+    this->set_bottonColor(ui->toolButton_colormax,false);
+    ui->doubleSpinBox_high->setValue(settings::doubleMap.value(generalMap.value("WeightMode")).at(1));
+    this->set_bottonColor(ui->toolButton_colorhigh,false);
+    ui->doubleSpinBox_low->setValue(settings::doubleMap.value(generalMap.value("WeightMode")).at(2));
+    this->set_bottonColor(ui->toolButton_colorlow,false);
+    ui->doubleSpinBox_min->setValue(settings::doubleMap.value(generalMap.value("WeightMode")).at(3));
+    this->set_bottonColor(ui->toolButton_colormin,false);
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
     ui->listWidget_stressValue->setItemDelegate(&mousehover_del);
@@ -475,6 +485,24 @@ void Dialog_settings::set_color(QColor color,QString key)
     colorMapCache.insert(key,color);
 }
 
+void Dialog_settings::set_bottonColor(QToolButton *button,bool changeColor)
+{
+    QPalette palette = button->palette();
+    QString colorKey = button->objectName().remove("toolButton_color");
+
+    if(changeColor)
+    {
+        QColor color = this->openColor(button->palette().color(button->backgroundRole()));
+        if(color.isValid()) palette.setColor(button->backgroundRole(),color);
+    }
+    else
+    {
+        palette.setColor(button->backgroundRole(),colorMap.value(colorKey));
+    }
+    button->setAutoFillBackground(true);
+    button->setPalette(palette);
+}
+
 void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem *item)
 {
     QString listValue = item->data(Qt::DisplayRole).toString();
@@ -596,7 +624,7 @@ void Dialog_settings::on_dateEdit_saisonStart_dateChanged(const QDate &date)
 
 void Dialog_settings::on_toolButton_color_clicked()
 {
-    QColor color = QColorDialog::getColor(ui->toolButton_color->palette().color(ui->toolButton_color->backgroundRole()),this);
+    QColor color = this->openColor(ui->toolButton_color->palette().color(ui->toolButton_color->backgroundRole()));
     if(color.isValid())
     {
         this->set_color(color,ui->lineEdit_addedit->text());
@@ -730,6 +758,11 @@ QString Dialog_settings::getDirectory(QString getdir)
 {
     QFileDialog dialogSched;
     return dialogSched.getExistingDirectory(this,getdir,"C:\\",QFileDialog::ShowDirsOnly);
+}
+
+QColor Dialog_settings::openColor(QColor mappedColor)
+{
+    return QColorDialog::getColor(mappedColor,this);
 }
 
 void Dialog_settings::on_toolButton_workoutsPath_clicked()
@@ -1032,4 +1065,32 @@ void Dialog_settings::on_toolButton_deleteSaison_clicked()
 void Dialog_settings::on_doubleSpinBox_PALvalue_valueChanged(double value)
 {
     ui->lineEdit_currDayCal->setText(QString::number(round(current_dayCalories() * value)));
+}
+
+void Dialog_settings::on_comboBox_weightmode_currentIndexChanged(const QString &mode)
+{
+    ui->doubleSpinBox_max->setValue(settings::doubleMap.value(mode).at(0));
+    ui->doubleSpinBox_high->setValue(settings::doubleMap.value(mode).at(1));
+    ui->doubleSpinBox_low->setValue(settings::doubleMap.value(mode).at(2));
+    ui->doubleSpinBox_min->setValue(settings::doubleMap.value(mode).at(3));
+}
+
+void Dialog_settings::on_toolButton_colormax_clicked()
+{
+    this->set_bottonColor(ui->toolButton_colormax,true);
+}
+
+void Dialog_settings::on_toolButton_colorhigh_clicked()
+{
+    this->set_bottonColor(ui->toolButton_colorhigh,true);
+}
+
+void Dialog_settings::on_toolButton_colorlow_clicked()
+{
+    this->set_bottonColor(ui->toolButton_colorlow,true);
+}
+
+void Dialog_settings::on_toolButton_colormin_clicked()
+{
+    this->set_bottonColor(ui->toolButton_colormin,true);
 }

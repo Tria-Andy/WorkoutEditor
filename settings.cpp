@@ -46,7 +46,10 @@ QString settings::isAlt;
 QString settings::isTria;
 QString settings::isOther;
 
+QVector<double> settings::tempVector;
+
 QHash<QString,QStringList> settings::listMap;
+QHash<QString,QVector<double>> settings::doubleMap;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
 QMap<int,double> settings::weightMap;
@@ -232,7 +235,7 @@ void settings::loadSettings()
         athleteMap.insert("ridercw",0.2279+(athleteMap.value("weight")/(athleteMap.value("height")*750)));
         delete myPref;
 
-        QStringList settingList;
+        QStringList settingList,tempList;
         QString settingString;
 
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
@@ -332,6 +335,30 @@ void settings::loadSettings()
         myvalues->endGroup();
 
         myvalues->beginGroup("Foodplanner");
+            settingList = myvalues->value("mode").toString().split(splitter);
+            listMap.insert("Mode",settingList);
+            settingList.clear();
+            settingString = myvalues->value("weightmode").toString();
+            generalMap.insert("WeightMode",settingString);
+            settingList = myvalues->value("modepercent").toString().split(splitter);
+            tempVector.resize(4);
+            for(int i = 0; i < listMap.value("Mode").count(); i++)
+            {
+                settingString = settingList.at(i);
+                tempList = settingString.split("-");
+                for(int x = 0; x < tempList.count();++x)
+                {
+                    settingString = tempList.at(x);
+                    tempVector[x] = settingString.toDouble();
+
+                }
+                doubleMap.insert(listMap.value("Mode").at(i),tempVector);
+            }
+            settingList.clear();
+            settingList = myvalues->value("modeborder").toString().split(splitter);
+            settingString = myvalues->value("color").toString();
+            settings::fill_mapColor(&settingList,&settingString,false);
+            settingList.clear();
             settingList = myvalues->value("meals").toString().split(splitter);
             listMap.insert("Meals",settingList);
             settingList.clear();
