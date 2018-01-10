@@ -994,22 +994,22 @@ public:
         {
             if(index.data().toInt() >= (dayCal*(percent.at(0)/100.0)))
             {
-                itemColor = settings::get_itemColor("high").toHsv();
+                itemColor = settings::get_itemColor("max").toHsv();
                 painter->setPen(Qt::black);
             }
             if(index.data().toInt() < (dayCal*(percent.at(0)/100.0)) && index.data().toInt() > (dayCal*(percent.at(1)/100.0)))
             {
-                itemColor = settings::get_itemColor("max").toHsv();
+                itemColor = settings::get_itemColor("high").toHsv();
                 painter->setPen(Qt::black);
             }
             if(index.data().toInt() <= (dayCal*(percent.at(1)/100.0)) && index.data().toInt() > (dayCal*(percent.at(2)/100.0)))
             {
-                itemColor = settings::get_itemColor("min").toHsv();
+                itemColor = settings::get_itemColor("low").toHsv();
                 painter->setPen(Qt::black);
             }
             if(index.data().toInt() <= (dayCal*(percent.at(2)/100.0)))
             {
-                itemColor = settings::get_itemColor("low").toHsv();
+                itemColor = settings::get_itemColor("min").toHsv();
                 painter->setPen(Qt::black);
             }
         }
@@ -1060,22 +1060,22 @@ public:
         {
             if(index.data().toInt() >= (weekCal*(percent.at(0)/100.0)))
             {
-                itemColor = settings::get_itemColor("high").toHsv();
+                itemColor = settings::get_itemColor("max").toHsv();
                 painter->setPen(Qt::black);
             }
             if(index.data().toInt() < (weekCal*(percent.at(0)/100.0)) && index.data().toInt() > (weekCal*(percent.at(1)/100.0)))
             {
-                itemColor = settings::get_itemColor("max").toHsv();
+                itemColor = settings::get_itemColor("high").toHsv();
                 painter->setPen(Qt::black);
             }
             if(index.data().toInt() <= (weekCal*(percent.at(1)/100.0)) && index.data().toInt() > (weekCal*(percent.at(2)/100.0)))
             {
-                itemColor = settings::get_itemColor("min").toHsv();
+                itemColor = settings::get_itemColor("low").toHsv();
                 painter->setPen(Qt::black);
             }
             if(index.data().toInt() <= (weekCal*(percent.at(2)/100.0)))
             {
-                itemColor = settings::get_itemColor("low").toHsv();
+                itemColor = settings::get_itemColor("min").toHsv();
                 painter->setPen(Qt::black);
             }
         }
