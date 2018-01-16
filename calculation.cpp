@@ -324,8 +324,10 @@ double calculation::current_dayCalories()
     double weight = settings::get_weightforDate(QDateTime::currentDateTime());
     double height = athleteValues->value("height")*100;
     double age = QDate::currentDate().year() - athleteValues->value("yob");
+    int sF = athleteValues->value("sex") == 0.0 ? 5 : -161;
 
-    return round((10*weight)+(6.25*height)-(5*age)+5);
+    //Mifflin-St.Jeor-Formel
+    return round((10*weight)+(6.25*height)-(5*age)+sF);
 }
 
 double calculation::calc_swim_xpower(double distance,double pace,double time,double athleteWeight)
