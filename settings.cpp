@@ -202,6 +202,8 @@ void settings::loadSettings()
         double currWeight = 0.0;
         double currBone = 0.0;
         double currMuscle = 0.0;
+        int weightDate = 0;
+
         for(int i = 0; i < bodyWeight.count(); ++i)
         {
             weightInfo = bodyWeight.at(i).toObject();
@@ -210,12 +212,13 @@ void settings::loadSettings()
             currMuscle = weightInfo.value("musclekg").toDouble();
             weightMap.insert(weightInfo.value("when").toInt(),currWeight);
 
-            if(athleteMap.value("weight") < currWeight)
+            if(weightMap.lastKey() > weightDate)
             {
                 athleteMap.insert("weight",currWeight);
                 athleteMap.insert("boneskg",currBone);
                 athleteMap.insert("musclekg",currMuscle);
             }
+            weightDate = weightMap.lastKey();
         }
 
         //Sport Value Settings
@@ -231,6 +234,7 @@ void settings::loadSettings()
         QSettings *myPref = new QSettings(gcInfo.value("confpath") + QDir::separator() + "athlete-preferences.ini",QSettings::IniFormat);
         athleteMap.insert("yob",myPref->value("dob").toDate().year());
         athleteMap.insert("height",myPref->value("height").toDouble());
+        athleteMap.insert("sex",myPref->value("sex").toDouble());
         athleteMap.insert("riderfrg",(athleteMap.value("weight")+9.0)*9.81*0.45);
         athleteMap.insert("ridercw",0.2279+(athleteMap.value("weight")/(athleteMap.value("height")*750)));
         delete myPref;
