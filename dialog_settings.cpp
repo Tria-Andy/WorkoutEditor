@@ -64,6 +64,8 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->comboBox_contestsport->addItems(settings::get_listValues("Sport"));
     ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
     ui->comboBox_weightmode->setCurrentText(generalMap.value("WeightMode"));
+    ui->comboBox_food->addItem("Dish");
+    ui->comboBox_food->addItem("Meals");
     ui->pushButton_save->setEnabled(false);
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
     ui->label_watttospeed->setVisible(false);
@@ -86,6 +88,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
     ui->listWidget_stressValue->setItemDelegate(&mousehover_del);
+    ui->listWidget_food->setItemDelegate(&mousehover_del);
 
     this->refresh_saisonCombo();
     this->checkSetup();
@@ -1093,4 +1096,10 @@ void Dialog_settings::on_toolButton_colorlow_clicked()
 void Dialog_settings::on_toolButton_colormin_clicked()
 {
     this->set_bottonColor(ui->toolButton_colormin,true);
+}
+
+void Dialog_settings::on_comboBox_food_currentIndexChanged(const QString &value)
+{
+    ui->listWidget_food->clear();
+    ui->listWidget_food->addItems(listMap.value(value));
 }

@@ -98,6 +98,8 @@ private slots:
     void on_toolButton_colorlow_clicked();
     void on_toolButton_colormin_clicked();
 
+    void on_comboBox_food_currentIndexChanged(const QString &arg1);
+
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model,*contestTreeModel;

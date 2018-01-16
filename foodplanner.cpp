@@ -10,6 +10,7 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     mealsHeader = settings::get_listValues("Meals");
     sumHeader << "Calories Food:" << "Conversion Base:" << "Conversion Sport:" << "Summery:" << "Difference:";
     weekSumHeader << "Week Summery";
+    estHeader << "Weight at Weekstart:" << "Avg Daily Diff:" << "Estimate Loss:" << "Estimate Weight:";
 
     foodList.insert(0,QStringList() << "date");
     foodList.insert(1,QStringList() << "name");
@@ -25,13 +26,16 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     mealModel = new QStandardItemModel();
     mealModel->setColumnCount(mealTags.count());
     weekPlansModel = new QStandardItemModel();
-    weekPlansModel->setColumnCount(mealTags.count());
+    weekPlansModel->setColumnCount(mealTags.count()+1);
 
     daySumModel = new QStandardItemModel(sumHeader.count(),dayHeader.count());
     daySumModel->setVerticalHeaderLabels(sumHeader);
     weekSumModel = new QStandardItemModel(sumHeader.count(),1);
     weekSumModel->setVerticalHeaderLabels(sumHeader);
     weekSumModel->setHorizontalHeaderLabels(weekSumHeader);
+
+    estModel = new QStandardItemModel(estHeader.count(),1);
+    estModel->setVerticalHeaderLabels(estHeader);
 
     filePath = settings::getStringMapPointer(settings::stingMap::GC)->value("foodplanner");
 
@@ -68,6 +72,12 @@ void foodplanner::read_foodPlan(QDomDocument xmldoc)
         weekID = childLevel.attribute("id")+"_"+childLevel.attribute("year");
         intItems << new QStandardItem(weekID);
         intItems << new QStandardItem(childLevel.attribute("fdw"));
+        intItems << new QStandardItem(childLevel.attribute("weight"));
+        if(intItems.at(1)->data(Qt::DisplayRole).toDate() == firstDayofWeek)
+        {
+            intItems.at(2)->setData(athleteValues->value("weight"),Qt::EditRole);
+        }
+
         rootItem->appendRow(intItems);
         build_weekFoodTree(childLevel,intItems.at(0));
     }
@@ -133,6 +143,7 @@ void foodplanner::write_foodPlan()
         xmlElement.setAttribute("id",weekID.split("_").first());
         xmlElement.setAttribute("year",weekID.split("_").last());
         xmlElement.setAttribute("fdw",weekPlansModel->data(weekPlansModel->index(week,1)).toString());
+        xmlElement.setAttribute("weight",weekPlansModel->data(weekPlansModel->index(week,2)).toString());
 
         weekItem = weekPlansModel->item(week,0);
 
@@ -473,6 +484,29 @@ void foodplanner::update_weekSumModel()
     {
         weekSumModel->setData(weekSumModel->index(i,0),weekSum[i]);
     }
+
+    double weekWeight;
+    QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(loadedWeek,Qt::MatchExactly,0).at(0));
+
+    if(weekPlansModel->data(weekPlansModel->index(weekIndex.row(),1)).toDate() == QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek()))
+    {
+        weekWeight = athleteValues->value("weight");
+    }
+    else
+    {
+        weekWeight = weekPlansModel->data(weekPlansModel->index(weekIndex.row(),2)).toDouble();
+    }
+
+    double weekSave = weekSumModel->data(weekSumModel->index(4,0)).toDouble();
+    double weekLoss = round(weekSave/7.45)/1000.0 * -1;
+    double nextWeek = this->set_doubleValue(weekWeight + weekLoss,false);
+
+    estModel->setData(estModel->index(0,0),weekWeight);
+    estModel->setData(estModel->index(1,0),QString::number(round(weekSave/7.0)) + " Cal");
+    estModel->setData(estModel->index(2,0),QString::number(weekLoss) + " Kg");
+    estModel->setData(estModel->index(3,0),nextWeek);
+    weekPlansModel->setData(weekPlansModel->index(weekIndex.row()+1,2),nextWeek);
+
 }
 
 void foodplanner::update_sumBySchedule(QDate firstday)

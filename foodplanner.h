@@ -13,9 +13,9 @@ class foodplanner : public xmlHandler, public calculation
 public:
     explicit foodplanner(schedule *ptrSchedule = 0,QDate fd = QDate());
 
-    QStandardItemModel *weekPlansModel,*weekSumModel,*daySumModel,*mealModel;
+    QStandardItemModel *weekPlansModel,*weekSumModel,*daySumModel,*mealModel,*estModel;
     QDate firstDayofWeek;
-    QStringList planList,mealsHeader,dayHeader;
+    QStringList planList,mealsHeader,dayHeader,estHeader;
     QMap<int,QStringList> foodList;
 
     QString set_weekID(QDate);
@@ -43,6 +43,7 @@ private:
     void addrow_mealModel(QStandardItem*,QStringList*);
 
     int read_dayCalories(QDate);
+    void calc_weekGoal();
     void update_weekPlanModel(QDate,int,QStringList*);
     void update_daySumModel();
     void update_weekSumModel();

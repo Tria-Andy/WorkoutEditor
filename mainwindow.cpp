@@ -172,6 +172,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->listWidget_MenuEdit->setItemDelegate(&mousehover_del);
     ui->spinBox_calories->setVisible(false);
     ui->lineEdit_Mealname->setVisible(false);
+
+    ui->tableView_forecast->setModel(foodPlan->estModel);
+    ui->tableView_forecast->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_forecast->horizontalHeader()->hide();
+
     this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy"));
 
     ui->toolButton_saveMeals->setEnabled(false);
@@ -235,6 +240,8 @@ void MainWindow::fill_weekTable(QString weekID,bool reset)
     QString dayString;
     int foodCount = 0;
     int mealCal = 0;
+
+    foodPlan->estModel->setData(foodPlan->estModel->index(0,0),model->data(model->index(weekIndex.row(),2)).toDouble());
 
     for(int day = 0; day < foodPlan->dayHeader.count(); ++day)
     {
