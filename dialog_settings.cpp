@@ -888,6 +888,7 @@ void Dialog_settings::on_tabWidget_tabBarClicked(int index)
 
 void Dialog_settings::on_pushButton_calcFat_clicked()
 {
+
     int age = ui->lineEdit_age->text().toInt();
     double weight = ui->lineEdit_weight->text().toDouble();
     double sum7 = 0;
@@ -908,6 +909,7 @@ void Dialog_settings::on_pushButton_calcFat_clicked()
          + ui->spinBox_stomach->value() * 1.0
          + ui->spinBox_trizeps->value() * 1.0;
 
+    //7 Point Methode Jackson & Pollock
     fatPercent = k0 + k1*sum7 + k2*sum7*sum7 + ka;
     fatPercent = 495 / fatPercent - 450;
 
