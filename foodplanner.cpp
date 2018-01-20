@@ -10,7 +10,7 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     mealsHeader = settings::get_listValues("Meals");
     sumHeader << "Calories Food:" << "Conversion Base:" << "Conversion Sport:" << "Summery:" << "Difference:";
     weekSumHeader << "Week Summery";
-    estHeader << "Weight at Weekstart:" << "Avg Daily Diff:" << "Estimate Loss:" << "Estimate Weight:";
+    estHeader << "Weight at Weekstart:" << "Avg Daily Calories:" << "Avg Daily Conversion:" <<"Avg Daily Diff:" << "Weight Change:" << "Weight at Weekend:";
 
     foodList.insert(0,QStringList() << "date");
     foodList.insert(1,QStringList() << "name");
@@ -501,12 +501,14 @@ void foodplanner::update_weekSumModel()
     double weekLoss = round(weekSave/7.45)/1000.0 * -1;
     double nextWeek = this->set_doubleValue(weekWeight + weekLoss,false);
 
-    estModel->setData(estModel->index(0,0),weekWeight);
-    estModel->setData(estModel->index(1,0),QString::number(round(weekSave/7.0)) + " Cal");
-    estModel->setData(estModel->index(2,0),QString::number(weekLoss) + " Kg");
-    estModel->setData(estModel->index(3,0),nextWeek);
-    weekPlansModel->setData(weekPlansModel->index(weekIndex.row()+1,2),nextWeek);
+    estModel->setData(estModel->index(0,0),QString::number(weekWeight) + " Kg");
+    estModel->setData(estModel->index(1,0),QString::number(round(weekSumModel->data(weekSumModel->index(0,0)).toDouble()/7.0))+ " Cal");
+    estModel->setData(estModel->index(2,0),QString::number(round(weekSumModel->data(weekSumModel->index(3,0)).toDouble()/7.0))+ " Cal");
+    estModel->setData(estModel->index(3,0),QString::number(round((weekSave/7.0)*-1)) + " Cal");
+    estModel->setData(estModel->index(4,0),QString::number(weekLoss) + " Kg");
+    estModel->setData(estModel->index(5,0),QString::number(nextWeek) + " Kg");
 
+    weekPlansModel->setData(weekPlansModel->index(weekIndex.row()+1,2),nextWeek);
 }
 
 void foodplanner::update_sumBySchedule(QDate firstday)
@@ -586,5 +588,7 @@ QStringList foodplanner::get_mealList(QString section)
             mealList << "No Meals";
         }
     }
+    qSort(mealList.begin(),mealList.end());
+
     return mealList;
 }
