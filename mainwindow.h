@@ -1180,7 +1180,9 @@ private:
     void fill_weekTable(QString,bool);
     void set_foodWeek(QString);
     void calc_foodCalories(int,double,int);
+    void calc_menuCal();
     int checkFoodString(QString);
+
 
 public:
     explicit MainWindow(QWidget *parent = 0);

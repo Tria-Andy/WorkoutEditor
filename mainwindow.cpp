@@ -175,6 +175,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->tableView_forecast->setModel(foodPlan->estModel);
     ui->tableView_forecast->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_forecast->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView_forecast->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView_forecast->horizontalHeader()->hide();
 
     this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy"));
@@ -2100,6 +2102,25 @@ int MainWindow::checkFoodString(QString checkString)
     return rxpVal.validate(checkString,pos);
 }
 
+void MainWindow::calc_menuCal()
+{
+    QString foodString;
+    int listCount = ui->listWidget_MenuEdit->count();
+    int calPos = 0;
+    int mealCal = 0;
+
+    if(listCount != 0)
+    {
+        for(int i = 0; i < listCount; ++i)
+        {
+            foodString = ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString();
+            calPos = foodString.indexOf("-")+1;
+            mealCal = mealCal + foodString.mid(calPos,foodString.indexOf(")")-calPos).toInt();
+        }
+    }
+    ui->label_menuCal->setText("Meal Cal: "+QString::number(mealCal));
+}
+
 void MainWindow::on_listWidget_weekPlans_clicked(const QModelIndex &index)
 {
     QString weekId = index.data(Qt::DisplayRole).toString();
@@ -2118,6 +2139,7 @@ void MainWindow::on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item)
 {
     ui->listWidget_MenuEdit->clear();
     ui->listWidget_MenuEdit->addItems(item->data(Qt::DisplayRole).toString().split("\n"));
+    this->calc_menuCal();
     ui->label_menuEdit->setText("Edit: "+ foodPlan->dayHeader.at(item->column()) + " - " + foodPlan->mealsHeader.at(item->row()));
     ui->toolButton_foodDown->setEnabled(true);
     ui->toolButton_foodUp->setEnabled(true);
@@ -2141,6 +2163,7 @@ void MainWindow::on_listWidget_Menu_doubleClicked(const QModelIndex &index)
 void MainWindow::on_listWidget_MenuEdit_doubleClicked(const QModelIndex &index)
 {
     delete ui->listWidget_MenuEdit->takeItem(index.row());
+    this->calc_menuCal();
 }
 
 void MainWindow::on_listWidget_Menu_clicked(const QModelIndex &index)
@@ -2196,6 +2219,7 @@ void MainWindow::on_toolButton_menuEdit_clicked()
 
     selItem->setData(Qt::EditRole,setString);
     selItem->setToolTip("Meal Cal: "+QString::number(mealCal));
+    ui->label_menuCal->setText("Meal Cal:");
 
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek.addDays(index.column()),index.row(),&updateList,true);
 
@@ -2251,6 +2275,7 @@ void MainWindow::on_toolButton_addMeal_clicked()
 {
     QString mealPort = QString::number(ui->spinBox_portion->value()*ui->doubleSpinBox_portion->value());
     ui->listWidget_MenuEdit->addItem(ui->lineEdit_Mealname->text()+" ("+mealPort+"-"+ui->lineEdit_calories->text()+")");
+    this->calc_menuCal();
 }
 
 void MainWindow::on_toolButton_foodUp_clicked()
