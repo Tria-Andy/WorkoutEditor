@@ -2132,6 +2132,7 @@ void MainWindow::on_comboBox_menu_currentTextChanged(const QString &value)
 {
     ui->listWidget_Menu->clear();
     ui->listWidget_Menu->addItems(foodPlan->get_mealList(value));
+
     ui->progressBar_saveMeals->setValue(0);
 }
 
@@ -2331,4 +2332,17 @@ void MainWindow::on_tableWidget_weekPlan_itemChanged(QTableWidgetItem *item)
 
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek.addDays(item->column()),item->row(),&itemList,true);
     ui->actionSave->setEnabled(true);
+}
+
+void MainWindow::on_listWidget_MenuEdit_itemClicked(QListWidgetItem *item)
+{
+    QString foodString,foodName;
+    int calPos = 0;
+    int mealCal = 0;
+
+    foodString = item->data(Qt::DisplayRole).toString();
+    foodName = foodString.split(" (").first();
+    calPos = foodString.indexOf("-")+1;
+    mealCal = mealCal + foodString.mid(calPos,foodString.indexOf(")")-calPos).toInt();
+
 }
