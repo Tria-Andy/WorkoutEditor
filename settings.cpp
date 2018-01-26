@@ -444,14 +444,20 @@ void settings::loadSettings()
 
 double settings::get_weightforDate(QDateTime actDate)
 {
-    QDateTime weightDate;
+    QDateTime weightDate,firstDate;
     double weight = 0.0;
+    firstDate.setTime_t(weightMap.firstKey());
+
 
     for(QMap<int,double>::const_iterator it = weightMap.cbegin(), end = weightMap.cend(); it != end; ++it)
     {
         weightDate.setTime_t(it.key());
 
-        if(actDate > weightDate)
+        if(actDate >= firstDate && actDate < weightDate)
+        {
+            weight = it.value();
+        }
+        else if(actDate >= weightDate)
         {
             weight = it.value();
         }
