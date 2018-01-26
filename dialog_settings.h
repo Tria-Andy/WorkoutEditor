@@ -27,6 +27,7 @@
 #include "del_mousehover.h"
 #include "schedule.h"
 #include "settings.h"
+#include "foodplanner.h"
 #include "calculation.h"
 #include "xmlhandler.h"
 
@@ -39,7 +40,7 @@ class Dialog_settings : public QDialog, public calculation, public xmlHandler, p
     Q_OBJECT
 
 public:
-    explicit Dialog_settings(QWidget *parent = 0,schedule *psched = 0);
+    explicit Dialog_settings(QWidget *parent = 0,schedule *psched = 0,foodplanner *pFood = 0);
     ~Dialog_settings();
 
 private slots:
@@ -97,14 +98,21 @@ private slots:
     void on_toolButton_colorhigh_clicked();
     void on_toolButton_colorlow_clicked();
     void on_toolButton_colormin_clicked();
-
     void on_comboBox_food_currentIndexChanged(const QString &arg1);
+    void on_listWidget_food_itemClicked(QListWidgetItem *item);
+
+    void on_toolButton_mealAdd_clicked();
+
+    void on_toolButton_mealDelete_clicked();
+
+    void on_toolButton_mealEdit_clicked();
 
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model,*contestTreeModel;
     QSortFilterProxyModel *saisonProxy,*contestProxy;
     schedule *schedule_ptr;
+    foodplanner *food_ptr;
     saisons *saisons_ptr;
     QHash<QString,QColor> colorMapCache;
     QStringList sportList,model_header,contestTags;

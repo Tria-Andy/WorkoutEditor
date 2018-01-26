@@ -22,13 +22,14 @@
 #include <QColorDialog>
 #include <QFileDialog>
 
-Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
+Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *pFood) :
     QDialog(parent),
     ui(new Ui::Dialog_settings)
 {
     ui->setupUi(this);
 
     schedule_ptr = psched;
+    food_ptr = pFood;
     saisonProxy = new QSortFilterProxyModel(this);
     saisonProxy->setSourceModel(schedule_ptr->saisonsModel);
     contestProxy = new QSortFilterProxyModel(this);
@@ -73,7 +74,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
 
     ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - athleteValues->value("yob")));
     ui->lineEdit_weight->setText(QString::number(settings::get_weightforDate(QDateTime::currentDateTime())));
-    ui->lineEdit_currDayCal->setText(QString::number(current_dayCalories()));
+    ui->lineEdit_currDayCal->setText(QString::number(current_dayCalories(QDateTime::currentDateTime())));
     ui->doubleSpinBox_bone->setValue(athleteValues->value("boneskg"));
     ui->doubleSpinBox_muscle->setValue(athleteValues->value("musclekg"));
     ui->doubleSpinBox_PALvalue->setValue(athleteValues->value("currpal"));
@@ -94,6 +95,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
     this->checkSetup();
 }
 
+enum {ADD,DEL,EDIT};
 enum {SPORT,LEVEL,PHASE,CYCLE,WCODE,JFILE,EDITOR,MISC};
 enum {SPORTUSE};
 
@@ -1069,7 +1071,7 @@ void Dialog_settings::on_toolButton_deleteSaison_clicked()
 
 void Dialog_settings::on_doubleSpinBox_PALvalue_valueChanged(double value)
 {
-    ui->lineEdit_currDayCal->setText(QString::number(round(current_dayCalories() * value)));
+    ui->lineEdit_currDayCal->setText(QString::number(round(current_dayCalories(QDateTime::currentDateTime()) * value)));
 }
 
 void Dialog_settings::on_comboBox_weightmode_currentIndexChanged(const QString &mode)
@@ -1104,4 +1106,54 @@ void Dialog_settings::on_comboBox_food_currentIndexChanged(const QString &value)
 {
     ui->listWidget_food->clear();
     ui->listWidget_food->addItems(listMap.value(value));
+}
+
+void Dialog_settings::on_listWidget_food_itemClicked(QListWidgetItem *item)
+{
+    ui->lineEdit_mealEdit->setText(item->data(Qt::DisplayRole).toString());
+    ui->toolButton_mealDelete->setEnabled(true);
+    ui->toolButton_mealEdit->setEnabled(true);
+}
+
+void Dialog_settings::on_toolButton_mealAdd_clicked()
+{
+    ui->listWidget_food->addItem(ui->lineEdit_mealEdit->text());
+    QStringList tempList = listMap.value(ui->comboBox_food->currentText());
+    tempList.append(ui->lineEdit_mealEdit->text());
+    listMap.insert(ui->comboBox_food->currentText(),tempList);
+    food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),ADD);
+    ui->lineEdit_mealEdit->clear();
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_toolButton_mealDelete_clicked()
+{
+    QListWidgetItem *item = ui->listWidget_food->takeItem(ui->listWidget_food->currentRow());
+    food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),DEL);
+    ui->lineEdit_mealEdit->clear();
+    delete item;
+
+    QStringList tempList;
+    for(int i = 0; i < ui->listWidget_food->count(); ++i)
+    {
+        tempList.append(ui->listWidget_food->item(i)->data(Qt::DisplayRole).toString());
+    }
+    listMap.insert(ui->comboBox_food->currentText(),tempList);
+    this->enableSavebutton();
+
+}
+
+void Dialog_settings::on_toolButton_mealEdit_clicked()
+{
+    QListWidgetItem *item = ui->listWidget_food->currentItem();
+    item->setData(Qt::EditRole,ui->lineEdit_mealEdit->text());
+    food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),EDIT);
+    ui->lineEdit_mealEdit->clear();
+    QStringList tempList;
+    for(int i = 0; i < ui->listWidget_food->count(); ++i)
+    {
+        tempList.append(ui->listWidget_food->item(i)->data(Qt::DisplayRole).toString());
+    }
+    listMap.insert(ui->comboBox_food->currentText(),tempList);
+    this->enableSavebutton();
 }
