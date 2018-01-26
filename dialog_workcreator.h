@@ -118,6 +118,11 @@ public:
         painter->restore();
     }
 
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+       return option.fontMetrics.boundingRect(option.rect, Qt::TextWordWrap, index.data().toString()).size();
+    }
+
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
