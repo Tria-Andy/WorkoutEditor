@@ -36,7 +36,7 @@ protected:
     static double calc_swim_xpower(double,double,double,double);
     static double get_corrected_MET(double,int);
     static double calc_lnp(double,double,double);
-    static double current_dayCalories();
+    static double current_dayCalories(QDateTime);
     static QHash<QString,double> *thresValues, *athleteValues;
 
 };

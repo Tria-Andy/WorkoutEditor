@@ -319,9 +319,9 @@ double calculation::calc_lnp(double speed,double athleteHeight,double athleteWei
     return (cAero+3.6*athleteEff)*speed*athleteWeight;
 }
 
-double calculation::current_dayCalories()
+double calculation::current_dayCalories(QDateTime calcDate)
 {
-    double weight = settings::get_weightforDate(QDateTime::currentDateTime());
+    double weight = settings::get_weightforDate(calcDate);
     double height = athleteValues->value("height")*100;
     double age = QDate::currentDate().year() - athleteValues->value("yob");
     int sF = athleteValues->value("sex") == 0.0 ? 5 : -161;
@@ -358,7 +358,7 @@ double calculation::get_corrected_MET(double weight, int style)
 {
     QString factor = settings::get_listValues("SwimMET").at(style);
     double swimMET = factor.toDouble();
-    double mlkgmin = (((current_dayCalories()/1440)/5)/weight)*1000.0;
+    double mlkgmin = (((current_dayCalories(QDateTime::currentDateTime())/1440)/5)/weight)*1000.0;
 
     if(style == 0)
     {
