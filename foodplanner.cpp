@@ -16,8 +16,6 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     foodList.insert(1,QStringList() << "name");
     foodList.insert(2,QStringList() << "name" << "cal");
 
-    dayCalBase = this->current_dayCalories() * athleteValues->value("currpal");
-
     for(int d = 1; d < 8; ++d)
     {
         dayHeader << QDate::longDayName(d);
@@ -56,6 +54,8 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     this->update_sumBySchedule(firstDayofWeek);
     this->update_sumByMenu(firstDayofWeek,0,NULL,false);
 }
+
+enum {ADD,DEL,EDIT};
 
 void foodplanner::read_foodPlan(QDomDocument xmldoc)
 {
@@ -201,7 +201,6 @@ void foodplanner::write_foodPlan()
     xmlDoc.clear();
 }
 
-
 void foodplanner::read_meals(QDomDocument xmlDoc)
 {
     QStandardItem *rootItem = mealModel->invisibleRootItem();
@@ -214,7 +213,7 @@ void foodplanner::read_meals(QDomDocument xmlDoc)
     {
         QList<QStandardItem*> secItem;
         xmlElement = xmlList.at(i).toElement();
-        secItem << new QStandardItem(xmlElement.attribute("name"));
+        secItem << new QStandardItem(xmlElement.attribute("name"));        
         rootItem->appendRow(secItem);
 
         if(xmlElement.hasChildNodes())
@@ -232,6 +231,35 @@ void foodplanner::read_meals(QDomDocument xmlDoc)
         }
     }
 }
+
+void foodplanner::edit_mealSection(QString sectionName,int mode)
+{
+    if(mode == ADD)
+    {
+        QStandardItem *item = new QStandardItem(sectionName);
+        mealModel->invisibleRootItem()->appendRow(item);
+    }
+    if(mode == DEL)
+    {
+        QList<QStandardItem*> mealSection = mealModel->findItems(sectionName,Qt::MatchExactly,0);
+        if(!mealSection.isEmpty())
+        {
+            QModelIndex sectionIndex = mealModel->indexFromItem(mealSection.at(0));
+
+            if(mealSection.at(0)->hasChildren())
+            {
+                mealModel->removeRows(0,mealSection.at(0)->rowCount(),sectionIndex);
+            }
+        }
+    }
+    if(mode == EDIT)
+    {
+        QList<QStandardItem*> mealSection = mealModel->findItems(sectionName,Qt::MatchExactly,0);
+        mealSection.at(0)->setData(sectionName,Qt::EditRole);
+    }
+    this->write_meals();
+}
+
 
 void foodplanner::write_meals()
 {
@@ -269,6 +297,52 @@ void foodplanner::write_meals()
     }
     this->write_XMLFile(filePath,&xmlDoc,mealXML);
     xmlDoc.clear();
+}
+
+void foodplanner::add_meal(QItemSelectionModel *mealSelect)
+{
+    QList<QStandardItem*> mealItems;
+    QStandardItem *SectionItem = mealModel->itemFromIndex(mealSelect->currentIndex());
+
+    mealItems << new QStandardItem("NewMeal");
+    mealItems << new QStandardItem("0");
+    mealItems << new QStandardItem("0");
+
+    SectionItem->insertRow(0,mealItems);
+}
+
+void foodplanner::remove_meal(QItemSelectionModel *mealSelect)
+{
+    QModelIndex index = mealSelect->currentIndex();
+    mealModel->removeRow(index.row(),index.parent());
+}
+
+QVector<int> foodplanner::get_mealData(QString mealName)
+{
+    QVector<int> mealData(2);
+    QStandardItem *sectionItem;
+    QModelIndex sectionIndex,mealIndex;
+
+    for(int row = 0; row < mealModel->rowCount(); ++row)
+    {
+        sectionItem = mealModel->item(row,0);
+        sectionIndex = sectionItem->index();
+
+        if(sectionItem->hasChildren())
+        {
+            for(int subrow = 0; subrow < sectionItem->rowCount(); ++subrow)
+            {
+                mealIndex = mealModel->index(subrow,0,sectionIndex);
+                if(mealName == mealModel->data(mealIndex).toString())
+                {
+                    mealData[0] = mealModel->data(mealModel->index(subrow,1,sectionIndex)).toInt();
+                    mealData[1] = mealModel->data(mealModel->index(subrow,2,sectionIndex)).toInt();
+                    break;
+                }
+            }
+        }
+    }
+    return mealData;
 }
 
 void foodplanner::insert_newWeek(QDate firstday)
@@ -339,33 +413,6 @@ void foodplanner::addrow_mealModel(QStandardItem *item, QStringList *itemList)
         mealItems << new QStandardItem(mealString.at(1));
         mealItems << new QStandardItem(mealString.at(2));
         item->appendRow(mealItems);
-    }
-}
-
-
-void foodplanner::update_mealModel(QString section,QStringList *mealList)
-{
-    if(!section.isEmpty())
-    {
-        QList<QStandardItem*> mealSection = mealModel->findItems(section,Qt::MatchExactly,0);
-
-        if(!mealSection.isEmpty())
-        {
-            QModelIndex sectionIndex = mealModel->indexFromItem(mealSection.at(0));
-
-            if(mealSection.at(0)->hasChildren())
-            {
-                mealModel->removeRows(0,mealSection.at(0)->rowCount(),sectionIndex);
-                this->addrow_mealModel(mealSection.at(0),mealList);
-            }
-        }
-        else
-        {
-            QStandardItem *root = mealModel->invisibleRootItem();
-            QStandardItem *mealItem = new QStandardItem(section);
-            root->appendRow(mealItem);
-            this->addrow_mealModel(mealItem,mealList);
-        }
     }
 }
 
@@ -456,11 +503,16 @@ void foodplanner::update_daySumModel()
 {
     int sum = 0;
     int diff = 0;
+    double currPal = athleteValues->value("currpal");
+    int dayCalBase = 0;
+    QDateTime calcDay;
+    calcDay.setDate(firstDayofWeek);
 
     for(int i = 0; i < dayHeader.count(); ++i)
     {
         sum = daySumModel->data(daySumModel->index(1,i)).toInt() + daySumModel->data(daySumModel->index(2,i)).toInt();
         diff = sum - daySumModel->data(daySumModel->index(0,i)).toInt();
+        dayCalBase = this->current_dayCalories(calcDay.addDays(i)) * currPal;
         daySumModel->setData(daySumModel->index(1,i),dayCalBase);
         daySumModel->setData(daySumModel->index(3,i),sum);
         daySumModel->setData(daySumModel->index(4,i),diff);

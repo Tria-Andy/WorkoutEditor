@@ -21,10 +21,13 @@ public:
     QString set_weekID(QDate);
     void write_foodPlan();
     void write_meals();
+    void edit_mealSection(QString,int);
+    void add_meal(QItemSelectionModel*);
+    void remove_meal(QItemSelectionModel*);
+    QVector<int> get_mealData(QString);
     void fill_plannerModel();
     void insert_newWeek(QDate);
     void remove_week(QString);
-    void update_mealModel(QString,QStringList*);
     void update_sumBySchedule(QDate);
     void update_sumByMenu(QDate,int, QStringList*,bool);
     QStringList get_mealList(QString);
@@ -33,7 +36,6 @@ private:
     schedule *schedulePtr;
     QString loadedWeek,filePath,planerXML,mealXML;
     QStringList dayTags,sectionTags,mealTags,weekHeader,sumHeader,daySumHeader,weekSumHeader;
-    int dayCalBase;
 
     void read_foodPlan(QDomDocument);
     void read_meals(QDomDocument);
