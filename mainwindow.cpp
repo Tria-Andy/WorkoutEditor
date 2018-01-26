@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     stress_sum.resize(sportCounter);
     isWeekMode = true;
     buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
+    viewStyle = "QTreeView::item:hover {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #e7effd, stop: 1 #cbdaf1);border: 1px solid #bfcde4;}";
     ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
     planerIcon.addFile(":/images/icons/DateTime.png");
     editorIcon.addFile(":/images/icons/Editor.png");
@@ -164,14 +165,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView_daySummery->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_daySummery->verticalHeader()->setFixedWidth(110);
     ui->tableView_daySummery->setItemDelegate(&foodSum_del);
-    ui->listWidget_Menu->addItems(foodPlan->get_mealList(ui->comboBox_menu->currentText()));
+    ui->treeView_meals->setModel(foodPlan->mealModel);
+    ui->treeView_meals->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->treeView_meals->header()->hide();
+    ui->treeView_meals->setSortingEnabled(true);
+    ui->treeView_meals->sortByColumn(0,Qt::AscendingOrder);
+    //ui->treeView_meals->setItemDelegate(&mousehover_del);
+    ui->treeView_meals->setStyleSheet(viewStyle);
+    ui->treeView_meals->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    mealSelection = ui->treeView_meals->selectionModel();
+    connect(mealSelection,SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(setSelectedMeal(QModelIndex)));
+    connect(foodPlan->mealModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(mealSave(QStandardItem*)));
 
     ui->listWidget_weekPlans->addItems(foodPlan->planList);
     ui->listWidget_weekPlans->setItemDelegate(&mousehover_del);
-    ui->listWidget_Menu->setItemDelegate(&mousehover_del);
     ui->listWidget_MenuEdit->setItemDelegate(&mousehover_del);
     ui->spinBox_calories->setVisible(false);
-    ui->lineEdit_Mealname->setVisible(false);
 
     ui->tableView_forecast->setModel(foodPlan->estModel);
     ui->tableView_forecast->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -182,6 +191,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy"));
 
     ui->toolButton_saveMeals->setEnabled(false);
+    ui->toolButton_deleteMenu->setEnabled(false);
+    ui->toolButton_addMenu->setEnabled(false);
     ui->toolButton_foodUp->setEnabled(false);
     ui->toolButton_foodDown->setEnabled(false);
     ui->toolButton_menuEdit->setEnabled(false);
@@ -207,8 +218,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::loadUISettings()
 {
-        ui->comboBox_menu->clear();
-        ui->comboBox_menu->addItems(settings::get_listValues("Dish"));
         settings::settingsUpdated = false;
 }
 
@@ -931,7 +940,6 @@ void MainWindow::on_actionSave_triggered()
                                           );
         if (reply == QMessageBox::Yes)
         {
-            foodPlan->write_meals();
             foodPlan->write_foodPlan();
             ui->actionSave->setEnabled(false);
         }
@@ -1845,7 +1853,7 @@ void MainWindow::on_actionIntervall_Editor_triggered()
 void MainWindow::on_actionPreferences_triggered()
 {
     int dialog_code;
-    Dialog_settings dia_settings(this,workSchedule);
+    Dialog_settings dia_settings(this,workSchedule,foodPlan);
     dia_settings.setModal(true);
     dialog_code = dia_settings.exec();
     if(dialog_code == QDialog::Rejected)
@@ -2128,66 +2136,17 @@ void MainWindow::on_listWidget_weekPlans_clicked(const QModelIndex &index)
     ui->actionDelete->setEnabled(true);
 }
 
-void MainWindow::on_comboBox_menu_currentTextChanged(const QString &value)
-{
-    ui->listWidget_Menu->clear();
-    ui->listWidget_Menu->addItems(foodPlan->get_mealList(value));
-
-    ui->progressBar_saveMeals->setValue(0);
-}
-
-void MainWindow::on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item)
-{
-    ui->listWidget_MenuEdit->clear();
-    ui->listWidget_MenuEdit->addItems(item->data(Qt::DisplayRole).toString().split("\n"));
-    this->calc_menuCal();
-    ui->label_menuEdit->setText("Edit: "+ foodPlan->dayHeader.at(item->column()) + " - " + foodPlan->mealsHeader.at(item->row()));
-    ui->toolButton_foodDown->setEnabled(true);
-    ui->toolButton_foodUp->setEnabled(true);
-    ui->toolButton_menuEdit->setEnabled(true);
-}
-
 void MainWindow::on_toolButton_addMenu_clicked()
 {
-    ui->listWidget_Menu->addItem("NewMeal - 1 - 1");
     ui->toolButton_saveMeals->setEnabled(true);
-}
-
-void MainWindow::on_listWidget_Menu_doubleClicked(const QModelIndex &index)
-{
-    QListWidgetItem *item = ui->listWidget_Menu->item(index.row());
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-    ui->listWidget_Menu->editItem(item);
-    ui->toolButton_saveMeals->setEnabled(true);
+    foodPlan->add_meal(mealSelection);
 }
 
 void MainWindow::on_listWidget_MenuEdit_doubleClicked(const QModelIndex &index)
 {
     delete ui->listWidget_MenuEdit->takeItem(index.row());
+    ui->listWidget_MenuEdit->clearSelection();
     this->calc_menuCal();
-}
-
-void MainWindow::on_listWidget_Menu_clicked(const QModelIndex &index)
-{
-    int checkID = this->checkFoodString(index.data().toString());
-
-    if(checkID == 2)
-    {
-        QStringList mealValues = index.data().toString().split(" - ");
-        QString mealName = mealValues.at(0);
-        QString portion = mealValues.at(1);
-        QString calories = mealValues.at(2);
-
-        int cal = calories.toInt();
-        int port = portion.toInt();
-
-        ui->lineEdit_Mealname->setText(mealName);
-        ui->spinBox_portion->setValue(port);
-        ui->doubleSpinBox_portion->setValue(1);
-        ui->spinBox_calories->setValue(cal);
-
-        this->calc_foodCalories(port,1.0,cal);
-    }
 }
 
 void MainWindow::on_toolButton_menuEdit_clicked()
@@ -2234,20 +2193,12 @@ void MainWindow::on_toolButton_menuEdit_clicked()
 
 void MainWindow::on_toolButton_saveMeals_clicked()
 {
-    QStringList mealList;
-
     ui->progressBar_saveMeals->setValue(0);
-
-    for(int i = 0; i < ui->listWidget_Menu->count(); ++i)
-    {
-       mealList << ui->listWidget_Menu->item(i)->data(Qt::DisplayRole).toString();
-       ui->progressBar_saveMeals->setValue(i*10);
-    }
-    foodPlan->update_mealModel(ui->comboBox_menu->currentText(),&mealList);
-
+    foodPlan->write_meals();
     ui->progressBar_saveMeals->setValue(100);
     ui->actionSave->setEnabled(true);
     QTimer::singleShot(2000,ui->progressBar_saveMeals,SLOT(reset()));
+    ui->toolButton_saveMeals->setEnabled(false);
 }
 
 void MainWindow::on_calendarWidget_Food_clicked(const QDate &date)
@@ -2258,7 +2209,7 @@ void MainWindow::on_calendarWidget_Food_clicked(const QDate &date)
 
 void MainWindow::on_toolButton_deleteMenu_clicked()
 {
-    delete ui->listWidget_Menu->takeItem(ui->listWidget_Menu->currentRow());
+    foodPlan->remove_meal(mealSelection);
     ui->toolButton_saveMeals->setEnabled(true);
 }
 
@@ -2275,7 +2226,31 @@ void MainWindow::on_spinBox_portion_valueChanged(int value)
 void MainWindow::on_toolButton_addMeal_clicked()
 {
     QString mealPort = QString::number(ui->spinBox_portion->value()*ui->doubleSpinBox_portion->value());
-    ui->listWidget_MenuEdit->addItem(ui->lineEdit_Mealname->text()+" ("+mealPort+"-"+ui->lineEdit_calories->text()+")");
+    QString mealString = ui->lineEdit_Mealname->text()+" ("+mealPort+"-"+ui->lineEdit_calories->text()+")";
+    bool mealFlag = false;
+
+
+    if(ui->listWidget_MenuEdit->selectedItems().count() == 1)
+    {
+        ui->listWidget_MenuEdit->currentItem()->setData(Qt::EditRole,mealString);
+    }
+    else if(ui->listWidget_MenuEdit->selectedItems().count() == 0)
+    {
+        QString checkMeal;
+        for(int i = 0; i < ui->listWidget_MenuEdit->count(); ++i)
+        {
+            checkMeal = ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString().split(" (").first();
+
+            if(checkMeal == ui->lineEdit_Mealname->text())
+            {
+                ui->listWidget_MenuEdit->item(i)->setData(Qt::EditRole,mealString);
+                mealFlag = true;
+                break;
+            }
+        }
+        if(!mealFlag) ui->listWidget_MenuEdit->addItem(mealString);
+    }
+
     this->calc_menuCal();
 }
 
@@ -2336,13 +2311,99 @@ void MainWindow::on_tableWidget_weekPlan_itemChanged(QTableWidgetItem *item)
 
 void MainWindow::on_listWidget_MenuEdit_itemClicked(QListWidgetItem *item)
 {
-    QString foodString,foodName;
-    int calPos = 0;
-    int mealCal = 0;
-
+    QString foodString,foodName,portCal,portion;
+    QVector<int> mealData(2);
     foodString = item->data(Qt::DisplayRole).toString();
     foodName = foodString.split(" (").first();
-    calPos = foodString.indexOf("-")+1;
-    mealCal = mealCal + foodString.mid(calPos,foodString.indexOf(")")-calPos).toInt();
+    portCal = foodString.split(" (").last();
+    portCal = portCal.remove(")");
 
+    portion = portCal.split("-").first();
+    mealData = foodPlan->get_mealData(foodName);
+
+    double d_portion = portion.toDouble()/mealData.at(0);
+    double d_mealCal = mealData.at(1)*d_portion;
+
+    ui->lineEdit_Mealname->setText(foodName);
+    ui->doubleSpinBox_portion->setValue(d_portion);
+    ui->spinBox_portion->setValue(mealData.at(0));
+    ui->spinBox_calories->setValue(mealData.at(1));
+    ui->lineEdit_calories->setText(QString::number(round(d_mealCal)));
+}
+
+void MainWindow::on_treeView_meals_clicked(const QModelIndex &index)
+{
+    mealSelection->setCurrentIndex(index,QItemSelectionModel::Select);
+    ui->listWidget_MenuEdit->clearSelection();
+}
+
+void MainWindow::setSelectedMeal(QModelIndex index)
+{
+    mealSelection->select(index,QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+
+    if(foodPlan->mealModel->itemFromIndex(index)->parent() == nullptr)
+    {
+        ui->treeView_meals->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        if(ui->treeView_meals->isExpanded(index))
+        {
+            ui->treeView_meals->collapse(index);
+            ui->toolButton_addMenu->setEnabled(false);
+        }
+        else
+        {
+            ui->treeView_meals->expand(index);
+            ui->toolButton_addMenu->setEnabled(true);
+        }
+        ui->toolButton_deleteMenu->setEnabled(false);
+    }
+    else
+    {
+        ui->treeView_meals->setEditTriggers(QAbstractItemView::DoubleClicked);
+        int port = mealSelection->selectedRows(1).at(0).data().toInt();
+        int cal = mealSelection->selectedRows(2).at(0).data().toInt();
+
+        ui->lineEdit_Mealname->setText(mealSelection->selectedRows(0).at(0).data().toString());
+        ui->spinBox_portion->setValue(port);
+        ui->doubleSpinBox_portion->setValue(1);
+        ui->spinBox_calories->setValue(cal);
+        ui->toolButton_deleteMenu->setEnabled(true);
+        ui->toolButton_addMenu->setEnabled(false);
+        this->calc_foodCalories(port,1.0,cal);
+    }
+}
+
+void MainWindow::on_treeView_meals_collapsed(const QModelIndex &index)
+{
+    Q_UNUSED(index)
+    ui->toolButton_addMenu->setEnabled(false);
+    ui->toolButton_deleteMenu->setEnabled(false);
+}
+
+void MainWindow::on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item)
+{
+    ui->listWidget_MenuEdit->clear();
+    ui->listWidget_MenuEdit->addItems(item->data(Qt::DisplayRole).toString().split("\n"));
+    this->calc_menuCal();
+    ui->label_menuEdit->setText("Edit: "+ foodPlan->dayHeader.at(item->column()) + " - " + foodPlan->mealsHeader.at(item->row()));
+    ui->toolButton_foodDown->setEnabled(true);
+    ui->toolButton_foodUp->setEnabled(true);
+    ui->toolButton_menuEdit->setEnabled(true);
+}
+
+void MainWindow::on_treeView_meals_expanded(const QModelIndex &index)
+{
+    Q_UNUSED(index)
+    ui->toolButton_addMenu->setEnabled(true);
+    ui->toolButton_deleteMenu->setEnabled(false);
+}
+
+void MainWindow::mealSave(QStandardItem *item)
+{
+    Q_UNUSED(item)
+    ui->toolButton_saveMeals->setEnabled(true);
+}
+
+void MainWindow::on_toolButton_mealreset_clicked()
+{
+    ui->treeView_meals->collapseAll();
 }

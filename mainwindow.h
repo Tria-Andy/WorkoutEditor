@@ -1121,7 +1121,7 @@ private:
     del_foodWeekSum foodSumWeek_del;
     del_mousehover mousehover_del;
     QStandardItemModel *calendarModel,*sumModel,*fileModel,*infoModel,*avgModel;
-    QItemSelectionModel *treeSelection;
+    QItemSelectionModel *treeSelection,*mealSelection;
     QSortFilterProxyModel *scheduleProxy,*metaProxy,*metaProxyFilter,*contentProxy;
     QStringList modus_list,cal_header,year_header,avgHeader,schedMode,y2Label;
     QLabel *planerMode;
@@ -1141,7 +1141,7 @@ private:
 
     int avgCounter,sportUse;
     QDate selectedDate,firstdayofweek;
-    QString weeknumber,phaseFilter,buttonStyle;
+    QString weeknumber,phaseFilter,buttonStyle,viewStyle;
     QVector<double> work_sum,dur_sum,stress_sum;
     QVector<double> dist_sum;
     int selModule,weekRange,weekpos,saisonWeeks,weekDays;
@@ -1189,8 +1189,6 @@ public:
     ~MainWindow();
 
 private slots:
-
-
     //Menu
     void on_actionEditor_triggered();
     void on_actionPlaner_triggered();
@@ -1238,14 +1236,14 @@ private slots:
     void on_treeView_files_clicked(const QModelIndex &index);
     void on_actionRefresh_Filelist_triggered();
     void on_comboBox_saisonName_currentIndexChanged(const QString &arg1);
-    void on_comboBox_menu_currentTextChanged(const QString &arg1);
     void on_actionSave_triggered();
+    void on_actionDelete_triggered();
+
+    //Food
     void on_toolButton_addMenu_clicked();
     void on_listWidget_MenuEdit_doubleClicked(const QModelIndex &index);
     void on_toolButton_menuEdit_clicked();
     void on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item);
-    void on_listWidget_Menu_clicked(const QModelIndex &index);
-    void on_listWidget_Menu_doubleClicked(const QModelIndex &index);
     void on_toolButton_saveMeals_clicked();
     void on_calendarWidget_Food_clicked(const QDate &date);
     void on_listWidget_weekPlans_clicked(const QModelIndex &index);
@@ -1255,9 +1253,14 @@ private slots:
     void on_toolButton_addMeal_clicked();
     void on_toolButton_foodUp_clicked();
     void on_toolButton_foodDown_clicked();
-    void on_actionDelete_triggered();
+    void on_treeView_meals_clicked(const QModelIndex &index);
+    void setSelectedMeal(QModelIndex);
+    void on_treeView_meals_collapsed(const QModelIndex &index);
     void on_tableWidget_weekPlan_itemChanged(QTableWidgetItem *item);
     void on_listWidget_MenuEdit_itemClicked(QListWidgetItem *item);
+    void on_treeView_meals_expanded(const QModelIndex &index);
+    void mealSave(QStandardItem*);
+    void on_toolButton_mealreset_clicked();
 };
 
 #endif // MAINWINDOW_H
