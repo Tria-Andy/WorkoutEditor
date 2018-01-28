@@ -448,13 +448,13 @@ double settings::get_weightforDate(QDateTime actDate)
     double weight = 0.0;
     firstDate.setTime_t(weightMap.firstKey());
 
-
     for(QMap<int,double>::const_iterator it = weightMap.cbegin(), end = weightMap.cend(); it != end; ++it)
     {
         weightDate.setTime_t(it.key());
 
         if(actDate >= firstDate && actDate < weightDate)
         {
+            break;
             weight = it.value();
         }
         else if(actDate >= weightDate)
@@ -462,6 +462,7 @@ double settings::get_weightforDate(QDateTime actDate)
             weight = it.value();
         }
     }
+
     return weight;
 }
 
@@ -626,6 +627,15 @@ void settings::saveSettings()
         settingList.clear();
         settingList = listMap.value("Dish");
         myvalues->setValue("dish",settings::setSettingString(settingList));
+        settingList.clear();
+        for(int i = 0; i < listMap.value("Mode").count(); ++i)
+        {
+            for(int x = 0; x < 4; ++x)
+            {
+                settingList << QString::number(doubleMap.value(listMap.value("Mode").at(i)).at(x)) +"-";
+            }
+        }
+
         settingList.clear();
     myvalues->endGroup();
 

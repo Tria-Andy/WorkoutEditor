@@ -512,7 +512,7 @@ void foodplanner::update_daySumModel()
     {
         sum = daySumModel->data(daySumModel->index(1,i)).toInt() + daySumModel->data(daySumModel->index(2,i)).toInt();
         diff = sum - daySumModel->data(daySumModel->index(0,i)).toInt();
-        dayCalBase = this->current_dayCalories(calcDay.addDays(i)) * currPal;
+        dayCalBase = this->current_dayCalories(calcDay.addDays(i).addSecs(120)) * currPal;
         daySumModel->setData(daySumModel->index(1,i),dayCalBase);
         daySumModel->setData(daySumModel->index(3,i),sum);
         daySumModel->setData(daySumModel->index(4,i),diff);
@@ -537,12 +537,15 @@ void foodplanner::update_weekSumModel()
         weekSumModel->setData(weekSumModel->index(i,0),weekSum[i]);
     }
 
+    QDateTime calcDay;
+    calcDay.setDate(firstDayofWeek);
+
     double weekWeight;
     QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(loadedWeek,Qt::MatchExactly,0).at(0));
 
-    if(weekPlansModel->data(weekPlansModel->index(weekIndex.row(),1)).toDate() == QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek()))
+    if(firstDayofWeek == QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek()))
     {
-        weekWeight = athleteValues->value("weight");
+        weekWeight = settings::get_weightforDate(calcDay.addSecs(120));
     }
     else
     {

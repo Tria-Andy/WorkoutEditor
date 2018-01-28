@@ -196,6 +196,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolButton_foodUp->setEnabled(false);
     ui->toolButton_foodDown->setEnabled(false);
     ui->toolButton_menuEdit->setEnabled(false);
+    ui->toolButton_clear->setEnabled(false);
     selModule = 0;
 
     this->set_speedgraph();
@@ -2189,6 +2190,7 @@ void MainWindow::on_toolButton_menuEdit_clicked()
     ui->toolButton_foodUp->setEnabled(false);
     ui->toolButton_foodDown->setEnabled(false);
     ui->toolButton_menuEdit->setEnabled(false);
+    ui->toolButton_clear->setEnabled(false);
 }
 
 void MainWindow::on_toolButton_saveMeals_clicked()
@@ -2388,6 +2390,7 @@ void MainWindow::on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item)
     ui->toolButton_foodDown->setEnabled(true);
     ui->toolButton_foodUp->setEnabled(true);
     ui->toolButton_menuEdit->setEnabled(true);
+    ui->toolButton_clear->setEnabled(true);
 }
 
 void MainWindow::on_treeView_meals_expanded(const QModelIndex &index)
@@ -2406,4 +2409,10 @@ void MainWindow::mealSave(QStandardItem *item)
 void MainWindow::on_toolButton_mealreset_clicked()
 {
     ui->treeView_meals->collapseAll();
+}
+
+void MainWindow::on_toolButton_clear_clicked()
+{
+    ui->listWidget_MenuEdit->clear();
+    this->calc_menuCal();
 }

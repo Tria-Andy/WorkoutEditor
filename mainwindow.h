@@ -1261,6 +1261,7 @@ private slots:
     void on_treeView_meals_expanded(const QModelIndex &index);
     void mealSave(QStandardItem*);
     void on_toolButton_mealreset_clicked();
+    void on_toolButton_clear_clicked();
 };
 
 #endif // MAINWINDOW_H
