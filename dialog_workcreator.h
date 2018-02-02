@@ -58,11 +58,16 @@ public:
             painter->setPen(Qt::black);
         }
 
+        itemColor = settings::get_itemColor(levelName).toHsv();
+        itemColor.setAlpha(180);
+        if(levelName.isEmpty()) itemColor.setHsv(0,0,255,200);
+        painter->setPen(Qt::black);
+
         itemGradient.setColorAt(0,gradColor);
         itemGradient.setColorAt(1,itemColor);
-        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
         painter->fillRect(option.rect,itemGradient);
 
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
         QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
         painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 

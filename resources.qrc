@@ -46,4 +46,7 @@
         <file>icons/Food.png</file>
         <file>icons/Add.png</file>
     </qresource>
+    <qresource prefix="/style">
+        <file>qss/style.qss</file>
+    </qresource>
 </RCC>

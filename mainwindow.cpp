@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     stress_sum.resize(sportCounter);
     isWeekMode = true;
     buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
-    viewStyle = "QTreeView::item:hover {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #e7effd, stop: 1 #cbdaf1);border: 1px solid #bfcde4;}";
+
     ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
     planerIcon.addFile(":/images/icons/DateTime.png");
     editorIcon.addFile(":/images/icons/Editor.png");
@@ -170,7 +170,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeView_meals->header()->hide();
     ui->treeView_meals->setSortingEnabled(true);
     ui->treeView_meals->sortByColumn(0,Qt::AscendingOrder);
-    //ui->treeView_meals->setItemDelegate(&mousehover_del);
+    ui->treeView_meals->setItemDelegate(&mousehover_del);
     ui->treeView_meals->setStyleSheet(viewStyle);
     ui->treeView_meals->setEditTriggers(QAbstractItemView::NoEditTriggers);
     mealSelection = ui->treeView_meals->selectionModel();
@@ -178,7 +178,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(foodPlan->mealModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(mealSave(QStandardItem*)));
 
     ui->listWidget_weekPlans->addItems(foodPlan->planList);
+    ui->listWidget_weekPlans->setStyleSheet(viewStyle);
     ui->listWidget_weekPlans->setItemDelegate(&mousehover_del);
+    ui->listWidget_MenuEdit->setStyleSheet(viewStyle);
     ui->listWidget_MenuEdit->setItemDelegate(&mousehover_del);
     ui->spinBox_calories->setVisible(false);
 
@@ -812,7 +814,7 @@ void MainWindow::set_phaseButtons()
         pButton->setFixedWidth(50);
         pButton->setAutoRaise(true);
         pButton->setCheckable(true);
-        pButton->setStyleSheet(buttonStyle);
+        //pButton->setStyleSheet(buttonStyle);
         QFrame *sline = new QFrame();
         sline->setFrameShape(QFrame::VLine);
         sline->setFrameShadow(QFrame::Sunken);
@@ -1253,7 +1255,7 @@ void MainWindow::init_controlStyleSheets()
     ui->treeView_files->setStyleSheet(viewBackground);
     ui->tableView_cal->setStyleSheet(viewBackground);
     ui->tableView_summery->setStyleSheet(viewBackground);
-
+    /*
     ui->toolButton_addSelect->setStyleSheet(buttonStyle);
     ui->toolButton_clearSelect->setStyleSheet(buttonStyle);
     ui->toolButton_add->setStyleSheet(buttonStyle);
@@ -1262,6 +1264,7 @@ void MainWindow::init_controlStyleSheets()
     ui->toolButton_downInt->setStyleSheet(buttonStyle);
     ui->toolButton_upInt->setStyleSheet(buttonStyle);
     planMode->setStyleSheet(buttonStyle);
+    */
 }
 
 void MainWindow::update_infoModel()

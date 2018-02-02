@@ -22,10 +22,17 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QApplication::setStyle(QStyleFactory::create("Fusion"));
+    a.style()->unpolish(&a);
+    a.setStyle(QStyleFactory::create("Fusion"));
+    QFile file(":/style/qss/style.qss");
+    file.open(QFile::ReadOnly);
+    QString styleSheet = QLatin1String(file.readAll());
+    a.setStyleSheet(styleSheet);
+    a.style()->polish(&a);
 
     MainWindow w;
     w.setWindowIcon(QIcon(":/images/icons/workouteditor.png"));
+    w.setStyleSheet(styleSheet);
     w.showMaximized();
 
     return a.exec();
