@@ -22,13 +22,15 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    a.style()->unpolish(&a);
+    QFont font("Segoe UI");
+    font.setPixelSize(12);
     a.setStyle(QStyleFactory::create("Fusion"));
+    a.setFont(font);
     QFile file(":/style/qss/style.qss");
     file.open(QFile::ReadOnly);
     QString styleSheet = QLatin1String(file.readAll());
     a.setStyleSheet(styleSheet);
-    a.style()->polish(&a);
+    file.close();
 
     MainWindow w;
     w.setWindowIcon(QIcon(":/images/icons/workouteditor.png"));

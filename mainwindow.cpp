@@ -170,18 +170,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeView_meals->header()->hide();
     ui->treeView_meals->setSortingEnabled(true);
     ui->treeView_meals->sortByColumn(0,Qt::AscendingOrder);
-    ui->treeView_meals->setItemDelegate(&mousehover_del);
-    ui->treeView_meals->setStyleSheet(viewStyle);
+    //ui->treeView_meals->setItemDelegate(&mousehover_del);
+    //ui->treeView_meals->setStyleSheet(viewStyle);
     ui->treeView_meals->setEditTriggers(QAbstractItemView::NoEditTriggers);
     mealSelection = ui->treeView_meals->selectionModel();
     connect(mealSelection,SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(setSelectedMeal(QModelIndex)));
     connect(foodPlan->mealModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(mealSave(QStandardItem*)));
 
     ui->listWidget_weekPlans->addItems(foodPlan->planList);
-    ui->listWidget_weekPlans->setStyleSheet(viewStyle);
-    ui->listWidget_weekPlans->setItemDelegate(&mousehover_del);
-    ui->listWidget_MenuEdit->setStyleSheet(viewStyle);
-    ui->listWidget_MenuEdit->setItemDelegate(&mousehover_del);
+    //ui->listWidget_weekPlans->setStyleSheet(viewStyle);
+    //ui->listWidget_weekPlans->setItemDelegate(&mousehover_del);
+    //ui->listWidget_MenuEdit->setStyleSheet(viewStyle);
+    //ui->listWidget_MenuEdit->setItemDelegate(&mousehover_del);
     ui->spinBox_calories->setVisible(false);
 
     ui->tableView_forecast->setModel(foodPlan->estModel);

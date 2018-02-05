@@ -6,6 +6,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     ui(new Ui::Dialog_workCreator)
 {
     ui->setupUi(this);
+    this->setStyleSheet(parent->styleSheet());
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     listModel = new QStandardItemModel(this);
     plotModel = new QStandardItemModel(this);
@@ -52,13 +53,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     ui->label_head->setText("Add Phase");
 
     viewBackground = "background-color: #e6e6e6";
-    buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
 
-    ui->toolButton_remove->setStyleSheet(buttonStyle);
-    ui->toolButton_update->setStyleSheet(buttonStyle);
-    ui->toolButton_cancel->setStyleSheet(buttonStyle);
-    ui->toolButton_down->setStyleSheet(buttonStyle);
-    ui->toolButton_up->setStyleSheet(buttonStyle);
     ui->toolButton_copy->setEnabled(false);
     this->set_controlButtons(false);
 
@@ -67,6 +62,10 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     ui->listWidget_phases->setStyleSheet(viewBackground);
     ui->listView_values->setStyleSheet(viewBackground);
     ui->widget_plot->setStyleSheet(viewBackground);
+
+    ui->listView_workouts->setModel(listModel);
+    ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->listView_workouts->setItemDelegate(&mousehover_del);
 
     ui->widget_plot->xAxis->setTicks(true);
     ui->widget_plot->xAxis->setTickLabels(true);
@@ -254,10 +253,6 @@ void Dialog_workCreator::get_workouts(QString sport)
     listModel->sort(0);
 
     ui->label_workouts->setText("Workouts: "+QString::number(metaProxy->rowCount()));
-
-    ui->listView_workouts->setModel(listModel);
-    ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->listView_workouts->setItemDelegate(&mousehover_del);
 
     QColor sportColor = settings::get_itemColor(sport);
     QString sportBack = "rgb("+QString::number(sportColor.red())+","+QString::number(sportColor.green())+","+QString::number(sportColor.blue())+",35%)";
@@ -1518,7 +1513,7 @@ void Dialog_workCreator::update_workoutsSchedule(int index,QDate wDate, QPair<do
     proxyFilter->setData(proxyFilter->index(index,6),get_workoutTime(timeSum));                //duration
     proxyFilter->setData(proxyFilter->index(index,7),QString::number(distSum));                //distance
     proxyFilter->setData(proxyFilter->index(index,8),QString::number(round(stressSum)));       //stress
-    proxyFilter->setData(proxyFilter->index(index,9),QString::number(workSum));                 //kj
+    proxyFilter->setData(proxyFilter->index(index,9),QString::number(round(workSum)));                 //kj
     updateProgess->setValue(progress);
 }
 

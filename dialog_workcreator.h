@@ -58,11 +58,6 @@ public:
             painter->setPen(Qt::black);
         }
 
-        itemColor = settings::get_itemColor(levelName).toHsv();
-        itemColor.setAlpha(180);
-        if(levelName.isEmpty()) itemColor.setHsv(0,0,255,200);
-        painter->setPen(Qt::black);
-
         itemGradient.setColorAt(0,gradColor);
         itemGradient.setColorAt(1,itemColor);
         painter->fillRect(option.rect,itemGradient);
@@ -463,7 +458,7 @@ private:
     Ui::Dialog_workCreator *ui;
 
     schedule *worksched;
-    QString isSeries,isGroup,currentSport,currentWorkID,isBreak,buttonStyle,viewBackground;
+    QString isSeries,isGroup,currentSport,currentWorkID,isBreak,viewBackground;
     QStandardItemModel *plotModel,*valueModel,*listModel,*workoutModel;
     QSortFilterProxyModel *metaProxy,*stepProxy, *schedProxy, *proxyFilter;
     QMap<QString,QString> workoutMap;
