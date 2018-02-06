@@ -1339,7 +1339,7 @@
                    <item>
                     <widget class="QPushButton" name="pushButton_addContest">
                      <property name="text">
-                      <string>Add/Edit</string>
+                      <string>Add</string>
                      </property>
                     </widget>
                    </item>

@@ -1181,6 +1181,7 @@ private:
     void set_foodWeek(QString);
     void calc_foodCalories(int,double,int);
     void calc_menuCal();
+    void reset_menuEdit();
     int checkFoodString(QString);
 
 

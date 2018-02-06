@@ -194,11 +194,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->toolButton_saveMeals->setEnabled(false);
     ui->toolButton_deleteMenu->setEnabled(false);
-    ui->toolButton_addMenu->setEnabled(false);
-    ui->toolButton_foodUp->setEnabled(false);
-    ui->toolButton_foodDown->setEnabled(false);
-    ui->toolButton_menuEdit->setEnabled(false);
-    ui->toolButton_clear->setEnabled(false);
+    this->reset_menuEdit();
     selModule = 0;
 
     this->set_speedgraph();
@@ -2133,11 +2129,21 @@ void MainWindow::calc_menuCal()
     ui->label_menuCal->setText("Meal Cal: "+QString::number(mealCal));
 }
 
+void MainWindow::reset_menuEdit()
+{
+    ui->toolButton_foodUp->setEnabled(false);
+    ui->toolButton_foodDown->setEnabled(false);
+    ui->toolButton_menuEdit->setEnabled(false);
+    ui->toolButton_clear->setEnabled(false);
+    ui->listWidget_MenuEdit->clear();
+}
+
 void MainWindow::on_listWidget_weekPlans_clicked(const QModelIndex &index)
 {
     QString weekId = index.data(Qt::DisplayRole).toString();
     this->set_foodWeek(weekId);
     ui->actionDelete->setEnabled(true);
+    this->reset_menuEdit();
 }
 
 void MainWindow::on_toolButton_addMenu_clicked()
@@ -2188,12 +2194,9 @@ void MainWindow::on_toolButton_menuEdit_clicked()
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek.addDays(index.column()),index.row(),&updateList,true);
 
     ui->label_menuEdit->setText("Edit: -");
-    ui->listWidget_MenuEdit->clear();
     ui->actionSave->setEnabled(true);
-    ui->toolButton_foodUp->setEnabled(false);
-    ui->toolButton_foodDown->setEnabled(false);
-    ui->toolButton_menuEdit->setEnabled(false);
-    ui->toolButton_clear->setEnabled(false);
+    this->reset_menuEdit();
+
 }
 
 void MainWindow::on_toolButton_saveMeals_clicked()
