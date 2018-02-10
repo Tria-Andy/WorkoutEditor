@@ -637,6 +637,7 @@ void settings::saveSettings()
         }
 
         settingList.clear();
+        myvalues->setValue("weightmode",generalMap.value("WeightMode"));
     myvalues->endGroup();
 
     myvalues->beginGroup("Misc");

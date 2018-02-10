@@ -288,6 +288,8 @@ void Dialog_settings::writeChangedValues()
 
     athleteMap.insert("currpal",ui->doubleSpinBox_PALvalue->value());
 
+    generalMap.insert("WeightMode",ui->comboBox_weightmode->currentText());
+
     for(QHash<QString,QColor>::const_iterator it = colorMapCache.cbegin(), end = colorMapCache.cend(); it != end; ++it)
     {
         colorMap.insert(it.key(),it.value());
