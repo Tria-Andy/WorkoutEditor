@@ -194,6 +194,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->toolButton_saveMeals->setEnabled(false);
     ui->toolButton_deleteMenu->setEnabled(false);
+    ui->toolButton_menuCopy->setEnabled(false);
+    ui->toolButton_menuPaste->setEnabled(false);
     this->reset_menuEdit();
     selModule = 0;
 
@@ -934,7 +936,7 @@ void MainWindow::on_actionSave_triggered()
         QMessageBox::StandardButton reply;
             reply = QMessageBox::question(this,
                                           tr("Save Food Plan"),
-                                          "Save Food Plan and Meal List?",
+                                          "Save Food Plan?",
                                           QMessageBox::Yes|QMessageBox::No
                                           );
         if (reply == QMessageBox::Yes)
@@ -2126,7 +2128,7 @@ void MainWindow::calc_menuCal()
             mealCal = mealCal + foodString.mid(calPos,foodString.indexOf(")")-calPos).toInt();
         }
     }
-    ui->label_menuCal->setText("Meal Cal: "+QString::number(mealCal));
+    ui->label_menuCal->setText(" : "+QString::number(mealCal) +" KCal");
 }
 
 void MainWindow::reset_menuEdit()
@@ -2189,7 +2191,7 @@ void MainWindow::on_toolButton_menuEdit_clicked()
 
     selItem->setData(Qt::EditRole,setString);
     selItem->setToolTip("Meal Cal: "+QString::number(mealCal));
-    ui->label_menuCal->setText("Meal Cal:");
+    ui->label_menuCal->setText(" : 0 KCal");
 
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek.addDays(index.column()),index.row(),&updateList,true);
 
@@ -2397,6 +2399,7 @@ void MainWindow::on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item)
     ui->toolButton_foodUp->setEnabled(true);
     ui->toolButton_menuEdit->setEnabled(true);
     ui->toolButton_clear->setEnabled(true);
+    ui->toolButton_menuCopy->setEnabled(true);
 }
 
 void MainWindow::on_treeView_meals_expanded(const QModelIndex &index)
@@ -2420,5 +2423,22 @@ void MainWindow::on_toolButton_mealreset_clicked()
 void MainWindow::on_toolButton_clear_clicked()
 {
     ui->listWidget_MenuEdit->clear();
+    this->calc_menuCal();
+}
+
+void MainWindow::on_toolButton_menuCopy_clicked()
+{
+    menuCopy.clear();
+    for(int i = 0; i < ui->listWidget_MenuEdit->count(); ++i)
+    {
+        menuCopy << ui->listWidget_MenuEdit->item(i)->text();
+    }
+    ui->toolButton_menuPaste->setEnabled(true);
+}
+
+void MainWindow::on_toolButton_menuPaste_clicked()
+{
+    ui->listWidget_MenuEdit->clear();
+    ui->listWidget_MenuEdit->addItems(menuCopy);
     this->calc_menuCal();
 }

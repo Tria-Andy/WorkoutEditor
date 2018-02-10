@@ -1123,7 +1123,7 @@ private:
     QStandardItemModel *calendarModel,*sumModel,*fileModel,*infoModel,*avgModel;
     QItemSelectionModel *treeSelection,*mealSelection;
     QSortFilterProxyModel *scheduleProxy,*metaProxy,*metaProxyFilter,*contentProxy;
-    QStringList modus_list,cal_header,year_header,avgHeader,schedMode,y2Label;
+    QStringList modus_list,cal_header,year_header,avgHeader,schedMode,y2Label,menuCopy;
     QLabel *planerMode;
     QToolButton *planMode;
     QIcon editorIcon,planerIcon,foodIcon;
@@ -1263,6 +1263,8 @@ private slots:
     void mealSave(QStandardItem*);
     void on_toolButton_mealreset_clicked();
     void on_toolButton_clear_clicked();
+    void on_toolButton_menuCopy_clicked();
+    void on_toolButton_menuPaste_clicked();
 };
 
 #endif // MAINWINDOW_H
