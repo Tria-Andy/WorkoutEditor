@@ -61,7 +61,6 @@ void Activity::readJsonFile(QString jsonfile,bool intAct)
 
         sampleModel = new QStandardItemModel();
         mapValues = settings::getListMapPointer(settings::lMap::Sample);
-
         this->init_actModel("SAMPLES",mapValues,sampleModel,&sampList,0);
 
         if(hasXdata)

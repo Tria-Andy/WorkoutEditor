@@ -169,7 +169,6 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     updateProgess = new QProgressBar(statusFrame);
     updateProgess->setTextVisible(true);
     updateProgess->setMinimum(0);
-    updateProgess->setValue(0);
     updateProgess->setFixedHeight(15);
     updateProgess->setFormat("%v");
     statusBox->setContentsMargins(2,2,2,2);
@@ -1502,6 +1501,7 @@ void Dialog_workCreator::update_workouts()
         }
     }
     worksched->set_isUpdated(true);
+    QTimer::singleShot(2000,updateProgess,SLOT(reset()));
 }
 
 
