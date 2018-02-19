@@ -735,7 +735,6 @@ void Activity::recalcIntTree()
     }
     else
     {
-        //double msec = 0;
         double lapDist = 0;
         for(int row = 0; row < rowCount; ++row)
         {
@@ -744,18 +743,7 @@ void Activity::recalcIntTree()
            lapDist = intTreeModel->data(intTreeModel->index(row,4)).toDouble();
 
            workDist = workDist + lapDist;
-           /*
-           msec = lapDist / intTime;
 
-           if(row < rowCount-1)
-           {
-                workDist = workDist + (lapDist + msec);
-           }
-           else
-           {
-                workDist = workDist + lapDist;
-           }
-           */
            if(isBike)
            {
                totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,9)).toDouble();
