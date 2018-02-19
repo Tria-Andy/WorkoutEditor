@@ -313,16 +313,6 @@ void Activity::prepareData()
             intModel->setData(intModel->index(row,3),this->get_int_distance(row));
             intModel->setData(intModel->index(row,4),1);
             intModel->setData(intModel->index(row,5),"Int-"+QString::number(row));
-
-            if(row > 0 && row < intModelCount)
-            {
-                intStart = intModel->data(intModel->index(row,1)).toInt();
-                intStop = intModel->data(intModel->index(row-1,2)).toInt();
-                if(intStart != intStop)
-                {
-                    intModel->setData(intModel->index(row,1),intStop);
-                }
-            }
         }
 
         for(int i = 0; i < sampCount; ++i)
@@ -1305,7 +1295,7 @@ void Activity::updateIntModel(int startCol,int duraCol)
     for(int row = 0; row < intTreeModel->rowCount(); ++row)
     {
         intStart = this->get_timesec(intTreeModel->data(intTreeModel->index(row,startCol)).toString());
-        intStop = intStart + this->get_timesec(intTreeModel->data(intTreeModel->index(row,duraCol)).toString());
+        intStop = intStart + this->get_timesec(intTreeModel->data(intTreeModel->index(row,duraCol)).toString())-1;
 
         intModel->setData(intModel->index(row,0),intTreeModel->data(intTreeModel->index(row,0)).toString().trimmed());
         intModel->setData(intModel->index(row,1),intStart);
@@ -1421,9 +1411,12 @@ void Activity::updateSampleModel(int rowcount)
     }
     else
     {
+        int firstLap = 0;
+
         for(int intRow = 0; intRow < intModel->rowCount(); ++intRow)
         {
-            intStart = intModel->data(intModel->index(intRow,1)).toInt();
+            firstLap = intRow == 0 ? 0 : 1;
+            intStart = intModel->data(intModel->index(intRow,1)).toInt()-firstLap;
             intStop = intModel->data(intModel->index(intRow,2)).toInt();
             msec = intModel->data(intModel->index(intRow,3)).toDouble() / (intStop-intStart);
 
@@ -1631,7 +1624,7 @@ int Activity::get_int_duration(int row)
 
     duration = intModel->data(intModel->index(row,2,QModelIndex()),Qt::DisplayRole).toInt() - intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt();
 
-    return duration;
+    return duration+1;
 }
 
 double Activity::get_int_distance(int row)
@@ -1646,7 +1639,7 @@ double Activity::get_int_distance(int row)
     }
     else
     {
-        int_start = intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt();
+        int_start = intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt()-1;
         int_stop = intModel->data(intModel->index(row,2,QModelIndex()),Qt::DisplayRole).toInt();
         dist_start = sampleModel->data(sampleModel->index(int_start,1,QModelIndex()),Qt::DisplayRole).toDouble();
         dist_stop = sampleModel->data(sampleModel->index(int_stop,1,QModelIndex()),Qt::DisplayRole).toDouble();
