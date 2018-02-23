@@ -1279,16 +1279,22 @@ void Activity::updateIntModel(int startCol,int duraCol)
 {
     int intStart = 0;
     int intStop = 0;
+    int lastStop = 0;
 
     for(int row = 0; row < intTreeModel->rowCount(); ++row)
     {
         intStart = this->get_timesec(intTreeModel->data(intTreeModel->index(row,startCol)).toString());
         intStop = intStart + this->get_timesec(intTreeModel->data(intTreeModel->index(row,duraCol)).toString())-1;
+        if(row > 0)
+        {
+            if(lastStop == intStart) ++intStart;
+        }
 
         intModel->setData(intModel->index(row,0),intTreeModel->data(intTreeModel->index(row,0)).toString().trimmed());
         intModel->setData(intModel->index(row,1),intStart);
         intModel->setData(intModel->index(row,2),intStop);
         intModel->setData(intModel->index(row,3),intTreeModel->data(intTreeModel->index(row,4)).toDouble());
+        lastStop = intStop;
     }
     this->updateSampleModel(++intStop);
 }

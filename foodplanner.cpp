@@ -26,6 +26,8 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     weekPlansModel = new QStandardItemModel();
     weekPlansModel->setColumnCount(mealTags.count()+1);
 
+    calPercent = settings::doubleMap.value(generalValues->value("WeightMode"));
+
     daySumModel = new QStandardItemModel(sumHeader.count(),dayHeader.count());
     daySumModel->setVerticalHeaderLabels(sumHeader);
     weekSumModel = new QStandardItemModel(sumHeader.count(),1);
@@ -508,6 +510,9 @@ void foodplanner::update_daySumModel()
     QDateTime calcDay;
     calcDay.setDate(firstDayofWeek);
 
+    int minCal = 0;
+    int maxCal = 0;
+
     for(int i = 0; i < dayHeader.count(); ++i)
     {
         sum = daySumModel->data(daySumModel->index(1,i)).toInt() + daySumModel->data(daySumModel->index(2,i)).toInt();
@@ -516,6 +521,11 @@ void foodplanner::update_daySumModel()
         daySumModel->setData(daySumModel->index(1,i),dayCalBase);
         daySumModel->setData(daySumModel->index(3,i),sum);
         daySumModel->setData(daySumModel->index(4,i),diff);
+
+        maxCal = sum * (calPercent.at(1)/100);
+        minCal = sum * (calPercent.at(2)/100);
+
+        daySumModel->item(4,i)->setToolTip("Range: "+QString::number(minCal)+"-"+QString::number(maxCal));
     }
     this->update_weekSumModel();
 }
@@ -564,6 +574,12 @@ void foodplanner::update_weekSumModel()
     estModel->setData(estModel->index(5,0),QString::number(nextWeek) + " Kg");
 
     weekPlansModel->setData(weekPlansModel->index(weekIndex.row()+1,2),nextWeek);
+
+    int maxCal = weekSum[3] * (calPercent.at(1)/100);
+    int minCal = weekSum[3] * (calPercent.at(2)/100);
+
+    weekSumModel->item(4,0)->setToolTip("Range: "+QString::number(minCal)+"-"+QString::number(maxCal));
+
 }
 
 void foodplanner::update_sumBySchedule(QDate firstday)

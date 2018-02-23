@@ -37,6 +37,8 @@ private:
     QString loadedWeek,filePath,planerXML,mealXML;
     QStringList dayTags,sectionTags,mealTags,weekHeader,sumHeader,daySumHeader,weekSumHeader;
 
+    QVector<double> calPercent;
+
     void read_foodPlan(QDomDocument);
     void read_meals(QDomDocument);
     void build_weekFoodTree(QDomElement,QStandardItem*);
