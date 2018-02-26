@@ -458,17 +458,17 @@ void Dialog_workCreator::save_workout()
 
     int roundNum = static_cast<int>(round(workSum)) % 10;
 
-    if(roundNum < 5)
+    if(roundNum <= 2)
     {
         workSum = round(workSum - roundNum);
     }
-    else if(roundNum > 5)
+    else if(roundNum > 2 && roundNum < 8)
+    {
+        workSum = static_cast<int>(round(workSum) + 5-roundNum);
+    }
+    else if(roundNum >= 8)
     {
         workSum = round(workSum + (10-roundNum));
-    }
-    else if(roundNum == 5)
-    {
-        workSum = static_cast<int>(round(workSum));
     }
 
     workoutValues << currentSport
