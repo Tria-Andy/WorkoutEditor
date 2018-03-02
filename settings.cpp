@@ -69,8 +69,8 @@ QStringList settings::extkeyList;
 
 QStringList settings::table_header;
 QStringList settings::header_swim;
-QStringList settings::header_bike;
-QStringList settings::header_run;
+QStringList settings::header_pm;
+QStringList settings::header_pace;
 QStringList settings::headerTria;
 QStringList settings::header_other;
 QStringList settings::triaDistance;
@@ -144,8 +144,8 @@ void settings::loadSettings()
     settingsUpdated = false;
 
     header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes" << "Work";
-    header_bike << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD" << "Work";
-    header_run << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Work";
+    header_pm << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD" << "Work";
+    header_pace << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Work";
     headerTria << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "Work";
     header_other << "Interval" << "Duration" << "Start" << "Distance" << "Work";
 
@@ -661,7 +661,7 @@ QString settings::set_colorString(QColor color)
     return QString::number(color.red())+"-"+QString::number(color.green())+"-"+QString::number(color.blue());;
 }
 
-QStringList settings::get_int_header(QString vSport)
+QStringList settings::get_int_header(QString vSport,bool usePM)
 {
     QString avg = "Avg";
     table_header.clear();
@@ -669,13 +669,17 @@ QStringList settings::get_int_header(QString vSport)
     {
         return table_header << header_swim << avg;
     }
-    else if(vSport == isBike)
+    else if(vSport == isBike || vSport == isRun)
     {
-        return table_header << header_bike << avg;
-    }
-    else if(vSport == isRun)
-    {
-        return table_header << header_run << avg;
+        if(usePM)
+        {
+            return table_header << header_pm << avg;
+        }
+        else
+        {
+            return table_header << header_pace << avg;
+        }
+
     }
     else if(vSport == isTria)
     {

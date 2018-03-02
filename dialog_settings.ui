@@ -1732,13 +1732,6 @@
                </property>
               </widget>
              </item>
-             <item row="9" column="2">
-              <widget class="QLabel" name="label_38">
-               <property name="text">
-                <string>Comment:</string>
-               </property>
-              </widget>
-             </item>
              <item row="6" column="2">
               <widget class="QLabel" name="label_35">
                <property name="text">
@@ -1790,9 +1783,6 @@
              <item row="7" column="3">
               <widget class="QLineEdit" name="lineEdit_fatweight"/>
              </item>
-             <item row="9" column="3">
-              <widget class="QLineEdit" name="lineEdit_comment"/>
-             </item>
              <item row="3" column="0" colspan="4">
               <widget class="Line" name="line_7">
                <property name="orientation">
@@ -1825,6 +1815,26 @@
                 <double>1.000000000000000</double>
                </property>
               </widget>
+             </item>
+             <item row="10" column="2">
+              <widget class="QLabel" name="label_38">
+               <property name="text">
+                <string>Comment:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="10" column="3">
+              <widget class="QLineEdit" name="lineEdit_comment"/>
+             </item>
+             <item row="9" column="2">
+              <widget class="QLabel" name="label_54">
+               <property name="text">
+                <string>FFMI:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="3">
+              <widget class="QLineEdit" name="lineEdit_ffmi"/>
              </item>
             </layout>
             <zorder>spinBox_leg</zorder>
@@ -1859,11 +1869,13 @@
             <zorder>lineEdit_fatweight</zorder>
             <zorder>label_37</zorder>
             <zorder>lineEdit_fatpercent</zorder>
-            <zorder>label_38</zorder>
-            <zorder>lineEdit_comment</zorder>
             <zorder>line_7</zorder>
             <zorder>label_47</zorder>
             <zorder>doubleSpinBox_PALvalue</zorder>
+            <zorder>label_38</zorder>
+            <zorder>lineEdit_comment</zorder>
+            <zorder>label_54</zorder>
+            <zorder>lineEdit_ffmi</zorder>
            </widget>
           </item>
          </layout>

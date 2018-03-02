@@ -9,6 +9,7 @@ calculation::calculation()
 
 QHash<QString,double>* calculation::thresValues = settings::getdoubleMapPointer(settings::dMap::Threshold);
 QHash<QString,double>* calculation::athleteValues = settings::getdoubleMapPointer(settings::dMap::Athlete);
+bool calculation::usePMData;
 
 QString calculation::set_time(int sec)
 {
@@ -230,8 +231,15 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,int
     }
     if(sport == settings::isRun)
     {
-        double bodyHub = (height * 0.057) + (((3600/thresValues->value("runpace")) / pValue) / 100.0);
-        return (weight * grav * mSec * bodyHub) * dura / factor;
+        if(usePMData)
+        {
+            return dura * pValue / factor;
+        }
+        else
+        {
+            double bodyHub = (height * 0.057) + (((3600/thresValues->value("runpace")) / pValue) / 100.0);
+            return (weight * grav * mSec * bodyHub) * dura / factor;
+        }
     }
     if(sport == settings::isStrength || sport == settings::isAlt)
     {

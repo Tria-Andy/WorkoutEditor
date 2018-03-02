@@ -41,7 +41,7 @@ void Activity::readJsonFile(QString jsonfile,bool intAct)
     QStringList valueList;
     QString stgValue;
     valueList = settings::get_listValues("JsonFile");
-
+    this->hasPMData = false;
     curr_sport = this->readJsonContent(jsonfile);
 
     for(int i = 0; i < valueList.count();++i)
@@ -74,6 +74,7 @@ void Activity::readJsonFile(QString jsonfile,bool intAct)
 
 void Activity::prepareData()
 {
+    calculation::usePMData = hasPMData;
     isSwim = isBike = isRun = isTria = isStrength = false;
     itemHeader.insert(0,QStringList() << "Name:" << "Type:" << "Distance (M):" << "Duration (Sec):" << "Pace/100m:" << "Speed km/h:" << "Strokes:");
     itemHeader.insert(1,QStringList() << "Name:" << "Start:" << "Distance:" << "Duration:" << "Pace:" << "Speed km/h:");
@@ -282,8 +283,8 @@ void Activity::prepareData()
             thresSpeed = thresValues->value("bikespeed");
             this->fillRangeLevel(thresPower,false);
             isTimeBased = true;
-            avgValues.resize(6);
-            avgModel->setVerticalHeaderLabels(avgHeader.value(1));
+            avgValues.resize(avgHeader.value(hasPMData).count());
+            avgModel->setVerticalHeaderLabels(avgHeader.value(hasPMData));
             selItemModel->setVerticalHeaderLabels(itemHeader.value(1));
         }
         else if(isRun)
@@ -292,8 +293,8 @@ void Activity::prepareData()
             thresPace = thresValues->value("runpace");
             this->fillRangeLevel(thresPace,true);
             isTimeBased = false;
-            avgValues.resize(4);
-            avgModel->setVerticalHeaderLabels(avgHeader.value(0));
+            avgValues.resize(avgHeader.value(hasPMData).count());
+            avgModel->setVerticalHeaderLabels(avgHeader.value(hasPMData));
             selItemModel->setVerticalHeaderLabels(itemHeader.value(1));
         }
         else if(isTria)
@@ -303,9 +304,9 @@ void Activity::prepareData()
         else
         {
             isTimeBased = true;
-            avgValues.resize(4);
-            avgModel->setVerticalHeaderLabels(avgHeader.value(2));
-            selItemModel->setVerticalHeaderLabels(itemHeader.value(2));
+            avgValues.resize(avgHeader.value(hasPMData).count());
+            avgModel->setVerticalHeaderLabels(avgHeader.value(0));
+            selItemModel->setVerticalHeaderLabels(itemHeader.value(0));
         }
 
         for(int row = 0; row < intModelCount; ++row)
@@ -419,7 +420,7 @@ void Activity::build_intTree()
             intItems.clear();
         }
     }
-    intTreeModel->setHorizontalHeaderLabels(settings::get_int_header(curr_sport));
+    intTreeModel->setHorizontalHeaderLabels(settings::get_int_header(curr_sport,hasPMData));
     this->recalcIntTree();
 }
 
@@ -453,26 +454,30 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
     intItems << new QStandardItem(this->set_time(lapPace));
     intItems << new QStandardItem(QString::number(this->set_doubleValue(lapSpeed,false)));
 
-    if(isBike)
+    if(isBike || isRun)
     {
-        double watts = round(this->get_int_value(pInt,4));
-        double wattSpeed = this->wattToSpeed(thresPower,thresSpeed,watts);
-        lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(watts);
-
-        intItems << new QStandardItem(QString::number(watts));
-        intItems << new QStandardItem(QString::number(round(this->get_int_value(pInt,3))));
-        intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,watts,lapTime,0),false)));
-
-        if(isIndoor)
+        if(hasPMData)
         {
-            intItems.at(4)->setData(QString::number(this->calc_distance(this->set_time(lapTime),3600.0/wattSpeed)),Qt::EditRole);
-            intItems.at(6)->setData(QString::number(wattSpeed),Qt::EditRole);
+            double watts = round(this->get_int_value(pInt,4));         
+            lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(watts);
+
+            intItems << new QStandardItem(QString::number(watts));
+            intItems << new QStandardItem(QString::number(round(this->get_int_value(pInt,3))));
+            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,watts,lapTime,0),false)));
+
+            if(isIndoor)
+            {
+                double wattSpeed = this->wattToSpeed(thresPower,thresSpeed,watts);
+                intItems.at(4)->setData(QString::number(this->calc_distance(this->set_time(lapTime),3600.0/wattSpeed)),Qt::EditRole);
+                intItems.at(6)->setData(QString::number(wattSpeed),Qt::EditRole);
+            }
         }
-    }
-    else if(isRun)
-    {
-        lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(lapPace);
-        intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,lapSpeed,lapTime,0),false)));
+        else
+        {
+            lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(lapPace);
+            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,lapSpeed,lapTime,0),false)));
+        }
+
     }
     else if(isTria)
     {
@@ -750,10 +755,17 @@ void Activity::recalcIntTree()
            }
            else if(isRun)
            {
-               totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,7)).toDouble();
-               totalCal = ceil((totalWork*4)/4.184);
-               ride_info.insert("Total Cal",QString::number(totalCal));
-               this->hasOverride = true;
+               if(hasPMData)
+               {
+                   totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,9)).toDouble();
+               }
+               else
+               {
+                   totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,7)).toDouble();
+                   totalCal = ceil((totalWork*4)/4.184);
+                   ride_info.insert("Total Cal",QString::number(totalCal));
+                   this->hasOverride = true;
+               }
            }
            else if(isTria)
            {
@@ -1451,7 +1463,9 @@ void Activity::updateSampleModel(int rowcount)
                     {
                         calcSpeed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
                         newDist[intSec] = newDist[intSec-1] + msec;
+                        if(hasPMData) calcCadence[intSec] = sampleModel->data(sampleModel->index(intSec,3,QModelIndex())).toDouble();
                     }
+
                 }
                 calcSpeed[intStop] = calcSpeed[intStop-1];
             }
@@ -1677,11 +1691,12 @@ double Activity::get_int_value(int row,int col)
     int_start = intModel->data(intModel->index(row,1,QModelIndex())).toInt();
     int_stop = intModel->data(intModel->index(row,2,QModelIndex())).toInt();
 
-    for(int i = int_start; i < int_stop; ++i)
+    for(int i = int_start; i <= int_stop; ++i)
     {
         value = value + sampleModel->data(sampleModel->index(i,col,QModelIndex())).toDouble();
     }
-    value = value / (int_stop - int_start);
+
+    value = value / ((int_stop - int_start)+1);
 
     return value;
 }
@@ -1847,7 +1862,7 @@ void Activity::set_avgValues(int counter,int factor)
             avgValues[2] = avgValues.at(2) + (static_cast<double>(this->get_timesec(intTreeModel->data(selItem.value(5)).toString()))*factor);
             avgValues[3] = avgValues.at(3) + (intTreeModel->data(selItem.value(4)).toDouble()*factor);
 
-            if(curr_sport == settings::isBike)
+            if(hasPMData)
             {
                 avgValues[4] = avgValues.at(4) + (intTreeModel->data(selItem.value(7)).toDouble()*factor);
                 avgValues[5] = avgValues.at(5) + (intTreeModel->data(selItem.value(8)).toDouble()*factor);

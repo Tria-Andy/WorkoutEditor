@@ -17,6 +17,7 @@ protected:
     QHash<QString,double> *ltsValues;
     QHash<QString,QString> *gcValues,*generalValues;
 
+    static bool usePMData;
     static double calc_totalWork(QString,double,double,int);
     static QString set_time(int);
     static QString get_workout_pace(double, QTime, QString,bool);

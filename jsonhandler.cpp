@@ -42,6 +42,11 @@ void jsonHandler::fill_keyList(QStringList *targetList,QMap<int, QString> *map, 
         if(list->contains(map->value(i)))
         {
             targetList->insert(i,map->value(i));
+
+            if(map->value(i) == "WATTS")
+            {
+                hasPMData = true;
+            }
         }
         else
         {

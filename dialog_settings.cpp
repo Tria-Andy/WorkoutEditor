@@ -571,6 +571,7 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         level_del.threshold = thresPace;
         ui->label_watttospeed->setVisible(false);
         ui->doubleSpinBox_watttospeed->setVisible(false);
+
     }
     if(value == settings::isBike)
     {
@@ -583,6 +584,7 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         level_del.threshold = thresPower;
         ui->label_watttospeed->setVisible(true);
         ui->doubleSpinBox_watttospeed->setVisible(true);
+
     }
     if(value == settings::isRun)
     {
@@ -895,6 +897,7 @@ void Dialog_settings::on_pushButton_calcFat_clicked()
 
     int age = ui->lineEdit_age->text().toInt();
     double weight = ui->lineEdit_weight->text().toDouble();
+    double height = athleteValues->value("height");
     double sum7 = 0;
     double k0 = 1.112;
     double k1 = - 0.00043499;
@@ -903,6 +906,7 @@ void Dialog_settings::on_pushButton_calcFat_clicked()
     double fatCalc = 0.0;
     double fatPercent;
     double bodyFreeFat;
+    double ffmi;
     QString fatComment;
 
     sum7 = ui->spinBox_breast->value() * 1.0
@@ -919,10 +923,12 @@ void Dialog_settings::on_pushButton_calcFat_clicked()
 
     fatCalc = (fatPercent * weight) / 100;
     bodyFreeFat = weight - fatCalc;
+    ffmi = bodyFreeFat / (height*height)+6.3*(1.8-height);
 
     ui->lineEdit_fatfree->setText(QString::number(set_doubleValue(bodyFreeFat,false)));
     ui->lineEdit_fatweight->setText(QString::number(set_doubleValue(fatCalc,false)));
     ui->lineEdit_fatpercent->setText(QString::number(set_doubleValue(fatPercent,false)));
+    ui->lineEdit_ffmi->setText(QString::number(set_doubleValue(ffmi,false)));
 
     fatComment = QString::number(ui->spinBox_breast->value())+"-"+
                  QString::number(ui->spinBox_stomach->value())+"-"+

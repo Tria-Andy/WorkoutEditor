@@ -33,7 +33,7 @@ private:
     static QString set_colorString(QColor);
 
     static QString settingFile,valueFile,valueFilePath,splitter;
-    static QStringList table_header,header_swim,header_bike,header_run,headerTria,header_other;
+    static QStringList table_header,header_swim,header_pm,header_pace,headerTria,header_other;
     static QStringList header_int_time,header_swim_time,triaDistance;
 
     static QMap<int,QString> sampList,intList;
@@ -130,7 +130,7 @@ public:
     static void set_ltsValue(QString key,double value) {ltsMap.insert(key,value);}
 
     //common functions
-    static QStringList get_int_header(QString);
+    static QStringList get_int_header(QString,bool);
     static int get_timesec(QString time);
     static double get_weightforDate(QDateTime);
     static void writeListValues(QHash<QString,QStringList> *plist);
