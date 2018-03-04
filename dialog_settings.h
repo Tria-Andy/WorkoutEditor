@@ -107,6 +107,8 @@ private slots:
 
     void on_toolButton_mealEdit_clicked();
 
+    void on_comboBox_thresBase_currentIndexChanged(int index);
+
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model,*contestTreeModel;
@@ -128,7 +130,7 @@ private:
     void set_bottonColor(QToolButton*,bool changeColor);
     void save_settingsChanges();
     void set_thresholdView(QString);
-    void set_thresholdModel(QString);
+    void set_thresholdModel(QString,int);
     void set_hfmodel(double);
     void set_ltsList();
     void checkSportUse();

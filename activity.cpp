@@ -281,7 +281,14 @@ void Activity::prepareData()
             thresPower = thresValues->value("bikepower");
             thresPace = thresValues->value("bikepace");
             thresSpeed = thresValues->value("bikespeed");
-            this->fillRangeLevel(thresPower,false);
+            if(hasPMData)
+            {
+                this->fillRangeLevel(thresPower,false);
+            }
+            else
+            {
+                this->fillRangeLevel(thresPace,true);
+            }
             isTimeBased = true;
             avgValues.resize(avgHeader.value(hasPMData).count());
             avgModel->setVerticalHeaderLabels(avgHeader.value(hasPMData));
@@ -291,7 +298,16 @@ void Activity::prepareData()
         {
             thresPower = thresValues->value("runpower");
             thresPace = thresValues->value("runpace");
-            this->fillRangeLevel(thresPace,true);
+
+            if(hasPMData)
+            {
+                this->fillRangeLevel(thresPower,false);
+            }
+            else
+            {
+                this->fillRangeLevel(thresPace,true);
+            }
+
             isTimeBased = false;
             avgValues.resize(avgHeader.value(hasPMData).count());
             avgModel->setVerticalHeaderLabels(avgHeader.value(hasPMData));
@@ -327,10 +343,20 @@ void Activity::prepareData()
             }
             else
             {
-                secondValue = sampleModel->data(sampleModel->index(i,posHF,QModelIndex())).toDouble();
                 sampSpeed[i] = sampleModel->data(sampleModel->index(i,2,QModelIndex())).toDouble();
-                sampSecond[i] = secondValue;
-                avgHF = avgHF + static_cast<int>(secondValue);
+
+                if(hasPMData)
+                {
+                    sampSecond[i] = sampleModel->data(sampleModel->index(i,4,QModelIndex())).toDouble();
+                    avgHF = avgHF + sampleModel->data(sampleModel->index(i,posHF,QModelIndex())).toDouble();
+                }
+                else
+                {
+                    secondValue = sampleModel->data(sampleModel->index(i,posHF,QModelIndex())).toDouble();
+                    sampSecond[i] = secondValue;
+                    avgHF = avgHF + static_cast<int>(secondValue);
+                }
+
             }
         }
 
@@ -820,7 +846,6 @@ void Activity::fillRangeLevel(double threshold,bool isPace)
             zoneValues.first = this->get_zone_values(zoneLow.toDouble(),threshold,isPace);
             zoneValues.second = this->get_zone_values(zoneHigh.toDouble(),threshold,isPace);
         }
-
         rangeLevels.insert(levels.at(i),zoneValues);
     }
 }
@@ -831,12 +856,13 @@ QString Activity::checkRangeLevel(double lapValue)
 
     for(QHash<QString,QPair<double,double>>::const_iterator it = rangeLevels.cbegin(), end = rangeLevels.cend(); it != end; ++it)
     {
+
         if(lapValue >= it.value().first && lapValue < it.value().second)
         {
             currZone = it.key();
         }
 
-        if(lapValue < rangeLevels.value(levels.last()).second && (isSwim || isRun))
+        if(lapValue < rangeLevels.value(levels.last()).second && !hasPMData)
         {
             currZone = levels.last();
         }

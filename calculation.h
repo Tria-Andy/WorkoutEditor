@@ -25,7 +25,7 @@ protected:
     static double calc_Speed(double,double,double);
     static QString calc_lapSpeed(QString,double);
     static int calc_lapPace(QString,int,double);
-    static QString calc_threshold(QString,double,double);
+    static QString calc_threshold(double,double,int);
     static QString calc_duration(QString,double,QString);
     static QString threstopace(double,double);
     static double wattToSpeed(double,double,double);

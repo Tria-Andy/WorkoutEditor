@@ -9,7 +9,7 @@ calculation::calculation()
 
 QHash<QString,double>* calculation::thresValues = settings::getdoubleMapPointer(settings::dMap::Threshold);
 QHash<QString,double>* calculation::athleteValues = settings::getdoubleMapPointer(settings::dMap::Athlete);
-bool calculation::usePMData;
+bool calculation::usePMData = false;
 
 QString calculation::set_time(int sec)
 {
@@ -237,7 +237,7 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,int
         }
         else
         {
-            double bodyHub = (height * 0.057) + (((3600/thresValues->value("runpace")) / pValue) / 100.0);
+            double bodyHub = (height * 0.054) + (((3600/thresValues->value("runpace")) / pValue) / 100.0);
             return (weight * grav * mSec * bodyHub) * dura / factor;
         }
     }
@@ -277,17 +277,17 @@ double calculation::wattToSpeed(double thresPower,double thresSpeed,double currW
     return 0;
 }
 
-QString calculation::calc_threshold(QString sport,double threshold,double percent)
+QString calculation::calc_threshold(double threshold,double percent,int thresBase)
 {
     QString thresValue = "00:00";
 
     if(percent > 0)
     {
-        if(sport == settings::isSwim || sport == settings::isRun)
+        if(thresBase == 0)
         {
             thresValue = set_time(static_cast<int>(round(threshold / (percent/100.0))));
         }
-        if(sport == settings::isBike || sport == settings::isStrength || sport == settings::isAlt)
+        else
         {
             thresValue = QString::number(threshold * (percent/100));
         }

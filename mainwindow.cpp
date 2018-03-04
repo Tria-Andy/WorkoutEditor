@@ -1486,8 +1486,8 @@ void MainWindow::set_speedValues(int index)
         if(curr_activity->isIndoor)
         {
             ui->horizontalSlider_factor->setEnabled(false);
-            yPos = 1;
         }
+        yPos = calculation::usePMData ? 1 : 0;
     }
     else
     {
@@ -1496,7 +1496,6 @@ void MainWindow::set_speedValues(int index)
         intDist = treeSelection->selectedRows(3).at(0).data().toDouble();
         yPos = 2;
     }
-
     this->set_speedPlot(intSpeed,intDist,yPos);
 }
 

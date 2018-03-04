@@ -76,6 +76,7 @@ public:
     explicit del_workcreatoredit(QObject *parent = 0) : QStyledItemDelegate(parent) {}
     bool hasValue,timeBased;
     QString sport;
+    int thresBase;
     QString groupName;
     double currThres;
     double thresPace;
@@ -342,7 +343,7 @@ public:
 
     void rangeChanged(QAbstractItemModel *model,double value) const
     {
-        model->setData(model->index(3,0),calc_threshold(sport,currThres,value));
+        model->setData(model->index(3,0),calc_threshold(currThres,value,thresBase));
 
         if(sport == settings::isBike)
         {
@@ -454,6 +455,8 @@ private slots:
     void on_pushButton_sync_clicked();
     void on_checkBox_timebased_clicked(bool checked);
 
+    void on_comboBox_thresBase_currentIndexChanged(int index);
+
 private:
     Ui::Dialog_workCreator *ui;
 
@@ -487,6 +490,7 @@ private:
     void control_editPanel(bool);
     void resetAxis();
     void set_itemData(QTreeWidgetItem *item);
+    void set_thresholdBase(int);
     void show_editItem(QTreeWidgetItem *item);
     void set_selectData(QTreeWidgetItem *item);
     QTreeWidgetItem* move_item(bool,QTreeWidgetItem*);

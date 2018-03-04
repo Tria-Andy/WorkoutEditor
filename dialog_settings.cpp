@@ -61,6 +61,8 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->spinBox_lastLTS->setValue(ltsValues->value("lastlts"));
     ui->spinBox_lastSTS->setValue(ltsValues->value("laststs"));
     ui->comboBox_thresSport->addItems(sportList);
+    ui->comboBox_thresBase->addItem("Pace");
+    ui->comboBox_thresBase->addItem("Power");
     ui->dateEdit_contest->setDate(QDate::currentDate());
     ui->comboBox_contestsport->addItems(settings::get_listValues("Sport"));
     ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
@@ -121,7 +123,7 @@ void Dialog_settings::checkSetup()
     ui->toolButton_edit->setEnabled(false);
     ui->toolButton_delete->setEnabled(false);
 
-    this->set_thresholdModel(ui->comboBox_thresSport->currentText());
+    this->set_thresholdModel(ui->comboBox_thresSport->currentText(),ui->comboBox_thresBase->currentIndex());
     this->set_hfmodel(ui->spinBox_hfThres->value());
     this->set_ltsList();
     this->set_saisonInfo(ui->comboBox_saisons->currentText());
@@ -370,17 +372,17 @@ void Dialog_settings::set_thresholdView(QString sport)
     if(sport == settings::isSwim)
     {
         ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_thresPace->time(),100,ui->comboBox_thresSport->currentText(),true)));
-        this->set_thresholdModel(sport);
+        this->set_thresholdModel(sport,ui->comboBox_thresBase->currentIndex());
     }
     if(sport == settings::isBike)
     {
         ui->lineEdit_speed->setText(QString::number(this->set_doubleValue(ui->spinBox_thresPower->value()/athleteValues->value("ridercw")/thresValues->value("wattfactor"),false)));
-        this->set_thresholdModel(sport);
+        this->set_thresholdModel(sport,ui->comboBox_thresBase->currentIndex());
     }
     if(sport == settings::isRun)
     {
         ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true)));
-        this->set_thresholdModel(sport);
+        this->set_thresholdModel(sport,ui->comboBox_thresBase->currentIndex());
     }
 }
 
@@ -445,7 +447,7 @@ void Dialog_settings::checkSportUse()
     }
 }
 
-void Dialog_settings::set_thresholdModel(QString sport)
+void Dialog_settings::set_thresholdModel(QString sport,int thresBase)
 {
     QStringList levels = listMap.value("Level");
     if(level_model->rowCount() > 0) level_model->clear();
@@ -470,15 +472,15 @@ void Dialog_settings::set_thresholdModel(QString sport)
         percLow = level_model->data(level_model->index(i,1,QModelIndex())).toDouble()/100;
         percHigh = level_model->data(level_model->index(i,3,QModelIndex())).toDouble()/100;
 
-        if(sport == settings::isBike)
-        {
-            level_model->setData(level_model->index(i,2,QModelIndex()),round(thresPower * percLow));
-            level_model->setData(level_model->index(i,4,QModelIndex()),round(thresPower * percHigh));
-        }
-        else
+        if(thresBase == 0)
         {
             level_model->setData(level_model->index(i,2,QModelIndex()),this->set_time(static_cast<int>(round(thresPace / percLow))));
             level_model->setData(level_model->index(i,4,QModelIndex()),this->set_time(static_cast<int>(round(thresPace / percHigh))));
+        }
+        else
+        {
+            level_model->setData(level_model->index(i,2,QModelIndex()),round(thresPower * percLow));
+            level_model->setData(level_model->index(i,4,QModelIndex()),round(thresPower * percHigh));
         }
     }
 }
@@ -566,6 +568,7 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         thresPower = thresValues->value("swimpower");
         thresPace = thresValues->value("swimpace");
         sportFactor = thresValues->value("swimfactor");
+        ui->checkBox_usepm->setChecked(thresValues->value("swimpm"));
         ui->spinBox_thresPower->setPalette(wback);
         ui->timeEdit_thresPace->setPalette(gback);
         level_del.threshold = thresPace;
@@ -578,6 +581,7 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         thresPower = thresValues->value("bikepower");
         thresPace = thresValues->value("bikepace");
         sportFactor = thresValues->value("bikefactor");
+        ui->checkBox_usepm->setChecked(thresValues->value("bikepm"));
         ui->doubleSpinBox_watttospeed->setValue(thresValues->value("wattfactor"));
         ui->spinBox_thresPower->setPalette(gback);
         ui->timeEdit_thresPace->setPalette(wback);
@@ -590,6 +594,7 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
     {
         thresPower = thresValues->value("runpower");
         thresPace = thresValues->value("runpace");
+        ui->checkBox_usepm->setChecked(thresValues->value("runpm"));
         sportFactor = thresValues->value("runfactor");
         ui->spinBox_thresPower->setPalette(wback);
         ui->timeEdit_thresPace->setPalette(gback);
@@ -1164,4 +1169,9 @@ void Dialog_settings::on_toolButton_mealEdit_clicked()
     }
     listMap.insert(ui->comboBox_food->currentText(),tempList);
     this->enableSavebutton();
+}
+
+void Dialog_settings::on_comboBox_thresBase_currentIndexChanged(int index)
+{
+    this->set_thresholdModel(ui->comboBox_thresSport->currentText(),index);
 }

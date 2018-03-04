@@ -811,66 +811,66 @@
                 <property name="bottomMargin">
                  <number>1</number>
                 </property>
-                <item row="0" column="0">
+                <item row="1" column="0">
                  <widget class="QLabel" name="label_8">
                   <property name="text">
                    <string>Power:</string>
                   </property>
                  </widget>
                 </item>
-                <item row="0" column="1">
+                <item row="1" column="1">
                  <widget class="QSpinBox" name="spinBox_thresPower">
                   <property name="maximum">
                    <number>500</number>
                   </property>
                  </widget>
                 </item>
-                <item row="1" column="0">
+                <item row="2" column="0">
                  <widget class="QLabel" name="label_9">
                   <property name="text">
                    <string>Pace:</string>
                   </property>
                  </widget>
                 </item>
-                <item row="1" column="1">
+                <item row="2" column="1">
                  <widget class="QTimeEdit" name="timeEdit_thresPace">
                   <property name="displayFormat">
                    <string>mm:ss</string>
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="0">
+                <item row="3" column="0">
                  <widget class="QLabel" name="label_10">
                   <property name="text">
                    <string>Speed:</string>
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="1">
+                <item row="3" column="1">
                  <widget class="QLineEdit" name="lineEdit_speed">
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="0">
+                <item row="5" column="0">
                  <widget class="QLabel" name="label_17">
                   <property name="text">
                    <string>Factor:</string>
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="1">
+                <item row="5" column="1">
                  <widget class="QDoubleSpinBox" name="doubleSpinBox_factor"/>
                 </item>
-                <item row="4" column="0">
+                <item row="6" column="0">
                  <widget class="QLabel" name="label_watttospeed">
                   <property name="text">
                    <string>WTS:</string>
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="1">
+                <item row="6" column="1">
                  <widget class="QDoubleSpinBox" name="doubleSpinBox_watttospeed">
                   <property name="maximumSize">
                    <size>
@@ -883,6 +883,30 @@
                   </property>
                   <property name="singleStep">
                    <double>0.050000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QCheckBox" name="checkBox_usepm">
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="label_55">
+                  <property name="text">
+                   <string>PM:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="comboBox_thresBase"/>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label_56">
+                  <property name="text">
+                   <string>Base:</string>
                   </property>
                  </widget>
                 </item>
