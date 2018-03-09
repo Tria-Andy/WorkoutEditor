@@ -289,8 +289,8 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     QStringList valueList;
     QString parentItem,partName,thresValue,stepTime,empty = "";
     int tempID = 0;
-    double percent;
-    double currDist;
+    double percent = 0;
+    double currDist = 0;
     double pValue = 0;
     double workFactor = 1.0;
 
