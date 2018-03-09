@@ -328,7 +328,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             {
                 usePM = thresValues->value("bikepm");
                 pValue = this->calc_thresPower(thresPower,percent);
-                thresValue = this->calc_thresPower(thresPower,percent);
+                thresValue = QString::number(this->calc_thresPower(thresPower,percent));
 
                 if(timeBase)
                 {
@@ -383,7 +383,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             valueList << stepProxy->data(stepProxy->index(i,2)).toString()
                       << stepProxy->data(stepProxy->index(i,3)).toString()
                       << QString::number(percent)
-                      << thresValue
+                      << this->calc_thresPace(thresPace,percent)
                       << QString::number(round(thresPower* (percent/100.0)))
                       << stepTime
                       << QString::number(this->estimate_stress(ui->comboBox_sport->currentText(),thresValue,this->get_timesec(stepTime),usePM))
@@ -1137,20 +1137,22 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
     }
     if(isStrength)
     {
+       usePM = 1;
        thresPower = thresValues->value("stgpower");
        thresPace = 0;
        currThres = thresPower;
-       postFix = "-";
+       postFix = " Watt";
        editRow[2] = 1;
        editRow[5] = 1;
        editRow[8] = 1;
     }
     if(isAlt)
     {
+       usePM = 1;
        thresPower = thresValues->value("runpower");
        thresPace = 0;
        currThres = thresPower;
-       postFix = "-";
+       postFix = " Watt";
        editRow[2] = 1;
        editRow[5] = 1;
        editRow[8] = 0;

@@ -428,10 +428,6 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration,
             thresPower = thresValues->value("runpower");
             est_power = calc_lnp(goal,athleteHeight,athleteWeight);
             raw_effort = est_power * duration * (est_power / thresPower);
-
-            //thresPower = thresValues->value("runcp");
-            //raw_effort = (duration * goal) * (goal / thresPower);
-
         }
         if(sport == settings::isStrength)
         {
