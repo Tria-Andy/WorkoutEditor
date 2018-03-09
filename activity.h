@@ -27,6 +27,7 @@
 
 class Activity : public jsonHandler
 {
+
 private:
     QList<QStandardItem*> setIntRow(int);
     QList<QStandardItem*> setSwimLap(int,QString);

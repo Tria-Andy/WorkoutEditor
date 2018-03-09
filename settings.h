@@ -55,7 +55,7 @@ protected:
     static QHash<QString,double> thresholdMap,ltsMap,athleteMap,modeMap;
     static QHash<QString,QString> generalMap,gcInfo,triaMap;
     static QHash<QString,QColor> colorMap;
-    static QHash<QString,QStringList> listMap;
+    static QHash<QString,QStringList> listMap,jsonTags;
     static QStringList keyList,extkeyList;
 
 
@@ -73,6 +73,7 @@ public:
     static int get_fontValue(QString key) {return fontMap.value(key);}
     static QStringList get_listValues(QString key) {return listMap.value(key);}
     static QStringList get_triaDistance() {return triaDistance;}
+    static QStringList get_jsonTags(QString key) {return jsonTags.value(key);}
 
     //Get Map Pointer
     enum lMap {Sample,Interval};

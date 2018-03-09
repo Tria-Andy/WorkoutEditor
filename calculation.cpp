@@ -231,15 +231,8 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,int
     }
     if(sport == settings::isRun)
     {
-        if(usePMData)
-        {
-            return dura * pValue / factor;
-        }
-        else
-        {
-            double bodyHub = (height * 0.054) + (((3600/thresValues->value("runpace")) / pValue) / 100.0);
-            return (weight * grav * mSec * bodyHub) * dura / factor;
-        }
+        double bodyHub = (height * 0.0543) + (((3600/thresValues->value("runpace")) / pValue) / 100.0);
+        return (weight * grav * mSec * bodyHub) * dura / factor;
     }
     if(sport == settings::isStrength || sport == settings::isAlt)
     {
@@ -277,23 +270,21 @@ double calculation::wattToSpeed(double thresPower,double thresSpeed,double currW
     return 0;
 }
 
-QString calculation::calc_threshold(double threshold,double percent,int thresBase)
+QString calculation::calc_thresPace(double threshold,double percent)
 {
     QString thresValue = "00:00";
 
     if(percent > 0)
     {
-        if(thresBase == 0)
-        {
-            thresValue = set_time(static_cast<int>(round(threshold / (percent/100.0))));
-        }
-        else
-        {
-            thresValue = QString::number(threshold * (percent/100));
-        }
+        thresValue = set_time(static_cast<int>(round(threshold / (percent/100.0))));
     }
 
     return thresValue;
+}
+
+double calculation::calc_thresPower(double threshold, double percent)
+{
+    return round(threshold *(percent/100.0));
 }
 
 double calculation::calc_distance(QString duration, double pace)
@@ -380,7 +371,7 @@ double calculation::get_corrected_MET(double weight, int style)
     return 10;
 }
 
-double calculation::estimate_stress(QString sport, QString p_goal, int duration)
+double calculation::estimate_stress(QString sport, QString p_goal, int duration,int usePM)
 {
     double goal = 0;
     double est_stress = 0;
@@ -397,7 +388,14 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
     }
     if(sport == settings::isBike)
     {
-        goal = p_goal.toDouble();
+        if(usePM == 0)
+        {
+            goal = get_speed(QTime::fromString(p_goal,"mm:ss"),0,settings::isRun,true)/3.6;
+        }
+        else
+        {
+            goal = p_goal.toDouble();
+        }
     }
     if(sport == settings::isRun)
     {
@@ -430,6 +428,10 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
             thresPower = thresValues->value("runpower");
             est_power = calc_lnp(goal,athleteHeight,athleteWeight);
             raw_effort = est_power * duration * (est_power / thresPower);
+
+            //thresPower = thresValues->value("runcp");
+            //raw_effort = (duration * goal) * (goal / thresPower);
+
         }
         if(sport == settings::isStrength)
         {
@@ -441,8 +443,10 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration)
             thresPower = thresValues->value("runpower");
             raw_effort = (duration * goal) * (goal / thresPower);
         }
+
         cv_effort = thresPower * 3600;
         est_stress = (raw_effort / cv_effort) * 100;
+
         return set_doubleValue(est_stress,false);
     }
     return 0;

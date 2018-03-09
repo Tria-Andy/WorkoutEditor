@@ -299,14 +299,7 @@ void Activity::prepareData()
             thresPower = thresValues->value("runpower");
             thresPace = thresValues->value("runpace");
 
-            if(hasPMData)
-            {
-                this->fillRangeLevel(thresPower,false);
-            }
-            else
-            {
-                this->fillRangeLevel(thresPace,true);
-            }
+            this->fillRangeLevel(thresPace,true);
 
             isTimeBased = false;
             avgValues.resize(avgHeader.value(hasPMData).count());
@@ -356,7 +349,6 @@ void Activity::prepareData()
                     sampSecond[i] = secondValue;
                     avgHF = avgHF + static_cast<int>(secondValue);
                 }
-
             }
         }
 
@@ -485,11 +477,20 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
         if(hasPMData)
         {
             double watts = round(this->get_int_value(pInt,4));         
-            lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(watts);
 
             intItems << new QStandardItem(QString::number(watts));
             intItems << new QStandardItem(QString::number(round(this->get_int_value(pInt,3))));
-            intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,watts,lapTime,0),false)));
+            if(isBike)
+            {
+                intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,watts,lapTime,0),false)));
+                lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(watts);
+            }
+            else
+            {           
+                intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,lapSpeed,lapTime,0),false)));
+                lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(lapPace);
+            }
+
 
             if(isIndoor)
             {
@@ -856,7 +857,6 @@ QString Activity::checkRangeLevel(double lapValue)
 
     for(QHash<QString,QPair<double,double>>::const_iterator it = rangeLevels.cbegin(), end = rangeLevels.cend(); it != end; ++it)
     {
-
         if(lapValue >= it.value().first && lapValue < it.value().second)
         {
             currZone = it.key();
@@ -1104,10 +1104,9 @@ void Activity::updateInterval()
         intTreeModel->setData(selItem.value(5),selItemModel->data(selItemModel->index(4,0)));
         intTreeModel->setData(selItem.value(6),this->set_doubleValue(lapSpeed,false));
 
-        if(isRun)
+        if(isRun && !hasPMData)
         {
             intTreeModel->setData(selItem.value(7),this->set_doubleValue(this->calc_totalWork(curr_sport,lapSpeed,lapTime,0),false));
-
         }
         if(isTria)
         {
@@ -1569,13 +1568,13 @@ void Activity::updateSampleModel(int rowcount)
           sampleModel->setData(sampleModel->index(row,3,QModelIndex()),calcCadence[row]);
         }
         this->hasOverride = true;
-        sportValue = round(this->estimate_stress(settings::isSwim,this->set_time(this->get_int_pace(0,settings::isSwim)/10),this->get_int_duration(0)));
+        sportValue = round(this->estimate_stress(settings::isSwim,this->set_time(this->get_int_pace(0,settings::isSwim)/10),this->get_int_duration(0),hasPMData));
         this->overrideData.insert("swimscore",QString::number(sportValue));
         triValue = triValue + sportValue;
-        sportValue = round(this->estimate_stress(settings::isBike,QString::number(this->get_int_value(2,4)),this->get_int_duration(2)));
+        sportValue = round(this->estimate_stress(settings::isBike,QString::number(this->get_int_value(2,4)),this->get_int_duration(2),hasPMData));
         this->overrideData.insert("skiba_bike_score",QString::number(sportValue));
         triValue = triValue + sportValue;
-        sportValue = round(this->estimate_stress(settings::isRun,this->set_time(this->get_int_pace(4,settings::isRun)),this->get_int_duration(4)));
+        sportValue = round(this->estimate_stress(settings::isRun,this->set_time(this->get_int_pace(4,settings::isRun)),this->get_int_duration(4),hasPMData));
         this->overrideData.insert("govss",QString::number(sportValue));
         triValue = triValue + sportValue;
         this->overrideData.insert("triscore",QString::number(triValue));
@@ -1587,7 +1586,7 @@ void Activity::writeChangedData()
     this->init_jsonFile();
     this->write_actModel("INTERVALS",intModel,&intList);
     this->write_actModel("SAMPLES",sampleModel,&sampList);
-    this->write_xdataModel(curr_sport,xdataModel);
+    if(hasXdata) this->write_xdataModel(curr_sport,xdataModel);
     this->write_jsonFile();
 }
 

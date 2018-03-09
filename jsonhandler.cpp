@@ -198,35 +198,51 @@ void jsonHandler::init_actModel(QString tagName, QMap<int,QString> *mapValues,QS
 
 void jsonHandler::init_xdataModel(QString sport,QStandardItemModel *model)
 {
+    QStringList xdataList = settings::get_jsonTags("xdata");
+
+    QJsonArray itemArray;
+    QJsonObject item_xdata = activityItem["XDATA"].toArray().at(0).toObject();
+    this->fill_qmap(&xData,&item_xdata);
+
+    itemArray = item_xdata[xdataList.at(2)].toArray();
+    this->fill_list(&itemArray,&xdataUnits);
+
+    itemArray = QJsonArray();
+    itemArray = item_xdata[xdataList.at(1)].toArray();
+    this->fill_list(&itemArray,&xdataValues);
+
+    itemArray = QJsonArray();
+    itemArray = item_xdata[xdataList.at(3)].toArray();
+    QJsonObject obj_xdata = itemArray.at(0).toObject();
+
+    model->setRowCount(itemArray.count());
+    model->setColumnCount((obj_xdata.keys().count()+xdataValues.count()));
+
     if(sport == settings::isSwim)
     {
-        QJsonArray itemArray;
-        QJsonObject item_xdata = activityItem["XDATA"].toArray().at(0).toObject();
-        this->fill_qmap(&xData,&item_xdata);
-
-        itemArray = item_xdata["UNITS"].toArray();
-        this->fill_list(&itemArray,&xdataUnits);
-
-        itemArray = QJsonArray();
-        itemArray = item_xdata["VALUES"].toArray();
-        this->fill_list(&itemArray,&xdataValues);
-
-        itemArray = QJsonArray();
-        itemArray = item_xdata["SAMPLES"].toArray();
-        QJsonObject obj_xdata = itemArray.at(0).toObject();
-
-        model->setRowCount(itemArray.count());
-        model->setColumnCount((obj_xdata.keys().count()+xdataValues.count()));
-
         for(int i = 0; i < itemArray.count(); ++i)
         {
             obj_xdata = itemArray.at(i).toObject();
-            QJsonArray arrValues = obj_xdata["VALUES"].toArray();
+            QJsonArray arrValues = obj_xdata[xdataList.at(1)].toArray();
             model->setData(model->index(i,0,QModelIndex()),obj_xdata["SECS"].toInt());
             model->setData(model->index(i,1,QModelIndex()),obj_xdata["KM"].toDouble());
             model->setData(model->index(i,2,QModelIndex()),arrValues.at(0).toInt());
             model->setData(model->index(i,3,QModelIndex()),arrValues.at(1).toDouble());
             model->setData(model->index(i,4,QModelIndex()),arrValues.at(2).toInt());
+        }
+    }
+    if(sport == settings::isRun)
+    {
+        for(int i = 0; i < itemArray.count(); ++i)
+        {
+            obj_xdata = itemArray.at(i).toObject();
+            QJsonArray arrValues = obj_xdata[xdataList.at(1)].toArray();
+            model->setData(model->index(i,0,QModelIndex()),obj_xdata["SECS"].toInt());
+            model->setData(model->index(i,1,QModelIndex()),obj_xdata["KM"].toInt());
+            model->setData(model->index(i,2,QModelIndex()),arrValues.at(0).toInt());
+            model->setData(model->index(i,3,QModelIndex()),arrValues.at(1).toInt());
+            model->setData(model->index(i,4,QModelIndex()),arrValues.at(2).toInt());
+            model->setData(model->index(i,5,QModelIndex()),arrValues.at(3).toDouble());
         }
     }
 }
@@ -250,7 +266,6 @@ void jsonHandler::init_jsonFile()
         }
         activityItem["OVERRIDES"] = intArray;
     }
-
 }
 
 void jsonHandler::write_actModel(QString tagName, QStandardItemModel *model, QStringList *list)
@@ -260,14 +275,45 @@ void jsonHandler::write_actModel(QString tagName, QStandardItemModel *model, QSt
 
 void jsonHandler::write_xdataModel(QString sport, QStandardItemModel *model)
 {
+    QJsonArray item_xdata,intArray,value_array;
+    QJsonObject xdataObj,item_array;
+    int offset;;
+    int xdataCol;
     if(sport == settings::isSwim)
     {
-        QJsonArray item_xdata,intArray;
-        QJsonObject xdataObj;
+        offset = 3;
+        xdataCol = 1;
+    }
+    else
+    {
+        offset = 2;
+        xdataCol = 0;
+    }
 
-        xdataObj.insert("NAME",xData.value("NAME"));
-        xdataObj.insert("UNITS",listToJson(&xdataUnits));
-        xdataObj.insert("VALUES",listToJson(&xdataValues));
+    xdataObj.insert("NAME",xData.value("NAME"));
+    xdataObj.insert("UNITS",listToJson(&xdataUnits));
+    xdataObj.insert("VALUES",listToJson(&xdataValues));
+
+    for(int i = 0; i < model->rowCount(); ++i)
+    {
+        item_array.insert("SECS",QJsonValue::fromVariant(model->data(model->index(i,xdataCol,QModelIndex()))));
+        item_array.insert("KM",QJsonValue::fromVariant(model->data(model->index(i,xdataCol+1,QModelIndex()))));
+
+        for(int x = 0; x < xdataValues.count(); ++x)
+        {
+            value_array.insert(x,QJsonValue::fromVariant(model->data(model->index(i,x+offset,QModelIndex()))));
+        }
+
+        item_array["VALUES"] = value_array;
+        intArray.insert(i,item_array);
+        item_array = QJsonObject();
+        value_array = QJsonArray();
+    }
+
+    /*
+    if(sport == settings::isSwim)
+    {
+
 
         for(int i = 0; i < model->rowCount(); ++i)
         {
@@ -281,10 +327,12 @@ void jsonHandler::write_xdataModel(QString sport, QStandardItemModel *model)
             item_array["VALUES"] = value_array;
             intArray.insert(i,item_array);
         }
-        xdataObj.insert("SAMPLES",intArray);
-        item_xdata.insert(0,xdataObj);
-        activityItem["XDATA"] = item_xdata;
     }
+    */
+
+    xdataObj.insert("SAMPLES",intArray);
+    item_xdata.insert(0,xdataObj);
+    activityItem["XDATA"] = item_xdata;
 }
 
 void jsonHandler::write_jsonFile()

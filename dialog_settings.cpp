@@ -592,7 +592,15 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
     }
     if(value == settings::isRun)
     {
-        thresPower = thresValues->value("runpower");
+        if(ui->comboBox_thresBase->currentIndex() == 0)
+        {
+            thresPower = thresValues->value("runpower");
+        }
+        else
+        {
+            thresPower = thresValues->value("runcp");
+        }
+
         thresPace = thresValues->value("runpace");
         ui->checkBox_usepm->setChecked(thresValues->value("runpm"));
         sportFactor = thresValues->value("runfactor");
@@ -1173,5 +1181,19 @@ void Dialog_settings::on_toolButton_mealEdit_clicked()
 
 void Dialog_settings::on_comboBox_thresBase_currentIndexChanged(int index)
 {
+    if(ui->comboBox_thresSport->currentText() == settings::isRun)
+    {
+        if(index == 0)
+        {
+            thresPower = thresValues->value("runpower");
+        }
+        else
+        {
+            thresPower = thresValues->value("runcp");
+        }
+
+        ui->spinBox_thresPower->setValue(thresPower);
+    }
+
     this->set_thresholdModel(ui->comboBox_thresSport->currentText(),index);
 }

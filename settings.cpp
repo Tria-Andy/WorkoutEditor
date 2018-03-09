@@ -49,6 +49,7 @@ QString settings::isOther;
 QVector<double> settings::tempVector;
 
 QHash<QString,QStringList> settings::listMap;
+QHash<QString,QStringList> settings::jsonTags;
 QHash<QString,QVector<double>> settings::doubleMap;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
@@ -259,6 +260,9 @@ void settings::loadSettings()
             settingString = myvalues->value("sampinfo").toString();
             fill_mapList(&sampList,&settingString);
             settingList.clear();
+            settingList << myvalues->value("xdatainfo").toString().split(splitter);
+            jsonTags.insert("xdata",settingList);
+            settingList.clear();
         myvalues->endGroup();
 
         myvalues->beginGroup("Keylist");
@@ -270,6 +274,7 @@ void settings::loadSettings()
             thresholdMap.insert("swimpower",myvalues->value("swimpower").toDouble());
             thresholdMap.insert("bikepower",myvalues->value("bikepower").toDouble());
             thresholdMap.insert("runpower",myvalues->value("runpower").toDouble());
+            thresholdMap.insert("runcp",myvalues->value("runcp").toDouble());
             thresholdMap.insert("stgpower",myvalues->value("stgpower").toDouble());
             thresholdMap.insert("swimfactor",myvalues->value("swimfactor").toDouble());
             thresholdMap.insert("bikefactor",myvalues->value("bikefactor").toDouble());
