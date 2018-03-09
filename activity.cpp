@@ -1361,7 +1361,7 @@ void Activity::updateSampleModel(int rowcount)
         }
         if(isRun)
         {
-            limitFactor = 0.20;
+            limitFactor = 0.50;
         }
         lowLimit = this->get_speed(QTime::fromString(this->set_time(thresPace),"mm:ss"),0,curr_sport,true);
         lowLimit = lowLimit - (lowLimit*limitFactor);
