@@ -355,7 +355,8 @@ void foodplanner::insert_newWeek(QDate firstday)
     QStandardItem *rootItem = weekPlansModel->invisibleRootItem();
     QList<QStandardItem*> weekList;
     weekList << new QStandardItem(this->set_weekID(firstday));
-    weekList << new QStandardItem(firstday.toString("yyyy-MM-dd"));
+    weekList << new QStandardItem(settings::get_listValues("Mode").at(0));
+    weekList << new QStandardItem(firstday.toString("yyyy-MM-dd"));   
     rootItem->appendRow(weekList);
 
     for(int day = 0; day < dayHeader.count(); ++day)
@@ -388,7 +389,7 @@ void foodplanner::fill_planList(QDate firstDate, bool addWeek)
 {
     if(addWeek)
     {
-        planList << weekPlansModel->data(weekPlansModel->index(weekPlansModel->rowCount()-1,0)).toString()+" - "+firstDate.toString("dd.MM.yyyy");
+        planList << weekPlansModel->data(weekPlansModel->index(weekPlansModel->rowCount()-1,0)).toString()+" - "+firstDate.toString("dd.MM.yyyy")+" - "+weekPlansModel->data(weekPlansModel->index(weekPlansModel->rowCount()-1,1)).toString();
     }
     else
     {
@@ -562,7 +563,7 @@ void foodplanner::update_weekSumModel()
     }
     else
     {
-        weekWeight = weekPlansModel->data(weekPlansModel->index(weekIndex.row(),2)).toDouble();
+        weekWeight = weekPlansModel->data(weekPlansModel->index(weekIndex.row(),3)).toDouble();
     }
 
     double weekSave = weekSumModel->data(weekSumModel->index(4,0)).toDouble();
@@ -576,7 +577,7 @@ void foodplanner::update_weekSumModel()
     estModel->setData(estModel->index(4,0),QString::number(weekLoss) + " Kg");
     estModel->setData(estModel->index(5,0),QString::number(nextWeek) + " Kg");
 
-    weekPlansModel->setData(weekPlansModel->index(weekIndex.row()+1,2),nextWeek);
+    weekPlansModel->setData(weekPlansModel->index(weekIndex.row()+1,3),nextWeek);
 
     int maxCal = weekSum[3] * (calPercent.at(1)/100);
     int minCal = weekSum[3] * (calPercent.at(2)/100);
