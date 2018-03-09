@@ -178,6 +178,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(foodPlan->mealModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(mealSave(QStandardItem*)));
 
     ui->listWidget_weekPlans->addItems(foodPlan->planList);
+    ui->comboBox_weightmode->blockSignals(true);
+    ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
+    ui->comboBox_weightmode->setEnabled(false);
+    ui->comboBox_weightmode->blockSignals(false);
+
     //ui->listWidget_weekPlans->setStyleSheet(viewStyle);
     //ui->listWidget_weekPlans->setItemDelegate(&mousehover_del);
     //ui->listWidget_MenuEdit->setStyleSheet(viewStyle);
@@ -190,7 +195,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView_forecast->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView_forecast->horizontalHeader()->hide();
 
-    this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy"));
+    this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy")+" - "+ui->comboBox_weightmode->currentText());
 
     ui->toolButton_saveMeals->setEnabled(false);
     ui->toolButton_deleteMenu->setEnabled(false);
@@ -320,8 +325,8 @@ void MainWindow::clearActivtiy()
 
     if(actLoaded)
     {
-        delete treeSelection;
         curr_activity->reset_avgSelection();
+        delete treeSelection;
         delete curr_activity->intModel;
         delete curr_activity->sampleModel;
         delete curr_activity->intTreeModel;
@@ -332,6 +337,11 @@ void MainWindow::clearActivtiy()
             delete curr_activity->swimModel;
             delete curr_activity->swimProxy;
         }
+        if(hasXdata)
+        {
+            //delete curr_activity->xdataModel;
+        }
+
         delete curr_activity;
     }
     actLoaded = false;
@@ -2083,8 +2093,12 @@ void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value
 
 void MainWindow::set_foodWeek(QString weekID)
 {
-    foodPlan->firstDayofWeek = QDate::fromString(weekID.split(" - ").last(),"dd.MM.yyyy");
-    this->fill_weekTable(weekID.split(" - ").first(),true);
+    QStringList weekInfo = weekID.split(" - ");
+    foodPlan->firstDayofWeek = QDate::fromString(weekInfo.at(1),"dd.MM.yyyy");
+    this->fill_weekTable(weekInfo.at(0),true);
+    foodPlan->calPercent = settings::doubleMap.value(weekInfo.at(2));
+    foodSum_del.percent = foodPlan->calPercent;
+    foodSumWeek_del.percent = foodPlan->calPercent;
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek,0,NULL,false);
     foodPlan->update_sumBySchedule(foodPlan->firstDayofWeek);
     ui->label_foodWeek->setText("Kw "+ weekID);
@@ -2141,8 +2155,13 @@ void MainWindow::reset_menuEdit()
 
 void MainWindow::on_listWidget_weekPlans_clicked(const QModelIndex &index)
 {
-    QString weekId = index.data(Qt::DisplayRole).toString();
-    this->set_foodWeek(weekId);
+    QString weekString = index.data(Qt::DisplayRole).toString();
+    QStringList weekInfo = weekString.split(" - ");
+    QString weekId = weekInfo.at(0)+" - "+weekInfo.at(1);
+    ui->label_foodWeekInfo->setText(weekId);
+    ui->comboBox_weightmode->setCurrentText(weekInfo.at(2));
+    ui->comboBox_weightmode->setEnabled(true);
+    this->set_foodWeek(weekString);
     ui->actionDelete->setEnabled(true);
     this->reset_menuEdit();
 }
@@ -2213,6 +2232,7 @@ void MainWindow::on_toolButton_saveMeals_clicked()
 void MainWindow::on_calendarWidget_Food_clicked(const QDate &date)
 {
     ui->label_foodWeekInfo->setText("Add Week: " + QString::number(date.weekNumber())+ " - " +QString::number(date.year()));
+    ui->comboBox_weightmode->setCurrentIndex(0);
     ui->actionNew->setEnabled(true);
 }
 
@@ -2440,4 +2460,14 @@ void MainWindow::on_toolButton_menuPaste_clicked()
     ui->listWidget_MenuEdit->clear();
     ui->listWidget_MenuEdit->addItems(menuCopy);
     this->calc_menuCal();
+}
+
+void MainWindow::on_comboBox_weightmode_currentIndexChanged(const QString &value)
+{
+    int modelRow = ui->listWidget_weekPlans->currentRow();
+    ui->listWidget_weekPlans->currentItem()->setData(Qt::EditRole,ui->label_foodWeekInfo->text()+" - "+value);
+    this->set_foodWeek(ui->listWidget_weekPlans->currentItem()->text());
+    foodPlan->weekPlansModel->setData(foodPlan->weekPlansModel->index(modelRow,1),value);
+    ui->comboBox_weightmode->setEnabled(false);
+    ui->actionSave->setEnabled(true);
 }

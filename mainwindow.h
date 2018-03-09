@@ -964,6 +964,8 @@ class del_foodSummery : public QStyledItemDelegate, public calculation
 public:
     explicit del_foodSummery(QObject *parent = 0) : QStyledItemDelegate(parent) {}
 
+    QVector<double> percent;
+
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
@@ -973,8 +975,6 @@ public:
         QFont foodFont;
         foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
-
-        QVector<double> percent = settings::doubleMap.value(generalValues->value("WeightMode"));
 
         int dayCal = index.model()->data(index.model()->index(3,index.column())).toInt();
 
@@ -1031,6 +1031,8 @@ class del_foodWeekSum : public QStyledItemDelegate, public calculation
 public:
     explicit del_foodWeekSum(QObject *parent = 0) : QStyledItemDelegate(parent) {}
 
+    QVector<double> percent;
+
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
@@ -1041,7 +1043,6 @@ public:
         foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
 
-        QVector<double> percent = settings::doubleMap.value(generalValues->value("WeightMode"));
         int weekCal = index.model()->data(index.model()->index(3,index.column())).toInt();
 
         gradColor.setHsv(0,0,200,150);
@@ -1265,6 +1266,7 @@ private slots:
     void on_toolButton_clear_clicked();
     void on_toolButton_menuCopy_clicked();
     void on_toolButton_menuPaste_clicked();
+    void on_comboBox_weightmode_currentIndexChanged(const QString &arg1);
 };
 
 #endif // MAINWINDOW_H

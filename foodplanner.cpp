@@ -26,8 +26,6 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     weekPlansModel = new QStandardItemModel();
     weekPlansModel->setColumnCount(mealTags.count()+1);
 
-    calPercent = settings::doubleMap.value(generalValues->value("WeightMode"));
-
     daySumModel = new QStandardItemModel(sumHeader.count(),dayHeader.count());
     daySumModel->setVerticalHeaderLabels(sumHeader);
     weekSumModel = new QStandardItemModel(sumHeader.count(),1);
@@ -52,6 +50,9 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
 
     loadedWeek = set_weekID(firstDayofWeek);
 
+    QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(loadedWeek,Qt::MatchExactly,0).at(0));
+    calPercent = settings::doubleMap.value(weekPlansModel->data(weekPlansModel->index(weekIndex.row(),1)).toString());
+
     this->fill_planList(firstDayofWeek,false);
     this->update_sumBySchedule(firstDayofWeek);
     this->update_sumByMenu(firstDayofWeek,0,NULL,false);
@@ -73,6 +74,7 @@ void foodplanner::read_foodPlan(QDomDocument xmldoc)
         childLevel = xmlList.at(weeks).toElement();
         weekID = childLevel.attribute("id")+"_"+childLevel.attribute("year");
         intItems << new QStandardItem(weekID);
+        intItems << new QStandardItem(settings::get_listValues("Mode").at(childLevel.attribute("mode").toInt()));
         intItems << new QStandardItem(childLevel.attribute("fdw"));
         intItems << new QStandardItem(childLevel.attribute("weight"));
         if(intItems.at(1)->data(Qt::DisplayRole).toDate() == firstDayofWeek)
@@ -144,8 +146,9 @@ void foodplanner::write_foodPlan()
         xmlElement = xmlDoc.createElement("week");
         xmlElement.setAttribute("id",weekID.split("_").first());
         xmlElement.setAttribute("year",weekID.split("_").last());
-        xmlElement.setAttribute("fdw",weekPlansModel->data(weekPlansModel->index(week,1)).toString());
-        xmlElement.setAttribute("weight",weekPlansModel->data(weekPlansModel->index(week,2)).toString());
+        xmlElement.setAttribute("mode",settings::get_listValues("Mode").indexOf(weekPlansModel->data(weekPlansModel->index(week,1)).toString()));
+        xmlElement.setAttribute("fdw",weekPlansModel->data(weekPlansModel->index(week,2)).toString());
+        xmlElement.setAttribute("weight",weekPlansModel->data(weekPlansModel->index(week,3)).toString());
 
         weekItem = weekPlansModel->item(week,0);
 
@@ -391,7 +394,7 @@ void foodplanner::fill_planList(QDate firstDate, bool addWeek)
     {
         for(int i = 0; i < weekPlansModel->rowCount(); ++i)
         {
-            planList << weekPlansModel->data(weekPlansModel->index(i,0)).toString()+" - "+weekPlansModel->data(weekPlansModel->index(i,1)).toDate().toString("dd.MM.yyyy");
+            planList << weekPlansModel->data(weekPlansModel->index(i,0)).toString()+" - "+weekPlansModel->data(weekPlansModel->index(i,2)).toDate().toString("dd.MM.yyyy")+" - "+weekPlansModel->data(weekPlansModel->index(i,1)).toString();
         }
     }
 }

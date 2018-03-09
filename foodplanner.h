@@ -25,6 +25,7 @@ public:
     void add_meal(QItemSelectionModel*);
     void remove_meal(QItemSelectionModel*);
     QVector<int> get_mealData(QString);
+    QVector<double> calPercent;
     void fill_plannerModel();
     void insert_newWeek(QDate);
     void remove_week(QString);
@@ -37,7 +38,7 @@ private:
     QString loadedWeek,filePath,planerXML,mealXML;
     QStringList dayTags,sectionTags,mealTags,weekHeader,sumHeader,daySumHeader,weekSumHeader;
 
-    QVector<double> calPercent;
+
 
     void read_foodPlan(QDomDocument);
     void read_meals(QDomDocument);
