@@ -249,6 +249,7 @@ void Dialog_settings::writeChangedValues()
         thresholdMap.insert("swimpower",ui->spinBox_thresPower->value());
         thresholdMap.insert("swimpace",paceSec);
         thresholdMap.insert("swimfactor",ui->doubleSpinBox_factor->value());
+        thresholdMap.insert("swimpm",ui->checkBox_usepm->isChecked());
         this->writeRangeValues(sport);
     }
     if(sport == settings::isBike)
@@ -257,6 +258,7 @@ void Dialog_settings::writeChangedValues()
         thresholdMap.insert("bikepace",paceSec);
         thresholdMap.insert("bikespeed",this->set_doubleValue(ui->lineEdit_speed->text().toDouble(),true));
         thresholdMap.insert("bikefactor",ui->doubleSpinBox_factor->value());
+        thresholdMap.insert("bikepm",ui->checkBox_usepm->isChecked());
         thresholdMap.insert("wattfactor",ui->doubleSpinBox_watttospeed->value());
         this->writeRangeValues(sport);
     }
@@ -264,6 +266,7 @@ void Dialog_settings::writeChangedValues()
     {
         thresholdMap.insert("runpower",ui->spinBox_thresPower->value());
         thresholdMap.insert("runpace",paceSec);
+        thresholdMap.insert("runpm",ui->checkBox_usepm->isChecked());
         thresholdMap.insert("runfactor",ui->doubleSpinBox_factor->value());
         this->writeRangeValues(sport);
     }
