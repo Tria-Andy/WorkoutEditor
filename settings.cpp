@@ -350,8 +350,6 @@ void settings::loadSettings()
             settingList = myvalues->value("mode").toString().split(splitter);
             listMap.insert("Mode",settingList);
             settingList.clear();
-            settingString = myvalues->value("weightmode").toString();
-            generalMap.insert("WeightMode",settingString);
             settingList = myvalues->value("modepercent").toString().split(splitter);
             tempVector.resize(4);
             for(int i = 0; i < listMap.value("Mode").count(); i++)
@@ -645,7 +643,6 @@ void settings::saveSettings()
         }
 
         settingList.clear();
-        myvalues->setValue("weightmode",generalMap.value("WeightMode"));
     myvalues->endGroup();
 
     myvalues->beginGroup("Misc");

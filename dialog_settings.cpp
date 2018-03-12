@@ -66,7 +66,6 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->dateEdit_contest->setDate(QDate::currentDate());
     ui->comboBox_contestsport->addItems(settings::get_listValues("Sport"));
     ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
-    ui->comboBox_weightmode->setCurrentText(generalMap.value("WeightMode"));
     ui->comboBox_food->addItem("Dish");
     ui->comboBox_food->addItem("Meals");
     ui->pushButton_save->setEnabled(false);
@@ -80,13 +79,13 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->doubleSpinBox_bone->setValue(athleteValues->value("boneskg"));
     ui->doubleSpinBox_muscle->setValue(athleteValues->value("musclekg"));
     ui->doubleSpinBox_PALvalue->setValue(athleteValues->value("currpal"));
-    ui->doubleSpinBox_max->setValue(settings::doubleMap.value(generalMap.value("WeightMode")).at(0));
+    ui->doubleSpinBox_max->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(0));
     this->set_bottonColor(ui->toolButton_colormax,false);
-    ui->doubleSpinBox_high->setValue(settings::doubleMap.value(generalMap.value("WeightMode")).at(1));
+    ui->doubleSpinBox_high->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(1));
     this->set_bottonColor(ui->toolButton_colorhigh,false);
-    ui->doubleSpinBox_low->setValue(settings::doubleMap.value(generalMap.value("WeightMode")).at(2));
+    ui->doubleSpinBox_low->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(2));
     this->set_bottonColor(ui->toolButton_colorlow,false);
-    ui->doubleSpinBox_min->setValue(settings::doubleMap.value(generalMap.value("WeightMode")).at(3));
+    ui->doubleSpinBox_min->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(3));
     this->set_bottonColor(ui->toolButton_colormin,false);
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
@@ -292,8 +291,6 @@ void Dialog_settings::writeChangedValues()
     if(generalValues->value("breakname") != listMap.value("Misc").at(2)) generalMap.insert("breakname",listMap.value("Misc").at(2));
 
     athleteMap.insert("currpal",ui->doubleSpinBox_PALvalue->value());
-
-    generalMap.insert("WeightMode",ui->comboBox_weightmode->currentText());
 
     for(QHash<QString,QColor>::const_iterator it = colorMapCache.cbegin(), end = colorMapCache.cend(); it != end; ++it)
     {
