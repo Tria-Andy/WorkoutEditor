@@ -590,6 +590,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
 {
     currentItem = item;
     QString defaultTime = "05:00";
+    int usePM = 0;
     int level = 1;
     int tempID = 0;
     double pValue = 0;
@@ -599,6 +600,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
 
     if(isSwim)
     {
+        usePM = thresValues->value("swimpm");
         if(item->data(0,Qt::DisplayRole).toString() == isBreak)
         {
             defaultDist = percent = 0.0;
@@ -618,16 +620,19 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
     }
     else if (isBike)
     {
+        usePM = thresValues->value("bikepm");
         pValue = calc_thresPower(thresPower,percent);
         defaultDist = this->calc_distance(defaultTime,3600.0/this->wattToSpeed(thresPower,thresSpeed,pValue));
     }
     else if(isRun)
     {
+        usePM = thresValues->value("runpm");
         defaultDist = this->calc_distance(defaultTime,static_cast<double>(this->get_timesec(threstopace(thresPace,percent))));
         pValue = get_speed(QTime::fromString(calc_thresPace(thresPace,percent),"mm:ss"),0,currentSport,true);
     }
     else if(isStrength || isAlt)
     {
+        usePM = 1;
         pValue = percent / 10.0;
     }
 
@@ -636,9 +641,9 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
         item->setData(1,Qt::EditRole,levelList.at(level));
         item->setData(2,Qt::EditRole,percent);
         item->setData(3,Qt::EditRole,thresValue);
-        item->setData(4,Qt::EditRole,pValue);
+        item->setData(4,Qt::EditRole,QString::number(round(thresPower* (percent/100.0))));
         item->setData(5,Qt::EditRole,defaultTime);
-        item->setData(6,Qt::EditRole,this->estimate_stress(currentSport,thresValue,this->get_timesec(defaultTime),0));
+        item->setData(6,Qt::EditRole,this->estimate_stress(currentSport,thresValue,this->get_timesec(defaultTime),usePM));
         item->setData(7,Qt::EditRole,this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(defaultTime),tempID),false));
         item->setData(8,Qt::EditRole,defaultDist);
         item->setData(9,Qt::EditRole,"");
@@ -1239,9 +1244,9 @@ void Dialog_workCreator::on_toolButton_remove_clicked()
         delete deleteItem;
         currentItem = ui->treeWidget_intervall->currentItem();
         this->show_editItem(currentItem);
+        ui->treeWidget_intervall->setCurrentItem(currentItem);
     }
     this->set_plotModel();
-    ui->treeWidget_intervall->setCurrentItem(currentItem);
 }
 
 QTreeWidgetItem* Dialog_workCreator::move_item(bool up, QTreeWidgetItem *currentItem)
