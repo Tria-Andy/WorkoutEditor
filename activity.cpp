@@ -729,6 +729,8 @@ void Activity::recalcIntTree()
 {
     int startTime = 0;
     int intTime = 0;
+    int lastStart = 0;
+    int lastTime = 0;
     double workDist = 0;
     double totalWork = 0.0;
     double totalCal = 0.0;
@@ -775,6 +777,14 @@ void Activity::recalcIntTree()
            lapDist = intTreeModel->data(intTreeModel->index(row,4)).toDouble();
 
            workDist = workDist + lapDist;
+
+           if(row > 0)
+           {
+               lastTime = this->get_timesec(intTreeModel->data(intTreeModel->index(row-1,1)).toString());
+               lastStart = this->get_timesec(intTreeModel->data(intTreeModel->index(row-1,2)).toString());
+           }
+
+           startTime = lastStart + lastTime;
 
            if(isBike)
            {
@@ -902,7 +912,7 @@ void Activity::set_editRow(QString lapIdent,bool isInt)
     }
     else
     {
-        if(isInt) editRow << 1 << 1 << 1 << 0 << 0 << 0;
+        if(isInt) editRow << 1 << 1 << 1 << 1 << 0 << 0;
     }
 }
 

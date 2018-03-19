@@ -371,12 +371,13 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
             }
             else if(isStrength || isAlt)
             {
-                thresValue = "0";
+                usePM = 1;
+                thresValue = QString::number(this->calc_thresPower(thresPower,percent));
                 pValue = percent / 10.0;
             }
             else
             {
-                thresValue = this->calc_thresPower(thresPower,percent);
+                thresValue = QString::number(this->calc_thresPower(thresPower,percent));
                 pValue = 1.0;
             }
 
@@ -1093,7 +1094,6 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
         thresPace = 0;
         thresPower = 0.0;
         ui->label_threshold->setText("-");
-        currThres = thresPower;
         editRow[2] = 0;
         editRow[5] = 1;
         editRow[8] = 1;
@@ -1103,7 +1103,6 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
        usePM = thresValues->value("swimpm");
        thresPower = thresValues->value("swimpower");
        thresPace = thresValues->value("swimpace");
-       currThres = thresPace;
        postFix = "/100m";
        editRow[2] = 1;
        editRow[5] = 0;
@@ -1115,7 +1114,6 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
        thresPower = thresValues->value("bikepower");
        thresPace = thresValues->value("bikepace");
        thresSpeed = thresValues->value("bikespeed");
-       currThres = thresPower;
        postFix = " Watt";
        editRow[2] = 1;
        editRow[5] = 1;
@@ -1135,7 +1133,6 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
            thresPower = thresValues->value("runcp");
        }
        usePM = 0;
-       currThres = thresPace;
        editRow[2] = 1;
        editRow[5] = 1;
        editRow[8] = 1;
@@ -1145,7 +1142,6 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
        usePM = 1;
        thresPower = thresValues->value("stgpower");
        thresPace = 0;
-       currThres = thresPower;
        postFix = " Watt";
        editRow[2] = 1;
        editRow[5] = 1;
@@ -1156,7 +1152,6 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
        usePM = 1;
        thresPower = thresValues->value("runpower");
        thresPace = 0;
-       currThres = thresPower;
        postFix = " Watt";
        editRow[2] = 1;
        editRow[5] = 1;

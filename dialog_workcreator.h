@@ -483,7 +483,7 @@ private:
     del_workcreatoredit edit_del;
     del_mousehover mousehover_del;
     double timeSum,distSum,stressSum,workSum,thresSpeed;
-    int currThres,thresPace,thresPower;
+    int thresPace,thresPower;
     QVector<bool> editRow;
     bool isSwim,isBike,isRun,isStrength,isAlt,isOther;
     bool clearFlag;

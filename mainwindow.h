@@ -751,6 +751,13 @@ public:
                 editor->setDecimals(3);
                 return editor;
             }
+            if(index.row() == 3 && setEdit)
+            {
+                QTimeEdit *editor = new QTimeEdit(parent);
+                editor->setDisplayFormat("mm:ss");
+                editor->setFrame(true);
+                return editor;
+            }
         }
 
         return 0;
@@ -795,6 +802,12 @@ public:
             {
                 QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
                 spinBox->setValue(index.data().toDouble());
+            }
+            if(index.row() == 3)
+            {
+                QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
+                timeEdit->setDisplayFormat("mm:ss");
+                timeEdit->setTime(QTime::fromString(index.data().toString(),"mm:ss"));
             }
         }
     }
@@ -851,6 +864,14 @@ public:
                 double value = spinBox->value();
                 model->setData(index, value);
                 setPace(model,get_timesec(model->data(model->index(3,0)).toString()));
+            }
+            if(index.row() == 3)
+            {
+                QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
+                timeEdit->setDisplayFormat("mm:ss");
+                timeEdit->interpretText();
+                QString value = timeEdit->time().toString();
+                model->setData(index,value);
             }
         }
     }
