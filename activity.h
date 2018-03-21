@@ -30,7 +30,7 @@ class Activity : public jsonHandler
 
 private:
     QList<QStandardItem*> setIntRow(int);
-    QList<QStandardItem*> setSwimLap(int,QString);
+    QStandardItem *rootItem;
     QString v_date,curr_sport,intLabel,breakName;
     QMap<int,QStringList> itemHeader,avgHeader;
     QHash<QString,int> paceTimeInZone,hfTimeInZone,hfZoneAvg;
@@ -47,7 +47,6 @@ private:
     void readJsonFile(QString,bool);
     void prepareData();
     void build_intTree();
-    int build_swimModel(bool,QString,int,int,int,int);
     QString build_lapName(QString,int,double);
     void updateSwimLap();
     void updateSwimInt(QModelIndex,QItemSelectionModel*);
@@ -64,7 +63,6 @@ private:
     void swimTimeInZone(int,double);
     void fillRangeLevel(double,bool);
     QString checkRangeLevel(double);
-    int get_swim_laps(int);
     int get_zone_values(double,int,bool);
 
 public:
@@ -80,8 +78,7 @@ public:
     void writeChangedData();
     QHash<int,QModelIndex> selItem,avgItems;
     QHash<QString,int> swimPace,swimHF;
-    QStandardItemModel *intModel,*sampleModel,*xdataModel,*swimModel,*intTreeModel,*selItemModel,*avgModel;
-    QSortFilterProxyModel *swimProxy;
+    QStandardItemModel *intModel,*sampleModel,*xdataModel,*intTreeModel,*selItemModel,*avgModel;
     QMap<QString,QString> ride_info;
     QVector<double> sampSpeed,sampSecond,avgValues;
 
