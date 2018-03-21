@@ -332,11 +332,6 @@ void MainWindow::clearActivtiy()
         delete curr_activity->intTreeModel;
         delete curr_activity->avgModel;
         delete curr_activity->selItemModel;
-        if(curr_activity->get_sport() == settings::isSwim)
-        {
-            delete curr_activity->swimModel;
-            delete curr_activity->swimProxy;
-        }
         if(hasXdata)
         {
             //delete curr_activity->xdataModel;
