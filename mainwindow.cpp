@@ -1687,6 +1687,11 @@ void MainWindow::fill_WorkoutContent()
         {
             newEntry = contentValue+"-" +avgPace+"/km";
         }
+        if(usePMData)
+        {
+            QString watts = avgModel->data(avgModel->index(4,0)).toString()+"W";
+            newEntry = newEntry+"-"+watts;
+        }
     }
 
     if(ui->lineEdit_workContent->text() == "")
