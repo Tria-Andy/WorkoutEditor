@@ -280,6 +280,7 @@ void Activity::prepareData()
                 }
                 else
                 {
+                    currType = 0;
                     intItems << new QStandardItem(lapName);
                     intItems << new QStandardItem(swimType.at(intType));
                     intItems << new QStandardItem(QString::number(laps));
@@ -289,7 +290,7 @@ void Activity::prepareData()
                     intItems << new QStandardItem(this->set_time(intPace));
                     intItems << new QStandardItem(QString::number(this->set_doubleValue(this->get_int_speed(row),true)));
                     intItems << new QStandardItem(QString::number(intStrokes));
-                    intItems << new QStandardItem(QString::number(this->set_doubleValue(intWork,false)));
+                    intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(curr_sport,intPace,intTime,currType),false)));
                     intItems << new QStandardItem("-");
                 }
 
