@@ -195,8 +195,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView_forecast->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView_forecast->horizontalHeader()->hide();
 
-    this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy")+" - "+ui->comboBox_weightmode->currentText());
-
+    //this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy")+" - "+ui->comboBox_weightmode->currentText());
+    this->set_foodWeek(ui->listWidget_weekPlans->item(0)->text());
     ui->toolButton_saveMeals->setEnabled(false);
     ui->toolButton_deleteMenu->setEnabled(false);
     ui->toolButton_menuCopy->setEnabled(false);
