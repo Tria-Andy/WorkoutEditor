@@ -345,7 +345,9 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                 usePM = thresValues->value("runpm");
                 thresValue = this->calc_thresPace(thresPace,percent);
                 pValue = 3600.0 / this->get_timesec(thresValue);
-                currDist = this->calc_distance(stepTime,this->get_timesec(thresValue));
+                //currDist = this->calc_distance(stepTime,this->get_timesec(thresValue));
+                currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
+                stepTime = this->calc_duration(currentSport,currDist,this->calc_thresPace(thresPace,percent));
             }
             else if(isSwim)
             {
@@ -655,7 +657,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
         QList<QTreeWidgetItem*> groupCount = ui->treeWidget_intervall->findItems(itemName,Qt::MatchRecursive | Qt::MatchContains,0);
         itemName = itemName +"-"+QString::number(groupCount.count());
         item->setData(0,Qt::EditRole,itemName);
-        item->setData(8,Qt::EditRole,2);
+        item->setData(9,Qt::EditRole,2);
     }
     ui->treeWidget_intervall->expandAll();
     ui->treeWidget_intervall->setTreePosition(-1);
