@@ -538,9 +538,11 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
 
             if(isIndoor)
             {
-                double wattSpeed = this->wattToSpeed(thresPower,thresSpeed,watts);
+                double wattSpeed = this->wattToSpeed(thresPower,thresSpeed,watts);             
+                intItems.at(1)->setData(this->set_time(lapTime+1),Qt::EditRole);
                 intItems.at(4)->setData(QString::number(this->calc_distance(this->set_time(lapTime),3600.0/wattSpeed)),Qt::EditRole);
                 intItems.at(6)->setData(QString::number(wattSpeed),Qt::EditRole);
+                lapTime = lapTime+1;
             }
         }
         else
@@ -1255,7 +1257,12 @@ void Activity::updateIntModel(int startCol,int duraCol)
         intModel->setData(intModel->index(row,3),intTreeModel->data(intTreeModel->index(row,4)).toDouble());
         lastStop = intStop;
     }
-    this->updateSampleModel(++intStop);
+
+    lastStop = sampleModel->rowCount();
+
+    intModel->setData(intModel->index(intModel->rowCount()-1,2),lastStop-1);
+
+    this->updateSampleModel(lastStop);
 }
 
 void Activity::set_workoutContent(QString content)
@@ -1263,14 +1270,13 @@ void Activity::set_workoutContent(QString content)
     this->tagData.insert("Workout Content",content);
 }
 
-void Activity::updateSampleModel(int rowcount)
+void Activity::updateSampleModel(int sampRowCount)
 {
-    int sampRowCount = rowcount;
     newDist.resize(sampRowCount);
     calcSpeed.resize(sampRowCount);
     calcCadence.resize(sampRowCount);
     double msec = 0.0;
-    int intStart,intStop,sportpace = 0;
+    int intStart,intStop = 0,sportpace = 0;
     double lowLimit = 0.0,limitFactor = 0.0;
     double swimPace,swimSpeed,swimCycle;
     QString lapName;
@@ -1369,12 +1375,14 @@ void Activity::updateSampleModel(int rowcount)
         for(int intRow = 0; intRow < intModel->rowCount(); ++intRow)
         {
             firstLap = intRow == 0 ? 0 : 1;
-            intStart = intModel->data(intModel->index(intRow,1)).toInt()-firstLap;
+            intStart = intModel->data(intModel->index(intRow,1)).toInt();
             intStop = intModel->data(intModel->index(intRow,2)).toInt();
             msec = intModel->data(intModel->index(intRow,3)).toDouble() / (intStop-intStart);
 
             if(isBike)
             {
+                intStart = intStart-firstLap;
+
                 for(int intSec = intStart;intSec < intStop; ++intSec)
                 {
                     if(intSec == 0)
@@ -1453,8 +1461,8 @@ void Activity::updateSampleModel(int rowcount)
                 }
             }
             newDist[intStop] = newDist[intStop-1]+msec;
-
         }
+        newDist[sampRowCount-1] = newDist[intStop]+msec;
     }
 
     if(isBike)
@@ -1579,7 +1587,7 @@ int Activity::get_int_duration(int row)
 
     duration = intModel->data(intModel->index(row,2,QModelIndex()),Qt::DisplayRole).toInt() - intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt();
 
-    return duration+1;
+    return duration;
 }
 
 double Activity::get_int_distance(int row)
