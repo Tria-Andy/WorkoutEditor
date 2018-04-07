@@ -369,11 +369,11 @@ public:
 
     void set_stressValue(QAbstractItemModel *model) const
     {
-        if(sport == settings::isBike)
+        if(sport == settings::isBike || sport == settings::isStrength || sport == settings::isAlt)
         {
             model->setData(model->index(6,0),estimate_stress(sport,model->data(model->index(4,0)).toString(),get_timesec(model->data(model->index(5,0)).toString()),1));
         }
-        else
+        else if(sport == settings::isRun || sport == settings::isSwim)
         {
             model->setData(model->index(6,0),estimate_stress(sport,model->data(model->index(3,0)).toString(),get_timesec(model->data(model->index(5,0)).toString()),0));
         }
