@@ -105,6 +105,7 @@ void Activity::prepareData()
     double secondValue;
     isTimeBased = true;
     isIndoor = false;
+    isUpdated = tagData.value("Updated").toInt();
     levels = settings::get_listValues("Level");
     breakName = generalValues->value("breakname");
     QString lapName;
@@ -205,7 +206,7 @@ void Activity::prepareData()
 
             for(int row = 0; row < intModelCount; ++row)
             {
-                intTime = this->get_int_duration(row);
+                intTime = 0;
                 intStart = intModel->data(intModel->index(row,1)).toInt();
                 intStop = intModel->data(intModel->index(row,2)).toInt();
 
@@ -216,6 +217,9 @@ void Activity::prepareData()
 
                 while(xdataModel->data(xdataModel->index(xdataRow+xdataLap,0)).toInt() < intStop && xdataModel->hasIndex(xdataRow+xdataLap,0))
                 {
+                    lapTime = round(xdataModel->data(xdataModel->index(xdataRow+xdataLap,3)).toDouble());
+                    intTime = intTime + lapTime;
+
                     if(!xdataModel->data(xdataModel->index(xdataRow+xdataLap,2)).toBool())
                     {
                         lapName = breakName;
@@ -223,7 +227,6 @@ void Activity::prepareData()
                     else
                     {
                         lapName = intLabel;
-                        lapTime = xdataModel->data(xdataModel->index(xdataRow+xdataLap,3)).toInt();
                         currType = xdataModel->data(xdataModel->index(xdataRow+xdataLap,2)).toInt();
                         strokeCount = xdataModel->data(xdataModel->index(xdataRow+xdataLap,4)).toInt();
                         intStrokes = intStrokes + strokeCount;
@@ -233,6 +236,7 @@ void Activity::prepareData()
                         lapWork = this->calc_totalWork(curr_sport,lapPace,lapTime,currType);
                         intWork = intWork + lapWork;
                         moveTime = moveTime + lapTime;
+
 
                         subItems << new QStandardItem(QString::number(intervallCount)+"_"+QString::number(laps*swimTrack)+"_"+level);
                         subItems << new QStandardItem(swimType.at(currType));
@@ -539,10 +543,9 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
             if(isIndoor)
             {
                 double wattSpeed = this->wattToSpeed(thresPower,thresSpeed,watts);             
-                intItems.at(1)->setData(this->set_time(lapTime+1),Qt::EditRole);
+                intItems.at(1)->setData(this->set_time(lapTime),Qt::EditRole);
                 intItems.at(4)->setData(QString::number(this->calc_distance(this->set_time(lapTime),3600.0/wattSpeed)),Qt::EditRole);
                 intItems.at(6)->setData(QString::number(wattSpeed),Qt::EditRole);
-                lapTime = lapTime+1;
             }
         }
         else
@@ -586,7 +589,6 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
             intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,lapSpeed,lapTime,0),false)));
         }
     }
-
 
     lapName = this->build_lapName(lapName,lapTime,lapDist);
 
@@ -1393,17 +1395,39 @@ void Activity::updateSampleModel(int sampRowCount)
                     {
                         if(isIndoor)
                         {
-                            calcSpeed[intSec] = this->wattToSpeed(thresPower,thresSpeed,sampleModel->data(sampleModel->index(intSec,4,QModelIndex())).toDouble());
+                            if(usePMData)
+                            {
+                                calcSpeed[intSec] = this->wattToSpeed(thresPower,thresSpeed,sampleModel->data(sampleModel->index(intSec,4,QModelIndex())).toDouble());
+                            }
+                            else
+                            {
+                                calcSpeed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
+                            }
                         }
                         else
                         {
-                            calcSpeed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
+                            calcSpeed[intSec] = sampleModel->data(sampleModel->index(intSec,2)).toDouble();
                         }
                         newDist[intSec] = newDist[intSec-1] + msec;
                         calcCadence[intSec] = sampleModel->data(sampleModel->index(intSec,3,QModelIndex())).toDouble();
                     }
                 }
-                calcSpeed[intStop] = this->wattToSpeed(thresPower,thresSpeed,sampleModel->data(sampleModel->index(intStop,4,QModelIndex())).toDouble());
+                if(isIndoor)
+                {
+                    if(usePMData)
+                    {
+                        calcSpeed[intStop] = this->wattToSpeed(thresPower,thresSpeed,sampleModel->data(sampleModel->index(intStop,2,QModelIndex())).toDouble());
+                    }
+                    else
+                    {
+                        calcSpeed[intStop] = this->interpolate_speed(intRow,intStop,lowLimit);
+                    }
+                }
+                else
+                {
+                    calcSpeed[intStop] = sampleModel->data(sampleModel->index(intStop,4,QModelIndex())).toDouble();
+                }
+
                 calcCadence[intStop] = sampleModel->data(sampleModel->index(intStop,3,QModelIndex())).toDouble();
             }
             if(isRun)
@@ -1513,6 +1537,7 @@ void Activity::updateSampleModel(int sampRowCount)
 
 void Activity::writeChangedData()
 {
+    tagData.insert("Updated","1");
     this->init_jsonFile();
     this->write_actModel("INTERVALS",intModel,&intList);
     this->write_actModel("SAMPLES",sampleModel,&sampList);
@@ -1586,6 +1611,9 @@ int Activity::get_int_duration(int row)
     int duration;
 
     duration = intModel->data(intModel->index(row,2,QModelIndex()),Qt::DisplayRole).toInt() - intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt();
+
+    if(isIndoor) return duration+1;
+    if(isUpdated) return duration+1;
 
     return duration;
 }
