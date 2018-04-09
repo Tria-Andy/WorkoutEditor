@@ -361,7 +361,7 @@ public:
 
     void set_duration(QAbstractItemModel *model) const
     {
-        if(sport == settings::isSwim || sport == settings::isRun)
+        if(sport == settings::isSwim || sport == settings::isRun || (sport == settings::isBike && !timeBased))
         {
             model->setData(model->index(5,0),calc_duration(sport,model->data(model->index(8,0)).toDouble(),model->data(model->index(3,0)).toString()));
         }
