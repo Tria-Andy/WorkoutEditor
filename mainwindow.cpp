@@ -105,7 +105,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //Editor Mode
     avgCounter = 0;
     fileModel = new QStandardItemModel(this);
-    avgCounter = 0;
     actLoaded = false;
 
     connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
@@ -437,10 +436,9 @@ void MainWindow::summery_view()
     ui->tableView_summery->verticalHeader()->setVisible(false);
     ui->tableView_summery->setItemDelegate(&sum_del);
     ui->tableView_summery->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    metaProxy->setFilterRegExp("");
-    metaProxy->setFilterFixedString("");
-    contentProxy->setFilterRegExp("");
-    scheduleProxy->setFilterFixedString("");
+    metaProxy->invalidate();
+    contentProxy->invalidate();
+    scheduleProxy->invalidate();
 
     QString sport,weekID;
     QStringList sumValues;
@@ -486,7 +484,7 @@ void MainWindow::summery_view()
         QString week = weekInfo.at(0);
         QDate firstday,calcDay;
         calcDay.setDate(year.toInt(),1,1);
-        firstday = calcDay.addDays(week.toInt()*7).addDays(1 - calcDay.dayOfWeek());
+        firstday = calcDay.addDays(week.toInt()*7).addDays(1 - calcDay.dayOfWeek()-7);
         ui->comboBox_saisonName->setCurrentText(workSchedule->saison_atDate(firstday));
         ui->label_selWeek->setText("Week: "+weeknumber+" - Phase: " +workSchedule->get_weekPhase(firstday,false));
     }
@@ -1837,7 +1835,7 @@ void MainWindow::on_actionReset_triggered()
 {
     this->clearActivtiy();
     avgSelect_del.sport = QString();
-    actLoaded = false;
+    avgCounter = 0;
     ui->horizontalSlider_factor->setEnabled(false);
 }
 

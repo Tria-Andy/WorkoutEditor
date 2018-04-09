@@ -312,6 +312,7 @@ void schedule::add_newSaison(QString saisonName)
 
 void schedule::delete_Saison(QString saisonName)
 {
+   metaProxy->invalidate();
    week_meta->sort(1);
    metaProxy->setFilterRegExp("\\b"+saisonName+"\\b");
    metaProxy->setFilterKeyColumn(0);
@@ -518,8 +519,7 @@ void schedule::deleteWeek(QString deleteWeek)
 
 QString schedule::get_weekPhase(QDate currDate,bool full)
 {
-    QSortFilterProxyModel *metaProxy = new QSortFilterProxyModel();
-    metaProxy->setSourceModel(week_meta);
+    metaProxy->invalidate();
     QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.addDays(1 - currDate.dayOfWeek()).year());
     metaProxy->setFilterRegExp("\\b"+weekID+"\\b");
     metaProxy->setFilterKeyColumn(2);
@@ -534,7 +534,6 @@ QString schedule::get_weekPhase(QDate currDate,bool full)
         return phaseString;
     }
 
-    delete metaProxy;
     return 0;
 }
 
