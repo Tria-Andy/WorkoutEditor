@@ -46,6 +46,7 @@
         <file>icons/Food.png</file>
         <file>icons/Add.png</file>
         <file>icons/Paste.png</file>
+        <file>icons/Map.png</file>
     </qresource>
     <qresource prefix="/style">
         <file>qss/style.qss</file>
