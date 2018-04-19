@@ -283,6 +283,9 @@ void settings::loadSettings()
             thresholdMap.insert("swimpace",myvalues->value("swimpace").toDouble());
             thresholdMap.insert("bikepace",myvalues->value("bikepace").toDouble());
             thresholdMap.insert("bikespeed",myvalues->value("bikespeed").toDouble());
+            thresholdMap.insert("swimlimit",myvalues->value("swimlimit").toDouble());
+            thresholdMap.insert("bikelimit",myvalues->value("bikelimit").toDouble());
+            thresholdMap.insert("runlimit",myvalues->value("runlimit").toDouble());
             thresholdMap.insert("runpace",myvalues->value("runpace").toDouble());
             thresholdMap.insert("swimpm",myvalues->value("swimpm").toDouble());
             thresholdMap.insert("bikepm",myvalues->value("bikepm").toDouble());
@@ -376,6 +379,16 @@ void settings::loadSettings()
             listMap.insert("Dish",settingList);
             settingList.clear();
             generalMap.insert("AddMoving",myvalues->value("addmoving").toString());
+            tempVector.resize(7);
+            settingList = myvalues->value("moveday").toString().split(splitter);
+
+            for(int i = 0; i < settingList.count();++i)
+            {
+                settingString = settingList.at(i);
+                tempVector[i] = settingString.toDouble();
+            }
+            doubleMap.insert("Moveday",tempVector);
+            settingList.clear();
         myvalues->endGroup();
 
         myvalues->beginGroup("Misc");
@@ -556,14 +569,20 @@ void settings::saveSettings()
     myvalues->beginGroup("Threshold");
         myvalues->setValue("swimpower",QString::number(thresholdMap.value("swimpower")));
         myvalues->setValue("swimpace",QString::number(thresholdMap.value("swimpace")));
+        myvalues->setValue("swimlimit",QString::number(thresholdMap.value("swimlimit")));
+        myvalues->setValue("swimpm",QString::number(thresholdMap.value("swimpm")));
         myvalues->setValue("swimfactor",QString::number(thresholdMap.value("swimfactor")));
         myvalues->setValue("bikepower",QString::number(thresholdMap.value("bikepower")));
         myvalues->setValue("bikespeed",QString::number(thresholdMap.value("bikespeed")));
         myvalues->setValue("bikepace",QString::number(thresholdMap.value("bikepace")));
         myvalues->setValue("bikefactor",QString::number(thresholdMap.value("bikefactor")));
+        myvalues->setValue("bikelimit",QString::number(thresholdMap.value("bikelimit")));
+        myvalues->setValue("bikepm",QString::number(thresholdMap.value("bikepm")));
         myvalues->setValue("runpower",QString::number(thresholdMap.value("runpower")));
         myvalues->setValue("runpace",QString::number(thresholdMap.value("runpace")));
-        myvalues->setValue("runfactor",QString::number(thresholdMap.value("runfactor")));
+        myvalues->setValue("runfactor",QString::number(thresholdMap.value("runfactor")));     
+        myvalues->setValue("runlimit",QString::number(thresholdMap.value("runlimit")));
+        myvalues->setValue("runpm",QString::number(thresholdMap.value("runpm")));
         myvalues->setValue("hfthres",QString::number(thresholdMap.value("hfthres")));
         myvalues->setValue("hfmax",QString::number(thresholdMap.value("hfmax")));
     myvalues->endGroup();
@@ -641,8 +660,15 @@ void settings::saveSettings()
                 settingList << QString::number(doubleMap.value(listMap.value("Mode").at(i)).at(x)) +"-";
             }
         }
-
         settingList.clear();
+
+        for(int i = 0; i < doubleMap.value("Moveday").count(); ++i)
+        {
+            settingList << QString::number(doubleMap.value("Moveday").at(i));
+        }
+        myvalues->setValue("moveday",settings::setSettingString(settingList));
+        settingList.clear();
+
     myvalues->endGroup();
 
     myvalues->beginGroup("Misc");
