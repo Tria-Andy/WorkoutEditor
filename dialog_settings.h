@@ -100,14 +100,12 @@ private slots:
     void on_toolButton_colormin_clicked();
     void on_comboBox_food_currentIndexChanged(const QString &arg1);
     void on_listWidget_food_itemClicked(QListWidgetItem *item);
-
     void on_toolButton_mealAdd_clicked();
-
     void on_toolButton_mealDelete_clicked();
-
     void on_toolButton_mealEdit_clicked();
-
     void on_comboBox_thresBase_currentIndexChanged(int index);
+    void on_toolButton_seasonPath_clicked();
+    void on_toolButton_foodPath_clicked();
 
 private:
     Ui::Dialog_settings *ui;
@@ -117,6 +115,7 @@ private:
     foodplanner *food_ptr;
     saisons *saisons_ptr;
     QHash<QString,QColor> colorMapCache;
+    QCheckBox *tempCheck;
     QStringList sportList,model_header,contestTags;
     del_level level_del;
     del_mousehover mousehover_del;

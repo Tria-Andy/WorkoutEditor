@@ -54,6 +54,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->lineEdit_standard->setText(gcValues->value("workouts"));
     ui->lineEdit_saisonFile->setText(gcValues->value("saisons"));
     ui->lineEdit_configfile->setText(gcValues->value("valuefile"));
+    ui->lineEdit_foodFile->setText(gcValues->value("foodplanner"));
     ui->spinBox_hfThres->setValue(thresValues->value("hfthres"));
     ui->spinBox_hfMax->setValue(thresValues->value("hfmax"));
     ui->spinBox_ltsDays->setValue(ltsValues->value("ltsdays"));
@@ -87,6 +88,13 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     this->set_bottonColor(ui->toolButton_colorlow,false);
     ui->doubleSpinBox_min->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(3));
     this->set_bottonColor(ui->toolButton_colormin,false);
+
+    for(int i = 0; i < 7; ++i)
+    {
+       tempCheck = this->findChild<QCheckBox *>("checkBox_Work_"+QString::number(i));
+       tempCheck->setChecked(doubleMap.value("Moveday").at(i));
+    }
+
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
     ui->listWidget_stressValue->setItemDelegate(&mousehover_del);
@@ -242,12 +250,15 @@ void Dialog_settings::writeChangedValues()
 {
     QString sport = ui->comboBox_thresSport->currentText();
     double paceSec = (ui->timeEdit_thresPace->time().minute()*60) + ui->timeEdit_thresPace->time().second();
+    QVector<double> saveVector;
+
 
     if(sport == settings::isSwim)
     {        
         thresholdMap.insert("swimpower",ui->spinBox_thresPower->value());
         thresholdMap.insert("swimpace",paceSec);
         thresholdMap.insert("swimfactor",ui->doubleSpinBox_factor->value());
+        thresholdMap.insert("swimlimit",ui->doubleSpinBox_lowLimit->value());
         thresholdMap.insert("swimpm",ui->checkBox_usepm->isChecked());
         this->writeRangeValues(sport);
     }
@@ -257,6 +268,7 @@ void Dialog_settings::writeChangedValues()
         thresholdMap.insert("bikepace",paceSec);
         thresholdMap.insert("bikespeed",this->set_doubleValue(ui->lineEdit_speed->text().toDouble(),true));
         thresholdMap.insert("bikefactor",ui->doubleSpinBox_factor->value());
+        thresholdMap.insert("bikelimit",ui->doubleSpinBox_lowLimit->value());
         thresholdMap.insert("bikepm",ui->checkBox_usepm->isChecked());
         thresholdMap.insert("wattfactor",ui->doubleSpinBox_watttospeed->value());
         this->writeRangeValues(sport);
@@ -266,6 +278,7 @@ void Dialog_settings::writeChangedValues()
         thresholdMap.insert("runpower",ui->spinBox_thresPower->value());
         thresholdMap.insert("runpace",paceSec);
         thresholdMap.insert("runpm",ui->checkBox_usepm->isChecked());
+        thresholdMap.insert("runlimit",ui->doubleSpinBox_lowLimit->value());
         thresholdMap.insert("runfactor",ui->doubleSpinBox_factor->value());
         this->writeRangeValues(sport);
     }
@@ -296,6 +309,14 @@ void Dialog_settings::writeChangedValues()
     {
         colorMap.insert(it.key(),it.value());
     }
+
+    saveVector.resize(7);
+    for(int i = 0; i < 7; ++i)
+    {
+       tempCheck = this->findChild<QCheckBox *>("checkBox_Work_"+QString::number(i));
+       saveVector[i] = tempCheck->isChecked();
+    }
+    doubleMap.insert("Moveday",saveVector);
 
     settings::writeListValues(&listMap);
 
@@ -568,6 +589,7 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         thresPower = thresValues->value("swimpower");
         thresPace = thresValues->value("swimpace");
         sportFactor = thresValues->value("swimfactor");
+        ui->doubleSpinBox_lowLimit->setValue(thresValues->value("swimlimit"));
         ui->checkBox_usepm->setChecked(thresValues->value("swimpm"));
         ui->spinBox_thresPower->setPalette(wback);
         ui->timeEdit_thresPace->setPalette(gback);
@@ -581,6 +603,7 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         thresPower = thresValues->value("bikepower");
         thresPace = thresValues->value("bikepace");
         sportFactor = thresValues->value("bikefactor");
+        ui->doubleSpinBox_lowLimit->setValue(thresValues->value("bikelimit"));
         ui->checkBox_usepm->setChecked(thresValues->value("bikepm"));
         ui->doubleSpinBox_watttospeed->setValue(thresValues->value("wattfactor"));
         ui->spinBox_thresPower->setPalette(gback);
@@ -602,6 +625,7 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
         }
 
         thresPace = thresValues->value("runpace");
+        ui->doubleSpinBox_lowLimit->setValue(thresValues->value("runlimit"));
         ui->checkBox_usepm->setChecked(thresValues->value("runpm"));
         sportFactor = thresValues->value("runfactor");
         ui->spinBox_thresPower->setPalette(wback);
@@ -1196,4 +1220,22 @@ void Dialog_settings::on_comboBox_thresBase_currentIndexChanged(int index)
     }
 
     this->set_thresholdModel(ui->comboBox_thresSport->currentText(),index);
+}
+
+void Dialog_settings::on_toolButton_seasonPath_clicked()
+{
+    QString dir = this->getDirectory("Select Season File Dir");
+    if(!dir.isEmpty())
+    {
+        ui->lineEdit_saisonFile->setText(QDir::toNativeSeparators(dir));
+    }
+}
+
+void Dialog_settings::on_toolButton_foodPath_clicked()
+{
+    QString dir = this->getDirectory("Select FoodPlanner File Dir");
+    if(!dir.isEmpty())
+    {
+        ui->lineEdit_foodFile->setText(QDir::toNativeSeparators(dir));
+    }
 }
