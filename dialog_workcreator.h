@@ -16,6 +16,7 @@
 #include "standardworkouts.h"
 #include "del_mousehover.h"
 #include "schedule.h"
+#include "dialog_map.h"
 
 class del_workcreator : public QStyledItemDelegate
 {
@@ -467,12 +468,13 @@ private slots:
     void update_workouts();
     void on_pushButton_sync_clicked();
     void on_checkBox_timebased_clicked(bool checked);
+    void on_toolButton_map_clicked();
 
 private:
     Ui::Dialog_workCreator *ui;
 
     schedule *worksched;
-    QString isSeries,isGroup,currentSport,currentWorkID,isBreak,viewBackground;
+    QString isSeries,isGroup,currentSport,currentWorkID,isBreak,viewBackground,workMap;
     QStandardItemModel *plotModel,*valueModel,*listModel,*workoutModel;
     QSortFilterProxyModel *metaProxy,*stepProxy, *schedProxy, *proxyFilter;
     QMap<QString,QString> workoutMap;
@@ -515,6 +517,7 @@ private:
     void save_workout();
     void save_workout_values(QStringList,QStandardItemModel *);
     void update_workoutsSchedule(int,QDate,QPair<double,double>,int);
+    void set_metaFilter(QString,int,bool);
 };
 
 #endif // DIALOG_WORKCREATOR_H

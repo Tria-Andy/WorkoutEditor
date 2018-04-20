@@ -157,9 +157,7 @@ void day_popup::set_comboWorkouts(QString workoutSport, QString stdid)
     if(!workoutSport.isEmpty())
     {
         QString workID,workTitle,listString;
-        stdProxy->invalidate();
-        stdProxy->setFilterFixedString(workoutSport);
-        stdProxy->setFilterKeyColumn(0);
+        this->set_proxyFilter(workoutSport,0);
         stdlistModel->clear();
 
         stdlistModel->setRowCount(stdProxy->rowCount());
@@ -384,6 +382,13 @@ void day_popup::set_result(int resultCode)
     this->set_comboWorkouts(QString(),QString());
 }
 
+void day_popup::set_proxyFilter(QString filterTo, int col)
+{
+    stdProxy->invalidate();
+    stdProxy->setFilterRegExp("\\b"+filterTo+"\\b");
+    stdProxy->setFilterKeyColumn(col);
+}
+
 void day_popup::edit_workoutDate(QDate workDate)
 {
     newDate = workDate;
@@ -530,8 +535,7 @@ void day_popup::on_comboBox_stdworkout_activated(int stdindex)
     ui->tableView_day->setCurrentIndex(dayModel->index(0,selWorkout));
     QString workoutID = ui->comboBox_stdworkout->model()->data(ui->comboBox_stdworkout->model()->index(stdindex,1)).toString();
     stdworkData.clear();
-    stdProxy->setFilterRegExp("\\b"+workoutID+"\\b");
-    stdProxy->setFilterKeyColumn(1);
+    this->set_proxyFilter(workoutID,1);
 
     for(int i = 1; i < stdProxy->columnCount()-1; ++i)
     {
@@ -552,4 +556,15 @@ void day_popup::on_comboBox_stdworkout_activated(int stdindex)
 
     dayModel->setData(dayModel->index(9,selWorkout),this->get_workout_pace(dayModel->data(dayModel->index(5,selWorkout)).toDouble(),QTime::fromString(dayModel->data(dayModel->index(4,selWorkout)).toString(),"hh:mm:ss"),dayModel->data(dayModel->index(1,selWorkout)).toString(),true));
     ui->tableView_day->setCurrentIndex(dayModel->index(0,selWorkout));
+}
+
+void day_popup::on_toolButton_map_clicked()
+{
+    QString workoutID = ui->comboBox_stdworkout->model()->data(ui->comboBox_stdworkout->model()->index(ui->comboBox_stdworkout->currentIndex(),1)).toString();
+    this->set_proxyFilter(workoutID,1);
+    QString image = stdProxy->data(stdProxy->index(0,9)).toString();
+
+    Dialog_map dialogMap(this,stdProxy,workoutID,image);
+    dialogMap.setModal(true);
+    dialogMap.exec();
 }

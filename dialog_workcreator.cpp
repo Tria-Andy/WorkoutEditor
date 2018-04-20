@@ -55,6 +55,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     viewBackground = "background-color: #e6e6e6";
 
     ui->toolButton_copy->setEnabled(false);
+    ui->label_picName->setVisible(false);
     this->set_controlButtons(false);
 
     ui->treeWidget_intervall->setStyleSheet(viewBackground);
@@ -227,9 +228,7 @@ void Dialog_workCreator::get_workouts(QString sport)
     bool timeBased;
     workoutMap.clear();
     listModel->clear();
-    metaProxy->invalidate();
-    metaProxy->setFilterFixedString(sport);
-    metaProxy->setFilterKeyColumn(0);
+    this->set_metaFilter(sport,0,true);
 
     schedProxy->invalidate();
     schedProxy->setFilterFixedString(sport);
@@ -428,8 +427,7 @@ void Dialog_workCreator::save_workout()
     sport = ui->comboBox_sport->currentText();
     QTreeWidgetItem *currentItem;
     QStandardItemModel *workModel;
-    metaProxy->setFilterFixedString(sport);
-    metaProxy->setFilterKeyColumn(0);
+    this->set_metaFilter(sport,0,true);
 
     existWorkIDs = this->get_workoutIds();
 
@@ -481,6 +479,7 @@ void Dialog_workCreator::save_workout()
     {
         workSum = round(workSum + (10-roundNum));
     }
+    workModel = this->workouts_meta;
 
     workoutValues << currentSport
                   << workID
@@ -490,9 +489,9 @@ void Dialog_workCreator::save_workout()
                   << QString::number(distSum)
                   << QString::number(round(stressSum))
                   << QString::number(workSum)
-                  << QString::number(ui->checkBox_timebased->isChecked());
+                  << QString::number(ui->checkBox_timebased->isChecked())
+                  << ui->label_picName->text();
 
-     workModel = this->workouts_meta;
      this->save_workout_values(workoutValues,workModel);
 
     //Intervalldaten
@@ -1189,6 +1188,9 @@ void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
     proxyFilter->setFilterRegExp("\\b"+workoutID+"\\b");
     proxyFilter->setFilterKeyColumn(10);
 
+    this->set_metaFilter(currentWorkID,1,false);
+    ui->label_picName->setText(metaProxy->data(metaProxy->index(0,9)).toString());
+
     ui->pushButton_sync->setText(" - "+QString::number(proxyFilter->rowCount()));
     ui->comboBox_code->setCurrentText(workCode.replace(" ",""));
     ui->lineEdit_workoutname->setText(workTitle.replace(" ",""));
@@ -1545,6 +1547,22 @@ void Dialog_workCreator::update_workoutsSchedule(int index,QDate wDate, QPair<do
     updateProgess->setValue(progress);
 }
 
+void Dialog_workCreator::set_metaFilter(QString filterTo, int col, bool fixString)
+{
+    metaProxy->invalidate();
+
+    if(fixString)
+    {
+        metaProxy->setFilterFixedString(filterTo);
+    }
+    else
+    {
+        metaProxy->setFilterRegExp("\\b"+filterTo+"\\b");
+    }
+
+    metaProxy->setFilterKeyColumn(col);
+}
+
 
 void Dialog_workCreator::set_updateDates(bool pAll)
 {
@@ -1560,4 +1578,15 @@ void Dialog_workCreator::on_checkBox_timebased_clicked(bool checked)
         editRow[4] = 1;
     }
     edit_del.timeBased = checked;
+}
+
+void Dialog_workCreator::on_toolButton_map_clicked()
+{
+    this->set_metaFilter(currentWorkID,1,false);
+    QString image = metaProxy->data(metaProxy->index(0,9)).toString();
+
+    Dialog_map dialogMap(this,metaProxy,currentWorkID,image);
+    dialogMap.setModal(true);
+    dialogMap.exec();
+    ui->label_picName->setText(metaProxy->data(metaProxy->index(0,9)).toString());
 }
