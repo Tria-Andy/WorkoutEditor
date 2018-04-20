@@ -346,6 +346,7 @@ void Activity::prepareData()
             thresPower = thresValues->value("bikepower");
             thresPace = thresValues->value("bikepace");
             thresSpeed = thresValues->value("bikespeed");
+            thresLimit = thresValues->value("bikelimit");
             if(hasPMData)
             {
                 this->fillRangeLevel(thresPower,false);
@@ -363,6 +364,7 @@ void Activity::prepareData()
         {
             thresPower = thresValues->value("runpower");
             thresPace = thresValues->value("runpace");
+            thresLimit = thresValues->value("runlimit");
 
             this->fillRangeLevel(thresPace,true);
 
@@ -1278,23 +1280,15 @@ void Activity::updateSampleModel(int sampRowCount)
     calcSpeed.resize(sampRowCount);
     calcCadence.resize(sampRowCount);
     double msec = 0.0;
-    int intStart,intStop = 0,sportpace = 0;
-    double lowLimit = 0.0,limitFactor = 0.0;
+    int intStart,intStop = 0,sportpace = 0, currPower = 0;
+    double lowLimit = 0.0;
     double swimPace,swimSpeed,swimCycle;
     QString lapName;
 
     if(!isSwim && !isTria)
     {
-        if(isBike)
-        {
-            limitFactor = 0.35;
-        }
-        if(isRun)
-        {
-            limitFactor = 0.50;
-        }
         lowLimit = this->get_speed(QTime::fromString(this->set_time(thresPace),"mm:ss"),0,curr_sport,true);
-        lowLimit = lowLimit - (lowLimit*limitFactor);
+        lowLimit = lowLimit - (lowLimit*thresLimit);
     }
 
     if(isSwim)
@@ -1373,13 +1367,14 @@ void Activity::updateSampleModel(int sampRowCount)
     else
     {
         int firstLap = 0;
+        double firstLapWatt = this->get_int_value(0,4);
 
         for(int intRow = 0; intRow < intModel->rowCount(); ++intRow)
         {
             firstLap = intRow == 0 ? 0 : 1;
             intStart = intModel->data(intModel->index(intRow,1)).toInt();
             intStop = intModel->data(intModel->index(intRow,2)).toInt();
-            msec = intModel->data(intModel->index(intRow,3)).toDouble() / (intStop-intStart);
+            msec = intModel->data(intModel->index(intRow,3)).toDouble() / (intStop-intStart+1);
 
             if(isBike)
             {
@@ -1434,12 +1429,19 @@ void Activity::updateSampleModel(int sampRowCount)
             {
                 for(int intSec = intStart;intSec < intStop; ++intSec)
                 {
+                    currPower = sampleModel->data(sampleModel->index(intSec,4)).toInt();
+
                     if(intSec == 0)
                     {
                         newDist[0] = 0.0000;
                     }
                     else
                     {
+                        if(intRow == 0 && currPower < firstLapWatt*0.5)
+                        {
+                            sampleModel->setData(sampleModel->index(intSec,4),round(pow(intSec,2.5)+firstLapWatt*0.5));
+                        }
+
                         calcSpeed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
                         newDist[intSec] = newDist[intSec-1] + msec;
                         if(hasPMData) calcCadence[intSec] = sampleModel->data(sampleModel->index(intSec,3,QModelIndex())).toDouble();
@@ -1464,17 +1466,15 @@ void Activity::updateSampleModel(int sampRowCount)
                     if(intRow == 0)
                     {
                         sportpace = thresValues->value("swimpace");
-                        limitFactor = 0.15;
                         lowLimit = this->get_speed(QTime::fromString(this->set_time(sportpace),"mm:ss"),0,settings::isSwim,true);
-                        lowLimit = lowLimit - (lowLimit*limitFactor);
+                        lowLimit = lowLimit - (lowLimit*thresLimit);
                         calcSpeed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
                     }
                     else if(intRow == 4)
                     {
                         sportpace = thresValues->value("runpace");
-                        limitFactor = 0.20;
                         lowLimit = this->get_speed(QTime::fromString(this->set_time(sportpace),"mm:ss"),0,settings::isRun,true);
-                        lowLimit = lowLimit - (lowLimit*limitFactor);
+                        lowLimit = lowLimit - (lowLimit*thresLimit);
                         calcSpeed[intSec] = this->interpolate_speed(intRow,intSec,lowLimit);
                     }
                     else
