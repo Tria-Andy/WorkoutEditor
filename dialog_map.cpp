@@ -43,9 +43,9 @@ void Dialog_map::setImage(QString fileName)
     QImage image(fileName);
 
     ui->imageLabel->setPixmap(QPixmap::fromImage(image));
-    this->resize(image.width()+offset.left()+offset.right(),image.height()+ui->frame_info->height()+ui->frame_head->height()+offset.top()+offset.bottom());
-    ui->lineEdit_path->setText(fileName);
+    this->resize(image.width()+offset.left()+offset.right(),image.height()+ui->progressBar_save->height()+ui->frame_head->height()+(offset.top()*2)+offset.bottom());
     ui->label_imageName->setText(QDir::toNativeSeparators(fileName).split(QDir::separator()).last());
+    ui->label_imagePath->setText(fileName);
 }
 
 void Dialog_map::on_toolButton_close_clicked()
