@@ -27,6 +27,7 @@
 #include "del_mousehover.h"
 #include "schedule.h"
 #include "settings.h"
+#include "foodplanner.h"
 #include "calculation.h"
 #include "xmlhandler.h"
 
@@ -34,12 +35,12 @@ namespace Ui {
 class Dialog_settings;
 }
 
-class Dialog_settings : public QDialog, public calculation, public xmlHandler
+class Dialog_settings : public QDialog, public calculation, public xmlHandler, public settings
 {
     Q_OBJECT
 
 public:
-    explicit Dialog_settings(QWidget *parent = 0,schedule *psched = 0);
+    explicit Dialog_settings(QWidget *parent = 0,schedule *psched = 0,foodplanner *pFood = 0);
     ~Dialog_settings();
 
 private slots:
@@ -91,29 +92,44 @@ private slots:
     void on_comboBox_saisons_editTextChanged(const QString &arg1);
     void on_toolButton_updateSaison_clicked();
     void on_toolButton_deleteSaison_clicked();
-
     void on_doubleSpinBox_PALvalue_valueChanged(double arg1);
+    void on_comboBox_weightmode_currentIndexChanged(const QString &arg1);
+    void on_toolButton_colormax_clicked();
+    void on_toolButton_colorhigh_clicked();
+    void on_toolButton_colorlow_clicked();
+    void on_toolButton_colormin_clicked();
+    void on_comboBox_food_currentIndexChanged(const QString &arg1);
+    void on_listWidget_food_itemClicked(QListWidgetItem *item);
+    void on_toolButton_mealAdd_clicked();
+    void on_toolButton_mealDelete_clicked();
+    void on_toolButton_mealEdit_clicked();
+    void on_comboBox_thresBase_currentIndexChanged(int index);
+    void on_toolButton_seasonPath_clicked();
+    void on_toolButton_foodPath_clicked();
 
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model,*contestTreeModel;
     QSortFilterProxyModel *saisonProxy,*contestProxy;
     schedule *schedule_ptr;
+    foodplanner *food_ptr;
     saisons *saisons_ptr;
-    QHash<QString,QStringList> listMap;
     QHash<QString,QColor> colorMapCache;
-    QStringList keyList,extkeyList,sportList,model_header,contestTags;
+    QCheckBox *tempCheck;
+    QStringList sportList,model_header,contestTags;
     del_level level_del;
     del_mousehover mousehover_del;
     double thresPower,thresPace,sportFactor;
     QString getDirectory(QString);
+    QColor openColor(QColor);
     bool useColor,stressEdit;
     void checkSetup();
     void set_SelectControls(QString);
     void set_color(QColor,QString);
+    void set_bottonColor(QToolButton*,bool changeColor);
     void save_settingsChanges();
     void set_thresholdView(QString);
-    void set_thresholdModel(QString);
+    void set_thresholdModel(QString,int);
     void set_hfmodel(double);
     void set_ltsList();
     void checkSportUse();

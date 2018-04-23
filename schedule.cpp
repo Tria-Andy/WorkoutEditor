@@ -32,7 +32,7 @@ schedule::schedule()
     contentTags << "summery";
     workout_sport.clear();
     firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
-    schedulePath = settings::get_gcInfo("schedule");
+    schedulePath = gcValues->value("schedule");
     workoutFile = "workout_schedule.xml";
     metaFile = "workout_phase_meta.xml";
     contentFile = "workout_phase_content.xml";
@@ -55,8 +55,9 @@ enum {ADD,EDIT,COPY,DEL};
 
 void schedule::freeMem()
 {
+    delete saisonsModel;
+    delete contestModel;
     delete scheduleProxy;
-    delete workout_schedule;
     delete week_meta;
     delete week_content;
 }
@@ -147,17 +148,17 @@ void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
     content_list = root_content.elementsByTagName("content");
 
     week_meta = new QStandardItemModel(meta_list.count(),metaTags.count());
-    metaProxy = new QSortFilterProxyModel;
+    metaProxy = new QSortFilterProxyModel();
     metaProxy->setSourceModel(week_meta);
     week_content = new QStandardItemModel(content_list.count(),contentTags.count());
-    contentProxy = new QSortFilterProxyModel;
+    contentProxy = new QSortFilterProxyModel();
     contentProxy->setSourceModel(week_content);
 
     //fill week_meta
     if(meta_list.count() == 0)
     {
         QString weekid;
-        QString noPhase = settings::get_generalValue("empty");
+        QString noPhase = generalValues->value("empty");
 
         week_meta->setRowCount(saisonWeeks);
         for(int week = 0,id = 1; week < saisonWeeks; ++week,++id)
@@ -280,7 +281,7 @@ void schedule::add_newSaison(QString saisonName)
     int saisonWeeks = this->get_saisonInfo(saisonName,"weeks").toInt();
     QDate startDay = this->get_saisonInfo(saisonName,"start").toDate();
     QDate firstDay;
-    QString phase = settings::get_generalValue("empty");
+    QString phase = generalValues->value("empty");
     QString weekID;
     QString emptyContent = "0-0-00:00-0";
     int rowCount;
@@ -311,6 +312,7 @@ void schedule::add_newSaison(QString saisonName)
 
 void schedule::delete_Saison(QString saisonName)
 {
+   metaProxy->invalidate();
    week_meta->sort(1);
    metaProxy->setFilterRegExp("\\b"+saisonName+"\\b");
    metaProxy->setFilterKeyColumn(0);
@@ -337,7 +339,7 @@ QHash<int, QString> schedule::get_weekList()
 
 void schedule::read_ltsFile(QDomDocument stressContent)
 {
-    int ltsDays = settings::get_ltsValue("ltsdays");
+    int ltsDays = ltsValues->value("ltsdays");
     QDomElement root_lts = stressContent.firstChildElement();
     QDomNodeList lts_list;
     QDate wDate;
@@ -414,8 +416,8 @@ int schedule::check_workouts(QDate date)
 void schedule::save_ltsValues()
 {
     double stress = 0,currStress = 0,pastStress = 0,startLTS = 0;
-    startLTS = settings::get_ltsValue("lastlts");
-    int ltsDays = settings::get_ltsValue("ltsdays");
+    startLTS = ltsValues->value("lastlts");
+    int ltsDays = ltsValues->value("ltsdays");
     double factor = (double)exp(-1.0/ltsDays);
     pastStress = startLTS;
 
@@ -427,8 +429,8 @@ void schedule::save_ltsValues()
     }
     settings::set_ltsValue("lastlts",round(pastStress));
 
-    startLTS = settings::get_ltsValue("laststs");
-    double stsDays = settings::get_ltsValue("stsdays");
+    startLTS = ltsValues->value("laststs");
+    double stsDays = ltsValues->value("stsdays");
     factor = (double)exp(-1.0/stsDays);
     pastStress = startLTS;
 
@@ -517,8 +519,7 @@ void schedule::deleteWeek(QString deleteWeek)
 
 QString schedule::get_weekPhase(QDate currDate,bool full)
 {
-    QSortFilterProxyModel *metaProxy = new QSortFilterProxyModel();
-    metaProxy->setSourceModel(week_meta);
+    metaProxy->invalidate();
     QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.addDays(1 - currDate.dayOfWeek()).year());
     metaProxy->setFilterRegExp("\\b"+weekID+"\\b");
     metaProxy->setFilterKeyColumn(2);
@@ -544,6 +545,7 @@ void schedule::set_workoutData(int mode)
     double currDura = 0;
     int row = 0;
     int col = 0;
+
     if(mode == EDIT) //EDIT
     {
         for(QHash<QModelIndex,QHash<int,QString>>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it)
@@ -622,8 +624,6 @@ void schedule::updateStress(QString date,QPair<double,double> stressMap,int mode
             stressValues.insert(wDate,qMakePair(stressValue -stressMap.first,duraValue - stressMap.second));
         }
     }
-
-
 
     isUpdated = true;
 }

@@ -14,11 +14,13 @@ TEMPLATE = app
 
 #Application version
 VERSION_MAJOR = 1
-VERSION_MINOR = 3
-VERSION_BUILD = 18
+VERSION_MINOR = 4
+VERSION_BUILD = 9
+DEV_BUILD = 1
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
-       "VERSION_BUILD=$$VERSION_BUILD"
+       "VERSION_BUILD=$$VERSION_BUILD"\
+       "DEV_BUILD=$$DEV_BUILD"\
 
 #Target version
 VERSION = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
@@ -48,7 +50,9 @@ SOURCES += main.cpp\
     xmlhandler.cpp \
     dialog_workcreator.cpp \
     filereader.cpp \
-    saisons.cpp
+    saisons.cpp \
+    foodplanner.cpp \
+    dialog_map.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
@@ -75,7 +79,9 @@ HEADERS  += mainwindow.h \
     dialog_workcreator.h \
     filereader.h \
     del_mousehover.h \
-    saisons.h
+    saisons.h \
+    foodplanner.h \
+    dialog_map.h
 
 FORMS    += mainwindow.ui \
     dialog_export.ui \
@@ -89,7 +95,8 @@ FORMS    += mainwindow.ui \
     dialog_version.ui \
     stress_popup.ui \
     dialog_workcreator.ui \
-    dialog_addweek.ui
+    dialog_addweek.ui \
+    dialog_map.ui
 
 RESOURCES += \
     resources.qrc

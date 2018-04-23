@@ -29,7 +29,7 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
     dayCount = 7;
     workSched = p_sched;
     week_info << weekinfo.split("#");
-    workProxy = new QSortFilterProxyModel;
+    workProxy = new QSortFilterProxyModel(this);
     workProxy->setSourceModel(workSched->workout_schedule);
     barSelection << "Duration" << "Distance" << "Work(kj)";
     ui->comboBox_yValue->addItems(barSelection);
@@ -55,7 +55,6 @@ enum {DURATION,DISTANCE,KJ};
 week_popup::~week_popup()
 {
     delete ui;
-    delete workProxy;
 }
 
 void week_popup::set_plotValues()
@@ -87,12 +86,12 @@ void week_popup::set_plotValues()
         ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(proxyCount));
 
         double dateValue = 0;
-        double ltsDays = settings::get_ltsValue("ltsdays");
+        double ltsDays = ltsValues->value("ltsdays");
         double lte = (double)exp(-1.0/ltsDays);
         int ltsStart = -ltsDays;
         double ltsStress = 0,currStress = 0,pastStress = 0,startLTS = 0;
         QMap<QDate,QPair<double,double> > *stressMap = workSched->get_StressMap();
-        pastStress = settings::get_ltsValue("lastlts");
+        pastStress = ltsValues->value("lastlts");
 
         for(QMap<QDate,QPair<double,double> >::const_iterator it = stressMap->cbegin(), end = stressMap->find(weekDates.at(0).date().addDays(ltsStart)); it != end; ++it)
         {

@@ -1,0 +1,60 @@
+QTreeView {
+    show-decoration-selected: 0;
+}
+
+QTreeView::item {
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+}
+
+QTreeView::item:hover {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #80c2ff, stop: 1 #72ade3);
+    color: white;
+}
+
+QTreeView::item:selected {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #0055ff, stop: 1 #567dbc);
+    color: white;
+}
+
+QTreeView::item:selected:active{
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #0096fa, stop: 1 #567dbc);
+    color: white;
+}
+
+QTreeView::item:selected:!active {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #55a2ff, stop: 1 #577fbf);
+    color: white;
+}
+
+QToolButton:hover {
+    color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #80c2ff, stop: 0.5 #72ade3,stop: 1 #6da5d9)
+}
+
+QListWidget {
+    show-decoration-selected: 1; /* make the selection span the entire width of the view */
+}
+
+QListWidget::item:alternate {
+    background: #EEEEEE;
+}
+
+QListWidget::item:hover {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #80c2ff, stop: 1 #72ade3);
+    color: white;
+}
+
+QListWidget::item:selected {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #0055ff, stop: 1 #567dbc);
+    color: white;
+}
+
+QListWidget::item:selected:active {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #0096fa, stop: 1 #567dbc);
+    color: white;
+}
+
+QListWidget::item:selected:!active {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #55a2ff, stop: 1 #577fbf);
+    color: white;
+}

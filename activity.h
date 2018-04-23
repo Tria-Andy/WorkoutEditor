@@ -27,18 +27,18 @@
 
 class Activity : public jsonHandler
 {
+
 private:
     QList<QStandardItem*> setIntRow(int);
-    QList<QStandardItem*> setSwimLap(int,QString);
-    QSortFilterProxyModel *swimProxy;
+    QStandardItem *rootItem;
     QString v_date,curr_sport,intLabel,breakName;
     QMap<int,QStringList> itemHeader,avgHeader;
     QHash<QString,int> paceTimeInZone,hfTimeInZone,hfZoneAvg;
     QHash<QString,QPair<double,double>> rangeLevels;
     QHash<QString,QVector<double>> swimHFZoneFactor;
     QStringList ride_items,swimType,levels;
-    QVector<double> calc_speed,calc_cadence,swimTime,new_dist;
-    double swimTrack,polishFactor,swimThresPace,hfThreshold,hfMax,actWeight;
+    QVector<double> calcSpeed,calcCadence,swimTime,newDist;
+    double thresPower,thresSpeed,thresPace,thresLimit,swimTrack,polishFactor,hfThreshold,hfMax,actWeight;
     int distFactor,avgCounter,zoneCount,moveTime;
     bool isSwim,isBike,isRun,isTria,isStrength,isAlt,changeRowCount,isUpdated,selectInt,isTimeBased;
     QVector<bool> editRow;
@@ -47,7 +47,6 @@ private:
     void readJsonFile(QString,bool);
     void prepareData();
     void build_intTree();
-    int build_swimModel(bool,QString,int,int,int,int);
     QString build_lapName(QString,int,double);
     void updateSwimLap();
     void updateSwimInt(QModelIndex,QItemSelectionModel*);
@@ -64,7 +63,6 @@ private:
     void swimTimeInZone(int,double);
     void fillRangeLevel(double,bool);
     QString checkRangeLevel(double);
-    int get_swim_laps(int);
     int get_zone_values(double,int,bool);
 
 public:
@@ -80,9 +78,9 @@ public:
     void writeChangedData();
     QHash<int,QModelIndex> selItem,avgItems;
     QHash<QString,int> swimPace,swimHF;
-    QStandardItemModel *intModel,*sampleModel,*xdataModel,*swimModel,*intTreeModel,*selItemModel,*avgModel;
+    QStandardItemModel *intModel,*sampleModel,*xdataModel,*intTreeModel,*selItemModel,*avgModel;
     QMap<QString,QString> ride_info;
-    QVector<double> sampSpeed,avgValues;
+    QVector<double> sampSpeed,sampSecond,avgValues;
 
     //Recalculation
     void updateRow_intTree(QItemSelectionModel *);
@@ -101,6 +99,8 @@ public:
     //Averages
     void reset_avgSelection();
     void set_avgValues(int,int);
+
+    bool isIndoor;
 };
 
 #endif // ACTIVITY_H

@@ -10,10 +10,11 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched,const QDate startDa
     this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     stressMap = p_sched->get_StressMap();
     isLoad = false;
-    ltsDays = settings::get_ltsValue("ltsdays");
-    stsDays = settings::get_ltsValue("stsdays");
-    lastLTS = settings::get_ltsValue("lastlts");
-    lastSTS = settings::get_ltsValue("laststs");
+    ltsValues = settings::getdoubleMapPointer(settings::dMap::LTS);
+    ltsDays = ltsValues->value("ltsdays");
+    stsDays = ltsValues->value("stsdays");
+    lastLTS = ltsValues->value("lastlts");
+    lastSTS = ltsValues->value("laststs");
     startDay = startDate.addDays(1-startDate.dayOfWeek());
     firstDay = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
     dateRange = 6;

@@ -46,6 +46,13 @@ year_popup::year_popup(QWidget *parent, QString pInfo,int position,schedule *p_s
 
        ui->label_info->setText(phaseList.at(phaseindex) +": " + partInfo.at(0) + " Workouts: " + partInfo.at(1) + " - Hours: " + partInfo.at(2) + " - Distance: " + partInfo.at(4));
 
+       metaProxy = new QSortFilterProxyModel(this);
+       metaProxy->setSourceModel(workSched->week_meta);
+       proxyFilter = new QSortFilterProxyModel(this);
+       proxyFilter->setSourceModel(metaProxy);
+       contentProxy = new QSortFilterProxyModel(this);
+       contentProxy->setSourceModel(workSched->week_content);
+
        this->set_plotValues();
 }
 
@@ -59,14 +66,12 @@ year_popup::~year_popup()
 void year_popup::set_plotValues()
 {
     QString selSaison = workSched->get_selSaison();
-    QSortFilterProxyModel *metaProxy = new QSortFilterProxyModel;
-    metaProxy->setSourceModel(workSched->week_meta);
+
+    metaProxy->invalidate();
     metaProxy->setFilterFixedString(selSaison);
     metaProxy->setFilterKeyColumn(0);
-    QSortFilterProxyModel *proxyFilter = new QSortFilterProxyModel;
-    proxyFilter->setSourceModel(metaProxy);
-    QSortFilterProxyModel *contentProxy = new QSortFilterProxyModel;
-    contentProxy->setSourceModel(workSched->week_content);
+
+
     QString weekID;
 
     if(phaseindex == 0)
@@ -75,6 +80,7 @@ void year_popup::set_plotValues()
     }
     else
     {
+        proxyFilter->invalidate();
         proxyFilter->setFilterFixedString(phase);
         proxyFilter->setFilterKeyColumn(3);
         weekcount = proxyFilter->rowCount();
@@ -133,6 +139,7 @@ void year_popup::set_plotValues()
     for(int week = 0; week < proxyFilter->rowCount(); ++week)
     {
         weekID = proxyFilter->data(proxyFilter->index(week,2)).toString();
+        contentProxy->invalidate();
         contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
         contentProxy->setFilterKeyColumn(1);
 

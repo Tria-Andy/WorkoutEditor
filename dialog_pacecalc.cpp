@@ -31,9 +31,9 @@ Dialog_paceCalc::Dialog_paceCalc(QWidget *parent) :
     race_header << "Lap" << "Distance" << "Pace" << "Speed" << "Duration";
     dist <<25<<50<<100<<200<<300<<400<<500<<600<<800<<1000;
     distFactor = 1;
-    paceModel = new QStandardItemModel();
-    raceModel = new QStandardItemModel();
-    triathlonMap = settings::get_triaMap();
+    paceModel = new QStandardItemModel(this);
+    raceModel = new QStandardItemModel(this);
+    triaMap = settings::getStringMapPointer(settings::stingMap::Tria);
     triaDist = settings::get_triaDistance();
     this->init_paceView();
     runRaces << "5K" << "10K" << "HM" << "M";
@@ -46,7 +46,7 @@ Dialog_paceCalc::Dialog_paceCalc(QWidget *parent) :
     }
     for(int i = 0; i < triaDist.count(); ++i)
     {
-        ui->comboBox_race->addItem(settings::isTria +" "+triaDist.at(i)+ ": "+triathlonMap.value(triaDist.at(i)));
+        ui->comboBox_race->addItem(settings::isTria +" "+triaDist.at(i)+ ": "+triaMap->value(triaDist.at(i)));
     }
     ui->tableView_raceCalc->setItemDelegate(&race_del);
 }
@@ -58,8 +58,6 @@ Dialog_paceCalc::~Dialog_paceCalc()
 
 void Dialog_paceCalc::on_pushButton_close_clicked()
 {
-    delete paceModel;
-    delete raceModel;
     reject();
 }
 
@@ -206,7 +204,7 @@ void Dialog_paceCalc::set_raceTable(QString label)
     {
         QString vtria = label.split(" ").at(1);
         QStringList triaDistance;
-        triaDistance << triathlonMap.value(vtria.remove(":")).split("-");
+        triaDistance << triaMap->value(vtria.remove(":")).split("-");
 
         raceModel->insertRows(0,5,QModelIndex());
         raceModel->setData(raceModel->index(0,0,QModelIndex()),settings::isSwim);

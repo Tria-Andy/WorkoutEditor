@@ -6,25 +6,26 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     ui(new Ui::Dialog_workCreator)
 {
     ui->setupUi(this);
+    this->setStyleSheet(parent->styleSheet());
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    listModel = new QStandardItemModel;
-    plotModel = new QStandardItemModel;
-    valueModel = new QStandardItemModel;
+    listModel = new QStandardItemModel(this);
+    plotModel = new QStandardItemModel(this);
+    valueModel = new QStandardItemModel(this);
     worksched = psched;
-    metaProxy = new QSortFilterProxyModel;
+    metaProxy = new QSortFilterProxyModel(this);
     metaProxy->setSourceModel(this->workouts_meta);
-    stepProxy = new QSortFilterProxyModel;
+    stepProxy = new QSortFilterProxyModel(this);
     stepProxy->setSourceModel(this->workouts_steps);
-    schedProxy = new QSortFilterProxyModel;
+    schedProxy = new QSortFilterProxyModel(this);
     schedProxy->setSourceModel(worksched->workout_schedule);
-    proxyFilter = new QSortFilterProxyModel;
+    proxyFilter = new QSortFilterProxyModel(this);
     proxyFilter->setSourceModel(schedProxy);
 
-    editRow <<1<<1<<1<<0<<1<<0<<0<<0<<0;
+    editRow <<1<<1<<1<<0<<0<<1<<0<<0<<0<<0;
 
     isSeries = "Series";
     isGroup = "Group";
-    isBreak = settings::get_generalValue("breakname");
+    isBreak = generalValues->value("breakname");
     groupList << isGroup << isSeries;
     levelList = settings::get_listValues("Level");
     ui->listWidget_group->addItems(groupList);
@@ -35,7 +36,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     ui->comboBox_code->addItems(settings::get_listValues("WorkoutCode"));
     clearFlag = false;
 
-    modelHeader << "Phase" << "Level" << "Threshold %" << "Value" << "Time" << "TSS" << "Work" << "Distance" << "Repeats";
+    modelHeader << "Phase" << "Level" << "Threshold %" << "Pace" << "Power" << "Time" << "TSS" << "Work" << "Distance" << "Repeats";
     ui->treeWidget_intervall->setHeaderLabels(modelHeader);
     ui->treeWidget_intervall->header()->setSectionResizeMode(QHeaderView::Stretch);
     ui->treeWidget_intervall->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
@@ -52,14 +53,9 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     ui->label_head->setText("Add Phase");
 
     viewBackground = "background-color: #e6e6e6";
-    buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
 
-    ui->toolButton_remove->setStyleSheet(buttonStyle);
-    ui->toolButton_update->setStyleSheet(buttonStyle);
-    ui->toolButton_cancel->setStyleSheet(buttonStyle);
-    ui->toolButton_down->setStyleSheet(buttonStyle);
-    ui->toolButton_up->setStyleSheet(buttonStyle);
     ui->toolButton_copy->setEnabled(false);
+    ui->label_picName->setVisible(false);
     this->set_controlButtons(false);
 
     ui->treeWidget_intervall->setStyleSheet(viewBackground);
@@ -67,6 +63,10 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     ui->listWidget_phases->setStyleSheet(viewBackground);
     ui->listView_values->setStyleSheet(viewBackground);
     ui->widget_plot->setStyleSheet(viewBackground);
+
+    ui->listView_workouts->setModel(listModel);
+    ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->listView_workouts->setItemDelegate(&mousehover_del);
 
     ui->widget_plot->xAxis->setTicks(true);
     ui->widget_plot->xAxis->setTickLabels(true);
@@ -78,18 +78,138 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     ui->widget_plot->xAxis2->setLabel("Distance - KM");
     ui->widget_plot->yAxis2->setVisible(true);
 
+
+    //Update Dialog
+    updateDialog = new QDialog(this);
+    updateDialog->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    updateDialog->setFixedHeight(260);
+    updateDialog->setFixedWidth(280);
+
+    workoutModel = new QStandardItemModel(updateDialog);
+
+    QVBoxLayout *diaLayout = new QVBoxLayout(updateDialog);
+    diaLayout->setContentsMargins(3,3,3,3);
+    diaLayout->setSpacing(5);
+
+    QFrame *labelFrame = new QFrame(updateDialog);
+    labelFrame->setMaximumWidth(updateDialog->width());
+    labelFrame->setMaximumHeight(20);
+    QHBoxLayout *hLabel = new QHBoxLayout(labelFrame);
+    hLabel->setContentsMargins(5,2,5,2);
+    QLabel *updateLabel = new QLabel(labelFrame);
+    //updateLabel->setFont(QFont().setBold(true));
+    updateLabel->setText("Update future connected Workouts in schedule?");
+    hLabel->addWidget(updateLabel);
+    labelFrame->setLayout(hLabel);
+    diaLayout->addWidget(labelFrame);
+
+    QGroupBox *selectGroup = new QGroupBox(updateDialog);
+    selectGroup->setTitle("Selection");
+    selectGroup->setMaximumHeight(70);
+    selectGroup->setMaximumWidth(updateDialog->width());
+    QVBoxLayout *selectBox = new QVBoxLayout(selectGroup);
+    selectBox->setContentsMargins(5,2,5,2);
+    selectBox->setSpacing(5);
+    selectGroup->setLayout(selectBox);
+
+    QFrame *radioFrame = new QFrame(selectGroup);
+    radioFrame->setMaximumWidth(updateDialog->width());
+    radioFrame->setMaximumHeight(30);
+    QHBoxLayout *hRadio = new QHBoxLayout(radioFrame);
+    hRadio->setContentsMargins(5,2,5,2);
+    hRadio->setSpacing(5);
+    updateAll = new QRadioButton("All Workouts",radioFrame);
+    updateRange = new QRadioButton("Workouts in Range",radioFrame);
+    updateAll->setChecked(true);
+    hRadio->addWidget(updateAll);
+    hRadio->addStretch();
+    hRadio->addWidget(updateRange);
+
+    QFrame *dateFrame = new QFrame(selectGroup);
+    dateFrame->setMaximumWidth(updateDialog->width());
+    dateFrame->setMaximumHeight(30);
+    QHBoxLayout *hDate = new QHBoxLayout(dateFrame);
+    hDate->setContentsMargins(5,2,5,2);
+    hDate->setSpacing(5);
+    QLabel *fromLabel = new QLabel(labelFrame);
+    fromLabel->setText("From:");
+    updateFrom = new QDateEdit(dateFrame);
+    updateFrom->setEnabled(false);
+    updateFrom->setCalendarPopup(true);
+    QLabel *toLabel = new QLabel(labelFrame);
+    toLabel->setText("To:");
+    updateTo = new QDateEdit(dateFrame);
+    updateTo->setEnabled(false);
+    updateTo->setCalendarPopup(true);
+    hDate->addWidget(fromLabel);
+    hDate->addWidget(updateFrom);
+    hDate->addStretch();
+    hDate->addWidget(toLabel);
+    hDate->addWidget(updateTo);
+    dateFrame->setLayout(hDate);
+
+    selectBox->addWidget(radioFrame);
+    selectBox->addWidget(dateFrame);
+    diaLayout->addWidget(selectGroup);
+
+    QFrame *viewFrame = new QFrame(updateDialog);
+    viewFrame->setFrameStyle(QFrame::Box | QFrame::Sunken);
+    viewFrame->setMaximumWidth(updateDialog->width());
+    viewFrame->setMaximumHeight(140);
+    QVBoxLayout *viewBox = new QVBoxLayout(viewFrame);
+    viewBox->setContentsMargins(1,1,1,1);
+    workoutView = new QListView(viewFrame);
+    workoutView->setModel(workoutModel);
+    workoutView->setSelectionMode(QAbstractItemView::NoSelection);
+    viewBox->addWidget(workoutView);
+
+    QFrame *statusFrame = new QFrame(viewFrame);
+    statusFrame->setMaximumWidth(updateDialog->width());
+    statusFrame->setMaximumHeight(30);
+    QHBoxLayout *statusBox = new QHBoxLayout(statusFrame);
+    updateProgess = new QProgressBar(statusFrame);
+    updateProgess->setTextVisible(true);
+    updateProgess->setMinimum(0);
+    updateProgess->setFixedHeight(15);
+    updateProgess->setFormat("%v");
+    statusBox->setContentsMargins(2,2,2,2);
+    updateOk = new QToolButton(statusFrame);
+    updateOk->setFixedSize(26,26);
+    updateOk->setIcon(QIcon(":/images/icons/Sync.png"));
+    updateOk->setIconSize(QSize(20,20));
+    updateOk->setAutoRaise(true);
+    statusBox->addWidget(updateProgess);
+    statusBox->addWidget(updateOk);
+    viewBox->addWidget(statusFrame);
+    diaLayout->addWidget(viewFrame);
+
+    QFrame *buttonFrame = new QFrame(updateDialog);
+    buttonFrame->setMaximumWidth(updateDialog->width());
+    buttonFrame->setMaximumHeight(25);
+    QHBoxLayout *hButton = new QHBoxLayout(buttonFrame);
+    hButton->setContentsMargins(5,2,5,2);
+    hButton->setSpacing(5);
+    updateClose = new QPushButton(buttonFrame);
+    updateClose->setText("Close");
+    updateClose->setFixedWidth(100);
+    hButton->addWidget(updateClose);
+    hDate->addStretch();
+    hButton->addWidget(updateClose);
+    diaLayout->addWidget(buttonFrame);
+
+    connect(updateClose,SIGNAL(clicked(bool)),updateDialog,SLOT(reject()));
+    connect(updateAll,SIGNAL(toggled(bool)),this,SLOT(set_updateDates(bool)));
+    connect(updateFrom,SIGNAL(dateChanged(QDate)),this,SLOT(set_workoutModel(QDate)));
+    connect(updateTo,SIGNAL(dateChanged(QDate)),this,SLOT(set_workoutModel(QDate)));
+    connect(updateOk,SIGNAL(clicked(bool)),this,SLOT(update_workouts()));
+
     this->resetAxis();
 }
 
 Dialog_workCreator::~Dialog_workCreator()
 {
-    delete metaProxy;
-    delete stepProxy;
-    delete schedProxy;
-    delete proxyFilter;
-    delete plotModel;
-    delete valueModel;
-    delete listModel;
+    delete workouts_meta;
+    delete workouts_steps;
     delete ui;
 }
 
@@ -98,6 +218,7 @@ void Dialog_workCreator::set_controlButtons(bool setButton)
     ui->pushButton_clear->setEnabled(setButton);
     ui->toolButton_save->setEnabled(setButton);
     ui->toolButton_delete->setEnabled(setButton);
+    ui->pushButton_sync->setEnabled(setButton);
     ui->comboBox_code->setEnabled(setButton);
 }
 
@@ -107,9 +228,7 @@ void Dialog_workCreator::get_workouts(QString sport)
     bool timeBased;
     workoutMap.clear();
     listModel->clear();
-    metaProxy->invalidate();
-    metaProxy->setFilterFixedString(sport);
-    metaProxy->setFilterKeyColumn(0);
+    this->set_metaFilter(sport,0,true);
 
     schedProxy->invalidate();
     schedProxy->setFilterFixedString(sport);
@@ -131,14 +250,33 @@ void Dialog_workCreator::get_workouts(QString sport)
     }
     listModel->sort(0);
 
-    ui->listView_workouts->setModel(listModel);
-    ui->listView_workouts->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->listView_workouts->setItemDelegate(&mousehover_del);
+    ui->label_workouts->setText("Workouts: "+QString::number(metaProxy->rowCount()));
 
     QColor sportColor = settings::get_itemColor(sport);
     QString sportBack = "rgb("+QString::number(sportColor.red())+","+QString::number(sportColor.green())+","+QString::number(sportColor.blue())+",35%)";
     QString actBackground = "background: "+sportBack;
     ui->listView_workouts->setStyleSheet(actBackground);
+}
+
+QString Dialog_workCreator::get_workoutTime(double time)
+{
+    QString worktime;
+
+    if(isAlt || isStrength)
+    {
+        worktime = this->set_time(static_cast<int>(time));
+    }
+    else
+    {
+        worktime = this->set_time(static_cast<int>(ceil(time/60.0)*60));
+    }
+
+    if(worktime.length() == 5)
+    {
+        worktime = "00:"+worktime;
+    }
+
+    return worktime;
 }
 
 void Dialog_workCreator::open_stdWorkout(QString workID)
@@ -150,11 +288,15 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     QStringList valueList;
     QString parentItem,partName,thresValue,stepTime,empty = "";
     int tempID = 0;
-    double percent;
-    double currDist;
+    double percent = 0;
+    double currDist = 0;
     double pValue = 0;
+    double workFactor = 1.0;
+
+    int usePM = 0;
 
     bool timeBase = ui->checkBox_timebased->isChecked();
+    edit_del.timeBased = timeBase;
     stepProxy->setFilterRegExp("\\b"+workID+"\\b");
     stepProxy->setFilterKeyColumn(0);
 
@@ -162,9 +304,11 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     {
         valueList.clear();
         partName = stepProxy->data(stepProxy->index(i,2)).toString();
+
         if(partName.contains(isGroup) || partName.contains(isSeries))
         {
             valueList << stepProxy->data(stepProxy->index(i,2)).toString()
+                      << empty
                       << empty
                       << empty
                       << empty
@@ -176,41 +320,43 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
         }
         else
         {
-            percent = stepProxy->data(stepProxy->index(i,4)).toDouble();
-            thresValue = this->calc_threshold(currentSport,currThres,percent);
+            percent = stepProxy->data(stepProxy->index(i,4)).toDouble();         
             stepTime = stepProxy->data(stepProxy->index(i,5)).toString();
-            currDist = this->calc_distance(stepTime,this->get_timesec(thresValue));
 
             if(isBike)
             {
-                pValue = currThres * (percent/100.0);
+                usePM = thresValues->value("bikepm");
+                pValue = this->calc_thresPower(thresPower,percent);
+                thresValue = QString::number(this->calc_thresPower(thresPower,percent));
 
                 if(timeBase)
                 {
-                    currDist = this->calc_distance(stepTime,this->get_timesec(this->threstopace(thresPace,percent)));
+                    currDist = this->calc_distance(stepTime,3600.0/this->wattToSpeed(thresPower,thresSpeed,pValue));
                 }
                 else
                 {
                     currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
-                    stepTime = this->calc_duration(currentSport,currDist,thresValue);
+                    stepTime = this->calc_duration(currentSport,currDist,this->calc_thresPace(thresPace,percent));
                 }
             }
             else if(isRun)
             {
-                if(!timeBase)
-                {
-                    currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
-                    stepTime = this->calc_duration(currentSport,currDist,thresValue);
-                }
+                usePM = thresValues->value("runpm");
+                thresValue = this->calc_thresPace(thresPace,percent);
                 pValue = 3600.0 / this->get_timesec(thresValue);
+                //currDist = this->calc_distance(stepTime,this->get_timesec(thresValue));
+                currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
+                stepTime = this->calc_duration(currentSport,currDist,this->calc_thresPace(thresPace,percent));
             }
             else if(isSwim)
             {
+                usePM = thresValues->value("swimpm");
+                thresValue = this->calc_thresPace(thresPace,percent);
                 currDist = stepProxy->data(stepProxy->index(i,6)).toDouble();
                 if(!partName.contains(isBreak))
                 {
                     tempID = 6;
-                    stepTime = this->calc_duration(currentSport,currDist,thresValue);
+                    if(!timeBase) stepTime = this->calc_duration(currentSport,currDist,thresValue);
                     pValue = this->get_timesec(thresValue);
                 }
                 else
@@ -218,27 +364,32 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
                     tempID = 0;
                     pValue = 0.0;
                 }
+                if(timeBase)
+                {
+                    editRow[4] = 1;
+                    workFactor = generalValues->value("workfactor").toDouble();
+                }
             }
-            else if(isStrength)
+            else if(isStrength || isAlt)
             {
-                pValue = percent / 20.0;
-            }
-            else if(isAlt)
-            {
+                usePM = 1;
+                thresValue = QString::number(this->calc_thresPower(thresPower,percent));
                 pValue = percent / 10.0;
             }
             else
             {
-
+                thresValue = QString::number(this->calc_thresPower(thresPower,percent));
+                pValue = 1.0;
             }
 
             valueList << stepProxy->data(stepProxy->index(i,2)).toString()
                       << stepProxy->data(stepProxy->index(i,3)).toString()
                       << QString::number(percent)
-                      << thresValue
+                      << this->calc_thresPace(thresPace,percent)
+                      << QString::number(round(thresPower* (percent/100.0)))
                       << stepTime
-                      << QString::number(this->estimate_stress(ui->comboBox_sport->currentText(),thresValue,this->get_timesec(stepTime)))
-                      << QString::number(this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(stepTime),tempID),false))
+                      << QString::number(this->estimate_stress(ui->comboBox_sport->currentText(),thresValue,this->get_timesec(stepTime),usePM))
+                      << QString::number(this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(stepTime),tempID)*workFactor,false))
                       << QString::number(this->set_doubleValue(currDist,true))
                       << stepProxy->data(stepProxy->index(i,7)).toString();
         }
@@ -263,19 +414,20 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
     clearFlag = false;
     this->set_controlButtons(true);
     ui->toolButton_copy->setEnabled(false);
+    if(proxyFilter->rowCount() == 0) ui->pushButton_sync->setEnabled(false);
     ui->treeWidget_intervall->setCurrentItem(ui->treeWidget_intervall->topLevelItem(0));
 }
-void Dialog_workCreator::save_workout(bool updateSchedule)
+
+void Dialog_workCreator::save_workout()
 {
     int counter = 1;
     int workcounter;
-    QString workID,sport,phase,subphase,worktime,currWorkID;
+    QString workID,sport,phase,subphase,currWorkID;
     QStringList workoutValues,existWorkIDs,sportWorkIDs;
     sport = ui->comboBox_sport->currentText();
     QTreeWidgetItem *currentItem;
     QStandardItemModel *workModel;
-    metaProxy->setFilterFixedString(sport);
-    metaProxy->setFilterKeyColumn(0);
+    this->set_metaFilter(sport,0,true);
 
     existWorkIDs = this->get_workoutIds();
 
@@ -286,15 +438,6 @@ void Dialog_workCreator::save_workout(bool updateSchedule)
         {
             sportWorkIDs << currWorkID;
         }
-    }
-
-    if(isAlt || isStrength)
-    {
-        worktime = this->set_time(static_cast<int>(timeSum));
-    }
-    else
-    {
-        worktime = this->set_time(static_cast<int>(ceil(timeSum/60.0)*60));
     }
 
     //Update Workout -> delete first
@@ -320,38 +463,36 @@ void Dialog_workCreator::save_workout(bool updateSchedule)
         workID = currentWorkID;
     }
 
-    if(worktime.length() == 5)
-    {
-        worktime = "00:"+worktime;
-    }
-
     //Metadaten
+
+    int roundNum = static_cast<int>(round(workSum)) % 10;
+
+    if(roundNum <= 2)
+    {
+        workSum = round(workSum - roundNum);
+    }
+    else if(roundNum > 2 && roundNum < 8)
+    {
+        workSum = static_cast<int>(round(workSum) + 5-roundNum);
+    }
+    else if(roundNum >= 8)
+    {
+        workSum = round(workSum + (10-roundNum));
+    }
+    workModel = this->workouts_meta;
+
     workoutValues << currentSport
                   << workID
                   << ui->comboBox_code->currentText()
                   << ui->lineEdit_workoutname->text()
-                  << worktime
+                  << get_workoutTime(timeSum)
                   << QString::number(distSum)
                   << QString::number(round(stressSum))
-                  << QString::number(round(workSum/10.0)*10)
-                  << QString::number(ui->checkBox_timebased->isChecked());
+                  << QString::number(workSum)
+                  << QString::number(ui->checkBox_timebased->isChecked())
+                  << ui->label_picName->text();
 
-     workModel = this->workouts_meta;
      this->save_workout_values(workoutValues,workModel);
-
-     if(updateSchedule)
-     {
-         worksched->set_isUpdated(updateSchedule);
-         for(int i = 0; i < proxyFilter->rowCount(); ++i)
-         {
-             proxyFilter->setData(proxyFilter->index(i,4),ui->comboBox_code->currentText());        //code
-             proxyFilter->setData(proxyFilter->index(i,5),ui->lineEdit_workoutname->text());        //title
-             proxyFilter->setData(proxyFilter->index(i,6),worktime);                                //duration
-             proxyFilter->setData(proxyFilter->index(i,7),QString::number(distSum));                //distance
-             proxyFilter->setData(proxyFilter->index(i,8),QString::number(round(stressSum)));       //stress
-             proxyFilter->setData(proxyFilter->index(i,9),QString::number(round(workSum/10.0)*10)); //kj
-         }
-     }
 
     //Intervalldaten
      workModel = this->workouts_steps;
@@ -368,9 +509,9 @@ void Dialog_workCreator::save_workout(bool updateSchedule)
                   << get_treeValue(c_item,0,0,0,0)   //part
                   << get_treeValue(c_item,0,0,1,0)   //level
                   << get_treeValue(c_item,0,0,2,0)   //threshold
-                  << get_treeValue(c_item,0,0,4,0)   //time
-                  << get_treeValue(c_item,0,0,7,0)   //dist
-                  << get_treeValue(c_item,0,0,8,0)   //repeats
+                  << get_treeValue(c_item,0,0,5,0)   //time
+                  << get_treeValue(c_item,0,0,8,0)   //dist
+                  << get_treeValue(c_item,0,0,9,0)   //repeats
                   << "-";
          this->save_workout_values(workoutValues,workModel);
 
@@ -385,9 +526,9 @@ void Dialog_workCreator::save_workout(bool updateSchedule)
                           << get_treeValue(c_item,c_child,0,0,1)
                           << get_treeValue(c_item,c_child,0,1,1)
                           << get_treeValue(c_item,c_child,0,2,1)
-                          << get_treeValue(c_item,c_child,0,4,1)
-                          << get_treeValue(c_item,c_child,0,7,1)
+                          << get_treeValue(c_item,c_child,0,5,1)
                           << get_treeValue(c_item,c_child,0,8,1)
+                          << get_treeValue(c_item,c_child,0,9,1)
                           << phase;
 
                  this->save_workout_values(workoutValues,workModel);
@@ -404,9 +545,9 @@ void Dialog_workCreator::save_workout(bool updateSchedule)
                                   << get_treeValue(c_item,c_child,subchild,0,2)
                                   << get_treeValue(c_item,c_child,subchild,1,2)
                                   << get_treeValue(c_item,c_child,subchild,2,2)
-                                  << get_treeValue(c_item,c_child,subchild,4,2)
-                                  << get_treeValue(c_item,c_child,subchild,7,2)
+                                  << get_treeValue(c_item,c_child,subchild,5,2)
                                   << get_treeValue(c_item,c_child,subchild,8,2)
+                                  << get_treeValue(c_item,c_child,subchild,9,2)
                                   << subphase;
 
                          this->save_workout_values(workoutValues,workModel);
@@ -444,7 +585,6 @@ void Dialog_workCreator::on_treeWidget_intervall_itemChanged(QTreeWidgetItem *it
             this->set_defaultData(item,true);
         }
     }
-    //ui->pushButton_clear->setEnabled(true);
     this->set_controlButtons(true);
 }
 
@@ -452,19 +592,21 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
 {
     currentItem = item;
     QString defaultTime = "05:00";
+    int usePM = 0;
     int level = 1;
     int tempID = 0;
     double pValue = 0;
     double defaultDist = 0.0;
     double percent = this->get_thresPercent(currentSport,levelList.at(level),false);
-    QString threshold = this->calc_threshold(currentSport,currThres,percent);
+    QString thresValue = this->calc_thresPace(thresPace,percent);
 
     if(isSwim)
     {
+        usePM = thresValues->value("swimpm");
         if(item->data(0,Qt::DisplayRole).toString() == isBreak)
         {
             defaultDist = percent = 0.0;
-            threshold = "00:00";
+            thresValue = "00:00";
             defaultTime = "00:30";
             level = 0;
             tempID = 0;
@@ -473,23 +615,26 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
         else
         {
             defaultDist = 0.1;
-            defaultTime = this->calc_duration(currentSport,defaultDist,threshold);
+            defaultTime = this->calc_duration(currentSport,defaultDist,thresValue);
             tempID = 6;
-            pValue = this->get_timesec(threshold);
+            pValue = this->get_timesec(thresValue);
         }
     }
-    else if (isBike || isRun)
+    else if (isBike)
     {
+        usePM = thresValues->value("bikepm");
+        pValue = calc_thresPower(thresPower,percent);
+        defaultDist = this->calc_distance(defaultTime,3600.0/this->wattToSpeed(thresPower,thresSpeed,pValue));
+    }
+    else if(isRun)
+    {
+        usePM = thresValues->value("runpm");
         defaultDist = this->calc_distance(defaultTime,static_cast<double>(this->get_timesec(threstopace(thresPace,percent))));
-        if(isBike) pValue = threshold.toDouble();
-        if(isRun) pValue = get_speed(QTime::fromString(threshold,"mm:ss"),0,currentSport,true);
+        pValue = get_speed(QTime::fromString(calc_thresPace(thresPace,percent),"mm:ss"),0,currentSport,true);
     }
-    else if(isStrength)
+    else if(isStrength || isAlt)
     {
-        pValue = percent / 20.0;
-    }
-    else if(isAlt)
-    {
+        usePM = 1;
         pValue = percent / 10.0;
     }
 
@@ -497,12 +642,13 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
     {
         item->setData(1,Qt::EditRole,levelList.at(level));
         item->setData(2,Qt::EditRole,percent);
-        item->setData(3,Qt::EditRole,threshold);
-        item->setData(4,Qt::EditRole,defaultTime);
-        item->setData(5,Qt::EditRole,this->estimate_stress(currentSport,threshold,this->get_timesec(defaultTime)));
-        item->setData(6,Qt::EditRole,this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(defaultTime),tempID),false));
-        item->setData(7,Qt::EditRole,defaultDist);
-        item->setData(8,Qt::EditRole,"");
+        item->setData(3,Qt::EditRole,thresValue);
+        item->setData(4,Qt::EditRole,QString::number(round(thresPower* (percent/100.0))));
+        item->setData(5,Qt::EditRole,defaultTime);
+        item->setData(6,Qt::EditRole,this->estimate_stress(currentSport,thresValue,this->get_timesec(defaultTime),usePM));
+        item->setData(7,Qt::EditRole,this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_timesec(defaultTime),tempID),false));
+        item->setData(8,Qt::EditRole,defaultDist);
+        item->setData(9,Qt::EditRole,"");
     }
     else
     {
@@ -510,7 +656,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
         QList<QTreeWidgetItem*> groupCount = ui->treeWidget_intervall->findItems(itemName,Qt::MatchRecursive | Qt::MatchContains,0);
         itemName = itemName +"-"+QString::number(groupCount.count());
         item->setData(0,Qt::EditRole,itemName);
-        item->setData(8,Qt::EditRole,2);
+        item->setData(9,Qt::EditRole,2);
     }
     ui->treeWidget_intervall->expandAll();
     ui->treeWidget_intervall->setTreePosition(-1);
@@ -531,7 +677,7 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
         edit_del.hasValue = false;
         valueModel->setData(valueModel->index(0,0,QModelIndex()),item->data(0,Qt::DisplayRole));
         valueModel->setData(valueModel->index(0,2,QModelIndex()),true);
-        valueModel->setData(valueModel->index(1,0,QModelIndex()),item->data(8,Qt::DisplayRole));
+        valueModel->setData(valueModel->index(1,0,QModelIndex()),item->data(9,Qt::DisplayRole));
         valueModel->setData(valueModel->index(1,2,QModelIndex()),true);
     }
     else
@@ -548,21 +694,21 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
 
         if(isBike)
         {
-            valueModel->setData(valueModel->index(8,0,QModelIndex()),this->calc_lapSpeed(currentSport,get_timesec(threstopace(thresPace,item->data(2,Qt::DisplayRole).toDouble()))));
+            valueModel->setData(valueModel->index(9,0,QModelIndex()),set_doubleValue(this->wattToSpeed(thresPower,thresSpeed,item->data(4,Qt::DisplayRole).toDouble()),true));
         }
         else
         {
             if(item->data(2,Qt::DisplayRole).toInt() > 0)
             {
-                valueModel->setData(valueModel->index(8,0,QModelIndex()),this->calc_lapSpeed(currentSport,static_cast<double>(this->get_timesec(item->data(3,Qt::DisplayRole).toString()))));
+                valueModel->setData(valueModel->index(9,0,QModelIndex()),this->calc_lapSpeed(currentSport,static_cast<double>(this->get_timesec(item->data(3,Qt::DisplayRole).toString()))));
             }
             else
             {
-                if(isSwim && item->data(0,Qt::DisplayRole) == settings::get_generalValue("breakname"))
+                if(isSwim && item->data(0,Qt::DisplayRole) == generalValues->value("breakname"))
                 {
-                    valueModel->setData(valueModel->index(4,2),true);
+                    valueModel->setData(valueModel->index(5,2),true);
                 }
-                valueModel->setData(valueModel->index(8,0,QModelIndex()),"0 km/h");
+                valueModel->setData(valueModel->index(9,0,QModelIndex()),"0 km/h");
             }
         }
         edit_del.hasValue = true;
@@ -577,7 +723,7 @@ void Dialog_workCreator::set_itemData(QTreeWidgetItem *item)
     if(itemIdent.contains(isGroup) || itemIdent.contains(isSeries))
     {
         item->setData(0,Qt::EditRole,valueModel->data(valueModel->index(0,0)));
-        item->setData(8,Qt::EditRole,valueModel->data(valueModel->index(1,0)));
+        item->setData(9,Qt::EditRole,valueModel->data(valueModel->index(1,0)));
     }
     else
     {
@@ -585,7 +731,7 @@ void Dialog_workCreator::set_itemData(QTreeWidgetItem *item)
         {
             item->setData(i,Qt::EditRole,valueModel->data(valueModel->index(i,0)));
         }
-        item->setData(8,Qt::EditRole,"");
+        item->setData(9,Qt::EditRole,"");
     }
 }
 
@@ -628,6 +774,7 @@ void Dialog_workCreator::clearIntTree()
     ui->listView_workouts->clearSelection();
     ui->listWidget_group->clearSelection();
     ui->listWidget_phases->clearSelection();
+    ui->pushButton_sync->setText(" - 0");
     this->resetAxis();
 }
 
@@ -658,7 +805,7 @@ void Dialog_workCreator::set_plotModel()
         {
             if(phase.contains(isGroup))
             {
-                groupReps = topItem->data(8,Qt::DisplayRole).toInt();
+                groupReps = topItem->data(9,Qt::DisplayRole).toInt();
 
                 for(int repeat = 0; repeat < groupReps; ++repeat)
                 {
@@ -674,7 +821,7 @@ void Dialog_workCreator::set_plotModel()
                         {
                             if(subphase.contains(isSeries))
                             {
-                                seriesReps = childItem->data(8,Qt::DisplayRole).toInt();
+                                seriesReps = childItem->data(9,Qt::DisplayRole).toInt();
                                 for(int repeat = 0; repeat < seriesReps; ++repeat)
                                 {
                                     for(int subChild = 0; subChild < subchildCount; ++subChild)
@@ -696,7 +843,7 @@ void Dialog_workCreator::set_plotModel()
             }
             else if(phase.contains(isSeries))
             {
-                seriesReps = topItem->data(8,Qt::DisplayRole).toInt();
+                seriesReps = topItem->data(9,Qt::DisplayRole).toInt();
 
                 for(int repeat = 0; repeat < seriesReps; ++repeat)
                 {
@@ -747,10 +894,10 @@ void Dialog_workCreator::add_to_plot(QTreeWidgetItem *item,int currIndex)
     plotModel->setData(plotModel->index(row,4,QModelIndex()),workSum);
 
     plotModel->setData(plotModel->index(row+1,0,QModelIndex()),item->data(2,Qt::DisplayRole).toDouble());
-    plotModel->setData(plotModel->index(row+1,1,QModelIndex()),timeSum + (this->get_timesec(item->data(4,Qt::DisplayRole).toString())));
-    plotModel->setData(plotModel->index(row+1,2,QModelIndex()),distSum + item->data(7,Qt::DisplayRole).toDouble());
-    plotModel->setData(plotModel->index(row+1,3,QModelIndex()),stressSum + item->data(5,Qt::DisplayRole).toDouble());
-    plotModel->setData(plotModel->index(row+1,4,QModelIndex()),workSum + item->data(6,Qt::DisplayRole).toDouble());
+    plotModel->setData(plotModel->index(row+1,1,QModelIndex()),timeSum + (this->get_timesec(item->data(5,Qt::DisplayRole).toString())));
+    plotModel->setData(plotModel->index(row+1,2,QModelIndex()),distSum + item->data(8,Qt::DisplayRole).toDouble());
+    plotModel->setData(plotModel->index(row+1,3,QModelIndex()),stressSum + item->data(6,Qt::DisplayRole).toDouble());
+    plotModel->setData(plotModel->index(row+1,4,QModelIndex()),workSum + item->data(7,Qt::DisplayRole).toDouble());
 
     if(item->parent() == nullptr)
     {
@@ -778,7 +925,7 @@ void Dialog_workCreator::set_plotGraphic(int dataPoints)
     double timeRange = 0;
 
     ui->widget_plot->setInteractions(QCP::iSelectPlottables | QCP::iMultiSelect);
-    QCPSelectionDecorator *lineDec = new QCPSelectionDecorator;
+    QCPSelectionDecorator *lineDec = new QCPSelectionDecorator();
     lineDec->setPen(QPen(QColor(255,0,0)));
     lineDec->setBrush(QColor(255,0,0,50));
     QCPGraph *workout_line = ui->widget_plot->addGraph();
@@ -848,7 +995,7 @@ void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
         {
             groupRange = true;
             int childCount,groupCount;
-            dataCount = groupCount = item->data(8,Qt::DisplayRole).toInt()*2;
+            dataCount = groupCount = item->data(9,Qt::DisplayRole).toInt()*2;
             childCount = item->childCount();
             if(childCount > 0)
             {
@@ -858,7 +1005,7 @@ void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
                     if(item->child(i)->childCount() > 0)
                     {
                         int subCount = item->child(i)->childCount();
-                        dataCount = dataCount*(subCount*item->child(i)->data(8,Qt::DisplayRole).toInt());
+                        dataCount = dataCount*(subCount*item->child(i)->data(9,Qt::DisplayRole).toInt());
                     }
                     else
                     {
@@ -905,6 +1052,7 @@ void Dialog_workCreator::set_selectData(QTreeWidgetItem *item)
         }
     }
 
+    delete plotProxy;
     graph->setSelection(selection);
     ui->widget_plot->replot();
 }
@@ -930,7 +1078,6 @@ void Dialog_workCreator::on_treeWidget_intervall_itemClicked(QTreeWidgetItem *it
 void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &sport)
 {
     currentSport = sport;
-
     isSwim = isBike = isRun = isStrength = isAlt = isOther = false;
 
     if(currentSport == settings::isSwim) isSwim = true;
@@ -940,79 +1087,93 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
     if(currentSport == settings::isAlt) isAlt = true;
     if(currentSport == settings::isOther) isOther = true;
 
-    edit_del.sport = sport;
-    this->clearIntTree();
+    QString postFix;
+    int usePM = 0;
 
     if(isOther)
     {
         thresPace = 0;
         thresPower = 0.0;
         ui->label_threshold->setText("-");
-        currThres = thresPower;
-
         editRow[2] = 0;
-        editRow[4] = 1;
-        editRow[7] = 1;
+        editRow[5] = 1;
+        editRow[8] = 1;
     }
     if(isSwim)
     {
-       thresPower = settings::get_thresValue("swimpower");
-       thresPace = settings::get_thresValue("swimpace");
-       ui->label_threshold->setText(this->set_time(thresPace) + " /100m");
-       currThres = thresPace;
-
+       usePM = thresValues->value("swimpm");
+       thresPower = thresValues->value("swimpower");
+       thresPace = thresValues->value("swimpace");
+       postFix = "/100m";
        editRow[2] = 1;
-       editRow[4] = 0;
-       editRow[7] = 1;
+       editRow[5] = 0;
+       editRow[8] = 1;
     }
     if(isBike)
     {
-       thresPower = settings::get_thresValue("bikepower");
-       thresPace = settings::get_thresValue("bikepace");
-       ui->label_threshold->setText(QString::number(thresPower) + " Watt");
-       currThres = thresPower;
-
+       usePM = thresValues->value("bikepm");
+       thresPower = thresValues->value("bikepower");
+       thresPace = thresValues->value("bikepace");
+       thresSpeed = thresValues->value("bikespeed");
+       postFix = " Watt";
        editRow[2] = 1;
-       editRow[4] = 1;
-       editRow[7] = 1;
+       editRow[5] = 1;
+       editRow[8] = 1;
     }
     if(isRun)
     {
-       thresPower = settings::get_thresValue("runpower");
-       thresPace = settings::get_thresValue("runpace");
-       ui->label_threshold->setText(this->set_time(thresPace) + " /km");
-       currThres = thresPace;
+       postFix = "/km";
+       thresPace = thresValues->value("runpace");
 
+       if(thresValues->value("runpm") == 0)
+       {
+           thresPower = thresValues->value("runpower");
+       }
+       else
+       {
+           thresPower = thresValues->value("runcp");
+       }
+       usePM = 0;
        editRow[2] = 1;
-       editRow[4] = 1;
-       editRow[7] = 1;
+       editRow[5] = 1;
+       editRow[8] = 1;
     }
     if(isStrength)
     {
-       thresPower = settings::get_thresValue("stgpower");
+       usePM = 1;
+       thresPower = thresValues->value("stgpower");
        thresPace = 0;
-       ui->label_threshold->setText(QString::number(thresPower) + " Watt");
-       currThres = thresPower;
-
+       postFix = " Watt";
        editRow[2] = 1;
-       editRow[4] = 1;
-       editRow[7] = 1;
+       editRow[5] = 1;
+       editRow[8] = 1;
     }
     if(isAlt)
     {
-       thresPower = settings::get_thresValue("runpower");
+       usePM = 1;
+       thresPower = thresValues->value("runpower");
        thresPace = 0;
-       ui->label_threshold->setText(QString::number(thresPower) + " Watt");
-       currThres = thresPower;
-
+       postFix = " Watt";
        editRow[2] = 1;
-       editRow[4] = 1;
-       editRow[7] = 0;
+       editRow[5] = 1;
+       editRow[8] = 0;
     }
 
-    edit_del.currThres = currThres;
-    edit_del.thresPace = thresPace;
+    if(usePM == 0)
+    {
+        ui->label_threshold->setText(this->set_time(thresPace) + postFix);
+    }
+    else
+    {
+        ui->label_threshold->setText(QString::number(thresPower) + postFix);
+    }
 
+    edit_del.thresPower = thresPower;
+    edit_del.thresPace = thresPace;
+    edit_del.thresSpeed = thresSpeed;
+
+    edit_del.sport = sport;
+    this->clearIntTree();
     this->get_workouts(sport);
 }
 
@@ -1024,9 +1185,13 @@ void Dialog_workCreator::on_listView_workouts_clicked(const QModelIndex &index)
     QString workTitle = workoutTitle.last();
     currentWorkID = workoutID;
     proxyFilter->invalidate();
-    proxyFilter->setFilterFixedString(workoutID);
+    proxyFilter->setFilterRegExp("\\b"+workoutID+"\\b");
     proxyFilter->setFilterKeyColumn(10);
 
+    this->set_metaFilter(currentWorkID,1,false);
+    ui->label_picName->setText(metaProxy->data(metaProxy->index(0,9)).toString());
+
+    ui->pushButton_sync->setText(" - "+QString::number(proxyFilter->rowCount()));
     ui->comboBox_code->setCurrentText(workCode.replace(" ",""));
     ui->lineEdit_workoutname->setText(workTitle.replace(" ",""));
     ui->checkBox_timebased->setChecked(listModel->data(listModel->index(index.row(),2)).toBool());
@@ -1078,9 +1243,9 @@ void Dialog_workCreator::on_toolButton_remove_clicked()
         delete deleteItem;
         currentItem = ui->treeWidget_intervall->currentItem();
         this->show_editItem(currentItem);
+        ui->treeWidget_intervall->setCurrentItem(currentItem);
     }
     this->set_plotModel();
-    ui->treeWidget_intervall->setCurrentItem(currentItem);
 }
 
 QTreeWidgetItem* Dialog_workCreator::move_item(bool up, QTreeWidgetItem *currentItem)
@@ -1210,27 +1375,8 @@ void Dialog_workCreator::control_editPanel(bool setedit)
 
 void Dialog_workCreator::on_toolButton_save_clicked()
 {
-    int rowCount = proxyFilter->rowCount();
 
-    if(rowCount > 0)
-    {
-
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this,"Update Workout Schedule","Update "+QString::number(rowCount)+" connected Workouts in schedule?",QMessageBox::Yes|QMessageBox::No);
-
-        if (reply == QMessageBox::Yes)
-        {
-            this->save_workout(true);
-        }
-        else
-        {
-            this->save_workout(false);
-        }
-    }
-    else
-    {
-        this->save_workout(false);
-    }
+    this->save_workout();
 
     ui->toolButton_delete->setEnabled(true);
     ui->toolButton_save->setEnabled(false);
@@ -1239,7 +1385,7 @@ void Dialog_workCreator::on_toolButton_save_clicked()
 void Dialog_workCreator::on_toolButton_copy_clicked()
 {
     currentWorkID = QString();
-    this->save_workout(false);
+    this->save_workout();
     ui->toolButton_copy->setEnabled(false);
 }
 
@@ -1295,5 +1441,152 @@ void Dialog_workCreator::on_toolButton_close_clicked()
     {
         reject();
     }
+}
 
+void Dialog_workCreator::set_workoutModel(QDate cDate)
+{
+    Q_UNUSED(cDate)
+    QDate workDate;
+    workoutModel->clear();
+    workoutModel->setColumnCount(2);
+    bool dateRange = updateRange->isChecked();
+    int x = 0;
+
+    for(int i = 0; i < proxyFilter->rowCount(); ++i)
+    {
+        workDate = QDate::fromString(proxyFilter->data(proxyFilter->index(i,1)).toString(),"dd.MM.yyyy");
+
+        if(workDate.operator >(QDate::currentDate()))
+        {
+            if(dateRange)
+            {
+                if(workDate.operator >=(updateFrom->date()) && workDate.operator <=(updateTo->date()))
+                {
+                    workoutModel->insertRow(workoutModel->rowCount());
+                    workoutModel->setData(workoutModel->index(x,0),proxyFilter->data(proxyFilter->index(i,1)).toString()+"-"+
+                                                                   proxyFilter->data(proxyFilter->index(i,4)).toString());
+                    workoutModel->setData(workoutModel->index(x,1),workDate);
+                    ++x;
+                }
+            }
+            else
+            {
+                workoutModel->insertRow(x);
+                workoutModel->setData(workoutModel->index(x,0),proxyFilter->data(proxyFilter->index(i,1)).toString()+"-"+
+                                                               proxyFilter->data(proxyFilter->index(i,4)).toString());
+                workoutModel->setData(workoutModel->index(x,1),workDate);
+                ++x;
+            }
+        }
+    }
+    workoutModel->sort(1);
+    updateProgess->setMaximum(x);
+}
+
+void Dialog_workCreator::on_pushButton_sync_clicked()
+{
+    this->set_workoutModel(QDate());
+    QDate timeRange = workoutModel->data(workoutModel->index(workoutModel->rowCount()-1,1)).toDate();
+    updateFrom->setDate(QDate::currentDate());
+    updateFrom->setDateRange(QDate::currentDate(),timeRange);
+    updateTo->setDate(timeRange);
+    updateTo->setDateRange(QDate::currentDate(),timeRange);
+
+    updateDialog->exec();
+}
+
+void Dialog_workCreator::update_workouts()
+{
+    QPair<double,double> stressMap;
+
+    QDate wDate;
+    double stressValue = 0;
+    double duraValue = 0;
+    int progress = 0;
+
+    for(int i = 0; i < proxyFilter->rowCount(); ++i)
+    {
+        wDate = QDate::fromString(proxyFilter->data(proxyFilter->index(i,1)).toString(),"dd.MM.yyyy");
+        if(wDate.operator >(QDate::currentDate()))
+        {
+            stressValue = proxyFilter->data(proxyFilter->index(i,8)).toDouble();
+            duraValue = proxyFilter->data(proxyFilter->index(i,7)).toDouble();
+            stressValue = (worksched->stressValues.value(wDate).first - stressValue)+round(stressSum);
+            duraValue = (worksched->stressValues.value(wDate).second - duraValue)+distSum;
+            stressMap.first = stressValue;
+            stressMap.second = duraValue;
+
+            if(updateAll->isChecked())
+            {
+                this->update_workoutsSchedule(i,wDate,stressMap,++progress);
+            }
+            else
+            {
+                if(wDate.operator >=(updateFrom->date()) && wDate.operator <=(updateTo->date()))
+                {
+                    this->update_workoutsSchedule(i,wDate,stressMap,++progress);
+                }
+            }
+
+        }
+    }
+    worksched->set_isUpdated(true);
+    QTimer::singleShot(2000,updateProgess,SLOT(reset()));
+}
+
+
+void Dialog_workCreator::update_workoutsSchedule(int index,QDate wDate, QPair<double, double> stressMap,int progress)
+{
+    worksched->stressValues.insert(wDate,qMakePair(stressMap.first,stressMap.second));
+    proxyFilter->setData(proxyFilter->index(index,4),ui->comboBox_code->currentText());        //code
+    proxyFilter->setData(proxyFilter->index(index,5),ui->lineEdit_workoutname->text());        //title
+    proxyFilter->setData(proxyFilter->index(index,6),get_workoutTime(timeSum));                //duration
+    proxyFilter->setData(proxyFilter->index(index,7),QString::number(distSum));                //distance
+    proxyFilter->setData(proxyFilter->index(index,8),QString::number(round(stressSum)));       //stress
+    proxyFilter->setData(proxyFilter->index(index,9),QString::number(round(workSum)));                 //kj
+    updateProgess->setValue(progress);
+}
+
+void Dialog_workCreator::set_metaFilter(QString filterTo, int col, bool fixString)
+{
+    metaProxy->invalidate();
+
+    if(fixString)
+    {
+        metaProxy->setFilterFixedString(filterTo);
+    }
+    else
+    {
+        metaProxy->setFilterRegExp("\\b"+filterTo+"\\b");
+    }
+
+    metaProxy->setFilterKeyColumn(col);
+}
+
+
+void Dialog_workCreator::set_updateDates(bool pAll)
+{
+    updateTo->setEnabled(!pAll);
+    updateFrom->setEnabled(!pAll);
+    this->set_workoutModel(QDate());
+}
+
+void Dialog_workCreator::on_checkBox_timebased_clicked(bool checked)
+{
+    if(checked)
+    {
+        editRow[4] = 1;
+    }
+    edit_del.timeBased = checked;
+}
+
+void Dialog_workCreator::on_toolButton_map_clicked()
+{
+    this->set_metaFilter(currentWorkID,1,false);
+    QString image = metaProxy->data(metaProxy->index(0,9)).toString();
+
+    Dialog_map dialogMap(this,metaProxy,currentWorkID,image);
+    dialogMap.setModal(true);
+    dialogMap.exec();
+    ui->label_picName->setText(metaProxy->data(metaProxy->index(0,9)).toString());
 }

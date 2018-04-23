@@ -54,10 +54,10 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
 
     editMode = 0;
     saveweekFile = "workout_saveweek.xml";
-    schedulePath = settings::get_gcInfo("schedule");
+    schedulePath = gcValues->value("schedule");
     weekTags << "id" << "weekday" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj";
-    saveWeekModel = new QStandardItemModel();
-    listModel = new QStandardItemModel();
+    saveWeekModel = new QStandardItemModel(this);
+    listModel = new QStandardItemModel(this);
     saveWeekModel->setColumnCount(10);
     listModel->setColumnCount(5);
     ui->listView_weeks->setModel(listModel);
@@ -70,8 +70,6 @@ enum {COPY,CLEAR,SAVE,LOAD,DEL};
 
 Dialog_week_copy::~Dialog_week_copy()
 {
-    delete saveWeekModel;
-    delete listModel;
     delete ui;
 }
 
@@ -156,6 +154,7 @@ void Dialog_week_copy::write_weekList()
     }
     this->write_XMLFile(schedulePath,&xmlDoc,saveweekFile);
     xmlDoc.clear();
+    delete weekProxy;
 }
 
 void Dialog_week_copy::addWeek()
@@ -194,6 +193,7 @@ void Dialog_week_copy::addWeek()
         }
         workSched->updateStress(setDate,stressMap,0);
     }
+    delete workProxy;
 }
 
 void Dialog_week_copy::processWeek()
@@ -396,6 +396,8 @@ void Dialog_week_copy::on_toolButton_addweek_clicked()
     ui->lineEdit_saveas->setText("");
     ui->toolButton_addweek->setEnabled(false);
     isSaveWeek = true;
+
+    delete scheduleProxy;
 }
 
 void Dialog_week_copy::on_toolButton_delete_clicked()

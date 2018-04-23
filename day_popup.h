@@ -23,6 +23,7 @@
 #include "standardworkouts.h"
 #include "schedule.h"
 #include "settings.h"
+#include "dialog_map.h"
 #include <QtGui>
 #include <QDialog>
 #include <QSortFilterProxyModel>
@@ -287,12 +288,13 @@ private slots:
     void on_toolButton_dayEdit_clicked(bool checked);
     void on_toolButton_upload_clicked();
     void on_comboBox_stdworkout_activated(int index);
+    void on_toolButton_map_clicked();
 
 private:
     Ui::day_popup *ui;
     schedule *workSched;
     del_daypop daypop_del;
-    QStandardItemModel *dayModel,*stdlistModel, *intExport, *sampExport;
+    QStandardItemModel *dayModel,*stdlistModel,*intExport, *sampExport;
     QSortFilterProxyModel *scheduleProxy,*stdProxy;
     QHash<QString,QString> currWorkout;
     QHash<int,QString> stdworkData;
@@ -308,6 +310,7 @@ private:
     void set_controlButtons(bool);
     void set_exportContent();
     void set_result(int);
+    void set_proxyFilter(QString,int);
 
 };
 

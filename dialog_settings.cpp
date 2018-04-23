@@ -22,64 +22,89 @@
 #include <QColorDialog>
 #include <QFileDialog>
 
-Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched) :
+Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *pFood) :
     QDialog(parent),
     ui(new Ui::Dialog_settings)
 {
     ui->setupUi(this);
+
     schedule_ptr = psched;
-    saisonProxy = new QSortFilterProxyModel;
+    food_ptr = pFood;
+    saisonProxy = new QSortFilterProxyModel(this);
     saisonProxy->setSourceModel(schedule_ptr->saisonsModel);
-    contestProxy = new QSortFilterProxyModel;
+    contestProxy = new QSortFilterProxyModel(this);
     contestProxy->setSourceModel(schedule_ptr->contestModel);
-    contestTreeModel = new QStandardItemModel;
+    contestTreeModel = new QStandardItemModel(this);
     sportList << settings::isSwim << settings::isBike << settings::isRun;
-    keyList = settings::get_keyList();
-    extkeyList = settings::get_extkeyList();
     colorMapCache = settings::get_colorMap();
     useColor = false;
     stressEdit = false;
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
-    level_model = new QStandardItemModel();
-    hf_model = new QStandardItemModel();
+    level_model = new QStandardItemModel(this);
+    hf_model = new QStandardItemModel(this);
     ui->treeView_contest->setModel(contestTreeModel);
     ui->treeView_contest->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->treeView_contest->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->treeView_contest->header()->setVisible(false);
-    ui->lineEdit_gcpath->setText(settings::get_gcInfo("gcpath"));
+    ui->lineEdit_gcpath->setText(gcValues->value("gcpath"));
     ui->lineEdit_gcpath->setEnabled(false);
-    ui->lineEdit_athlete->setText(settings::get_gcInfo("athlete"));
-    ui->lineEdit_activity->setText(settings::get_gcInfo("folder"));
-    ui->lineEdit_schedule->setText(settings::get_gcInfo("schedule"));
-    ui->lineEdit_standard->setText(settings::get_gcInfo("workouts"));
-    ui->lineEdit_saisonFile->setText(settings::get_gcInfo("saisons"));
-    ui->lineEdit_configfile->setText(settings::get_gcInfo("valuefile"));
-    ui->spinBox_hfThres->setValue(settings::get_thresValue("hfthres"));
-    ui->spinBox_hfMax->setValue(settings::get_thresValue("hfmax"));
-    ui->spinBox_ltsDays->setValue(settings::get_ltsValue("ltsdays"));
-    ui->spinBox_stsDays->setValue(settings::get_ltsValue("stsdays"));
-    ui->spinBox_lastLTS->setValue(settings::get_ltsValue("lastlts"));
-    ui->spinBox_lastSTS->setValue(settings::get_ltsValue("laststs"));
+    ui->lineEdit_athlete->setText(gcValues->value("athlete"));
+    ui->lineEdit_activity->setText(gcValues->value("folder"));
+    ui->lineEdit_schedule->setText(gcValues->value("schedule"));
+    ui->lineEdit_standard->setText(gcValues->value("workouts"));
+    ui->lineEdit_saisonFile->setText(gcValues->value("saisons"));
+    ui->lineEdit_configfile->setText(gcValues->value("valuefile"));
+    ui->lineEdit_foodFile->setText(gcValues->value("foodplanner"));
+    ui->spinBox_hfThres->setValue(thresValues->value("hfthres"));
+    ui->spinBox_hfMax->setValue(thresValues->value("hfmax"));
+    ui->spinBox_ltsDays->setValue(ltsValues->value("ltsdays"));
+    ui->spinBox_stsDays->setValue(ltsValues->value("stsdays"));
+    ui->spinBox_lastLTS->setValue(ltsValues->value("lastlts"));
+    ui->spinBox_lastSTS->setValue(ltsValues->value("laststs"));
     ui->comboBox_thresSport->addItems(sportList);
+    ui->comboBox_thresBase->addItem("Pace");
+    ui->comboBox_thresBase->addItem("Power");
     ui->dateEdit_contest->setDate(QDate::currentDate());
     ui->comboBox_contestsport->addItems(settings::get_listValues("Sport"));
+    ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
+    ui->comboBox_food->addItem("Dish");
+    ui->comboBox_food->addItem("Meals");
     ui->pushButton_save->setEnabled(false);
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
+    ui->label_watttospeed->setVisible(false);
+    ui->doubleSpinBox_watttospeed->setVisible(false);
 
-    ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - settings::get_athleteValue("yob")));
+    ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - athleteValues->value("yob")));
     ui->lineEdit_weight->setText(QString::number(settings::get_weightforDate(QDateTime::currentDateTime())));
-    ui->lineEdit_currDayCal->setText(QString::number(current_dayCalories()));
-    ui->doubleSpinBox_bone->setValue(settings::get_athleteValue("boneskg"));
-    ui->doubleSpinBox_muscle->setValue(settings::get_athleteValue("musclekg"));
+    ui->lineEdit_currDayCal->setText(QString::number(current_dayCalories(QDateTime::currentDateTime())));
+    ui->doubleSpinBox_bone->setValue(athleteValues->value("boneskg"));
+    ui->doubleSpinBox_muscle->setValue(athleteValues->value("musclekg"));
+    ui->doubleSpinBox_PALvalue->setValue(athleteValues->value("currpal"));
+    ui->doubleSpinBox_max->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(0));
+    this->set_bottonColor(ui->toolButton_colormax,false);
+    ui->doubleSpinBox_high->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(1));
+    this->set_bottonColor(ui->toolButton_colorhigh,false);
+    ui->doubleSpinBox_low->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(2));
+    this->set_bottonColor(ui->toolButton_colorlow,false);
+    ui->doubleSpinBox_min->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(3));
+    this->set_bottonColor(ui->toolButton_colormin,false);
+
+    for(int i = 0; i < 7; ++i)
+    {
+       tempCheck = this->findChild<QCheckBox *>("checkBox_Work_"+QString::number(i));
+       tempCheck->setChecked(doubleMap.value("Moveday").at(i));
+    }
 
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
     ui->listWidget_stressValue->setItemDelegate(&mousehover_del);
+    ui->listWidget_food->setItemDelegate(&mousehover_del);
 
     this->refresh_saisonCombo();
     this->checkSetup();
 }
 
+enum {ADD,DEL,EDIT};
 enum {SPORT,LEVEL,PHASE,CYCLE,WCODE,JFILE,EDITOR,MISC};
 enum {SPORTUSE};
 
@@ -90,11 +115,6 @@ Dialog_settings::~Dialog_settings()
 
 void Dialog_settings::on_pushButton_cancel_clicked()
 {
-    delete level_model;
-    delete hf_model;
-    delete contestTreeModel;
-    delete saisonProxy;
-    delete contestProxy;
     reject();
 }
 
@@ -102,7 +122,6 @@ void Dialog_settings::checkSetup()
 {
     if(ui->lineEdit_athlete->text().isEmpty()) ui->pushButton_save->setEnabled(true);
 
-    listMap = settings::get_listMap();
     listMap.insert(extkeyList.at(SPORTUSE),settings::get_listValues("Sportuse"));
 
     ui->comboBox_selInfo->addItems(keyList);
@@ -111,7 +130,7 @@ void Dialog_settings::checkSetup()
     ui->toolButton_edit->setEnabled(false);
     ui->toolButton_delete->setEnabled(false);
 
-    this->set_thresholdModel(ui->comboBox_thresSport->currentText());
+    this->set_thresholdModel(ui->comboBox_thresSport->currentText(),ui->comboBox_thresBase->currentIndex());
     this->set_hfmodel(ui->spinBox_hfThres->value());
     this->set_ltsList();
     this->set_saisonInfo(ui->comboBox_saisons->currentText());
@@ -231,53 +250,73 @@ void Dialog_settings::writeChangedValues()
 {
     QString sport = ui->comboBox_thresSport->currentText();
     double paceSec = (ui->timeEdit_thresPace->time().minute()*60) + ui->timeEdit_thresPace->time().second();
+    QVector<double> saveVector;
+
 
     if(sport == settings::isSwim)
-    {
-        settings::set_thresValue("swimpower",ui->spinBox_thresPower->value());
-        settings::set_thresValue("swimpace",paceSec);
-        settings::set_thresValue("swimfactor",ui->doubleSpinBox_factor->value());
+    {        
+        thresholdMap.insert("swimpower",ui->spinBox_thresPower->value());
+        thresholdMap.insert("swimpace",paceSec);
+        thresholdMap.insert("swimfactor",ui->doubleSpinBox_factor->value());
+        thresholdMap.insert("swimlimit",ui->doubleSpinBox_lowLimit->value());
+        thresholdMap.insert("swimpm",ui->checkBox_usepm->isChecked());
         this->writeRangeValues(sport);
     }
     if(sport == settings::isBike)
     {
-        settings::set_thresValue("bikepower",ui->spinBox_thresPower->value());
-        settings::set_thresValue("bikepace",paceSec);
-        settings::set_thresValue("bikefactor",ui->doubleSpinBox_factor->value());
+        thresholdMap.insert("bikepower",ui->spinBox_thresPower->value());
+        thresholdMap.insert("bikepace",paceSec);
+        thresholdMap.insert("bikespeed",this->set_doubleValue(ui->lineEdit_speed->text().toDouble(),true));
+        thresholdMap.insert("bikefactor",ui->doubleSpinBox_factor->value());
+        thresholdMap.insert("bikelimit",ui->doubleSpinBox_lowLimit->value());
+        thresholdMap.insert("bikepm",ui->checkBox_usepm->isChecked());
+        thresholdMap.insert("wattfactor",ui->doubleSpinBox_watttospeed->value());
         this->writeRangeValues(sport);
     }
     if(sport == settings::isRun)
     {
-        settings::set_thresValue("runpower",ui->spinBox_thresPower->value());
-        settings::set_thresValue("runpace",paceSec);
-        settings::set_thresValue("runfactor",ui->doubleSpinBox_factor->value());
+        thresholdMap.insert("runpower",ui->spinBox_thresPower->value());
+        thresholdMap.insert("runpace",paceSec);
+        thresholdMap.insert("runpm",ui->checkBox_usepm->isChecked());
+        thresholdMap.insert("runlimit",ui->doubleSpinBox_lowLimit->value());
+        thresholdMap.insert("runfactor",ui->doubleSpinBox_factor->value());
         this->writeRangeValues(sport);
     }
 
-    settings::set_thresValue("hfthres",ui->spinBox_hfThres->value());
-    settings::set_thresValue("hfmax",ui->spinBox_hfMax->value());
+    thresholdMap.insert("hfthres",ui->spinBox_hfThres->value());
+    thresholdMap.insert("hfmax",ui->spinBox_hfMax->value());
     this->writeRangeValues("HF");
 
-    settings::set_gcInfo("gcpath",ui->lineEdit_gcpath->text());
-    settings::set_gcInfo("athlete",ui->lineEdit_athlete->text());
-    settings::set_gcInfo("folder",ui->lineEdit_activity->text());
-    settings::set_gcInfo("schedule",ui->lineEdit_schedule->text());
-    settings::set_gcInfo("workouts",ui->lineEdit_standard->text());
-    settings::set_gcInfo("valuefile",ui->lineEdit_configfile->text());
+    gcInfo.insert("gcpath",ui->lineEdit_gcpath->text());
+    gcInfo.insert("athlete",ui->lineEdit_athlete->text());
+    gcInfo.insert("folder",ui->lineEdit_activity->text());
+    gcInfo.insert("schedule",ui->lineEdit_schedule->text());
+    gcInfo.insert("workouts",ui->lineEdit_standard->text());
+    gcInfo.insert("valuefile",ui->lineEdit_configfile->text());
 
-    settings::set_ltsValue("ltsdays",ui->spinBox_ltsDays->value());
-    settings::set_ltsValue("stsdays",ui->spinBox_stsDays->value());
-    settings::set_ltsValue("lastlts",ui->spinBox_lastLTS->value());
-    settings::set_ltsValue("laststs",ui->spinBox_lastSTS->value());
+    ltsMap.insert("ltsdays",ui->spinBox_ltsDays->value());
+    ltsMap.insert("stsdays",ui->spinBox_stsDays->value());
+    ltsMap.insert("lastlts",ui->spinBox_lastLTS->value());
+    ltsMap.insert("laststs",ui->spinBox_lastSTS->value());
 
-    if(settings::get_generalValue("sum") != listMap.value("Misc").at(0)) settings::set_generalValue("sum",listMap.value("Misc").at(0));
-    if(settings::get_generalValue("empty") != listMap.value("Misc").at(1)) settings::set_generalValue("empty",listMap.value("Misc").at(1));
-    if(settings::get_generalValue("breakname") != listMap.value("Misc").at(2)) settings::set_generalValue("breakname",listMap.value("Misc").at(2));
+    if(generalValues->value("sum") != listMap.value("Misc").at(0)) generalMap.insert("sum",listMap.value("Misc").at(0));
+    if(generalValues->value("empty") != listMap.value("Misc").at(1)) generalMap.insert("empty",listMap.value("Misc").at(1));
+    if(generalValues->value("breakname") != listMap.value("Misc").at(2)) generalMap.insert("breakname",listMap.value("Misc").at(2));
+
+    athleteMap.insert("currpal",ui->doubleSpinBox_PALvalue->value());
 
     for(QHash<QString,QColor>::const_iterator it = colorMapCache.cbegin(), end = colorMapCache.cend(); it != end; ++it)
     {
-        settings::set_itemColor(it.key(),it.value());
+        colorMap.insert(it.key(),it.value());
     }
+
+    saveVector.resize(7);
+    for(int i = 0; i < 7; ++i)
+    {
+       tempCheck = this->findChild<QCheckBox *>("checkBox_Work_"+QString::number(i));
+       saveVector[i] = tempCheck->isChecked();
+    }
+    doubleMap.insert("Moveday",saveVector);
 
     settings::writeListValues(&listMap);
 
@@ -354,17 +393,17 @@ void Dialog_settings::set_thresholdView(QString sport)
     if(sport == settings::isSwim)
     {
         ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_thresPace->time(),100,ui->comboBox_thresSport->currentText(),true)));
-        this->set_thresholdModel(sport);
+        this->set_thresholdModel(sport,ui->comboBox_thresBase->currentIndex());
     }
     if(sport == settings::isBike)
     {
-        ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true)));
-        this->set_thresholdModel(sport);
+        ui->lineEdit_speed->setText(QString::number(this->set_doubleValue(ui->spinBox_thresPower->value()/athleteValues->value("ridercw")/thresValues->value("wattfactor"),false)));
+        this->set_thresholdModel(sport,ui->comboBox_thresBase->currentIndex());
     }
     if(sport == settings::isRun)
     {
         ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_thresPace->time(),1000,ui->comboBox_thresSport->currentText(),true)));
-        this->set_thresholdModel(sport);
+        this->set_thresholdModel(sport,ui->comboBox_thresBase->currentIndex());
     }
 }
 
@@ -429,7 +468,7 @@ void Dialog_settings::checkSportUse()
     }
 }
 
-void Dialog_settings::set_thresholdModel(QString sport)
+void Dialog_settings::set_thresholdModel(QString sport,int thresBase)
 {
     QStringList levels = listMap.value("Level");
     if(level_model->rowCount() > 0) level_model->clear();
@@ -454,15 +493,15 @@ void Dialog_settings::set_thresholdModel(QString sport)
         percLow = level_model->data(level_model->index(i,1,QModelIndex())).toDouble()/100;
         percHigh = level_model->data(level_model->index(i,3,QModelIndex())).toDouble()/100;
 
-        if(sport == settings::isBike)
-        {
-            level_model->setData(level_model->index(i,2,QModelIndex()),round(thresPower * percLow));
-            level_model->setData(level_model->index(i,4,QModelIndex()),round(thresPower * percHigh));
-        }
-        else
+        if(thresBase == 0)
         {
             level_model->setData(level_model->index(i,2,QModelIndex()),this->set_time(static_cast<int>(round(thresPace / percLow))));
             level_model->setData(level_model->index(i,4,QModelIndex()),this->set_time(static_cast<int>(round(thresPace / percHigh))));
+        }
+        else
+        {
+            level_model->setData(level_model->index(i,2,QModelIndex()),round(thresPower * percLow));
+            level_model->setData(level_model->index(i,4,QModelIndex()),round(thresPower * percHigh));
         }
     }
 }
@@ -474,6 +513,24 @@ void Dialog_settings::set_color(QColor color,QString key)
     ui->toolButton_color->setAutoFillBackground(true);
     ui->toolButton_color->setPalette(palette);
     colorMapCache.insert(key,color);
+}
+
+void Dialog_settings::set_bottonColor(QToolButton *button,bool changeColor)
+{
+    QPalette palette = button->palette();
+    QString colorKey = button->objectName().remove("toolButton_color");
+
+    if(changeColor)
+    {
+        QColor color = this->openColor(button->palette().color(button->backgroundRole()));
+        if(color.isValid()) palette.setColor(button->backgroundRole(),color);
+    }
+    else
+    {
+        palette.setColor(button->backgroundRole(),colorMap.value(colorKey));
+    }
+    button->setAutoFillBackground(true);
+    button->setPalette(palette);
 }
 
 void Dialog_settings::on_listWidget_selection_itemDoubleClicked(QListWidgetItem *item)
@@ -529,30 +586,53 @@ void Dialog_settings::on_comboBox_thresSport_currentTextChanged(const QString &v
 
     if(value == settings::isSwim)
     {
-        thresPower = settings::get_thresValue("swimpower");
-        thresPace = settings::get_thresValue("swimpace");
-        sportFactor = settings::get_thresValue("swimfactor");
+        thresPower = thresValues->value("swimpower");
+        thresPace = thresValues->value("swimpace");
+        sportFactor = thresValues->value("swimfactor");
+        ui->doubleSpinBox_lowLimit->setValue(thresValues->value("swimlimit"));
+        ui->checkBox_usepm->setChecked(thresValues->value("swimpm"));
         ui->spinBox_thresPower->setPalette(wback);
         ui->timeEdit_thresPace->setPalette(gback);
         level_del.threshold = thresPace;
+        ui->label_watttospeed->setVisible(false);
+        ui->doubleSpinBox_watttospeed->setVisible(false);
+
     }
     if(value == settings::isBike)
     {
-        thresPower = settings::get_thresValue("bikepower");
-        thresPace = settings::get_thresValue("bikepace");
-        sportFactor = settings::get_thresValue("bikefactor");
+        thresPower = thresValues->value("bikepower");
+        thresPace = thresValues->value("bikepace");
+        sportFactor = thresValues->value("bikefactor");
+        ui->doubleSpinBox_lowLimit->setValue(thresValues->value("bikelimit"));
+        ui->checkBox_usepm->setChecked(thresValues->value("bikepm"));
+        ui->doubleSpinBox_watttospeed->setValue(thresValues->value("wattfactor"));
         ui->spinBox_thresPower->setPalette(gback);
         ui->timeEdit_thresPace->setPalette(wback);
         level_del.threshold = thresPower;
+        ui->label_watttospeed->setVisible(true);
+        ui->doubleSpinBox_watttospeed->setVisible(true);
+
     }
     if(value == settings::isRun)
     {
-        thresPower = settings::get_thresValue("runpower");
-        thresPace = settings::get_thresValue("runpace");
-        sportFactor = settings::get_thresValue("runfactor");
+        if(ui->comboBox_thresBase->currentIndex() == 0)
+        {
+            thresPower = thresValues->value("runpower");
+        }
+        else
+        {
+            thresPower = thresValues->value("runcp");
+        }
+
+        thresPace = thresValues->value("runpace");
+        ui->doubleSpinBox_lowLimit->setValue(thresValues->value("runlimit"));
+        ui->checkBox_usepm->setChecked(thresValues->value("runpm"));
+        sportFactor = thresValues->value("runfactor");
         ui->spinBox_thresPower->setPalette(wback);
         ui->timeEdit_thresPace->setPalette(gback);
         level_del.threshold = thresPace;
+        ui->label_watttospeed->setVisible(false);
+        ui->doubleSpinBox_watttospeed->setVisible(false);
     }
     paceTime = paceTime.addSecs(static_cast<int>(thresPace));
     ui->spinBox_thresPower->setValue(thresPower);
@@ -590,7 +670,7 @@ void Dialog_settings::on_dateEdit_saisonStart_dateChanged(const QDate &date)
 
 void Dialog_settings::on_toolButton_color_clicked()
 {
-    QColor color = QColorDialog::getColor(ui->toolButton_color->palette().color(ui->toolButton_color->backgroundRole()),this);
+    QColor color = this->openColor(ui->toolButton_color->palette().color(ui->toolButton_color->backgroundRole()));
     if(color.isValid())
     {
         this->set_color(color,ui->lineEdit_addedit->text());
@@ -697,7 +777,7 @@ void Dialog_settings::on_spinBox_thresPower_valueChanged(int value)
     {
         thresPower = value;
         QTime paceTime(0,0,0);
-        paceTime = paceTime.addSecs(static_cast<int>(3600/(round(static_cast<double>(value)/6.5))));
+        paceTime = paceTime.addSecs(static_cast<int>(round(3600/ui->lineEdit_speed->text().toDouble())));
         ui->timeEdit_thresPace->setTime(paceTime);
         this->set_thresholdView(ui->comboBox_thresSport->currentText());
     }
@@ -724,6 +804,11 @@ QString Dialog_settings::getDirectory(QString getdir)
 {
     QFileDialog dialogSched;
     return dialogSched.getExistingDirectory(this,getdir,"C:\\",QFileDialog::ShowDirsOnly);
+}
+
+QColor Dialog_settings::openColor(QColor mappedColor)
+{
+    return QColorDialog::getColor(mappedColor,this);
 }
 
 void Dialog_settings::on_toolButton_workoutsPath_clicked()
@@ -846,8 +931,10 @@ void Dialog_settings::on_tabWidget_tabBarClicked(int index)
 
 void Dialog_settings::on_pushButton_calcFat_clicked()
 {
+
     int age = ui->lineEdit_age->text().toInt();
     double weight = ui->lineEdit_weight->text().toDouble();
+    double height = athleteValues->value("height");
     double sum7 = 0;
     double k0 = 1.112;
     double k1 = - 0.00043499;
@@ -856,6 +943,7 @@ void Dialog_settings::on_pushButton_calcFat_clicked()
     double fatCalc = 0.0;
     double fatPercent;
     double bodyFreeFat;
+    double ffmi;
     QString fatComment;
 
     sum7 = ui->spinBox_breast->value() * 1.0
@@ -866,15 +954,18 @@ void Dialog_settings::on_pushButton_calcFat_clicked()
          + ui->spinBox_stomach->value() * 1.0
          + ui->spinBox_trizeps->value() * 1.0;
 
+    //7 Point Methode Jackson & Pollock
     fatPercent = k0 + k1*sum7 + k2*sum7*sum7 + ka;
     fatPercent = 495 / fatPercent - 450;
 
     fatCalc = (fatPercent * weight) / 100;
     bodyFreeFat = weight - fatCalc;
+    ffmi = bodyFreeFat / (height*height)+6.3*(1.8-height);
 
     ui->lineEdit_fatfree->setText(QString::number(set_doubleValue(bodyFreeFat,false)));
     ui->lineEdit_fatweight->setText(QString::number(set_doubleValue(fatCalc,false)));
     ui->lineEdit_fatpercent->setText(QString::number(set_doubleValue(fatPercent,false)));
+    ui->lineEdit_ffmi->setText(QString::number(set_doubleValue(ffmi,false)));
 
     fatComment = QString::number(ui->spinBox_breast->value())+"-"+
                  QString::number(ui->spinBox_stomach->value())+"-"+
@@ -1025,5 +1116,126 @@ void Dialog_settings::on_toolButton_deleteSaison_clicked()
 
 void Dialog_settings::on_doubleSpinBox_PALvalue_valueChanged(double value)
 {
-    ui->lineEdit_currDayCal->setText(QString::number(round(current_dayCalories() * value)));
+    ui->lineEdit_currDayCal->setText(QString::number(round(current_dayCalories(QDateTime::currentDateTime()) * value)));
+}
+
+void Dialog_settings::on_comboBox_weightmode_currentIndexChanged(const QString &mode)
+{
+    ui->doubleSpinBox_max->setValue(settings::doubleMap.value(mode).at(0));
+    ui->doubleSpinBox_high->setValue(settings::doubleMap.value(mode).at(1));
+    ui->doubleSpinBox_low->setValue(settings::doubleMap.value(mode).at(2));
+    ui->doubleSpinBox_min->setValue(settings::doubleMap.value(mode).at(3));
+}
+
+void Dialog_settings::on_toolButton_colormax_clicked()
+{
+    this->set_bottonColor(ui->toolButton_colormax,true);
+}
+
+void Dialog_settings::on_toolButton_colorhigh_clicked()
+{
+    this->set_bottonColor(ui->toolButton_colorhigh,true);
+}
+
+void Dialog_settings::on_toolButton_colorlow_clicked()
+{
+    this->set_bottonColor(ui->toolButton_colorlow,true);
+}
+
+void Dialog_settings::on_toolButton_colormin_clicked()
+{
+    this->set_bottonColor(ui->toolButton_colormin,true);
+}
+
+void Dialog_settings::on_comboBox_food_currentIndexChanged(const QString &value)
+{
+    ui->listWidget_food->clear();
+    ui->listWidget_food->addItems(listMap.value(value));
+}
+
+void Dialog_settings::on_listWidget_food_itemClicked(QListWidgetItem *item)
+{
+    ui->lineEdit_mealEdit->setText(item->data(Qt::DisplayRole).toString());
+    ui->toolButton_mealDelete->setEnabled(true);
+    ui->toolButton_mealEdit->setEnabled(true);
+}
+
+void Dialog_settings::on_toolButton_mealAdd_clicked()
+{
+    ui->listWidget_food->addItem(ui->lineEdit_mealEdit->text());
+    QStringList tempList = listMap.value(ui->comboBox_food->currentText());
+    tempList.append(ui->lineEdit_mealEdit->text());
+    listMap.insert(ui->comboBox_food->currentText(),tempList);
+    food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),ADD);
+    ui->lineEdit_mealEdit->clear();
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_toolButton_mealDelete_clicked()
+{
+    QListWidgetItem *item = ui->listWidget_food->takeItem(ui->listWidget_food->currentRow());
+    food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),DEL);
+    ui->lineEdit_mealEdit->clear();
+    delete item;
+
+    QStringList tempList;
+    for(int i = 0; i < ui->listWidget_food->count(); ++i)
+    {
+        tempList.append(ui->listWidget_food->item(i)->data(Qt::DisplayRole).toString());
+    }
+    listMap.insert(ui->comboBox_food->currentText(),tempList);
+    this->enableSavebutton();
+
+}
+
+void Dialog_settings::on_toolButton_mealEdit_clicked()
+{
+    QListWidgetItem *item = ui->listWidget_food->currentItem();
+    item->setData(Qt::EditRole,ui->lineEdit_mealEdit->text());
+    food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),EDIT);
+    ui->lineEdit_mealEdit->clear();
+    QStringList tempList;
+    for(int i = 0; i < ui->listWidget_food->count(); ++i)
+    {
+        tempList.append(ui->listWidget_food->item(i)->data(Qt::DisplayRole).toString());
+    }
+    listMap.insert(ui->comboBox_food->currentText(),tempList);
+    this->enableSavebutton();
+}
+
+void Dialog_settings::on_comboBox_thresBase_currentIndexChanged(int index)
+{
+    if(ui->comboBox_thresSport->currentText() == settings::isRun)
+    {
+        if(index == 0)
+        {
+            thresPower = thresValues->value("runpower");
+        }
+        else
+        {
+            thresPower = thresValues->value("runcp");
+        }
+
+        ui->spinBox_thresPower->setValue(thresPower);
+    }
+
+    this->set_thresholdModel(ui->comboBox_thresSport->currentText(),index);
+}
+
+void Dialog_settings::on_toolButton_seasonPath_clicked()
+{
+    QString dir = this->getDirectory("Select Season File Dir");
+    if(!dir.isEmpty())
+    {
+        ui->lineEdit_saisonFile->setText(QDir::toNativeSeparators(dir));
+    }
+}
+
+void Dialog_settings::on_toolButton_foodPath_clicked()
+{
+    QString dir = this->getDirectory("Select FoodPlanner File Dir");
+    if(!dir.isEmpty())
+    {
+        ui->lineEdit_foodFile->setText(QDir::toNativeSeparators(dir));
+    }
 }

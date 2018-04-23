@@ -53,8 +53,8 @@ public:
 
         if(index.row() == sportuse.count())
         {
-            rectColor = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
-            //painter->fillRect(option.rect,QBrush(settings::get_itemColor(settings::get_generalValue("sum"))));
+            rectColor = settings::get_itemColor(generalValues->value("sum")).toHsv();
+            //painter->fillRect(option.rect,QBrush(settings::get_itemColor(gcValues->value("sum"))));
             cFont.setBold(true);
         }
         else
@@ -138,9 +138,9 @@ public:
         QString sport = model->data(model->index(index.row(),0,QModelIndex())).toString();
         QModelIndex sum_index = model->index(listCount,index.column(),QModelIndex());
 
-        if(sport == settings::isSwim) factor = settings::get_thresValue("swimfactor");
-        if(sport == settings::isBike) factor = settings::get_thresValue("bikefactor");
-        if(sport == settings::isRun) factor = settings::get_thresValue("runfactor");
+        if(sport == settings::isSwim) factor = thresValues->value("swimfactor");
+        if(sport == settings::isBike) factor = thresValues->value("bikefactor");
+        if(sport == settings::isRun) factor = thresValues->value("runfactor");
 
         if(index.column() == 1 && index.row() != listCount)
         {

@@ -49,7 +49,7 @@ class del_racecalc : public QStyledItemDelegate, public calculation
 
         if(index.row() == model->rowCount()-1 && model->rowCount() > 1)
         {
-            rectColor = settings::get_itemColor(settings::get_generalValue("sum")).toHsv();
+            rectColor = settings::get_itemColor(generalValues->value("sum")).toHsv();
             cFont.setBold(true);
         }
         else
@@ -219,7 +219,7 @@ private:
     QStringList sportList,model_header,race_header,triaDist,runRaces;
     QStandardItemModel *paceModel;
     QStandardItemModel *raceModel;
-    QHash<QString,QString> triathlonMap;
+    QHash<QString,QString> *triaMap;
     QVector<double> dist,raceDist;
     del_racecalc race_del;
     int distFactor;

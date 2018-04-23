@@ -28,6 +28,7 @@ settings::settings()
 
 QString settings::settingFile;
 QString settings::splitter = "/";
+bool settings::settingsUpdated;
 
 QHash<QString,QString> settings::gcInfo;
 QHash<QString,QString> settings::generalMap;
@@ -45,7 +46,11 @@ QString settings::isAlt;
 QString settings::isTria;
 QString settings::isOther;
 
+QVector<double> settings::tempVector;
+
 QHash<QString,QStringList> settings::listMap;
+QHash<QString,QStringList> settings::jsonTags;
+QHash<QString,QVector<double>> settings::doubleMap;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
 QMap<int,double> settings::weightMap;
@@ -65,15 +70,13 @@ QStringList settings::extkeyList;
 
 QStringList settings::table_header;
 QStringList settings::header_swim;
-QStringList settings::header_bike;
-QStringList settings::header_run;
+QStringList settings::header_pm;
+QStringList settings::header_pace;
 QStringList settings::headerTria;
 QStringList settings::header_other;
 QStringList settings::triaDistance;
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
-
-int settings::swimLaplen;
 
 enum {SPORT,LEVEL,PHASE,CYCLE,WCODE,JFILE,EDITOR};
 enum {SPORTUSE};
@@ -139,9 +142,11 @@ QColor settings::get_colorRGB(QString colorValue,bool trans)
 
 void settings::loadSettings()
 {
+    settingsUpdated = false;
+
     header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes" << "Work";
-    header_bike << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD" << "Work";
-    header_run << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Work";
+    header_pm << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD" << "Work";
+    header_pace << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Work";
     headerTria << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "Work";
     header_other << "Interval" << "Duration" << "Start" << "Distance" << "Work";
 
@@ -178,6 +183,8 @@ void settings::loadSettings()
             gcInfo.insert("workouts",mysettings->value("workouts").toString());
             gcInfo.insert("contests",mysettings->value("contests").toString());
             gcInfo.insert("saisons",mysettings->value("saisons").toString());
+            gcInfo.insert("foodplanner",mysettings->value("foodplanner").toString());
+            gcInfo.insert("maps",mysettings->value("maps").toString());
             gcInfo.insert("valuefile",mysettings->value("valuefile").toString());
             valueFile = mysettings->value("valuefile").toString();
         mysettings->endGroup();
@@ -197,6 +204,8 @@ void settings::loadSettings()
         double currWeight = 0.0;
         double currBone = 0.0;
         double currMuscle = 0.0;
+        int weightDate = 0;
+
         for(int i = 0; i < bodyWeight.count(); ++i)
         {
             weightInfo = bodyWeight.at(i).toObject();
@@ -205,12 +214,13 @@ void settings::loadSettings()
             currMuscle = weightInfo.value("musclekg").toDouble();
             weightMap.insert(weightInfo.value("when").toInt(),currWeight);
 
-            if(athleteMap.value("weight") < currWeight)
+            if(weightMap.lastKey() > weightDate)
             {
                 athleteMap.insert("weight",currWeight);
                 athleteMap.insert("boneskg",currBone);
                 athleteMap.insert("musclekg",currMuscle);
             }
+            weightDate = weightMap.lastKey();
         }
 
         //Sport Value Settings
@@ -226,9 +236,12 @@ void settings::loadSettings()
         QSettings *myPref = new QSettings(gcInfo.value("confpath") + QDir::separator() + "athlete-preferences.ini",QSettings::IniFormat);
         athleteMap.insert("yob",myPref->value("dob").toDate().year());
         athleteMap.insert("height",myPref->value("height").toDouble());
+        athleteMap.insert("sex",myPref->value("sex").toDouble());
+        athleteMap.insert("riderfrg",(athleteMap.value("weight")+9.0)*9.81*0.45);
+        athleteMap.insert("ridercw",0.2279+(athleteMap.value("weight")/(athleteMap.value("height")*750)));
         delete myPref;
 
-        QStringList settingList;
+        QStringList settingList,tempList;
         QString settingString;
 
         QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
@@ -248,6 +261,9 @@ void settings::loadSettings()
             settingString = myvalues->value("sampinfo").toString();
             fill_mapList(&sampList,&settingString);
             settingList.clear();
+            settingList << myvalues->value("xdatainfo").toString().split(splitter);
+            jsonTags.insert("xdata",settingList);
+            settingList.clear();
         myvalues->endGroup();
 
         myvalues->beginGroup("Keylist");
@@ -259,13 +275,22 @@ void settings::loadSettings()
             thresholdMap.insert("swimpower",myvalues->value("swimpower").toDouble());
             thresholdMap.insert("bikepower",myvalues->value("bikepower").toDouble());
             thresholdMap.insert("runpower",myvalues->value("runpower").toDouble());
-            thresholdMap.insert("stgpower",athleteMap.value("weight")*4);
+            thresholdMap.insert("runcp",myvalues->value("runcp").toDouble());
+            thresholdMap.insert("stgpower",myvalues->value("stgpower").toDouble());
             thresholdMap.insert("swimfactor",myvalues->value("swimfactor").toDouble());
             thresholdMap.insert("bikefactor",myvalues->value("bikefactor").toDouble());
+            thresholdMap.insert("wattfactor",myvalues->value("wattfactor").toDouble());
             thresholdMap.insert("runfactor",myvalues->value("runfactor").toDouble());
             thresholdMap.insert("swimpace",myvalues->value("swimpace").toDouble());
             thresholdMap.insert("bikepace",myvalues->value("bikepace").toDouble());
+            thresholdMap.insert("bikespeed",myvalues->value("bikespeed").toDouble());
+            thresholdMap.insert("swimlimit",myvalues->value("swimlimit").toDouble());
+            thresholdMap.insert("bikelimit",myvalues->value("bikelimit").toDouble());
+            thresholdMap.insert("runlimit",myvalues->value("runlimit").toDouble());
             thresholdMap.insert("runpace",myvalues->value("runpace").toDouble());
+            thresholdMap.insert("swimpm",myvalues->value("swimpm").toDouble());
+            thresholdMap.insert("bikepm",myvalues->value("bikepm").toDouble());
+            thresholdMap.insert("runpm",myvalues->value("runpm").toDouble());
             thresholdMap.insert("hfthres",myvalues->value("hfthres").toDouble());
             thresholdMap.insert("hfmax",myvalues->value("hfmax").toDouble());
         myvalues->endGroup();
@@ -321,7 +346,49 @@ void settings::loadSettings()
             listMap.insert("SwimStyle",settingList);
             settingList.clear();
             settingList = myvalues->value("swimMET").toString().split(splitter);
-            listMap.insert("SwimMET",settingList);
+            listMap.insert("SwimMET",settingList);    
+            settingList.clear();
+        myvalues->endGroup();
+
+        myvalues->beginGroup("Foodplanner");
+            settingList = myvalues->value("mode").toString().split(splitter);
+            listMap.insert("Mode",settingList);
+            settingList.clear();
+            settingList = myvalues->value("modepercent").toString().split(splitter);
+            tempVector.resize(4);
+            for(int i = 0; i < listMap.value("Mode").count(); i++)
+            {
+                settingString = settingList.at(i);
+                tempList = settingString.split("-");
+                for(int x = 0; x < tempList.count();++x)
+                {
+                    settingString = tempList.at(x);
+                    tempVector[x] = settingString.toDouble();
+
+                }
+                doubleMap.insert(listMap.value("Mode").at(i),tempVector);
+            }
+            settingList.clear();
+            settingList = myvalues->value("modeborder").toString().split(splitter);
+            settingString = myvalues->value("color").toString();
+            settings::fill_mapColor(&settingList,&settingString,false);
+            settingList.clear();
+            settingList = myvalues->value("meals").toString().split(splitter);
+            listMap.insert("Meals",settingList);
+            settingList.clear();
+            settingList = myvalues->value("dish").toString().split(splitter);
+            listMap.insert("Dish",settingList);
+            settingList.clear();
+            generalMap.insert("AddMoving",myvalues->value("addmoving").toString());
+            tempVector.resize(7);
+            settingList = myvalues->value("moveday").toString().split(splitter);
+
+            for(int i = 0; i < settingList.count();++i)
+            {
+                settingString = settingList.at(i);
+                tempVector[i] = settingString.toDouble();
+            }
+            doubleMap.insert("Moveday",tempVector);
             settingList.clear();
         myvalues->endGroup();
 
@@ -330,6 +397,7 @@ void settings::loadSettings()
             settingList << myvalues->value("empty").toString();
             settingList << myvalues->value("breakname").toString();
             settingList << myvalues->value("filecount").toString();
+            settingList << myvalues->value("workfactor").toString();
             listMap.insert("Misc",settingList);
             generalMap.insert("sum", settingList.at(0));
             colorMap.insert(settingList.at(0),settings::get_colorRGB(myvalues->value("sumcolor").toString(),false));
@@ -338,7 +406,9 @@ void settings::loadSettings()
             generalMap.insert("breakname",settingList.at(2));
             colorMap.insert(settingList.at(2),settings::get_colorRGB(myvalues->value("breakcolor").toString(),false));
             generalMap.insert("filecount",settingList.at(3));
+            generalMap.insert("workfactor",settingList.at(4));
             settingList.clear();
+            athleteMap.insert("currpal",myvalues->value("currpal").toDouble());
         myvalues->endGroup();
 
         myvalues->beginGroup("Sport");            
@@ -394,18 +464,25 @@ void settings::loadSettings()
 
 double settings::get_weightforDate(QDateTime actDate)
 {
-    QDateTime weightDate;
+    QDateTime weightDate,firstDate;
     double weight = 0.0;
+    firstDate.setTime_t(weightMap.firstKey());
 
     for(QMap<int,double>::const_iterator it = weightMap.cbegin(), end = weightMap.cend(); it != end; ++it)
     {
         weightDate.setTime_t(it.key());
 
-        if(actDate > weightDate)
+        if(actDate >= firstDate && actDate < weightDate)
+        {
+            break;
+            weight = it.value();
+        }
+        else if(actDate >= weightDate)
         {
             weight = it.value();
         }
     }
+
     return weight;
 }
 
@@ -493,13 +570,20 @@ void settings::saveSettings()
     myvalues->beginGroup("Threshold");
         myvalues->setValue("swimpower",QString::number(thresholdMap.value("swimpower")));
         myvalues->setValue("swimpace",QString::number(thresholdMap.value("swimpace")));
+        myvalues->setValue("swimlimit",QString::number(thresholdMap.value("swimlimit")));
+        myvalues->setValue("swimpm",QString::number(thresholdMap.value("swimpm")));
         myvalues->setValue("swimfactor",QString::number(thresholdMap.value("swimfactor")));
         myvalues->setValue("bikepower",QString::number(thresholdMap.value("bikepower")));
+        myvalues->setValue("bikespeed",QString::number(thresholdMap.value("bikespeed")));
         myvalues->setValue("bikepace",QString::number(thresholdMap.value("bikepace")));
         myvalues->setValue("bikefactor",QString::number(thresholdMap.value("bikefactor")));
+        myvalues->setValue("bikelimit",QString::number(thresholdMap.value("bikelimit")));
+        myvalues->setValue("bikepm",QString::number(thresholdMap.value("bikepm")));
         myvalues->setValue("runpower",QString::number(thresholdMap.value("runpower")));
         myvalues->setValue("runpace",QString::number(thresholdMap.value("runpace")));
-        myvalues->setValue("runfactor",QString::number(thresholdMap.value("runfactor")));
+        myvalues->setValue("runfactor",QString::number(thresholdMap.value("runfactor")));     
+        myvalues->setValue("runlimit",QString::number(thresholdMap.value("runlimit")));
+        myvalues->setValue("runpm",QString::number(thresholdMap.value("runpm")));
         myvalues->setValue("hfthres",QString::number(thresholdMap.value("hfthres")));
         myvalues->setValue("hfmax",QString::number(thresholdMap.value("hfmax")));
     myvalues->endGroup();
@@ -563,6 +647,31 @@ void settings::saveSettings()
         settingList.clear();
     myvalues->endGroup();
 
+    myvalues->beginGroup("Foodplanner");
+        settingList = listMap.value("Meals");
+        myvalues->setValue("meals",settings::setSettingString(settingList));
+        settingList.clear();
+        settingList = listMap.value("Dish");
+        myvalues->setValue("dish",settings::setSettingString(settingList));
+        settingList.clear();
+        for(int i = 0; i < listMap.value("Mode").count(); ++i)
+        {
+            for(int x = 0; x < 4; ++x)
+            {
+                settingList << QString::number(doubleMap.value(listMap.value("Mode").at(i)).at(x)) +"-";
+            }
+        }
+        settingList.clear();
+
+        for(int i = 0; i < doubleMap.value("Moveday").count(); ++i)
+        {
+            settingList << QString::number(doubleMap.value("Moveday").at(i));
+        }
+        myvalues->setValue("moveday",settings::setSettingString(settingList));
+        settingList.clear();
+
+    myvalues->endGroup();
+
     myvalues->beginGroup("Misc");
         settingList = listMap.value("Misc");
         myvalues->setValue("sum",settingList.at(0));
@@ -571,10 +680,12 @@ void settings::saveSettings()
         myvalues->setValue("sumcolor",settings::set_colorString(colorMap.value(settingList.at(0))));
         myvalues->setValue("emptycolor",settings::set_colorString(colorMap.value(settingList.at(1))));
         myvalues->setValue("breakcolor",settings::set_colorString(colorMap.value(settingList.at(2))));
+        myvalues->setValue("currpal",athleteMap.value("currpal"));
         settingList.clear();
     myvalues->endGroup();
 
     delete myvalues;
+    settingsUpdated = true;
 }
 
 QString settings::set_colorString(QColor color)
@@ -582,7 +693,7 @@ QString settings::set_colorString(QColor color)
     return QString::number(color.red())+"-"+QString::number(color.green())+"-"+QString::number(color.blue());;
 }
 
-QStringList settings::get_int_header(QString vSport)
+QStringList settings::get_int_header(QString vSport,bool usePM)
 {
     QString avg = "Avg";
     table_header.clear();
@@ -590,13 +701,17 @@ QStringList settings::get_int_header(QString vSport)
     {
         return table_header << header_swim << avg;
     }
-    else if(vSport == isBike)
+    else if(vSport == isBike || vSport == isRun)
     {
-        return table_header << header_bike << avg;
-    }
-    else if(vSport == isRun)
-    {
-        return table_header << header_run << avg;
+        if(usePM)
+        {
+            return table_header << header_pm << avg;
+        }
+        else
+        {
+            return table_header << header_pace << avg;
+        }
+
     }
     else if(vSport == isTria)
     {
