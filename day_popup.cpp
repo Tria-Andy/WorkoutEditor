@@ -156,10 +156,10 @@ void day_popup::set_comboWorkouts(QString workoutSport, QString stdid)
 
     if(!workoutSport.isEmpty())
     {
-        QString workID,workTitle,listString;
         this->set_proxyFilter(workoutSport,0,true);
-        stdlistModel->clear();
+        QString workID,workTitle,listString;
 
+        stdlistModel->clear();
         stdlistModel->setRowCount(stdProxy->rowCount());
         stdlistModel->setColumnCount(2);
 
@@ -543,10 +543,11 @@ void day_popup::on_comboBox_stdworkout_activated(int stdindex)
 {
     ui->tableView_day->setCurrentIndex(dayModel->index(0,selWorkout));
     QString workoutID = ui->comboBox_stdworkout->model()->data(ui->comboBox_stdworkout->model()->index(stdindex,1)).toString();
+
     stdworkData.clear();
     this->set_proxyFilter(workoutID,1,false);
 
-    for(int i = 1; i < stdProxy->columnCount()-1; ++i)
+    for(int i = 1; i < stdProxy->columnCount()-2; ++i)
     {
         stdworkData.insert(i,stdProxy->data(stdProxy->index(0,i)).toString());
     }
