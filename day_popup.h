@@ -310,7 +310,7 @@ private:
     void set_controlButtons(bool);
     void set_exportContent();
     void set_result(int);
-    void set_proxyFilter(QString,int);
+    void set_proxyFilter(QString,int,bool);
 
 };
 

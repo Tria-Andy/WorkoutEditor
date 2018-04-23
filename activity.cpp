@@ -925,11 +925,11 @@ void Activity::addRow_intTree(QItemSelectionModel *treeSelect)
             subItems << new QStandardItem(selItem.value(1).data().toString());
             subItems << new QStandardItem("-");
             subItems << new QStandardItem(QString::number(swimTrack));
-            subItems << new QStandardItem("00:00");
+            subItems << new QStandardItem("00:01");
             subItems << new QStandardItem("-");
             subItems << new QStandardItem("00:00");
             subItems << new QStandardItem(QString::number(0.0));
-            subItems << new QStandardItem(QString::number(0));
+            subItems << new QStandardItem(QString::number(1));
 
             parentItem->insertRow(treeSelect->currentIndex().row(),subItems);
         }
