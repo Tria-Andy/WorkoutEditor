@@ -383,6 +383,7 @@ void foodplanner::remove_week(QString weekID)
 {
     QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(weekID.split(" - ").first(),Qt::MatchExactly,0).at(0));
     weekPlansModel->removeRow(weekIndex.row());
+    this->fill_planList(QDate(),false);
 }
 
 void foodplanner::fill_planList(QDate firstDate, bool addWeek)
@@ -393,6 +394,7 @@ void foodplanner::fill_planList(QDate firstDate, bool addWeek)
     }
     else
     {
+        planList.clear();
         for(int i = 0; i < weekPlansModel->rowCount(); ++i)
         {
             planList << weekPlansModel->data(weekPlansModel->index(i,0)).toString()+" - "+weekPlansModel->data(weekPlansModel->index(i,2)).toDate().toString("dd.MM.yyyy")+" - "+weekPlansModel->data(weekPlansModel->index(i,1)).toString();
