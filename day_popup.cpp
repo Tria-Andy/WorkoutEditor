@@ -157,7 +157,7 @@ void day_popup::set_comboWorkouts(QString workoutSport, QString stdid)
     if(!workoutSport.isEmpty())
     {
         QString workID,workTitle,listString;
-        this->set_proxyFilter(workoutSport,0);
+        this->set_proxyFilter(workoutSport,0,true);
         stdlistModel->clear();
 
         stdlistModel->setRowCount(stdProxy->rowCount());
@@ -382,10 +382,19 @@ void day_popup::set_result(int resultCode)
     this->set_comboWorkouts(QString(),QString());
 }
 
-void day_popup::set_proxyFilter(QString filterTo, int col)
+void day_popup::set_proxyFilter(QString filterTo, int col,bool fixString)
 {
     stdProxy->invalidate();
-    stdProxy->setFilterRegExp("\\b"+filterTo+"\\b");
+
+    if(fixString)
+    {
+        stdProxy->setFilterFixedString(filterTo);
+    }
+    else
+    {
+        stdProxy->setFilterRegExp("\\b"+filterTo+"\\b");
+    }
+
     stdProxy->setFilterKeyColumn(col);
 }
 
@@ -535,7 +544,7 @@ void day_popup::on_comboBox_stdworkout_activated(int stdindex)
     ui->tableView_day->setCurrentIndex(dayModel->index(0,selWorkout));
     QString workoutID = ui->comboBox_stdworkout->model()->data(ui->comboBox_stdworkout->model()->index(stdindex,1)).toString();
     stdworkData.clear();
-    this->set_proxyFilter(workoutID,1);
+    this->set_proxyFilter(workoutID,1,false);
 
     for(int i = 1; i < stdProxy->columnCount()-1; ++i)
     {
@@ -561,7 +570,7 @@ void day_popup::on_comboBox_stdworkout_activated(int stdindex)
 void day_popup::on_toolButton_map_clicked()
 {
     QString workoutID = ui->comboBox_stdworkout->model()->data(ui->comboBox_stdworkout->model()->index(ui->comboBox_stdworkout->currentIndex(),1)).toString();
-    this->set_proxyFilter(workoutID,1);
+    this->set_proxyFilter(workoutID,1,false);
     QString image = stdProxy->data(stdProxy->index(0,9)).toString();
 
     Dialog_map dialogMap(this,stdProxy,workoutID,image);
