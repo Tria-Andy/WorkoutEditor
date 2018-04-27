@@ -106,6 +106,9 @@ private slots:
     void on_comboBox_thresBase_currentIndexChanged(int index);
     void on_toolButton_seasonPath_clicked();
     void on_toolButton_foodPath_clicked();
+    void on_toolButton_mapPath_clicked();
+
+    void on_pushButton_clearContest_clicked();
 
 private:
     Ui::Dialog_settings *ui;
@@ -125,6 +128,7 @@ private:
     bool useColor,stressEdit;
     void checkSetup();
     void set_SelectControls(QString);
+    void reset_contest(bool);
     void set_color(QColor,QString);
     void set_bottonColor(QToolButton*,bool changeColor);
     void save_settingsChanges();
