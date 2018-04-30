@@ -697,11 +697,10 @@ void Activity::recalcIntTree()
                lastStart = this->get_timesec(intTreeModel->data(intTreeModel->index(row-1,2)).toString());
            }
 
-           startTime = lastStart + lastTime;
-
            if(isBike)
            {
                totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,9)).toDouble();
+               //startTime = lastStart + lastTime;
            }
            else if(isRun)
            {
@@ -1249,7 +1248,9 @@ void Activity::updateIntModel(int startCol,int duraCol)
     for(int row = 0; row < intTreeModel->rowCount(); ++row)
     {
         intStart = this->get_timesec(intTreeModel->data(intTreeModel->index(row,startCol)).toString());
-        intStop = intStart + this->get_timesec(intTreeModel->data(intTreeModel->index(row,duraCol)).toString())-1;
+        intStop = intStart + this->get_timesec(intTreeModel->data(intTreeModel->index(row,duraCol)).toString());
+        if(isSwim) --intStop;
+
         if(row > 0)
         {
             if(lastStop == intStart) ++intStart;
@@ -1613,7 +1614,7 @@ int Activity::get_int_duration(int row)
     duration = intModel->data(intModel->index(row,2,QModelIndex()),Qt::DisplayRole).toInt() - intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt();
 
     if(isIndoor) return duration+1;
-    if(isUpdated) return duration+1;
+    if(isUpdated && isBike) return duration+1;
 
     return duration;
 }
