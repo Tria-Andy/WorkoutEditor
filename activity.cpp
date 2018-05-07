@@ -700,7 +700,7 @@ void Activity::recalcIntTree()
            if(isBike)
            {
                totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,9)).toDouble();
-               //startTime = lastStart + lastTime;
+               startTime = lastStart + lastTime;
            }
            else if(isRun)
            {
@@ -1249,7 +1249,7 @@ void Activity::updateIntModel(int startCol,int duraCol)
     {
         intStart = this->get_timesec(intTreeModel->data(intTreeModel->index(row,startCol)).toString());
         intStop = intStart + this->get_timesec(intTreeModel->data(intTreeModel->index(row,duraCol)).toString());
-        if(isSwim) --intStop;
+        if(isSwim || (isBike && isIndoor)) --intStop;
 
         if(row > 0)
         {
@@ -1707,7 +1707,6 @@ double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double fact
 
     std::random_device seeder;
     std::mt19937 gen(seeder());
-
 
     if(currSpeed < avgLow)
     {
