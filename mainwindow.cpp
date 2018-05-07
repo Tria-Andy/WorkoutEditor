@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     sportCounter = settings::get_listValues("Sport").count();
     sportUse = settings::get_listValues("Sportuse").count();
     weekRange = settings::get_fontValue("weekRange");
+    ui->lineEdit_athlete->setText(gcValues->value("athlete"));
 
     //Planning Mode
     graphLoaded = false;
