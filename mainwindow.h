@@ -872,6 +872,7 @@ public:
                 timeEdit->interpretText();
                 QString value = timeEdit->time().toString();
                 model->setData(index,value);
+                setPace(model,get_timesec(value));
             }
         }
     }
