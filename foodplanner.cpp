@@ -557,6 +557,7 @@ void foodplanner::update_weekSumModel()
     calcDay.setDate(firstDayofWeek);
 
     double weekWeight;
+    double bodyfatcal = athleteValues->value("BodyFatCal");
     QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(loadedWeek,Qt::MatchExactly,0).at(0));
 
     if(firstDayofWeek == QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek()))
@@ -569,7 +570,7 @@ void foodplanner::update_weekSumModel()
     }
 
     double weekSave = weekSumModel->data(weekSumModel->index(4,0)).toDouble();
-    double weekLoss = round(weekSave/7.7)/1000.0 * -1;
+    double weekLoss = round(weekSave/bodyfatcal)/1000.0 * -1;
     double nextWeek = this->set_doubleValue(weekWeight + weekLoss,false);
 
     estModel->setData(estModel->index(0,0),QString::number(weekWeight) + " Kg");

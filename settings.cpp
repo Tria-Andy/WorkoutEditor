@@ -380,6 +380,7 @@ void settings::loadSettings()
             listMap.insert("Dish",settingList);
             settingList.clear();
             generalMap.insert("AddMoving",myvalues->value("addmoving").toString());
+            athleteMap.insert("BodyFatCal",myvalues->value("fatcal").toDouble());
             tempVector.resize(7);
             settingList = myvalues->value("moveday").toString().split(splitter);
 
