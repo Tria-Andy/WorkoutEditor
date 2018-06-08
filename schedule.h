@@ -36,6 +36,7 @@ public:
     QHash<QModelIndex,QHash<int,QString>> itemList;
     QMap<QDate,QPair<double,double> > stressValues;
     void freeMem();
+    void filter_schedule(QString,int,bool);
     void save_dayWorkouts();
     void save_weekPlan();
     void save_ltsFile(double);

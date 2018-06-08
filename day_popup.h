@@ -295,7 +295,7 @@ private:
     schedule *workSched;
     del_daypop daypop_del;
     QStandardItemModel *dayModel,*stdlistModel,*intExport, *sampExport;
-    QSortFilterProxyModel *scheduleProxy,*stdProxy;
+    QSortFilterProxyModel *scheduleProxy;
     QHash<QString,QString> currWorkout;
     QHash<int,QString> stdworkData;
     QDate popupDate,newDate;

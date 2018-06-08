@@ -62,6 +62,20 @@ void schedule::freeMem()
     delete week_content;
 }
 
+void schedule::filter_schedule(QString filterValue, int col, bool fixed)
+{
+    scheduleProxy->invalidate();
+    if(fixed)
+    {
+        scheduleProxy->setFilterFixedString(filterValue);
+    }
+    else
+    {
+        scheduleProxy->setFilterRegExp("\\b"+filterValue+"\\b");
+    }
+    scheduleProxy->setFilterKeyColumn(col);
+}
+
 void schedule::read_dayWorkouts(QDomDocument workouts)
 {
     QPair<double,double> tempValues;
@@ -404,11 +418,8 @@ void schedule::save_ltsFile(double ltsDays)
 int schedule::check_workouts(QDate date)
 {
     int workCount;
-    scheduleProxy->setSourceModel(workout_schedule);
-    scheduleProxy->setFilterRegExp("\\b"+date.toString("dd.MM.yyyy")+"\\");
-    scheduleProxy->setFilterKeyColumn(1);
+    this->filter_schedule(date.toString("dd.MM.yyyy"),1,false);
     workCount = scheduleProxy->rowCount();
-    scheduleProxy->setFilterRegExp("");
 
     return workCount;
 }
@@ -454,8 +465,7 @@ void schedule::save_ltsValues()
 
 void schedule::copyWeek(QString copyFrom,QString copyTo)
 {
-    scheduleProxy->setFilterRegExp("\\b"+copyFrom+"\\b");
-    scheduleProxy->setFilterKeyColumn(0);
+    this->filter_schedule(copyFrom,0,false);
     this->deleteWeek(copyTo);
     QHash<int,QString> valueList;
     QString fromWeek,toWeek,fromYear,toYear,workdate;
@@ -495,7 +505,6 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
         itemList.insert(scheduleProxy->index(row,0),valueList);
     }
     this->set_workoutData(COPY);
-    scheduleProxy->setFilterRegExp("");
 }
 
 void schedule::delete_workout(QModelIndex index)

@@ -33,8 +33,6 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
     workSched = p_sched;
     scheduleProxy = new QSortFilterProxyModel(this);
     scheduleProxy->setSourceModel(workSched->workout_schedule);
-    stdProxy = new QSortFilterProxyModel(this);
-    stdProxy->setSourceModel(workouts_meta);
     stdlistModel = new QStandardItemModel(this);
     editIcon = QIcon(":/images/icons/Modify.png");
     addIcon = QIcon(":/images/icons/Create.png");
@@ -156,22 +154,22 @@ void day_popup::set_comboWorkouts(QString workoutSport, QString stdid)
 
     if(!workoutSport.isEmpty())
     {
-        this->set_proxyFilter(workoutSport,0,true);
+        this->filter_workout(workoutSport,0,true);
         QString workID,workTitle,listString;
 
         stdlistModel->clear();
-        stdlistModel->setRowCount(stdProxy->rowCount());
+        stdlistModel->setRowCount(metaProxy->rowCount());
         stdlistModel->setColumnCount(2);
 
-        for(int i = 0; i < stdProxy->rowCount(); ++i)
+        for(int i = 0; i < metaProxy->rowCount(); ++i)
         {
-            workID = stdProxy->data(stdProxy->index(i,1)).toString();
-            workTitle = stdProxy->data(stdProxy->index(i,3)).toString();
-            listString = stdProxy->data(stdProxy->index(i,2)).toString() + " - " + workTitle
-                            + " (" +stdProxy->data(stdProxy->index(i,4)).toString()
-                            + " - " +stdProxy->data(stdProxy->index(i,5)).toString()
-                            + " - " +stdProxy->data(stdProxy->index(i,6)).toString()
-                            + " - " +stdProxy->data(stdProxy->index(i,7)).toString()+")";
+            workID = metaProxy->data(metaProxy->index(i,1)).toString();
+            workTitle = metaProxy->data(metaProxy->index(i,3)).toString();
+            listString = metaProxy->data(metaProxy->index(i,2)).toString() + " - " + workTitle
+                            + " (" +metaProxy->data(metaProxy->index(i,4)).toString()
+                            + " - " +metaProxy->data(metaProxy->index(i,5)).toString()
+                            + " - " +metaProxy->data(metaProxy->index(i,6)).toString()
+                            + " - " +metaProxy->data(metaProxy->index(i,7)).toString()+")";
             stdlistModel->setData(stdlistModel->index(i,0,QModelIndex()),listString);
             stdlistModel->setData(stdlistModel->index(i,1,QModelIndex()),workID);
         }
@@ -384,18 +382,18 @@ void day_popup::set_result(int resultCode)
 
 void day_popup::set_proxyFilter(QString filterTo, int col,bool fixString)
 {
-    stdProxy->invalidate();
+    metaProxy->invalidate();
 
     if(fixString)
     {
-        stdProxy->setFilterFixedString(filterTo);
+        metaProxy->setFilterFixedString(filterTo);
     }
     else
     {
-        stdProxy->setFilterRegExp("\\b"+filterTo+"\\b");
+        metaProxy->setFilterRegExp("\\b"+filterTo+"\\b");
     }
 
-    stdProxy->setFilterKeyColumn(col);
+    metaProxy->setFilterKeyColumn(col);
 }
 
 void day_popup::edit_workoutDate(QDate workDate)
@@ -547,9 +545,9 @@ void day_popup::on_comboBox_stdworkout_activated(int stdindex)
     stdworkData.clear();
     this->set_proxyFilter(workoutID,1,false);
 
-    for(int i = 1; i < stdProxy->columnCount()-2; ++i)
+    for(int i = 1; i < metaProxy->columnCount()-2; ++i)
     {
-        stdworkData.insert(i,stdProxy->data(stdProxy->index(0,i)).toString());
+        stdworkData.insert(i,metaProxy->data(metaProxy->index(0,i)).toString());
     }
 
     for(QHash<int,QString>::const_iterator it = stdworkData.cbegin(), end = stdworkData.cend(); it != end; ++it)
@@ -572,9 +570,9 @@ void day_popup::on_toolButton_map_clicked()
 {
     QString workoutID = ui->comboBox_stdworkout->model()->data(ui->comboBox_stdworkout->model()->index(ui->comboBox_stdworkout->currentIndex(),1)).toString();
     this->set_proxyFilter(workoutID,1,false);
-    QString image = stdProxy->data(stdProxy->index(0,9)).toString();
+    QString image = metaProxy->data(metaProxy->index(0,9)).toString();
 
-    Dialog_map dialogMap(this,stdProxy,workoutID,image);
+    Dialog_map dialogMap(this,metaProxy,workoutID,image);
     dialogMap.setModal(true);
     dialogMap.exec();
 }

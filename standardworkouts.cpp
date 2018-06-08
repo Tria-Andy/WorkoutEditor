@@ -72,6 +72,11 @@ void standardWorkouts::read_standard_workouts(QDomDocument meta_doc,QDomDocument
         }
     }
 
+    metaProxy =  new QSortFilterProxyModel();
+    metaProxy->setSourceModel(workouts_meta);
+    stepProxy = new QSortFilterProxyModel();
+    stepProxy->setSourceModel(workouts_steps);
+
     this->set_workoutIds();
 }
 
@@ -128,17 +133,42 @@ void standardWorkouts::set_workoutIds()
     }
 }
 
+void standardWorkouts::filter_steps(QString workID,bool fixed)
+{
+    stepProxy->invalidate();
+    if(fixed)
+    {
+        stepProxy->setFilterFixedString(workID);
+    }
+    else
+    {
+        stepProxy->setFilterRegExp("\\b"+workID+"\\b");
+    }
+    stepProxy->setFilterKeyColumn(0);
+    stepProxy->sort(1);
+}
+
+void standardWorkouts::filter_workout(QString filterValue,int col,bool fixed)
+{
+    metaProxy->invalidate();
+    if(fixed)
+    {
+        metaProxy->setFilterFixedString(filterValue);
+    }
+    else
+    {
+        metaProxy->setFilterRegExp("\\b"+filterValue+"\\b");
+    }
+
+    metaProxy->setFilterKeyColumn(col);
+}
+
 void standardWorkouts::delete_stdWorkout(QString workID,bool isdelete)
 {
-    QSortFilterProxyModel *metaProxy =  new QSortFilterProxyModel();
-    metaProxy->setSourceModel(workouts_meta);
-    metaProxy->setFilterRegExp("\\b"+workID+"\\b");
-    metaProxy->setFilterKeyColumn(1);
+    this->filter_workout(workID,1,false);
     metaProxy->removeRow(0,QModelIndex());
 
-    QSortFilterProxyModel *stepProxy = new QSortFilterProxyModel();
-    stepProxy->setSourceModel(workouts_steps);
-    stepProxy->setFilterRegExp("\\b"+workID+"\\b");
+    this->filter_steps(workID,false);
     stepProxy->removeRows(0,stepProxy->rowCount(),QModelIndex());
 
     if(isdelete) this->set_workoutIds();
