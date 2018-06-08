@@ -38,7 +38,7 @@ private:
 
     static QMap<int,QString> sampList,intList;
     static QMap<int,double> weightMap;
-    static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,altRange,hfRange;
+    static QHash<QString,QString> swimRange,bikeRange,runRange,triRange,stgRange,altRange,hfRange;
     static QHash<QString,int> fontMap;
     static QVector<double> tempVector;
 
