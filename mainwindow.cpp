@@ -682,7 +682,7 @@ void MainWindow::workout_calendar()
         if(phaseFilterID == 1)
         {
             ui->tableView_cal->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-            weekoffset = settings::get_fontValue("weekOffSet");
+            weekoffset = settings::get_fontValue("weekRange");
             calendarModel->setRowCount(weekRange);
         }
         else
@@ -759,7 +759,7 @@ QString MainWindow::get_weekRange()
     {
         if(phaseFilterID == 1)
         {
-            display_weeks = QString::number(weekpos+1) + " - " + QString::number(weekpos + settings::get_fontValue("weekOffSet"));
+            display_weeks = QString::number(weekpos+1) + " - " + QString::number(weekpos + weekRange);
         }
         else
         {
@@ -1086,7 +1086,7 @@ void MainWindow::on_toolButton_weekPlus_clicked()
     else
     {
         ++weekpos;
-        if(weekpos + settings::get_fontValue("weekOffSet") == saisonWeeks)
+        if(weekpos + weekRange == saisonWeeks)
         {
             ui->toolButton_weekFour->setEnabled(false);
             ui->toolButton_weekPlus->setEnabled(false);
@@ -1112,11 +1112,10 @@ void MainWindow::on_toolButton_weekFour_clicked()
     }
     else
     {
-        int offSet = settings::get_fontValue("weekOffSet");
         weekpos = weekpos+4;
-        if(weekpos + offSet >= saisonWeeks)
+        if(weekpos + weekRange >= saisonWeeks)
         {
-            weekpos = saisonWeeks-offSet;
+            weekpos = saisonWeeks-weekRange;
             ui->toolButton_weekFour->setEnabled(false);
             ui->toolButton_weekPlus->setEnabled(false);
             this->workout_calendar();
