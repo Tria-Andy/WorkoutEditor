@@ -73,7 +73,10 @@ void week_popup::set_plotValues()
     QDate tempDate;
     QDateTime workDateTime;
     QStringList workDetails;
-    QString currZone,parent;
+    QString currZone,part,parent;
+    QMap<QString,int> factorMap;
+    int groupFactor = 1;
+    int seriesFactor = 1;
     int factor = 1;
     double timeSum = 0;
     double currTime = 0;
@@ -176,6 +179,7 @@ void week_popup::set_plotValues()
 
         for(int i = 0; i < workSched->scheduleProxy->rowCount(); ++i)
         {
+            workDateTime.setTime(QTime());
             workDateTime.setDate(QDate::fromString(workSched->scheduleProxy->data(workSched->scheduleProxy->index(i,1)).toString(),"dd.MM.yyyy"));
             workDateTime.setTime(QTime::fromString(workSched->scheduleProxy->data(workSched->scheduleProxy->index(i,2)).toString(),"hh:mm"));
 
@@ -194,24 +198,31 @@ void week_popup::set_plotValues()
             for(int x = 0; x < stepProxy->rowCount(); ++x)
             {
                 currZone = stepProxy->data(stepProxy->index(x,3)).toString();
-                parent = stepProxy->data(stepProxy->index(x,2)).toString();
+                part = stepProxy->data(stepProxy->index(x,2)).toString();
+                parent = stepProxy->data(stepProxy->index(x,8)).toString();
 
-                if(parent.contains("Group") || parent.contains("Series"))
+                if(part.contains("Group") || part.contains("Series"))
                 {
-                    if(parent.contains("Group"))
-                    {
-                        factor = factor * stepProxy->data(stepProxy->index(x,7)).toInt();
-                    }
-                    if(parent.contains("Series"))
-                    {
-                        factor = factor * stepProxy->data(stepProxy->index(x,7)).toInt();
-                    }
+                    factorMap.insert(part,stepProxy->data(stepProxy->index(x,7)).toInt());
                 }
+
+                if(parent.contains("Group") && part.contains("Series"))
+                {
+                    groupFactor = factorMap.value(parent);
+                    seriesFactor = factorMap.value(part);
+                    factorMap.insert(part,groupFactor*seriesFactor);
+                    factor = factorMap.value(parent);
+                }
+                else
+                {
+                    factor = 1;
+                }
+
                 currTime = this->get_timesec(stepProxy->data(stepProxy->index(x,5)).toString())*factor;
                 zoneTime.insert(currZone,zoneTime.value(currZone) + currTime);
                 timeSum = timeSum + currTime;
             }
-            factor = 1;
+            factorMap.clear();
         }
 
         for(QMap<QString,double>::const_iterator it = zoneTime.cbegin(), end = zoneTime.cend(); it != end; ++it)

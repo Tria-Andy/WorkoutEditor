@@ -68,7 +68,14 @@ void standardWorkouts::read_standard_workouts(QDomDocument meta_doc,QDomDocument
         workouts_steps->insertRows(row,1,QModelIndex());
         for(int col = 0; col < workouts_steps->columnCount(); ++col)
         {
-            workouts_steps->setData(workouts_steps->index(row,col,QModelIndex()),xmlElement.attribute(step_tags.at(col)));
+            if(col == 1)
+            {
+                workouts_steps->setData(workouts_steps->index(row,col,QModelIndex()),xmlElement.attribute(step_tags.at(col)).toInt());
+            }
+            else
+            {
+                workouts_steps->setData(workouts_steps->index(row,col,QModelIndex()),xmlElement.attribute(step_tags.at(col)));
+            }
         }
     }
 
