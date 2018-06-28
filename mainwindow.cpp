@@ -2256,6 +2256,10 @@ void MainWindow::on_toolButton_addMeal_clicked()
     QString mealString = ui->lineEdit_Mealname->text()+" ("+mealPort+"-"+ui->lineEdit_calories->text()+")";
     bool mealFlag = false;
 
+    if(ui->listWidget_MenuEdit->item(0)->data(Qt::DisplayRole).toString().contains("Default"))
+    {
+        ui->listWidget_MenuEdit->clear();
+    }
 
     if(ui->listWidget_MenuEdit->selectedItems().count() == 1)
     {

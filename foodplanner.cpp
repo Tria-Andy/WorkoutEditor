@@ -52,7 +52,7 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
 
     QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(loadedWeek,Qt::MatchExactly,0).at(0));
     calPercent = settings::doubleMap.value(weekPlansModel->data(weekPlansModel->index(weekIndex.row(),1)).toString());
-
+    defaultCal = settings::doubleMap.value("Mealdefault");
     this->fill_planList(firstDayofWeek,false);
     this->update_sumBySchedule(firstDayofWeek);
     this->update_sumByMenu(firstDayofWeek,0,NULL,false);
@@ -77,13 +77,17 @@ void foodplanner::read_foodPlan(QDomDocument xmldoc)
         intItems << new QStandardItem(settings::get_listValues("Mode").at(childLevel.attribute("mode").toInt()));
         intItems << new QStandardItem(childLevel.attribute("fdw"));
         intItems << new QStandardItem(childLevel.attribute("weight"));
-        if(intItems.at(1)->data(Qt::DisplayRole).toDate() == firstDayofWeek)
+
+        if(intItems.at(2)->data(Qt::DisplayRole).toDate() == firstDayofWeek)
         {
-            intItems.at(2)->setData(athleteValues->value("weight"),Qt::EditRole);
+            intItems.at(3)->setData(athleteValues->value("weight"),Qt::EditRole);
         }
 
-        rootItem->appendRow(intItems);
-        build_weekFoodTree(childLevel,intItems.at(0));
+        if(intItems.at(2)->data(Qt::DisplayRole).toDate() >= firstDayofWeek)
+        {
+            rootItem->appendRow(intItems);
+            build_weekFoodTree(childLevel,intItems.at(0));
+        }
     }
 }
 
@@ -372,11 +376,13 @@ void foodplanner::insert_newWeek(QDate firstday)
             dayItem.at(0)->appendRow(mealsItem);
 
             QList<QStandardItem*> foodItem;
-            foodItem << new QStandardItem("No Food");
+            foodItem << new QStandardItem("Default ");
+            foodItem << new QStandardItem("1");
+            foodItem << new QStandardItem(QString::number(defaultCal.at(meals)));
             mealsItem.at(0)->appendRow(foodItem);
         }
     }
-    this->fill_planList(firstday,true);
+    this->fill_planList(firstday,false);
 }
 
 void foodplanner::remove_week(QString weekID)

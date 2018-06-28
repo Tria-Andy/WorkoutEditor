@@ -362,7 +362,7 @@ void settings::loadSettings()
             for(int i = 0; i < listMap.value("Mode").count(); i++)
             {
                 settingString = settingList.at(i);
-                tempList = settingString.split("-");
+                tempList = settingString.split("|");
                 for(int x = 0; x < tempList.count();++x)
                 {
                     settingString = tempList.at(x);
@@ -379,14 +379,23 @@ void settings::loadSettings()
             settingList = myvalues->value("meals").toString().split(splitter);
             listMap.insert("Meals",settingList);
             settingList.clear();
+            settingList = myvalues->value("mealdefault").toString().split(splitter);
+            tempVector.resize(settingList.count());
+            for(int i = 0; i < settingList.count();++i)
+            {
+                settingString = settingList.at(i);
+                tempVector[i] = settingString.toDouble();
+            }
+            settingList.clear();
+            doubleMap.insert("Mealdefault",tempVector);
+            tempVector.clear();
             settingList = myvalues->value("dish").toString().split(splitter);
             listMap.insert("Dish",settingList);
             settingList.clear();
             generalMap.insert("AddMoving",myvalues->value("addmoving").toString());
             athleteMap.insert("BodyFatCal",myvalues->value("fatcal").toDouble());
-            tempVector.resize(7);
             settingList = myvalues->value("moveday").toString().split(splitter);
-
+            tempVector.resize(7);
             for(int i = 0; i < settingList.count();++i)
             {
                 settingString = settingList.at(i);
