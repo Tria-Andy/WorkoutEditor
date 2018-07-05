@@ -86,7 +86,6 @@ private slots:
     void on_pushButton_clearFat_clicked();
     void on_pushButton_addContest_clicked();
     void on_pushButton_delContest_clicked();
-    void on_treeView_contest_clicked(const QModelIndex &index);
     void on_toolButton_addSaison_clicked();
     void on_comboBox_saisons_currentIndexChanged(const QString &arg1);
     void on_comboBox_saisons_editTextChanged(const QString &arg1);
@@ -107,13 +106,14 @@ private slots:
     void on_toolButton_seasonPath_clicked();
     void on_toolButton_foodPath_clicked();
     void on_toolButton_mapPath_clicked();
-
     void on_pushButton_clearContest_clicked();
+    void selectContest(int);
 
 private:
     Ui::Dialog_settings *ui;
-    QStandardItemModel *level_model,*hf_model,*contestTreeModel;
+    QStandardItemModel *level_model,*hf_model;
     QSortFilterProxyModel *saisonProxy,*contestProxy;
+    QModelIndex contestIndex;
     schedule *schedule_ptr;
     foodplanner *food_ptr;
     saisons *saisons_ptr;
@@ -125,7 +125,7 @@ private:
     double thresPower,thresPace,sportFactor;
     QString getDirectory(QString);
     QColor openColor(QColor);
-    bool useColor,stressEdit;
+    bool useColor,stressEdit,editContest;
     void checkSetup();
     void set_SelectControls(QString);
     void reset_contest(bool);
@@ -144,7 +144,7 @@ private:
     void updateContest(bool,int);
     void refresh_saisonCombo();
     void set_saisonInfo(QString);
-    void refresh_contestTree(QString);
+    void refresh_contestTable(QString);
 };
 
 

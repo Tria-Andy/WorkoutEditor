@@ -49,7 +49,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="tab_gc">
          <attribute name="title">
@@ -1451,6 +1451,12 @@
           </item>
           <item>
            <widget class="QFrame" name="frame_9">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>1</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
             </property>
@@ -1471,7 +1477,13 @@
               <number>1</number>
              </property>
              <item>
-              <widget class="QTreeView" name="treeView_contest"/>
+              <widget class="QTableView" name="tableView_contest">
+               <property name="font">
+                <font>
+                 <pointsize>8</pointsize>
+                </font>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
