@@ -176,6 +176,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mealSelection = ui->treeView_meals->selectionModel();
     connect(mealSelection,SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(setSelectedMeal(QModelIndex)));
     connect(foodPlan->mealModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(mealSave(QStandardItem*)));
+    connect(ui->tableWidget_weekPlan->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodMealDay(int)));
+    connect(ui->tableWidget_weekPlan->verticalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodMealWeek(int)));
 
     ui->listWidget_weekPlans->addItems(foodPlan->planList);
     ui->comboBox_weightmode->blockSignals(true);
@@ -201,6 +203,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolButton_deleteMenu->setEnabled(false);
     ui->toolButton_menuCopy->setEnabled(false);
     ui->toolButton_menuPaste->setEnabled(false);
+    foodcopyMode = false;
+    dayLineSelected = false;
     this->reset_menuEdit();
     selModule = 0;
 
@@ -2200,7 +2204,7 @@ void MainWindow::on_toolButton_menuEdit_clicked()
     }
     else
     {
-        setString = "No Food\n";
+        setString = "None (0-0)\n";
     }
 
     setString.remove(setString.length()-1,1);
@@ -2256,9 +2260,12 @@ void MainWindow::on_toolButton_addMeal_clicked()
     QString mealString = ui->lineEdit_Mealname->text()+" ("+mealPort+"-"+ui->lineEdit_calories->text()+")";
     bool mealFlag = false;
 
-    if(ui->listWidget_MenuEdit->item(0)->data(Qt::DisplayRole).toString().contains("Default"))
+    if(ui->listWidget_MenuEdit->count() > 0)
     {
-        ui->listWidget_MenuEdit->clear();
+        if(ui->listWidget_MenuEdit->item(0)->data(Qt::DisplayRole).toString().contains("Default"))
+        {
+            ui->listWidget_MenuEdit->clear();
+        }
     }
 
     if(ui->listWidget_MenuEdit->selectedItems().count() == 1)
@@ -2449,18 +2456,65 @@ void MainWindow::on_toolButton_clear_clicked()
 
 void MainWindow::on_toolButton_menuCopy_clicked()
 {
-    menuCopy.clear();
-    for(int i = 0; i < ui->listWidget_MenuEdit->count(); ++i)
+    if(!lineSelected)
     {
-        menuCopy << ui->listWidget_MenuEdit->item(i)->text();
+        menuCopy.clear();
+        for(int i = 0; i < ui->listWidget_MenuEdit->count(); ++i)
+        {
+            menuCopy << ui->listWidget_MenuEdit->item(i)->text();
+        }
     }
+    else
+    {
+        foodcopyMode = true;
+    }
+
     ui->toolButton_menuPaste->setEnabled(true);
 }
 
 void MainWindow::on_toolButton_menuPaste_clicked()
 {
-    ui->listWidget_MenuEdit->clear();
-    ui->listWidget_MenuEdit->addItems(menuCopy);
+    if(foodcopyMode)
+    {
+        int counter = 0;
+        QString tempValue;
+        if(dayLineSelected)
+        {
+            counter = ui->tableWidget_weekPlan->rowCount();
+        }
+        else
+        {
+            counter = ui->tableWidget_weekPlan->columnCount();
+        }
+
+        for(int i = 0; i < counter; ++i)
+        {
+            for(int x = 0; x < selectedLine.value(i).count(); ++x)
+            {
+                tempValue = tempValue + selectedLine.value(i).at(x) + "\n";
+            }
+            tempValue.remove(tempValue.length()-1,1);
+            if(dayLineSelected)
+            {
+                ui->tableWidget_weekPlan->item(i,foodcopyLine)->setData(Qt::EditRole,tempValue);
+            }
+            else
+            {
+                ui->tableWidget_weekPlan->item(foodcopyLine,i)->setData(Qt::EditRole,tempValue);
+            }
+            tempValue.clear();
+        }
+        foodcopyLine = 0;
+        foodcopyMode = false;
+        ui->toolButton_menuCopy->setEnabled(false);
+        ui->toolButton_menuPaste->setEnabled(false);
+    }
+    else
+    {
+        ui->listWidget_MenuEdit->clear();
+        ui->listWidget_MenuEdit->addItems(menuCopy);
+    }
+
     this->calc_menuCal();
 }
 
@@ -2472,4 +2526,53 @@ void MainWindow::on_comboBox_weightmode_currentIndexChanged(const QString &value
     foodPlan->weekPlansModel->setData(foodPlan->weekPlansModel->index(modelRow,1),value);
     ui->comboBox_weightmode->setEnabled(false);
     ui->actionSave->setEnabled(true);
+}
+
+void MainWindow::fill_selectLine(int line, int lineCounter,bool day)
+{
+    QStringList tempValues;
+    selectedLine.clear();
+    lineSelected = true;
+    dayLineSelected = day;
+
+    for(int i = 0; i < lineCounter;++i)
+    {
+        if(day)
+        {
+            tempValues = ui->tableWidget_weekPlan->item(i,line)->data(Qt::DisplayRole).toString().split("\n");
+        }
+        else
+        {
+            tempValues = ui->tableWidget_weekPlan->item(line,i)->data(Qt::DisplayRole).toString().split("\n");
+        }
+
+        selectedLine.insert(i,tempValues);
+        tempValues.clear();
+    }
+
+    ui->toolButton_menuCopy->setEnabled(true);
+}
+
+void MainWindow::selectFoodMealWeek(int selectedMeal)
+{
+    if(!foodcopyMode)
+    {
+        this->fill_selectLine(selectedMeal,ui->tableWidget_weekPlan->columnCount(),false);
+    }
+    else
+    {
+        foodcopyLine = selectedMeal;
+    }
+}
+
+void MainWindow::selectFoodMealDay(int selectedDay)
+{
+    if(!foodcopyMode)
+    {
+        this->fill_selectLine(selectedDay,ui->tableWidget_weekPlan->rowCount(),true);
+    }
+    else
+    {
+        foodcopyLine = selectedDay;
+    }
 }

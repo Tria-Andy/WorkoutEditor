@@ -1167,9 +1167,9 @@ private:
     QString weeknumber,phaseFilter,buttonStyle,viewStyle;
     QVector<double> work_sum,dur_sum,stress_sum;
     QVector<double> dist_sum;
-    int selModule,weekRange,weekpos,saisonWeeks,weekDays;
+    int selModule,weekRange,weekpos,saisonWeeks,weekDays,foodcopyLine;
     unsigned int weekCounter,sportCounter,phaseFilterID;
-    bool userSetup,isWeekMode,graphLoaded,actLoaded;
+    bool userSetup,isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
 
     void openPreferences();
     void summery_view();
@@ -1200,6 +1200,8 @@ private:
     void freeMem();
 
     //Food
+    QMap<int,QStringList> selectedLine;
+    void fill_selectLine(int,int,bool);
     void fill_weekTable(QString,bool);
     void set_foodWeek(QString);
     void calc_foodCalories(int,double,int);
@@ -1289,6 +1291,8 @@ private slots:
     void on_toolButton_menuCopy_clicked();
     void on_toolButton_menuPaste_clicked();
     void on_comboBox_weightmode_currentIndexChanged(const QString &arg1);
+    void selectFoodMealWeek(int);
+    void selectFoodMealDay(int);
 };
 
 #endif // MAINWINDOW_H
