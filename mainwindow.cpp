@@ -203,8 +203,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolButton_deleteMenu->setEnabled(false);
     ui->toolButton_menuCopy->setEnabled(false);
     ui->toolButton_menuPaste->setEnabled(false);
-    foodcopyMode = false;
-    dayLineSelected = false;
+    foodcopyMode = lineSelected = dayLineSelected = false;
     this->reset_menuEdit();
     selModule = 0;
 
@@ -2506,14 +2505,15 @@ void MainWindow::on_toolButton_menuPaste_clicked()
         }
         foodcopyLine = 0;
         foodcopyMode = false;
-        ui->toolButton_menuCopy->setEnabled(false);
-        ui->toolButton_menuPaste->setEnabled(false);
+        lineSelected = false;
     }
     else
     {
         ui->listWidget_MenuEdit->clear();
         ui->listWidget_MenuEdit->addItems(menuCopy);
     }
+
+    ui->toolButton_menuCopy->setEnabled(false);
 
     this->calc_menuCal();
 }
