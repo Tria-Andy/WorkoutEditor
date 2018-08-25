@@ -35,6 +35,7 @@
 #include "week_popup.h"
 #include "year_popup.h"
 #include "stress_popup.h"
+#include "foodmacro_popup.h"
 #include "dialog_export.h"
 #include "dialog_stresscalc.h"
 #include "dialog_workcreator.h"
@@ -53,7 +54,7 @@ class calendar_delegate : public QStyledItemDelegate, public calculation
     Q_OBJECT
 
 public:
-    calendar_delegate(QTableView *parent = 0) : QStyledItemDelegate(parent) {}
+    calendar_delegate(QTableView *parent = nullptr) : QStyledItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -250,7 +251,7 @@ class week_delegate : public QStyledItemDelegate, public calculation
     Q_OBJECT
 
 public:
-    week_delegate(QTableView *parent = 0) : QStyledItemDelegate(parent) {}
+    week_delegate(QTableView *parent = nullptr) : QStyledItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -403,7 +404,7 @@ class summery_delegate : public QStyledItemDelegate, public calculation
     Q_OBJECT
 
 public:
-    summery_delegate(QTableView *parent = 0) : QStyledItemDelegate(parent) {}
+    summery_delegate(QTableView *parent = nullptr) : QStyledItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -504,7 +505,7 @@ class del_treeview : public QStyledItemDelegate, public calculation
     Q_OBJECT
 
 public:
-    explicit del_treeview(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_treeview(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -609,7 +610,7 @@ class del_avgselect : public QStyledItemDelegate
     Q_OBJECT
 
 public:
-    explicit del_avgselect(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_avgselect(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
     QString sport;
 
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -652,7 +653,7 @@ class del_intselect : public QStyledItemDelegate, public calculation
     Q_OBJECT
 
 public:
-    explicit del_intselect(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_intselect(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
     enum{SwimLap,Interval};
     int intType;
     QString sport;
@@ -906,7 +907,7 @@ class del_avgweek : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 public:
-    explicit del_avgweek(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_avgweek(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -944,7 +945,7 @@ class del_foodplan : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit del_foodplan(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_foodplan(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -984,7 +985,7 @@ class del_foodSummery : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 public:
-    explicit del_foodSummery(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_foodSummery(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
     QVector<double> percent;
 
@@ -1051,7 +1052,7 @@ class del_foodWeekSum : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 public:
-    explicit del_foodWeekSum(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_foodWeekSum(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
     QVector<double> percent;
 
@@ -1195,7 +1196,7 @@ private:
     void update_infoModel();
     void fill_WorkoutContent();
     void unselect_intRow(bool);
-    void set_menuItems(bool,bool);
+    void set_menuItems(bool,bool,bool);
     void reset_jsontext();
     void freeMem();
 
@@ -1293,6 +1294,7 @@ private slots:
     void on_comboBox_weightmode_currentIndexChanged(const QString &arg1);
     void selectFoodMealWeek(int);
     void selectFoodMealDay(int);
+    void on_actionFood_Macros_triggered();
 };
 
 #endif // MAINWINDOW_H

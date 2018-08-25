@@ -97,6 +97,10 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->doubleSpinBox_min->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(3));
     this->set_bottonColor(ui->toolButton_colormin,false);
 
+    ui->spinBox_carbs->setValue(settings::doubleMap.value("Macros").at(0));
+    ui->spinBox_protein->setValue(settings::doubleMap.value("Macros").at(1));
+    ui->spinBox_fat->setValue(settings::doubleMap.value("Macros").at(2));
+
     for(int i = 0; i < 7; ++i)
     {
        tempCheck = this->findChild<QCheckBox *>("checkBox_Work_"+QString::number(i));
@@ -173,6 +177,25 @@ void Dialog_settings::refresh_contestTable(QString saisonName)
     }
 
     this->reset_contest(false);
+}
+
+void Dialog_settings::refresh_macros()
+{
+    QPalette sumBox;
+    int value = ui->spinBox_carbs->value()+ui->spinBox_protein->value()+ui->spinBox_fat->value();
+
+    if(value > 100)
+    {
+        sumBox.setColor(QPalette::Base,Qt::red);
+        sumBox.setColor(QPalette::Text,Qt::white);
+    }
+    else
+    {
+        sumBox.setColor(QPalette::NoRole,Qt::NoBrush);
+        sumBox.setColor(QPalette::Text,Qt::black);
+    }
+    ui->lineEdit_macroSum->setPalette(sumBox);
+    ui->lineEdit_macroSum->setText(QString::number(value));
 }
 
 
@@ -1037,6 +1060,20 @@ void Dialog_settings::on_pushButton_addContest_clicked()
         schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,5),ui->doubleSpinBox_contest->value());
         schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,6),ui->spinBox_contestStress->value());
     }
+    /*
+    schedule_ptr->scheduleProxy->setFilterFixedString(ui->dateEdit_contest->date().toString("dd.MM.yyyy"));
+    schedule_ptr->scheduleProxy->setFilterKeyColumn(1);
+    if(schedule_ptr->scheduleProxy->rowCount() == 0)
+    {
+        schedule_ptr->scheduleProxy->setData(schedule_ptr->scheduleProxy->index(0,0),);
+        schedule_ptr->scheduleProxy->setData(schedule_ptr->scheduleProxy->index(0,1),);
+        schedule_ptr->scheduleProxy->setData(schedule_ptr->scheduleProxy->index(0,2),);
+        schedule_ptr->scheduleProxy->setData(schedule_ptr->scheduleProxy->index(0,3),);
+        schedule_ptr->scheduleProxy->setData(schedule_ptr->scheduleProxy->index(0,4),);
+        schedule_ptr->scheduleProxy->setData(schedule_ptr->scheduleProxy->index(0,5),);
+    }
+    schedule_ptr->scheduleProxy->invalidate();
+    */
 
     this->reset_contest(false);
     this->refresh_contestTable(ui->comboBox_saisons->currentText());
@@ -1270,4 +1307,19 @@ void Dialog_settings::selectContest(int row)
     ui->pushButton_clearContest->setEnabled(true);
     ui->pushButton_delContest->setEnabled(true);
     editContest = true;
+}
+
+void Dialog_settings::on_spinBox_carbs_valueChanged(int value)
+{
+    refresh_macros();
+}
+
+void Dialog_settings::on_spinBox_protein_valueChanged(int value)
+{
+    refresh_macros();
+}
+
+void Dialog_settings::on_spinBox_fat_valueChanged(int value)
+{
+    refresh_macros();
 }

@@ -167,7 +167,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView_daySummery->setItemDelegate(&foodSum_del);
     ui->treeView_meals->setModel(foodPlan->mealModel);
     ui->treeView_meals->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->treeView_meals->header()->hide();
     ui->treeView_meals->setSortingEnabled(true);
     ui->treeView_meals->sortByColumn(0,Qt::AscendingOrder);
     //ui->treeView_meals->setItemDelegate(&mousehover_del);
@@ -212,7 +211,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->read_activityFiles();
 
     ui->actionSave->setEnabled(false);
-    this->set_menuItems(false,true);
+    this->set_menuItems(false,true,false);
     this->set_phaseFilter(1);
     this->loadUISettings();
 }
@@ -362,21 +361,28 @@ void MainWindow::openPreferences()
     dia_settings.exec();
 }
 
-void MainWindow::set_menuItems(bool mEditor,bool mPlaner)
+void MainWindow::set_menuItems(bool mEditor,bool mPlaner, bool mFood)
 {
     //Editor
     ui->actionRefresh_Filelist->setVisible(mEditor);
     ui->actionReset->setVisible(mEditor);
     ui->actionSelect_File->setVisible(mEditor);
     ui->actionReset->setEnabled(actLoaded);
+    ui->actionPMC->setVisible(mPlaner);
 
     //Schedule
     ui->menuWorkout->setEnabled(mPlaner);
+    ui->actionPMC->setVisible(mPlaner);
+    ui->actionIntervall_Editor->setVisible(mPlaner);
     ui->actionExport_to_Golden_Cheetah->setVisible(mPlaner);
     ui->actionNew->setVisible(mPlaner);
     planerMode->setEnabled(mPlaner);
     planMode->setEnabled(mPlaner);
     planerMode->setVisible(mPlaner);
+
+    //Food
+    ui->actionFood_Macros->setVisible(mFood);
+    ui->actionEditor->setVisible(mPlaner);
 
     ui->actionDelete->setVisible(false);
 
@@ -1188,7 +1194,7 @@ void MainWindow::loadfile(const QString &filename)
         ui->actionSelect_File->setEnabled(false);
         ui->actionReset->setEnabled(true);
         intSelect_del.sport = avgSelect_del.sport = curr_activity->get_sport();
-        this->set_menuItems(true,false);
+        this->set_menuItems(true,false,false);
 
         this->init_editorViews();
         this->update_infoModel();
@@ -1785,13 +1791,13 @@ void MainWindow::setCurrentTreeIndex(bool up)
 void MainWindow::on_actionEditor_triggered()
 {
     ui->stackedWidget->setCurrentIndex(1);
-    this->set_menuItems(true,false);
+    this->set_menuItems(true,false,false);
 }
 
 void MainWindow::on_actionPlaner_triggered()
 {
     ui->stackedWidget->setCurrentIndex(0);
-    this->set_menuItems(false,true);
+    this->set_menuItems(false,true,false);
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -1994,15 +2000,15 @@ void MainWindow::set_module(int modID)
 
     if(modID == PLANER)
     {
-        this->set_menuItems(false,true);
+        this->set_menuItems(false,true,false);
     }
     else if(modID == EDITOR)
     {
-        this->set_menuItems(true,false);
+        this->set_menuItems(true,false,false);
     }
     else if(modID == FOOD)
     {
-        this->set_menuItems(false,false);
+        this->set_menuItems(false,false,true);
         ui->actionDelete->setVisible(true);
         ui->actionDelete->setEnabled(false);
         ui->actionNew->setVisible(true);
@@ -2065,6 +2071,8 @@ void MainWindow::toolButton_planMode(bool checked)
 
 void MainWindow::on_treeView_files_clicked(const QModelIndex &index)
 {
+    this->unselect_intRow(false);
+    ui->lineEdit_workContent->clear();
     this->clearActivtiy();
     this->loadfile(fileModel->data(fileModel->index(index.row(),4)).toString());
 }
@@ -2075,7 +2083,6 @@ void MainWindow::on_actionRefresh_Filelist_triggered()
     this->read_activityFiles();
     ui->progressBar_fileState->setValue(100);
     QTimer::singleShot(2000,ui->progressBar_fileState,SLOT(reset()));
-
 }
 
 void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value)
@@ -2094,14 +2101,16 @@ void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value
 
 void MainWindow::set_foodWeek(QString weekID)
 {
+    foodPlan->dayMacros.clear();
+    foodPlan->dayTarget.clear();
     QStringList weekInfo = weekID.split(" - ");
     foodPlan->firstDayofWeek = QDate::fromString(weekInfo.at(1),"dd.MM.yyyy");
     this->fill_weekTable(weekInfo.at(0),true);
     foodPlan->calPercent = settings::doubleMap.value(weekInfo.at(2));
     foodSum_del.percent = foodPlan->calPercent;
     foodSumWeek_del.percent = foodPlan->calPercent;
-    foodPlan->update_sumByMenu(foodPlan->firstDayofWeek,0,NULL,false);
-    foodPlan->update_sumBySchedule(foodPlan->firstDayofWeek);
+    foodPlan->update_sumByMenu(foodPlan->firstDayofWeek,0,nullptr,false);
+    //foodPlan->update_sumBySchedule(foodPlan->firstDayofWeek);
     ui->label_foodWeek->setText("Kw "+ weekID);
 }
 
@@ -2356,7 +2365,7 @@ void MainWindow::on_listWidget_MenuEdit_itemClicked(QListWidgetItem *item)
     portCal = portCal.remove(")");
 
     portion = portCal.split("-").first();
-    mealData = foodPlan->get_mealData(foodName);
+    mealData = foodPlan->get_mealData(foodName,false);
 
     double d_portion = portion.toDouble()/mealData.at(0);
     double d_mealCal = mealData.at(1)*d_portion;
@@ -2419,8 +2428,11 @@ void MainWindow::on_treeView_meals_collapsed(const QModelIndex &index)
 void MainWindow::on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item)
 {
     ui->listWidget_MenuEdit->clear();
-    ui->listWidget_MenuEdit->addItems(item->data(Qt::DisplayRole).toString().split("\n"));
-    this->calc_menuCal();
+    if(!item->data(Qt::DisplayRole).toString().isEmpty())
+    {
+        ui->listWidget_MenuEdit->addItems(item->data(Qt::DisplayRole).toString().split("\n"));
+        this->calc_menuCal();
+    }
     ui->label_menuEdit->setText("Edit: "+ foodPlan->dayHeader.at(item->column()) + " - " + foodPlan->mealsHeader.at(item->row()));
     ui->toolButton_foodDown->setEnabled(true);
     ui->toolButton_foodUp->setEnabled(true);
@@ -2575,4 +2587,11 @@ void MainWindow::selectFoodMealDay(int selectedDay)
     {
         foodcopyLine = selectedDay;
     }
+}
+
+void MainWindow::on_actionFood_Macros_triggered()
+{
+    foodmacro_popup foodPop(this,foodPlan,ui->calendarWidget->selectedDate());
+    foodPop.setModal(true);
+    foodPop.exec();
 }

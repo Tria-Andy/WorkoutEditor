@@ -2178,13 +2178,13 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>200</width>
+                <width>250</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>275</width>
+                <width>400</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -2935,6 +2935,7 @@
     <addaction name="actionPace_Calculator"/>
     <addaction name="actionStress_Calculator"/>
     <addaction name="actionPMC"/>
+    <addaction name="actionFood_Macros"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -2984,6 +2985,7 @@
    <addaction name="actionPace_Calculator"/>
    <addaction name="actionStress_Calculator"/>
    <addaction name="actionPMC"/>
+   <addaction name="actionFood_Macros"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -3183,6 +3185,15 @@
    </property>
    <property name="text">
     <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionFood_Macros">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/images/icons/Load.png</normaloff>:/images/icons/Load.png</iconset>
+   </property>
+   <property name="text">
+    <string>Food Macros</string>
    </property>
   </action>
  </widget>

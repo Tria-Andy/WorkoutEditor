@@ -11,11 +11,12 @@
 class foodplanner : public xmlHandler, public calculation
 {
 public:
-    explicit foodplanner(schedule *ptrSchedule = 0,QDate fd = QDate());
+    explicit foodplanner(schedule *ptrSchedule = nullptr,QDate fd = QDate());
 
     QStandardItemModel *weekPlansModel,*weekSumModel,*daySumModel,*mealModel,*estModel;
+    QSortFilterProxyModel *daySumProxy;
     QDate firstDayofWeek;
-    QStringList planList,mealsHeader,dayHeader,estHeader;
+    QStringList planList,mealsHeader,menuHeader,dayHeader,estHeader;
     QMap<int,QStringList> foodList;
 
     QString set_weekID(QDate);
@@ -24,7 +25,7 @@ public:
     void edit_mealSection(QString,int);
     void add_meal(QItemSelectionModel*);
     void remove_meal(QItemSelectionModel*);
-    QVector<int> get_mealData(QString);
+    QVector<int> get_mealData(QString,bool);
     QVector<double> calPercent,defaultCal;
     void fill_plannerModel();
     void insert_newWeek(QDate);
@@ -32,6 +33,8 @@ public:
     void update_sumBySchedule(QDate);
     void update_sumByMenu(QDate,int, QStringList*,bool);
     QStringList get_mealList(QString);
+    QMap<QDate,QVector<double>> dayTarget;
+    QMap<QDate,QVector<double>> dayMacros;
 
 private:
     schedule *schedulePtr;
@@ -50,6 +53,7 @@ private:
     void update_weekPlanModel(QDate,int,QStringList*);
     void update_daySumModel();
     void update_weekSumModel();
+    void set_foodMacros(QDate,QString,double);
 
 private slots:
 

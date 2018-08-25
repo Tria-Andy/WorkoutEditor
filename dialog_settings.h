@@ -40,7 +40,7 @@ class Dialog_settings : public QDialog, public calculation, public xmlHandler, p
     Q_OBJECT
 
 public:
-    explicit Dialog_settings(QWidget *parent = 0,schedule *psched = 0,foodplanner *pFood = 0);
+    explicit Dialog_settings(QWidget *parent = nullptr,schedule *psched = nullptr,foodplanner *pFood = nullptr);
     ~Dialog_settings();
 
 private slots:
@@ -108,6 +108,9 @@ private slots:
     void on_toolButton_mapPath_clicked();
     void on_pushButton_clearContest_clicked();
     void selectContest(int);
+    void on_spinBox_carbs_valueChanged(int arg1);
+    void on_spinBox_protein_valueChanged(int arg1);
+    void on_spinBox_fat_valueChanged(int arg1);
 
 private:
     Ui::Dialog_settings *ui;
@@ -141,10 +144,10 @@ private:
     void updateListMap(int,bool);
     void writeChangedValues();
     void writeRangeValues(QString);
-    void updateContest(bool,int);
     void refresh_saisonCombo();
     void set_saisonInfo(QString);
     void refresh_contestTable(QString);
+    void refresh_macros();
 };
 
 
