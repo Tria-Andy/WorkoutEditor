@@ -79,7 +79,7 @@ void Activity::prepareData()
     itemHeader.insert(0,QStringList() << "Name:" << "Type:" << "Distance (M):" << "Duration (Sec):" << "Pace/100m:" << "Speed km/h:" << "Strokes:");
     itemHeader.insert(1,QStringList() << "Name:" << "Start:" << "Distance:" << "Duration:" << "Pace:" << "Speed km/h:");
     itemHeader.insert(2,QStringList() << "Name:" << "Start:" << "Distance:" << "Duration:");
-    avgHeader.insert(0,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance:");
+    avgHeader.insert(0,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance:" << "Strokes:" << "SWOLF:" << "Cycletime:");
     avgHeader.insert(1,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance:" << "Watts:" << "CAD:");
     avgHeader.insert(2,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance");
     intTreeModel = new QStandardItemModel();
@@ -152,8 +152,8 @@ void Activity::prepareData()
             zone_low = temp.split("-").first();
             zone_high = temp.split("-").last();
 
-            zoneLow = this->get_zone_values(zone_low.toDouble(),hfThreshold,false);
-            zoneHigh = this->get_zone_values(zone_high.toDouble(),hfThreshold,false);
+            zoneLow = this->get_zone_values(zone_low.toDouble(),static_cast<int>(hfThreshold),false);
+            zoneHigh = this->get_zone_values(zone_high.toDouble(),static_cast<int>(hfThreshold),false);
 
             if(i < zoneCount-1)
             {
@@ -331,7 +331,7 @@ void Activity::prepareData()
         }
 
         selItemModel->setVerticalHeaderLabels(itemHeader.value(0));
-        avgValues.resize(4);
+        avgValues.resize(7);
         avgModel->setVerticalHeaderLabels(avgHeader.value(0));
 
         this->swimhfTimeInZone(false);
@@ -1833,6 +1833,12 @@ void Activity::set_avgValues(int counter,int factor)
             avgValues[1] = avgValues[1] + (static_cast<double>(this->get_timesec(intTreeModel->data(selItem.value(4)).toString()))*factor);
             avgValues[2] = avgValues.at(2) + (static_cast<double>(this->get_timesec(intTreeModel->data(selItem.value(6)).toString()))*factor);
             avgValues[3] = avgValues.at(3) + (intTreeModel->data(selItem.value(3)).toDouble()*factor);
+            avgValues[4] = avgValues.at(4) + (intTreeModel->data(selItem.value(8)).toDouble());
+            avgValues[5] = avgValues.at(5) + (this->get_timesec(intTreeModel->data(selItem.value(4)).toString())+intTreeModel->data(selItem.value(8)).toInt());
+            avgValues[6] = avgValues.at(6) + (avgValues.at(1)/avgValues.at(4));
+            avgModel->setData(avgModel->index(4,0),round(avgValues[4]/avgCounter));
+            avgModel->setData(avgModel->index(5,0),round(avgValues[5]/avgCounter));
+            avgModel->setData(avgModel->index(6,0),this->set_doubleValue(avgValues[6]/avgCounter,false));
         }
         else
         {
