@@ -87,7 +87,7 @@ public:
         {
             return &intList;
         }
-        return 0;
+        return nullptr;
     }
 
     enum stingMap {GC,General,Tria};
@@ -105,7 +105,7 @@ public:
         {
             return &triaMap;
         }
-        return 0;
+        return nullptr;
     }
 
     enum dMap {Threshold,Athlete,LTS};
@@ -123,7 +123,7 @@ public:
         {
             return &ltsMap;
         }
-        return 0;
+        return nullptr;
     }
 
     //QMap/QHash Setter
