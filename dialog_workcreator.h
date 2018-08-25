@@ -22,7 +22,7 @@ class del_workcreator : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit del_workcreator(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_workcreator(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
     QStringList groupList;
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
@@ -74,7 +74,7 @@ class del_workcreatoredit : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 public:
-    explicit del_workcreatoredit(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_workcreatoredit(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
     bool hasValue,timeBased;
     QString sport;
     int thresBase;
@@ -209,7 +209,7 @@ public:
                 return editor;
             }
         }
-        return 0;
+        return nullptr;
     }
 
     void setEditorData(QWidget *editor, const QModelIndex &index) const
@@ -462,7 +462,7 @@ class Dialog_workCreator : public QDialog, public calculation, public standardWo
     Q_OBJECT
 
 public:
-    explicit Dialog_workCreator(QWidget *parent = 0,schedule *psched = 0);
+    explicit Dialog_workCreator(QWidget *parent = nullptr,schedule *psched = nullptr);
     ~Dialog_workCreator();
 
 private slots:

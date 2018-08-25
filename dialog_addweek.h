@@ -34,7 +34,7 @@ class del_addweek : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 public:
-    explicit del_addweek(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_addweek(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {

@@ -198,7 +198,7 @@ class Dialog_paceCalc : public QDialog, public calculation
     Q_OBJECT
 
 public:
-    explicit Dialog_paceCalc(QWidget *parent = 0);
+    explicit Dialog_paceCalc(QWidget *parent = nullptr);
     ~Dialog_paceCalc();
 
 private slots:

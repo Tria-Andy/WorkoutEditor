@@ -35,7 +35,7 @@ class week_popup : public QDialog, public calculation,public standardWorkouts
     Q_OBJECT
 
 public:
-    explicit week_popup(QWidget *parent = 0,QString weekinfo = 0,schedule *p_sched = 0);
+    explicit week_popup(QWidget *parent = nullptr,QString weekinfo = nullptr,schedule *p_sched = nullptr);
     ~week_popup();
 
 private slots:

@@ -36,7 +36,7 @@ class Dialog_export : public QDialog, public jsonHandler
     Q_OBJECT
 
 public:
-    explicit Dialog_export(QWidget *parent = 0,schedule *p_schedule = 0);
+    explicit Dialog_export(QWidget *parent = nullptr,schedule *p_schedule = nullptr);
     ~Dialog_export();
 
 private slots:

@@ -36,7 +36,7 @@ class Dialog_week_copy : public QDialog, public xmlHandler, public calculation
     Q_OBJECT
 
 public:
-    explicit Dialog_week_copy(QWidget *parent = 0,QString selectedWeek = 0, schedule *p_sched = 0,bool hasWeek = false);
+    explicit Dialog_week_copy(QWidget *parent = nullptr,QString selectedWeek = nullptr, schedule *p_sched = nullptr,bool hasWeek = false);
     ~Dialog_week_copy();
 
 private slots:

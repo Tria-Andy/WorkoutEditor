@@ -198,23 +198,26 @@ void year_popup::set_plot(int yValue)
     ui->widget_plot->legend->setFillOrder(QCPLegend::foColumnsFirst);
     ui->widget_plot->plotLayout()->setRowStretchFactor(1,0.0001);
 
+    QMap<double,QString> tickerList;
+    tickerList.insert(0,"Start");
+
     QSharedPointer<QCPAxisTickerText> weekTicker(new QCPAxisTickerText);
-    weekTicker->addTick(0,"Start");
     if(phaseindex != 0)
     {
         for(int i = 1; i <= weekcount; ++i)
         {
-            weekTicker->addTick(i,weekList.at(i-1));
+            tickerList.insert(i,weekList.at(i-1));
         }
     }
     else
     {
         for(int i = 1; i <= weekcount; ++i)
         {
-            weekTicker->addTick(i,QString::number(i));
+            tickerList.insert(i,QString::number(i));
         }
     }
-    weekTicker->addTick(weekcount+1,"End");
+    tickerList.insert(tickerList.count(),"End");
+    weekTicker->addTicks(tickerList);
 
     ui->widget_plot->xAxis->setRange(0,weekcount+1);
     ui->widget_plot->xAxis->setTicker(weekTicker);
