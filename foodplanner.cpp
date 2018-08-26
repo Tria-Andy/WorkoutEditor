@@ -517,6 +517,7 @@ int foodplanner::read_dayCalories(QDate vDate)
 
         if(dayDate == vDate)
         {
+            dayMacros.insert(dayDate,QVector<double>(5));
             dayIndex = weekPlansModel->index(day,0,weekIndex);
             for(int meal = 0; meal < mealsHeader.count(); ++meal)
             {
@@ -546,7 +547,6 @@ void foodplanner::update_daySumModel()
     QDateTime calcDay;
     calcDay.setDate(firstDayofWeek);
     QVector<double> temp(5);
-    temp.fill(0);
 
     int minCal = 0;
     int maxCal = 0;
@@ -556,7 +556,6 @@ void foodplanner::update_daySumModel()
         sum = daySumModel->data(daySumModel->index(1,i)).toInt() + daySumModel->data(daySumModel->index(2,i)).toInt();
         diff = sum - daySumModel->data(daySumModel->index(0,i)).toInt();
         dayCalBase = this->current_dayCalories(calcDay.addDays(i).addSecs(120)) * currPal;
-        dayMacros.insert(calcDay.date().addDays(i),temp);
         daySumModel->setData(daySumModel->index(1,i),dayCalBase);
         daySumModel->setData(daySumModel->index(3,i),sum);
         daySumModel->setData(daySumModel->index(4,i),diff);
@@ -631,19 +630,10 @@ void foodplanner::update_weekSumModel()
 
 void foodplanner::set_foodMacros(QDate day,QString foodString,double foodPort)
 {
-    QVector<int> dayCal(7);
     QVector<int> foodMacros(5);
     QVector<double> temp(5);
     double factor = 0;
-
-    if(foodPort > 10)
-    {
-        factor = foodPort / 100.0;
-    }
-    else
-    {
-        factor = foodPort;
-    }
+    double portion = 0;
 
     if(foodString.contains("Default") || foodString.contains("None") || foodString.isEmpty())
     {
@@ -651,7 +641,17 @@ void foodplanner::set_foodMacros(QDate day,QString foodString,double foodPort)
     }
     else
     {
+        portion = this->get_mealData(foodString,false).at(0);
         foodMacros = this->get_mealData(foodString,true);
+
+        if(portion >= 1 && portion < 100)
+        {
+            factor = foodPort;
+        }
+        else if(portion >= 100)
+        {
+            factor = foodPort / 100.0;
+        }
 
         for(int i = 0; i < 5; ++i)
         {

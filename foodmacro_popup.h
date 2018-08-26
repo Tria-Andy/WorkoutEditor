@@ -23,8 +23,10 @@ private:
     Ui::foodmacro_popup *ui;
     foodplanner *foodplan;
     QDate startDay;
+    double yMax;
     int dayCount;
     QList<QDateTime> weekDates;
+    QStringList macroHeader,dateHeader;
     QVector<double> carbValues,proteinValues, fatValues, fiberValues,sugarValues,xValues;
     QVector<double> carbMarco,proteinMacro, fatMacro, fiberMacro,sugarMacro;
     void set_plotValues(QDate);

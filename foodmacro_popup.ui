@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>891</width>
-    <height>407</height>
+    <width>1000</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -109,6 +109,12 @@
    </item>
    <item>
     <widget class="QFrame" name="frame_graph">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>1</horstretch>
+       <verstretch>1</verstretch>
+      </sizepolicy>
+     </property>
      <property name="frameShape">
       <enum>QFrame::Panel</enum>
      </property>
@@ -132,9 +138,32 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QCustomPlot" name="widget_plot" native="true"/>
+       <widget class="QCustomPlot" name="widget_plot" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTableWidget" name="tableWidget_macros">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>1</horstretch>
+       <verstretch>1</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
     </widget>
    </item>
   </layout>

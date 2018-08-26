@@ -2110,7 +2110,7 @@ void MainWindow::set_foodWeek(QString weekID)
     foodSum_del.percent = foodPlan->calPercent;
     foodSumWeek_del.percent = foodPlan->calPercent;
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek,0,nullptr,false);
-    //foodPlan->update_sumBySchedule(foodPlan->firstDayofWeek);
+    foodPlan->update_sumBySchedule(foodPlan->firstDayofWeek);
     ui->label_foodWeek->setText("Kw "+ weekID);
 }
 
@@ -2129,7 +2129,7 @@ void MainWindow::calc_foodCalories(int portion,double factor,int calories)
 int MainWindow::checkFoodString(QString checkString)
 {
     QRegExp rxp("\\b([A-Za-zäöü]*\\s){1,3}(\\s?\\-{1}\\s{1}\\d{1,3}){2}\\b");
-    QRegExpValidator rxpVal(rxp,0);
+    QRegExpValidator rxpVal(rxp,nullptr);
     int pos = 0;
 
     return rxpVal.validate(checkString,pos);
@@ -2173,6 +2173,7 @@ void MainWindow::on_listWidget_weekPlans_clicked(const QModelIndex &index)
     ui->comboBox_weightmode->setEnabled(true);
     this->set_foodWeek(weekString);
     ui->actionDelete->setEnabled(true);
+    ui->calendarWidget_Food->setSelectedDate(QDate::fromString(weekInfo.at(1),"dd.MM.yyyy"));
     this->reset_menuEdit();
 }
 
@@ -2591,7 +2592,7 @@ void MainWindow::selectFoodMealDay(int selectedDay)
 
 void MainWindow::on_actionFood_Macros_triggered()
 {
-    foodmacro_popup foodPop(this,foodPlan,ui->calendarWidget->selectedDate());
+    foodmacro_popup foodPop(this,foodPlan,ui->calendarWidget_Food->selectedDate());
     foodPop.setModal(true);
     foodPop.exec();
 }
