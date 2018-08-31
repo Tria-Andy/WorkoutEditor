@@ -358,6 +358,12 @@ void Dialog_settings::writeChangedValues()
     }
     doubleMap.insert("Moveday",saveVector);
 
+    saveVector.resize(3);
+    saveVector[0] = ui->spinBox_carbs->value();
+    saveVector[1] = ui->spinBox_protein->value();
+    saveVector[2] = ui->spinBox_fat->value();
+    doubleMap.insert("Macros",saveVector);
+
     settings::writeListValues(&listMap);
 
     schedule_ptr->write_saisonInfo();
@@ -370,7 +376,6 @@ void Dialog_settings::writeChangedValues()
 
     this->set_thresholdView(ui->comboBox_thresSport->currentText());
     this->set_hfmodel(ui->spinBox_hfThres->value());
-
 }
 
 void Dialog_settings::writeRangeValues(QString sport)

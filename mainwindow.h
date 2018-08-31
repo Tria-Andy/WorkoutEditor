@@ -280,7 +280,7 @@ public:
 
         QLinearGradient rectGradient;
         rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
-        rectGradient.setSpread(QGradient::RepeatSpread);
+        rectGradient.setSpread(QGradient::PadSpread);
 
         if(index.column() == 0)
         {

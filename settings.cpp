@@ -517,7 +517,7 @@ QString settings::get_rangeValue(QString map, QString key)
     if(map == settings::isTria) return triRange.value(key);
     if(map == "HF") return hfRange.value(key);
 
-    return 0;
+    return nullptr;
 }
 
 void settings::set_rangeValue(QString map, QString key,QString value)
@@ -693,6 +693,12 @@ void settings::saveSettings()
         myvalues->setValue("moveday",settings::setSettingString(settingList));
         settingList.clear();
 
+        for(int i = 0; i < doubleMap.value("Macros").count(); ++i)
+        {
+            settingList << QString::number(doubleMap.value("Macros").at(i));
+        }
+        myvalues->setValue("macros",settings::setSettingString(settingList));
+        settingList.clear();
     myvalues->endGroup();
 
     myvalues->beginGroup("Misc");

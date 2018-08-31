@@ -628,7 +628,7 @@ void foodplanner::update_weekSumModel()
 
 }
 
-void foodplanner::set_foodMacros(QDate day,QString foodString,double foodPort)
+QVector<int> foodplanner::calc_FoodMacros(QString foodString, double foodPort)
 {
     QVector<int> foodMacros(5);
     QVector<double> temp(5);
@@ -657,15 +657,25 @@ void foodplanner::set_foodMacros(QDate day,QString foodString,double foodPort)
         {
             foodMacros[i] = static_cast<int>(round(foodMacros.at(i) * factor));
         }
-
-        temp = dayMacros.value(day);
-
-        for(int x = 0; x < temp.count(); ++x)
-        {
-            temp[x] = temp[x] + foodMacros[x];
-        }
-        dayMacros.insert(day,temp);
     }
+
+    return foodMacros;
+}
+
+void foodplanner::set_foodMacros(QDate day,QString foodString,double foodPort)
+{
+    QVector<int> foodMacros(5);
+    QVector<double> temp(5);
+
+    foodMacros = this->calc_FoodMacros(foodString,foodPort);
+
+    temp = dayMacros.value(day);
+
+    for(int x = 0; x < temp.count(); ++x)
+    {
+        temp[x] = temp[x] + foodMacros[x];
+    }
+        dayMacros.insert(day,temp);
 }
 
 void foodplanner::update_sumBySchedule(QDate firstDay)

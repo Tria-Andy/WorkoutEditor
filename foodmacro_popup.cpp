@@ -31,6 +31,18 @@ foodmacro_popup::foodmacro_popup(QWidget *parent,foodplanner *pFood,const QDate 
     ui->tableWidget_macros->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_macros->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
+    macroColors.insert(macroHeader.at(0),QColor(0,85,255,200));
+    macroColors.insert(macroHeader.at(1),QColor(0,100,255,100));
+    macroColors.insert(macroHeader.at(2),QColor(0,125,0,200));
+    macroColors.insert(macroHeader.at(3),QColor(0,255,0,100));
+    macroColors.insert(macroHeader.at(4),QColor(200,0,0,200));
+    macroColors.insert(macroHeader.at(5),QColor(255,0,0,100));
+    macroColors.insert(macroHeader.at(6),QColor(150,125,0,200));
+    macroColors.insert(macroHeader.at(7),QColor(225,150,0,100));
+    macroColors.insert(macroHeader.at(8),QColor(150,150,150,200));
+    macroColors.insert(macroHeader.at(9),QColor(200,200,200,100));
+
+
     set_plotValues(startDay);
 }
 
@@ -46,6 +58,14 @@ void foodmacro_popup::on_toolButton_close_clicked()
 
 void foodmacro_popup::set_plotValues(QDate startDate)
 {   
+    QColor whiteColor,redColor;
+    whiteColor.setRgb(255,255,255,100);
+    redColor.setRgb(255,0,0,100);
+
+    QLinearGradient gradient;
+    //gradient.setCoordinateMode(QGradient::ObjectBoundingMode);
+    //gradient.setSpread(QGradient::RepeatSpread);
+
     ui->widget_plot->xAxis->setLabel("Day");
     ui->widget_plot->yAxis->setLabel("Gramms");
 
@@ -102,29 +122,44 @@ void foodmacro_popup::set_plotValues(QDate startDate)
         }
     }
 
-    for(int mac = 0, pos = 0; mac < macroHeader.count(); ++mac)
+    double targetValue = 0;
+    double macroValue = 0;
+
+    for(int day = 0,pos = 0; day < dayCount; ++day)
     {
-        for(int i = 0; i < dayCount; ++i)
+        dateHeader << weekDates.at(day).toString("dd.MM");
+
+        for(int mac = 0; mac < macroHeader.count(); ++mac)
         {
-            dateHeader << weekDates.at(i).toString("dd.MM");
             QTableWidgetItem *item = new QTableWidgetItem();
 
             if(mac %2 == 0)
             {
-                itemValue = QString::number(foodplan->dayTarget.value(weekDates.at(i).date()).at(pos));
-                qDebug() << weekDates.at(i).date() << macroHeader.at(mac) << pos << foodplan->dayTarget.value(weekDates.at(i).date()).at(pos);
+                itemValue = QString::number(foodplan->dayTarget.value(weekDates.at(day).date()).at(pos));
+                targetValue = foodplan->dayTarget.value(weekDates.at(day).date()).at(pos);
             }
             else
             {
-                itemValue = QString::number(foodplan->dayMacros.value(weekDates.at(i).date()).at(pos));
-                qDebug() << weekDates.at(i).date() << macroHeader.at(mac) << pos << foodplan->dayMacros.value(weekDates.at(i).date()).at(pos);
+                itemValue = QString::number(foodplan->dayMacros.value(weekDates.at(day).date()).at(pos));
+                macroValue = foodplan->dayMacros.value(weekDates.at(day).date()).at(pos);
+            }
+            gradient.setColorAt(0,macroColors.value(macroHeader.at(mac)));
+
+            if(macroValue > targetValue)
+            {
+                gradient.setColorAt(1,redColor);
             }
 
+            if(mac %2 == 1) ++pos;
+
             item->setText(itemValue);
-            ui->tableWidget_macros->setItem(mac,i,item);
+            item->setBackground(QBrush(gradient));
+            ui->tableWidget_macros->setItem(mac,day,item);
         }
-        if(mac %2 == 1) ++pos;
+        pos = 0;
+
     }
+
     ui->tableWidget_macros->setHorizontalHeaderLabels(dateHeader);
     ui->tableWidget_macros->setVerticalHeaderLabels(macroHeader);
 
@@ -143,101 +178,101 @@ void foodmacro_popup::set_graph(QDate startDate)
     QCPBarsGroup *barGroup = new QCPBarsGroup(ui->widget_plot);
 
     QCPBars *carbBar = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis);
-    carbBar->setName("Carb Target");
+    carbBar->setName(macroHeader.at(0));
     carbBar->setWidthType(QCPBars::wtAbsolute);
     carbBar->setWidth(barWidth);
     carbBar->setAntialiased(true);
-    carbBar->setBrush(QBrush(QColor(0,85,255,200)));
+    carbBar->setBrush(QBrush(macroColors.value(macroHeader.at(0))));
     carbBar->setPen(QPen(Qt::darkGray));
     carbBar->setData(xValues,carbValues);
     carbBar->setBarsGroup(barGroup);
 
     QCPBars *carbMBar = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis);
-    carbMBar->setName("Carb Day");
+    carbMBar->setName(macroHeader.at(1));
     carbMBar->setWidthType(QCPBars::wtAbsolute);
     carbMBar->setWidth(barWidth);
     carbMBar->setAntialiased(true);
-    carbMBar->setBrush(QBrush(QColor(0,100,255,100)));
+    carbMBar->setBrush(QBrush(macroColors.value(macroHeader.at(1))));
     carbMBar->setPen(QPen(Qt::darkGray));
     carbMBar->setData(xValues,carbMarco);
     carbMBar->setBarsGroup(barGroup);
 
     QCPBars *proteinBar = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis);
-    proteinBar->setName("Protein Target");
+    proteinBar->setName(macroHeader.at(2));
     proteinBar->setWidthType(QCPBars::wtAbsolute);
     proteinBar->setWidth(barWidth);
     proteinBar->setAntialiased(true);
-    proteinBar->setBrush(QBrush(QColor(0,125,0,200)));
+    proteinBar->setBrush(QBrush(macroColors.value(macroHeader.at(2))));
     proteinBar->setPen(QPen(Qt::darkGray));
     proteinBar->setData(xValues,proteinValues);
     proteinBar->setBarsGroup(barGroup);
 
     QCPBars *proteinMBar = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis);
-    proteinMBar->setName("Protein Day");
+    proteinMBar->setName(macroHeader.at(3));
     proteinMBar->setWidthType(QCPBars::wtAbsolute);
     proteinMBar->setWidth(barWidth);
     proteinBar->setAntialiased(true);
-    proteinMBar->setBrush(QBrush(QColor(0,255,0,100)));
+    proteinMBar->setBrush(QBrush(macroColors.value(macroHeader.at(3))));
     proteinMBar->setPen(QPen(Qt::darkGray));
     proteinMBar->setData(xValues,proteinMacro);
     proteinMBar->setBarsGroup(barGroup);
 
     QCPBars *fatBar = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis);
-    fatBar->setName("Fat Target");
+    fatBar->setName(macroHeader.at(4));
     fatBar->setWidthType(QCPBars::wtAbsolute);
     fatBar->setWidth(barWidth);
     fatBar->setAntialiased(true);
-    fatBar->setBrush(QBrush(QColor(200,0,0,200)));
+    fatBar->setBrush(QBrush(macroColors.value(macroHeader.at(4))));
     fatBar->setPen(QPen(Qt::darkGray));
     fatBar->setData(xValues,fatValues);
     fatBar->setBarsGroup(barGroup);
 
     QCPBars *fatMBar = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis);
-    fatMBar->setName("Fat Day");
+    fatMBar->setName(macroHeader.at(5));
     fatMBar->setWidthType(QCPBars::wtAbsolute);
     fatMBar->setWidth(barWidth);
     fatMBar->setAntialiased(true);
-    fatMBar->setBrush(QBrush(QColor(255,0,0,100)));
+    fatMBar->setBrush(QBrush(macroColors.value(macroHeader.at(5))));
     fatMBar->setPen(QPen(Qt::darkGray));
     fatMBar->setData(xValues,fatMacro);
     fatMBar->setBarsGroup(barGroup);
 
     QCPBars *fiberBar = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis);
-    fiberBar->setName("Fiber Target");
+    fiberBar->setName(macroHeader.at(6));
     fiberBar->setWidthType(QCPBars::wtAbsolute);
     fiberBar->setWidth(barWidth);
     fiberBar->setAntialiased(true);
-    fiberBar->setBrush(QBrush(QColor(150,125,0,200)));
+    fiberBar->setBrush(QBrush(macroColors.value(macroHeader.at(6))));
     fiberBar->setPen(QPen(Qt::darkGray));
     fiberBar->setData(xValues,fiberValues);
     fiberBar->setBarsGroup(barGroup);
 
     QCPBars *fiberMBar = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis);
-    fiberMBar->setName("Fiber Day");
+    fiberMBar->setName(macroHeader.at(7));
     fiberMBar->setWidthType(QCPBars::wtAbsolute);
     fiberMBar->setWidth(barWidth);
     fiberMBar->setAntialiased(true);
-    fiberMBar->setBrush(QBrush(QColor(225,150,0,100)));
+    fiberMBar->setBrush(QBrush(macroColors.value(macroHeader.at(7))));
     fiberMBar->setPen(QPen(Qt::darkGray));
     fiberMBar->setData(xValues,fiberMacro);
     fiberMBar->setBarsGroup(barGroup);
 
     QCPBars *sugarBar = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis);
-    sugarBar->setName("Sugar Target");
+    sugarBar->setName(macroHeader.at(8));
     sugarBar->setWidthType(QCPBars::wtAbsolute);
     sugarBar->setWidth(barWidth);
     sugarBar->setAntialiased(true);
-    sugarBar->setBrush(QBrush(QColor(150,150,150,200)));
+    sugarBar->setBrush(QBrush(macroColors.value(macroHeader.at(8))));
     sugarBar->setPen(QPen(Qt::darkGray));
     sugarBar->setData(xValues,sugarValues);
     sugarBar->setBarsGroup(barGroup);
 
     QCPBars *sugarMBar = new QCPBars(ui->widget_plot->xAxis,ui->widget_plot->yAxis);
-    sugarMBar->setName("Sugar Day");
+    sugarMBar->setName(macroHeader.at(9));
     sugarMBar->setWidthType(QCPBars::wtAbsolute);
     sugarMBar->setWidth(barWidth);
     sugarMBar->setAntialiased(true);
-    sugarMBar->setBrush(QBrush(QColor(200,200,200,100)));
+    sugarMBar->setBrush(QBrush(macroColors.value(macroHeader.at(9))));
     sugarMBar->setPen(QPen(Qt::darkGray));
     sugarMBar->setData(xValues,sugarMacro);
     sugarMBar->setBarsGroup(barGroup);

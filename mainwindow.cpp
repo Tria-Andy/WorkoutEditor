@@ -2137,21 +2137,46 @@ int MainWindow::checkFoodString(QString checkString)
 
 void MainWindow::calc_menuCal()
 {
-    QString foodString;
+    QString foodString,temp;
+    QVector<int> foodMacros(5);
+    QVector<int> sumMacros(5);
+    sumMacros.fill(0);
+    QStringList macroShort;
+    macroShort << "C:" << "P:" << "F:" << "Fi:" << "S:";
+
     int listCount = ui->listWidget_MenuEdit->count();
-    int calPos = 0;
+    int vPos = 0;
     int mealCal = 0;
+    double mealPort = 0;
 
     if(listCount != 0)
     {
         for(int i = 0; i < listCount; ++i)
         {
             foodString = ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString();
-            calPos = foodString.indexOf("-")+1;
-            mealCal = mealCal + foodString.mid(calPos,foodString.indexOf(")")-calPos).toInt();
+            vPos = foodString.indexOf("-")+1;
+            mealCal = mealCal + foodString.mid(vPos,foodString.indexOf(")")-vPos).toInt();
+            vPos = foodString.indexOf("(")+1;
+            mealPort = foodString.mid(vPos,foodString.indexOf("-")-vPos).toDouble();
+            temp = foodString.mid(vPos,foodString.indexOf("-")-vPos);
+
+            foodString = foodString.left(foodString.indexOf("(")-1);
+            foodMacros = foodPlan->calc_FoodMacros(foodString,mealPort);
+
+            for(int x = 0; x < foodMacros.count(); ++x)
+            {
+                sumMacros[x] = sumMacros[x] + foodMacros.at(x);
+            }
+        }
+        foodString.clear();
+
+        for(int y = 0; y < sumMacros.count(); ++y)
+        {
+            foodString = foodString + macroShort.at(y)+QString::number(sumMacros.at(y)) + " - ";
         }
     }
-    ui->label_menuCal->setText(" : "+QString::number(mealCal) +" KCal");
+    foodString.remove(foodString.length()-3,3);
+    ui->label_menuCal->setText("Summery: "+QString::number(mealCal) +" KCal - " + foodString);
 }
 
 void MainWindow::reset_menuEdit()

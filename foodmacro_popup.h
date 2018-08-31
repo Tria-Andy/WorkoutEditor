@@ -2,6 +2,7 @@
 #define FOODMACRO_POPUP_H
 
 #include <QDialog>
+#include <QStyledItemDelegate>
 #include <foodplanner.h>
 
 namespace Ui {
@@ -29,6 +30,7 @@ private:
     QStringList macroHeader,dateHeader;
     QVector<double> carbValues,proteinValues, fatValues, fiberValues,sugarValues,xValues;
     QVector<double> carbMarco,proteinMacro, fatMacro, fiberMacro,sugarMacro;
+    QMap<QString,QColor> macroColors;
     void set_plotValues(QDate);
     void set_graph(QDate);
 };

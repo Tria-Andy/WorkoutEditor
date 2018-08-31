@@ -32,9 +32,11 @@ public:
     void remove_week(QString);
     void update_sumBySchedule(QDate);
     void update_sumByMenu(QDate,int, QStringList*,bool);
+    QVector<int> calc_FoodMacros(QString, double);
     QStringList get_mealList(QString);
     QMap<QDate,QVector<double>> dayTarget;
     QMap<QDate,QVector<double>> dayMacros;
+
 
 private:
     schedule *schedulePtr;
@@ -54,6 +56,7 @@ private:
     void update_daySumModel();
     void update_weekSumModel();
     void set_foodMacros(QDate,QString,double);
+
 
 private slots:
 
