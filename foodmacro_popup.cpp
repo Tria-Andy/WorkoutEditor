@@ -24,24 +24,18 @@ foodmacro_popup::foodmacro_popup(QWidget *parent,foodplanner *pFood,const QDate 
     yMax = 0;
     xValues.resize(dayCount);
 
-    macroHeader << "Carb Target" << "Carb Day" << "Protein Target" << "Protein Day" << "Fat Target" << "Fat Day" << "Fiber Target" << "Fiber Day" << "Sugar Target" << "Sugar Day";
+    macroHeader = settings::get_listValues("MacroHeader");
 
     ui->tableWidget_macros->setRowCount(macroHeader.count());
     ui->tableWidget_macros->setColumnCount(dayCount);
     ui->tableWidget_macros->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_macros->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_macros->setItemDelegate(&del_foodMacro);
 
-    macroColors.insert(macroHeader.at(0),QColor(0,85,255,200));
-    macroColors.insert(macroHeader.at(1),QColor(0,100,255,100));
-    macroColors.insert(macroHeader.at(2),QColor(0,125,0,200));
-    macroColors.insert(macroHeader.at(3),QColor(0,255,0,100));
-    macroColors.insert(macroHeader.at(4),QColor(200,0,0,200));
-    macroColors.insert(macroHeader.at(5),QColor(255,0,0,100));
-    macroColors.insert(macroHeader.at(6),QColor(150,125,0,200));
-    macroColors.insert(macroHeader.at(7),QColor(225,150,0,100));
-    macroColors.insert(macroHeader.at(8),QColor(150,150,150,200));
-    macroColors.insert(macroHeader.at(9),QColor(200,200,200,100));
-
+    for(int i = 0; i < macroHeader.count(); ++i)
+    {
+        macroColors.insert(macroHeader.at(i),settings::get_colorMap().value(macroHeader.at(i)));
+    }
 
     set_plotValues(startDay);
 }
@@ -58,14 +52,6 @@ void foodmacro_popup::on_toolButton_close_clicked()
 
 void foodmacro_popup::set_plotValues(QDate startDate)
 {   
-    QColor whiteColor,redColor;
-    whiteColor.setRgb(255,255,255,100);
-    redColor.setRgb(255,0,0,100);
-
-    QLinearGradient gradient;
-    //gradient.setCoordinateMode(QGradient::ObjectBoundingMode);
-    //gradient.setSpread(QGradient::RepeatSpread);
-
     ui->widget_plot->xAxis->setLabel("Day");
     ui->widget_plot->yAxis->setLabel("Gramms");
 
@@ -122,9 +108,6 @@ void foodmacro_popup::set_plotValues(QDate startDate)
         }
     }
 
-    double targetValue = 0;
-    double macroValue = 0;
-
     for(int day = 0,pos = 0; day < dayCount; ++day)
     {
         dateHeader << weekDates.at(day).toString("dd.MM");
@@ -136,24 +119,15 @@ void foodmacro_popup::set_plotValues(QDate startDate)
             if(mac %2 == 0)
             {
                 itemValue = QString::number(foodplan->dayTarget.value(weekDates.at(day).date()).at(pos));
-                targetValue = foodplan->dayTarget.value(weekDates.at(day).date()).at(pos);
             }
             else
             {
                 itemValue = QString::number(foodplan->dayMacros.value(weekDates.at(day).date()).at(pos));
-                macroValue = foodplan->dayMacros.value(weekDates.at(day).date()).at(pos);
-            }
-            gradient.setColorAt(0,macroColors.value(macroHeader.at(mac)));
-
-            if(macroValue > targetValue)
-            {
-                gradient.setColorAt(1,redColor);
             }
 
             if(mac %2 == 1) ++pos;
 
             item->setText(itemValue);
-            item->setBackground(QBrush(gradient));
             ui->tableWidget_macros->setItem(mac,day,item);
         }
         pos = 0;
@@ -172,7 +146,6 @@ void foodmacro_popup::set_graph(QDate startDate)
     ui->widget_plot->clearItems();
     ui->widget_plot->legend->setFillOrder(QCPLegend::foColumnsFirst);
     ui->widget_plot->plotLayout()->setRowStretchFactor(1,0.0001);
-
 
     double barWidth = 6.0;
     QCPBarsGroup *barGroup = new QCPBarsGroup(ui->widget_plot);

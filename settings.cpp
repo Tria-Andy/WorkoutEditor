@@ -398,6 +398,13 @@ void settings::loadSettings()
             settingList.clear();
             doubleMap.insert("Macros",tempVector);
             tempVector.clear();
+
+            settingList = myvalues->value("macroheader").toString().split(splitter);
+            listMap.insert("MacroHeader",settingList);
+            settingString = myvalues->value("macrocolor").toString();
+            settings::fill_mapColor(&settingList,&settingString,true);
+            settingList.clear();
+
             settingList = myvalues->value("dish").toString().split(splitter);
             listMap.insert("Dish",settingList);
             settingList.clear();

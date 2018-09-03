@@ -981,6 +981,7 @@ public:
         painter->restore();
     }
 };
+
 class del_foodSummery : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
