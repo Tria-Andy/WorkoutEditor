@@ -387,6 +387,7 @@ void settings::loadSettings()
                 tempVector[i] = settingString.toDouble();
             }
             settingList.clear();
+            doubleMap.insert("Mealdefault",tempVector);
             tempVector.clear();
             settingList = myvalues->value("macros").toString().split(splitter);
             tempVector.resize(settingList.count());
@@ -409,6 +410,8 @@ void settings::loadSettings()
             listMap.insert("Dish",settingList);
             settingList.clear();
             generalMap.insert("AddMoving",myvalues->value("addmoving").toString());
+            generalMap.insert("DayRoutine",myvalues->value("dayroutine").toString());
+            generalMap.insert("DayRoutineCal",myvalues->value("dayroutinecal").toString());
             generalMap.insert("DaySugar",myvalues->value("sugar").toString());
             athleteMap.insert("BodyFatCal",myvalues->value("fatcal").toDouble());
             settingList = myvalues->value("moveday").toString().split(splitter);
