@@ -27,7 +27,7 @@ foodmacro_popup::foodmacro_popup(QWidget *parent,foodplanner *pFood,const QDate 
     macroHeader = settings::get_listValues("MacroHeader");
 
     ui->tableWidget_macros->setRowCount(macroHeader.count());
-    ui->tableWidget_macros->setColumnCount(dayCount);
+    ui->tableWidget_macros->setColumnCount(dayCount+1);
     ui->tableWidget_macros->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_macros->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_macros->setItemDelegate(&del_foodMacro);
@@ -131,7 +131,23 @@ void foodmacro_popup::set_plotValues(QDate startDate)
             ui->tableWidget_macros->setItem(mac,day,item);
         }
         pos = 0;
+    }
 
+    dateHeader << "Summery";
+
+    int macValue = 0;
+
+    for(int row = 0; row < macroHeader.count(); ++row)
+    {
+        QTableWidgetItem *item = new QTableWidgetItem();
+
+        for(int col = 0; col < dayCount; ++col)
+        {
+            macValue = macValue + ui->tableWidget_macros->item(row,col)->data(Qt::DisplayRole).toInt();
+        }
+        item->setText(QString::number(macValue));
+        ui->tableWidget_macros->setItem(row,dayCount,item);
+        macValue = 0;
     }
 
     ui->tableWidget_macros->setHorizontalHeaderLabels(dateHeader);

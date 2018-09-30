@@ -6,7 +6,7 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     firstDayofWeek = fd;
 
     dayTags  << "Day" << "Meal" << "Food";
-    mealTags << "name" << "port" << "cal" << "carb" << "protein" << "fat" << "fiber" << "sugar";
+    mealTags << "name" << "port" << "cal" << "carb" << "protein" << "fat" << "fiber" << "sugar" << "id";
     menuHeader << "Name" << "Port" << "Cal" << "Carb" << "Protein" << "Fat" << "Fiber" << "Sugar";
     mealsHeader = settings::get_listValues("Meals");
     sumHeader << "Calories Food:" << "Conversion Base:" << "Conversion Sport:" << "Summery:" << "Difference:";
@@ -320,7 +320,14 @@ void foodplanner::add_meal(QItemSelectionModel *mealSelect)
     QList<QStandardItem*> mealItems;
     QStandardItem *SectionItem = mealModel->itemFromIndex(mealSelect->currentIndex());
 
+    qDebug() << SectionItem->data(Qt::DisplayRole).toString() +"_"+ QString::number(SectionItem->rowCount()+1);
+
     mealItems << new QStandardItem("NewMeal");
+    mealItems << new QStandardItem("0");
+    mealItems << new QStandardItem("0");
+    mealItems << new QStandardItem("0");
+    mealItems << new QStandardItem("0");
+    mealItems << new QStandardItem("0");
     mealItems << new QStandardItem("0");
     mealItems << new QStandardItem("0");
 
@@ -522,7 +529,6 @@ int foodplanner::read_dayCalories(QDate vDate)
             for(int meal = 0; meal < mealsHeader.count(); ++meal)
             {
                 mealIndex = weekPlansModel->index(meal,0,dayIndex);
-                //mealString = weekPlansModel->data(weekPlansModel->index(meal,0,dayIndex)).toString();
                 foodCount = weekPlansModel->itemFromIndex(mealIndex)->rowCount();
                 for(int food = 0; food < foodCount; ++food)
                 {
@@ -542,20 +548,26 @@ void foodplanner::update_daySumModel()
 {
     int sum = 0;
     int diff = 0;
+    int dayRoutineCal = 0;
+    bool dayRoutine = generalValues->value("DayRoutine").toInt();
     double currPal = athleteValues->value("currpal");
     int dayCalBase = 0;
     QDateTime calcDay;
     calcDay.setDate(firstDayofWeek);
     QVector<double> temp(5);
 
-    int minCal = 0;
-    int maxCal = 0;
+    if(dayRoutine) dayRoutineCal = generalValues->value("DayRoutineCal").toInt();
+
+    double minCal = 0;
+    double maxCal = 0;
 
     for(int i = 0; i < dayHeader.count(); ++i)
     {
-        sum = daySumModel->data(daySumModel->index(1,i)).toInt() + daySumModel->data(daySumModel->index(2,i)).toInt();
+        dayCalBase = static_cast<int>(this->current_dayCalories(calcDay.addDays(i).addSecs(120)) * currPal) + dayRoutineCal;
+        //sum = daySumModel->data(daySumModel->index(1,i)).toInt() + daySumModel->data(daySumModel->index(2,i)).toInt();
+        sum = dayCalBase + daySumModel->data(daySumModel->index(2,i)).toInt();
         diff = sum - daySumModel->data(daySumModel->index(0,i)).toInt();
-        dayCalBase = this->current_dayCalories(calcDay.addDays(i).addSecs(120)) * currPal;
+
         daySumModel->setData(daySumModel->index(1,i),dayCalBase);
         daySumModel->setData(daySumModel->index(3,i),sum);
         daySumModel->setData(daySumModel->index(4,i),diff);
@@ -563,12 +575,12 @@ void foodplanner::update_daySumModel()
         temp[0] = round(sum * (settings::doubleMap.value("Macros").at(0) / 100.0) / 4.0);
         temp[1] = round(sum * (settings::doubleMap.value("Macros").at(1) / 100.0) / 4.0);
         temp[2] = round(sum * (settings::doubleMap.value("Macros").at(2) / 100.0) / 9.0);
-        temp[3] = athleteValues->value("weight") / 2.0;
+        temp[3] = ceil(athleteValues->value("weight") / 2.0);
         temp[4] = round(sum * (generalValues->value("DaySugar").toDouble() / 100.0) / 4.0);
         dayTarget.insert(calcDay.date().addDays(i),temp);
 
-        maxCal = sum * (calPercent.at(1)/100);
-        minCal = sum * (calPercent.at(2)/100);
+        maxCal = round(sum * (calPercent.at(1)/100.0));
+        minCal = round(sum * (calPercent.at(2)/100.0));
 
         daySumModel->item(4,i)->setToolTip("Range: "+QString::number(minCal)+"-"+QString::number(maxCal));
     }
@@ -621,8 +633,8 @@ void foodplanner::update_weekSumModel()
 
     weekPlansModel->setData(weekPlansModel->index(weekIndex.row()+1,3),nextWeek);
 
-    int maxCal = weekSum[3] * (calPercent.at(1)/100);
-    int minCal = weekSum[3] * (calPercent.at(2)/100);
+    double maxCal = round(weekSum[3] * (calPercent.at(1)/100.0));
+    double minCal = round(weekSum[3] * (calPercent.at(2)/100.0));
 
     weekSumModel->item(4,0)->setToolTip("Range: "+QString::number(minCal)+"-"+QString::number(maxCal));
 
@@ -675,7 +687,8 @@ void foodplanner::set_foodMacros(QDate day,QString foodString,double foodPort)
     {
         temp[x] = temp[x] + foodMacros[x];
     }
-        dayMacros.insert(day,temp);
+
+    dayMacros.insert(day,temp);
 }
 
 void foodplanner::update_sumBySchedule(QDate firstDay)
@@ -684,7 +697,6 @@ void foodplanner::update_sumBySchedule(QDate firstDay)
     int dayWork = 0;
     QString weekID = set_weekID(firstDay);
     QVector<double> addMoving = settings::doubleMap.value("Moveday");
-
 
     if(weekID == loadedWeek)
     {
@@ -704,9 +716,9 @@ void foodplanner::update_sumBySchedule(QDate firstDay)
             {
                 dayWork = dayWork + generalValues->value("AddMoving").toInt();
             }
-
             daySumModel->setData(daySumModel->index(2,day),dayWork);
         }
+
         this->update_daySumModel();
     }
 }
