@@ -761,7 +761,7 @@ public:
             }
         }
 
-        return 0;
+        return nullptr;
     }
 
     void setEditorData(QWidget *editor, const QModelIndex &index) const
@@ -981,7 +981,6 @@ public:
         painter->restore();
     }
 };
-
 class del_foodSummery : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
@@ -1213,7 +1212,7 @@ private:
 
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
@@ -1296,6 +1295,7 @@ private slots:
     void selectFoodMealWeek(int);
     void selectFoodMealDay(int);
     void on_actionFood_Macros_triggered();
+    void on_toolButton_switch_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -306,6 +306,7 @@ void MainWindow::fill_weekTable(QString weekID,bool reset)
 void MainWindow::read_activityFiles()
 {
     fileModel->clear();
+    ui->lineEdit_workContent->clear();
     ui->progressBar_fileState->setValue(20);
     QStandardItem *rootItem = fileModel->invisibleRootItem();
     this->readJsonFiles(rootItem);
@@ -614,10 +615,14 @@ void MainWindow::workout_calendar()
         ui->tableView_cal->setItemDelegate(&calender_del);
         scheduleProxy->sort(2);
         int offset = (1 - dayofweek) + (weekDays*weekCounter);
+        int firstJan = 0;
 
         for(int week = 0; week < weekRange; ++week)
         {
-            weekValue = QString::number(currentdate.addDays(offset).weekNumber()) +"_"+ QString::number(currentdate.addDays(offset).year());
+            if(currentdate.addDays(offset) == QDate(currentdate.addDays(offset).year(),12,31)) ++firstJan;
+
+            weekValue = QString::number(currentdate.addDays(offset).weekNumber()) +"_"+ QString::number(currentdate.addDays(offset+firstJan).year());
+
             metaProxy->setFilterRegExp("\\b"+weekValue+"\\b");
             metaProxy->setFilterKeyColumn(2);
 
@@ -2192,6 +2197,7 @@ void MainWindow::on_listWidget_weekPlans_clicked(const QModelIndex &index)
 {
     QString weekString = index.data(Qt::DisplayRole).toString();
     QStringList weekInfo = weekString.split(" - ");
+
     QString weekId = weekInfo.at(0)+" - "+weekInfo.at(1);
     ui->label_foodWeekInfo->setText(weekId);
     ui->comboBox_weightmode->setCurrentText(weekInfo.at(2));
@@ -2235,13 +2241,8 @@ void MainWindow::on_toolButton_menuEdit_clicked()
             setString = setString + ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString()+"\n";
             updateList << ui->listWidget_MenuEdit->item(i)->data(Qt::DisplayRole).toString();
         }
+        setString.remove(setString.length()-1,1);
     }
-    else
-    {
-        setString = "None (0-0)\n";
-    }
-
-    setString.remove(setString.length()-1,1);
 
     selItem->setData(Qt::EditRole,setString);
     selItem->setToolTip("Meal Cal: "+QString::number(mealCal));
@@ -2267,9 +2268,24 @@ void MainWindow::on_toolButton_saveMeals_clicked()
 
 void MainWindow::on_calendarWidget_Food_clicked(const QDate &date)
 {
-    ui->label_foodWeekInfo->setText("Add Week: " + QString::number(date.weekNumber())+ " - " +QString::number(date.year()));
-    ui->comboBox_weightmode->setCurrentIndex(0);
-    ui->actionNew->setEnabled(true);
+    int firstJan = 0;
+
+    if(date == QDate(date.year(),12,31)) ++firstJan;
+
+    QString weekID = QString::number(date.weekNumber())+"_"+QString::number(date.year()+firstJan);
+
+    if(foodPlan->weekPlansModel->findItems(weekID,Qt::MatchExactly,0).count() == 0 && date > firstdayofweek)
+    {
+        ui->listWidget_weekPlans->clearSelection();
+        ui->label_foodWeekInfo->setText("Add Week: " + weekID);
+        ui->comboBox_weightmode->setCurrentIndex(0);
+        ui->actionNew->setEnabled(true);
+    }
+    else
+    {
+        ui->listWidget_weekPlans->setCurrentItem(ui->listWidget_weekPlans->findItems(weekID,Qt::MatchStartsWith).first());
+        this->set_foodWeek(ui->listWidget_weekPlans->currentItem()->data(Qt::DisplayRole).toString());
+    }
 }
 
 void MainWindow::on_toolButton_deleteMenu_clicked()
@@ -2383,22 +2399,22 @@ void MainWindow::on_tableWidget_weekPlan_itemChanged(QTableWidgetItem *item)
 
 void MainWindow::on_listWidget_MenuEdit_itemClicked(QListWidgetItem *item)
 {
-    QString foodString,foodName,portCal,portion;
+    QString foodString,foodName,mealValues,mealCal,mealPort;
     QVector<int> mealData(2);
     foodString = item->data(Qt::DisplayRole).toString();
     foodName = foodString.split(" (").first();
-    portCal = foodString.split(" (").last();
-    portCal = portCal.remove(")");
-
-    portion = portCal.split("-").first();
+    mealValues = foodString.split(" (").last();
+    mealValues = mealValues.remove(")");
+    mealPort = mealValues.split("-").first();
+    mealCal = mealValues.split("-").last();
     mealData = foodPlan->get_mealData(foodName,false);
 
-    double d_portion = portion.toDouble()/mealData.at(0);
-    double d_mealCal = mealData.at(1)*d_portion;
+    double pFactor = mealPort.toDouble()/mealData.at(0);
+    double d_mealCal = mealData.at(1)*pFactor;
 
     ui->lineEdit_Mealname->setText(foodName);
-    ui->doubleSpinBox_portion->setValue(d_portion);
     ui->spinBox_portion->setValue(mealData.at(0));
+    ui->doubleSpinBox_portion->setValue(pFactor);
     ui->spinBox_calories->setValue(mealData.at(1));
     ui->lineEdit_calories->setText(QString::number(round(d_mealCal)));
 }
@@ -2558,12 +2574,15 @@ void MainWindow::on_toolButton_menuPaste_clicked()
 
 void MainWindow::on_comboBox_weightmode_currentIndexChanged(const QString &value)
 {
-    int modelRow = ui->listWidget_weekPlans->currentRow();
-    ui->listWidget_weekPlans->currentItem()->setData(Qt::EditRole,ui->label_foodWeekInfo->text()+" - "+value);
-    this->set_foodWeek(ui->listWidget_weekPlans->currentItem()->text());
-    foodPlan->weekPlansModel->setData(foodPlan->weekPlansModel->index(modelRow,1),value);
-    ui->comboBox_weightmode->setEnabled(false);
-    ui->actionSave->setEnabled(true);
+    if(ui->listWidget_weekPlans->selectedItems().count() == 1)
+    {
+        int modelRow = ui->listWidget_weekPlans->currentRow();
+        ui->listWidget_weekPlans->currentItem()->setData(Qt::EditRole,ui->label_foodWeekInfo->text()+" - "+value);
+        this->set_foodWeek(ui->listWidget_weekPlans->currentItem()->text());
+        foodPlan->weekPlansModel->setData(foodPlan->weekPlansModel->index(modelRow,1),value);
+        ui->comboBox_weightmode->setEnabled(false);
+        ui->actionSave->setEnabled(true);
+    }
 }
 
 void MainWindow::fill_selectLine(int line, int lineCounter,bool day)
@@ -2620,4 +2639,13 @@ void MainWindow::on_actionFood_Macros_triggered()
     foodmacro_popup foodPop(this,foodPlan,ui->calendarWidget_Food->selectedDate());
     foodPop.setModal(true);
     foodPop.exec();
+}
+
+void MainWindow::on_toolButton_switch_clicked()
+{
+    int firstVal = ui->spinBox_portion->value();
+    double secVal = ui->doubleSpinBox_portion->value();
+
+    ui->spinBox_portion->setValue(static_cast<int>(secVal));
+    ui->doubleSpinBox_portion->setValue(firstVal);
 }

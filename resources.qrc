@@ -48,6 +48,7 @@
         <file>icons/Paste.png</file>
         <file>icons/Map.png</file>
         <file>icons/Load.png</file>
+        <file>icons/Left-right.png</file>
     </qresource>
     <qresource prefix="/style">
         <file>qss/style.qss</file>
