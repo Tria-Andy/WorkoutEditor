@@ -529,9 +529,9 @@ void schedule::deleteWeek(QString deleteWeek)
 QString schedule::get_weekPhase(QDate currDate,bool full)
 {
     metaProxy->invalidate();
-    QString weekID = QString::number(currDate.weekNumber()) +"_"+ QString::number(currDate.addDays(1 - currDate.dayOfWeek()).year());
-    metaProxy->setFilterRegExp("\\b"+weekID+"\\b");
-    metaProxy->setFilterKeyColumn(2);
+    QString firstDay = currDate.addDays(1 - currDate.dayOfWeek()).toString("dd.MM.yyyy");
+    metaProxy->setFilterRegExp("\\b"+firstDay+"\\b");
+    metaProxy->setFilterKeyColumn(4);
     QString phaseString = metaProxy->data(metaProxy->index(0,3)).toString();
 
     if(metaProxy->rowCount() == 1 && full)
@@ -543,7 +543,7 @@ QString schedule::get_weekPhase(QDate currDate,bool full)
         return phaseString;
     }
 
-    return 0;
+    return nullptr;
 }
 
 void schedule::set_workoutData(int mode)
