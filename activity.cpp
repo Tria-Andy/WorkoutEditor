@@ -58,6 +58,7 @@ void Activity::readJsonFile(QString jsonfile,bool intAct)
         intModel = new QStandardItemModel();
         mapValues = settings::getListMapPointer(settings::lMap::Interval);
         this->init_actModel("INTERVALS",mapValues,intModel,&intList,3);
+        intListCount = intList.count();
 
         sampleModel = new QStandardItemModel();
         mapValues = settings::getListMapPointer(settings::lMap::Sample);
@@ -259,8 +260,8 @@ void Activity::prepareData()
                 }
                 --laps;
                 dist = laps*swimTrack;
-                intModel->setData(intModel->index(row,3),dist);
-                intModel->setData(intModel->index(row,4),laps);
+                intModel->setData(intModel->index(row,intListCount+1),dist);
+                intModel->setData(intModel->index(row,intListCount+2),laps);
 
                 if(laps == 1) intType = currType;
 
@@ -318,9 +319,9 @@ void Activity::prepareData()
         }
         else
         {
-            intModel->setData(intModel->index(0,3),overrideData.value("total_distance"));
-            intModel->setData(intModel->index(0,4),1);
-            intModel->setData(intModel->index(0,5),"Workout_1");
+            intModel->setData(intModel->index(0,intListCount+1),overrideData.value("total_distance"));
+            intModel->setData(intModel->index(0,intListCount+2),1);
+            intModel->setData(intModel->index(0,intListCount+3),"Workout_1");
         }
 
         for(int i = 0; i < sampCount; ++i)
@@ -387,9 +388,9 @@ void Activity::prepareData()
 
         for(int row = 0; row < intModelCount; ++row)
         {
-            intModel->setData(intModel->index(row,3),this->get_int_distance(row));
-            intModel->setData(intModel->index(row,4),1);
-            intModel->setData(intModel->index(row,5),"Int-"+QString::number(row));
+            intModel->setData(intModel->index(row,intListCount),this->get_int_distance(row));
+            intModel->setData(intModel->index(row,intListCount+1),1);
+            intModel->setData(intModel->index(row,intListCount+2),"Int-"+QString::number(row));
         }
 
         for(int i = 0; i < sampCount; ++i)
@@ -504,13 +505,13 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
 
     if(pInt == 0)
     {
-        workDist = intModel->data(intModel->index(pInt,3)).toDouble();
+        workDist = intModel->data(intModel->index(pInt,intListCount+1)).toDouble();
     }
     else
     {
         for(int i = 0; i <= pInt; ++i)
         {
-            workDist = workDist + intModel->data(intModel->index(i,3)).toDouble();
+            workDist = workDist + intModel->data(intModel->index(i,intListCount)).toDouble();
         }
     }
 
@@ -526,7 +527,7 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
     {
         if(hasPMData)
         {
-            double watts = round(this->get_int_value(pInt,4));         
+            double watts = round(this->get_int_value(pInt,4));
 
             intItems << new QStandardItem(QString::number(watts));
             intItems << new QStandardItem(QString::number(round(this->get_int_value(pInt,3))));
@@ -574,7 +575,7 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
         else if(pInt == 2)
         {
             lapName = settings::isBike;
-            double watts = round(this->get_int_value(pInt,4));
+            double watts = round(this->get_int_value(pInt,intListCount+1));
             intItems << new QStandardItem(QString::number(watts));
             intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,watts,lapTime,0),false)));
         }
@@ -1259,7 +1260,7 @@ void Activity::updateIntModel(int startCol,int duraCol)
         intModel->setData(intModel->index(row,0),intTreeModel->data(intTreeModel->index(row,0)).toString().trimmed());
         intModel->setData(intModel->index(row,1),intStart);
         intModel->setData(intModel->index(row,2),intStop);
-        intModel->setData(intModel->index(row,3),intTreeModel->data(intTreeModel->index(row,4)).toDouble());
+        intModel->setData(intModel->index(row,intListCount),intTreeModel->data(intTreeModel->index(row,4)).toDouble());
         lastStop = intStop;
     }
 
@@ -1375,7 +1376,7 @@ void Activity::updateSampleModel(int sampRowCount)
             firstLap = intRow == 0 ? 0 : 1;
             intStart = intModel->data(intModel->index(intRow,1)).toInt();
             intStop = intModel->data(intModel->index(intRow,2)).toInt();
-            msec = intModel->data(intModel->index(intRow,3)).toDouble() / (intStop-intStart+1);
+            msec = intModel->data(intModel->index(intRow,intListCount)).toDouble() / (intStop-intStart+1);
 
             if(isBike)
             {
@@ -1652,7 +1653,7 @@ int Activity::get_int_pace(int row,QString lapName)
         }
         else
         {
-            pace = this->get_int_duration(row) / ((intModel->data(intModel->index(row,4)).toInt()*swimTrack)/100);
+            pace = this->get_int_duration(row) / ((intModel->data(intModel->index(row,intListCount+2)).toInt()*swimTrack)/100);
         }
     }
     else
@@ -1686,11 +1687,11 @@ double Activity::get_int_speed(int row)
 
     if(isSwim)
     {
-        pace = this->get_int_duration(row) / (intModel->data(intModel->index(row,3,QModelIndex())).toDouble() / distFactor);
+        pace = this->get_int_duration(row) / (intModel->data(intModel->index(row,intListCount,QModelIndex())).toDouble() / distFactor);
     }
     else
     {
-        pace = this->get_int_duration(row) / (intModel->data(intModel->index(row,3,QModelIndex())).toDouble()); // *10.0
+        pace = this->get_int_duration(row) / (intModel->data(intModel->index(row,intListCount,QModelIndex())).toDouble()); // *10.0
     }
     speed = 3600.0 / pace;
 

@@ -30,6 +30,7 @@ void jsonHandler::fill_qmap(QHash<QString, QString> *qmap,QJsonObject *objItem)
     for(int i = 0; i < objItem->keys().count(); ++i)
     {
         keyValue = objItem->keys().at(i);
+        qDebug() << keyValue << objItem->value(keyValue).toString().trimmed();
         qmap->insert(keyValue,objItem->value(keyValue).toString().trimmed());
         if(keyValue == "OVERRIDES") hasOverride = true;
     }
@@ -351,8 +352,8 @@ void jsonHandler::write_jsonFile()
         return;
     }
 
-    file.write(jsonDoc.toJson(QJsonDocument::Compact));
-    //file.write(jsonDoc.toJson()); //Test
+    //file.write(jsonDoc.toJson(QJsonDocument::Compact));
+    file.write(jsonDoc.toJson()); //Test
     file.flush();
     file.close();
 }

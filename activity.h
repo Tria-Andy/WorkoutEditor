@@ -39,7 +39,7 @@ private:
     QStringList ride_items,swimType,levels;
     QVector<double> calcSpeed,calcCadence,swimTime,newDist;
     double thresPower,thresSpeed,thresPace,thresLimit,swimTrack,polishFactor,hfThreshold,hfMax,actWeight;
-    int distFactor,avgCounter,zoneCount,moveTime;
+    int distFactor,avgCounter,zoneCount,moveTime,intListCount;
     bool isSwim,isBike,isRun,isTria,isStrength,isAlt,changeRowCount,isUpdated,selectInt,isTimeBased;
     QVector<bool> editRow;
 
