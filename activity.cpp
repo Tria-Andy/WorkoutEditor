@@ -58,6 +58,8 @@ void Activity::readJsonFile(QString jsonfile,bool intAct)
         intModel = new QStandardItemModel();
         mapValues = settings::getListMapPointer(settings::lMap::Interval);
         this->init_actModel("INTERVALS",mapValues,intModel,&intList,3);
+        intList.removeAt(intList.indexOf("COLOR"));
+        intList.removeAt(intList.indexOf("PTEST"));
         intListCount = intList.count();
 
         sampleModel = new QStandardItemModel();
@@ -67,7 +69,7 @@ void Activity::readJsonFile(QString jsonfile,bool intAct)
         if(hasXdata)
         {
             xdataModel = new QStandardItemModel();
-            this->init_xdataModel(curr_sport,xdataModel);
+            this->init_xdataModel(xdataModel);
         }
         this->prepareData();
     }
@@ -260,8 +262,8 @@ void Activity::prepareData()
                 }
                 --laps;
                 dist = laps*swimTrack;
-                intModel->setData(intModel->index(row,intListCount+1),dist);
-                intModel->setData(intModel->index(row,intListCount+2),laps);
+                intModel->setData(intModel->index(row,intListCount),dist);
+                intModel->setData(intModel->index(row,intListCount+1),laps);
 
                 if(laps == 1) intType = currType;
 
@@ -319,9 +321,9 @@ void Activity::prepareData()
         }
         else
         {
-            intModel->setData(intModel->index(0,intListCount+1),overrideData.value("total_distance"));
-            intModel->setData(intModel->index(0,intListCount+2),1);
-            intModel->setData(intModel->index(0,intListCount+3),"Workout_1");
+            intModel->setData(intModel->index(0,intListCount),overrideData.value("total_distance"));
+            intModel->setData(intModel->index(0,intListCount+1),1);
+            intModel->setData(intModel->index(0,intListCount+2),"Workout_1");
         }
 
         for(int i = 0; i < sampCount; ++i)
@@ -1653,7 +1655,7 @@ int Activity::get_int_pace(int row,QString lapName)
         }
         else
         {
-            pace = this->get_int_duration(row) / ((intModel->data(intModel->index(row,intListCount+2)).toInt()*swimTrack)/100);
+            pace = this->get_int_duration(row) / ((intModel->data(intModel->index(row,intListCount+1)).toInt()*swimTrack)/100);
         }
     }
     else
