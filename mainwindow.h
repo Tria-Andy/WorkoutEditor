@@ -1202,11 +1202,13 @@ private:
 
     //Food
     QMap<int,QStringList> selectedLine;
-    void fill_selectLine(int,int,bool);
+    void fill_selectLine(int,int);
     void fill_weekTable(QString,bool);
+    void fill_dayTable(int);
     void set_foodWeek(QString);
     void calc_foodCalories(int,double,int);
-    void calc_menuCal();
+    void set_menuList();
+    QVector<int> calc_menuCal(QString);
     void reset_menuEdit();
     int checkFoodString(QString);
 
@@ -1296,6 +1298,8 @@ private slots:
     void selectFoodMealDay(int);
     void on_actionFood_Macros_triggered();
     void on_toolButton_switch_clicked();
+    void on_toolButton_lineCopy_clicked();
+    void on_toolButton_linePaste_clicked();
 };
 
 #endif // MAINWINDOW_H

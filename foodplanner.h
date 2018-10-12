@@ -16,7 +16,7 @@ public:
     QStandardItemModel *weekPlansModel,*weekSumModel,*daySumModel,*mealModel,*estModel;
     QSortFilterProxyModel *daySumProxy;
     QDate firstDayofWeek;
-    QStringList planList,mealsHeader,menuHeader,dayHeader,estHeader;
+    QStringList planList,mealsHeader,menuHeader,dayHeader,dayListHeader,estHeader;
     QMap<int,QStringList> foodList;
 
     QString set_weekID(QDate);

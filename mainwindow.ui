@@ -2211,286 +2211,79 @@
                 <number>2</number>
                </property>
                <item>
-                <widget class="QFrame" name="frame_3">
+                <widget class="QFrame" name="frame_mealsEdit">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>2</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="frameShape">
                   <enum>QFrame::StyledPanel</enum>
                  </property>
                  <property name="frameShadow">
                   <enum>QFrame::Raised</enum>
                  </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_15">
-                  <property name="spacing">
-                   <number>4</number>
-                  </property>
-                  <property name="leftMargin">
-                   <number>2</number>
-                  </property>
-                  <property name="topMargin">
-                   <number>2</number>
-                  </property>
-                  <property name="rightMargin">
-                   <number>2</number>
-                  </property>
-                  <property name="bottomMargin">
-                   <number>2</number>
-                  </property>
-                  <item>
-                   <widget class="QToolButton" name="toolButton_mealreset">
-                    <property name="minimumSize">
-                     <size>
-                      <width>125</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="font">
-                     <font>
-                      <pointsize>10</pointsize>
-                      <weight>75</weight>
-                      <bold>true</bold>
-                     </font>
-                    </property>
-                    <property name="text">
-                     <string>Meals</string>
-                    </property>
-                    <property name="checkable">
-                     <bool>false</bool>
-                    </property>
-                    <property name="autoRaise">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="Line" name="line_15">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButton_addMenu">
-                    <property name="minimumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>...</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="resources.qrc">
-                      <normaloff>:/images/icons/Create.png</normaloff>:/images/icons/Create.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>18</width>
-                      <height>18</height>
-                     </size>
-                    </property>
-                    <property name="autoRaise">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButton_deleteMenu">
-                    <property name="minimumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>...</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="resources.qrc">
-                      <normaloff>:/images/icons/Delete.png</normaloff>:/images/icons/Delete.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>18</width>
-                      <height>18</height>
-                     </size>
-                    </property>
-                    <property name="autoRaise">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButton_saveMeals">
-                    <property name="minimumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>...</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="resources.qrc">
-                      <normaloff>:/images/icons/Save.png</normaloff>:/images/icons/Save.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>18</width>
-                      <height>18</height>
-                     </size>
-                    </property>
-                    <property name="autoRaise">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QProgressBar" name="progressBar_saveMeals">
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>5</height>
-                  </size>
-                 </property>
-                 <property name="value">
-                  <number>0</number>
-                 </property>
-                 <property name="textVisible">
-                  <bool>false</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QTreeView" name="treeView_meals">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                   <horstretch>0</horstretch>
-                   <verstretch>2</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                  </font>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QFrame" name="frame_4">
-                 <property name="frameShape">
-                  <enum>QFrame::Panel</enum>
-                 </property>
-                 <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
-                 </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_15">
+                 <layout class="QVBoxLayout" name="verticalLayout_17">
                   <property name="spacing">
                    <number>2</number>
                   </property>
                   <property name="leftMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <property name="topMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <property name="rightMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_Mealname">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QFrame" name="frame_6">
+                   <widget class="QFrame" name="frame_meals">
                     <property name="frameShape">
                      <enum>QFrame::StyledPanel</enum>
                     </property>
                     <property name="frameShadow">
                      <enum>QFrame::Raised</enum>
                     </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_12">
+                    <layout class="QHBoxLayout" name="horizontalLayout_15">
                      <property name="spacing">
-                      <number>5</number>
+                      <number>4</number>
                      </property>
                      <property name="leftMargin">
-                      <number>1</number>
+                      <number>2</number>
                      </property>
                      <property name="topMargin">
-                      <number>1</number>
+                      <number>2</number>
                      </property>
                      <property name="rightMargin">
-                      <number>1</number>
+                      <number>2</number>
                      </property>
                      <property name="bottomMargin">
-                      <number>1</number>
+                      <number>2</number>
                      </property>
                      <item>
-                      <widget class="QSpinBox" name="spinBox_portion">
-                       <property name="maximumSize">
-                        <size>
-                         <width>60</width>
-                         <height>16777215</height>
-                        </size>
-                       </property>
-                       <property name="maximum">
-                        <number>1000</number>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QToolButton" name="toolButton_switch">
+                      <widget class="QToolButton" name="toolButton_mealreset">
                        <property name="minimumSize">
                         <size>
-                         <width>24</width>
+                         <width>125</width>
                          <height>24</height>
                         </size>
                        </property>
-                       <property name="maximumSize">
-                        <size>
-                         <width>24</width>
-                         <height>24</height>
-                        </size>
+                       <property name="font">
+                        <font>
+                         <pointsize>10</pointsize>
+                         <weight>75</weight>
+                         <bold>true</bold>
+                        </font>
                        </property>
                        <property name="text">
-                        <string/>
+                        <string>Meals</string>
                        </property>
-                       <property name="icon">
-                        <iconset resource="resources.qrc">
-                         <normaloff>:/images/icons/Left-right.png</normaloff>:/images/icons/Left-right.png</iconset>
-                       </property>
-                       <property name="iconSize">
-                        <size>
-                         <width>18</width>
-                         <height>18</height>
-                        </size>
+                       <property name="checkable">
+                        <bool>false</bool>
                        </property>
                        <property name="autoRaise">
                         <bool>true</bool>
@@ -2498,44 +2291,14 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QDoubleSpinBox" name="doubleSpinBox_portion">
-                       <property name="maximumSize">
-                        <size>
-                         <width>50</width>
-                         <height>16777215</height>
-                        </size>
-                       </property>
-                       <property name="maximum">
-                        <double>10.000000000000000</double>
-                       </property>
-                       <property name="singleStep">
-                        <double>0.050000000000000</double>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QSpinBox" name="spinBox_calories">
-                       <property name="maximum">
-                        <number>1000</number>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLineEdit" name="lineEdit_calories">
-                       <property name="enabled">
-                        <bool>false</bool>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="Line" name="line_18">
+                      <widget class="Line" name="line_15">
                        <property name="orientation">
                         <enum>Qt::Vertical</enum>
                        </property>
                       </widget>
                      </item>
                      <item>
-                      <widget class="QToolButton" name="toolButton_addMeal">
+                      <widget class="QToolButton" name="toolButton_addMenu">
                        <property name="minimumSize">
                         <size>
                          <width>24</width>
@@ -2553,7 +2316,71 @@
                        </property>
                        <property name="icon">
                         <iconset resource="resources.qrc">
-                         <normaloff>:/images/icons/Add.png</normaloff>:/images/icons/Add.png</iconset>
+                         <normaloff>:/images/icons/Create.png</normaloff>:/images/icons/Create.png</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>18</width>
+                         <height>18</height>
+                        </size>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="toolButton_deleteMenu">
+                       <property name="minimumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="resources.qrc">
+                         <normaloff>:/images/icons/Delete.png</normaloff>:/images/icons/Delete.png</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>18</width>
+                         <height>18</height>
+                        </size>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="toolButton_saveMeals">
+                       <property name="minimumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="resources.qrc">
+                         <normaloff>:/images/icons/Save.png</normaloff>:/images/icons/Save.png</iconset>
                        </property>
                        <property name="iconSize">
                         <size>
@@ -2569,241 +2396,187 @@
                     </layout>
                    </widget>
                   </item>
+                  <item>
+                   <widget class="QProgressBar" name="progressBar_saveMeals">
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>5</height>
+                     </size>
+                    </property>
+                    <property name="value">
+                     <number>0</number>
+                    </property>
+                    <property name="textVisible">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QTreeView" name="treeView_meals">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                      <horstretch>0</horstretch>
+                      <verstretch>2</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>10</pointsize>
+                     </font>
+                    </property>
+                   </widget>
+                  </item>
                  </layout>
                 </widget>
                </item>
                <item>
-                <widget class="QFrame" name="frame_2">
+                <widget class="QFrame" name="frame_dayShow">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>1</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="frameShape">
-                  <enum>QFrame::Panel</enum>
+                  <enum>QFrame::StyledPanel</enum>
                  </property>
                  <property name="frameShadow">
                   <enum>QFrame::Raised</enum>
                  </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_14">
+                 <layout class="QVBoxLayout" name="verticalLayout_16">
                   <property name="spacing">
                    <number>2</number>
                   </property>
                   <property name="leftMargin">
-                   <number>4</number>
+                   <number>0</number>
                   </property>
                   <property name="topMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <property name="rightMargin">
-                   <number>4</number>
+                   <number>0</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <item>
-                   <widget class="QToolButton" name="toolButton_menuEdit">
-                    <property name="minimumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
+                   <widget class="QFrame" name="frame_dayEdit">
+                    <property name="font">
+                     <font>
+                      <pointsize>9</pointsize>
+                     </font>
                     </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
+                    <property name="frameShape">
+                     <enum>QFrame::Panel</enum>
                     </property>
-                    <property name="icon">
-                     <iconset resource="resources.qrc">
-                      <normaloff>:/images/icons/OK.png</normaloff>:/images/icons/OK.png</iconset>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
                     </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>18</width>
-                      <height>18</height>
-                     </size>
-                    </property>
-                    <property name="autoRaise">
-                     <bool>true</bool>
-                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_16">
+                     <property name="spacing">
+                      <number>4</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>4</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>2</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>4</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>2</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="label_dayShow">
+                       <property name="text">
+                        <string>-</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="toolButton_lineCopy">
+                       <property name="minimumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="resources.qrc">
+                         <normaloff>:/images/icons/Copy.png</normaloff>:/images/icons/Copy.png</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>18</width>
+                         <height>18</height>
+                        </size>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="toolButton_linePaste">
+                       <property name="minimumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="resources.qrc">
+                         <normaloff>:/images/icons/Paste.png</normaloff>:/images/icons/Paste.png</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>18</width>
+                         <height>18</height>
+                        </size>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QToolButton" name="toolButton_clear">
-                    <property name="minimumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>...</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="resources.qrc">
-                      <normaloff>:/images/icons/Erase.png</normaloff>:/images/icons/Erase.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>18</width>
-                      <height>18</height>
-                     </size>
-                    </property>
-                    <property name="autoRaise">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="Line" name="line_16">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButton_menuCopy">
-                    <property name="minimumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>...</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="resources.qrc">
-                      <normaloff>:/images/icons/Copy.png</normaloff>:/images/icons/Copy.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>18</width>
-                      <height>18</height>
-                     </size>
-                    </property>
-                    <property name="autoRaise">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButton_menuPaste">
-                    <property name="minimumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>...</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="resources.qrc">
-                      <normaloff>:/images/icons/Paste.png</normaloff>:/images/icons/Paste.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>18</width>
-                      <height>18</height>
-                     </size>
-                    </property>
-                    <property name="autoRaise">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="Line" name="line_19">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButton_foodUp">
-                    <property name="minimumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>...</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="resources.qrc">
-                      <normaloff>:/images/icons/Up.png</normaloff>:/images/icons/Up.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>18</width>
-                      <height>18</height>
-                     </size>
-                    </property>
-                    <property name="autoRaise">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButton_foodDown">
-                    <property name="minimumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>...</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="resources.qrc">
-                      <normaloff>:/images/icons/Down.png</normaloff>:/images/icons/Down.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>18</width>
-                      <height>18</height>
-                     </size>
-                    </property>
-                    <property name="autoRaise">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
+                   <widget class="QTableWidget" name="tableWidget_daySummery"/>
                   </item>
                  </layout>
                 </widget>
                </item>
                <item>
-                <widget class="QFrame" name="frame_5">
+                <widget class="QFrame" name="frame_menuEdit">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>1</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="frameShape">
                   <enum>QFrame::StyledPanel</enum>
                  </property>
@@ -2848,6 +2621,411 @@
                     <property name="text">
                      <string>Edit Menu</string>
                     </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="frame_mealSet">
+                    <property name="frameShape">
+                     <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout_15">
+                     <property name="spacing">
+                      <number>2</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>2</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>2</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>2</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>2</number>
+                     </property>
+                     <item>
+                      <widget class="QLineEdit" name="lineEdit_Mealname">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QFrame" name="frame_6">
+                       <property name="frameShape">
+                        <enum>QFrame::StyledPanel</enum>
+                       </property>
+                       <property name="frameShadow">
+                        <enum>QFrame::Raised</enum>
+                       </property>
+                       <layout class="QHBoxLayout" name="horizontalLayout_12">
+                        <property name="spacing">
+                         <number>5</number>
+                        </property>
+                        <property name="leftMargin">
+                         <number>1</number>
+                        </property>
+                        <property name="topMargin">
+                         <number>1</number>
+                        </property>
+                        <property name="rightMargin">
+                         <number>1</number>
+                        </property>
+                        <property name="bottomMargin">
+                         <number>1</number>
+                        </property>
+                        <item>
+                         <widget class="QSpinBox" name="spinBox_portion">
+                          <property name="maximumSize">
+                           <size>
+                            <width>60</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <property name="maximum">
+                           <number>1000</number>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QToolButton" name="toolButton_switch">
+                          <property name="minimumSize">
+                           <size>
+                            <width>24</width>
+                            <height>24</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>24</width>
+                            <height>24</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string/>
+                          </property>
+                          <property name="icon">
+                           <iconset resource="resources.qrc">
+                            <normaloff>:/images/icons/Left-right.png</normaloff>:/images/icons/Left-right.png</iconset>
+                          </property>
+                          <property name="iconSize">
+                           <size>
+                            <width>18</width>
+                            <height>18</height>
+                           </size>
+                          </property>
+                          <property name="autoRaise">
+                           <bool>true</bool>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QDoubleSpinBox" name="doubleSpinBox_portion">
+                          <property name="maximumSize">
+                           <size>
+                            <width>50</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <property name="maximum">
+                           <double>10.000000000000000</double>
+                          </property>
+                          <property name="singleStep">
+                           <double>0.050000000000000</double>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QSpinBox" name="spinBox_calories">
+                          <property name="maximum">
+                           <number>1000</number>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QLineEdit" name="lineEdit_calories">
+                          <property name="enabled">
+                           <bool>false</bool>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="Line" name="line_18">
+                          <property name="orientation">
+                           <enum>Qt::Vertical</enum>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QToolButton" name="toolButton_addMeal">
+                          <property name="minimumSize">
+                           <size>
+                            <width>24</width>
+                            <height>24</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>24</width>
+                            <height>24</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string>...</string>
+                          </property>
+                          <property name="icon">
+                           <iconset resource="resources.qrc">
+                            <normaloff>:/images/icons/Add.png</normaloff>:/images/icons/Add.png</iconset>
+                          </property>
+                          <property name="iconSize">
+                           <size>
+                            <width>18</width>
+                            <height>18</height>
+                           </size>
+                          </property>
+                          <property name="autoRaise">
+                           <bool>true</bool>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="frame_mealEdit">
+                    <property name="frameShape">
+                     <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_14">
+                     <property name="spacing">
+                      <number>2</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>4</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>2</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>4</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>2</number>
+                     </property>
+                     <item>
+                      <widget class="QToolButton" name="toolButton_menuEdit">
+                       <property name="minimumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="resources.qrc">
+                         <normaloff>:/images/icons/OK.png</normaloff>:/images/icons/OK.png</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>18</width>
+                         <height>18</height>
+                        </size>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="toolButton_clear">
+                       <property name="minimumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="resources.qrc">
+                         <normaloff>:/images/icons/Erase.png</normaloff>:/images/icons/Erase.png</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>18</width>
+                         <height>18</height>
+                        </size>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="Line" name="line_16">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="toolButton_menuCopy">
+                       <property name="minimumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="resources.qrc">
+                         <normaloff>:/images/icons/Copy.png</normaloff>:/images/icons/Copy.png</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>18</width>
+                         <height>18</height>
+                        </size>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="toolButton_menuPaste">
+                       <property name="minimumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="resources.qrc">
+                         <normaloff>:/images/icons/Paste.png</normaloff>:/images/icons/Paste.png</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>18</width>
+                         <height>18</height>
+                        </size>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="Line" name="line_19">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="toolButton_foodUp">
+                       <property name="minimumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="resources.qrc">
+                         <normaloff>:/images/icons/Up.png</normaloff>:/images/icons/Up.png</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>18</width>
+                         <height>18</height>
+                        </size>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="toolButton_foodDown">
+                       <property name="minimumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>24</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="resources.qrc">
+                         <normaloff>:/images/icons/Down.png</normaloff>:/images/icons/Down.png</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>18</width>
+                         <height>18</height>
+                        </size>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </widget>
                   </item>
                   <item>

@@ -9,6 +9,9 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     mealTags << "name" << "port" << "cal" << "carb" << "protein" << "fat" << "fiber" << "sugar" << "id";
     menuHeader << "Name" << "Port" << "Cal" << "Carb" << "Protein" << "Fat" << "Fiber" << "Sugar";
     mealsHeader = settings::get_listValues("Meals");
+    dayListHeader << "Cal (%)" << "Carbs ("+QString::number(settings::doubleMap.value("Macros").at(0))+"%)"
+                               << "Protein ("+QString::number(settings::doubleMap.value("Macros").at(1))+"%)"
+                               << "Fat ("+QString::number(settings::doubleMap.value("Macros").at(2))+"%)";
     sumHeader << "Calories Food:" << "Conversion Base:" << "Conversion Sport:" << "Summery:" << "Difference:";
     weekSumHeader << "Week Summery";
     estHeader << "Weight at Weekstart:" << "Avg Daily Calories:" << "Avg Daily Conversion:" <<"Avg Daily Diff:" << "Weight Change:" << "Weight at Weekend:";
@@ -575,7 +578,7 @@ void foodplanner::update_daySumModel()
         temp[0] = round(sum * (settings::doubleMap.value("Macros").at(0) / 100.0) / 4.0);
         temp[1] = round(sum * (settings::doubleMap.value("Macros").at(1) / 100.0) / 4.0);
         temp[2] = round(sum * (settings::doubleMap.value("Macros").at(2) / 100.0) / 9.0);
-        temp[3] = ceil(athleteValues->value("weight") / 2.0);
+        temp[3] = ceil(athleteValues->value("weight") * (generalValues->value("DayFiber").toDouble() /100.0));
         temp[4] = round(sum * (generalValues->value("DaySugar").toDouble() / 100.0) / 4.0);
         dayTarget.insert(calcDay.date().addDays(i),temp);
 

@@ -202,6 +202,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolButton_deleteMenu->setEnabled(false);
     ui->toolButton_menuCopy->setEnabled(false);
     ui->toolButton_menuPaste->setEnabled(false);
+    ui->frame_dayShow->setVisible(false);
+    ui->tableWidget_daySummery->setColumnCount(4);
+    ui->tableWidget_daySummery->setRowCount(foodPlan->mealsHeader.count()+1);
+    ui->tableWidget_daySummery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_daySummery->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->toolButton_lineCopy->setEnabled(false);
+    ui->toolButton_linePaste->setEnabled(false);
     foodcopyMode = lineSelected = dayLineSelected = false;
     this->reset_menuEdit();
     selModule = 0;
@@ -301,6 +308,88 @@ void MainWindow::fill_weekTable(QString weekID,bool reset)
         }
     }
     ui->tableWidget_weekPlan->blockSignals(false);
+}
+
+void MainWindow::fill_dayTable(int daySelected)
+{
+    QVector<int> foodMacros(5);
+    QVector<int> sumMacros(4);
+    QVector<int> summery(4);
+    sumMacros.fill(0);
+    summery.fill(0);
+
+    double dayCal = foodPlan->daySumModel->data(foodPlan->daySumModel->index(0,daySelected)).toDouble();
+    double mealCal = 0;
+    double percent = 0;
+
+    QStringList mealList;
+    QString calString;
+
+    for(int i = 0; i < foodPlan->mealsHeader.count(); ++i)
+    {
+        mealList = ui->tableWidget_weekPlan->item(i,daySelected)->data(Qt::DisplayRole).toString().split("\n");
+
+        for(int x = 0; x < mealList.count(); ++x)
+        {
+            foodMacros = this->calc_menuCal(mealList.at(x));
+            for(int y = 0; y < 4; ++y)
+            {
+                sumMacros[y] = sumMacros[y] + foodMacros.at(y);
+            }
+
+            for(int val = 0; val < sumMacros.count(); ++val)
+            {
+                 QTableWidgetItem *item = new QTableWidgetItem();
+                 if(val == 0)
+                 {
+                    percent = (sumMacros.at(val) / dayCal)*100.0;
+                    calString = QString::number(sumMacros.at(val));
+                 }
+                 else if(val == 1 || val == 2)
+                 {
+                    mealCal = sumMacros.at(val) * 4;
+                    percent = (mealCal / sumMacros.at(0))*100.0;
+                    calString = QString::number(sumMacros.at(val))+"-"+QString::number(mealCal);
+                 }
+                 else if(val == 3)
+                 {
+                    mealCal = sumMacros.at(val) * 9;
+                    percent = (mealCal / sumMacros.at(0))*100.0;
+                    calString = QString::number(sumMacros.at(val))+"-"+QString::number(mealCal);
+                 }
+
+                 if(mealCal == 0.0) percent = 0;
+
+                 if(x == mealList.count()-1)
+                 {
+                     if(val == 0)
+                     {
+                         summery[val] = summery.at(val) + sumMacros.at(val);
+                     }
+                     if(val == 1 || val == 2)
+                     {
+                         summery[val] = summery.at(val) + (sumMacros.at(val)*4);
+                     }
+                     if(val == 3)
+                     {
+                         summery[val] = summery.at(val) + (sumMacros.at(val)*9);
+                     }
+
+                 }
+                 item->setText(calString+" ("+QString::number(set_doubleValue(percent,false))+")");
+                 ui->tableWidget_daySummery->setItem(i,val,item);
+            }
+        }
+
+        sumMacros.fill(0);
+    }
+
+    for(int i = 0; i < summery.count(); ++i)
+    {
+        QTableWidgetItem *item = new QTableWidgetItem();
+        item->setText(QString::number(summery.at(i))+" ("+QString::number(set_doubleValue((summery.at(i)/dayCal)*100.0,false))+")");
+        ui->tableWidget_daySummery->setItem(foodPlan->mealsHeader.count(),i,item);
+    }
 }
 
 void MainWindow::read_activityFiles()
@@ -2140,7 +2229,30 @@ int MainWindow::checkFoodString(QString checkString)
     return rxpVal.validate(checkString,pos);
 }
 
-void MainWindow::calc_menuCal()
+QVector<int> MainWindow::calc_menuCal(QString foodString)
+{
+    QString calcString;
+    QVector<int> foodMacros(5);
+    int vPos = 0;
+    int mealCal = 0;
+    double mealPort = 0;
+
+    vPos = foodString.indexOf("-")+1;
+    mealCal = mealCal + foodString.mid(vPos,foodString.indexOf(")")-vPos).toInt();
+    vPos = foodString.indexOf("(")+1;
+    mealPort = foodString.mid(vPos,foodString.indexOf("-")-vPos).toDouble();
+    calcString = foodString.mid(vPos,foodString.indexOf("-")-vPos);
+
+    foodString = foodString.left(foodString.indexOf("(")-1);
+    foodMacros = foodPlan->calc_FoodMacros(foodString,mealPort);
+
+    foodMacros.append(mealCal);
+    foodMacros.move(foodMacros.count()-1,0);
+
+    return  foodMacros;
+}
+
+void MainWindow::set_menuList()
 {
     QString foodString,temp;
     QVector<int> foodMacros(5);
@@ -2218,7 +2330,7 @@ void MainWindow::on_listWidget_MenuEdit_doubleClicked(const QModelIndex &index)
 {
     delete ui->listWidget_MenuEdit->takeItem(index.row());
     ui->listWidget_MenuEdit->clearSelection();
-    this->calc_menuCal();
+    this->set_menuList();
 }
 
 void MainWindow::on_toolButton_menuEdit_clicked()
@@ -2339,7 +2451,7 @@ void MainWindow::on_toolButton_addMeal_clicked()
         if(!mealFlag) ui->listWidget_MenuEdit->addItem(mealString);
     }
 
-    this->calc_menuCal();
+    this->set_menuList();
 }
 
 void MainWindow::on_toolButton_foodUp_clicked()
@@ -2399,6 +2511,7 @@ void MainWindow::on_tableWidget_weekPlan_itemChanged(QTableWidgetItem *item)
 
 void MainWindow::on_listWidget_MenuEdit_itemClicked(QListWidgetItem *item)
 {
+    foodcopyMode = false;
     QString foodString,foodName,mealValues,mealCal,mealPort;
     QVector<int> mealData(2);
     foodString = item->data(Qt::DisplayRole).toString();
@@ -2469,11 +2582,15 @@ void MainWindow::on_treeView_meals_collapsed(const QModelIndex &index)
 
 void MainWindow::on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item)
 {
+    ui->frame_dayShow->setVisible(false);
+    ui->toolButton_lineCopy->setEnabled(false);
+    ui->toolButton_linePaste->setEnabled(false);
+    ui->frame_menuEdit->setVisible(true);
     ui->listWidget_MenuEdit->clear();
     if(!item->data(Qt::DisplayRole).toString().isEmpty())
     {
         ui->listWidget_MenuEdit->addItems(item->data(Qt::DisplayRole).toString().split("\n"));
-        this->calc_menuCal();
+        this->set_menuList();
     }
     ui->label_menuEdit->setText("Edit: "+ foodPlan->dayHeader.at(item->column()) + " - " + foodPlan->mealsHeader.at(item->row()));
     ui->toolButton_foodDown->setEnabled(true);
@@ -2504,22 +2621,15 @@ void MainWindow::on_toolButton_mealreset_clicked()
 void MainWindow::on_toolButton_clear_clicked()
 {
     ui->listWidget_MenuEdit->clear();
-    this->calc_menuCal();
+    this->set_menuList();
 }
 
 void MainWindow::on_toolButton_menuCopy_clicked()
 {
-    if(!lineSelected)
+    menuCopy.clear();
+    for(int i = 0; i < ui->listWidget_MenuEdit->count(); ++i)
     {
-        menuCopy.clear();
-        for(int i = 0; i < ui->listWidget_MenuEdit->count(); ++i)
-        {
-            menuCopy << ui->listWidget_MenuEdit->item(i)->text();
-        }
-    }
-    else
-    {
-        foodcopyMode = true;
+        menuCopy << ui->listWidget_MenuEdit->item(i)->text();
     }
 
     ui->toolButton_menuPaste->setEnabled(true);
@@ -2527,49 +2637,13 @@ void MainWindow::on_toolButton_menuCopy_clicked()
 
 void MainWindow::on_toolButton_menuPaste_clicked()
 {
-    if(foodcopyMode)
-    {
-        int counter = 0;
-        QString tempValue;
-        if(dayLineSelected)
-        {
-            counter = ui->tableWidget_weekPlan->rowCount();
-        }
-        else
-        {
-            counter = ui->tableWidget_weekPlan->columnCount();
-        }
 
-        for(int i = 0; i < counter; ++i)
-        {
-            for(int x = 0; x < selectedLine.value(i).count(); ++x)
-            {
-                tempValue = tempValue + selectedLine.value(i).at(x) + "\n";
-            }
-            tempValue.remove(tempValue.length()-1,1);
-            if(dayLineSelected)
-            {
-                ui->tableWidget_weekPlan->item(i,foodcopyLine)->setData(Qt::EditRole,tempValue);
-            }
-            else
-            {
-                ui->tableWidget_weekPlan->item(foodcopyLine,i)->setData(Qt::EditRole,tempValue);
-            }
-            tempValue.clear();
-        }
-        foodcopyLine = 0;
-        foodcopyMode = false;
-        lineSelected = false;
-    }
-    else
-    {
-        ui->listWidget_MenuEdit->clear();
-        ui->listWidget_MenuEdit->addItems(menuCopy);
-    }
+    ui->listWidget_MenuEdit->clear();
+    ui->listWidget_MenuEdit->addItems(menuCopy);
 
     ui->toolButton_menuCopy->setEnabled(false);
 
-    this->calc_menuCal();
+    this->set_menuList();
 }
 
 void MainWindow::on_comboBox_weightmode_currentIndexChanged(const QString &value)
@@ -2585,16 +2659,14 @@ void MainWindow::on_comboBox_weightmode_currentIndexChanged(const QString &value
     }
 }
 
-void MainWindow::fill_selectLine(int line, int lineCounter,bool day)
+void MainWindow::fill_selectLine(int line, int lineCounter)
 {
     QStringList tempValues;
     selectedLine.clear();
-    lineSelected = true;
-    dayLineSelected = day;
 
     for(int i = 0; i < lineCounter;++i)
     {
-        if(day)
+        if(dayLineSelected)
         {
             tempValues = ui->tableWidget_weekPlan->item(i,line)->data(Qt::DisplayRole).toString().split("\n");
         }
@@ -2612,26 +2684,65 @@ void MainWindow::fill_selectLine(int line, int lineCounter,bool day)
 
 void MainWindow::selectFoodMealWeek(int selectedMeal)
 {
+    ui->tableWidget_daySummery->clearContents();
+    ui->label_dayShow->setText("Selected: "+foodPlan->mealsHeader.at(selectedMeal));
+
     if(!foodcopyMode)
     {
-        this->fill_selectLine(selectedMeal,ui->tableWidget_weekPlan->columnCount(),false);
+        ui->frame_dayShow->setVisible(true);
+        ui->frame_menuEdit->setVisible(false);
+        ui->tableWidget_daySummery->clearContents();
+        ui->tableWidget_daySummery->verticalHeader()->setVisible(false);
+        ui->tableWidget_daySummery->horizontalHeader()->setVisible(false);
     }
     else
     {
-        foodcopyLine = selectedMeal;
+        if(!dayLineSelected)
+        {
+            ui->label_dayShow->setText(ui->label_dayShow->text()+" - Insert");
+        }
+        else
+        {
+            ui->toolButton_linePaste->setEnabled(false);
+        }
+
     }
+
+    ui->toolButton_lineCopy->setEnabled(true);
+    foodcopyLine = selectedMeal;
+    dayLineSelected = false;
 }
 
 void MainWindow::selectFoodMealDay(int selectedDay)
 {
+    ui->label_dayShow->setText("Selected: "+QDate::longDayName(selectedDay+1));
+
     if(!foodcopyMode)
     {
-        this->fill_selectLine(selectedDay,ui->tableWidget_weekPlan->rowCount(),true);
+        ui->frame_dayShow->setVisible(true);
+        ui->frame_menuEdit->setVisible(false);
+        ui->tableWidget_daySummery->setVerticalHeaderLabels(foodPlan->mealsHeader);
+        ui->tableWidget_daySummery->setHorizontalHeaderLabels(foodPlan->dayListHeader);
+        ui->tableWidget_daySummery->setVerticalHeaderItem(foodPlan->mealsHeader.count(),new QTableWidgetItem(generalValues->value("sum")));
+        ui->tableWidget_daySummery->verticalHeader()->setVisible(true);
+        ui->tableWidget_daySummery->horizontalHeader()->setVisible(true);
+        this->fill_dayTable(selectedDay);
     }
     else
     {
-        foodcopyLine = selectedDay;
+        if(dayLineSelected)
+        {
+            ui->label_dayShow->setText(ui->label_dayShow->text()+" - Insert");
+        }
+        else
+        {
+            ui->toolButton_linePaste->setEnabled(false);
+        }
     }
+
+    ui->toolButton_lineCopy->setEnabled(true);
+    foodcopyLine = selectedDay;
+    dayLineSelected = true;
 }
 
 void MainWindow::on_actionFood_Macros_triggered()
@@ -2648,4 +2759,55 @@ void MainWindow::on_toolButton_switch_clicked()
 
     ui->spinBox_portion->setValue(static_cast<int>(secVal));
     ui->doubleSpinBox_portion->setValue(firstVal);
+}
+
+void MainWindow::on_toolButton_lineCopy_clicked()
+{
+    foodcopyMode = true;
+
+    if(dayLineSelected)
+    {
+        this->fill_selectLine(foodcopyLine,ui->tableWidget_weekPlan->rowCount());
+    }
+    else
+    {
+        this->fill_selectLine(foodcopyLine,ui->tableWidget_weekPlan->columnCount());
+    }
+    ui->label_dayShow->setText(ui->label_dayShow->text()+" - Copy");
+    ui->toolButton_linePaste->setEnabled(true);
+}
+
+void MainWindow::on_toolButton_linePaste_clicked()
+{
+    int counter = 0;
+    QString tempValue;
+
+    if(dayLineSelected)
+    {
+        counter = ui->tableWidget_weekPlan->rowCount();
+    }
+    else
+    {
+        counter = ui->tableWidget_weekPlan->columnCount();
+    }
+
+    for(int i = 0; i < counter; ++i)
+    {
+        for(int x = 0; x < selectedLine.value(i).count(); ++x)
+        {
+            tempValue = tempValue + selectedLine.value(i).at(x) + "\n";
+        }
+
+        tempValue.remove(tempValue.length()-1,1);
+
+        if(dayLineSelected)
+        {
+            ui->tableWidget_weekPlan->item(i,foodcopyLine)->setData(Qt::EditRole,tempValue);
+        }
+        else
+        {
+            ui->tableWidget_weekPlan->item(foodcopyLine,i)->setData(Qt::EditRole,tempValue);
+        }
+        tempValue.clear();
+    }
 }
