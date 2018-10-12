@@ -412,6 +412,7 @@ void settings::loadSettings()
             generalMap.insert("AddMoving",myvalues->value("addmoving").toString());
             generalMap.insert("DayRoutine",myvalues->value("dayroutine").toString());
             generalMap.insert("DayRoutineCal",myvalues->value("dayroutinecal").toString());
+            generalMap.insert("DayFiber",myvalues->value("fiber").toString());
             generalMap.insert("DaySugar",myvalues->value("sugar").toString());
             athleteMap.insert("BodyFatCal",myvalues->value("fatcal").toDouble());
             settingList = myvalues->value("moveday").toString().split(splitter);
