@@ -32,7 +32,7 @@ class Dialog_stresscalc : public QDialog, public calculation
     Q_OBJECT
 
 public:
-    explicit Dialog_stresscalc(QWidget *parent = 0);
+    explicit Dialog_stresscalc(QWidget *parent = nullptr);
     ~Dialog_stresscalc();
 
 private slots:

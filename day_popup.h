@@ -41,7 +41,7 @@ class del_daypop: public QStyledItemDelegate, public calculation
     Q_OBJECT
 
 public:
-    explicit del_daypop(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_daypop(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
     int selCol;
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
@@ -295,7 +295,7 @@ private:
     schedule *workSched;
     del_daypop daypop_del;
     QStandardItemModel *dayModel,*stdlistModel,*intExport, *sampExport;
-    QSortFilterProxyModel *scheduleProxy,*stdProxy;
+    QSortFilterProxyModel *scheduleProxy;
     QHash<QString,QString> currWorkout;
     QHash<int,QString> stdworkData;
     QDate popupDate,newDate;

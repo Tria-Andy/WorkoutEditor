@@ -637,6 +637,12 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
         usePM = 1;
         pValue = percent / 10.0;
     }
+    else if(isTria)
+    {
+        usePM = 1;
+        pValue = percent / 10.0;
+    }
+
 
     if(hasValues)
     {
@@ -1078,7 +1084,7 @@ void Dialog_workCreator::on_treeWidget_intervall_itemClicked(QTreeWidgetItem *it
 void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &sport)
 {
     currentSport = sport;
-    isSwim = isBike = isRun = isStrength = isAlt = isOther = false;
+    isSwim = isBike = isRun = isStrength = isAlt = isOther = isTria = false;
 
     if(currentSport == settings::isSwim) isSwim = true;
     if(currentSport == settings::isBike) isBike = true;
@@ -1086,6 +1092,7 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
     if(currentSport == settings::isStrength) isStrength = true;
     if(currentSport == settings::isAlt) isAlt = true;
     if(currentSport == settings::isOther) isOther = true;
+    if(currentSport == settings::isTria) isTria = true;
 
     QString postFix;
     int usePM = 0;
@@ -1158,6 +1165,21 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
        editRow[5] = 1;
        editRow[8] = 0;
     }
+    if(isTria)
+    {
+       usePM = 1;
+       thresPower = thresValues->value("stgpower");
+       thresPace = 0;
+       postFix = " Watt";
+       editRow[2] = 1;
+       editRow[3] = 1;
+       editRow[4] = 1;
+       editRow[5] = 1;
+       editRow[6] = 1;
+       editRow[7] = 1;
+       editRow[8] = 1;
+    }
+
 
     if(usePM == 0)
     {

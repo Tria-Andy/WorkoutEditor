@@ -30,7 +30,7 @@ class Dialog_version : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_version(QWidget *parent = 0);
+    explicit Dialog_version(QWidget *parent = nullptr);
     ~Dialog_version();
 
 private:

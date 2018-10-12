@@ -33,7 +33,7 @@ QString calculation::set_time(int sec)
         timeVal = QString::number(hours) + ":" + QString::number(minutes);
         return timeVal;
     }
-    return 0;
+    return nullptr;
 }
 
 int calculation::get_timesec(QString time)
@@ -306,7 +306,7 @@ QString calculation::calc_duration(QString sport,double dist, QString pace)
     {
         return set_time(get_timesec(pace) * dist);
     }
-    return 0;
+    return nullptr;
 }
 
 double calculation::calc_lnp(double speed,double athleteHeight,double athleteWeight)

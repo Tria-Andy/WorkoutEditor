@@ -38,7 +38,7 @@ private:
 
     static QMap<int,QString> sampList,intList;
     static QMap<int,double> weightMap;
-    static QHash<QString,QString> swimRange,bikeRange,runRange,stgRange,altRange,hfRange;
+    static QHash<QString,QString> swimRange,bikeRange,runRange,triRange,stgRange,altRange,hfRange;
     static QHash<QString,int> fontMap;
     static QVector<double> tempVector;
 
@@ -87,7 +87,7 @@ public:
         {
             return &intList;
         }
-        return 0;
+        return nullptr;
     }
 
     enum stingMap {GC,General,Tria};
@@ -105,7 +105,7 @@ public:
         {
             return &triaMap;
         }
-        return 0;
+        return nullptr;
     }
 
     enum dMap {Threshold,Athlete,LTS};
@@ -123,7 +123,7 @@ public:
         {
             return &ltsMap;
         }
-        return 0;
+        return nullptr;
     }
 
     //QMap/QHash Setter

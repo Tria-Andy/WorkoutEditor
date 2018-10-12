@@ -34,7 +34,7 @@ class del_addweek : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 public:
-    explicit del_addweek(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_addweek(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -267,18 +267,26 @@ private slots:
     void on_toolButton_update_clicked();
     void on_toolButton_close_clicked();
 
+    void on_toolButton_copy_clicked();
+
+    void on_toolButton_paste_clicked();
+
 private:
     Ui::Dialog_addweek *ui;
     schedule *workSched;
     del_addweek week_del;
     QStandardItemModel *weekModel;
     QSortFilterProxyModel *metaProxy,*metaProxyFilter,*contentProxy;
-    QString editWeekID,timeFormat,empty;
-    QStringList sportuseList,weekHeader;
+    QString editWeekID,timeFormat,empty,sumString;
+    QStringList sportuseList,weekHeader,weekMeta,weekContent;
     QString delimiter;
+    int sportlistCount;
     bool update;
 
     void fill_values(QString);
+    void get_currentValues();
+    void fill_currentValues();
+    void fill_weekSumRow(QAbstractItemModel*);
     QStringList create_values();
 };
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>650</width>
+    <width>730</width>
     <height>330</height>
    </rect>
   </property>
@@ -185,6 +185,38 @@
       <property name="verticalSpacing">
        <number>5</number>
       </property>
+      <item row="0" column="10">
+       <widget class="QToolButton" name="toolButton_copy">
+        <property name="minimumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/images/icons/Copy.png</normaloff>:/images/icons/Copy.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>18</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
        <widget class="QDateEdit" name="dateEdit_selectDate">
         <property name="minimumSize">
@@ -338,6 +370,38 @@
       </item>
       <item row="2" column="1" colspan="7">
        <widget class="QLineEdit" name="lineEdit_weekGoals"/>
+      </item>
+      <item row="0" column="11">
+       <widget class="QToolButton" name="toolButton_paste">
+        <property name="minimumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/images/icons/Paste.png</normaloff>:/images/icons/Paste.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>18</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

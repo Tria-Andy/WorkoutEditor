@@ -40,7 +40,7 @@ class Dialog_settings : public QDialog, public calculation, public xmlHandler, p
     Q_OBJECT
 
 public:
-    explicit Dialog_settings(QWidget *parent = 0,schedule *psched = 0,foodplanner *pFood = 0);
+    explicit Dialog_settings(QWidget *parent = nullptr,schedule *psched = nullptr,foodplanner *pFood = nullptr);
     ~Dialog_settings();
 
 private slots:
@@ -86,7 +86,6 @@ private slots:
     void on_pushButton_clearFat_clicked();
     void on_pushButton_addContest_clicked();
     void on_pushButton_delContest_clicked();
-    void on_treeView_contest_clicked(const QModelIndex &index);
     void on_toolButton_addSaison_clicked();
     void on_comboBox_saisons_currentIndexChanged(const QString &arg1);
     void on_comboBox_saisons_editTextChanged(const QString &arg1);
@@ -106,11 +105,18 @@ private slots:
     void on_comboBox_thresBase_currentIndexChanged(int index);
     void on_toolButton_seasonPath_clicked();
     void on_toolButton_foodPath_clicked();
+    void on_toolButton_mapPath_clicked();
+    void on_pushButton_clearContest_clicked();
+    void selectContest(int);
+    void on_spinBox_carbs_valueChanged(int arg1);
+    void on_spinBox_protein_valueChanged(int arg1);
+    void on_spinBox_fat_valueChanged(int arg1);
 
 private:
     Ui::Dialog_settings *ui;
-    QStandardItemModel *level_model,*hf_model,*contestTreeModel;
+    QStandardItemModel *level_model,*hf_model;
     QSortFilterProxyModel *saisonProxy,*contestProxy;
+    QModelIndex contestIndex;
     schedule *schedule_ptr;
     foodplanner *food_ptr;
     saisons *saisons_ptr;
@@ -122,9 +128,10 @@ private:
     double thresPower,thresPace,sportFactor;
     QString getDirectory(QString);
     QColor openColor(QColor);
-    bool useColor,stressEdit;
+    bool useColor,stressEdit,editContest;
     void checkSetup();
     void set_SelectControls(QString);
+    void reset_contest(bool);
     void set_color(QColor,QString);
     void set_bottonColor(QToolButton*,bool changeColor);
     void save_settingsChanges();
@@ -137,10 +144,10 @@ private:
     void updateListMap(int,bool);
     void writeChangedValues();
     void writeRangeValues(QString);
-    void updateContest(bool,int);
     void refresh_saisonCombo();
     void set_saisonInfo(QString);
-    void refresh_contestTree(QString);
+    void refresh_contestTable(QString);
+    void refresh_macros();
 };
 
 

@@ -22,6 +22,7 @@
 #include <QDialog>
 #include <QStandardItemModel>
 #include "schedule.h"
+#include "standardworkouts.h"
 #include "settings.h"
 #include "calculation.h"
 
@@ -29,12 +30,12 @@ namespace Ui {
 class week_popup;
 }
 
-class week_popup : public QDialog, public calculation
+class week_popup : public QDialog, public calculation,public standardWorkouts
 {
     Q_OBJECT
 
 public:
-    explicit week_popup(QWidget *parent = 0,QString weekinfo = 0,schedule *p_sched = 0);
+    explicit week_popup(QWidget *parent = nullptr,QString weekinfo = nullptr,schedule *p_sched = nullptr);
     ~week_popup();
 
 private slots:
@@ -44,17 +45,18 @@ private slots:
 
 private:
     Ui::week_popup *ui;
-    QStringList week_info,barSelection;
-    QSortFilterProxyModel *workProxy;
+    QStringList week_info,barSelection,levelList;
     schedule *workSched;
     QDateTime firstDay;
     bool isLoad;
     QList<QDateTime> weekDates;
     QVector<double> xStress,xLTS,xBar,xWorks,maxValues;
     QVector<double> yStress,yLTS,yDura,yDist,yWorkKj,yWorks,yWorkCount,yValues;
-    int dayCount;
+    QMap<QDateTime,QStringList> weekworkouts;
+    QMap<QString,double> zoneTime;
+    int dayCount,levelCount;
     QCPGraph *get_QCPLine(QString,QColor,QVector<double> &xdata,QVector<double> &ydata,bool);
-    QCPBars *get_QCPBar(QColor,int,bool);
+    QCPBars *get_QCPBar(QColor,int,int,bool);
     void set_itemTracer(QCPGraph*,QVector<double> &xdata,QColor,int);
     void set_itemLineText(QFont,QVector<double> &xdata,QVector<double> &ydata,int);
     void set_itemBarText(QFont,QColor,QVector<double> &xdata,QVector<double> &ydata,QVector<double> &ytext,int,bool);

@@ -30,12 +30,15 @@ class standardWorkouts : public xmlHandler
 public:
     standardWorkouts();
     QStandardItemModel *workouts_meta, *workouts_steps;
+    QSortFilterProxyModel *metaProxy,*stepProxy;
 
     void delete_stdWorkout(QString,bool);
     QStringList get_workoutIds() {return workoutIDs;}
 
 protected:
     void write_standard_workouts();
+    void filter_steps(QString,bool);
+    void filter_workout(QString,int,bool);
 
 private:
     QStringList meta_tags,step_tags,workoutIDs;

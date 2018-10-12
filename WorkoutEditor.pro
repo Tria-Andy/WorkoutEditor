@@ -15,7 +15,7 @@ TEMPLATE = app
 #Application version
 VERSION_MAJOR = 1
 VERSION_MINOR = 5
-VERSION_BUILD = 0
+VERSION_BUILD = 5
 DEV_BUILD = 1
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
@@ -52,7 +52,8 @@ SOURCES += main.cpp\
     filereader.cpp \
     saisons.cpp \
     foodplanner.cpp \
-    dialog_map.cpp
+    dialog_map.cpp \
+    foodmacro_popup.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
@@ -81,7 +82,8 @@ HEADERS  += mainwindow.h \
     del_mousehover.h \
     saisons.h \
     foodplanner.h \
-    dialog_map.h
+    dialog_map.h \
+    foodmacro_popup.h
 
 FORMS    += mainwindow.ui \
     dialog_export.ui \
@@ -96,7 +98,8 @@ FORMS    += mainwindow.ui \
     stress_popup.ui \
     dialog_workcreator.ui \
     dialog_addweek.ui \
-    dialog_map.ui
+    dialog_map.ui \
+    foodmacro_popup.ui
 
 RESOURCES += \
     resources.qrc

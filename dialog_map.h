@@ -18,7 +18,7 @@ class Dialog_map : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_map(QWidget *parent = 0,QSortFilterProxyModel *workMeta = 0, QString workID = 0,QString mapPix = 0);
+    explicit Dialog_map(QWidget *parent = nullptr,QSortFilterProxyModel *workMeta = nullptr, QString workID = nullptr,QString mapPix = nullptr);
     ~Dialog_map();
 
 private slots:

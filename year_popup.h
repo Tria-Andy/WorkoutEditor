@@ -33,7 +33,7 @@ class year_popup : public QDialog, public calculation
     Q_OBJECT
 
 public:
-    explicit year_popup(QWidget *parent = 0, QString pInfo = 0,int position = 0,schedule *p_sched = 0, QString pPhase = 0,int pIndex = 0);
+    explicit year_popup(QWidget *parent = nullptr, QString pInfo = nullptr,int position = 0,schedule *p_sched = nullptr, QString pPhase = nullptr,int pIndex = 0);
     ~year_popup();
 
 private slots:

@@ -58,6 +58,9 @@ void Activity::readJsonFile(QString jsonfile,bool intAct)
         intModel = new QStandardItemModel();
         mapValues = settings::getListMapPointer(settings::lMap::Interval);
         this->init_actModel("INTERVALS",mapValues,intModel,&intList,3);
+        intList.removeAt(intList.indexOf("COLOR"));
+        intList.removeAt(intList.indexOf("PTEST"));
+        intListCount = intList.count();
 
         sampleModel = new QStandardItemModel();
         mapValues = settings::getListMapPointer(settings::lMap::Sample);
@@ -66,7 +69,7 @@ void Activity::readJsonFile(QString jsonfile,bool intAct)
         if(hasXdata)
         {
             xdataModel = new QStandardItemModel();
-            this->init_xdataModel(curr_sport,xdataModel);
+            this->init_xdataModel(xdataModel);
         }
         this->prepareData();
     }
@@ -79,7 +82,7 @@ void Activity::prepareData()
     itemHeader.insert(0,QStringList() << "Name:" << "Type:" << "Distance (M):" << "Duration (Sec):" << "Pace/100m:" << "Speed km/h:" << "Strokes:");
     itemHeader.insert(1,QStringList() << "Name:" << "Start:" << "Distance:" << "Duration:" << "Pace:" << "Speed km/h:");
     itemHeader.insert(2,QStringList() << "Name:" << "Start:" << "Distance:" << "Duration:");
-    avgHeader.insert(0,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance:");
+    avgHeader.insert(0,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance:" << "Strokes:" << "SWOLF:" << "Cycletime:");
     avgHeader.insert(1,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance:" << "Watts:" << "CAD:");
     avgHeader.insert(2,QStringList() << "Intervalls:" << "Duration:" << "Pace:" << "Distance");
     intTreeModel = new QStandardItemModel();
@@ -152,8 +155,8 @@ void Activity::prepareData()
             zone_low = temp.split("-").first();
             zone_high = temp.split("-").last();
 
-            zoneLow = this->get_zone_values(zone_low.toDouble(),hfThreshold,false);
-            zoneHigh = this->get_zone_values(zone_high.toDouble(),hfThreshold,false);
+            zoneLow = this->get_zone_values(zone_low.toDouble(),static_cast<int>(hfThreshold),false);
+            zoneHigh = this->get_zone_values(zone_high.toDouble(),static_cast<int>(hfThreshold),false);
 
             if(i < zoneCount-1)
             {
@@ -259,8 +262,8 @@ void Activity::prepareData()
                 }
                 --laps;
                 dist = laps*swimTrack;
-                intModel->setData(intModel->index(row,3),dist);
-                intModel->setData(intModel->index(row,4),laps);
+                intModel->setData(intModel->index(row,intListCount),dist);
+                intModel->setData(intModel->index(row,intListCount+1),laps);
 
                 if(laps == 1) intType = currType;
 
@@ -318,9 +321,9 @@ void Activity::prepareData()
         }
         else
         {
-            intModel->setData(intModel->index(0,3),overrideData.value("total_distance"));
-            intModel->setData(intModel->index(0,4),1);
-            intModel->setData(intModel->index(0,5),"Workout_1");
+            intModel->setData(intModel->index(0,intListCount),overrideData.value("total_distance"));
+            intModel->setData(intModel->index(0,intListCount+1),1);
+            intModel->setData(intModel->index(0,intListCount+2),"Workout_1");
         }
 
         for(int i = 0; i < sampCount; ++i)
@@ -331,7 +334,7 @@ void Activity::prepareData()
         }
 
         selItemModel->setVerticalHeaderLabels(itemHeader.value(0));
-        avgValues.resize(4);
+        avgValues.resize(7);
         avgModel->setVerticalHeaderLabels(avgHeader.value(0));
 
         this->swimhfTimeInZone(false);
@@ -387,9 +390,9 @@ void Activity::prepareData()
 
         for(int row = 0; row < intModelCount; ++row)
         {
-            intModel->setData(intModel->index(row,3),this->get_int_distance(row));
-            intModel->setData(intModel->index(row,4),1);
-            intModel->setData(intModel->index(row,5),"Int-"+QString::number(row));
+            intModel->setData(intModel->index(row,intListCount),this->get_int_distance(row));
+            intModel->setData(intModel->index(row,intListCount+1),1);
+            intModel->setData(intModel->index(row,intListCount+2),"Int-"+QString::number(row));
         }
 
         for(int i = 0; i < sampCount; ++i)
@@ -504,13 +507,13 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
 
     if(pInt == 0)
     {
-        workDist = intModel->data(intModel->index(pInt,3)).toDouble();
+        workDist = intModel->data(intModel->index(pInt,intListCount+1)).toDouble();
     }
     else
     {
         for(int i = 0; i <= pInt; ++i)
         {
-            workDist = workDist + intModel->data(intModel->index(i,3)).toDouble();
+            workDist = workDist + intModel->data(intModel->index(i,intListCount)).toDouble();
         }
     }
 
@@ -526,7 +529,7 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
     {
         if(hasPMData)
         {
-            double watts = round(this->get_int_value(pInt,4));         
+            double watts = round(this->get_int_value(pInt,4));
 
             intItems << new QStandardItem(QString::number(watts));
             intItems << new QStandardItem(QString::number(round(this->get_int_value(pInt,3))));
@@ -574,7 +577,7 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
         else if(pInt == 2)
         {
             lapName = settings::isBike;
-            double watts = round(this->get_int_value(pInt,4));
+            double watts = round(this->get_int_value(pInt,intListCount+1));
             intItems << new QStandardItem(QString::number(watts));
             intItems << new QStandardItem(QString::number(this->set_doubleValue(this->calc_totalWork(lapName,watts,lapTime,0),false)));
         }
@@ -697,11 +700,10 @@ void Activity::recalcIntTree()
                lastStart = this->get_timesec(intTreeModel->data(intTreeModel->index(row-1,2)).toString());
            }
 
-           startTime = lastStart + lastTime;
-
            if(isBike)
            {
                totalWork = totalWork + intTreeModel->data(intTreeModel->index(row,9)).toDouble();
+               startTime = lastStart + lastTime;
            }
            else if(isRun)
            {
@@ -1249,7 +1251,9 @@ void Activity::updateIntModel(int startCol,int duraCol)
     for(int row = 0; row < intTreeModel->rowCount(); ++row)
     {
         intStart = this->get_timesec(intTreeModel->data(intTreeModel->index(row,startCol)).toString());
-        intStop = intStart + this->get_timesec(intTreeModel->data(intTreeModel->index(row,duraCol)).toString())-1;
+        intStop = intStart + this->get_timesec(intTreeModel->data(intTreeModel->index(row,duraCol)).toString());
+        if(isSwim || (isBike && isIndoor)) --intStop;
+
         if(row > 0)
         {
             if(lastStop == intStart) ++intStart;
@@ -1258,7 +1262,7 @@ void Activity::updateIntModel(int startCol,int duraCol)
         intModel->setData(intModel->index(row,0),intTreeModel->data(intTreeModel->index(row,0)).toString().trimmed());
         intModel->setData(intModel->index(row,1),intStart);
         intModel->setData(intModel->index(row,2),intStop);
-        intModel->setData(intModel->index(row,3),intTreeModel->data(intTreeModel->index(row,4)).toDouble());
+        intModel->setData(intModel->index(row,intListCount),intTreeModel->data(intTreeModel->index(row,4)).toDouble());
         lastStop = intStop;
     }
 
@@ -1374,7 +1378,7 @@ void Activity::updateSampleModel(int sampRowCount)
             firstLap = intRow == 0 ? 0 : 1;
             intStart = intModel->data(intModel->index(intRow,1)).toInt();
             intStop = intModel->data(intModel->index(intRow,2)).toInt();
-            msec = intModel->data(intModel->index(intRow,3)).toDouble() / (intStop-intStart+1);
+            msec = intModel->data(intModel->index(intRow,intListCount)).toDouble() / (intStop-intStart+1);
 
             if(isBike)
             {
@@ -1613,7 +1617,7 @@ int Activity::get_int_duration(int row)
     duration = intModel->data(intModel->index(row,2,QModelIndex()),Qt::DisplayRole).toInt() - intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt();
 
     if(isIndoor) return duration+1;
-    if(isUpdated) return duration+1;
+    if(isUpdated && isBike) return duration+1;
 
     return duration;
 }
@@ -1651,7 +1655,7 @@ int Activity::get_int_pace(int row,QString lapName)
         }
         else
         {
-            pace = this->get_int_duration(row) / ((intModel->data(intModel->index(row,4)).toInt()*swimTrack)/100);
+            pace = this->get_int_duration(row) / ((intModel->data(intModel->index(row,intListCount+1)).toInt()*swimTrack)/100);
         }
     }
     else
@@ -1685,11 +1689,11 @@ double Activity::get_int_speed(int row)
 
     if(isSwim)
     {
-        pace = this->get_int_duration(row) / (intModel->data(intModel->index(row,3,QModelIndex())).toDouble() / distFactor);
+        pace = this->get_int_duration(row) / (intModel->data(intModel->index(row,intListCount,QModelIndex())).toDouble() / distFactor);
     }
     else
     {
-        pace = this->get_int_duration(row) / (intModel->data(intModel->index(row,3,QModelIndex())).toDouble()); // *10.0
+        pace = this->get_int_duration(row) / (intModel->data(intModel->index(row,intListCount,QModelIndex())).toDouble()); // *10.0
     }
     speed = 3600.0 / pace;
 
@@ -1706,7 +1710,6 @@ double Activity::polish_SpeedValues(double currSpeed,double avgSpeed,double fact
 
     std::random_device seeder;
     std::mt19937 gen(seeder());
-
 
     if(currSpeed < avgLow)
     {
@@ -1833,6 +1836,12 @@ void Activity::set_avgValues(int counter,int factor)
             avgValues[1] = avgValues[1] + (static_cast<double>(this->get_timesec(intTreeModel->data(selItem.value(4)).toString()))*factor);
             avgValues[2] = avgValues.at(2) + (static_cast<double>(this->get_timesec(intTreeModel->data(selItem.value(6)).toString()))*factor);
             avgValues[3] = avgValues.at(3) + (intTreeModel->data(selItem.value(3)).toDouble()*factor);
+            avgValues[4] = avgValues.at(4) + (intTreeModel->data(selItem.value(8)).toDouble());
+            avgValues[5] = avgValues.at(5) + (this->get_timesec(intTreeModel->data(selItem.value(4)).toString())+intTreeModel->data(selItem.value(8)).toInt());
+            avgValues[6] = avgValues.at(6) + (avgValues.at(1)/avgValues.at(4));
+            avgModel->setData(avgModel->index(4,0),round(avgValues[4]/avgCounter));
+            avgModel->setData(avgModel->index(5,0),round(avgValues[5]/avgCounter));
+            avgModel->setData(avgModel->index(6,0),this->set_doubleValue(avgValues[6]/avgCounter,false));
         }
         else
         {

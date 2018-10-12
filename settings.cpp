@@ -60,6 +60,7 @@ QHash<QString,double> settings::athleteMap;
 QHash<QString,QString> settings::swimRange;
 QHash<QString,QString> settings::bikeRange;
 QHash<QString,QString> settings::runRange;
+QHash<QString,QString> settings::triRange;
 QHash<QString,QString> settings::stgRange;
 QHash<QString,QString> settings::altRange;
 QHash<QString,QString> settings::hfRange;
@@ -310,6 +311,8 @@ void settings::loadSettings()
             settings::fill_mapRange(&bikeRange,&settingString);
             settingString = myvalues->value("run").toString();
             settings::fill_mapRange(&runRange,&settingString);
+            settingString = myvalues->value("triathlon").toString();
+            settings::fill_mapRange(&triRange,&settingString);
             settingString = myvalues->value("strength").toString();
             settings::fill_mapRange(&stgRange,&settingString);
             settingString = myvalues->value("alternative").toString();
@@ -359,7 +362,7 @@ void settings::loadSettings()
             for(int i = 0; i < listMap.value("Mode").count(); i++)
             {
                 settingString = settingList.at(i);
-                tempList = settingString.split("-");
+                tempList = settingString.split("|");
                 for(int x = 0; x < tempList.count();++x)
                 {
                     settingString = tempList.at(x);
@@ -376,13 +379,44 @@ void settings::loadSettings()
             settingList = myvalues->value("meals").toString().split(splitter);
             listMap.insert("Meals",settingList);
             settingList.clear();
+            settingList = myvalues->value("mealdefault").toString().split(splitter);
+            tempVector.resize(settingList.count());
+            for(int i = 0; i < settingList.count();++i)
+            {
+                settingString = settingList.at(i);
+                tempVector[i] = settingString.toDouble();
+            }
+            settingList.clear();
+            doubleMap.insert("Mealdefault",tempVector);
+            tempVector.clear();
+            settingList = myvalues->value("macros").toString().split(splitter);
+            tempVector.resize(settingList.count());
+            for(int i = 0; i < settingList.count();++i)
+            {
+                settingString = settingList.at(i);
+                tempVector[i] = settingString.toDouble();
+            }
+            settingList.clear();
+            doubleMap.insert("Macros",tempVector);
+            tempVector.clear();
+
+            settingList = myvalues->value("macroheader").toString().split(splitter);
+            listMap.insert("MacroHeader",settingList);
+            settingString = myvalues->value("macrocolor").toString();
+            settings::fill_mapColor(&settingList,&settingString,true);
+            settingList.clear();
+
             settingList = myvalues->value("dish").toString().split(splitter);
             listMap.insert("Dish",settingList);
             settingList.clear();
             generalMap.insert("AddMoving",myvalues->value("addmoving").toString());
-            tempVector.resize(7);
+            generalMap.insert("DayRoutine",myvalues->value("dayroutine").toString());
+            generalMap.insert("DayRoutineCal",myvalues->value("dayroutinecal").toString());
+            generalMap.insert("DayFiber",myvalues->value("fiber").toString());
+            generalMap.insert("DaySugar",myvalues->value("sugar").toString());
+            athleteMap.insert("BodyFatCal",myvalues->value("fatcal").toDouble());
             settingList = myvalues->value("moveday").toString().split(splitter);
-
+            tempVector.resize(7);
             for(int i = 0; i < settingList.count();++i)
             {
                 settingString = settingList.at(i);
@@ -443,7 +477,6 @@ void settings::loadSettings()
         if(screenHeight > 1000)
         {
             fontMap.insert("weekRange",8);
-            fontMap.insert("weekOffSet",12);
             fontMap.insert("fontBig",16);
             fontMap.insert("fontMedium",14);
             fontMap.insert("fontSmall",12);
@@ -451,7 +484,6 @@ void settings::loadSettings()
         else
         {
             fontMap.insert("weekRange",6);
-            fontMap.insert("weekOffSet",8);
             fontMap.insert("fontBig",14);
             fontMap.insert("fontMedium",12);
             fontMap.insert("fontSmall",10);
@@ -493,9 +525,10 @@ QString settings::get_rangeValue(QString map, QString key)
     if(map == settings::isRun) return runRange.value(key);
     if(map == settings::isStrength) return stgRange.value(key);
     if(map == settings::isAlt) return altRange.value(key);
+    if(map == settings::isTria) return triRange.value(key);
     if(map == "HF") return hfRange.value(key);
 
-    return 0;
+    return nullptr;
 }
 
 void settings::set_rangeValue(QString map, QString key,QString value)
@@ -621,6 +654,7 @@ void settings::saveSettings()
         myvalues->setValue("bike",settings::setSettingString(settings::setRangeString(&bikeRange)));
         myvalues->setValue("run",settings::setSettingString(settings::setRangeString(&runRange)));
         myvalues->setValue("strength",settings::setSettingString(settings::setRangeString(&stgRange)));
+        myvalues->setValue("triathlon",settings::setSettingString(settings::setRangeString(&triRange)));
         myvalues->setValue("hf",settings::setSettingString(settings::setRangeString(&hfRange)));
     myvalues->endGroup();
 
@@ -670,6 +704,12 @@ void settings::saveSettings()
         myvalues->setValue("moveday",settings::setSettingString(settingList));
         settingList.clear();
 
+        for(int i = 0; i < doubleMap.value("Macros").count(); ++i)
+        {
+            settingList << QString::number(doubleMap.value("Macros").at(i));
+        }
+        myvalues->setValue("macros",settings::setSettingString(settingList));
+        settingList.clear();
     myvalues->endGroup();
 
     myvalues->beginGroup("Misc");

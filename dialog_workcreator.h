@@ -22,7 +22,7 @@ class del_workcreator : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit del_workcreator(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_workcreator(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
     QStringList groupList;
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
@@ -74,7 +74,7 @@ class del_workcreatoredit : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 public:
-    explicit del_workcreatoredit(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+    explicit del_workcreatoredit(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
     bool hasValue,timeBased;
     QString sport;
     int thresBase;
@@ -152,12 +152,20 @@ public:
                 editor->setMaximum(get_thresPercent(sport,level,true));
                 return editor;
             }
-            if(index.row() ==  5 && setEdit)
+            if((index.row() ==  5 || index.row() == 3) && setEdit)
             {
                 QTimeEdit *editor = new QTimeEdit(parent);
                 editor->setDisplayFormat("mm:ss");
                 editor->setFrame(true);
                 editor->setFont(eFont);
+                return editor;
+            }
+            if((index.row() == 4 || index.row() == 6 || index.row() == 7) && setEdit)
+            {
+                QSpinBox *editor = new QSpinBox(parent);
+                editor->setFrame(true);
+                editor->setFont(eFont);
+                editor->setMaximum(999);
                 return editor;
             }
             if(index.row() == 8 && setEdit)
@@ -201,7 +209,7 @@ public:
                 return editor;
             }
         }
-        return 0;
+        return nullptr;
     }
 
     void setEditorData(QWidget *editor, const QModelIndex &index) const
@@ -227,10 +235,15 @@ public:
                 QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
                 spinBox->setValue(index.data(Qt::DisplayRole).toInt());
             }
-            if(index.row() == 5)
+            if(index.row() == 5 || index.row() == 3)
             {
                 QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
                 timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"mm:ss"));
+            }
+            if(index.row() == 4 || index.row() == 6 || index.row() == 7)
+            {
+                QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
+                spinBox->setValue(index.data(Qt::DisplayRole).toDouble());
             }
             if(index.row() == 8)
             {
@@ -282,13 +295,20 @@ public:
                    rangeChanged(model,get_thresPercent(sport,value,false));
                }
             }
-            if(index.row() == 2) //RangeValue Percent
+            if(index.row() == 2 || index.row() == 4 || index.row() == 6 || index.row() == 7) //RangeValue Percent - Pace - Stress - Work
             {
                 QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
                 int value = spinBox->value();
                 spinBox->interpretText();
                 model->setData(index,value, Qt::EditRole);
-                rangeChanged(model,value);
+                if(index.row() == 2) rangeChanged(model,value);
+            }
+            if(index.row() == 3) //Pace
+            {
+                    QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
+                    QTime value = timeEdit->time();
+                    timeEdit->interpretText();
+                    model->setData(model->index(3,0),value.toString("mm:ss"), Qt::EditRole);
             }
             if(index.row() == 5) //Duration
             {
@@ -442,7 +462,7 @@ class Dialog_workCreator : public QDialog, public calculation, public standardWo
     Q_OBJECT
 
 public:
-    explicit Dialog_workCreator(QWidget *parent = 0,schedule *psched = 0);
+    explicit Dialog_workCreator(QWidget *parent = nullptr,schedule *psched = nullptr);
     ~Dialog_workCreator();
 
 private slots:
@@ -487,7 +507,7 @@ private:
     double timeSum,distSum,stressSum,workSum,thresSpeed;
     int thresPace,thresPower;
     QVector<bool> editRow;
-    bool isSwim,isBike,isRun,isStrength,isAlt,isOther;
+    bool isSwim,isBike,isRun,isStrength,isAlt,isOther,isTria;
     bool clearFlag;
 
     QDialog *updateDialog;
