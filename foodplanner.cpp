@@ -222,6 +222,7 @@ void foodplanner::read_meals(QDomDocument xmlDoc)
     QDomElement xmlElement,childElement;
 
     xmlList = xmlDoc.firstChildElement().elementsByTagName("section");
+    double calcCals = 0;
 
     for(int i = 0; i < xmlList.count(); ++i)
     {
@@ -245,7 +246,14 @@ void foodplanner::read_meals(QDomDocument xmlDoc)
                 mealItems << new QStandardItem(childElement.attribute("fat"));
                 mealItems << new QStandardItem(childElement.attribute("fiber"));
                 mealItems << new QStandardItem(childElement.attribute("sugar"));
+
+                calcCals = calcCals + mealItems.at(3)->data(Qt::DisplayRole).toDouble() * 4.1;
+                calcCals = calcCals + mealItems.at(4)->data(Qt::DisplayRole).toDouble() * 4.1;
+                calcCals = calcCals + mealItems.at(5)->data(Qt::DisplayRole).toDouble() * 9.3;
+                calcCals = calcCals - mealItems.at(6)->data(Qt::DisplayRole).toDouble();
+                mealItems.at(0)->setToolTip("Cal: "+QString::number(round(calcCals)));
                 secItem.at(0)->appendRow(mealItems);
+                calcCals = 0;
             }
         }
     }
@@ -575,11 +583,11 @@ void foodplanner::update_daySumModel()
         daySumModel->setData(daySumModel->index(3,i),sum);
         daySumModel->setData(daySumModel->index(4,i),diff);
 
-        temp[0] = round(sum * (settings::doubleMap.value("Macros").at(0) / 100.0) / 4.0);
-        temp[1] = round(sum * (settings::doubleMap.value("Macros").at(1) / 100.0) / 4.0);
-        temp[2] = round(sum * (settings::doubleMap.value("Macros").at(2) / 100.0) / 9.0);
+        temp[0] = round(sum * (settings::doubleMap.value("Macros").at(0) / 100.0) / 4.1);
+        temp[1] = round(sum * (settings::doubleMap.value("Macros").at(1) / 100.0) / 4.1);
+        temp[2] = round(sum * (settings::doubleMap.value("Macros").at(2) / 100.0) / 9.3);
         temp[3] = ceil(athleteValues->value("weight") * (generalValues->value("DayFiber").toDouble() /100.0));
-        temp[4] = round(sum * (generalValues->value("DaySugar").toDouble() / 100.0) / 4.0);
+        temp[4] = round(sum * (generalValues->value("DaySugar").toDouble() / 100.0) / 4.1);
         dayTarget.insert(calcDay.date().addDays(i),temp);
 
         maxCal = round(sum * (calPercent.at(1)/100.0));
