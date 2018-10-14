@@ -313,8 +313,8 @@ void MainWindow::fill_weekTable(QString weekID,bool reset)
 void MainWindow::fill_dayTable(int daySelected)
 {
     QVector<int> foodMacros(5);
-    QVector<int> sumMacros(4);
-    QVector<int> summery(4);
+    QVector<int> sumMacros(5);
+    QVector<int> summery(5);
     sumMacros.fill(0);
     summery.fill(0);
 
@@ -332,12 +332,12 @@ void MainWindow::fill_dayTable(int daySelected)
         for(int x = 0; x < mealList.count(); ++x)
         {
             foodMacros = this->calc_menuCal(mealList.at(x));
-            for(int y = 0; y < 4; ++y)
+            for(int y = 0; y < 5; ++y)
             {
                 sumMacros[y] = sumMacros[y] + foodMacros.at(y);
             }
 
-            for(int val = 0; val < sumMacros.count(); ++val)
+            for(int val = 0; val < 5; ++val)
             {
                  QTableWidgetItem *item = new QTableWidgetItem();
                  if(val == 0)
@@ -347,15 +347,16 @@ void MainWindow::fill_dayTable(int daySelected)
                  }
                  else if(val == 1 || val == 2)
                  {
-                    mealCal = sumMacros.at(val) * 4;
+                    mealCal = sumMacros.at(val) * 4.1;
+                    if(val == 1) mealCal = mealCal - sumMacros.at(4);
                     percent = (mealCal / sumMacros.at(0))*100.0;
-                    calString = QString::number(sumMacros.at(val))+"-"+QString::number(mealCal);
+                    calString = QString::number(sumMacros.at(val))+"-"+QString::number(round(mealCal));
                  }
                  else if(val == 3)
                  {
-                    mealCal = sumMacros.at(val) * 9;
+                    mealCal = sumMacros.at(val) * 9.3;
                     percent = (mealCal / sumMacros.at(0))*100.0;
-                    calString = QString::number(sumMacros.at(val))+"-"+QString::number(mealCal);
+                    calString = QString::number(sumMacros.at(val))+"-"+QString::number(round(mealCal));
                  }
 
                  if(mealCal == 0.0) percent = 0;
@@ -368,11 +369,12 @@ void MainWindow::fill_dayTable(int daySelected)
                      }
                      if(val == 1 || val == 2)
                      {
-                         summery[val] = summery.at(val) + (sumMacros.at(val)*4);
+                         summery[val] = summery.at(val) + (sumMacros.at(val)*4.1);
+                         if(val == 1) summery[val] = summery[val] - sumMacros.at(4);
                      }
                      if(val == 3)
                      {
-                         summery[val] = summery.at(val) + (sumMacros.at(val)*9);
+                         summery[val] = summery.at(val) + (sumMacros.at(val)*9.3);
                      }
 
                  }
