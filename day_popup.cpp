@@ -328,10 +328,8 @@ void day_popup::update_workValues()
 {
     if(editMode)
     {
-        QString weekNumber = QString::number(newDate.weekNumber());
-        weekNumber = weekNumber+"_"+QString::number(newDate.addDays(1 - ui->dateEdit_workDate->date().dayOfWeek()).year());
         QHash<int,QString> valueList;
-        valueList.insert(0,weekNumber);
+        valueList.insert(0,this->calc_weekID(newDate));
         valueList.insert(1,newDate.toString("dd.MM.yyyy"));
 
         for(int i = 2; i < dayModel->rowCount()+1; ++i)

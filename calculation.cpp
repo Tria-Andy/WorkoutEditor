@@ -329,6 +329,22 @@ double calculation::current_dayCalories(QDateTime calcDate)
     return round((10*weight)+(6.25*height)-(5*age)+sF);
 }
 
+QString calculation::calc_weekID(QDate workoutDate)
+{
+    QString weeknumber = QString::number(workoutDate.weekNumber());
+
+    if(workoutDate.year() != workoutDate.addDays(7 - workoutDate.dayOfWeek()).year())
+    {
+        weeknumber = weeknumber+"_"+QString::number(workoutDate.addDays(7 - workoutDate.dayOfWeek()).year());
+    }
+    else
+    {
+        weeknumber = weeknumber+"_"+QString::number(workoutDate.year());
+    }
+
+    return weeknumber;
+}
+
 double calculation::calc_swim_xpower(double distance,double pace,double time,double athleteWeight)
 {
     double K = 2 + 0.35 * athleteWeight;

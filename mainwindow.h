@@ -1298,8 +1298,8 @@ private slots:
     void selectFoodMealDay(int);
     void on_actionFood_Macros_triggered();
     void on_toolButton_switch_clicked();
-    void on_toolButton_lineCopy_clicked();
     void on_toolButton_linePaste_clicked();
+    void on_pushButton_lineCopy_toggled(bool checked);
 };
 
 #endif // MAINWINDOW_H

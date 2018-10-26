@@ -26,8 +26,6 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     }
 
     mealModel = new QStandardItemModel();
-    mealModel->setColumnCount(mealTags.count());
-    mealModel->setHorizontalHeaderLabels(menuHeader);
     weekPlansModel = new QStandardItemModel();
     weekPlansModel->setColumnCount(mealTags.count()+1);
 
@@ -53,7 +51,7 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
         this->read_meals(this->load_XMLFile(filePath,mealXML));
     }
 
-    loadedWeek = set_weekID(firstDayofWeek);
+    loadedWeek = this->calc_weekID(firstDayofWeek);
 
     QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(loadedWeek,Qt::MatchExactly,0).at(0));
     calPercent = settings::doubleMap.value(weekPlansModel->data(weekPlansModel->index(weekIndex.row(),1)).toString());
@@ -217,6 +215,9 @@ void foodplanner::write_foodPlan()
 
 void foodplanner::read_meals(QDomDocument xmlDoc)
 {
+    mealModel->clear();
+    mealModel->setColumnCount(mealTags.count());
+    mealModel->setHorizontalHeaderLabels(menuHeader);
     QStandardItem *rootItem = mealModel->invisibleRootItem();
     QDomNodeList xmlList,childList;
     QDomElement xmlElement,childElement;
@@ -284,11 +285,11 @@ void foodplanner::edit_mealSection(QString sectionName,int mode)
         QList<QStandardItem*> mealSection = mealModel->findItems(sectionName,Qt::MatchExactly,0);
         mealSection.at(0)->setData(sectionName,Qt::EditRole);
     }
-    this->write_meals();
+    this->write_meals(true);
 }
 
 
-void foodplanner::write_meals()
+void foodplanner::write_meals(bool refresh)
 {
     QDomDocument xmlDoc;
     QDomElement xmlRoot,xmlElement,childElement;
@@ -324,6 +325,7 @@ void foodplanner::write_meals()
     }
     this->write_XMLFile(filePath,&xmlDoc,mealXML);
     xmlDoc.clear();
+    if(refresh) this->read_meals(this->load_XMLFile(filePath,mealXML));
 }
 
 void foodplanner::add_meal(QItemSelectionModel *mealSelect)
@@ -396,7 +398,7 @@ void foodplanner::insert_newWeek(QDate firstday)
 {
     QStandardItem *rootItem = weekPlansModel->invisibleRootItem();
     QList<QStandardItem*> weekList;
-    weekList << new QStandardItem(this->set_weekID(firstday));
+    weekList << new QStandardItem(this->calc_weekID(firstday));
     weekList << new QStandardItem(settings::get_listValues("Mode").at(0));
     weekList << new QStandardItem(firstday.toString("yyyy-MM-dd"));   
     rootItem->appendRow(weekList);
@@ -446,11 +448,6 @@ void foodplanner::fill_planList(QDate firstDate, bool addWeek)
     }
 }
 
-QString foodplanner::set_weekID(QDate vDate)
-{
-    return QString::number(vDate.weekNumber())+"_"+QString::number(vDate.year());
-}
-
 void foodplanner::addrow_mealModel(QStandardItem *item, QStringList *itemList)
 {
     QStringList mealString;
@@ -470,7 +467,7 @@ void foodplanner::addrow_mealModel(QStandardItem *item, QStringList *itemList)
 
 void foodplanner::update_weekPlanModel(QDate vDate, int mealID, QStringList *foodList)
 {
-    QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(set_weekID(vDate),Qt::MatchExactly,0).at(0));
+    QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(this->calc_weekID(vDate),Qt::MatchExactly,0).at(0));
     QModelIndex dayIndex;
     QModelIndex mealIndex;
     QDate dayDate;
@@ -520,7 +517,7 @@ void foodplanner::update_weekPlanModel(QDate vDate, int mealID, QStringList *foo
 
 int foodplanner::read_dayCalories(QDate vDate)
 {
-    QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(set_weekID(vDate),Qt::MatchExactly,0).at(0));
+    QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(this->calc_weekID(vDate),Qt::MatchExactly,0).at(0));
     QModelIndex dayIndex;
     QModelIndex mealIndex;
     QDate dayDate;
@@ -706,7 +703,7 @@ void foodplanner::update_sumBySchedule(QDate firstDay)
 {
     int day = 0;
     int dayWork = 0;
-    QString weekID = set_weekID(firstDay);
+    QString weekID = this->calc_weekID(firstDay);
     QVector<double> addMoving = settings::doubleMap.value("Moveday");
 
     if(weekID == loadedWeek)
@@ -749,7 +746,7 @@ void foodplanner::update_sumByMenu(QDate firstDay, int meal, QStringList *foodLi
         }
     }
 
-    loadedWeek = set_weekID(firstDay);
+    loadedWeek = this->calc_weekID(firstDay);
     this->update_daySumModel();
 }
 

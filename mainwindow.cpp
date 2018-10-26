@@ -42,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
     selectedDate = QDate::currentDate();
     firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
     foodPlan = new foodplanner(workSchedule,firstdayofweek);
-    weeknumber = QString::number(selectedDate.weekNumber()) +"_"+QString::number(selectedDate.year()); 
+    weeknumber = this->calc_weekID(selectedDate);
     weekpos = weekCounter = 0;;
     weekDays = 7;
     work_sum.resize(sportCounter);
@@ -157,7 +157,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableWidget_weekPlan->viewport()->setMouseTracking(true);
     ui->tableWidget_weekPlan->installEventFilter(this);
     ui->tableWidget_weekPlan->viewport()->installEventFilter(this);
-    this->fill_weekTable(foodPlan->set_weekID(firstdayofweek),false);
+    this->fill_weekTable(this->calc_weekID(firstdayofweek),false);
 
     ui->tableView_daySummery->setModel(foodPlan->daySumModel);
     ui->tableView_daySummery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -207,7 +207,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableWidget_daySummery->setRowCount(foodPlan->mealsHeader.count()+1);
     ui->tableWidget_daySummery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_daySummery->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->toolButton_lineCopy->setEnabled(false);
+    ui->pushButton_lineCopy->setIcon(QIcon(":/images/icons/Copy.png"));
+    ui->pushButton_lineCopy->setEnabled(false);
     ui->toolButton_linePaste->setEnabled(false);
     foodcopyMode = lineSelected = dayLineSelected = false;
     this->reset_menuEdit();
@@ -712,7 +713,8 @@ void MainWindow::workout_calendar()
         {
             if(currentdate.addDays(offset) == QDate(currentdate.addDays(offset).year(),12,31)) ++firstJan;
 
-            weekValue = QString::number(currentdate.addDays(offset).weekNumber()) +"_"+ QString::number(currentdate.addDays(offset+firstJan).year());
+            //weekValue = QString::number(currentdate.addDays(offset).weekNumber()) +"_"+ QString::number(currentdate.addDays(offset+firstJan).year());
+            weekValue = this->calc_weekID(currentdate.addDays(offset));
 
             metaProxy->setFilterRegExp("\\b"+weekValue+"\\b");
             metaProxy->setFilterKeyColumn(2);
@@ -900,7 +902,7 @@ void MainWindow::set_calender()
         ui->calendarWidget->setSelectedDate(selectedDate.addDays((1-selectedDate.currentDate().dayOfWeek())+weekDays*weekCounter));
     }
 
-    weeknumber = QString::number(ui->calendarWidget->selectedDate().weekNumber())+"_"+QString::number(ui->calendarWidget->selectedDate().year());
+    weeknumber = this->calc_weekID(ui->calendarWidget->selectedDate());
     this->summery_view();
 }
 
@@ -1058,7 +1060,7 @@ void MainWindow::on_actionSave_triggered()
 
 void MainWindow::on_calendarWidget_clicked(const QDate &date)
 {
-   weeknumber = QString::number(date.weekNumber())+"_"+QString::number(date.year());
+   weeknumber = this->calc_weekID(date);
    this->summery_view();
 }
 
@@ -2373,7 +2375,7 @@ void MainWindow::on_toolButton_menuEdit_clicked()
 void MainWindow::on_toolButton_saveMeals_clicked()
 {
     ui->progressBar_saveMeals->setValue(0);
-    foodPlan->write_meals();
+    foodPlan->write_meals(true);
     ui->progressBar_saveMeals->setValue(100);
     ui->actionSave->setEnabled(true);
     QTimer::singleShot(2000,ui->progressBar_saveMeals,SLOT(reset()));
@@ -2382,11 +2384,7 @@ void MainWindow::on_toolButton_saveMeals_clicked()
 
 void MainWindow::on_calendarWidget_Food_clicked(const QDate &date)
 {
-    int firstJan = 0;
-
-    if(date == QDate(date.year(),12,31)) ++firstJan;
-
-    QString weekID = QString::number(date.weekNumber())+"_"+QString::number(date.year()+firstJan);
+    QString weekID = this->calc_weekID(date);
 
     if(foodPlan->weekPlansModel->findItems(weekID,Qt::MatchExactly,0).count() == 0 && date > firstdayofweek)
     {
@@ -2585,7 +2583,7 @@ void MainWindow::on_treeView_meals_collapsed(const QModelIndex &index)
 void MainWindow::on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item)
 {
     ui->frame_dayShow->setVisible(false);
-    ui->toolButton_lineCopy->setEnabled(false);
+    ui->pushButton_lineCopy->setEnabled(false);
     ui->toolButton_linePaste->setEnabled(false);
     ui->frame_menuEdit->setVisible(true);
     ui->listWidget_MenuEdit->clear();
@@ -2707,10 +2705,9 @@ void MainWindow::selectFoodMealWeek(int selectedMeal)
         {
             ui->toolButton_linePaste->setEnabled(false);
         }
-
     }
 
-    ui->toolButton_lineCopy->setEnabled(true);
+    ui->pushButton_lineCopy->setEnabled(true);
     foodcopyLine = selectedMeal;
     dayLineSelected = false;
 }
@@ -2742,7 +2739,7 @@ void MainWindow::selectFoodMealDay(int selectedDay)
         }
     }
 
-    ui->toolButton_lineCopy->setEnabled(true);
+    ui->pushButton_lineCopy->setEnabled(true);
     foodcopyLine = selectedDay;
     dayLineSelected = true;
 }
@@ -2763,9 +2760,10 @@ void MainWindow::on_toolButton_switch_clicked()
     ui->doubleSpinBox_portion->setValue(firstVal);
 }
 
-void MainWindow::on_toolButton_lineCopy_clicked()
+
+void MainWindow::on_pushButton_lineCopy_toggled(bool checked)
 {
-    foodcopyMode = true;
+    foodcopyMode = checked;
 
     if(dayLineSelected)
     {
@@ -2775,8 +2773,18 @@ void MainWindow::on_toolButton_lineCopy_clicked()
     {
         this->fill_selectLine(foodcopyLine,ui->tableWidget_weekPlan->columnCount());
     }
-    ui->label_dayShow->setText(ui->label_dayShow->text()+" - Copy");
-    ui->toolButton_linePaste->setEnabled(true);
+
+    if(checked)
+    {
+        ui->pushButton_lineCopy->setIcon(QIcon(":/images/icons/No.png"));
+    }
+    else
+    {
+        ui->pushButton_lineCopy->setIcon(QIcon(":/images/icons/Copy.png"));
+    }
+
+    ui->toolButton_linePaste->setEnabled(checked);
+
 }
 
 void MainWindow::on_toolButton_linePaste_clicked()

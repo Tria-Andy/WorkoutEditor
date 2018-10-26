@@ -39,6 +39,7 @@ protected:
     static double get_corrected_MET(double,int);
     static double calc_lnp(double,double,double);
     static double current_dayCalories(QDateTime);
+    static QString calc_weekID(QDate);
     static QHash<QString,double> *thresValues, *athleteValues;
 
 };

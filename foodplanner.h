@@ -19,9 +19,8 @@ public:
     QStringList planList,mealsHeader,menuHeader,dayHeader,dayListHeader,estHeader;
     QMap<int,QStringList> foodList;
 
-    QString set_weekID(QDate);
     void write_foodPlan();
-    void write_meals();
+    void write_meals(bool);
     void edit_mealSection(QString,int);
     void add_meal(QItemSelectionModel*);
     void remove_meal(QItemSelectionModel*);
