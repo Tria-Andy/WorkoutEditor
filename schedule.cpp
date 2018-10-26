@@ -65,6 +65,7 @@ void schedule::freeMem()
 void schedule::filter_schedule(QString filterValue, int col, bool fixed)
 {
     scheduleProxy->invalidate();
+
     if(fixed)
     {
         scheduleProxy->setFilterFixedString(filterValue);
@@ -73,6 +74,7 @@ void schedule::filter_schedule(QString filterValue, int col, bool fixed)
     {
         scheduleProxy->setFilterRegExp("\\b"+filterValue+"\\b");
     }
+
     scheduleProxy->setFilterKeyColumn(col);
 }
 
@@ -465,6 +467,8 @@ void schedule::save_ltsValues()
 
 void schedule::copyWeek(QString copyFrom,QString copyTo)
 {
+    qDebug() << copyFrom << copyTo;
+
     this->filter_schedule(copyFrom,0,false);
     this->deleteWeek(copyTo);
     QHash<int,QString> valueList;
@@ -490,11 +494,15 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
     if(toYear_int > fromYear_int)
     {
        addfactor = (lastDay.weekNumber() - fromWeek_int) + toWeek_int;
+       qDebug() << lastDay.weekNumber() << fromWeek_int << toWeek_int << addfactor;
     }
+
+
 
     for(int row = 0; row < scheduleProxy->rowCount(); ++row)
     {
         workdate = scheduleProxy->data(scheduleProxy->index(row,1)).toString();
+        qDebug() << workdate << workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy");
         valueList.insert(0,copyTo);
         valueList.insert(1,workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy"));
 
