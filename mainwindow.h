@@ -1115,6 +1115,80 @@ public:
         painter->restore();
     }
 };
+class del_foodDaySum : public QStyledItemDelegate, public calculation
+{
+    Q_OBJECT
+public:
+    explicit del_foodDaySum(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
+
+    QVector<double> percent;
+
+    void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
+    {
+        painter->save();
+        QLinearGradient itemGradient(option.rect.topLeft(),option.rect.bottomLeft());
+        itemGradient.setSpread(QGradient::ReflectSpread);
+        QColor itemColor,gradColor;
+        QFont foodFont;
+        foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
+        painter->setFont(foodFont);
+
+        qDebug() << index.row() << index.column() << index.data();
+
+
+        int weekCal = index.model()->data(index.model()->index(3,index.column())).toInt();
+
+        gradColor.setHsv(0,0,200,150);
+
+
+        if(index.row() == 0)
+        {
+            itemColor.setHsv(200,150,255,255);
+            painter->setPen(Qt::black);
+        }
+        else if(index.row() > 0 && index.row() < 4)
+        {
+            itemColor.setHsv(240,255,255,255);
+            painter->setPen(Qt::white);
+        }
+        else if(index.row() == 4)
+        {
+            if(index.data().toInt() >= (weekCal*(percent.at(0)/100.0)))
+            {
+                itemColor = settings::get_itemColor("max").toHsv();
+                painter->setPen(Qt::black);
+            }
+            if(index.data().toInt() < (weekCal*(percent.at(0)/100.0)) && index.data().toInt() > (weekCal*(percent.at(1)/100.0)))
+            {
+                itemColor = settings::get_itemColor("high").toHsv();
+                painter->setPen(Qt::black);
+            }
+            if(index.data().toInt() <= (weekCal*(percent.at(1)/100.0)) && index.data().toInt() > (weekCal*(percent.at(2)/100.0)))
+            {
+                itemColor = settings::get_itemColor("low").toHsv();
+                painter->setPen(Qt::black);
+            }
+            if(index.data().toInt() <= (weekCal*(percent.at(2)/100.0)))
+            {
+                itemColor = settings::get_itemColor("min").toHsv();
+                painter->setPen(Qt::black);
+            }
+        }
+
+        itemGradient.setColorAt(0,gradColor);
+        itemGradient.setColorAt(1,itemColor);
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+        painter->fillRect(option.rect,itemGradient);
+
+        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
+        painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+
+        painter->restore();
+
+    }
+};
+
+
 namespace Ui {
 class MainWindow;
 }
@@ -1143,6 +1217,7 @@ private:
     del_foodplan food_del;
     del_foodSummery foodSum_del;
     del_foodWeekSum foodSumWeek_del;
+    del_foodDaySum foodDaySum_del;
     del_mousehover mousehover_del;
     QStandardItemModel *calendarModel,*sumModel,*fileModel,*infoModel,*avgModel;
     QItemSelectionModel *treeSelection,*mealSelection;

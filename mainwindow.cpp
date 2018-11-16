@@ -204,6 +204,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolButton_menuPaste->setEnabled(false);
     ui->frame_dayShow->setVisible(false);
     ui->tableWidget_daySummery->setColumnCount(4);
+    ui->tableWidget_daySummery->setItemDelegate(&foodDaySum_del);
     ui->tableWidget_daySummery->setRowCount(foodPlan->mealsHeader.count()+1);
     ui->tableWidget_daySummery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_daySummery->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -343,6 +344,7 @@ void MainWindow::fill_dayTable(int daySelected)
                  QTableWidgetItem *item = new QTableWidgetItem();
                  if(val == 0)
                  {
+                    mealCal = sumMacros.at(val);
                     percent = (sumMacros.at(val) / dayCal)*100.0;
                     calString = QString::number(sumMacros.at(val));
                  }
