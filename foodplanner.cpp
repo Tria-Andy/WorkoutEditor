@@ -9,9 +9,9 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     mealTags << "name" << "port" << "cal" << "carb" << "protein" << "fat" << "fiber" << "sugar" << "id";
     menuHeader << "Name" << "Port" << "Cal" << "Carb" << "Protein" << "Fat" << "Fiber" << "Sugar";
     mealsHeader = settings::get_listValues("Meals");
-    dayListHeader << "Cal (%)" << "Carbs ("+QString::number(settings::doubleMap.value("Macros").at(0))+"%)"
-                               << "Protein ("+QString::number(settings::doubleMap.value("Macros").at(1))+"%)"
-                               << "Fat ("+QString::number(settings::doubleMap.value("Macros").at(2))+"%)";
+    dayListHeader << "Cal (%)" << "Carbs ("+QString::number(settings::doubleVector.value("Macros").at(0))+"%)"
+                               << "Protein ("+QString::number(settings::doubleVector.value("Macros").at(1))+"%)"
+                               << "Fat ("+QString::number(settings::doubleVector.value("Macros").at(2))+"%)";
     sumHeader << "Calories Food:" << "Conversion Base:" << "Conversion Sport:" << "Summery:" << "Difference:";
     weekSumHeader << "Week Summery";
     estHeader << "Weight at Weekstart:" << "Avg Daily Calories:" << "Avg Daily Conversion:" <<"Avg Daily Diff:" << "Weight Change:" << "Weight at Weekend:";
@@ -54,8 +54,8 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     loadedWeek = this->calc_weekID(firstDayofWeek);
 
     QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(loadedWeek,Qt::MatchExactly,0).at(0));
-    calPercent = settings::doubleMap.value(weekPlansModel->data(weekPlansModel->index(weekIndex.row(),1)).toString());
-    defaultCal = settings::doubleMap.value("Mealdefault");
+    calPercent = settings::doubleVector.value(weekPlansModel->data(weekPlansModel->index(weekIndex.row(),1)).toString());
+    defaultCal = settings::doubleVector.value("Mealdefault");
     this->fill_planList(firstDayofWeek,false);
     this->update_sumBySchedule(firstDayofWeek);
     this->update_sumByMenu(firstDayofWeek,0,nullptr,false);
@@ -557,14 +557,14 @@ void foodplanner::update_daySumModel()
     int sum = 0;
     int diff = 0;
     int dayRoutineCal = 0;
-    bool dayRoutine = generalValues->value("DayRoutine").toInt();
+    bool dayRoutine = static_cast<bool>(doubleValues->value("DayRoutine"));
     double currPal = athleteValues->value("currpal");
     int dayCalBase = 0;
     QDateTime calcDay;
     calcDay.setDate(firstDayofWeek);
     QVector<double> temp(5);
 
-    if(dayRoutine) dayRoutineCal = generalValues->value("DayRoutineCal").toInt();
+    if(dayRoutine) dayRoutineCal = static_cast<int>(doubleValues->value("DayRoutineCal"));
 
     double minCal = 0;
     double maxCal = 0;
@@ -580,11 +580,11 @@ void foodplanner::update_daySumModel()
         daySumModel->setData(daySumModel->index(3,i),sum);
         daySumModel->setData(daySumModel->index(4,i),diff);
 
-        temp[0] = round(sum * (settings::doubleMap.value("Macros").at(0) / 100.0) / 4.1);
-        temp[1] = round(sum * (settings::doubleMap.value("Macros").at(1) / 100.0) / 4.1);
-        temp[2] = round(sum * (settings::doubleMap.value("Macros").at(2) / 100.0) / 9.3);
-        temp[3] = ceil(athleteValues->value("weight") * (generalValues->value("DayFiber").toDouble() /100.0));
-        temp[4] = round(sum * (generalValues->value("DaySugar").toDouble() / 100.0) / 4.1);
+        temp[0] = round(sum * (settings::doubleVector.value("Macros").at(0) / 100.0) / 4.1);
+        temp[1] = round(sum * (settings::doubleVector.value("Macros").at(1) / 100.0) / 4.1);
+        temp[2] = round(sum * (settings::doubleVector.value("Macros").at(2) / 100.0) / 9.3);
+        temp[3] = ceil(athleteValues->value("weight") * (doubleValues->value("DayFiber") /100.0));
+        temp[4] = round(sum * (doubleValues->value("DaySugar") / 100.0) / 4.1);
         dayTarget.insert(calcDay.date().addDays(i),temp);
 
         maxCal = round(sum * (calPercent.at(1)/100.0));
@@ -704,7 +704,7 @@ void foodplanner::update_sumBySchedule(QDate firstDay)
     int day = 0;
     int dayWork = 0;
     QString weekID = this->calc_weekID(firstDay);
-    QVector<double> addMoving = settings::doubleMap.value("Moveday");
+    QVector<double> addMoving = settings::doubleVector.value("Moveday");
 
     if(weekID == loadedWeek)
     {
@@ -722,7 +722,7 @@ void foodplanner::update_sumBySchedule(QDate firstDay)
 
             if(schedulePtr->scheduleProxy->data(schedulePtr->scheduleProxy->index(i,3)).toString() == settings::isSwim && addMoving.at(day) == 1)
             {
-                dayWork = dayWork + generalValues->value("AddMoving").toInt();
+                dayWork = dayWork + static_cast<int>(doubleValues->value("AddMoving"));
             }
             daySumModel->setData(daySumModel->index(2,day),dayWork);
         }

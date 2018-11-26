@@ -3,8 +3,10 @@
 calculation::calculation()
 {
     ltsValues = settings::getdoubleMapPointer(settings::dMap::LTS);
+    doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
     gcValues = settings::getStringMapPointer(settings::stingMap::GC);
     generalValues = settings::getStringMapPointer(settings::stingMap::General);
+
 }
 
 QHash<QString,double>* calculation::thresValues = settings::getdoubleMapPointer(settings::dMap::Threshold);
@@ -160,8 +162,6 @@ QString calculation::calc_lapSpeed(QString sport,double sec)
     {
         return "--";
     }
-
-    return 0;
 }
 
 int calculation::calc_lapPace(QString sport, int duration, double distance)

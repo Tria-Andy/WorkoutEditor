@@ -2206,7 +2206,7 @@ void MainWindow::set_foodWeek(QString weekID)
     QStringList weekInfo = weekID.split(" - ");
     foodPlan->firstDayofWeek = QDate::fromString(weekInfo.at(1),"dd.MM.yyyy");
     this->fill_weekTable(weekInfo.at(0),true);
-    foodPlan->calPercent = settings::doubleMap.value(weekInfo.at(2));
+    foodPlan->calPercent = settings::doubleVector.value(weekInfo.at(2));
     foodSum_del.percent = foodPlan->calPercent;
     foodSumWeek_del.percent = foodPlan->calPercent;
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek,0,nullptr,false);

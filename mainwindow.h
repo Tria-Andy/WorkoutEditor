@@ -1121,8 +1121,6 @@ class del_foodDaySum : public QStyledItemDelegate, public calculation
 public:
     explicit del_foodDaySum(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
-    QVector<double> percent;
-
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
@@ -1133,45 +1131,48 @@ public:
         foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
 
-        qDebug() << index.row() << index.column() << index.data();
+        QString sPercent = index.data().toString().split(" ").last();
 
+        sPercent = sPercent.remove("(");
+        sPercent = sPercent.remove(")");
 
-        int weekCal = index.model()->data(index.model()->index(3,index.column())).toInt();
-
+        double percent = sPercent.toDouble();
+        double macroRange = doubleValues->value("Macrorange")/100.0;
         gradColor.setHsv(0,0,200,150);
 
-
-        if(index.row() == 0)
-        {
-            itemColor.setHsv(200,150,255,255);
-            painter->setPen(Qt::black);
-        }
-        else if(index.row() > 0 && index.row() < 4)
-        {
+        if(index.column() == 0)
+        {   
             itemColor.setHsv(240,255,255,255);
             painter->setPen(Qt::white);
         }
-        else if(index.row() == 4)
+        else
         {
-            if(index.data().toInt() >= (weekCal*(percent.at(0)/100.0)))
+            if(percent == 0.0)
             {
-                itemColor = settings::get_itemColor("max").toHsv();
+                itemColor.setHsv(200,255,255,255);
                 painter->setPen(Qt::black);
             }
-            if(index.data().toInt() < (weekCal*(percent.at(0)/100.0)) && index.data().toInt() > (weekCal*(percent.at(1)/100.0)))
+            else
             {
-                itemColor = settings::get_itemColor("high").toHsv();
-                painter->setPen(Qt::black);
-            }
-            if(index.data().toInt() <= (weekCal*(percent.at(1)/100.0)) && index.data().toInt() > (weekCal*(percent.at(2)/100.0)))
-            {
-                itemColor = settings::get_itemColor("low").toHsv();
-                painter->setPen(Qt::black);
-            }
-            if(index.data().toInt() <= (weekCal*(percent.at(2)/100.0)))
-            {
-                itemColor = settings::get_itemColor("min").toHsv();
-                painter->setPen(Qt::black);
+                double perHigh = settings::doubleVector.value("Macros").at(index.column()-1);
+                double perLow = perHigh - perHigh*macroRange;
+                perHigh = perHigh + perHigh*macroRange;
+
+                if(percent < perLow)
+                {
+                    itemColor.setHsv(60,255,255,255);
+                    painter->setPen(Qt::black);
+                }
+                else if(percent <= perHigh && percent >= perLow)
+                {
+                    itemColor.setHsv(120,255,170,255);
+                    painter->setPen(Qt::black);
+                }
+                else if(percent > perHigh)
+                {
+                    itemColor.setHsv(0,255,255,255);
+                    painter->setPen(Qt::white);
+                }
             }
         }
 
@@ -1184,7 +1185,6 @@ public:
         painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 
         painter->restore();
-
     }
 };
 

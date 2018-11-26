@@ -14,7 +14,7 @@ private:
 protected:
     double calc_totalCal(double,double,double);    
     int get_hfvalue(QString);
-    QHash<QString,double> *ltsValues;
+    QHash<QString,double> *ltsValues,*doubleValues;
     QHash<QString,QString> *gcValues,*generalValues;
 
     static bool usePMData;

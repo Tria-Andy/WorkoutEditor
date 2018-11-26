@@ -88,23 +88,23 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->doubleSpinBox_bone->setValue(athleteValues->value("boneskg"));
     ui->doubleSpinBox_muscle->setValue(athleteValues->value("musclekg"));
     ui->doubleSpinBox_PALvalue->setValue(athleteValues->value("currpal"));
-    ui->doubleSpinBox_max->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(0));
+    ui->doubleSpinBox_max->setValue(settings::doubleVector.value(ui->comboBox_weightmode->currentText()).at(0));
     this->set_bottonColor(ui->toolButton_colormax,false);
-    ui->doubleSpinBox_high->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(1));
+    ui->doubleSpinBox_high->setValue(settings::doubleVector.value(ui->comboBox_weightmode->currentText()).at(1));
     this->set_bottonColor(ui->toolButton_colorhigh,false);
-    ui->doubleSpinBox_low->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(2));
+    ui->doubleSpinBox_low->setValue(settings::doubleVector.value(ui->comboBox_weightmode->currentText()).at(2));
     this->set_bottonColor(ui->toolButton_colorlow,false);
-    ui->doubleSpinBox_min->setValue(settings::doubleMap.value(ui->comboBox_weightmode->currentText()).at(3));
+    ui->doubleSpinBox_min->setValue(settings::doubleVector.value(ui->comboBox_weightmode->currentText()).at(3));
     this->set_bottonColor(ui->toolButton_colormin,false);
 
-    ui->spinBox_carbs->setValue(settings::doubleMap.value("Macros").at(0));
-    ui->spinBox_protein->setValue(settings::doubleMap.value("Macros").at(1));
-    ui->spinBox_fat->setValue(settings::doubleMap.value("Macros").at(2));
+    ui->spinBox_carbs->setValue(settings::doubleVector.value("Macros").at(0));
+    ui->spinBox_protein->setValue(settings::doubleVector.value("Macros").at(1));
+    ui->spinBox_fat->setValue(settings::doubleVector.value("Macros").at(2));
 
     for(int i = 0; i < 7; ++i)
     {
        tempCheck = this->findChild<QCheckBox *>("checkBox_Work_"+QString::number(i));
-       tempCheck->setChecked(doubleMap.value("Moveday").at(i));
+       tempCheck->setChecked(doubleVector.value("Moveday").at(i));
     }
 
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
@@ -356,13 +356,13 @@ void Dialog_settings::writeChangedValues()
        tempCheck = this->findChild<QCheckBox *>("checkBox_Work_"+QString::number(i));
        saveVector[i] = tempCheck->isChecked();
     }
-    doubleMap.insert("Moveday",saveVector);
+    doubleVector.insert("Moveday",saveVector);
 
     saveVector.resize(3);
     saveVector[0] = ui->spinBox_carbs->value();
     saveVector[1] = ui->spinBox_protein->value();
     saveVector[2] = ui->spinBox_fat->value();
-    doubleMap.insert("Macros",saveVector);
+    doubleVector.insert("Macros",saveVector);
 
     settings::writeListValues(&listMap);
 
@@ -1167,10 +1167,10 @@ void Dialog_settings::on_doubleSpinBox_PALvalue_valueChanged(double value)
 
 void Dialog_settings::on_comboBox_weightmode_currentIndexChanged(const QString &mode)
 {
-    ui->doubleSpinBox_max->setValue(settings::doubleMap.value(mode).at(0));
-    ui->doubleSpinBox_high->setValue(settings::doubleMap.value(mode).at(1));
-    ui->doubleSpinBox_low->setValue(settings::doubleMap.value(mode).at(2));
-    ui->doubleSpinBox_min->setValue(settings::doubleMap.value(mode).at(3));
+    ui->doubleSpinBox_max->setValue(settings::doubleVector.value(mode).at(0));
+    ui->doubleSpinBox_high->setValue(settings::doubleVector.value(mode).at(1));
+    ui->doubleSpinBox_low->setValue(settings::doubleVector.value(mode).at(2));
+    ui->doubleSpinBox_min->setValue(settings::doubleVector.value(mode).at(3));
 }
 
 void Dialog_settings::on_toolButton_colormax_clicked()
@@ -1316,15 +1316,18 @@ void Dialog_settings::selectContest(int row)
 
 void Dialog_settings::on_spinBox_carbs_valueChanged(int value)
 {
+    Q_UNUSED(value)
     refresh_macros();
 }
 
 void Dialog_settings::on_spinBox_protein_valueChanged(int value)
 {
+     Q_UNUSED(value)
     refresh_macros();
 }
 
 void Dialog_settings::on_spinBox_fat_valueChanged(int value)
 {
+     Q_UNUSED(value)
     refresh_macros();
 }
