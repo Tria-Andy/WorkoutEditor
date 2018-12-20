@@ -42,13 +42,16 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
 
     planerXML = "foodplan.xml";
     mealXML = "meals.xml";
+    historyXML = "foodhistory.xml";
 
     if(!filePath.isEmpty())
     {
         this->check_File(filePath,planerXML);
         this->check_File(filePath,mealXML);
+        this->check_File(filePath,historyXML);
         this->read_foodPlan(this->load_XMLFile(filePath,planerXML));
         this->read_meals(this->load_XMLFile(filePath,mealXML));
+        this->read_history(this->load_XMLFile(filePath,historyXML));
     }
 
     loadedWeek = this->calc_weekID(firstDayofWeek);
@@ -258,6 +261,29 @@ void foodplanner::read_meals(QDomDocument xmlDoc)
             }
         }
     }
+}
+
+void foodplanner::read_history(QDomDocument xmlDoc)
+{
+    historyModel = new QStandardItemModel(0,0);
+    QDomElement rootTag;
+    QDomNodeList xmlList;
+    QDomElement xmlElement;
+
+    rootTag = xmlDoc.firstChildElement();
+    xmlList = rootTag.elementsByTagName("week");
+
+    for(int row = 0; row < xmlList.count(); ++row)
+    {
+        xmlElement = xmlList.at(row).toElement();
+        historyModel->insertRows(row,1,QModelIndex());
+        for(int col = 0; col < historyModel->columnCount(); ++col)
+        {
+            //historyModel->setData(historyModel->index(row,col,QModelIndex()),xmlElement.attribute(meta_tags.at(col)));
+        }
+    }
+
+
 }
 
 void foodplanner::edit_mealSection(QString sectionName,int mode)
