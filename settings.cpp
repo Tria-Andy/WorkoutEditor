@@ -50,13 +50,14 @@ QVector<double> settings::tempVector;
 
 QHash<QString,QStringList> settings::listMap;
 QHash<QString,QStringList> settings::jsonTags;
-QHash<QString,QVector<double>> settings::doubleMap;
+QHash<QString,QVector<double>> settings::doubleVector;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
 QMap<int,double> settings::weightMap;
 QHash<QString,double> settings::thresholdMap;
 QHash<QString,double> settings::ltsMap;
 QHash<QString,double> settings::athleteMap;
+QHash<QString,double> settings::doubleMap;
 QHash<QString,QString> settings::swimRange;
 QHash<QString,QString> settings::bikeRange;
 QHash<QString,QString> settings::runRange;
@@ -369,7 +370,7 @@ void settings::loadSettings()
                     tempVector[x] = settingString.toDouble();
 
                 }
-                doubleMap.insert(listMap.value("Mode").at(i),tempVector);
+                doubleVector.insert(listMap.value("Mode").at(i),tempVector);
             }
             settingList.clear();
             settingList = myvalues->value("modeborder").toString().split(splitter);
@@ -387,7 +388,7 @@ void settings::loadSettings()
                 tempVector[i] = settingString.toDouble();
             }
             settingList.clear();
-            doubleMap.insert("Mealdefault",tempVector);
+            doubleVector.insert("Mealdefault",tempVector);
             tempVector.clear();
             settingList = myvalues->value("macros").toString().split(splitter);
             tempVector.resize(settingList.count());
@@ -397,7 +398,7 @@ void settings::loadSettings()
                 tempVector[i] = settingString.toDouble();
             }
             settingList.clear();
-            doubleMap.insert("Macros",tempVector);
+            doubleVector.insert("Macros",tempVector);
             tempVector.clear();
 
             settingList = myvalues->value("macroheader").toString().split(splitter);
@@ -409,11 +410,12 @@ void settings::loadSettings()
             settingList = myvalues->value("dish").toString().split(splitter);
             listMap.insert("Dish",settingList);
             settingList.clear();
-            generalMap.insert("AddMoving",myvalues->value("addmoving").toString());
-            generalMap.insert("DayRoutine",myvalues->value("dayroutine").toString());
-            generalMap.insert("DayRoutineCal",myvalues->value("dayroutinecal").toString());
-            generalMap.insert("DayFiber",myvalues->value("fiber").toString());
-            generalMap.insert("DaySugar",myvalues->value("sugar").toString());
+            doubleMap.insert("AddMoving",myvalues->value("addmoving").toDouble());
+            doubleMap.insert("DayRoutine",myvalues->value("dayroutine").toDouble());
+            doubleMap.insert("DayRoutineCal",myvalues->value("dayroutinecal").toDouble());
+            doubleMap.insert("DayFiber",myvalues->value("fiber").toDouble());
+            doubleMap.insert("DaySugar",myvalues->value("sugar").toDouble());
+            doubleMap.insert("Macrorange",myvalues->value("macrorange").toDouble());
             athleteMap.insert("BodyFatCal",myvalues->value("fatcal").toDouble());
             settingList = myvalues->value("moveday").toString().split(splitter);
             tempVector.resize(7);
@@ -422,7 +424,7 @@ void settings::loadSettings()
                 settingString = settingList.at(i);
                 tempVector[i] = settingString.toDouble();
             }
-            doubleMap.insert("Moveday",tempVector);
+            doubleVector.insert("Moveday",tempVector);
             settingList.clear();
         myvalues->endGroup();
 
@@ -692,21 +694,21 @@ void settings::saveSettings()
         {
             for(int x = 0; x < 4; ++x)
             {
-                settingList << QString::number(doubleMap.value(listMap.value("Mode").at(i)).at(x)) +"-";
+                settingList << QString::number(doubleVector.value(listMap.value("Mode").at(i)).at(x)) +"-";
             }
         }
         settingList.clear();
 
-        for(int i = 0; i < doubleMap.value("Moveday").count(); ++i)
+        for(int i = 0; i < doubleVector.value("Moveday").count(); ++i)
         {
-            settingList << QString::number(doubleMap.value("Moveday").at(i));
+            settingList << QString::number(doubleVector.value("Moveday").at(i));
         }
         myvalues->setValue("moveday",settings::setSettingString(settingList));
         settingList.clear();
 
-        for(int i = 0; i < doubleMap.value("Macros").count(); ++i)
+        for(int i = 0; i < doubleVector.value("Macros").count(); ++i)
         {
-            settingList << QString::number(doubleMap.value("Macros").at(i));
+            settingList << QString::number(doubleVector.value("Macros").at(i));
         }
         myvalues->setValue("macros",settings::setSettingString(settingList));
         settingList.clear();

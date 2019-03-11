@@ -14,7 +14,7 @@ private:
 protected:
     double calc_totalCal(double,double,double);    
     int get_hfvalue(QString);
-    QHash<QString,double> *ltsValues;
+    QHash<QString,double> *ltsValues,*doubleValues;
     QHash<QString,QString> *gcValues,*generalValues;
 
     static bool usePMData;
@@ -39,6 +39,7 @@ protected:
     static double get_corrected_MET(double,int);
     static double calc_lnp(double,double,double);
     static double current_dayCalories(QDateTime);
+    static QString calc_weekID(QDate);
     static QHash<QString,double> *thresValues, *athleteValues;
 
 };

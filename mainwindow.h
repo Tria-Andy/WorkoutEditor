@@ -1115,6 +1115,80 @@ public:
         painter->restore();
     }
 };
+class del_foodDaySum : public QStyledItemDelegate, public calculation
+{
+    Q_OBJECT
+public:
+    explicit del_foodDaySum(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
+
+    void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
+    {
+        painter->save();
+        QLinearGradient itemGradient(option.rect.topLeft(),option.rect.bottomLeft());
+        itemGradient.setSpread(QGradient::ReflectSpread);
+        QColor itemColor,gradColor;
+        QFont foodFont;
+        foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
+        painter->setFont(foodFont);
+
+        QString sPercent = index.data().toString().split(" ").last();
+
+        sPercent = sPercent.remove("(");
+        sPercent = sPercent.remove(")");
+
+        double percent = sPercent.toDouble();
+        double macroRange = doubleValues->value("Macrorange")/100.0;
+        gradColor.setHsv(0,0,200,150);
+
+        if(index.column() == 0)
+        {   
+            itemColor.setHsv(240,255,255,255);
+            painter->setPen(Qt::white);
+        }
+        else
+        {
+            if(percent == 0.0)
+            {
+                itemColor.setHsv(200,255,255,255);
+                painter->setPen(Qt::black);
+            }
+            else
+            {
+                double perHigh = settings::doubleVector.value("Macros").at(index.column()-1);
+                double perLow = perHigh - perHigh*macroRange;
+                perHigh = perHigh + perHigh*macroRange;
+
+                if(percent < perLow)
+                {
+                    itemColor.setHsv(60,255,255,255);
+                    painter->setPen(Qt::black);
+                }
+                else if(percent <= perHigh && percent >= perLow)
+                {
+                    itemColor.setHsv(120,255,170,255);
+                    painter->setPen(Qt::black);
+                }
+                else if(percent > perHigh)
+                {
+                    itemColor.setHsv(0,255,255,255);
+                    painter->setPen(Qt::white);
+                }
+            }
+        }
+
+        itemGradient.setColorAt(0,gradColor);
+        itemGradient.setColorAt(1,itemColor);
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+        painter->fillRect(option.rect,itemGradient);
+
+        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
+        painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+
+        painter->restore();
+    }
+};
+
+
 namespace Ui {
 class MainWindow;
 }
@@ -1143,6 +1217,7 @@ private:
     del_foodplan food_del;
     del_foodSummery foodSum_del;
     del_foodWeekSum foodSumWeek_del;
+    del_foodDaySum foodDaySum_del;
     del_mousehover mousehover_del;
     QStandardItemModel *calendarModel,*sumModel,*fileModel,*infoModel,*avgModel;
     QItemSelectionModel *treeSelection,*mealSelection;
@@ -1298,8 +1373,8 @@ private slots:
     void selectFoodMealDay(int);
     void on_actionFood_Macros_triggered();
     void on_toolButton_switch_clicked();
-    void on_toolButton_lineCopy_clicked();
     void on_toolButton_linePaste_clicked();
+    void on_pushButton_lineCopy_toggled(bool checked);
 };
 
 #endif // MAINWINDOW_H

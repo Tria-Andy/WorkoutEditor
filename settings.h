@@ -52,7 +52,7 @@ private:
     static void fill_mapRange(QHash<QString,QString>*,QString*);
 
 protected:
-    static QHash<QString,double> thresholdMap,ltsMap,athleteMap,modeMap;
+    static QHash<QString,double> thresholdMap,ltsMap,athleteMap,modeMap,doubleMap;
     static QHash<QString,QString> generalMap,gcInfo,triaMap;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,QStringList> listMap,jsonTags;
@@ -67,7 +67,7 @@ public:
 
     //QMap/QHash Getter
     static QHash<QString,QColor> get_colorMap() {return colorMap;}
-    static QHash<QString,QVector<double>> doubleMap;
+    static QHash<QString,QVector<double>> doubleVector;
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
     static QString get_rangeValue(QString,QString);
     static int get_fontValue(QString key) {return fontMap.value(key);}
@@ -108,7 +108,7 @@ public:
         return nullptr;
     }
 
-    enum dMap {Threshold,Athlete,LTS};
+    enum dMap {Threshold,Athlete,LTS,Double};
     static QHash<QString,double>* getdoubleMapPointer(int map)
     {
         if(map == Threshold)
@@ -122,6 +122,10 @@ public:
         if(map == LTS)
         {
             return &ltsMap;
+        }
+        if(map == Double)
+        {
+            return &doubleMap;
         }
         return nullptr;
     }

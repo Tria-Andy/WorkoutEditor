@@ -2425,6 +2425,12 @@
                       <pointsize>10</pointsize>
                      </font>
                     </property>
+                    <property name="dragDropMode">
+                     <enum>QAbstractItemView::DragDrop</enum>
+                    </property>
+                    <property name="defaultDropAction">
+                     <enum>Qt::MoveAction</enum>
+                    </property>
                    </widget>
                   </item>
                  </layout>
@@ -2497,7 +2503,7 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QToolButton" name="toolButton_lineCopy">
+                      <widget class="QPushButton" name="pushButton_lineCopy">
                        <property name="minimumSize">
                         <size>
                          <width>24</width>
@@ -2513,17 +2519,13 @@
                        <property name="text">
                         <string/>
                        </property>
-                       <property name="icon">
-                        <iconset resource="resources.qrc">
-                         <normaloff>:/images/icons/Copy.png</normaloff>:/images/icons/Copy.png</iconset>
-                       </property>
                        <property name="iconSize">
                         <size>
                          <width>18</width>
                          <height>18</height>
                         </size>
                        </property>
-                       <property name="autoRaise">
+                       <property name="checkable">
                         <bool>true</bool>
                        </property>
                       </widget>

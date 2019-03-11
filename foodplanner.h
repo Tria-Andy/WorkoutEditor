@@ -13,15 +13,14 @@ class foodplanner : public xmlHandler, public calculation
 public:
     explicit foodplanner(schedule *ptrSchedule = nullptr,QDate fd = QDate());
 
-    QStandardItemModel *weekPlansModel,*weekSumModel,*daySumModel,*mealModel,*estModel;
+    QStandardItemModel *weekPlansModel,*weekSumModel,*daySumModel,*mealModel,*estModel,*historyModel;
     QSortFilterProxyModel *daySumProxy;
     QDate firstDayofWeek;
     QStringList planList,mealsHeader,menuHeader,dayHeader,dayListHeader,estHeader;
     QMap<int,QStringList> foodList;
 
-    QString set_weekID(QDate);
     void write_foodPlan();
-    void write_meals();
+    void write_meals(bool);
     void edit_mealSection(QString,int);
     void add_meal(QItemSelectionModel*);
     void remove_meal(QItemSelectionModel*);
@@ -40,11 +39,12 @@ public:
 
 private:
     schedule *schedulePtr;
-    QString loadedWeek,filePath,planerXML,mealXML;
+    QString loadedWeek,filePath,planerXML,mealXML,historyXML;
     QStringList dayTags,sectionTags,mealTags,weekHeader,sumHeader,daySumHeader,weekSumHeader;
 
     void read_foodPlan(QDomDocument);
     void read_meals(QDomDocument);
+    void read_history(QDomDocument);
     void build_weekFoodTree(QDomElement,QStandardItem*);
     QStandardItem *create_item(QDomElement,QStandardItem*);
     void fill_planList(QDate,bool);
