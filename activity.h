@@ -86,7 +86,7 @@ public:
     void updateRow_intTree(QItemSelectionModel *);
     void addRow_intTree(QItemSelectionModel *);
     void removeRow_intTree(QItemSelectionModel *);
-    double get_int_distance(int);
+    double get_int_distance(int,int);
     int get_int_duration(int);
     int get_int_pace(int,QString);
     double get_int_speed(int);

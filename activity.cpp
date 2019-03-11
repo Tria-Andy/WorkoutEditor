@@ -390,7 +390,7 @@ void Activity::prepareData()
 
         for(int row = 0; row < intModelCount; ++row)
         {
-            intModel->setData(intModel->index(row,intListCount),this->get_int_distance(row));
+            intModel->setData(intModel->index(row,intListCount),this->get_int_distance(row,0));
             intModel->setData(intModel->index(row,intListCount+1),1);
             intModel->setData(intModel->index(row,intListCount+2),"Int-"+QString::number(row));
         }
@@ -501,7 +501,7 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
     QString lapName = intModel->data(intModel->index(pInt,0)).toString();
     int lapPace = this->get_int_pace(pInt,lapName);
     int lapTime = this->get_int_duration(pInt);
-    double lapDist = this->set_doubleValue(this->get_int_distance(pInt),true);
+    double lapDist = this->set_doubleValue(this->get_int_distance(pInt,1),true);
     double lapSpeed = this->get_int_speed(pInt);
     double workDist = 0;
 
@@ -1600,14 +1600,12 @@ int Activity::get_zone_values(double value, int max, bool ispace)
 {
     if(ispace)
     {
-        return ceil(max/(value/100));
+        return static_cast<int>(ceil(max/(value/100)));
     }
     else
     {
-        return ceil(max*(value/100));
+        return static_cast<int>(ceil(max*(value/100)));
     }
-
-    return 0;
 }
 
 int Activity::get_int_duration(int row)
@@ -1622,7 +1620,7 @@ int Activity::get_int_duration(int row)
     return duration;
 }
 
-double Activity::get_int_distance(int row)
+double Activity::get_int_distance(int row,int offset)
 {
     double dist,dist_start,dist_stop;
     int int_start,int_stop;
@@ -1634,7 +1632,7 @@ double Activity::get_int_distance(int row)
     }
     else
     {
-        int_start = intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt()-1;
+        int_start = intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt()-offset;
         int_stop = intModel->data(intModel->index(row,2,QModelIndex()),Qt::DisplayRole).toInt();
         dist_start = sampleModel->data(sampleModel->index(int_start,1,QModelIndex()),Qt::DisplayRole).toDouble();
         dist_stop = sampleModel->data(sampleModel->index(int_stop,1,QModelIndex()),Qt::DisplayRole).toDouble();
@@ -1660,7 +1658,7 @@ int Activity::get_int_pace(int row,QString lapName)
     }
     else
     {
-        pace = this->get_int_duration(row) / this->get_int_distance(row);
+        pace = this->get_int_duration(row) / this->get_int_distance(row,1);
     }
 
     return pace;
