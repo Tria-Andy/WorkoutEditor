@@ -250,7 +250,6 @@ QString calculation::threstopace(double thresPace, double percent)
 double calculation::wattToSpeed(double thresPower,double thresSpeed,double currWatt)
 {
     double diff = 0;
-    double speedStep = 0.065;
 
     if(currWatt == 0.0)
     {
@@ -259,15 +258,13 @@ double calculation::wattToSpeed(double thresPower,double thresSpeed,double currW
     else if(currWatt < thresPower)
     {
         diff = thresPower - currWatt;
-        return thresSpeed - (diff * speedStep);
+        return thresSpeed - (diff * thresValues->value("wattfactor"));
     }
     else
     {
         diff = currWatt - thresPower;
-        return thresSpeed + (diff * speedStep);
+        return thresSpeed + (diff * thresValues->value("wattfactor"));
     }
-
-    return 0;
 }
 
 QString calculation::calc_thresPace(double threshold,double percent)
