@@ -3188,6 +3188,7 @@
    <addaction name="actionStress_Calculator"/>
    <addaction name="actionPMC"/>
    <addaction name="actionFood_Macros"/>
+   <addaction name="actionfood_History"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -3396,6 +3397,18 @@
    </property>
    <property name="text">
     <string>Food Macros</string>
+   </property>
+  </action>
+  <action name="actionfood_History">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/images/icons/List.png</normaloff>:/images/icons/List.png</iconset>
+   </property>
+   <property name="text">
+    <string>food_History</string>
+   </property>
+   <property name="toolTip">
+    <string>Food History</string>
    </property>
   </action>
  </widget>

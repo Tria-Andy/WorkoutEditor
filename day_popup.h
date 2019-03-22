@@ -272,7 +272,7 @@ class day_popup : public QDialog, public jsonHandler, public standardWorkouts
     Q_OBJECT
 
 public:
-    explicit day_popup(QWidget *parent = 0, const QDate w_date = QDate(), schedule *p_sched = 0);
+    explicit day_popup(QWidget *parent = nullptr, const QDate w_date = QDate(), schedule *p_sched = nullptr);
     ~day_popup();
 
 private slots:

@@ -1055,6 +1055,7 @@ void MainWindow::on_actionSave_triggered()
         if (reply == QMessageBox::Yes)
         {
             foodPlan->write_foodPlan();
+            foodPlan->write_foodHistory();
             ui->actionSave->setEnabled(false);
         }
     }
@@ -2822,4 +2823,11 @@ void MainWindow::on_toolButton_linePaste_clicked()
         }
         tempValue.clear();
     }
+}
+
+void MainWindow::on_actionfood_History_triggered()
+{
+    foodhistory_popup foodHistory(this,foodPlan);
+    foodHistory.setModal(true);
+    foodHistory.exec();
 }

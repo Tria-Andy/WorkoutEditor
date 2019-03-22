@@ -36,6 +36,7 @@
 #include "year_popup.h"
 #include "stress_popup.h"
 #include "foodmacro_popup.h"
+#include "foodhistory_popup.h"
 #include "dialog_export.h"
 #include "dialog_stresscalc.h"
 #include "dialog_workcreator.h"
@@ -1375,6 +1376,7 @@ private slots:
     void on_toolButton_switch_clicked();
     void on_toolButton_linePaste_clicked();
     void on_pushButton_lineCopy_toggled(bool checked);
+    void on_actionfood_History_triggered();
 };
 
 #endif // MAINWINDOW_H

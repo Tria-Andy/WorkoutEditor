@@ -10,6 +10,7 @@
 
 class foodplanner : public xmlHandler, public calculation
 {
+
 public:
     explicit foodplanner(schedule *ptrSchedule = nullptr,QDate fd = QDate());
 
@@ -21,6 +22,7 @@ public:
 
     void write_foodPlan();
     void write_meals(bool);
+    void write_foodHistory();
     void edit_mealSection(QString,int);
     void add_meal(QItemSelectionModel*);
     void remove_meal(QItemSelectionModel*);
@@ -40,7 +42,7 @@ public:
 private:
     schedule *schedulePtr;
     QString loadedWeek,filePath,planerXML,mealXML,historyXML;
-    QStringList dayTags,sectionTags,mealTags,weekHeader,sumHeader,daySumHeader,weekSumHeader;
+    QStringList dayTags,weekTags,dayHistTags,sectionTags,mealTags,sumHeader,daySumHeader,weekSumHeader;
 
     void read_foodPlan(QDomDocument);
     void read_meals(QDomDocument);
@@ -53,13 +55,12 @@ private:
     int read_dayCalories(QDate);
     void calc_weekGoal();
     void update_weekPlanModel(QDate,int,QStringList*);
-    void update_daySumModel();
-    void update_weekSumModel();
+    void update_historyModel();
     void set_foodMacros(QDate,QString,double);
 
-
 private slots:
-
+    void update_daySumModel();
+    void update_weekSumModel();
 };
 
 #endif // FOODPLANNER_H
