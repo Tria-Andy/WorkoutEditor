@@ -11,12 +11,16 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     mealTags << "name" << "port" << "cal" << "carb" << "protein" << "fat" << "fiber" << "sugar" << "id";
     menuHeader << "Name" << "Port" << "Cal" << "Carb" << "Protein" << "Fat" << "Fiber" << "Sugar";
     mealsHeader = settings::get_listValues("Meals");
-    dayListHeader << "Cal (%)" << "Carbs ("+QString::number(settings::doubleVector.value("Macros").at(0))+"%)"
-                               << "Protein ("+QString::number(settings::doubleVector.value("Macros").at(1))+"%)"
-                               << "Fat ("+QString::number(settings::doubleVector.value("Macros").at(2))+"%)";
+    dayListHeader << "Cal (%)"
+                  << "Carbs ("+QString::number(settings::doubleVector.value("Macros").at(0))+"%)"
+                  << "Protein ("+QString::number(settings::doubleVector.value("Macros").at(1))+"%)"
+                  << "Fat ("+QString::number(settings::doubleVector.value("Macros").at(2))+"%)";
+
     sumHeader << "Calories Food:" << "Conversion Base:" << "Conversion Sport:" << "Summery:" << "Difference:";
     weekSumHeader << "Week Summery";
     estHeader << "Weight at Weekstart:" << "Avg Daily Calories:" << "Avg Daily Conversion:" <<"Avg Daily Diff:" << "Weight Change:" << "Weight at Weekend:";
+
+    histHeader << "Week-Day" << "Date" << "Weight" << "CalBase" << "Sport" << "Mode";
 
     foodList.insert(0,QStringList() << "date");
     foodList.insert(1,QStringList() << "name");
@@ -37,7 +41,6 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     weekSumModel = new QStandardItemModel(sumHeader.count(),1);
     weekSumModel->setVerticalHeaderLabels(sumHeader);
     weekSumModel->setHorizontalHeaderLabels(weekSumHeader);
-
     estModel = new QStandardItemModel(estHeader.count(),1);
     estModel->setVerticalHeaderLabels(estHeader);
 
@@ -269,13 +272,13 @@ void foodplanner::read_meals(QDomDocument xmlDoc)
 void foodplanner::read_history(QDomDocument xmlDoc)
 {
     historyModel->clear();
-    historyModel->setColumnCount(weekTags.count());
+    historyModel->setColumnCount(histHeader.count());
+    historyModel->setHorizontalHeaderLabels(histHeader);
     QStandardItem *rootItem = historyModel->invisibleRootItem();
     QDomNodeList xmlList,childList;
     QDomElement xmlElement,childElement;
     QDate dayName;
     QList<QStandardItem*> dayItem,dayItems;
-
 
     xmlList = xmlDoc.firstChildElement().elementsByTagName("week");
 
@@ -286,6 +289,7 @@ void foodplanner::read_history(QDomDocument xmlDoc)
         dayItem << new QStandardItem(xmlElement.attribute("fdw"));
         dayItem << new QStandardItem(xmlElement.attribute("weight"));
         dayItem << new QStandardItem(xmlElement.attribute("base"));
+        dayItem << new QStandardItem("-");
         dayItem << new QStandardItem(settings::get_listValues("Mode").at(xmlElement.attribute("mode").toInt()));
         rootItem->appendRow(dayItem);
         dayName =  QDate().fromString(xmlElement.attribute("fdw"),"yyyy-MM-dd");
@@ -298,6 +302,7 @@ void foodplanner::read_history(QDomDocument xmlDoc)
                 childElement = childList.at(child).toElement();
                 dayItems << new QStandardItem(QDate::shortDayName(child+1));
                 dayItems << new QStandardItem(dayName.addDays(child).toString("dd.MM.yyyy"));
+                dayItems << new QStandardItem("-");
                 dayItems << new QStandardItem(childElement.attribute(dayHistTags.at(1)));
                 dayItems << new QStandardItem(childElement.attribute(dayHistTags.at(2)));
                 dayItem.at(0)->appendRow(dayItems);
@@ -317,6 +322,7 @@ void foodplanner::read_history(QDomDocument xmlDoc)
         dayItem << new QStandardItem(firstDayofWeek.toString("yyyy-MM-dd"));
         dayItem << new QStandardItem(QString::number(athleteValues->value("weight")));
         dayItem << new QStandardItem("0");
+        dayItem << new QStandardItem("-");
         dayItem << new QStandardItem(weekPlansModel->data(weekPlansModel->index(0,1)).toString());
         rootItem->appendRow(dayItem);
 
@@ -324,6 +330,7 @@ void foodplanner::read_history(QDomDocument xmlDoc)
         {
             dayItems << new QStandardItem(QDate::shortDayName(i+1));
             dayItems << new QStandardItem(firstDayofWeek.addDays(i).toString("dd.MM.yyyy"));
+            dayItems << new QStandardItem("-");
             dayItems << new QStandardItem("0");
             dayItems << new QStandardItem("0");
             dayItem.at(0)->appendRow(dayItems);
@@ -422,7 +429,7 @@ void foodplanner::write_foodHistory()
         xmlElement.setAttribute("fdw",historyModel->data(historyModel->index(section,1)).toString());
         xmlElement.setAttribute("weight",historyModel->data(historyModel->index(section,2)).toString());
         xmlElement.setAttribute("base",historyModel->data(historyModel->index(section,3)).toString());
-        xmlElement.setAttribute("mode",modeList.indexOf(historyModel->data(historyModel->index(section,4)).toString()));
+        xmlElement.setAttribute("mode",modeList.indexOf(historyModel->data(historyModel->index(section,5)).toString()));
 
         if(historyModel->item(section,0)->hasChildren())
         {
@@ -432,8 +439,8 @@ void foodplanner::write_foodHistory()
             {
                 childElement = xmlDoc.createElement("day");
                 childElement.setAttribute("id",day);
-                childElement.setAttribute("food",historyModel->data(historyModel->index(day,2,sectionIndex)).toString());
-                childElement.setAttribute("sport",historyModel->data(historyModel->index(day,3,sectionIndex)).toString());
+                childElement.setAttribute("food",historyModel->data(historyModel->index(day,3,sectionIndex)).toString());
+                childElement.setAttribute("sport",historyModel->data(historyModel->index(day,4,sectionIndex)).toString());
                 xmlElement.appendChild(childElement);
                 childElement.clear();
             }
@@ -784,8 +791,8 @@ void foodplanner::update_historyModel()
 
             for(int day = 0; day < daySumModel->columnCount(); ++day)
             {
-                 historyModel->setData(historyModel->index(day,2,sectionIndex),daySumModel->data(daySumModel->index(0,day)).toString());
-                 historyModel->setData(historyModel->index(day,3,sectionIndex),daySumModel->data(daySumModel->index(2,day)).toString());
+                 historyModel->setData(historyModel->index(day,3,sectionIndex),daySumModel->data(daySumModel->index(0,day)).toString());
+                 historyModel->setData(historyModel->index(day,4,sectionIndex),daySumModel->data(daySumModel->index(2,day)).toString());
             }
         }
     }

@@ -42,7 +42,7 @@ public:
 private:
     schedule *schedulePtr;
     QString loadedWeek,filePath,planerXML,mealXML,historyXML;
-    QStringList dayTags,weekTags,dayHistTags,sectionTags,mealTags,sumHeader,daySumHeader,weekSumHeader;
+    QStringList dayTags,weekTags,dayHistTags,sectionTags,mealTags,sumHeader,daySumHeader,weekSumHeader,histHeader;
 
     void read_foodPlan(QDomDocument);
     void read_meals(QDomDocument);

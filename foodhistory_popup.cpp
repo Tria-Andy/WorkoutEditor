@@ -8,7 +8,6 @@ foodhistory_popup::foodhistory_popup(QWidget *parent,foodplanner *pFood) :
     ui->setupUi(this);
 
     foodplan = pFood;
-
     ui->treeView_foodhistory->setModel(foodplan->historyModel);
 }
 

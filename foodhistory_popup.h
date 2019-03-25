@@ -18,8 +18,6 @@ public:
 
 private:
     Ui::foodhistory_popup *ui;
-
     foodplanner *foodplan;
 };
-
 #endif // FOODHISTORY_POPUP_H
