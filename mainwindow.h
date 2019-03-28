@@ -1272,7 +1272,7 @@ private:
     void update_infoModel();
     void fill_WorkoutContent();
     void unselect_intRow(bool);
-    void set_menuItems(bool,bool,bool);
+    void set_menuItems(int);
     void reset_jsontext();
     void freeMem();
 
@@ -1377,6 +1377,7 @@ private slots:
     void on_toolButton_linePaste_clicked();
     void on_pushButton_lineCopy_toggled(bool checked);
     void on_actionfood_History_triggered();
+    void on_actionFood_triggered();
 };
 
 #endif // MAINWINDOW_H

@@ -220,7 +220,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->read_activityFiles();
 
     ui->actionSave->setEnabled(false);
-    this->set_menuItems(false,true,false);
+    this->set_menuItems(0);
     this->set_phaseFilter(1);
     this->loadUISettings();
 }
@@ -456,32 +456,60 @@ void MainWindow::openPreferences()
     dia_settings.exec();
 }
 
-void MainWindow::set_menuItems(bool mEditor,bool mPlaner, bool mFood)
+void MainWindow::set_menuItems(int module)
 {
-    //Editor
-    ui->actionRefresh_Filelist->setVisible(mEditor);
-    ui->actionReset->setVisible(mEditor);
-    ui->actionSelect_File->setVisible(mEditor);
-    ui->actionReset->setEnabled(actLoaded);
-    ui->actionPMC->setVisible(mPlaner);
+    if(module == PLANER)
+    {
+        ui->menuWorkout->setEnabled(true);
+        ui->actionPMC->setVisible(true);
+        ui->actionIntervall_Editor->setVisible(true);
+        ui->actionExport_to_Golden_Cheetah->setVisible(true);
+        ui->actionNew->setVisible(true);
+        planerMode->setEnabled(true);
+        planMode->setEnabled(true);
+        planerMode->setVisible(true);
 
-    //Schedule
-    ui->menuWorkout->setEnabled(mPlaner);
-    ui->actionPMC->setVisible(mPlaner);
-    ui->actionIntervall_Editor->setVisible(mPlaner);
-    ui->actionExport_to_Golden_Cheetah->setVisible(mPlaner);
-    ui->actionNew->setVisible(mPlaner);
-    planerMode->setEnabled(mPlaner);
-    planMode->setEnabled(mPlaner);
-    planerMode->setVisible(mPlaner);
+        if(workSchedule->get_StressMap()->count() == 0) ui->actionPMC->setEnabled(false);
 
-    //Food
-    ui->actionFood_Macros->setVisible(mFood);
-    ui->actionEditor->setVisible(mPlaner);
+        ui->actionfood_History->setVisible(false);
+        ui->actionFood_Macros->setVisible(false);
+        ui->actionSelect_File->setVisible(false);
+        ui->actionDelete->setVisible(false);
+        ui->actionRefresh_Filelist->setVisible(false);
+        ui->actionReset->setVisible(false);
+    }
+    if(module == EDITOR)
+    {
+        ui->actionRefresh_Filelist->setVisible(true);
+        ui->actionIntervall_Editor->setVisible(true);
+        ui->actionReset->setVisible(true);
+        ui->actionSelect_File->setVisible(true);
+        ui->actionReset->setEnabled(actLoaded);
+        ui->actionPMC->setVisible(true);
 
-    ui->actionDelete->setVisible(false);
+        ui->actionfood_History->setVisible(false);
+        ui->actionFood_Macros->setVisible(false);
+        ui->actionSelect_File->setVisible(false);
+        ui->actionDelete->setVisible(false);
+    }
+    if(module == FOOD)
+    { 
+        ui->actionFood_Macros->setVisible(true);
+        ui->actionfood_History->setVisible(true);
+        ui->actionDelete->setVisible(true);
+        ui->actionDelete->setEnabled(false);
+        ui->actionNew->setVisible(true);
+        ui->actionNew->setEnabled(false);
 
-    if(workSchedule->get_StressMap()->count() == 0) ui->actionPMC->setEnabled(false);
+        ui->actionPMC->setVisible(false);
+        ui->actionReset->setVisible(false);
+        ui->actionPace_Calculator->setVisible(false);
+        ui->actionStress_Calculator->setVisible(false);
+        ui->actionIntervall_Editor->setVisible(false);
+        ui->actionRefresh_Filelist->setVisible(false);
+        planerMode->setVisible(false);
+        planMode->setEnabled(false);
+    }
 }
 
 //Planner Functions ***********************************************************************************
@@ -1295,7 +1323,7 @@ void MainWindow::loadfile(const QString &filename)
         ui->actionSelect_File->setEnabled(false);
         ui->actionReset->setEnabled(true);
         intSelect_del.sport = avgSelect_del.sport = curr_activity->get_sport();
-        this->set_menuItems(true,false,false);
+        this->set_menuItems(EDITOR);
 
         this->init_editorViews();
         this->update_infoModel();
@@ -1889,16 +1917,22 @@ void MainWindow::setCurrentTreeIndex(bool up)
     treeSelection->setCurrentIndex(index,QItemSelectionModel::Select);
 }
 
-void MainWindow::on_actionEditor_triggered()
-{
-    ui->stackedWidget->setCurrentIndex(1);
-    this->set_menuItems(true,false,false);
-}
-
 void MainWindow::on_actionPlaner_triggered()
 {
     ui->stackedWidget->setCurrentIndex(0);
-    this->set_menuItems(false,true,false);
+    this->set_menuItems(PLANER);
+}
+
+void MainWindow::on_actionEditor_triggered()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+    this->set_menuItems(EDITOR);
+}
+
+void MainWindow::on_actionFood_triggered()
+{
+    ui->stackedWidget->setCurrentIndex(2);
+    this->set_menuItems(FOOD);
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -2098,23 +2132,7 @@ void MainWindow::set_module(int modID)
 {
     ui->stackedWidget->setCurrentIndex(modID);
     selModule = modID;
-
-    if(modID == PLANER)
-    {
-        this->set_menuItems(false,true,false);
-    }
-    else if(modID == EDITOR)
-    {
-        this->set_menuItems(true,false,false);
-    }
-    else if(modID == FOOD)
-    {
-        this->set_menuItems(false,false,true);
-        ui->actionDelete->setVisible(true);
-        ui->actionDelete->setEnabled(false);
-        ui->actionNew->setVisible(true);
-        ui->actionNew->setEnabled(false);
-    }
+    this->set_menuItems(modID);
 }
 
 void MainWindow::on_actionEdit_Week_triggered()
