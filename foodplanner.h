@@ -54,13 +54,8 @@ private:
 
     int read_dayCalories(QDate);
     void calc_weekGoal();
-    void update_weekPlanModel(QDate,int,QStringList*);
-    void update_historyModel();
     void set_foodMacros(QDate,QString,double);
-
-private slots:
-    void update_daySumModel();
-    void update_weekSumModel();
+    void update_SumModels();
 };
 
 #endif // FOODPLANNER_H
