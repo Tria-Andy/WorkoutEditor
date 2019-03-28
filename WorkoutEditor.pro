@@ -14,8 +14,8 @@ TEMPLATE = app
 
 #Application version
 VERSION_MAJOR = 1
-VERSION_MINOR = 5
-VERSION_BUILD = 5
+VERSION_MINOR = 6
+VERSION_BUILD = 0
 DEV_BUILD = 1
 DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
        "VERSION_MINOR=$$VERSION_MINOR"\
@@ -85,7 +85,8 @@ HEADERS  += mainwindow.h \
     foodplanner.h \
     dialog_map.h \
     foodmacro_popup.h \
-    foodhistory_popup.h
+    foodhistory_popup.h \
+    qplotobject.h
 
 FORMS    += mainwindow.ui \
     dialog_export.ui \
