@@ -85,8 +85,7 @@ HEADERS  += mainwindow.h \
     foodplanner.h \
     dialog_map.h \
     foodmacro_popup.h \
-    foodhistory_popup.h \
-    qplotobject.h
+    foodhistory_popup.h
 
 FORMS    += mainwindow.ui \
     dialog_export.ui \

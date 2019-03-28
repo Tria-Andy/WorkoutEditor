@@ -464,6 +464,8 @@ void MainWindow::set_menuItems(int module)
         ui->actionPMC->setVisible(true);
         ui->actionIntervall_Editor->setVisible(true);
         ui->actionExport_to_Golden_Cheetah->setVisible(true);
+        ui->actionPace_Calculator->setVisible(true);
+        ui->actionStress_Calculator->setVisible(true);
         ui->actionNew->setVisible(true);
         planerMode->setEnabled(true);
         planMode->setEnabled(true);
@@ -486,6 +488,8 @@ void MainWindow::set_menuItems(int module)
         ui->actionSelect_File->setVisible(true);
         ui->actionReset->setEnabled(actLoaded);
         ui->actionPMC->setVisible(true);
+        ui->actionPace_Calculator->setVisible(true);
+        ui->actionStress_Calculator->setVisible(true);
 
         ui->actionfood_History->setVisible(false);
         ui->actionFood_Macros->setVisible(false);

@@ -4,7 +4,6 @@
 #include <QDialog>
 #include <foodplanner.h>
 
-
 namespace Ui {
 class foodhistory_popup;
 }
