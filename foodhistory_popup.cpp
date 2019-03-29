@@ -45,9 +45,22 @@ void foodhistory_popup::on_toolButton_close_clicked()
     reject();
 }
 
-void foodhistory_popup::set_plotValues(int currWeek,int count)
+void foodhistory_popup::set_plotValues(int currWeek,int count,bool week)
 {
-    int weekStart = currWeek - count;
+    int valueStart = 0;
+    int labelCol = 0;
+    QModelIndex sectionIndex;
+
+    if(week)
+    {
+        sectionIndex = foodplan->historyModel->indexFromItem(foodplan->historyModel->item(currWeek,0));
+        labelCol = 1;
+    }
+    else
+    {
+        valueStart = currWeek - count;
+    }
+
     weekLabels.clear();
     weekList.resize(count);
     metaRate.resize(count);
@@ -58,16 +71,18 @@ void foodhistory_popup::set_plotValues(int currWeek,int count)
     weight.resize(count);
     double maxConvers = 0;
 
-    for(int i = 0; i < count; ++i,++weekStart)
+    for(int i = 0; i < count; ++i,++valueStart)
     {
-       metaRate[i] = foodplan->historyModel->data(foodplan->historyModel->index(weekStart,3)).toDouble();
-       calSport[i] = foodplan->historyModel->data(foodplan->historyModel->index(weekStart,4)).toDouble();
-       calFood[i] = foodplan->historyModel->data(foodplan->historyModel->index(weekStart,5)).toDouble();
-       calDiff[i] = foodplan->historyModel->data(foodplan->historyModel->index(weekStart,6)).toDouble();
-       weight[i] = foodplan->historyModel->data(foodplan->historyModel->index(weekStart,2)).toDouble();
+       weekLabels << foodplan->historyModel->data(foodplan->historyModel->index(valueStart,labelCol,sectionIndex)).toString();
+       weight[i] = foodplan->historyModel->data(foodplan->historyModel->index(valueStart,2,sectionIndex)).toDouble();
+       metaRate[i] = foodplan->historyModel->data(foodplan->historyModel->index(valueStart,3,sectionIndex)).toDouble();
+       calSport[i] = foodplan->historyModel->data(foodplan->historyModel->index(valueStart,4,sectionIndex)).toDouble();
+       calFood[i] = foodplan->historyModel->data(foodplan->historyModel->index(valueStart,5,sectionIndex)).toDouble();
+       calDiff[i] = foodplan->historyModel->data(foodplan->historyModel->index(valueStart,6,sectionIndex)).toDouble();
+
        calConversion[i] = metaRate[i] + calSport[i];
        if(calConversion[i] > maxConvers) maxConvers = calConversion[i];
-       weekLabels << foodplan->historyModel->data(foodplan->historyModel->index(weekStart,0)).toString();
+
     }
 
     for(int i = 1; i <= count; ++i)
@@ -183,5 +198,23 @@ void foodhistory_popup::set_graph(int weekcount,double maxCon)
 
 void foodhistory_popup::on_comboBox_weekCount_currentIndexChanged(int index)
 {
-    this->set_plotValues(weekCount,index+1);
+    this->set_plotValues(weekCount,index+1,false);
+}
+
+void foodhistory_popup::on_treeView_foodhistory_clicked(const QModelIndex &index)
+{
+    ui->treeView_foodhistory->collapseAll();
+    if(foodplan->historyModel->item(index.row(),0)->hasChildren())
+    {
+        this->set_plotValues(index.row(),foodplan->historyModel->item(index.row(),0)->rowCount(),true);
+        ui->comboBox_weekCount->setEnabled(false);
+        ui->treeView_foodhistory->expand(index);
+    }
+}
+
+void foodhistory_popup::on_toolButton_reset_clicked()
+{
+    this->set_plotValues(weekCount,ui->comboBox_weekCount->currentIndex()+1,false);
+    ui->treeView_foodhistory->collapseAll();
+    ui->comboBox_weekCount->setEnabled(true);
 }

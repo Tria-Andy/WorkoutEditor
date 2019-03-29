@@ -20,6 +20,10 @@ private slots:
     void on_toolButton_close_clicked();
     void on_comboBox_weekCount_currentIndexChanged(int index);
 
+    void on_treeView_foodhistory_clicked(const QModelIndex &index);
+
+    void on_toolButton_reset_clicked();
+
 private:
     Ui::foodhistory_popup *ui;
     foodplanner *foodplan;
@@ -27,7 +31,7 @@ private:
     int weekCount;
     QStringList weekLabels;
 
-    void set_plotValues(int,int);
+    void set_plotValues(int,int,bool);
     void set_graph(int,double);
 };
 #endif // FOODHISTORY_POPUP_H

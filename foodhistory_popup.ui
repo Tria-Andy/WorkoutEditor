@@ -158,6 +158,26 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QToolButton" name="toolButton_reset">
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/images/icons/Refresh.png</normaloff>:/images/icons/Refresh.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>18</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
