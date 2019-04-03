@@ -291,6 +291,7 @@ void foodplanner::read_history(QDomDocument xmlDoc)
     {
         xmlElement = xmlList.at(i).toElement();
         metaRate = xmlElement.attribute("base").toInt();
+
         dayItem << new QStandardItem(xmlElement.attribute("id")+"_"+xmlElement.attribute("year"));
         dayItem << new QStandardItem(xmlElement.attribute("fdw"));
         dayItem << new QStandardItem(xmlElement.attribute("weight"));
@@ -299,6 +300,7 @@ void foodplanner::read_history(QDomDocument xmlDoc)
         dayItem << new QStandardItem("0");
         dayItem << new QStandardItem("0");
         dayItem << new QStandardItem(settings::get_listValues("Mode").at(xmlElement.attribute("mode").toInt()));
+
         rootItem->appendRow(dayItem);
         dayName =  QDate().fromString(xmlElement.attribute("fdw"),"dd.MM.yyyy");
 
@@ -345,8 +347,10 @@ void foodplanner::read_history(QDomDocument xmlDoc)
     if(loadedWeek.compare(currentWeek) != 0)
     {
         dayItem << new QStandardItem(this->calc_weekID(firstDayofWeek));
-        dayItem << new QStandardItem(firstDayofWeek.toString("yyyy-MM-dd"));
+        dayItem << new QStandardItem(firstDayofWeek.toString("dd.MM.yyyy"));
         dayItem << new QStandardItem(QString::number(athleteValues->value("weight")));
+        dayItem << new QStandardItem("0");
+        dayItem << new QStandardItem("0");
         dayItem << new QStandardItem("0");
         dayItem << new QStandardItem("-");
         dayItem << new QStandardItem(weekPlansModel->data(weekPlansModel->index(0,1)).toString());
@@ -357,6 +361,8 @@ void foodplanner::read_history(QDomDocument xmlDoc)
             dayItems << new QStandardItem(QDate::shortDayName(i+1));
             dayItems << new QStandardItem(firstDayofWeek.addDays(i).toString("dd.MM.yyyy"));
             dayItems << new QStandardItem("-");
+            dayItems << new QStandardItem("0");
+            dayItems << new QStandardItem("0");
             dayItems << new QStandardItem("0");
             dayItems << new QStandardItem("0");
             dayItem.at(0)->appendRow(dayItems);
