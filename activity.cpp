@@ -203,6 +203,7 @@ void Activity::prepareData()
             int currType = 0,lastType = 0;
             int lapPace = 0;
             int lapTime = 0;
+            int lapSplit = 0;
             double lapSpeed = 0;
             double lapWork = 0;
             QString level;
@@ -222,6 +223,7 @@ void Activity::prepareData()
                 {
                     lapTime = round(xdataModel->data(xdataModel->index(xdataRow+xdataLap,3)).toDouble());
                     intTime = intTime + lapTime;
+                    lapSplit = lapSplit + lapTime;
 
                     if(!xdataModel->data(xdataModel->index(xdataRow+xdataLap,2)).toBool())
                     {
@@ -246,7 +248,7 @@ void Activity::prepareData()
                         subItems << new QStandardItem("-");
                         subItems << new QStandardItem(QString::number(swimTrack));
                         subItems << new QStandardItem(this->set_time(lapTime));
-                        subItems << new QStandardItem("-");
+                        subItems << new QStandardItem(this->set_time(lapSplit));
                         subItems << new QStandardItem(this->set_time(lapPace));
                         subItems << new QStandardItem(QString::number(this->set_doubleValue(lapSpeed,true)));
                         subItems << new QStandardItem(QString::number(strokeCount));
@@ -260,8 +262,9 @@ void Activity::prepareData()
                     }
                     ++xdataLap;
                 }
+                lapSplit = 0;
                 --laps;
-                dist = laps*swimTrack;
+                dist = static_cast<int>(laps*swimTrack);
                 intModel->setData(intModel->index(row,intListCount),dist);
                 intModel->setData(intModel->index(row,intListCount+1),laps);
 
@@ -390,7 +393,7 @@ void Activity::prepareData()
 
         for(int row = 0; row < intModelCount; ++row)
         {
-            intModel->setData(intModel->index(row,intListCount),this->get_int_distance(row));
+            intModel->setData(intModel->index(row,intListCount),this->get_int_distance(row,0));
             intModel->setData(intModel->index(row,intListCount+1),1);
             intModel->setData(intModel->index(row,intListCount+2),"Int-"+QString::number(row));
         }
@@ -501,7 +504,7 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
     QString lapName = intModel->data(intModel->index(pInt,0)).toString();
     int lapPace = this->get_int_pace(pInt,lapName);
     int lapTime = this->get_int_duration(pInt);
-    double lapDist = this->set_doubleValue(this->get_int_distance(pInt),true);
+    double lapDist = this->set_doubleValue(this->get_int_distance(pInt,1),true);
     double lapSpeed = this->get_int_speed(pInt);
     double workDist = 0;
 
@@ -1101,6 +1104,8 @@ void Activity::updateSwimInt(QModelIndex parentIndex,QItemSelectionModel *treeSe
     QString lapName,level,lastType,currType,intType;
     int swimLap = 0;
     int lapPace;
+    int lapSplit = 0;
+    int lapTime = 0;
 
     if(intTreeModel->itemFromIndex(parentIndex)->hasChildren())
     {
@@ -1110,19 +1115,24 @@ void Activity::updateSwimInt(QModelIndex parentIndex,QItemSelectionModel *treeSe
         {
             currType = intTreeModel->itemFromIndex(parentIndex)->child(swimLap,1)->text();
             lapPace = this->get_timesec(intTreeModel->itemFromIndex(parentIndex)->child(swimLap,6)->text());
+            lapTime = this->get_timesec(intTreeModel->itemFromIndex(parentIndex)->child(swimLap,4)->text());
             level = this->checkRangeLevel(lapPace);
             intTreeModel->itemFromIndex(parentIndex)->child(swimLap,0)->setData(lapName+QString::number((swimLap+1)*swimTrack)+"_"+level,Qt::EditRole);
             intValue[0] = intValue[0] + intTreeModel->itemFromIndex(parentIndex)->child(swimLap,3)->text().toDouble();
-            intValue[1] = intValue[1] + this->get_timesec(intTreeModel->itemFromIndex(parentIndex)->child(swimLap,4)->text());
+            intValue[1] = intValue[1] + lapTime;
             intValue[2] = intValue[2] + lapPace;
             intValue[3] = intValue[3] + intTreeModel->itemFromIndex(parentIndex)->child(swimLap,7)->text().toDouble();
             intValue[4] = intValue[4] + intTreeModel->itemFromIndex(parentIndex)->child(swimLap,8)->text().toDouble();
             intValue[5] = intValue[5] + intTreeModel->itemFromIndex(parentIndex)->child(swimLap,9)->text().toDouble();
+
+            lapSplit = lapSplit + lapTime;
+            intTreeModel->itemFromIndex(parentIndex)->child(swimLap,5)->setData(this->set_time(lapSplit),Qt::EditRole);
             ++swimLap;    
+
             intType = currType == lastType ? currType : swimType.at(6);;
             lastType = currType;
         }
-        while(intTreeModel->itemFromIndex(parentIndex)->child(swimLap,0) != 0);
+        while(intTreeModel->itemFromIndex(parentIndex)->child(swimLap,0) != nullptr);
         intValue[2] = intValue[2] / swimLap;
         intValue[3] = intValue[3] / swimLap;
         if(swimLap == 1) intType = currType;
@@ -1600,14 +1610,12 @@ int Activity::get_zone_values(double value, int max, bool ispace)
 {
     if(ispace)
     {
-        return ceil(max/(value/100));
+        return static_cast<int>(ceil(max/(value/100)));
     }
     else
     {
-        return ceil(max*(value/100));
+        return static_cast<int>(ceil(max*(value/100)));
     }
-
-    return 0;
 }
 
 int Activity::get_int_duration(int row)
@@ -1622,7 +1630,7 @@ int Activity::get_int_duration(int row)
     return duration;
 }
 
-double Activity::get_int_distance(int row)
+double Activity::get_int_distance(int row,int offset)
 {
     double dist,dist_start,dist_stop;
     int int_start,int_stop;
@@ -1634,7 +1642,7 @@ double Activity::get_int_distance(int row)
     }
     else
     {
-        int_start = intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt()-1;
+        int_start = intModel->data(intModel->index(row,1,QModelIndex()),Qt::DisplayRole).toInt()-offset;
         int_stop = intModel->data(intModel->index(row,2,QModelIndex()),Qt::DisplayRole).toInt();
         dist_start = sampleModel->data(sampleModel->index(int_start,1,QModelIndex()),Qt::DisplayRole).toDouble();
         dist_stop = sampleModel->data(sampleModel->index(int_stop,1,QModelIndex()),Qt::DisplayRole).toDouble();
@@ -1660,7 +1668,7 @@ int Activity::get_int_pace(int row,QString lapName)
     }
     else
     {
-        pace = this->get_int_duration(row) / this->get_int_distance(row);
+        pace = this->get_int_duration(row) / this->get_int_distance(row,1);
     }
 
     return pace;

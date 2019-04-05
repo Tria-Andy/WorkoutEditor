@@ -3,8 +3,10 @@
 calculation::calculation()
 {
     ltsValues = settings::getdoubleMapPointer(settings::dMap::LTS);
+    doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
     gcValues = settings::getStringMapPointer(settings::stingMap::GC);
     generalValues = settings::getStringMapPointer(settings::stingMap::General);
+
 }
 
 QHash<QString,double>* calculation::thresValues = settings::getdoubleMapPointer(settings::dMap::Threshold);
@@ -160,8 +162,6 @@ QString calculation::calc_lapSpeed(QString sport,double sec)
     {
         return "--";
     }
-
-    return 0;
 }
 
 int calculation::calc_lapPace(QString sport, int duration, double distance)
@@ -250,7 +250,6 @@ QString calculation::threstopace(double thresPace, double percent)
 double calculation::wattToSpeed(double thresPower,double thresSpeed,double currWatt)
 {
     double diff = 0;
-    double speedStep = 0.065;
 
     if(currWatt == 0.0)
     {
@@ -259,15 +258,13 @@ double calculation::wattToSpeed(double thresPower,double thresSpeed,double currW
     else if(currWatt < thresPower)
     {
         diff = thresPower - currWatt;
-        return thresSpeed - (diff * speedStep);
+        return thresSpeed - (diff * thresValues->value("wattfactor"));
     }
     else
     {
         diff = currWatt - thresPower;
-        return thresSpeed + (diff * speedStep);
+        return thresSpeed + (diff * thresValues->value("wattfactor"));
     }
-
-    return 0;
 }
 
 QString calculation::calc_thresPace(double threshold,double percent)
@@ -327,6 +324,22 @@ double calculation::current_dayCalories(QDateTime calcDate)
 
     //Mifflin-St.Jeor-Formel
     return round((10*weight)+(6.25*height)-(5*age)+sF);
+}
+
+QString calculation::calc_weekID(QDate workoutDate)
+{
+    QString weeknumber = QString::number(workoutDate.weekNumber());
+
+    if(workoutDate.year() != workoutDate.addDays(7 - workoutDate.dayOfWeek()).year())
+    {
+        weeknumber = weeknumber+"_"+QString::number(workoutDate.addDays(7 - workoutDate.dayOfWeek()).year());
+    }
+    else
+    {
+        weeknumber = weeknumber+"_"+QString::number(workoutDate.year());
+    }
+
+    return weeknumber;
 }
 
 double calculation::calc_swim_xpower(double distance,double pace,double time,double athleteWeight)
