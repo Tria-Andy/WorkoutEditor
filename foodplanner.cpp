@@ -51,6 +51,7 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
     historyXML = "foodhistory.xml";
 
     loadedWeek = this->calc_weekID(firstDayofWeek);
+    defaultCal = settings::doubleVector.value("Mealdefault");
 
     if(!filePath.isEmpty())
     {
@@ -64,7 +65,6 @@ foodplanner::foodplanner(schedule *ptrSchedule, QDate fd)
 
     QModelIndex weekIndex = weekPlansModel->indexFromItem(weekPlansModel->findItems(loadedWeek,Qt::MatchExactly,0).at(0));
     calPercent = settings::doubleVector.value(weekPlansModel->data(weekPlansModel->index(weekIndex.row(),1)).toString());
-    defaultCal = settings::doubleVector.value("Mealdefault");
     this->fill_planList(firstDayofWeek,false);
     this->update_sumBySchedule(firstDayofWeek);
     this->update_sumByMenu(firstDayofWeek,0,nullptr,false);
@@ -80,26 +80,33 @@ void foodplanner::read_foodPlan(QDomDocument xmldoc)
     QString weekID;
     xmlList = xmldoc.firstChildElement().elementsByTagName("week");
 
-    for(int weeks = 0; weeks < xmlList.count(); ++weeks)
+    if(xmlList.count() > 0)
     {
-        QList<QStandardItem*> intItems;
-        childLevel = xmlList.at(weeks).toElement();
-        weekID = childLevel.attribute("id")+"_"+childLevel.attribute("year");
-        intItems << new QStandardItem(weekID);
-        intItems << new QStandardItem(settings::get_listValues("Mode").at(childLevel.attribute("mode").toInt()));
-        intItems << new QStandardItem(childLevel.attribute("fdw"));
-        intItems << new QStandardItem(childLevel.attribute("weight"));
-
-        if(intItems.at(2)->data(Qt::DisplayRole).toDate() == firstDayofWeek)
+        for(int weeks = 0; weeks < xmlList.count(); ++weeks)
         {
-            intItems.at(3)->setData(athleteValues->value("weight"),Qt::EditRole);
-        }
+            QList<QStandardItem*> intItems;
+            childLevel = xmlList.at(weeks).toElement();
+            weekID = childLevel.attribute("id")+"_"+childLevel.attribute("year");
+            intItems << new QStandardItem(weekID);
+            intItems << new QStandardItem(settings::get_listValues("Mode").at(childLevel.attribute("mode").toInt()));
+            intItems << new QStandardItem(childLevel.attribute("fdw"));
+            intItems << new QStandardItem(childLevel.attribute("weight"));
 
-        if(intItems.at(2)->data(Qt::DisplayRole).toDate() >= firstDayofWeek)
-        {
-            rootItem->appendRow(intItems);
-            build_weekFoodTree(childLevel,intItems.at(0));
+            if(intItems.at(2)->data(Qt::DisplayRole).toDate() == firstDayofWeek)
+            {
+                intItems.at(3)->setData(athleteValues->value("weight"),Qt::EditRole);
+            }
+
+            if(intItems.at(2)->data(Qt::DisplayRole).toDate() >= firstDayofWeek)
+            {
+                rootItem->appendRow(intItems);
+                build_weekFoodTree(childLevel,intItems.at(0));
+            }
         }
+    }
+    else
+    {
+        this->insert_newWeek(firstDayofWeek);
     }
 }
 
