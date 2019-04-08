@@ -2849,7 +2849,13 @@ void MainWindow::on_toolButton_linePaste_clicked()
 
 void MainWindow::on_actionfood_History_triggered()
 {
+    int dialog_code;
     foodhistory_popup foodHistory(this,foodPlan);
     foodHistory.setModal(true);
-    foodHistory.exec();
+    dialog_code = foodHistory.exec();
+
+    if(dialog_code == QDialog::Accepted)
+    {
+        ui->actionSave->setEnabled(true);
+    }
 }

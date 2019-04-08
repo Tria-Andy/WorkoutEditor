@@ -11,6 +11,8 @@ foodhistory_popup::foodhistory_popup(QWidget *parent,foodplanner *pFood) :
     foodplan = pFood;
     weekCount = foodplan->historyModel->rowCount();
     ui->treeView_foodhistory->setModel(foodplan->historyModel);
+    dialogResult = QDialog::Rejected;
+    athleteWeight = this->athleteValues->value("weight");
 
     ui->comboBox_weekCount->blockSignals(true);
     for(int i = 0; i < 15 && i < weekCount; ++i)
@@ -42,7 +44,7 @@ foodhistory_popup::~foodhistory_popup()
 
 void foodhistory_popup::on_toolButton_close_clicked()
 {
-    reject();
+    done(dialogResult);
 }
 
 void foodhistory_popup::set_plotValues(int currWeek,int count,bool week)
@@ -191,7 +193,7 @@ void foodhistory_popup::set_graph(int weekcount,double maxCon)
     }
 
     ui->widget_plot->yAxis->setRange(0,maxCon+1000);
-    ui->widget_plot->yAxis2->setRange(0,100);
+    ui->widget_plot->yAxis2->setRange(athleteWeight-(athleteWeight*0.10),athleteWeight+(athleteWeight*0.10));
 
     ui->widget_plot->replot();
 }
@@ -203,12 +205,20 @@ void foodhistory_popup::on_comboBox_weekCount_currentIndexChanged(int index)
 
 void foodhistory_popup::on_treeView_foodhistory_clicked(const QModelIndex &index)
 {
-    ui->treeView_foodhistory->collapseAll();
-    if(foodplan->historyModel->item(index.row(),0)->hasChildren())
+    if(index.column() == 0)
     {
-        this->set_plotValues(index.row(),foodplan->historyModel->item(index.row(),0)->rowCount(),true);
-        ui->comboBox_weekCount->setEnabled(false);
-        ui->treeView_foodhistory->expand(index);
+        ui->treeView_foodhistory->collapseAll();
+
+        if(foodplan->historyModel->item(index.row(),0)->hasChildren())
+        {
+            this->set_plotValues(index.row(),foodplan->historyModel->item(index.row(),0)->rowCount(),true);
+            ui->comboBox_weekCount->setEnabled(false);
+            ui->treeView_foodhistory->expand(index);
+        }
+    }
+    else
+    {
+        dialogResult = QDialog::Accepted;
     }
 }
 

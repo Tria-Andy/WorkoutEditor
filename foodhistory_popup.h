@@ -8,7 +8,7 @@ namespace Ui {
 class foodhistory_popup;
 }
 
-class foodhistory_popup : public QDialog
+class foodhistory_popup : public QDialog, public calculation
 {
     Q_OBJECT
 
@@ -19,16 +19,15 @@ public:
 private slots:
     void on_toolButton_close_clicked();
     void on_comboBox_weekCount_currentIndexChanged(int index);
-
     void on_treeView_foodhistory_clicked(const QModelIndex &index);
-
     void on_toolButton_reset_clicked();
 
 private:
     Ui::foodhistory_popup *ui;
     foodplanner *foodplan;
     QVector<double> weekList,metaRate,calConversion,calSport,calFood,calDiff,weight;
-    int weekCount;
+    int weekCount,dialogResult;
+    double athleteWeight;
     QStringList weekLabels;
 
     void set_plotValues(int,int,bool);

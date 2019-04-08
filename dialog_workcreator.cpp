@@ -1455,14 +1455,7 @@ void Dialog_workCreator::on_lineEdit_workoutname_textChanged(const QString &valu
 
 void Dialog_workCreator::on_toolButton_close_clicked()
 {
-    if(worksched->get_isUpdated())
-    {
-        accept();
-    }
-    else
-    {
-        reject();
-    }
+    done(worksched->get_isUpdated());
 }
 
 void Dialog_workCreator::set_workoutModel(QDate cDate)
