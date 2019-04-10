@@ -183,7 +183,6 @@ void settings::loadSettings()
         mysettings->beginGroup("Filepath");
             gcInfo.insert("schedule",mysettings->value("schedule").toString());
             gcInfo.insert("workouts",mysettings->value("workouts").toString());
-            gcInfo.insert("contests",mysettings->value("contests").toString());
             gcInfo.insert("saisons",mysettings->value("saisons").toString());
             gcInfo.insert("foodplanner",mysettings->value("foodplanner").toString());
             gcInfo.insert("maps",mysettings->value("maps").toString());
