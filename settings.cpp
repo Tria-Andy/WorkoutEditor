@@ -81,7 +81,7 @@ QStringList settings::triaDistance;
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
 
-enum {LOADED,GCERROR,VALUES};
+enum {LOADED,INITERROR,GCERROR,VALERROR};
 enum {SPORT,LEVEL,PHASE,CYCLE,WCODE,JFILE,EDITOR};
 enum {SPORTUSE};
 
@@ -491,7 +491,7 @@ int settings::loadSettings()
         }
         else
         {
-            return VALUES;
+            return VALERROR;
         }
 
         QDesktopWidget desk;
@@ -512,6 +512,10 @@ int settings::loadSettings()
             fontMap.insert("fontSmall",10);
         }
         delete mysettings; 
+    }
+    else
+    {
+        return INITERROR;
     }
     return LOADED;
 }

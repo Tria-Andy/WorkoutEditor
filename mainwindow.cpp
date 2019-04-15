@@ -228,20 +228,22 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     else
     {
+
         if(userSetup == 1)
         {
-            QMessageBox::warning(this,"GoldenCheetah Error","Not able to load GC Config. Check GCPath (GC Home Directory) in WorkoutEditor.ini",QMessageBox::Ok);
+            QMessageBox::warning(this,"Init Error","Not able to load WorkoutEditor.ini. Check WorkoutEditor.ini location. Has to be in WorkoutEditor Install Directory!",QMessageBox::Ok);
         }
         if(userSetup == 2)
         {
-            QMessageBox::warning(this,"Setting Error","Settings not loaded. Check WorkoutEditor_values.ini location!",QMessageBox::Ok);
+            QMessageBox::warning(this,"GoldenCheetah Error","Not able to load GC Config. Check GCPath (GC Home Directory) in WorkoutEditor.ini!",QMessageBox::Ok);
         }
-
-
+        if(userSetup == 3)
+        {
+            QMessageBox::warning(this,"User Setting Error","User Settings not loaded. Check WorkoutEditor_values.ini location!",QMessageBox::Ok);
+        }
     }
 }
 
-enum {LOADED,GCERROR,VALUES};
 enum {PLANER,EDITOR,FOOD};
 
 MainWindow::~MainWindow()
