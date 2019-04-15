@@ -27,204 +27,221 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     //Settings
-    settings::loadSettings();
-    userSetup = true;
-    sportCounter = settings::get_listValues("Sport").count();
-    sportUse = settings::get_listValues("Sportuse").count();
-    weekRange = settings::get_fontValue("weekRange");
-    ui->lineEdit_athlete->setText(gcValues->value("athlete"));
+    userSetup = settings::loadSettings();
 
-    //Planning Mode
-    graphLoaded = false;
-    workSchedule = new schedule();
-
-    schedMode << "Week" << "Year";    
-    selectedDate = QDate::currentDate();
-    firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
-    foodPlan = new foodplanner(workSchedule,firstdayofweek);
-    weeknumber = this->calc_weekID(selectedDate);
-    weekpos = weekCounter = 0;;
-    weekDays = 7;
-    work_sum.resize(sportCounter);
-    dur_sum.resize(sportCounter);
-    dist_sum.resize(sportCounter);
-    stress_sum.resize(sportCounter);
-    isWeekMode = true;
-    buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
-
-    ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
-    planerIcon.addFile(":/images/icons/DateTime.png");
-    editorIcon.addFile(":/images/icons/Editor.png");
-    foodIcon.addFile(":/images/icons/Food.png");
-
-    modules = new QComboBox(this);
-    modules->addItem(planerIcon,"Planner");
-    modules->addItem(editorIcon,"Editor");
-    modules->addItem(foodIcon,"Food");
-    modules->setToolTip("Modules");
-
-    planerMode = new QLabel(this);
-    planerMode->setText("Planer Mode:");
-    planMode = new QToolButton(this);
-    planMode->setCheckable(true);
-    planMode->setToolTip("Change Planer Mode");
-    planMode->setMinimumHeight(25);
-    planMode->setMinimumWidth(75);
-    planMode->setText(schedMode.at(0));
-    menuSpacer = new QWidget(this);
-    menuSpacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-    ui->mainToolBar->addWidget(modules);
-    ui->mainToolBar->addWidget(menuSpacer);
-    ui->mainToolBar->addWidget(planerMode);
-    ui->mainToolBar->addWidget(planMode);
-    ui->calendarWidget->setVisible(true);
-    ui->frame_YearAvg->setVisible(false);
-    ui->toolButton_weekCurrent->setEnabled(false);
-    ui->toolButton_weekMinus->setEnabled(false);
-    calendarModel = new QStandardItemModel(this);
-    sumModel = new QStandardItemModel(0,1,this);
-    avgModel = new QStandardItemModel(this);
-    scheduleProxy = new QSortFilterProxyModel(this);
-    scheduleProxy->setSourceModel(workSchedule->workout_schedule);
-    metaProxy = new QSortFilterProxyModel(this);
-    metaProxy->setSourceModel(workSchedule->week_meta);
-    metaProxyFilter = new QSortFilterProxyModel(this);
-    metaProxyFilter->setSourceModel(metaProxy);
-    contentProxy = new QSortFilterProxyModel(this);
-    contentProxy->setSourceModel(workSchedule->week_content);
-    this->set_phaseButtons();
-    ui->frame_phases->setVisible(false);
-    cal_header << "Week";
-    for(int d = 1; d < 8; ++d)
+    if(userSetup == 0)
     {
-        cal_header << QDate::longDayName(d);
+        sportCounter = settings::get_listValues("Sport").count();
+        sportUse = settings::get_listValues("Sportuse").count();
+        weekRange = settings::get_fontValue("weekRange");
+        ui->lineEdit_athlete->setText(gcValues->value("athlete"));
+
+        //Planning Mode
+        graphLoaded = false;
+        workSchedule = new schedule();
+
+        schedMode << "Week" << "Year";
+        selectedDate = QDate::currentDate();
+        firstdayofweek = selectedDate.addDays(1 - selectedDate.dayOfWeek());
+        foodPlan = new foodplanner(workSchedule,firstdayofweek);
+        weeknumber = this->calc_weekID(selectedDate);
+        weekpos = weekCounter = 0;;
+        weekDays = 7;
+        work_sum.resize(sportCounter);
+        dur_sum.resize(sportCounter);
+        dist_sum.resize(sportCounter);
+        stress_sum.resize(sportCounter);
+        isWeekMode = true;
+        buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
+
+        ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
+        planerIcon.addFile(":/images/icons/DateTime.png");
+        editorIcon.addFile(":/images/icons/Editor.png");
+        foodIcon.addFile(":/images/icons/Food.png");
+
+        modules = new QComboBox(this);
+        modules->addItem(planerIcon,"Planner");
+        modules->addItem(editorIcon,"Editor");
+        modules->addItem(foodIcon,"Food");
+        modules->setToolTip("Modules");
+
+        planerMode = new QLabel(this);
+        planerMode->setText("Planer Mode:");
+        planMode = new QToolButton(this);
+        planMode->setCheckable(true);
+        planMode->setToolTip("Change Planer Mode");
+        planMode->setMinimumHeight(25);
+        planMode->setMinimumWidth(75);
+        planMode->setText(schedMode.at(0));
+        menuSpacer = new QWidget(this);
+        menuSpacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+        ui->mainToolBar->addWidget(modules);
+        ui->mainToolBar->addWidget(menuSpacer);
+        ui->mainToolBar->addWidget(planerMode);
+        ui->mainToolBar->addWidget(planMode);
+        ui->calendarWidget->setVisible(true);
+        ui->frame_YearAvg->setVisible(false);
+        ui->toolButton_weekCurrent->setEnabled(false);
+        ui->toolButton_weekMinus->setEnabled(false);
+        calendarModel = new QStandardItemModel(this);
+        sumModel = new QStandardItemModel(0,1,this);
+        avgModel = new QStandardItemModel(this);
+        scheduleProxy = new QSortFilterProxyModel(this);
+        scheduleProxy->setSourceModel(workSchedule->workout_schedule);
+        metaProxy = new QSortFilterProxyModel(this);
+        metaProxy->setSourceModel(workSchedule->week_meta);
+        metaProxyFilter = new QSortFilterProxyModel(this);
+        metaProxyFilter->setSourceModel(metaProxy);
+        contentProxy = new QSortFilterProxyModel(this);
+        contentProxy->setSourceModel(workSchedule->week_content);
+        this->set_phaseButtons();
+        ui->frame_phases->setVisible(false);
+        cal_header << "Week";
+        for(int d = 1; d < 8; ++d)
+        {
+            cal_header << QDate::longDayName(d);
+        }
+        avgHeader << "Sport" << "Workouts" << "Duration" << "Distance";
+
+        this->refresh_saisonInfo();
+
+        //Editor Mode
+        avgCounter = 0;
+        fileModel = new QStandardItemModel(this);
+        actLoaded = false;
+
+        connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
+        connect(planMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_planMode(bool)));
+        connect(phaseGroup,SIGNAL(buttonClicked(int)),this,SLOT(set_phaseFilter(int)));
+        connect(modules,SIGNAL(currentIndexChanged(int)),this,SLOT(set_module(int)));
+        connect(workSchedule->workout_schedule,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
+        connect(workSchedule->workout_schedule,SIGNAL(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)),this,SLOT(refresh_model()));
+        connect(workSchedule->workout_schedule,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_model()));
+        connect(workSchedule->workout_schedule,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SLOT(refresh_model()));
+        connect(workSchedule->week_meta,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
+        connect(workSchedule->week_content,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
+
+        //UI
+        ui->stackedWidget->setGeometry(5,5,0,0);
+        this->summery_view();
+        ui->tableView_cal->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        ui->tableView_cal->setModel(calendarModel);
+        ui->tableView_cal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_cal->horizontalHeader()->setSectionsClickable(false);
+        ui->tableView_cal->verticalHeader()->hide();
+        ui->tableView_yearAvg->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        ui->tableView_yearAvg->setModel(avgModel);
+        ui->tableView_yearAvg->setItemDelegate(&avgweek_del);
+        ui->tableView_yearAvg->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_yearAvg->horizontalHeader()->setSectionsClickable(false);
+        ui->tableView_yearAvg->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_yearAvg->verticalHeader()->hide();
+        ui->toolButton_addSelect->setEnabled(false);
+        ui->toolButton_clearSelect->setEnabled(false);
+        ui->toolButton_clearContent->setEnabled(false);
+        ui->toolButton_sync->setEnabled(false);
+        ui->horizontalSlider_factor->setEnabled(false);
+
+        ui->tableView_weekSum->setModel(foodPlan->weekSumModel);
+        ui->tableView_weekSum->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_weekSum->horizontalHeader()->hide();
+        ui->tableView_weekSum->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_weekSum->setItemDelegate(&foodSumWeek_del);
+
+        ui->tableWidget_weekPlan->setRowCount(foodPlan->mealsHeader.count());
+        ui->tableWidget_weekPlan->setColumnCount(foodPlan->dayHeader.count());
+        ui->tableWidget_weekPlan->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableWidget_weekPlan->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableWidget_weekPlan->setVerticalHeaderLabels(foodPlan->mealsHeader);
+        ui->tableWidget_weekPlan->setHorizontalHeaderLabels(foodPlan->dayHeader);
+        ui->tableWidget_weekPlan->verticalHeader()->setFixedWidth(110);
+        ui->tableWidget_weekPlan->setItemDelegate(&food_del);
+        ui->tableWidget_weekPlan->viewport()->setMouseTracking(true);
+        ui->tableWidget_weekPlan->installEventFilter(this);
+        ui->tableWidget_weekPlan->viewport()->installEventFilter(this);
+        this->fill_weekTable(this->calc_weekID(firstdayofweek),false);
+
+        ui->tableView_daySummery->setModel(foodPlan->daySumModel);
+        ui->tableView_daySummery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_daySummery->horizontalHeader()->hide();
+        ui->tableView_daySummery->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_daySummery->verticalHeader()->setFixedWidth(110);
+        ui->tableView_daySummery->setItemDelegate(&foodSum_del);
+        ui->treeView_meals->setModel(foodPlan->mealModel);
+        ui->treeView_meals->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+        ui->treeView_meals->setSortingEnabled(true);
+        ui->treeView_meals->sortByColumn(0,Qt::AscendingOrder);
+        //ui->treeView_meals->setItemDelegate(&mousehover_del);
+        //ui->treeView_meals->setStyleSheet(viewStyle);
+        ui->treeView_meals->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        mealSelection = ui->treeView_meals->selectionModel();
+        connect(mealSelection,SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(setSelectedMeal(QModelIndex)));
+        connect(foodPlan->mealModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(mealSave(QStandardItem*)));
+        connect(ui->tableWidget_weekPlan->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodMealDay(int)));
+        connect(ui->tableWidget_weekPlan->verticalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodMealWeek(int)));
+
+        ui->listWidget_weekPlans->addItems(foodPlan->planList);
+        ui->comboBox_weightmode->blockSignals(true);
+        ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
+        ui->comboBox_weightmode->setEnabled(false);
+        ui->comboBox_weightmode->blockSignals(false);
+
+        //ui->listWidget_weekPlans->setStyleSheet(viewStyle);
+        //ui->listWidget_weekPlans->setItemDelegate(&mousehover_del);
+        //ui->listWidget_MenuEdit->setStyleSheet(viewStyle);
+        //ui->listWidget_MenuEdit->setItemDelegate(&mousehover_del);
+        ui->spinBox_calories->setVisible(false);
+
+        ui->tableView_forecast->setModel(foodPlan->estModel);
+        ui->tableView_forecast->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_forecast->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView_forecast->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        ui->tableView_forecast->horizontalHeader()->hide();
+
+        //this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy")+" - "+ui->comboBox_weightmode->currentText());
+        this->set_foodWeek(ui->listWidget_weekPlans->item(0)->text());
+        ui->toolButton_saveMeals->setEnabled(false);
+        ui->toolButton_deleteMenu->setEnabled(false);
+        ui->toolButton_menuCopy->setEnabled(false);
+        ui->toolButton_menuPaste->setEnabled(false);
+        ui->frame_dayShow->setVisible(false);
+        ui->tableWidget_daySummery->setColumnCount(4);
+        ui->tableWidget_daySummery->setItemDelegate(&foodDaySum_del);
+        ui->tableWidget_daySummery->setRowCount(foodPlan->mealsHeader.count()+1);
+        ui->tableWidget_daySummery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableWidget_daySummery->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->pushButton_lineCopy->setIcon(QIcon(":/images/icons/Copy.png"));
+        ui->pushButton_lineCopy->setEnabled(false);
+        ui->toolButton_linePaste->setEnabled(false);
+        foodcopyMode = lineSelected = dayLineSelected = false;
+        this->reset_menuEdit();
+        selModule = 0;
+
+        this->set_speedgraph();
+        this->resetPlot();
+        this->read_activityFiles();
+
+        ui->actionSave->setEnabled(false);
+        this->set_menuItems(0);
+        this->set_phaseFilter(1);
+        this->loadUISettings();
     }
-    avgHeader << "Sport" << "Workouts" << "Duration" << "Distance";
+    else
+    {
+        if(userSetup == 1)
+        {
+            QMessageBox::warning(this,"GoldenCheetah Error","Not able to load GC Config. Check GCPath (GC Home Directory) in WorkoutEditor.ini",QMessageBox::Ok);
+        }
+        if(userSetup == 2)
+        {
+            QMessageBox::warning(this,"Setting Error","Settings not loaded. Check WorkoutEditor_values.ini location!",QMessageBox::Ok);
+        }
 
-    this->refresh_saisonInfo();
 
-    //Editor Mode
-    avgCounter = 0;
-    fileModel = new QStandardItemModel(this);
-    actLoaded = false;
-
-    connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
-    connect(planMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_planMode(bool)));
-    connect(phaseGroup,SIGNAL(buttonClicked(int)),this,SLOT(set_phaseFilter(int)));
-    connect(modules,SIGNAL(currentIndexChanged(int)),this,SLOT(set_module(int)));
-    connect(workSchedule->workout_schedule,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
-    connect(workSchedule->workout_schedule,SIGNAL(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)),this,SLOT(refresh_model()));
-    connect(workSchedule->workout_schedule,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_model()));
-    connect(workSchedule->workout_schedule,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SLOT(refresh_model()));
-    connect(workSchedule->week_meta,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
-    connect(workSchedule->week_content,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(refresh_model()));
-
-    //UI
-    ui->stackedWidget->setGeometry(5,5,0,0);
-    this->summery_view();
-    ui->tableView_cal->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableView_cal->setModel(calendarModel);
-    ui->tableView_cal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_cal->horizontalHeader()->setSectionsClickable(false);
-    ui->tableView_cal->verticalHeader()->hide();
-    ui->tableView_yearAvg->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableView_yearAvg->setModel(avgModel);
-    ui->tableView_yearAvg->setItemDelegate(&avgweek_del);
-    ui->tableView_yearAvg->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_yearAvg->horizontalHeader()->setSectionsClickable(false);
-    ui->tableView_yearAvg->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_yearAvg->verticalHeader()->hide();
-    ui->toolButton_addSelect->setEnabled(false);
-    ui->toolButton_clearSelect->setEnabled(false);
-    ui->toolButton_clearContent->setEnabled(false);
-    ui->toolButton_sync->setEnabled(false);
-    ui->horizontalSlider_factor->setEnabled(false);
-
-    ui->tableView_weekSum->setModel(foodPlan->weekSumModel);
-    ui->tableView_weekSum->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_weekSum->horizontalHeader()->hide();
-    ui->tableView_weekSum->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_weekSum->setItemDelegate(&foodSumWeek_del);
-
-    ui->tableWidget_weekPlan->setRowCount(foodPlan->mealsHeader.count());
-    ui->tableWidget_weekPlan->setColumnCount(foodPlan->dayHeader.count());
-    ui->tableWidget_weekPlan->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableWidget_weekPlan->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableWidget_weekPlan->setVerticalHeaderLabels(foodPlan->mealsHeader);
-    ui->tableWidget_weekPlan->setHorizontalHeaderLabels(foodPlan->dayHeader);
-    ui->tableWidget_weekPlan->verticalHeader()->setFixedWidth(110);
-    ui->tableWidget_weekPlan->setItemDelegate(&food_del);
-    ui->tableWidget_weekPlan->viewport()->setMouseTracking(true);
-    ui->tableWidget_weekPlan->installEventFilter(this);
-    ui->tableWidget_weekPlan->viewport()->installEventFilter(this);
-    this->fill_weekTable(this->calc_weekID(firstdayofweek),false);
-
-    ui->tableView_daySummery->setModel(foodPlan->daySumModel);
-    ui->tableView_daySummery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_daySummery->horizontalHeader()->hide();
-    ui->tableView_daySummery->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_daySummery->verticalHeader()->setFixedWidth(110);
-    ui->tableView_daySummery->setItemDelegate(&foodSum_del);
-    ui->treeView_meals->setModel(foodPlan->mealModel);
-    ui->treeView_meals->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->treeView_meals->setSortingEnabled(true);
-    ui->treeView_meals->sortByColumn(0,Qt::AscendingOrder);
-    //ui->treeView_meals->setItemDelegate(&mousehover_del);
-    //ui->treeView_meals->setStyleSheet(viewStyle);
-    ui->treeView_meals->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mealSelection = ui->treeView_meals->selectionModel();
-    connect(mealSelection,SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(setSelectedMeal(QModelIndex)));
-    connect(foodPlan->mealModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(mealSave(QStandardItem*)));
-    connect(ui->tableWidget_weekPlan->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodMealDay(int)));
-    connect(ui->tableWidget_weekPlan->verticalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodMealWeek(int)));
-
-    ui->listWidget_weekPlans->addItems(foodPlan->planList);
-    ui->comboBox_weightmode->blockSignals(true);
-    ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
-    ui->comboBox_weightmode->setEnabled(false);
-    ui->comboBox_weightmode->blockSignals(false);
-
-    //ui->listWidget_weekPlans->setStyleSheet(viewStyle);
-    //ui->listWidget_weekPlans->setItemDelegate(&mousehover_del);
-    //ui->listWidget_MenuEdit->setStyleSheet(viewStyle);
-    //ui->listWidget_MenuEdit->setItemDelegate(&mousehover_del);
-    ui->spinBox_calories->setVisible(false);
-
-    ui->tableView_forecast->setModel(foodPlan->estModel);
-    ui->tableView_forecast->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_forecast->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_forecast->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableView_forecast->horizontalHeader()->hide();
-
-    //this->set_foodWeek(foodPlan->set_weekID(firstdayofweek)+" - "+firstdayofweek.toString("dd.MM.yyyy")+" - "+ui->comboBox_weightmode->currentText());
-    this->set_foodWeek(ui->listWidget_weekPlans->item(0)->text());
-    ui->toolButton_saveMeals->setEnabled(false);
-    ui->toolButton_deleteMenu->setEnabled(false);
-    ui->toolButton_menuCopy->setEnabled(false);
-    ui->toolButton_menuPaste->setEnabled(false);
-    ui->frame_dayShow->setVisible(false);
-    ui->tableWidget_daySummery->setColumnCount(4);
-    ui->tableWidget_daySummery->setItemDelegate(&foodDaySum_del);
-    ui->tableWidget_daySummery->setRowCount(foodPlan->mealsHeader.count()+1);
-    ui->tableWidget_daySummery->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableWidget_daySummery->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->pushButton_lineCopy->setIcon(QIcon(":/images/icons/Copy.png"));
-    ui->pushButton_lineCopy->setEnabled(false);
-    ui->toolButton_linePaste->setEnabled(false);
-    foodcopyMode = lineSelected = dayLineSelected = false;
-    this->reset_menuEdit();
-    selModule = 0;
-
-    this->set_speedgraph();
-    this->resetPlot();
-    this->read_activityFiles();
-
-    ui->actionSave->setEnabled(false);
-    this->set_menuItems(0);
-    this->set_phaseFilter(1);
-    this->loadUISettings();
+    }
 }
 
+enum {LOADED,GCERROR,VALUES};
 enum {PLANER,EDITOR,FOOD};
 
 MainWindow::~MainWindow()
@@ -240,7 +257,7 @@ void MainWindow::loadUISettings()
 
 void MainWindow::freeMem()
 {
-    if(userSetup)
+    if(userSetup == 0)
     {
         workSchedule->freeMem();
         calendarModel->clear();
@@ -1963,8 +1980,8 @@ void MainWindow::on_actionExit_triggered()
     }
     else
     {
-        this->freeMem();
-        close();
+        //close();
+        QApplication::exit(EXIT_FAILURE);
     }
 }
 

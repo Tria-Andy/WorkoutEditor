@@ -62,7 +62,7 @@ protected:
 public:
     settings();
     static bool settingsUpdated;
-    static void loadSettings();
+    static int loadSettings();
     static QString isAlt,isSwim,isBike,isRun,isTria,isStrength,isOther;
 
     //QMap/QHash Getter

@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QDesktopWidget>
+#include <QMessageBox>
 
 settings::settings()
 {
@@ -80,6 +81,7 @@ QStringList settings::triaDistance;
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
 
+enum {LOADED,GCERROR,VALUES};
 enum {SPORT,LEVEL,PHASE,CYCLE,WCODE,JFILE,EDITOR};
 enum {SPORTUSE};
 
@@ -142,7 +144,7 @@ QColor settings::get_colorRGB(QString colorValue,bool trans)
     return color;
 }
 
-void settings::loadSettings()
+int settings::loadSettings()
 {
     settingsUpdated = false;
 
@@ -173,6 +175,7 @@ void settings::loadSettings()
             QString gc_dir = gc_reg.value(gcInfo.value("dir")).toString();
             QString gcPath = gc_dir + QDir::separator() + gcInfo.value("athlete") + QDir::separator() + gcInfo.value("folder");
             gcInfo.insert("gcpath",QDir::toNativeSeparators(gcPath));
+            return GCERROR;
         }
         else
         {
@@ -192,36 +195,45 @@ void settings::loadSettings()
 
 
         QFile file(gcInfo.value("confpath") + QDir::separator() + "bodymeasures.json");
-        if (!file.open(QFile::ReadOnly | QFile::Text)) return;
-        QString jsonFile = file.readAll();
-        QJsonDocument d = QJsonDocument::fromJson(jsonFile.toUtf8());
-        QJsonObject jsonobj = d.object();
-        QJsonArray bodyWeight = jsonobj["measures"].toArray();
-        file.close();
 
-        athleteMap.insert("weight",0.0);
-
-        QJsonObject weightInfo;
-        double currWeight = 0.0;
-        double currBone = 0.0;
-        double currMuscle = 0.0;
-        int weightDate = 0;
-
-        for(int i = 0; i < bodyWeight.count(); ++i)
+        if (!file.open(QFile::ReadOnly | QFile::Text))
         {
-            weightInfo = bodyWeight.at(i).toObject();
-            currWeight = weightInfo.value("weightkg").toDouble();
-            currBone = weightInfo.value("boneskg").toDouble();
-            currMuscle = weightInfo.value("musclekg").toDouble();
-            weightMap.insert(weightInfo.value("when").toInt(),currWeight);
+            athleteMap.insert("weight",80.0);
+            athleteMap.insert("boneskg",30.0);
+            athleteMap.insert("musclekg",40.0);
+        }
+        else
+        {
+            QString jsonFile = file.readAll();
+            QJsonDocument d = QJsonDocument::fromJson(jsonFile.toUtf8());
+            QJsonObject jsonobj = d.object();
+            QJsonArray bodyWeight = jsonobj["measures"].toArray();
+            file.close();
 
-            if(weightMap.lastKey() > weightDate)
+            athleteMap.insert("weight",0.0);
+
+            QJsonObject weightInfo;
+            double currWeight = 0.0;
+            double currBone = 0.0;
+            double currMuscle = 0.0;
+            int weightDate = 0;
+
+            for(int i = 0; i < bodyWeight.count(); ++i)
             {
-                athleteMap.insert("weight",currWeight);
-                athleteMap.insert("boneskg",currBone);
-                athleteMap.insert("musclekg",currMuscle);
+                weightInfo = bodyWeight.at(i).toObject();
+                currWeight = weightInfo.value("weightkg").toDouble();
+                currBone = weightInfo.value("boneskg").toDouble();
+                currMuscle = weightInfo.value("musclekg").toDouble();
+                weightMap.insert(weightInfo.value("when").toInt(),currWeight);
+
+                if(weightMap.lastKey() > weightDate)
+                {
+                    athleteMap.insert("weight",currWeight);
+                    athleteMap.insert("boneskg",currBone);
+                    athleteMap.insert("musclekg",currMuscle);
+                }
+                weightDate = weightMap.lastKey();
             }
-            weightDate = weightMap.lastKey();
         }
 
         //Sport Value Settings
@@ -234,242 +246,252 @@ void settings::loadSettings()
             valueFilePath = gcInfo.value("workouts") + QDir::separator() + valueFile;
         }
 
-        QSettings *myPref = new QSettings(gcInfo.value("confpath") + QDir::separator() + "athlete-preferences.ini",QSettings::IniFormat);
-        athleteMap.insert("yob",myPref->value("dob").toDate().year());
-        athleteMap.insert("height",myPref->value("height").toDouble());
-        athleteMap.insert("sex",myPref->value("sex").toDouble());
-        athleteMap.insert("riderfrg",(athleteMap.value("weight")+9.0)*9.81*0.45);
-        athleteMap.insert("ridercw",0.2279+(athleteMap.value("weight")/(athleteMap.value("height")*750)));
-        delete myPref;
-
-        QStringList settingList,tempList;
-        QString settingString;
-
-        QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
-
-        myvalues->beginGroup("Stressterm");
-            ltsMap.insert("ltsdays",myvalues->value("ltsdays").toDouble());
-            ltsMap.insert("stsdays",myvalues->value("stsdays").toDouble());
-            ltsMap.insert("lastlts",myvalues->value("lastlts").toDouble());
-            ltsMap.insert("laststs",myvalues->value("laststs").toDouble());
-        myvalues->endGroup();
-
-        myvalues->beginGroup("JsonFile");
-            settingList << myvalues->value("actinfo").toString().split(splitter);
-            listMap.insert("JsonFile",settingList);
-            settingString = myvalues->value("intInfo").toString();
-            fill_mapList(&intList,&settingString);
-            settingString = myvalues->value("sampinfo").toString();
-            fill_mapList(&sampList,&settingString);
-            settingList.clear();
-            settingList << myvalues->value("xdatainfo").toString().split(splitter);
-            jsonTags.insert("xdata",settingList);
-            settingList.clear();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Keylist");
-            keyList << myvalues->value("keys").toString().split(splitter);
-            extkeyList << myvalues->value("extkeys").toString().split(splitter);
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Threshold");
-            thresholdMap.insert("swimpower",myvalues->value("swimpower").toDouble());
-            thresholdMap.insert("bikepower",myvalues->value("bikepower").toDouble());
-            thresholdMap.insert("runpower",myvalues->value("runpower").toDouble());
-            thresholdMap.insert("runcp",myvalues->value("runcp").toDouble());
-            thresholdMap.insert("stgpower",myvalues->value("stgpower").toDouble());
-            thresholdMap.insert("swimfactor",myvalues->value("swimfactor").toDouble());
-            thresholdMap.insert("bikefactor",myvalues->value("bikefactor").toDouble());
-            thresholdMap.insert("wattfactor",myvalues->value("wattfactor").toDouble());
-            thresholdMap.insert("runfactor",myvalues->value("runfactor").toDouble());
-            thresholdMap.insert("swimpace",myvalues->value("swimpace").toDouble());
-            thresholdMap.insert("bikepace",myvalues->value("bikepace").toDouble());
-            thresholdMap.insert("bikespeed",myvalues->value("bikespeed").toDouble());
-            thresholdMap.insert("swimlimit",myvalues->value("swimlimit").toDouble());
-            thresholdMap.insert("bikelimit",myvalues->value("bikelimit").toDouble());
-            thresholdMap.insert("runlimit",myvalues->value("runlimit").toDouble());
-            thresholdMap.insert("runpace",myvalues->value("runpace").toDouble());
-            thresholdMap.insert("swimpm",myvalues->value("swimpm").toDouble());
-            thresholdMap.insert("bikepm",myvalues->value("bikepm").toDouble());
-            thresholdMap.insert("runpm",myvalues->value("runpm").toDouble());
-            thresholdMap.insert("hfthres",myvalues->value("hfthres").toDouble());
-            thresholdMap.insert("hfmax",myvalues->value("hfmax").toDouble());
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Level");
-            settingList = myvalues->value("levels").toString().split(splitter);
-            listMap.insert("Level",settingList);
-            settingString = myvalues->value("color").toString();
-            settings::fill_mapColor(&settingList,&settingString,true);
-            settingList.clear();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Range");
-            settingString = myvalues->value("swim").toString();
-            settings::fill_mapRange(&swimRange,&settingString);
-            settingString = myvalues->value("bike").toString();
-            settings::fill_mapRange(&bikeRange,&settingString);
-            settingString = myvalues->value("run").toString();
-            settings::fill_mapRange(&runRange,&settingString);
-            settingString = myvalues->value("triathlon").toString();
-            settings::fill_mapRange(&triRange,&settingString);
-            settingString = myvalues->value("strength").toString();
-            settings::fill_mapRange(&stgRange,&settingString);
-            settingString = myvalues->value("alternative").toString();
-            settings::fill_mapRange(&altRange,&settingString);
-            settingString = myvalues->value("hf").toString();
-            settings::fill_mapRange(&hfRange,&settingString);
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Phase");
-            settingList = myvalues->value("phases").toString().split(splitter);
-            listMap.insert("Phase",settingList);
-            settingString = myvalues->value("color").toString();
-            settings::fill_mapColor(&settingList,&settingString,false);
-            settingList.clear();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Cycle");
-            settingList = myvalues->value("cycles").toString().split(splitter);
-            listMap.insert("Cycle",settingList);
-            settingList.clear();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("WorkoutCode");
-            settingList = myvalues->value("codes").toString().split(splitter);
-            listMap.insert("WorkoutCode",settingList);
-            settingList.clear();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("IntEditor");
-            settingList = myvalues->value("parts").toString().split(splitter);
-            listMap.insert("IntEditor",settingList);
-            settingList.clear();
-            settingList = myvalues->value("swimstyle").toString().split(splitter);
-            listMap.insert("SwimStyle",settingList);
-            settingList.clear();
-            settingList = myvalues->value("swimMET").toString().split(splitter);
-            listMap.insert("SwimMET",settingList);    
-            settingList.clear();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Foodplanner");
-            settingList = myvalues->value("mode").toString().split(splitter);
-            listMap.insert("Mode",settingList);
-            settingList.clear();
-            settingList = myvalues->value("modepercent").toString().split(splitter);
-            tempVector.resize(4);
-            for(int i = 0; i < listMap.value("Mode").count(); i++)
-            {
-                settingString = settingList.at(i);
-                tempList = settingString.split("|");
-                for(int x = 0; x < tempList.count();++x)
-                {
-                    settingString = tempList.at(x);
-                    tempVector[x] = settingString.toDouble();
-
-                }
-                doubleVector.insert(listMap.value("Mode").at(i),tempVector);
-            }
-            settingList.clear();
-            settingList = myvalues->value("modeborder").toString().split(splitter);
-            settingString = myvalues->value("color").toString();
-            settings::fill_mapColor(&settingList,&settingString,false);
-            settingList.clear();
-            settingList = myvalues->value("meals").toString().split(splitter);
-            listMap.insert("Meals",settingList);
-            settingList.clear();
-            settingList = myvalues->value("mealdefault").toString().split(splitter);
-            tempVector.resize(settingList.count());
-            for(int i = 0; i < settingList.count();++i)
-            {
-                settingString = settingList.at(i);
-                tempVector[i] = settingString.toDouble();
-            }
-            settingList.clear();
-            doubleVector.insert("Mealdefault",tempVector);
-            tempVector.clear();
-            settingList = myvalues->value("macros").toString().split(splitter);
-            tempVector.resize(settingList.count());
-            for(int i = 0; i < settingList.count();++i)
-            {
-                settingString = settingList.at(i);
-                tempVector[i] = settingString.toDouble();
-            }
-            settingList.clear();
-            doubleVector.insert("Macros",tempVector);
-            tempVector.clear();
-
-            settingList = myvalues->value("macroheader").toString().split(splitter);
-            listMap.insert("MacroHeader",settingList);
-            settingString = myvalues->value("macrocolor").toString();
-            settings::fill_mapColor(&settingList,&settingString,true);
-            settingList.clear();
-
-            settingList = myvalues->value("dish").toString().split(splitter);
-            listMap.insert("Dish",settingList);
-            settingList.clear();
-            doubleMap.insert("AddMoving",myvalues->value("addmoving").toDouble());
-            doubleMap.insert("DayRoutine",myvalues->value("dayroutine").toDouble());
-            doubleMap.insert("DayRoutineCal",myvalues->value("dayroutinecal").toDouble());
-            doubleMap.insert("DayFiber",myvalues->value("fiber").toDouble());
-            doubleMap.insert("DaySugar",myvalues->value("sugar").toDouble());
-            doubleMap.insert("Macrorange",myvalues->value("macrorange").toDouble());
-            athleteMap.insert("BodyFatCal",myvalues->value("fatcal").toDouble());
-            settingList = myvalues->value("moveday").toString().split(splitter);
-            tempVector.resize(7);
-            for(int i = 0; i < settingList.count();++i)
-            {
-                settingString = settingList.at(i);
-                tempVector[i] = settingString.toDouble();
-            }
-            doubleVector.insert("Moveday",tempVector);
-            settingList.clear();
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Misc");
-            settingList << myvalues->value("sum").toString();
-            settingList << myvalues->value("empty").toString();
-            settingList << myvalues->value("breakname").toString();
-            settingList << myvalues->value("filecount").toString();
-            settingList << myvalues->value("workfactor").toString();
-            listMap.insert("Misc",settingList);
-            generalMap.insert("sum", settingList.at(0));
-            colorMap.insert(settingList.at(0),settings::get_colorRGB(myvalues->value("sumcolor").toString(),false));
-            generalMap.insert("empty", settingList.at(1));
-            colorMap.insert(settingList.at(1),settings::get_colorRGB(myvalues->value("emptycolor").toString(),false));
-            generalMap.insert("breakname",settingList.at(2));
-            colorMap.insert(settingList.at(2),settings::get_colorRGB(myvalues->value("breakcolor").toString(),false));
-            generalMap.insert("filecount",settingList.at(3));
-            generalMap.insert("workfactor",settingList.at(4));
-            settingList.clear();
-            athleteMap.insert("currpal",myvalues->value("currpal").toDouble());
-        myvalues->endGroup();
-
-        myvalues->beginGroup("Sport");            
-            triaDistance << myvalues->value("triathlon").toString().split(splitter);
-            settingList << myvalues->value("triaDist").toString().split(splitter);
-            for(int i = 0; i < settingList.count(); i++)
-            {
-                triaMap.insert(triaDistance.at(i),settingList.at(i));
-            }
-            settingList.clear();
-            settingList <<  myvalues->value("sports").toString().split(splitter);
-            listMap.insert("Sport",myvalues->value("sports").toString().split(splitter));
-            listMap.insert("Sportuse",myvalues->value("sportuse").toString().split(splitter));
-            settingString = myvalues->value("color").toString();
-            settings::fill_mapColor(&settingList,&settingString,false);
-        myvalues->endGroup();
-
-        for(int i = 0; i < settingList.count(); ++i)
+        if(QFile(valueFilePath).exists())
         {
-            if(settingList.at(i) == "Swim") isSwim = settingList.at(i);
-            else if(settingList.at(i) == "Bike") isBike = settingList.at(i);
-            else if(settingList.at(i) == "Run") isRun = settingList.at(i);
-            else if(settingList.at(i) == "Strength" || settingList.at(i) == "Power") isStrength = settingList.at(i);
-            else if(settingList.at(i) == "Alt" || settingList.at(i) == "Alternative") isAlt = settingList.at(i);
-            else if(settingList.at(i) == "Tria" || settingList.at(i) == "Triathlon") isTria = settingList.at(i);
-            else if(settingList.at(i) == "Other") isOther = settingList.at(i);
+            QSettings *myPref = new QSettings(gcInfo.value("confpath") + QDir::separator() + "athlete-preferences.ini",QSettings::IniFormat);
+            athleteMap.insert("yob",myPref->value("dob").toDate().year());
+            athleteMap.insert("height",myPref->value("height").toDouble());
+            athleteMap.insert("sex",myPref->value("sex").toDouble());
+            athleteMap.insert("riderfrg",(athleteMap.value("weight")+9.0)*9.81*0.45);
+            athleteMap.insert("ridercw",0.2279+(athleteMap.value("weight")/(athleteMap.value("height")*750)));
+            ltsMap.insert("ltsdays",myPref->value("LTSdays").toDouble());
+            ltsMap.insert("stsdays",myPref->value("STSdays").toDouble());
+            delete myPref;
+
+            QStringList settingList,tempList;
+            QString settingString;
+
+            QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
+
+            myvalues->beginGroup("Stressterm");
+                if(ltsMap.value("ltsdays") == 0.0) ltsMap.insert("ltsdays",myvalues->value("ltsdays").toDouble());
+                if(ltsMap.value("stsdays") == 0.0) ltsMap.insert("ltsdays",myvalues->value("stsdays").toDouble());
+                ltsMap.insert("lastlts",myvalues->value("lastlts").toDouble());
+                ltsMap.insert("laststs",myvalues->value("laststs").toDouble());
+            myvalues->endGroup();
+
+            myvalues->beginGroup("JsonFile");
+                settingList << myvalues->value("actinfo").toString().split(splitter);
+                listMap.insert("JsonFile",settingList);
+                settingString = myvalues->value("intInfo").toString();
+                fill_mapList(&intList,&settingString);
+                settingString = myvalues->value("sampinfo").toString();
+                fill_mapList(&sampList,&settingString);
+                settingList.clear();
+                settingList << myvalues->value("xdatainfo").toString().split(splitter);
+                jsonTags.insert("xdata",settingList);
+                settingList.clear();
+            myvalues->endGroup();
+
+            myvalues->beginGroup("Keylist");
+                keyList << myvalues->value("keys").toString().split(splitter);
+                extkeyList << myvalues->value("extkeys").toString().split(splitter);
+            myvalues->endGroup();
+
+            myvalues->beginGroup("Threshold");
+                thresholdMap.insert("swimpower",myvalues->value("swimpower").toDouble());
+                thresholdMap.insert("bikepower",myvalues->value("bikepower").toDouble());
+                thresholdMap.insert("runpower",myvalues->value("runpower").toDouble());
+                thresholdMap.insert("runcp",myvalues->value("runcp").toDouble());
+                thresholdMap.insert("stgpower",myvalues->value("stgpower").toDouble());
+                thresholdMap.insert("swimfactor",myvalues->value("swimfactor").toDouble());
+                thresholdMap.insert("bikefactor",myvalues->value("bikefactor").toDouble());
+                thresholdMap.insert("wattfactor",myvalues->value("wattfactor").toDouble());
+                thresholdMap.insert("runfactor",myvalues->value("runfactor").toDouble());
+                thresholdMap.insert("swimpace",myvalues->value("swimpace").toDouble());
+                thresholdMap.insert("bikepace",myvalues->value("bikepace").toDouble());
+                thresholdMap.insert("bikespeed",myvalues->value("bikespeed").toDouble());
+                thresholdMap.insert("swimlimit",myvalues->value("swimlimit").toDouble());
+                thresholdMap.insert("bikelimit",myvalues->value("bikelimit").toDouble());
+                thresholdMap.insert("runlimit",myvalues->value("runlimit").toDouble());
+                thresholdMap.insert("runpace",myvalues->value("runpace").toDouble());
+                thresholdMap.insert("swimpm",myvalues->value("swimpm").toDouble());
+                thresholdMap.insert("bikepm",myvalues->value("bikepm").toDouble());
+                thresholdMap.insert("runpm",myvalues->value("runpm").toDouble());
+                thresholdMap.insert("hfthres",myvalues->value("hfthres").toDouble());
+                thresholdMap.insert("hfmax",myvalues->value("hfmax").toDouble());
+            myvalues->endGroup();
+
+            myvalues->beginGroup("Level");
+                settingList = myvalues->value("levels").toString().split(splitter);
+                listMap.insert("Level",settingList);
+                settingString = myvalues->value("color").toString();
+                settings::fill_mapColor(&settingList,&settingString,true);
+                settingList.clear();
+            myvalues->endGroup();
+
+            myvalues->beginGroup("Range");
+                settingString = myvalues->value("swim").toString();
+                settings::fill_mapRange(&swimRange,&settingString);
+                settingString = myvalues->value("bike").toString();
+                settings::fill_mapRange(&bikeRange,&settingString);
+                settingString = myvalues->value("run").toString();
+                settings::fill_mapRange(&runRange,&settingString);
+                settingString = myvalues->value("triathlon").toString();
+                settings::fill_mapRange(&triRange,&settingString);
+                settingString = myvalues->value("strength").toString();
+                settings::fill_mapRange(&stgRange,&settingString);
+                settingString = myvalues->value("alternative").toString();
+                settings::fill_mapRange(&altRange,&settingString);
+                settingString = myvalues->value("hf").toString();
+                settings::fill_mapRange(&hfRange,&settingString);
+            myvalues->endGroup();
+
+            myvalues->beginGroup("Phase");
+                settingList = myvalues->value("phases").toString().split(splitter);
+                listMap.insert("Phase",settingList);
+                settingString = myvalues->value("color").toString();
+                settings::fill_mapColor(&settingList,&settingString,false);
+                settingList.clear();
+            myvalues->endGroup();
+
+            myvalues->beginGroup("Cycle");
+                settingList = myvalues->value("cycles").toString().split(splitter);
+                listMap.insert("Cycle",settingList);
+                settingList.clear();
+            myvalues->endGroup();
+
+            myvalues->beginGroup("WorkoutCode");
+                settingList = myvalues->value("codes").toString().split(splitter);
+                listMap.insert("WorkoutCode",settingList);
+                settingList.clear();
+            myvalues->endGroup();
+
+            myvalues->beginGroup("IntEditor");
+                settingList = myvalues->value("parts").toString().split(splitter);
+                listMap.insert("IntEditor",settingList);
+                settingList.clear();
+                settingList = myvalues->value("swimstyle").toString().split(splitter);
+                listMap.insert("SwimStyle",settingList);
+                settingList.clear();
+                settingList = myvalues->value("swimMET").toString().split(splitter);
+                listMap.insert("SwimMET",settingList);
+                settingList.clear();
+            myvalues->endGroup();
+
+            myvalues->beginGroup("Foodplanner");
+                settingList = myvalues->value("mode").toString().split(splitter);
+                listMap.insert("Mode",settingList);
+                settingList.clear();
+                settingList = myvalues->value("modepercent").toString().split(splitter);
+                tempVector.resize(4);
+                for(int i = 0; i < listMap.value("Mode").count(); i++)
+                {
+                    settingString = settingList.at(i);
+                    tempList = settingString.split("|");
+                    for(int x = 0; x < tempList.count();++x)
+                    {
+                        settingString = tempList.at(x);
+                        tempVector[x] = settingString.toDouble();
+
+                    }
+                    doubleVector.insert(listMap.value("Mode").at(i),tempVector);
+                }
+                settingList.clear();
+                settingList = myvalues->value("modeborder").toString().split(splitter);
+                settingString = myvalues->value("color").toString();
+                settings::fill_mapColor(&settingList,&settingString,false);
+                settingList.clear();
+                settingList = myvalues->value("meals").toString().split(splitter);
+                listMap.insert("Meals",settingList);
+                settingList.clear();
+                settingList = myvalues->value("mealdefault").toString().split(splitter);
+                tempVector.resize(settingList.count());
+                for(int i = 0; i < settingList.count();++i)
+                {
+                    settingString = settingList.at(i);
+                    tempVector[i] = settingString.toDouble();
+                }
+                settingList.clear();
+                doubleVector.insert("Mealdefault",tempVector);
+                tempVector.clear();
+                settingList = myvalues->value("macros").toString().split(splitter);
+                tempVector.resize(settingList.count());
+                for(int i = 0; i < settingList.count();++i)
+                {
+                    settingString = settingList.at(i);
+                    tempVector[i] = settingString.toDouble();
+                }
+                settingList.clear();
+                doubleVector.insert("Macros",tempVector);
+                tempVector.clear();
+
+                settingList = myvalues->value("macroheader").toString().split(splitter);
+                listMap.insert("MacroHeader",settingList);
+                settingString = myvalues->value("macrocolor").toString();
+                settings::fill_mapColor(&settingList,&settingString,true);
+                settingList.clear();
+
+                settingList = myvalues->value("dish").toString().split(splitter);
+                listMap.insert("Dish",settingList);
+                settingList.clear();
+                doubleMap.insert("AddMoving",myvalues->value("addmoving").toDouble());
+                doubleMap.insert("DayRoutine",myvalues->value("dayroutine").toDouble());
+                doubleMap.insert("DayRoutineCal",myvalues->value("dayroutinecal").toDouble());
+                doubleMap.insert("DayFiber",myvalues->value("fiber").toDouble());
+                doubleMap.insert("DaySugar",myvalues->value("sugar").toDouble());
+                doubleMap.insert("Macrorange",myvalues->value("macrorange").toDouble());
+                athleteMap.insert("BodyFatCal",myvalues->value("fatcal").toDouble());
+                settingList = myvalues->value("moveday").toString().split(splitter);
+                tempVector.resize(7);
+                for(int i = 0; i < settingList.count();++i)
+                {
+                    settingString = settingList.at(i);
+                    tempVector[i] = settingString.toDouble();
+                }
+                doubleVector.insert("Moveday",tempVector);
+                settingList.clear();
+            myvalues->endGroup();
+
+            myvalues->beginGroup("Misc");
+                settingList << myvalues->value("sum").toString();
+                settingList << myvalues->value("empty").toString();
+                settingList << myvalues->value("breakname").toString();
+                settingList << myvalues->value("filecount").toString();
+                settingList << myvalues->value("workfactor").toString();
+                listMap.insert("Misc",settingList);
+                generalMap.insert("sum", settingList.at(0));
+                colorMap.insert(settingList.at(0),settings::get_colorRGB(myvalues->value("sumcolor").toString(),false));
+                generalMap.insert("empty", settingList.at(1));
+                colorMap.insert(settingList.at(1),settings::get_colorRGB(myvalues->value("emptycolor").toString(),false));
+                generalMap.insert("breakname",settingList.at(2));
+                colorMap.insert(settingList.at(2),settings::get_colorRGB(myvalues->value("breakcolor").toString(),false));
+                generalMap.insert("filecount",settingList.at(3));
+                generalMap.insert("workfactor",settingList.at(4));
+                settingList.clear();
+                athleteMap.insert("currpal",myvalues->value("currpal").toDouble());
+            myvalues->endGroup();
+
+            myvalues->beginGroup("Sport");
+                triaDistance << myvalues->value("triathlon").toString().split(splitter);
+                settingList << myvalues->value("triaDist").toString().split(splitter);
+                for(int i = 0; i < settingList.count(); i++)
+                {
+                    triaMap.insert(triaDistance.at(i),settingList.at(i));
+                }
+                settingList.clear();
+                settingList <<  myvalues->value("sports").toString().split(splitter);
+                listMap.insert("Sport",myvalues->value("sports").toString().split(splitter));
+                listMap.insert("Sportuse",myvalues->value("sportuse").toString().split(splitter));
+                settingString = myvalues->value("color").toString();
+                settings::fill_mapColor(&settingList,&settingString,false);
+            myvalues->endGroup();
+
+            for(int i = 0; i < settingList.count(); ++i)
+            {
+                if(settingList.at(i) == "Swim") isSwim = settingList.at(i);
+                else if(settingList.at(i) == "Bike") isBike = settingList.at(i);
+                else if(settingList.at(i) == "Run") isRun = settingList.at(i);
+                else if(settingList.at(i) == "Strength" || settingList.at(i) == "Power") isStrength = settingList.at(i);
+                else if(settingList.at(i) == "Alt" || settingList.at(i) == "Alternative") isAlt = settingList.at(i);
+                else if(settingList.at(i) == "Tria" || settingList.at(i) == "Triathlon") isTria = settingList.at(i);
+                else if(settingList.at(i) == "Other") isOther = settingList.at(i);
+            }
+            delete myvalues;
+        }
+        else
+        {
+            return VALUES;
         }
 
         QDesktopWidget desk;
@@ -489,10 +511,9 @@ void settings::loadSettings()
             fontMap.insert("fontMedium",12);
             fontMap.insert("fontSmall",10);
         }
-
-        delete mysettings;
-        delete myvalues;
+        delete mysettings; 
     }
+    return LOADED;
 }
 
 double settings::get_weightforDate(QDateTime actDate)

@@ -1244,9 +1244,9 @@ private:
     QString weeknumber,phaseFilter,buttonStyle,viewStyle;
     QVector<double> work_sum,dur_sum,stress_sum;
     QVector<double> dist_sum;
-    int selModule,weekRange,weekpos,saisonWeeks,weekDays,foodcopyLine;
+    int userSetup,selModule,weekRange,weekpos,saisonWeeks,weekDays,foodcopyLine;
     unsigned int weekCounter,sportCounter,phaseFilterID;
-    bool userSetup,isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
+    bool isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
 
     void openPreferences();
     void summery_view();
