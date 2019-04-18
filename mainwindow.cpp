@@ -2254,6 +2254,8 @@ void MainWindow::set_foodWeek(QString weekID)
     foodPlan->update_sumByMenu(foodPlan->firstDayofWeek,0,nullptr,false);
     foodPlan->update_sumBySchedule(foodPlan->firstDayofWeek);
     ui->label_foodWeek->setText("Kw "+ weekID);
+
+
 }
 
 void MainWindow::calc_foodCalories(int portion,double factor,int calories)
