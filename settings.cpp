@@ -216,6 +216,7 @@ int settings::loadSettings()
             double currWeight = 0.0;
             double currBone = 0.0;
             double currMuscle = 0.0;
+            double currBodyfat = 0.0;
             int weightDate = 0;
 
             for(int i = 0; i < bodyWeight.count(); ++i)
@@ -224,6 +225,7 @@ int settings::loadSettings()
                 currWeight = weightInfo.value("weightkg").toDouble();
                 currBone = weightInfo.value("boneskg").toDouble();
                 currMuscle = weightInfo.value("musclekg").toDouble();
+                currBodyfat = weightInfo.value("fatpercent").toDouble();
                 weightMap.insert(weightInfo.value("when").toInt(),currWeight);
 
                 if(weightMap.lastKey() > weightDate)
@@ -231,6 +233,7 @@ int settings::loadSettings()
                     athleteMap.insert("weight",currWeight);
                     athleteMap.insert("boneskg",currBone);
                     athleteMap.insert("musclekg",currMuscle);
+                    athleteMap.insert("bodyfat",currBodyfat);
                 }
                 weightDate = weightMap.lastKey();
             }
@@ -460,6 +463,7 @@ int settings::loadSettings()
                 generalMap.insert("workfactor",settingList.at(4));
                 settingList.clear();
                 athleteMap.insert("currpal",myvalues->value("currpal").toDouble());
+                athleteMap.insert("methode",myvalues->value("calmethode").toDouble());
             myvalues->endGroup();
 
             myvalues->beginGroup("Sport");
