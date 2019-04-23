@@ -88,6 +88,9 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->doubleSpinBox_bone->setValue(athleteValues->value("boneskg"));
     ui->doubleSpinBox_muscle->setValue(athleteValues->value("musclekg"));
     ui->doubleSpinBox_PALvalue->setValue(athleteValues->value("currpal"));
+    ui->comboBox_methode->addItem("Mifflin-St.Jeor");
+    ui->comboBox_methode->addItem("Katch-McArdle");
+    ui->comboBox_methode->setCurrentIndex(athleteValues->value("methode"));
     ui->doubleSpinBox_max->setValue(settings::doubleVector.value(ui->comboBox_weightmode->currentText()).at(0));
     this->set_bottonColor(ui->toolButton_colormax,false);
     ui->doubleSpinBox_high->setValue(settings::doubleVector.value(ui->comboBox_weightmode->currentText()).at(1));
@@ -442,7 +445,7 @@ void Dialog_settings::set_thresholdView(QString sport)
     }
     if(sport == settings::isBike)
     {
-        ui->lineEdit_speed->setText(QString::number(this->set_doubleValue(ui->spinBox_thresPower->value()/athleteValues->value("ridercw")/thresValues->value("wattfactor"),false)));
+        ui->lineEdit_speed->setText(QString::number(this->set_doubleValue(ui->spinBox_thresPower->value()/(athleteValues->value("ridercw")*(athleteValues->value("riderfrg")*thresValues->value("wattfactor"))),false)));
         this->set_thresholdModel(sport,ui->comboBox_thresBase->currentIndex());
     }
     if(sport == settings::isRun)
@@ -977,7 +980,6 @@ void Dialog_settings::on_tabWidget_tabBarClicked(int index)
 
 void Dialog_settings::on_pushButton_calcFat_clicked()
 {
-
     int age = ui->lineEdit_age->text().toInt();
     double weight = ui->lineEdit_weight->text().toDouble();
     double height = athleteValues->value("height");
@@ -1012,6 +1014,8 @@ void Dialog_settings::on_pushButton_calcFat_clicked()
     ui->lineEdit_fatweight->setText(QString::number(set_doubleValue(fatCalc,false)));
     ui->lineEdit_fatpercent->setText(QString::number(set_doubleValue(fatPercent,false)));
     ui->lineEdit_ffmi->setText(QString::number(set_doubleValue(ffmi,false)));
+    athleteValues->insert("bodyfat",fatPercent);
+    ui->lineEdit_currDayCal->setText(QString::number(round(current_dayCalories(QDateTime::currentDateTime()) * ui->doubleSpinBox_PALvalue->value())));
 
     fatComment = QString::number(ui->spinBox_breast->value())+"-"+
                  QString::number(ui->spinBox_stomach->value())+"-"+

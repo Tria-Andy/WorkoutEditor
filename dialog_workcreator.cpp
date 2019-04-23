@@ -331,7 +331,7 @@ void Dialog_workCreator::open_stdWorkout(QString workID)
 
                 if(timeBase)
                 {
-                    currDist = this->calc_distance(stepTime,3600.0/this->wattToSpeed(thresPower,thresSpeed,pValue));
+                    currDist = this->calc_distance(stepTime,3600.0/this->wattToSpeed(thresPower,pValue));
                 }
                 else
                 {
@@ -624,7 +624,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasValues)
     {
         usePM = thresValues->value("bikepm");
         pValue = calc_thresPower(thresPower,percent);
-        defaultDist = this->calc_distance(defaultTime,3600.0/this->wattToSpeed(thresPower,thresSpeed,pValue));
+        defaultDist = this->calc_distance(defaultTime,3600.0/this->wattToSpeed(thresPower,pValue));
     }
     else if(isRun)
     {
@@ -700,7 +700,7 @@ void Dialog_workCreator::show_editItem(QTreeWidgetItem *item)
 
         if(isBike)
         {
-            valueModel->setData(valueModel->index(9,0,QModelIndex()),set_doubleValue(this->wattToSpeed(thresPower,thresSpeed,item->data(4,Qt::DisplayRole).toDouble()),true));
+            valueModel->setData(valueModel->index(9,0,QModelIndex()),set_doubleValue(this->wattToSpeed(thresPower,item->data(4,Qt::DisplayRole).toDouble()),true));
         }
         else
         {

@@ -111,6 +111,7 @@ private slots:
     void on_spinBox_carbs_valueChanged(int arg1);
     void on_spinBox_protein_valueChanged(int arg1);
     void on_spinBox_fat_valueChanged(int arg1);
+    void enableSavebutton();
 
 private:
     Ui::Dialog_settings *ui;
@@ -140,7 +141,6 @@ private:
     void set_hfmodel(double);
     void set_ltsList();
     void checkSportUse();
-    void enableSavebutton();
     void updateListMap(int,bool);
     void writeChangedValues();
     void writeRangeValues(QString);

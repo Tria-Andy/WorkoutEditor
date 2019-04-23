@@ -1709,20 +1709,6 @@
              <string>Body Fat Calculation</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_4">
-             <item row="4" column="2">
-              <widget class="QPushButton" name="pushButton_calcFat">
-               <property name="text">
-                <string>Calc</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="3">
-              <widget class="QPushButton" name="pushButton_clearFat">
-               <property name="text">
-                <string>Clear</string>
-               </property>
-              </widget>
-             </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_46">
                <property name="text">
@@ -1938,6 +1924,30 @@
              <item row="9" column="3">
               <widget class="QLineEdit" name="lineEdit_ffmi"/>
              </item>
+             <item row="5" column="2">
+              <widget class="QPushButton" name="pushButton_calcFat">
+               <property name="text">
+                <string>Calc</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="3">
+              <widget class="QPushButton" name="pushButton_clearFat">
+               <property name="text">
+                <string>Clear</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="3">
+              <widget class="QComboBox" name="comboBox_methode"/>
+             </item>
+             <item row="4" column="2">
+              <widget class="QLabel" name="label_62">
+               <property name="text">
+                <string>Calc Methode:</string>
+               </property>
+              </widget>
+             </item>
             </layout>
             <zorder>spinBox_leg</zorder>
             <zorder>spinBox_stomach</zorder>
@@ -1963,8 +1973,6 @@
             <zorder>doubleSpinBox_muscle</zorder>
             <zorder>label_39</zorder>
             <zorder>doubleSpinBox_bone</zorder>
-            <zorder>pushButton_calcFat</zorder>
-            <zorder>pushButton_clearFat</zorder>
             <zorder>label_35</zorder>
             <zorder>lineEdit_fatfree</zorder>
             <zorder>label_36</zorder>
@@ -1978,6 +1986,10 @@
             <zorder>lineEdit_comment</zorder>
             <zorder>label_54</zorder>
             <zorder>lineEdit_ffmi</zorder>
+            <zorder>pushButton_calcFat</zorder>
+            <zorder>pushButton_clearFat</zorder>
+            <zorder>comboBox_methode</zorder>
+            <zorder>label_62</zorder>
            </widget>
           </item>
          </layout>

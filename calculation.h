@@ -29,7 +29,7 @@ protected:
     static double calc_thresPower(double,double);
     static QString calc_duration(QString,double,QString);
     static QString threstopace(double,double);
-    static double wattToSpeed(double,double,double);
+    static double wattToSpeed(double,double);
     static int get_timesec(QString time);
     static double set_doubleValue(double,bool);
     static double get_thresPercent(QString,QString,bool);

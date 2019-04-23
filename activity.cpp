@@ -403,7 +403,7 @@ void Activity::prepareData()
             if(isIndoor)
             {
                 secondValue = sampleModel->data(sampleModel->index(i,4,QModelIndex())).toDouble();
-                sampSpeed[i] = this->wattToSpeed(thresPower,thresSpeed,secondValue);
+                sampSpeed[i] = this->wattToSpeed(thresPower,secondValue);
                 sampSecond[i] = secondValue;
                 avgHF = avgHF + sampleModel->data(sampleModel->index(i,posHF,QModelIndex())).toDouble();
             }
@@ -550,7 +550,7 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
 
             if(isIndoor)
             {
-                double wattSpeed = this->wattToSpeed(thresPower,thresSpeed,watts);             
+                double wattSpeed = this->wattToSpeed(thresPower,watts);
                 intItems.at(1)->setData(this->set_time(lapTime),Qt::EditRole);
                 intItems.at(4)->setData(QString::number(this->calc_distance(this->set_time(lapTime),3600.0/wattSpeed)),Qt::EditRole);
                 intItems.at(6)->setData(QString::number(wattSpeed),Qt::EditRole);
@@ -1406,7 +1406,7 @@ void Activity::updateSampleModel(int sampRowCount)
                         {
                             if(usePMData)
                             {
-                                calcSpeed[intSec] = this->wattToSpeed(thresPower,thresSpeed,sampleModel->data(sampleModel->index(intSec,4,QModelIndex())).toDouble());
+                                calcSpeed[intSec] = this->wattToSpeed(thresPower,sampleModel->data(sampleModel->index(intSec,4,QModelIndex())).toDouble());
                             }
                             else
                             {
@@ -1425,7 +1425,7 @@ void Activity::updateSampleModel(int sampRowCount)
                 {
                     if(usePMData)
                     {
-                        calcSpeed[intStop] = this->wattToSpeed(thresPower,thresSpeed,sampleModel->data(sampleModel->index(intStop,2,QModelIndex())).toDouble());
+                        calcSpeed[intStop] = this->wattToSpeed(thresPower,sampleModel->data(sampleModel->index(intStop,2,QModelIndex())).toDouble());
                     }
                     else
                     {

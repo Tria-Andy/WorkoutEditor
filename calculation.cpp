@@ -247,23 +247,24 @@ QString calculation::threstopace(double thresPace, double percent)
     return set_time(static_cast<int>(round(thresPace / (percent/100.0))));
 }
 
-double calculation::wattToSpeed(double thresPower,double thresSpeed,double currWatt)
+double calculation::wattToSpeed(double thresPower,double currWatt)
 {
     double diff = 0;
+    double calcSpeed = 0;
 
     if(currWatt == 0.0)
     {
         return 0;
     }
-    else if(currWatt < thresPower)
+    else if(currWatt <= thresPower)
     {
         diff = thresPower - currWatt;
-        return thresSpeed - (diff * thresValues->value("wattfactor"));
+        return calcSpeed - (diff * thresValues->value("wattfactor"));
     }
     else
     {
         diff = currWatt - thresPower;
-        return thresSpeed + (diff * thresValues->value("wattfactor"));
+        return calcSpeed + (diff * thresValues->value("wattfactor"));
     }
 }
 
@@ -303,7 +304,6 @@ QString calculation::calc_duration(QString sport,double dist, QString pace)
     {
         return set_time(get_timesec(pace) * dist);
     }
-    return nullptr;
 }
 
 double calculation::calc_lnp(double speed,double athleteHeight,double athleteWeight)
@@ -317,13 +317,25 @@ double calculation::calc_lnp(double speed,double athleteHeight,double athleteWei
 
 double calculation::current_dayCalories(QDateTime calcDate)
 {
+    int calMethode = static_cast<int>(athleteValues->value("methode"));
     double weight = settings::get_weightforDate(calcDate);
-    double height = athleteValues->value("height")*100;
-    double age = QDate::currentDate().year() - athleteValues->value("yob");
-    int sF = athleteValues->value("sex") == 0.0 ? 5 : -161;
 
-    //Mifflin-St.Jeor-Formel
-    return round((10*weight)+(6.25*height)-(5*age)+sF);
+    if(calMethode == 0)
+    {
+        //Mifflin-St.Jeor-Formel
+        double height = athleteValues->value("height")*100;
+        double age = QDate::currentDate().year() - athleteValues->value("yob");
+        int sF = athleteValues->value("sex") == 0.0 ? 5 : -161;
+
+        return round((10*weight)+(6.25*height)-(5*age)+sF);
+    }
+    if(calMethode == 1)
+    {
+        //Katch-McArdle Formel
+        double bodyFat = athleteValues->value("bodyfat");
+        return round(370+(21.6 *(weight - (weight*(bodyFat/100.0)))));
+    }
+    return 0.0;
 }
 
 QString calculation::calc_weekID(QDate workoutDate)

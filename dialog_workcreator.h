@@ -404,7 +404,7 @@ public:
     {
         if(sport == settings::isBike)
         {
-            double pace = 3600.0/wattToSpeed(thresPower,thresSpeed,model->data(model->index(4,0)).toDouble());
+            double pace = 3600.0/wattToSpeed(thresPower,model->data(model->index(4,0)).toDouble());
             model->setData(model->index(8,0),calc_distance(value.toString("mm:ss"),pace));
             set_speed(model,pace);
         }
