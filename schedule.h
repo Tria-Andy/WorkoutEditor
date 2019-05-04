@@ -31,7 +31,7 @@ class schedule : public saisons, public calculation
 
 public:
     schedule();
-    QStandardItemModel *workout_schedule,*week_meta,*week_content;
+    QStandardItemModel *workout_schedule,*scheduleModel,*week_meta,*week_content;
     QSortFilterProxyModel *metaProxy,*contentProxy,*scheduleProxy;
     QHash<QModelIndex,QHash<int,QString>> itemList;
     QMap<QDate,QPair<double,double> > stressValues;
@@ -50,6 +50,8 @@ public:
     void add_newSaison(QString);
     void delete_Saison(QString);
     QHash<int,QString> get_weekList();
+    void get_dayWorkouts(QDate);
+    QString get_dayMeta(QString);
 
 //Workout
     //Setter
@@ -62,8 +64,8 @@ public:
 
 private:
 
-    QStringList workoutTags,metaTags,contentTags;
-    QString schedulePath,workoutFile,metaFile,contentFile,ltsFile;
+    QStringList workoutTags,scheduleTags,workTags,metaTags,contentTags;
+    QString schedulePath,workoutFile,scheduleFile,metaFile,contentFile,ltsFile;
     QDate firstdayofweek;
     QHash<int,QString> weekList;
     bool fileCreated,isUpdated;
