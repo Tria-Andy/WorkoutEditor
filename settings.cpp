@@ -453,6 +453,7 @@ int settings::loadSettings()
                 settingList << myvalues->value("filecount").toString();
                 settingList << myvalues->value("workfactor").toString();
                 listMap.insert("Misc",settingList);
+                listMap.insert("addworkout",myvalues->value("addworkout").toString().split(splitter));
                 generalMap.insert("sum", settingList.at(0));
                 colorMap.insert(settingList.at(0),settings::get_colorRGB(myvalues->value("sumcolor").toString(),false));
                 generalMap.insert("empty", settingList.at(1));
@@ -464,6 +465,7 @@ int settings::loadSettings()
                 settingList.clear();
                 athleteMap.insert("currpal",myvalues->value("currpal").toDouble());
                 athleteMap.insert("methode",myvalues->value("calmethode").toDouble());
+                doubleMap.insert("maxworkouts",myvalues->value("maxworkouts").toDouble());
             myvalues->endGroup();
 
             myvalues->beginGroup("Sport");

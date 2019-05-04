@@ -21,6 +21,8 @@
 
 int main(int argc, char *argv[])
 {
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
     QApplication a(argc, argv);
     QFont font("Segoe UI");
     font.setPixelSize(12);

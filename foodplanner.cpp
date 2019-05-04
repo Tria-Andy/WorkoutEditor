@@ -489,8 +489,6 @@ void foodplanner::write_foodHistory()
     }
     this->write_XMLFile(filePath,&xmlDoc,historyXML);
     xmlDoc.clear();
-
-
 }
 
 void foodplanner::add_meal(QItemSelectionModel *mealSelect)

@@ -289,6 +289,7 @@ private slots:
     void on_toolButton_upload_clicked();
     void on_comboBox_stdworkout_activated(int index);
     void on_toolButton_map_clicked();
+    void set_addWorkouts(int);
 
 private:
     Ui::day_popup *ui;
@@ -298,12 +299,14 @@ private:
     QSortFilterProxyModel *scheduleProxy;
     QHash<QString,QString> currWorkout;
     QHash<int,QString> stdworkData;
+    QMap<int,bool> addWorkouts;
     QDate popupDate,newDate;
     QModelIndex selIndex;
     QStringList workListHeader;
     QIcon editIcon,addIcon;
     int selWorkout;
     bool editMode,addWorkout;
+    QButtonGroup *workoutGroup;
 
     void init_dayWorkouts(QDate);
     void set_comboWorkouts(QString,QString);

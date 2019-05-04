@@ -1131,6 +1131,7 @@ void MainWindow:: on_tableView_cal_clicked(const QModelIndex &index)
             day_popup day_pop(this,selectDate,workSchedule);
             day_pop.setModal(true);
             dialog_code = day_pop.exec();
+
             if(dialog_code == QDialog::Rejected)
             {
                 ui->actionSave->setEnabled(workSchedule->get_isUpdated());

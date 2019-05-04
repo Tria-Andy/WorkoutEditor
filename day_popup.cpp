@@ -45,9 +45,24 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
     dayModel = new QStandardItemModel(this);
     workSched->itemList.clear();
 
+    QHBoxLayout *addLayout = new QHBoxLayout(ui->frame_addwork);
+    addLayout->setContentsMargins(1,1,1,1);
+    addLayout->addSpacing(2);
+    workoutGroup = new QButtonGroup(this);
+    workoutGroup->setExclusive(false);
+    for(int i = 0; i < settings::get_listValues("addworkout").count(); ++i)
+    {
+        QPushButton *pButton = new QPushButton();
+        pButton->setText(settings::get_listValues("addworkout").at(i));
+        pButton->setCheckable(true);
+        addLayout->addWidget(pButton);
+        workoutGroup->addButton(pButton,i);
+        addWorkouts.insert(i,false);
+    }
+
     this->init_dayWorkouts(popupDate);
     ui->lineEdit_workoutInfo->setText(workSched->get_weekPhase(w_date,false)+" - Week: "+ QString::number(w_date.weekNumber()));
-
+    connect(workoutGroup,SIGNAL(buttonClicked(int)),this,SLOT(set_addWorkouts(int)));
     connect(ui->tableView_day->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(load_workoutData(int)));
     connect(ui->dateEdit_workDate,SIGNAL(dateChanged(QDate)),this,SLOT(edit_workoutDate(QDate)));
     connect(ui->tableView_day->itemDelegate(),SIGNAL(closeEditor(QWidget *,QAbstractItemDelegate::EndEditHint)),this,SLOT(setNextEditRow()));
@@ -89,7 +104,7 @@ void day_popup::init_dayWorkouts(QDate workDate)
             workoutHeader << "Workout " + QString::number(i);
         }
 
-        if(workCount < 3)
+        if(workCount < static_cast<int>(doubleValues->value("maxworkouts")))
         {
             this->setFixedWidth(250*(workCount+1));
             workoutHeader << "Add";
@@ -141,9 +156,15 @@ void day_popup::init_dayWorkouts(QDate workDate)
     {
         ui->toolButton_dayEdit->setEnabled(true);
     }
-
     connect(dayModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(update_workValues()));
     ui->dateEdit_workDate->setDate(workDate);
+
+    //new Schedule Implementation
+    QStringList setaddWork = workSched->get_dayMeta(workoutDate).split("-");
+    for(int i = 0; i < workoutGroup->buttons().count();++i)
+    {
+        workoutGroup->button(i)->setChecked(setaddWork.at(0).toInt());
+    }
 }
 
 void day_popup::set_comboWorkouts(QString workoutSport, QString stdid)
@@ -573,4 +594,10 @@ void day_popup::on_toolButton_map_clicked()
     Dialog_map dialogMap(this,metaProxy,workoutID,image);
     dialogMap.setModal(true);
     dialogMap.exec();
+}
+
+void day_popup::set_addWorkouts(int buttonID)
+{
+    addWorkouts.insert(buttonID,workoutGroup->button(buttonID)->isChecked());
+
 }

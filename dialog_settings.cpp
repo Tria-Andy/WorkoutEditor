@@ -91,6 +91,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->comboBox_methode->addItem("Mifflin-St.Jeor");
     ui->comboBox_methode->addItem("Katch-McArdle");
     ui->comboBox_methode->setCurrentIndex(athleteValues->value("methode"));
+    ui->listWidget_addwork->addItems(listMap.value("addworkout"));
     ui->doubleSpinBox_max->setValue(settings::doubleVector.value(ui->comboBox_weightmode->currentText()).at(0));
     this->set_bottonColor(ui->toolButton_colormax,false);
     ui->doubleSpinBox_high->setValue(settings::doubleVector.value(ui->comboBox_weightmode->currentText()).at(1));
@@ -104,6 +105,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->spinBox_protein->setValue(settings::doubleVector.value("Macros").at(1));
     ui->spinBox_fat->setValue(settings::doubleVector.value("Macros").at(2));
 
+    ui->spinBox_addWork->setValue(settings::doubleMap.value("AddMoving"));
     for(int i = 0; i < 7; ++i)
     {
        tempCheck = this->findChild<QCheckBox *>("checkBox_Work_"+QString::number(i));
