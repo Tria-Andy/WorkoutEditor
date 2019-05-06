@@ -24,7 +24,6 @@ schedule::schedule()
     scheduleTags << "date" << "week" << "addwork";
     workTags << "id" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj" << "stdid";
     metaTags << "saison" << "id" << "week" << "name" << "fdw" << "content" << "goal";
-    //metaTags << "id" << "saison" << "week" << "weekid" << "phase" << "fdw";
     contentTags << "id" << "week";
     for(int i = 0; i < settings::get_listValues("Sportuse").count();++i)
     {
@@ -32,11 +31,15 @@ schedule::schedule()
         contentTags << workout_sport.toLower();
     }
     contentTags << "summery";
+
     workout_sport.clear();
     firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
     schedulePath = gcValues->value("schedule");
     workoutFile = "workout_schedule.xml";
     scheduleFile = "workouts_schedule.xml";
+    scheduleModel = new QStandardItemModel();
+    phaseFile = "workouts_phase.xml";
+    phaseModel = new QStandardItemModel();
     metaFile = "workout_phase_meta.xml";
     contentFile = "workout_phase_content.xml";
     ltsFile = "longtermstress.xml";
@@ -44,8 +47,18 @@ schedule::schedule()
     if(!schedulePath.isEmpty())
     {
         this->check_File(schedulePath,workoutFile);
-        this->check_File(schedulePath,scheduleFile);
         this->read_dayWorkouts(this->load_XMLFile(schedulePath,workoutFile));
+        //Schedule
+        this->check_File(schedulePath,scheduleFile);
+        xmlList = this->load_XMLFile(schedulePath,scheduleFile).firstChildElement().elementsByTagName("day");
+        tagList.insert(0,scheduleTags);
+        tagList.insert(1,workTags);
+        this->fill_treeModel(&xmlList,scheduleModel,&tagList);
+
+        this->check_File(schedulePath,phaseFile);
+        tagList.insert(0,metaTags);
+        tagList.insert(1,contentTags);
+
         this->check_File(schedulePath,metaFile);
         this->check_File(schedulePath,contentFile);
         this->read_weekPlan(this->load_XMLFile(schedulePath,metaFile),this->load_XMLFile(schedulePath,contentFile));
@@ -94,7 +107,6 @@ void schedule::read_dayWorkouts(QDomDocument workouts)
     }
 
     workout_schedule = new QStandardItemModel(workout_list.count(),workoutTags.count());
-    scheduleModel = new QStandardItemModel();
 
     QDate workDate;
 
@@ -128,44 +140,7 @@ void schedule::read_dayWorkouts(QDomDocument workouts)
         workout_schedule->sort(2);
     }
     scheduleProxy = new QSortFilterProxyModel();
-    scheduleProxy->setSourceModel(workout_schedule);
-
-    //new Implementation of Workout Schedule
-    scheduleModel = new QStandardItemModel();
-
-    QStandardItem *rootItem = scheduleModel->invisibleRootItem();
-    QDomElement dayElement,workElement;
-    QDomNodeList dayList,workList;
-
-    dayList = this->load_XMLFile(schedulePath,scheduleFile).firstChildElement().elementsByTagName("day");
-
-    for(int day = 0; day < dayList.count(); ++day)
-    {
-        QList<QStandardItem*> weekItem;
-        dayElement = dayList.at(day).toElement();
-
-        for(int dTag = 0; dTag < scheduleTags.count(); ++dTag)
-        {
-            weekItem << new QStandardItem(dayElement.attribute(scheduleTags.at(dTag)));
-        }
-        rootItem->appendRow(weekItem);
-
-        if(dayElement.hasChildNodes())
-        {
-            workList = dayElement.childNodes();
-            for(int work = 0; work < workList.count(); ++work)
-            {
-                QList<QStandardItem*> dayItem;
-                workElement = workList.at(work).toElement();
-
-                for(int wTag = 0; wTag < workTags.count(); ++wTag)
-                {
-                    dayItem << new QStandardItem(workElement.attribute(workTags.at(wTag)));
-                }
-                weekItem.at(0)->appendRow(dayItem);
-            }
-        }
-    }
+    scheduleProxy->setSourceModel(workout_schedule);    
 }
 
 void schedule::save_dayWorkouts()

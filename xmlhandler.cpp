@@ -3,7 +3,7 @@
 
 xmlHandler::xmlHandler()
 {
-
+    schedulePath = settings::getStringMapPointer(settings::stingMap::GC)->value("schedule");
 }
 void xmlHandler::check_File(QString path,QString fileName)
 {
@@ -50,6 +50,82 @@ void xmlHandler::write_XMLFile(QString path,QDomDocument *xmlDoc,QString fileNam
     QTextStream outXML(&xmlFile);
     xmlDoc->save(outXML,IndentSize);
     xmlFile.close();
+}
+
+void xmlHandler::fill_treeModel(QDomNodeList *pList, QStandardItemModel *model, QMap<int, QStringList> *tagList)
+{
+    QStandardItem *rootItem = model->invisibleRootItem();
+    QDomElement pElement,cElement;
+    QDomNodeList cList;
+
+    for(int parent = 0; parent < pList->count(); ++parent)
+    {
+        QList<QStandardItem*> pItem;
+        pElement = pList->at(parent).toElement();
+
+        for(int pTag = 0; pTag < tagList->value(0).count(); ++pTag)
+        {
+            pItem << new QStandardItem(pElement.attribute(tagList->value(0).at(pTag)));
+        }
+        rootItem->appendRow(pItem);
+
+        if(pElement.hasChildNodes())
+        {
+            cList = pElement.childNodes();
+            for(int child = 0; child < cList.count(); ++child)
+            {
+                QList<QStandardItem*> cItem;
+                cElement = cList.at(child).toElement();
+
+                for(int cTag = 0; cTag < tagList->value(1).count(); ++cTag)
+                {
+                    cItem << new QStandardItem(cElement.attribute(tagList->value(1).at(cTag)));
+                }
+                pItem.at(0)->appendRow(cItem);
+            }
+        }
+    }
+}
+
+void xmlHandler::read_treeModel(QStandardItemModel *model, QMap<int, QStringList> *tagList)
+{
+    //QModelIndex index;
+    QDomDocument xmlDoc;
+    QDomElement xmlRoot,xmlElement,childElement;
+
+    QMap<QDate,QString> scheduleDates;
+    QDate readDate;
+    QString weekID;
+    for(int i = 0; i < model->rowCount(); ++i)
+    {
+        readDate = QDate::fromString(model->data(model->index(i,1)).toString(),"dd.MM.yyyy");
+        weekID = model->data(model->index(i,0)).toString();
+
+        if(!scheduleDates.contains(readDate)) scheduleDates.insert(readDate,weekID);
+    }
+    /*
+    for(QMap<QDate,QString>::const_iterator it = scheduleDates.cbegin(), end = scheduleDates.cend(); it != end; ++it)
+    {
+       this->filter_schedule(it.key().toString("dd.MM.yyyy"),1,true);
+
+
+       for(int x = 0; x < scheduleProxy->rowCount(); ++x)
+       {
+           childElement = xmlDoc.createElement("workout");
+           childElement.setAttribute("id",QString::number(x));
+
+           for(int tags = 2; tags < workoutTags.count(); ++tags)
+           {
+               childElement.setAttribute(workoutTags.at(tags),scheduleProxy->data(scheduleProxy->index(x,tags)).toString());
+           }
+           xmlElement.appendChild(childElement);
+       }
+       xmlRoot.appendChild(xmlElement);
+       xmlElement.clear();
+    }
+    this->write_XMLFile(schedulePath,&xmlDoc,scheduleFile);
+    xmlDoc.clear();
+    */
 }
     /*
 void xmlHandler::fileToModel(QDomDocument xmldoc,QString rootTag,QStandardItemModel *model, QMap<int,QStringList> *tags)

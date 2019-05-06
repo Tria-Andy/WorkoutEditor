@@ -31,7 +31,7 @@ class schedule : public saisons, public calculation
 
 public:
     schedule();
-    QStandardItemModel *workout_schedule,*scheduleModel,*week_meta,*week_content;
+    QStandardItemModel *workout_schedule,*scheduleModel,*phaseModel,*week_meta,*week_content;
     QSortFilterProxyModel *metaProxy,*contentProxy,*scheduleProxy;
     QHash<QModelIndex,QHash<int,QString>> itemList;
     QMap<QDate,QPair<double,double> > stressValues;
@@ -65,8 +65,10 @@ public:
 private:
 
     QStringList workoutTags,scheduleTags,workTags,metaTags,contentTags;
-    QString schedulePath,workoutFile,scheduleFile,metaFile,contentFile,ltsFile;
+    QDomNodeList xmlList;
+    QString schedulePath,workoutFile,scheduleFile,phaseFile,metaFile,contentFile,ltsFile;
     QDate firstdayofweek;
+    QMap<int,QStringList> tagList;
     QHash<int,QString> weekList;
     bool fileCreated,isUpdated;
     void read_dayWorkouts(QDomDocument);
