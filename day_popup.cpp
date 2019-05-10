@@ -160,11 +160,12 @@ void day_popup::init_dayWorkouts(QDate workDate)
     ui->dateEdit_workDate->setDate(workDate);
 
     //new Schedule Implementation
-    QStringList setaddWork = workSched->get_dayMeta(workoutDate).split("-");
+    QStringList setaddWork = workSched->get_dayMeta(workoutDate).at(2).split("-");
     for(int i = 0; i < workoutGroup->buttons().count();++i)
     {
         workoutGroup->button(i)->setChecked(setaddWork.at(0).toInt());
     }
+    workSched->get_dayWorkouts(workoutDate);
 }
 
 void day_popup::set_comboWorkouts(QString workoutSport, QString stdid)

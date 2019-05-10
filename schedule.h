@@ -50,8 +50,8 @@ public:
     void add_newSaison(QString);
     void delete_Saison(QString);
     QHash<int,QString> get_weekList();
-    void get_dayWorkouts(QDate);
-    QString get_dayMeta(QString);
+    QMap<QTime,QStringList> get_dayWorkouts(QString);
+    QStringList get_dayMeta(QString);
 
 //Workout
     //Setter

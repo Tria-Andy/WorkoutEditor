@@ -412,11 +412,43 @@ QHash<int, QString> schedule::get_weekList()
     return weekList;
 }
 
-QString schedule::get_dayMeta(QString workDate)
+QMap<QTime, QStringList> schedule::get_dayWorkouts(QString workDate)
 {
+    QMap<QTime,QStringList> workouts;
+    QStringList workItems;
+    QTime workTime;
+
+    QModelIndex dayIndex = scheduleModel->indexFromItem(scheduleModel->findItems(workDate,Qt::MatchExactly,0).at(0));
+    QStandardItem *parent = scheduleModel->item(dayIndex.row());
+
+    if(parent->hasChildren())
+    {
+        for(int work = 0; work < parent->rowCount(); ++work)
+        {
+            for(int x = 1; x < workTags.count(); ++x)
+            {
+                if(x == 1) workTime = scheduleModel->data(scheduleModel->index(work,x,dayIndex)).toTime();
+                if(x > 1) workItems << scheduleModel->data(scheduleModel->index(work,x,dayIndex)).toString();
+            }
+            workouts.insert(workTime,workItems);
+            workItems.clear();
+        }
+    }
+
+    return workouts;
+}
+
+QStringList schedule::get_dayMeta(QString workDate)
+{
+    QStringList dayMeta;
     QModelIndex dayIndex = scheduleModel->indexFromItem(scheduleModel->findItems(workDate,Qt::MatchExactly,0).at(0));
 
-    return scheduleModel->data(scheduleModel->index(dayIndex.row(),2)).toString();
+    for(int i = 0; i < scheduleTags.count(); ++i)
+    {
+        dayMeta <<  scheduleModel->data(scheduleModel->index(dayIndex.row(),i)).toString();
+    }
+
+    return dayMeta;
 }
 
 
