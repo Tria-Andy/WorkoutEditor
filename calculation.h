@@ -16,6 +16,7 @@ protected:
     int get_hfvalue(QString);
     QHash<QString,double> *ltsValues,*doubleValues;
     QHash<QString,QString> *gcValues,*generalValues;
+    QDate firstdayofweek;
 
     static bool usePMData;
     static double calc_totalWork(QString,double,double,int);

@@ -66,7 +66,6 @@ private:
     void write_weekList();
     void addWeek();
     void saveWeek();
-    void processWeek();
 };
 
 #endif // DIALOG_WEEK_COPY_H

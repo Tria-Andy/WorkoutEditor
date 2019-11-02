@@ -51,7 +51,7 @@ QList<QStandardItem *> fileReader::readFileContent(QString jsonfile,QString file
 
     workDateTime = QDateTime::fromString(actInfo.value("STARTTIME"),"yyyy/MM/dd hh:mm:ss UTC").addSecs(localTime.offsetFromUtc());
 
-    listItems << new QStandardItem(QDate().shortDayName(workDateTime.date().dayOfWeek()));
+    listItems << new QStandardItem(QLocale().dayName(workDateTime.date().dayOfWeek(),QLocale::ShortFormat));
     listItems << new QStandardItem(workDateTime.toString("dd.MM.yyyy hh:mm:ss"));
     listItems << new QStandardItem(actInfo.value("Sport"));
     listItems << new QStandardItem(actInfo.value("Workout Code"));

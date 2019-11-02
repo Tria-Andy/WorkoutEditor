@@ -12,11 +12,10 @@ class foodplanner : public xmlHandler, public calculation
 {
 
 public:
-    explicit foodplanner(schedule *ptrSchedule = nullptr,QDate fd = QDate());
+    explicit foodplanner(schedule *ptrSchedule = nullptr);
 
     QStandardItemModel *weekPlansModel,*weekSumModel,*daySumModel,*mealModel,*estModel,*historyModel;
     QSortFilterProxyModel *daySumProxy;
-    QDate firstDayofWeek;
     QStringList planList,mealsHeader,menuHeader,dayHeader,dayListHeader,estHeader;
     QMap<int,QStringList> foodList;
 
@@ -37,7 +36,7 @@ public:
     QStringList get_mealList(QString);
     QMap<QDate,QVector<double>> dayTarget;
     QMap<QDate,QVector<double>> dayMacros;
-
+    QDate firstDayWeek;
 
 private:
     schedule *schedulePtr;

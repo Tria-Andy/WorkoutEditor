@@ -20,437 +20,210 @@
 
 schedule::schedule()
 {
-    workoutTags << "week" << "date" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj" << "stdid";
-    scheduleTags << "date" << "week" << "addwork";
-    workTags << "id" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj" << "stdid";
-    metaTags << "saison" << "id" << "week" << "name" << "fdw" << "content" << "goal";
-    contentTags << "id" << "week";
-    for(int i = 0; i < settings::get_listValues("Sportuse").count();++i)
-    {
-        workout_sport = settings::get_listValues("Sportuse").at(i);
-        contentTags << workout_sport.toLower();
-    }
-    contentTags << "summery";
+    macroTags = settings::getHeaderMap("macro");
+    workoutTags = settings::getHeaderMap("workout");
+    compTags = settings::getHeaderMap("comp");
+    phaseTags = settings::getHeaderMap("micro");
+    sportTags = settings::get_listValues("Sportuse");
 
-    workout_sport.clear();
-    firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
     schedulePath = gcValues->value("schedule");
-    workoutFile = "workout_schedule.xml";
-    scheduleFile = "workouts_schedule.xml";
+    //scheduleFile = "workouts_schedule.xml";
+    scheduleFile = "scheduleTest.xml";
     scheduleModel = new QStandardItemModel();
-    phaseFile = "workouts_phase.xml";
+    scheduleModel->setColumnCount(workoutTags->count());
+    //phaseFile = "phase_content.xml";
+    phaseFile = "phaseTest.xml";
     phaseModel = new QStandardItemModel();
-    metaFile = "workout_phase_meta.xml";
-    contentFile = "workout_phase_content.xml";
+    phaseModel->setColumnCount(compTags->count());
     ltsFile = "longtermstress.xml";
 
     if(!schedulePath.isEmpty())
     {
-        this->check_File(schedulePath,workoutFile);
-        this->read_dayWorkouts(this->load_XMLFile(schedulePath,workoutFile));
         //Schedule
         this->check_File(schedulePath,scheduleFile);
-        xmlList = this->load_XMLFile(schedulePath,scheduleFile).firstChildElement().elementsByTagName("day");
-        tagList.insert(0,scheduleTags);
-        tagList.insert(1,workTags);
-        this->fill_treeModel(&xmlList,scheduleModel,&tagList);
+        xmlList = this->load_XMLFile(schedulePath,scheduleFile).firstChildElement().elementsByTagName("week");
+        this->fill_treeModel(&xmlList,scheduleModel);
 
+        //Seasion - Phase
         this->check_File(schedulePath,phaseFile);
-        tagList.insert(0,metaTags);
-        tagList.insert(1,contentTags);
+        xmlList = this->load_XMLFile(schedulePath,phaseFile).firstChildElement().elementsByTagName("macro");
+        this->fill_treeModel(&xmlList,phaseModel);
 
-        this->check_File(schedulePath,metaFile);
-        this->check_File(schedulePath,contentFile);
-        this->read_weekPlan(this->load_XMLFile(schedulePath,metaFile),this->load_XMLFile(schedulePath,contentFile));
-        this->check_File(schedulePath,ltsFile);
+        //Last LTS
         this->read_ltsFile(this->load_XMLFile(schedulePath,ltsFile));
+
+        this->set_saisonValues();
     }
     isUpdated = false;
 }
 
 enum {ADD,EDIT,COPY,DEL};
+enum {SAISON,SCHEDULE};
 
 void schedule::freeMem()
 {
     delete saisonsModel;
     delete contestModel;
-    delete scheduleProxy;
-    delete week_meta;
-    delete week_content;
 }
 
 void schedule::filter_schedule(QString filterValue, int col, bool fixed)
 {
-    scheduleProxy->invalidate();
-
-    if(fixed)
-    {
-        scheduleProxy->setFilterFixedString(filterValue);
-    }
-    else
-    {
-        scheduleProxy->setFilterRegExp("\\b"+filterValue+"\\b");
-    }
-
-    scheduleProxy->setFilterKeyColumn(col);
+    qDebug() << filterValue << col << fixed;
 }
 
-void schedule::read_dayWorkouts(QDomDocument workouts)
+void schedule::save_workouts(bool saveModel)
 {
-    QPair<double,double> tempValues;
-
-    QDomElement root_workouts = workouts.firstChildElement();
-    QDomNodeList workout_list;
-    if(workouts.hasChildNodes())
+    if(saveModel == SAISON)
     {
-        workout_list = root_workouts.elementsByTagName("workout");
+        this->read_treeModel(phaseModel,"saisons",phaseFile);
     }
 
-    workout_schedule = new QStandardItemModel(workout_list.count(),workoutTags.count());
-
-    QDate workDate;
-
-    if(!workout_list.isEmpty())
+    if(saveModel == SCHEDULE)
     {
-        for(int i = 0; i < workout_list.count(); ++i)
-        {
-            QDomElement workout_element;
-            QDomNode workout_node = workout_list.at(i);
-
-            workout_element = workout_node.toElement();
-            for(int col = 0; col < workout_schedule->columnCount(); ++col)
-            {
-                workout_schedule->setData(workout_schedule->index(i,col,QModelIndex()),workout_element.attribute(workoutTags.at(col)));
-            }
-            workDate = QDate::fromString(workout_element.attribute("date"),"dd.MM.yyyy");
-            tempValues.first = workout_element.attribute("stress").toInt();
-            tempValues.second = this->get_timesec(workout_element.attribute("duration"))/60.0;
-
-            if(stressValues.contains(workDate))
-            {
-                tempValues.first = tempValues.first + stressValues.value(workDate).first;
-                tempValues.second = tempValues.second + stressValues.value(workDate).second;
-                stressValues.insert(workDate,tempValues);
-            }
-            else
-            {
-                stressValues.insert(workDate,tempValues);
-            }
-        }
-        workout_schedule->sort(2);
-    }
-    scheduleProxy = new QSortFilterProxyModel();
-    scheduleProxy->setSourceModel(workout_schedule);    
-}
-
-void schedule::save_dayWorkouts()
-{
-        QModelIndex index;
-        QDomDocument xmlDoc;
-        QDomElement xmlRoot,xmlElement,childElement;
-        xmlRoot = xmlDoc.createElement("workouts");
-        xmlDoc.appendChild(xmlRoot);
-
-        for(int i = 0; i < workout_schedule->rowCount(); ++i)
-        {
-            index = workout_schedule->index(i,1,QModelIndex());
-            if(QDate::fromString(workout_schedule->data(index,Qt::DisplayRole).toString(),"dd.MM.yyyy") < firstdayofweek ) continue;
-
-            xmlElement = xmlDoc.createElement("workout");
-
-            for(int x = 0; x < workout_schedule->columnCount(); ++x)
-            {
-                index = workout_schedule->index(i,x,QModelIndex());
-                xmlElement.setAttribute(workoutTags.at(x),workout_schedule->data(index,Qt::DisplayRole).toString());
-            }
-            xmlRoot.appendChild(xmlElement);
-        }
-
-        this->write_XMLFile(schedulePath,&xmlDoc,workoutFile);
-        xmlDoc.clear();
-
-        xmlRoot = xmlDoc.createElement("schedule");
-        xmlDoc.appendChild(xmlRoot);
-
-        QMap<QDate,QString> scheduleDates;
-        QDate readDate;
-        QString weekID;
-        for(int i = 0; i < workout_schedule->rowCount(); ++i)
-        {
-            readDate = QDate::fromString(workout_schedule->data(workout_schedule->index(i,1)).toString(),"dd.MM.yyyy");
-            weekID = workout_schedule->data(workout_schedule->index(i,0)).toString();
-
-            if(!scheduleDates.contains(readDate)) scheduleDates.insert(readDate,weekID);
-        }
-
-        for(QMap<QDate,QString>::const_iterator it = scheduleDates.cbegin(), end = scheduleDates.cend(); it != end; ++it)
-        {
-           this->filter_schedule(it.key().toString("dd.MM.yyyy"),1,true);
-
-           xmlElement = xmlDoc.createElement("day");
-           xmlElement.setAttribute("date",it.key().toString("dd.MM.yyyy"));
-           xmlElement.setAttribute("week",it.value());
-           xmlElement.setAttribute("addwork","0-0-0");
-
-           for(int x = 0; x < scheduleProxy->rowCount(); ++x)
-           {
-               childElement = xmlDoc.createElement("workout");
-               childElement.setAttribute("id",QString::number(x));
-
-               for(int tags = 2; tags < workoutTags.count(); ++tags)
-               {
-                   childElement.setAttribute(workoutTags.at(tags),scheduleProxy->data(scheduleProxy->index(x,tags)).toString());
-               }
-               xmlElement.appendChild(childElement);
-           }
-           xmlRoot.appendChild(xmlElement);
-           xmlElement.clear();
-        }
-        this->write_XMLFile(schedulePath,&xmlDoc,scheduleFile);
-        xmlDoc.clear();
-}
-
-void schedule::read_weekPlan(QDomDocument weekMeta, QDomDocument weekContent)
-{
-    QString contentString;
-    QString currentSaison = this->get_currSaison();
-    QDate startDate = this->get_saisonInfo(currentSaison,"start").toDate();
-    int saisonWeeks = this->get_saisonInfo(currentSaison,"weeks").toInt();
-
-    QDomElement root_meta = weekMeta.firstChildElement();
-    QDomElement root_content = weekContent.firstChildElement();
-    QDomNodeList meta_list,content_list;
-    meta_list = root_meta.elementsByTagName("phase");
-    content_list = root_content.elementsByTagName("content");
-
-    week_meta = new QStandardItemModel(meta_list.count(),metaTags.count());
-    metaProxy = new QSortFilterProxyModel();
-    metaProxy->setSourceModel(week_meta);
-    week_content = new QStandardItemModel(content_list.count(),contentTags.count());
-    contentProxy = new QSortFilterProxyModel();
-    contentProxy->setSourceModel(week_content);
-
-    //fill week_meta
-    if(meta_list.count() == 0)
-    {
-        QString weekid;
-        QString noPhase = generalValues->value("empty");
-
-        week_meta->setRowCount(saisonWeeks);
-        for(int week = 0,id = 1; week < saisonWeeks; ++week,++id)
-        {
-            weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
-            week_meta->setData(week_meta->index(week,0,QModelIndex()),currentSaison);
-            week_meta->setData(week_meta->index(week,1,QModelIndex()),id);
-            week_meta->setData(week_meta->index(week,2,QModelIndex()),weekid);
-            week_meta->setData(week_meta->index(week,3,QModelIndex()),noPhase);
-            week_meta->setData(week_meta->index(week,4,QModelIndex()),startDate.addDays(week*7).toString("dd.MM.yyyy"));
-        }
-        this->save_weekPlan();
-    }
-    else
-    {
-        for(int i = 0; i < meta_list.count(); ++i)
-        {
-            QDomElement meta_element;
-            QDomNode meta_node = meta_list.at(i);
-            meta_element = meta_node.toElement();
-            for(int col = 0; col < week_meta->columnCount(); ++col)
-            {
-                if(col == 1)
-                {
-                    week_meta->setData(week_meta->index(i,col,QModelIndex()),meta_element.attribute(metaTags.at(col)).toInt());
-                }
-                else
-                {
-                    week_meta->setData(week_meta->index(i,col,QModelIndex()),meta_element.attribute(metaTags.at(col)));
-                }
-            }
-        }
-    }
-    week_meta->sort(1);
-
-    //fill week_content
-    if(content_list.count() == 0)
-    {
-        QString weekid;
-        week_content->setRowCount(saisonWeeks);
-
-        for(int week = 0,id = 1; week < saisonWeeks; ++week,++id)
-        {
-            weekid = QString::number(startDate.addDays(week*7).weekNumber()) +"_"+ QString::number(startDate.addDays(week*7).year());
-            week_content->setData(week_content->index(week,0,QModelIndex()),id);
-            week_content->setData(week_content->index(week,1,QModelIndex()),weekid);
-            for(int col = 2; col < contentTags.count(); ++col)
-            {
-                week_content->setData(week_content->index(week,col,QModelIndex()),"0-0-00:00-0");
-            }
-        }
-        this->save_weekPlan();
-    }
-    else
-    {
-        for(int i = 0; i < content_list.count(); ++i)
-        {
-            QDomElement content_element;
-            QDomNode content_node = content_list.at(i);
-            content_element = content_node.toElement();
-            for(int col = 0; col < week_content->columnCount(); ++col)
-            {
-                if(col == 0)
-                {
-                    week_content->setData(week_content->index(i,col,QModelIndex()),content_element.attribute(contentTags.at(col)).toInt());
-                }
-                else
-                {
-                    contentString = content_element.attribute(contentTags.at(col));
-                    if(!contentString.isEmpty())
-                    {
-                        week_content->setData(week_content->index(i,col,QModelIndex()),contentString);
-                    }
-                    else
-                    {
-                        week_content->setData(week_content->index(i,col,QModelIndex()),"0-0-00:00-0");
-                    }
-                }
-            }
-        }
+        this->read_treeModel(scheduleModel,"schedule",scheduleFile);
     }
 }
 
-void schedule::save_weekPlan()
+void schedule::add_newSaison(QStringList saisonInfo)
 {
-    QDomDocument xmlDoc;
-    QDomElement xmlRoot,xmlElement;
-    xmlRoot = xmlDoc.createElement("phases");
-    xmlDoc.appendChild(xmlRoot);
+    QDate saisonStart = QDate::fromString(saisonInfo.at(1),"dd.MM.yyyy");
+    QDate firstday;
+    int weekCount = 0;
+    QVector<double> phaseCount = settings::doubleVector.value("Phaseweeks");
+    QStringList phaseList = settings::get_listValues("Phase");
+    QStringList sportUseList = settings::get_listValues("Sportuse");
 
-    for(int i = 0; i < week_meta->rowCount(); ++i)
+    QList<QStandardItem*> itemList;
+    for(int info = 0; info < saisonInfo.count(); ++info)
     {
-        xmlElement = xmlDoc.createElement("phase");
-        for(int col = 0; col < week_meta->columnCount(); ++col)
-        {
-            xmlElement.setAttribute(metaTags.at(col) ,week_meta->data(week_meta->index(i,col,QModelIndex())).toString());
-        }
-        xmlRoot.appendChild(xmlElement);
+        itemList << new QStandardItem(saisonInfo.at(info));
     }
-    this->write_XMLFile(schedulePath,&xmlDoc,metaFile);
-    xmlDoc.clear();
+    phaseModel->invisibleRootItem()->appendRow(itemList);
 
-    xmlRoot = xmlDoc.createElement("contents");
-    xmlDoc.appendChild(xmlRoot);
+    QStandardItem *macroItem = itemList.at(0);
+    itemList.clear();
 
-    for(int i = 0; i < week_content->rowCount(); ++i)
+    for(int meso = 0; meso < phaseList.count(); ++meso)
     {
-        xmlElement = xmlDoc.createElement("content");
-        for(int col = 0; col < week_content->columnCount(); ++col)
+        itemList << new QStandardItem(QString::number(meso));
+        itemList << new QStandardItem(phaseList.at(meso));
+
+        macroItem->appendRow(itemList);
+        QStandardItem *mesoItem = itemList.at(0);
+        itemList.clear();
+
+        for(int micro = 0; micro < static_cast<int>(phaseCount.at(meso)); ++micro)
         {
-            xmlElement.setAttribute(contentTags.at(col) ,week_content->data(week_content->index(i,col,QModelIndex())).toString());
-        }
-        xmlRoot.appendChild(xmlElement);
-    }
-    this->write_XMLFile(schedulePath,&xmlDoc,contentFile);
-}
+            firstday = saisonStart.addDays(7*weekCount++);
+            itemList << new QStandardItem(QString::number(weekCount));
+            itemList << new QStandardItem(this->calc_weekID(firstday));
+            itemList << new QStandardItem(phaseList.at(meso)+"_X");
+            itemList << new QStandardItem(firstday.toString("dd.MM.yyyy"));
+            itemList << new QStandardItem("-");
+            itemList << new QStandardItem("-");
 
-void schedule::add_newSaison(QString saisonName)
-{
-    int saisonWeeks = this->get_saisonInfo(saisonName,"weeks").toInt();
-    QDate startDay = this->get_saisonInfo(saisonName,"start").toDate();
-    QDate firstDay;
-    QString phase = generalValues->value("empty");
-    QString weekID;
-    QString emptyContent = "0-0-00:00-0";
-    int rowCount;
+            mesoItem->appendRow(itemList);
+            QStandardItem *microItem = itemList.at(0);
+            itemList.clear();
 
-    for(int i = 0; i < saisonWeeks; ++i)
-    {
-        firstDay = startDay.addDays(i*7);
-        weekID = QString::number(firstDay.weekNumber())+"_"+QString::number(firstDay.year());
-        rowCount = week_meta->rowCount();
+            for(int comp = 0; comp < sportUseList.count(); ++comp)
+            {
+                itemList << new QStandardItem(QString::number(comp));
+                itemList << new QStandardItem(sportUseList.at(comp));
+                itemList << new QStandardItem("0");
+                itemList << new QStandardItem("0.0");
+                itemList << new QStandardItem("00:00");
+                itemList << new QStandardItem("0");
 
-        week_meta->insertRow(rowCount,QModelIndex());
-        week_meta->setData(week_meta->index(rowCount,0),saisonName);
-        week_meta->setData(week_meta->index(rowCount,1),i+1);
-        week_meta->setData(week_meta->index(rowCount,2),weekID);
-        week_meta->setData(week_meta->index(rowCount,3),phase);
-        week_meta->setData(week_meta->index(rowCount,4),firstDay.toString("dd.MM.yyyy"));
-
-        week_content->insertRow(rowCount,QModelIndex());
-        week_content->setData(week_content->index(rowCount,0),i+1);
-        week_content->setData(week_content->index(rowCount,1),weekID);
-
-        for(int col = 2; col < contentTags.count(); ++col)
-        {
-            week_content->setData(week_content->index(rowCount,col),emptyContent);
+                microItem->appendRow(itemList);
+                itemList.clear();
+            }
         }
     }
+    this->save_workouts(SAISON);
 }
 
 void schedule::delete_Saison(QString saisonName)
 {
-   metaProxy->invalidate();
-   week_meta->sort(1);
-   metaProxy->setFilterRegExp("\\b"+saisonName+"\\b");
-   metaProxy->setFilterKeyColumn(0);
-   QString weekID;
-
-   for(int i = 0; i < metaProxy->rowCount(); ++i)
-   {
-       weekID = metaProxy->data(metaProxy->index(i,2)).toString();
-       contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
-       contentProxy->setFilterKeyColumn(1);
-       contentProxy->removeRow(0);
-       contentProxy->invalidate();
-   }
-   metaProxy->removeRows(0,metaProxy->rowCount());
+    qDebug() << saisonName;
 }
 
 QHash<int, QString> schedule::get_weekList()
 {
-    metaProxy->sort(1);
 
-    return weekList;
 }
 
-QMap<QTime, QStringList> schedule::get_dayWorkouts(QString workDate)
+QModelIndex schedule::get_modelIndex(QStandardItemModel *model,QString searchString, int col)
 {
-    QMap<QTime,QStringList> workouts;
-    QStringList workItems;
-    QTime workTime;
+    QList<QStandardItem*> list;
 
-    QModelIndex dayIndex = scheduleModel->indexFromItem(scheduleModel->findItems(workDate,Qt::MatchExactly,0).at(0));
-    QStandardItem *parent = scheduleModel->item(dayIndex.row());
+    list = model->findItems(searchString,Qt::MatchExactly | Qt::MatchRecursive,col);
 
-    if(parent->hasChildren())
+    if(list.count() > 0)
     {
-        for(int work = 0; work < parent->rowCount(); ++work)
-        {
-            for(int x = 1; x < workTags.count(); ++x)
-            {
-                if(x == 1) workTime = scheduleModel->data(scheduleModel->index(work,x,dayIndex)).toTime();
-                if(x > 1) workItems << scheduleModel->data(scheduleModel->index(work,x,dayIndex)).toString();
-            }
-            workouts.insert(workTime,workItems);
-            workItems.clear();
-        }
+        return model->indexFromItem(list.at(0));
+    }
+    else
+    {
+        return QModelIndex();
+    }
+}
+
+QMap<int, QStringList> schedule::get_workouts(bool dayWorkouts,QString indexString)
+{
+    QMap<int,QStringList> workouts;
+    QStringList workItems;
+    QStandardItemModel *model;
+    int counter = 0;
+    int indexCol = 0;
+
+    if(dayWorkouts)
+    {
+        model = scheduleModel;
+        counter = workoutTags->count();
+    }
+    else
+    {
+        model = phaseModel;
+        counter = compTags->count();
     }
 
+    QModelIndex modelIndex = this->get_modelIndex(model,indexString,indexCol);
+
+    if(modelIndex.isValid())
+    {
+        QStandardItem *parent = model->itemFromIndex(modelIndex);
+
+        if(parent->hasChildren())
+        {
+            for(int work = 0; work < parent->rowCount(); ++work)
+            {
+                for(int x = 1; x < counter; ++x)
+                {
+                    workItems << model->data(model->index(work,x,modelIndex)).toString();
+                }
+                workouts.insert(work,workItems);
+                workItems.clear();
+            }
+        }
+    }
     return workouts;
 }
 
-QStringList schedule::get_dayMeta(QString workDate)
+QStringList schedule::get_weekMeta(QString weekID)
 {
-    QStringList dayMeta;
-    QModelIndex dayIndex = scheduleModel->indexFromItem(scheduleModel->findItems(workDate,Qt::MatchExactly,0).at(0));
+    QStringList weekMeta;
+    QModelIndex weekIndex = this->get_modelIndex(phaseModel,weekID,1);
 
-    for(int i = 0; i < scheduleTags.count(); ++i)
+    if(weekIndex.isValid())
     {
-        dayMeta <<  scheduleModel->data(scheduleModel->index(dayIndex.row(),i)).toString();
+        for(int meta = 0; meta < phaseTags->count(); ++meta)
+        {
+            weekMeta << phaseModel->data(weekIndex.siblingAtColumn(meta)).toString();
+        }
     }
-
-    return dayMeta;
+    return weekMeta;
 }
-
 
 void schedule::read_ltsFile(QDomDocument stressContent)
 {
@@ -516,13 +289,31 @@ void schedule::save_ltsFile(double ltsDays)
     this->write_XMLFile(schedulePath,&xmlDoc,ltsFile);
 }
 
-int schedule::check_workouts(QDate date)
+void schedule::check_workouts(QDate date)
 {
-    int workCount;
-    this->filter_schedule(date.toString("dd.MM.yyyy"),1,false);
-    workCount = scheduleProxy->rowCount();
+    QList<QStandardItem*> itemList;
+    QString dateString = date.toString("dd.MM.yyyy");
+    QModelIndex index = this->get_modelIndex(scheduleModel,calc_weekID(date),0);
 
-    return workCount;
+    if(!index.isValid())
+    {
+        itemList << new QStandardItem(calc_weekID(date));
+        scheduleModel->invisibleRootItem()->appendRow(itemList);
+        index = this->get_modelIndex(scheduleModel,calc_weekID(date),0);
+        qDebug() << "Added Week" << scheduleModel->itemFromIndex(index)->data(Qt::DisplayRole).toString();
+    }
+    itemList.clear();
+    QStandardItem *weekItem = scheduleModel->itemFromIndex(index);
+
+    index = this->get_modelIndex(scheduleModel,dateString,0);
+
+    if(!index.isValid())
+    {
+        itemList << new QStandardItem(dateString);
+        weekItem->appendRow(itemList);
+        index = this->get_modelIndex(scheduleModel,dateString,0);
+        qDebug() << "Added Day" << scheduleModel->itemFromIndex(index)->data(Qt::DisplayRole).toString() << "to" << weekItem->data(Qt::DisplayRole).toString();
+    }
 }
 
 void schedule::save_ltsValues()
@@ -567,141 +358,139 @@ void schedule::save_ltsValues()
 void schedule::copyWeek(QString copyFrom,QString copyTo)
 {
     qDebug() << copyFrom << copyTo;
-
-    this->filter_schedule(copyFrom,0,false);
-    this->deleteWeek(copyTo);
-    QHash<int,QString> valueList;
-    QString fromWeek,toWeek,fromYear,toYear,workdate;
-    int fromWeek_int,fromYear_int,toWeek_int,toYear_int,addfactor = 0;
-    int days = 7;
-    fromWeek = copyFrom.split("_").first();
-    fromYear = copyFrom.split("_").last();
-    toWeek = copyTo.split("_").first();
-    toYear = copyTo.split("_").last();
-
-    QDate lastDay(fromYear.toInt(),12,31);
-    QDate workoutDate;
-    fromWeek_int = fromWeek.toInt();
-    fromYear_int = fromYear.toInt();
-    toWeek_int = toWeek.toInt();
-    toYear_int = toYear.toInt();
-
-    if(toYear_int == fromYear_int)
-    {
-        addfactor = toWeek_int - fromWeek_int;
-    }
-    if(toYear_int > fromYear_int)
-    {
-       addfactor = (lastDay.weekNumber() - fromWeek_int) + toWeek_int;
-       qDebug() << lastDay.weekNumber() << fromWeek_int << toWeek_int << addfactor;
-    }
-
-
-
-    for(int row = 0; row < scheduleProxy->rowCount(); ++row)
-    {
-        workdate = scheduleProxy->data(scheduleProxy->index(row,1)).toString();
-        qDebug() << workdate << workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy");
-        valueList.insert(0,copyTo);
-        valueList.insert(1,workoutDate.fromString(workdate,"dd.MM.yyyy").addDays(days*addfactor).toString("dd.MM.yyyy"));
-
-        for(int col = 2; col < scheduleProxy->columnCount();++col)
-        {
-            valueList.insert(col,scheduleProxy->data(scheduleProxy->index(row,col)).toString());
-        }
-        itemList.insert(scheduleProxy->index(row,0),valueList);
-    }
-    this->set_workoutData(COPY);
 }
 
-void schedule::delete_workout(QModelIndex index)
+void schedule::deleteWeek(QString weekId)
 {
-    QPair<double,double> stressMap;
-    QString wDate = workout_schedule->data(workout_schedule->index(index.row(),1)).toString();
-    stressMap.first = workout_schedule->data(workout_schedule->index(index.row(),8)).toDouble();
-    stressMap.second = get_timesec(workout_schedule->data(workout_schedule->index(index.row(),8)).toString())/60.0;
-    workout_schedule->removeRow(index.row(),QModelIndex());
-    this->updateStress(wDate,stressMap,3);
+    qDebug() << weekId;
 }
 
-void schedule::deleteWeek(QString deleteWeek)
+QString schedule::get_weekPhase(QDate currDate)
 {
-    QList<QStandardItem*> deleteList = workout_schedule->findItems(deleteWeek,Qt::MatchExactly,0);
-    for(int i = 0; i < deleteList.count(); ++i)
-    {
-        this->delete_workout(workout_schedule->indexFromItem(deleteList.at(i)));
-    }
+    QStringList weekMeta = this->get_weekMeta(this->calc_weekID(currDate));
+    return weekMeta.at(2);
 }
 
-QString schedule::get_weekPhase(QDate currDate,bool full)
-{
-    metaProxy->invalidate();
-    QString firstDay = currDate.addDays(1 - currDate.dayOfWeek()).toString("dd.MM.yyyy");
-    metaProxy->setFilterRegExp("\\b"+firstDay+"\\b");
-    metaProxy->setFilterKeyColumn(4);
-    QString phaseString = metaProxy->data(metaProxy->index(0,3)).toString();
-
-    if(metaProxy->rowCount() == 1 && full)
-    {
-        return phaseString +"#"+metaProxy->data(metaProxy->index(0,5)).toString()+"#"+metaProxy->data(metaProxy->index(0,6)).toString();
-    }
-    if(metaProxy->rowCount() == 1 && !full)
-    {
-        return phaseString;
-    }
-
-    return nullptr;
-}
-
-void schedule::set_workoutData(int mode)
+void schedule::set_workoutData(QHash<QString,QMap<int,QStringList>> workoutMap)
 {
     QString workoutStress;
     QPair<double,double> stressMap;
-    double currStress = 0;
-    double currDura = 0;
-    int row = 0;
-    int col = 0;
+    double dayStress = 0;
+    double dayDura = 0;
+    QModelIndex dayIndex;
+    QStandardItem *dayItem = nullptr;
 
-    if(mode == EDIT) //EDIT
+    for(QHash<QString,QMap<int,QStringList>>::const_iterator it =  workoutMap.cbegin(), end = workoutMap.cend(); it != end; ++it)
     {
-        for(QHash<QModelIndex,QHash<int,QString>>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it)
-        {
-            row = it.key().row();
-            currStress = workout_schedule->data(workout_schedule->index(row,8)).toDouble();
-            currDura = get_timesec(workout_schedule->data(workout_schedule->index(row,6)).toString())/60.0;
+        dayIndex = this->get_modelIndex(scheduleModel,it.key(),0);
+        dayItem = scheduleModel->itemFromIndex(dayIndex);
+        scheduleModel->removeRows(0,dayItem->rowCount(),dayIndex);
+        this->set_compValues(true,it.key(),it.value());
 
-            for(QHash<int,QString>::const_iterator vStart = it.value().cbegin(), vEnd = it.value().cend(); vStart != vEnd; ++vStart,++col)
+        for(QMap<int,QStringList>::const_iterator vit = it.value().cbegin(), vend = it.value().cend(); vit != vend; ++vit)
+        { 
+            QList<QStandardItem*> itemList;
+            itemList << new QStandardItem(QString::number(vit.key()));
+            dayStress = dayStress + vit.value().at(7).toDouble();
+            dayDura = dayDura + get_timesec(vit.value().at(5)) / 60.0;
+            for(int itemValue = 0; itemValue < vit.value().count(); ++itemValue)
             {
-                workout_schedule->setData(workout_schedule->index(row,col,QModelIndex()),it.value().value(col));
+                itemList << new QStandardItem(vit.value().at(itemValue));
             }
+            dayItem->appendRow(itemList);
+        }
+        stressMap.first = dayStress;
+        stressMap.second = dayDura;
+        this->updateStress(it.key(),stressMap,0);
+    }
+}
 
-            workout_date = it.value().value(1);
-            workoutStress = it.value().value(8);
-            stressMap.first = workoutStress.toDouble()-currStress;
-            stressMap.second = (get_timesec(it.value().value(6))/60.0)-currDura;
-            this->updateStress(workout_date,stressMap,0);
+void schedule::set_compValues(bool update,QString workDate,QMap<int,QStringList> valueList)
+{
+    QMap<QString,QVector<double>> compSum;
+    QMap<int,QStringList> compValues;
+
+    if(update)
+    {
+        this->update_compValues(&compSum,&valueList);
+        compMap.insert(QDate::fromString(workDate,"dd.MM.yyyy"),compSum);
+    }
+    else
+    {
+
+        QStringList saisons = saisonValues.keys();
+        QDate compDate;
+        qint64 daysLeft;
+        for(int saison = 0; saison < saisons.count(); ++saison)
+        {
+            daysLeft = firstdayofweek.daysTo(QDate().fromString(saisonValues.value(saisons.at(0)).at(1),"dd.MM.yyyy"));
+            for(int day = 0; day < daysLeft; ++day)
+            {
+                compDate = firstdayofweek.addDays(day);
+                this->check_workouts(compDate);
+                compValues = this->get_workouts(true,compDate.toString("dd.MM.yyyy"));
+                this->update_compValues(&compSum,&compValues);
+                compMap.insert(compDate,compSum);
+                compSum.clear();
+            }
         }
     }
-    else if(mode == ADD || mode == COPY) //ADD and COPY
-    {
-        int rowCount = workout_schedule->rowCount();
-        workout_schedule->insertRows(rowCount,itemList.count(),QModelIndex());
+}
 
-        for(QHash<QModelIndex,QHash<int,QString>>::const_iterator it =  itemList.cbegin(), end = itemList.cend(); it != end; ++it,++rowCount)
+void schedule::update_compValues(QMap<QString,QVector<double>> *compSum,QMap<int,QStringList> *compValues)
+{
+    QVector<double> comp(settings::getHeaderMap("summery")->count());
+    comp.fill(0);
+    QString compSport;
+    int amount = 1;
+
+    for(QMap<int,QStringList>::const_iterator it = compValues->cbegin(), end = compValues->cend(); it != end; ++it)
+    {
+        compSport = it.value().at(1);
+
+        if(compSum->contains(compSport))
         {
-            for(QHash<int,QString>::const_iterator vStart = it.value().cbegin(), vEnd = it.value().cend(); vStart != vEnd; ++vStart,++col)
-            {
-                workout_schedule->setData(workout_schedule->index(rowCount,col,QModelIndex()),it.value().value(col));
-            }
-            workout_date = it.value().value(1);
-            workoutStress = it.value().value(8);
-            stressMap.first = workoutStress.toDouble();
-            stressMap.second = get_timesec(it.value().value(6))/60.0;
-            this->updateStress(workout_date,stressMap,0);
-            col = 0;
+            comp[0] = compSum->value(compSport).at(0) + amount;
+            comp[1] = compSum->value(compSport).at(1) + this->get_timesec(it.value().at(5));
+            comp[3] = compSum->value(compSport).at(3) + it.value().at(6).toDouble();
+            comp[4] = compSum->value(compSport).at(4) + it.value().at(7).toDouble();
+            comp[5] = compSum->value(compSport).at(5) + it.value().at(8).toDouble();
         }
+        else
+        {
+            comp[0] = amount;
+            comp[1] = this->get_timesec(it.value().at(5));
+            comp[3] = it.value().at(6).toDouble();
+            comp[4] = it.value().at(7).toDouble();
+            comp[5] = it.value().at(8).toDouble();
+        }
+        compSum->insert(compSport,comp);
+        comp.fill(0);
     }
-    itemList.clear();
+}
+
+void schedule::set_saisonValues()
+{
+    QString saison;
+    QStringList values;
+
+    for(int saisons = 0; saisons < phaseModel->rowCount(); ++saisons)
+    {
+        for(int col = 0; col < macroTags->count(); ++col)
+        {
+            if(col == 0)
+            {
+                saison = phaseModel->data(phaseModel->index(saisons,col)).toString();
+            }
+            else
+            {
+                values << phaseModel->data(phaseModel->index(saisons,col)).toString();
+            }
+        }
+        saisonValues.insert(saison,values);
+        values.clear();
+    }
+    this->set_compValues(false,QString(),QMap<int,QStringList>());
 }
 
 void schedule::updateStress(QString date,QPair<double,double> stressMap,int mode)
@@ -731,7 +520,7 @@ void schedule::updateStress(QString date,QPair<double,double> stressMap,int mode
     {
         stressValue = stressValues.value(wDate).first;
         duraValue = stressValues.value(wDate).second;
-        if(stressValue - stressMap.first == 0)
+        if(stressValue - stressMap.first == 0.0)
         {
             stressValues.insert(wDate,qMakePair(0,0));
         }

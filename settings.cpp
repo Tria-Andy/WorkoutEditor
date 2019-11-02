@@ -38,6 +38,7 @@ QHash<QString,int> settings::fontMap;
 
 QString settings::valueFile;
 QString settings::valueFilePath;
+QString settings::headerFile;
 
 QString settings::isSwim;
 QString settings::isBike;
@@ -47,8 +48,7 @@ QString settings::isAlt;
 QString settings::isTria;
 QString settings::isOther;
 
-QVector<double> settings::tempVector;
-
+QHash<QString,QStringList*> settings::headerMap;
 QHash<QString,QStringList> settings::listMap;
 QHash<QString,QStringList> settings::jsonTags;
 QHash<QString,QVector<double>> settings::doubleVector;
@@ -144,10 +144,53 @@ QColor settings::get_colorRGB(QString colorValue,bool trans)
     return color;
 }
 
+void settings::readHeaderFile(QDomDocument *xmlFile)
+{
+    QDomNodeList xmlList;
+    QDomElement xmlElement,childElement;
+    QMap<int,QString> headerList;
+
+    xmlList = xmlFile->firstChild().childNodes();
+
+    for(int row = 0; row < xmlList.count(); ++row)
+    {
+       xmlElement =  xmlList.at(row).toElement();
+
+       for(int i = 0; i < xmlElement.childNodes().count(); ++i)
+       {
+           childElement = xmlElement.childNodes().at(i).toElement();
+           headerList.insert(childElement.attribute("id").toInt(),childElement.attribute("tag"));
+       }
+
+       QStringList *tagList = new QStringList();
+
+       for(QMap<int,QString>::const_iterator it = headerList.cbegin(), end = headerList.cend(); it != end; ++it)
+       {
+           tagList->append(it.value());
+       }
+
+       headerMap.insert(xmlList.at(row).toElement().tagName(),tagList);
+       headerList.clear();
+    }
+}
+
+QVector<double> settings::set_doubleValues(QStringList *list)
+{
+    QVector<double> doubleVector;
+    doubleVector.resize(list->count());
+
+    for(int i = 0; i < list->count();++i)
+    {
+        doubleVector[i] = list->at(i).toDouble();
+    }
+    list->clear();
+    return doubleVector;
+}
+
+
 int settings::loadSettings()
 {
     settingsUpdated = false;
-
     header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes" << "Work";
     header_pm << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD" << "Work";
     header_pace << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Work";
@@ -191,6 +234,7 @@ int settings::loadSettings()
             gcInfo.insert("maps",mysettings->value("maps").toString());
             gcInfo.insert("valuefile",mysettings->value("valuefile").toString());
             valueFile = mysettings->value("valuefile").toString();
+            headerFile = mysettings->value("headerfile").toString();
         mysettings->endGroup();
 
 
@@ -238,6 +282,13 @@ int settings::loadSettings()
                 weightDate = weightMap.lastKey();
             }
         }
+
+        //Read Header values
+        QDomDocument xmlDoc;
+        QFile xmlFile(gcInfo.value("schedule") + QDir::separator() + headerFile);
+        xmlDoc.setContent(&xmlFile);
+        readHeaderFile(&xmlDoc);
+        xmlFile.close();
 
         //Sport Value Settings
         if(gcInfo.value("schedule").isEmpty())
@@ -341,11 +392,13 @@ int settings::loadSettings()
             myvalues->endGroup();
 
             myvalues->beginGroup("Phase");
+                generalMap.insert("saison", myvalues->value("saison").toString());
                 settingList = myvalues->value("phases").toString().split(splitter);
                 listMap.insert("Phase",settingList);
                 settingString = myvalues->value("color").toString();
                 settings::fill_mapColor(&settingList,&settingString,false);
-                settingList.clear();
+                settingList = myvalues->value("phaseweeks").toString().split(splitter);
+                doubleVector.insert("Phaseweeks",set_doubleValues(&settingList));
             myvalues->endGroup();
 
             myvalues->beginGroup("Cycle");
@@ -377,20 +430,12 @@ int settings::loadSettings()
                 listMap.insert("Mode",settingList);
                 settingList.clear();
                 settingList = myvalues->value("modepercent").toString().split(splitter);
-                tempVector.resize(4);
                 for(int i = 0; i < listMap.value("Mode").count(); i++)
                 {
                     settingString = settingList.at(i);
                     tempList = settingString.split("|");
-                    for(int x = 0; x < tempList.count();++x)
-                    {
-                        settingString = tempList.at(x);
-                        tempVector[x] = settingString.toDouble();
-
-                    }
-                    doubleVector.insert(listMap.value("Mode").at(i),tempVector);
+                    doubleVector.insert(listMap.value("Mode").at(i),set_doubleValues(&tempList));
                 }
-                settingList.clear();
                 settingList = myvalues->value("modeborder").toString().split(splitter);
                 settingString = myvalues->value("color").toString();
                 settings::fill_mapColor(&settingList,&settingString,false);
@@ -399,26 +444,9 @@ int settings::loadSettings()
                 listMap.insert("Meals",settingList);
                 settingList.clear();
                 settingList = myvalues->value("mealdefault").toString().split(splitter);
-                tempVector.resize(settingList.count());
-                for(int i = 0; i < settingList.count();++i)
-                {
-                    settingString = settingList.at(i);
-                    tempVector[i] = settingString.toDouble();
-                }
-                settingList.clear();
-                doubleVector.insert("Mealdefault",tempVector);
-                tempVector.clear();
+                doubleVector.insert("Mealdefault",set_doubleValues(&settingList));
                 settingList = myvalues->value("macros").toString().split(splitter);
-                tempVector.resize(settingList.count());
-                for(int i = 0; i < settingList.count();++i)
-                {
-                    settingString = settingList.at(i);
-                    tempVector[i] = settingString.toDouble();
-                }
-                settingList.clear();
-                doubleVector.insert("Macros",tempVector);
-                tempVector.clear();
-
+                doubleVector.insert("Macros",set_doubleValues(&settingList));
                 settingList = myvalues->value("macroheader").toString().split(splitter);
                 listMap.insert("MacroHeader",settingList);
                 settingString = myvalues->value("macrocolor").toString();
@@ -436,14 +464,7 @@ int settings::loadSettings()
                 doubleMap.insert("Macrorange",myvalues->value("macrorange").toDouble());
                 athleteMap.insert("BodyFatCal",myvalues->value("fatcal").toDouble());
                 settingList = myvalues->value("moveday").toString().split(splitter);
-                tempVector.resize(7);
-                for(int i = 0; i < settingList.count();++i)
-                {
-                    settingString = settingList.at(i);
-                    tempVector[i] = settingString.toDouble();
-                }
-                doubleVector.insert("Moveday",tempVector);
-                settingList.clear();
+                doubleVector.insert("Moveday",set_doubleValues(&settingList));
             myvalues->endGroup();
 
             myvalues->beginGroup("Misc");
@@ -466,6 +487,7 @@ int settings::loadSettings()
                 athleteMap.insert("currpal",myvalues->value("currpal").toDouble());
                 athleteMap.insert("methode",myvalues->value("calmethode").toDouble());
                 doubleMap.insert("maxworkouts",myvalues->value("maxworkouts").toDouble());
+                doubleMap.insert("weekrange",myvalues->value("weekrange").toDouble());
             myvalues->endGroup();
 
             myvalues->beginGroup("Sport");
@@ -538,8 +560,8 @@ double settings::get_weightforDate(QDateTime actDate)
 
         if(actDate >= firstDate && actDate < weightDate)
         {
-            break;
             weight = it.value();
+            break;
         }
         else if(actDate >= weightDate)
         {
@@ -762,7 +784,7 @@ void settings::saveSettings()
 
 QString settings::set_colorString(QColor color)
 {
-    return QString::number(color.red())+"-"+QString::number(color.green())+"-"+QString::number(color.blue());;
+    return QString::number(color.red())+"-"+QString::number(color.green())+"-"+QString::number(color.blue());
 }
 
 QStringList settings::get_int_header(QString vSport,bool usePM)
@@ -793,7 +815,6 @@ QStringList settings::get_int_header(QString vSport,bool usePM)
     {
         return table_header << header_other << avg;
     }
-    return table_header;
 }
 
 int settings::get_timesec(QString time)

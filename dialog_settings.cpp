@@ -1132,14 +1132,18 @@ void Dialog_settings::on_toolButton_updateSaison_clicked()
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this,
                                       tr("New Saison"),
-                                      "Create and Save new Saison?",
+                                      "Create new Saison?",
                                       QMessageBox::Yes|QMessageBox::No
                                       );
         if (reply == QMessageBox::Yes)
         {
-            schedule_ptr->add_newSaison(ui->comboBox_saisons->currentText());
-            schedule_ptr->write_saisonInfo();
-            schedule_ptr->save_weekPlan();
+            QStringList saisonInfo;
+            saisonInfo << ui->comboBox_saisons->currentText()
+                       << ui->dateEdit_saisonStart->date().toString("dd.MM.yyyy")
+                       << ui->dateEdit_saisonEnd->date().toString("dd.MM.yyyy")
+                       << ui->lineEdit_saisonWeeks->text();
+
+            schedule_ptr->add_newSaison(saisonInfo);
         }
     }
 
@@ -1160,7 +1164,7 @@ void Dialog_settings::on_toolButton_deleteSaison_clicked()
         schedule_ptr->remove_saison(ui->comboBox_saisons->currentIndex());
         schedule_ptr->delete_Saison(ui->comboBox_saisons->currentText());
         schedule_ptr->write_saisonInfo();
-        schedule_ptr->save_weekPlan();
+        schedule_ptr->save_workouts(false);
         this->refresh_saisonCombo();
         this->set_saisonInfo(ui->comboBox_saisons->currentText());
     }

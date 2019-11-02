@@ -14,13 +14,13 @@ protected:
     void check_File(QString,QString);
     QDomDocument load_XMLFile(QString,QString);
     void write_XMLFile(QString,QDomDocument*,QString);
-    void fill_treeModel(QDomNodeList*, QStandardItemModel*,QMap<int,QStringList>*);
-    void read_treeModel(QStandardItemModel*,QMap<int,QStringList>*);
-    void fileToModel(QDomDocument,QString,QStandardItemModel*,QMap<int,QStringList>*);
-    void readLevel();
+    void fill_treeModel(QDomNodeList*, QStandardItemModel*);
+    void add_child(QDomElement,QStandardItem*);
+    void read_treeModel(QStandardItemModel*,QString,QString);
+    void read_child(QDomDocument*, QDomElement*, QStandardItem *,QStandardItemModel*,QStringList*,int);
+
 private:
     QString schedulePath,workoutFile,scheduleFile,metaFile,contentFile,ltsFile;
-
 };
 
 #endif // XMLHANDLER_H

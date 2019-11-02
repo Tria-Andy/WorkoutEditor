@@ -42,7 +42,6 @@ Dialog_export::Dialog_export(QWidget *parent, schedule *p_schedule) :
         ui->comboBox_week_export->addItem(p_schedule->week_meta->data(p_schedule->week_meta->index(i,1)).toString());
     }
     exportProxy->invalidate();
-    exportProxy->setSourceModel(p_schedule->workout_schedule);
     exportMode = 0;
 
     ui->dateEdit_export->setDate(currDate);

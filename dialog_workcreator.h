@@ -33,11 +33,12 @@ public:
         QString levelName;
         if(index.parent().isValid())
         {
-            levelName = index.parent().child(index.row(),1).data().toString();
+            //levelName = index.parent().child(index.row(),1).data().toString();
+            levelName = model->index(index.row(),1,index.parent()).data().toString();
         }
         else
         {
-            levelName = model->data(model->index(index.row(),1,QModelIndex())).toString();;
+            levelName = model->data(model->index(index.row(),1,QModelIndex())).toString();
         }
 
         QLinearGradient itemGradient(option.rect.topLeft(),option.rect.bottomLeft());

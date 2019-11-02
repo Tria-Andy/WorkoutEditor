@@ -21,7 +21,7 @@
 
 standardWorkouts::standardWorkouts()
 {
-    meta_tags << "sport" << "id" << "code" << "title" << "duration" << "distance" << "stress" << "work" << "timebase" << "pic";
+    meta_tags << "sport" << "id" << "code" << "title" << "comment" << "duration" << "distance" << "stress" << "work" << "timebase" << "pic";
     step_tags << "sport-id" << "id" << "part" << "level" << "threshold" << "int-time" << "int-dist" << "repeats" << "parent";
     workoutPath = settings::getStringMapPointer(settings::stingMap::GC)->value("workouts");
 

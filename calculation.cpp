@@ -6,7 +6,7 @@ calculation::calculation()
     doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
     gcValues = settings::getStringMapPointer(settings::stingMap::GC);
     generalValues = settings::getStringMapPointer(settings::stingMap::General);
-
+    firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
 }
 
 QHash<QString,double>* calculation::thresValues = settings::getdoubleMapPointer(settings::dMap::Threshold);
@@ -74,35 +74,45 @@ QString calculation::get_workout_pace(double dist, QTime duration,QString sport,
 
     if(dist != 0.0 || min != 0)
     {
-        if(sport == settings::isSwim) speed = sec/dist, nr=0;
+        if(sport == settings::isSwim)
+        {
+            speed = sec/dist;
+            nr=0;
+        }
         if(sport == settings::isBike)
         {
             if(min > 0)
             {
-                speed = (dist/min)*60, nr=1;
+                speed = (dist/min)*60;
+                nr=1;
             }
             else
             {
-                speed = (dist/sec)*3600, nr=1;
+                speed = (dist/sec)*3600;
+                nr=1;
             }
         }
-        if(sport == settings::isRun)  speed = sec/dist, nr=2;
-        if(sport == settings::isAlt || sport == settings::isStrength) speed = 0.0, nr=3;
+        if(sport == settings::isRun)
+        {
+            speed = sec/dist;
+            nr=2;
+        }
+        if(sport == settings::isAlt || sport == settings::isStrength) static_cast<void>(speed = 0.0), nr=3;
 
         speed = set_doubleValue(speed,false);
 
         if(full_label)
         {
-            if(nr == 0) return (QDateTime::fromTime_t(speed).toUTC().toString("mm:ss") + speedLabel.at(nr) + QDateTime::fromTime_t(speed/10.0).toUTC().toString("mm:ss") +" min/100m");
+            if(nr == 0) return (QDateTime::fromTime_t(static_cast<uint>(speed)).toUTC().toString("mm:ss") + speedLabel.at(nr) + QDateTime::fromTime_t(static_cast<uint>(speed/10.0)).toUTC().toString("mm:ss") +" min/100m");
             if(nr == 1) return (QString::number(speed) + speedLabel.at(nr));
-            if(nr == 2) return (QDateTime::fromTime_t(speed).toUTC().toString("mm:ss") + speedLabel.at(nr));
+            if(nr == 2) return (QDateTime::fromTime_t(static_cast<uint>(speed)).toUTC().toString("mm:ss") + speedLabel.at(nr));
             if(nr == 3) return speedLabel.at(nr);
         }
         else
         {
-            if(nr == 0) return (QDateTime::fromTime_t(speed/10.0).toUTC().toString("mm:ss") +" min/100m");
+            if(nr == 0) return (QDateTime::fromTime_t(static_cast<uint>(speed/10.0)).toUTC().toString("mm:ss") +" min/100m");
             if(nr == 1) return (QString::number(speed) + speedLabel.at(nr));
-            if(nr == 2) return (QDateTime::fromTime_t(speed).toUTC().toString("mm:ss") + speedLabel.at(nr));
+            if(nr == 2) return (QDateTime::fromTime_t(static_cast<uint>(speed)).toUTC().toString("mm:ss") + speedLabel.at(nr));
             if(nr == 3) return speedLabel.at(nr);
         }
     }
@@ -171,11 +181,11 @@ int calculation::calc_lapPace(QString sport, int duration, double distance)
     {
         if (sport == settings::isSwim)
         {
-            pace = duration * (100.0/distance);
+            pace = static_cast<int>(duration * (100.0/distance));
         }
         else
         {
-            pace = duration / distance;
+            pace = static_cast<int>(duration / distance);
         }
         return pace;
     }
@@ -183,7 +193,6 @@ int calculation::calc_lapPace(QString sport, int duration, double distance)
     {
         return 0;
     }
-    return 0;
 }
 
 int calculation::get_hfvalue(QString percent)
@@ -195,7 +204,7 @@ int calculation::get_hfvalue(QString percent)
 
 double calculation::calc_totalCal(double weight,double avgHF, double moveTime)
 {
-    int age = QDate::currentDate().year() - athleteValues->value("yob");
+    int age = static_cast<int>(QDate::currentDate().year() - athleteValues->value("yob"));
 
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
 }
@@ -299,11 +308,11 @@ QString calculation::calc_duration(QString sport,double dist, QString pace)
 {
     if(sport == settings::isSwim)
     {
-        return set_time(get_timesec(pace) * (dist*10));
+        return set_time(static_cast<int>(get_timesec(pace) * (dist*10)));
     }
     else
     {
-        return set_time(get_timesec(pace) * dist);
+        return set_time(static_cast<int>(get_timesec(pace) * dist));
     }
 }
 
@@ -352,6 +361,8 @@ QString calculation::calc_weekID(QDate workoutDate)
         weeknumber = weeknumber+"_"+QString::number(workoutDate.year());
     }
 
+    //qDebug() << workoutDate << weeknumber;
+
     return weeknumber;
 }
 
@@ -360,7 +371,7 @@ double calculation::calc_swim_xpower(double distance,double pace,double time,dou
     double K = 2 + 0.35 * athleteWeight;
     double velo = distance / pace;
     double alpha = 2.0 /10;
-    QVector<double> rawEWMA(time);
+    QVector<double> rawEWMA(static_cast<int>(time));
     double xPower = (K/0.6)*pow(velo,3);
     double xPowerSum = 0.0;
 
@@ -393,8 +404,6 @@ double calculation::get_corrected_MET(double weight, int style)
     {
         return swimMET * (3.5/mlkgmin);
     }
-
-    return 10;
 }
 
 double calculation::estimate_stress(QString sport, QString p_goal, int duration,int usePM)
@@ -484,7 +493,6 @@ double calculation::set_doubleValue(double value, bool setthree)
     {
         return ((static_cast<int>(value *100 +.5)) / 100.0);
     }
-    return 0;
 }
 
 double calculation::get_thresPercent(QString sport, QString level, bool max)

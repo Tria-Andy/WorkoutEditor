@@ -68,8 +68,8 @@ week_popup::~week_popup()
 void week_popup::set_plotValues()
 {
     workSched->filter_schedule(week_info.at(0),0,false);
-    workSched->scheduleProxy->sort(0);
-    int proxyCount = workSched->scheduleProxy->rowCount();
+
+    int proxyCount = 0;
     QDate tempDate;
     QDateTime workDateTime;
     QStringList workDetails;
@@ -86,7 +86,7 @@ void week_popup::set_plotValues()
         QDateTime weekStart,workoutDate;
         QTime wTime;
         wTime.fromString("00:00:00","hh:mm:ss");
-        tempDate = QDate::fromString(workSched->scheduleProxy->data(workSched->scheduleProxy->index(0,1)).toString(),"dd.MM.yyyy");
+
         weekStart.setDate(tempDate.addDays(1 - tempDate.dayOfWeek()));
         weekStart.setTime(wTime);
         weekStart.setTimeSpec(Qt::LocalTime);
@@ -141,14 +141,9 @@ void week_popup::set_plotValues()
 
         for(int i = 0,day = 0; i < proxyCount; ++i)
         {
-            workoutDate = QDateTime::fromString(workSched->scheduleProxy->data(workSched->scheduleProxy->index(i,1,QModelIndex())).toString(),"dd.MM.yyyy");
+
             workoutDate.setTime(wTime);
             workoutDate.setTimeSpec(Qt::LocalTime);
-
-            stress = workSched->scheduleProxy->data(workSched->scheduleProxy->index(i,8,QModelIndex())).toDouble();
-            dura = static_cast<double>(this->get_timesec(workSched->scheduleProxy->data(workSched->scheduleProxy->index(i,6,QModelIndex())).toString())) / 60;
-            dist = workSched->scheduleProxy->data(workSched->scheduleProxy->index(i,7,QModelIndex())).toDouble();
-            workkj = workSched->scheduleProxy->data(workSched->scheduleProxy->index(i,9,QModelIndex())).toDouble();
 
             for( ; day < weekDates.count(); ++day)
             {
@@ -174,22 +169,7 @@ void week_popup::set_plotValues()
         }
 
         //Load Level Distribution
-        workSched->filter_schedule(week_info.at(0),0,false);
-        workSched->scheduleProxy->sort(1);
 
-        for(int i = 0; i < workSched->scheduleProxy->rowCount(); ++i)
-        {
-            workDateTime.setTime(QTime());
-            workDateTime.setDate(QDate::fromString(workSched->scheduleProxy->data(workSched->scheduleProxy->index(i,1)).toString(),"dd.MM.yyyy"));
-            workDateTime.setTime(QTime::fromString(workSched->scheduleProxy->data(workSched->scheduleProxy->index(i,2)).toString(),"hh:mm"));
-
-            workDetails.append(workSched->scheduleProxy->data(workSched->scheduleProxy->index(i,3)).toString());
-            workDetails.append(workSched->scheduleProxy->data(workSched->scheduleProxy->index(i,6)).toString());
-            workDetails.append(workSched->scheduleProxy->data(workSched->scheduleProxy->index(i,10)).toString());
-
-            weekworkouts.insert(workDateTime,workDetails);
-            workDetails.clear();
-        }
 
         for(QMap<QDateTime,QStringList>::const_iterator it = weekworkouts.cbegin(), end = weekworkouts.cend(); it != end; ++it)
         {
@@ -420,7 +400,7 @@ void week_popup::set_weekPlot(int yValue)
 
         if(yValue == DURATION)
         {
-            qCopy(yDura.begin(),yDura.end(),yValues.begin());
+            std::copy(yDura.begin(),yDura.end(),yValues.begin());
             scaleBars->setName(barSelection.at(0)+"(Min)");
             scaleBars->setData(xBar,yValues);
             ui->widget_plot->yAxis2->setRange(0,maxValues[1]+(maxValues[1]*0.1));
@@ -428,7 +408,7 @@ void week_popup::set_weekPlot(int yValue)
         }
         if(yValue == DISTANCE)
         {
-            qCopy(yDist.begin(),yDist.end(),yValues.begin());
+            std::copy(yDist.begin(),yDist.end(),yValues.begin());
             scaleBars->setName(barSelection.at(1)+"(Km)");
             scaleBars->setData(xBar,yValues);
             ui->widget_plot->yAxis2->setRange(0,maxValues[2]+(maxValues[2]*0.1));
@@ -436,7 +416,7 @@ void week_popup::set_weekPlot(int yValue)
         }
         if(yValue == KJ)
         {
-            qCopy(yWorkKj.begin(),yWorkKj.end(),yValues.begin());
+            std::copy(yWorkKj.begin(),yWorkKj.end(),yValues.begin());
             scaleBars->setName(barSelection.at(2));
             scaleBars->setData(xBar,yValues);
             ui->widget_plot->yAxis2->setRange(0,maxValues[3]+(maxValues[3]*0.1));

@@ -110,7 +110,7 @@ void foodmacro_popup::set_plotValues(QDate startDate)
 
     for(int day = 0,pos = 0; day < dayCount; ++day)
     {
-        dateHeader << QDate::shortDayName(day+1) + " " +weekDates.at(day).toString("dd.MM");
+        dateHeader << QLocale().dayName(day+1,QLocale::ShortFormat) + " " +weekDates.at(day).toString("dd.MM");
 
         for(int mac = 0; mac < macroHeader.count(); ++mac)
         {

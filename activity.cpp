@@ -547,7 +547,6 @@ QList<QStandardItem *> Activity::setIntRow(int pInt)
                 lapName = QString::number(pInt+1)+"_"+this->checkRangeLevel(lapPace);
             }
 
-
             if(isIndoor)
             {
                 double wattSpeed = this->wattToSpeed(thresPower,watts);
@@ -1829,8 +1828,6 @@ double Activity::interpolate_speed(int row,int sec,double limit)
             return curr_speed;
         }
     }
-
-    return 0;
 }
 
 void Activity::set_avgValues(int counter,int factor)

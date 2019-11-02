@@ -159,44 +159,15 @@ void Dialog_week_copy::write_weekList()
 
 void Dialog_week_copy::addWeek()
 {
-    QString weekName = listModel->data(listModel->index(listIndex.row(),1)).toString();
-    QSortFilterProxyModel *workProxy = new QSortFilterProxyModel;
-    QStandardItemModel *schedModel = workSched->workout_schedule;
-    workProxy->setSourceModel(saveWeekModel);
-    workProxy->setFilterRegExp("\\b"+weekName+"\\b");
-    workProxy->setFilterKeyColumn(0);
-    workProxy->sort(1);
-    int workCount = workProxy->rowCount();
-    int schedCount = schedModel->rowCount();
-    QPair<double,double> stressMap;
-    QString setDate;
-    QModelIndex index = workSched->week_meta->findItems(sourceWeek,Qt::MatchExactly,1).at(0)->index();
 
-    QDate sourceFirstDay = QDate::fromString(workSched->week_meta->data(workSched->week_meta->index(index.row(),3)).toString(),"dd.MM.yyyy");
-    schedModel->insertRows(schedCount,workCount,QModelIndex());
-
-    int dayofweek;
-
-    for(int work = 0; work < workCount; ++work)
-    {
-        dayofweek = workProxy->data(workProxy->index(work,2)).toInt();
-        stressMap.first = workProxy->data(workProxy->index(work,9)).toDouble();
-        stressMap.second = get_timesec(workProxy->data(workProxy->index(work,6)).toString())/60.0;
-        setDate = sourceFirstDay.addDays(dayofweek-1).toString("dd.MM.yyyy");
-
-        schedModel->setData(schedModel->index(schedCount+work,0),sourceWeek);
-        schedModel->setData(schedModel->index(schedCount+work,1),setDate);
-
-        for(int col = 3; col < workProxy->columnCount(); ++col)
-        {
-            schedModel->setData(schedModel->index(schedCount+work,col-1),workProxy->data(workProxy->index(work,col)));
-        }
-        workSched->updateStress(setDate,stressMap,0);
-    }
-    delete workProxy;
 }
 
-void Dialog_week_copy::processWeek()
+void Dialog_week_copy::on_pushButton_cancel_clicked()
+{
+    reject();
+}
+
+void Dialog_week_copy::on_pushButton_ok_clicked()
 {
     if(editMode == COPY)
     {
@@ -267,17 +238,6 @@ void Dialog_week_copy::processWeek()
     }
 }
 
-
-void Dialog_week_copy::on_pushButton_cancel_clicked()
-{
-    reject();
-}
-
-void Dialog_week_copy::on_pushButton_ok_clicked()
-{
-    this->processWeek();
-}
-
 void Dialog_week_copy::on_radioButton_copy_clicked()
 {
     editMode = COPY;
@@ -338,66 +298,7 @@ void Dialog_week_copy::on_listView_weeks_clicked(const QModelIndex &index)
 
 void Dialog_week_copy::on_toolButton_addweek_clicked()
 {
-    QString weekName;
-    QList<QDate> workouts;
-    int timeSum = 0;
-    int stressSum = 0;
 
-    QSortFilterProxyModel *scheduleProxy = new QSortFilterProxyModel;
-    scheduleProxy->setSourceModel(workSched->workout_schedule);
-    scheduleProxy->setFilterRegExp("\\b"+sourceWeek+"\\b");
-    scheduleProxy->setFilterKeyColumn(0);
-    int idCount = 1;
-    int proxyCount = scheduleProxy->rowCount();
-    int modelCount = saveWeekModel->rowCount();
-
-    saveWeekModel->insertRows(modelCount,proxyCount,QModelIndex());
-
-    for(int i = 0; i < proxyCount; ++i)
-    {
-        QDate dateofWeek = QDate::fromString(scheduleProxy->data(scheduleProxy->index(i,1)).toString(),"dd.MM.yyyy");
-
-        timeSum =  timeSum+this->get_timesec(scheduleProxy->data(scheduleProxy->index(i,6)).toString());
-        stressSum = stressSum+scheduleProxy->data(scheduleProxy->index(i,8)).toInt();
-        if(!workouts.contains(dateofWeek)) workouts.append(dateofWeek);
-    }
-    qSort(workouts);
-
-    weekName = ui->lineEdit_saveas->text();
-
-    for(int day = 0; day < workouts.count(); ++day)
-    {
-        for(int work = 0; work < proxyCount; ++work)
-        {
-            if(QDate::fromString(scheduleProxy->data(scheduleProxy->index(work,1)).toString(),"dd.MM.yyyy") == workouts.at(day))
-            {
-                saveWeekModel->setData(saveWeekModel->index(modelCount+work,0),weekName); //Name
-                saveWeekModel->setData(saveWeekModel->index(modelCount+work,1),idCount); //LfdNr
-                saveWeekModel->setData(saveWeekModel->index(modelCount+work,2),day+1); // DayofWeek
-                saveWeekModel->setData(saveWeekModel->index(modelCount+work,3),scheduleProxy->data(scheduleProxy->index(work,2)).toString()); //Time
-                saveWeekModel->setData(saveWeekModel->index(modelCount+work,4),scheduleProxy->data(scheduleProxy->index(work,3)).toString()); //Sport
-                saveWeekModel->setData(saveWeekModel->index(modelCount+work,5),scheduleProxy->data(scheduleProxy->index(work,4)).toString()); //Code
-                saveWeekModel->setData(saveWeekModel->index(modelCount+work,6),scheduleProxy->data(scheduleProxy->index(work,5)).toString()); //Title
-                saveWeekModel->setData(saveWeekModel->index(modelCount+work,7),scheduleProxy->data(scheduleProxy->index(work,6)).toString()); //Duration
-                saveWeekModel->setData(saveWeekModel->index(modelCount+work,8),scheduleProxy->data(scheduleProxy->index(work,7)).toString()); //Distance
-                saveWeekModel->setData(saveWeekModel->index(modelCount+work,9),scheduleProxy->data(scheduleProxy->index(work,8)).toString()); //Stress
-                ++idCount;
-            }
-        }
-    }
-    int listCount = listModel->rowCount();
-    listModel->insertRow(listCount,QModelIndex());
-    listModel->setData(listModel->index(listCount,0),weekName+" - "+QString::number(proxyCount)+" - "+this->set_time(timeSum)+" - "+QString::number(stressSum));
-    listModel->setData(listModel->index(listCount,1),weekName);
-    listModel->setData(listModel->index(listCount,2),proxyCount);
-    listModel->setData(listModel->index(listCount,3),this->set_time(timeSum));
-    listModel->setData(listModel->index(listCount,4),stressSum);
-
-    ui->lineEdit_saveas->setText("");
-    ui->toolButton_addweek->setEnabled(false);
-    isSaveWeek = true;
-
-    delete scheduleProxy;
 }
 
 void Dialog_week_copy::on_toolButton_delete_clicked()

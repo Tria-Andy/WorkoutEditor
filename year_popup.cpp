@@ -242,21 +242,22 @@ void year_popup::set_plot(int yValue)
 
     if(yValue == DURATION)
     {
-        qCopy(yDura.begin(),yDura.end(),yValues.begin());
+
+        std::copy(yDura.begin(),yDura.end(),yValues.begin());
         bars->setName(selectList.at(0));
         ui->widget_plot->yAxis2->setRange(0,maxValues[0]+(maxValues[0]*0.2));
         ui->widget_plot->yAxis2->setLabel(selectList.at(0));
     }
     if(yValue == DISTANCE)
     {
-        qCopy(yDist.begin(),yDist.end(),yValues.begin());
+        std::copy(yDist.begin(),yDist.end(),yValues.begin());
         bars->setName(selectList.at(1));
         ui->widget_plot->yAxis2->setRange(0,maxValues[1]+(maxValues[1]*0.2));
         ui->widget_plot->yAxis2->setLabel(selectList.at(1));
     }
     if(yValue == WORKOUTS)
     {
-        qCopy(yWorks.begin(),yWorks.end(),yValues.begin());
+        std::copy(yWorks.begin(),yWorks.end(),yValues.begin());
         bars->setName(selectList.at(2));
         ui->widget_plot->yAxis2->setRange(0,maxValues[2]+(maxValues[2]*0.3));
         ui->widget_plot->yAxis2->setLabel(selectList.at(2));

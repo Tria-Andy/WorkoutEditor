@@ -97,40 +97,36 @@ public:
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         Q_UNUSED(option)
+        int row = index.row();
+        int col = index.column();
 
-        if(index.row() == 0 && index.column() == selCol)
+        if(row == 0 && col == selCol)    //Time
         {
             QTimeEdit *editor = new QTimeEdit(parent);
             editor->setDisplayFormat("hh:mm");
             editor->setFrame(true);
             return editor;
         }
-        if(index.row() == 1 && index.column() == selCol)
+        if((row == 1 || row == 2) && col == selCol)    //Sport || Code
         {
             QComboBox *editor = new QComboBox(parent);
             editor->setFrame(false);
             return editor;
         }
-        if(index.row() == 2 && index.column() == selCol)
-        {
-            QComboBox *editor = new QComboBox(parent);
-            editor->setFrame(false);
-            return editor;
-        }
-        if(index.row() == 3 && index.column() == selCol)
+        if((row == 3 || row == 4) && col == selCol)    //Title || Comment
         {
             QLineEdit *editor = new QLineEdit(parent);
             editor->setFrame(true);
             return editor;
         }
-        if(index.row() ==  4 && index.column() == selCol)
+        if(row ==  5 && col == selCol)
         {
             QTimeEdit *editor = new QTimeEdit(parent);
             editor->setDisplayFormat("hh:mm:ss");
             editor->setFrame(true);
             return editor;
         }
-        if(index.row() == 5 && index.column() == selCol)
+        if(row == 6 && col == selCol)
         {
             QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
             editor->setFrame(true);
@@ -140,7 +136,7 @@ public:
             editor->setSingleStep(0.100);
             return editor;
         }
-        if(index.row() == 6 && index.column() == selCol)
+        if(row == 7 && col == selCol)
         {
             QSpinBox *editor = new QSpinBox(parent);
             editor->setFrame(true);
@@ -148,7 +144,7 @@ public:
             editor->setMaximum(500);
             return editor;
         }
-        if(index.row() == 7 && index.column() == selCol)
+        if(row == 8 && col == selCol)
         {
             QSpinBox *editor = new QSpinBox(parent);
             editor->setFrame(true);
@@ -156,46 +152,49 @@ public:
             editor->setMaximum(5000);
             return editor;
         }
-        return 0;
+        return nullptr;
     }
 
     void setEditorData(QWidget *editor, const QModelIndex &index) const
     {
-        if(index.row() == 0)
+        int row = index.row();
+        if(row == 0 || row == 5)
         {
             QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
-            timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"hh:mm"));
+            if(row == 0)
+            {
+                timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"hh:mm"));
+            }
+            else
+            {
+                timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"hh:mm:ss"));
+            }
         }
-        if(index.row() == 1)
+        if(row == 1 || row == 2)
         {
             QString value = index.data(Qt::DisplayRole).toString();
             QComboBox *comboBox = static_cast<QComboBox*>(editor);
-            comboBox->addItems(settings::get_listValues("Sport"));
+            if(row == 1)
+            {
+                comboBox->addItems(settings::get_listValues("Sport"));
+            }
+            else
+            {
+                comboBox->addItems(settings::get_listValues("WorkoutCode"));
+            }
             comboBox->setCurrentText(value);
         }
-        if(index.row() == 2)
-        {
-            QString value = index.data(Qt::DisplayRole).toString();
-            QComboBox *comboBox = static_cast<QComboBox*>(editor);
-            comboBox->addItems(settings::get_listValues("WorkoutCode"));
-            comboBox->setCurrentText(value);
-        }
-        if(index.row() == 3)
+        if(row == 3 || row == 4)
         {
             QLineEdit *lineEdit = static_cast<QLineEdit*>(editor);
             lineEdit->setText(index.data().toString());
         }
-        if(index.row() == 4)
-        {
-            QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
-            timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"hh:mm:ss"));
-        }
-        if(index.row() == 5)
+        if(row == 6)
         {
             QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
             spinBox->setValue(index.data(Qt::DisplayRole).toDouble());
         }
-        if(index.row() == 6 || index.row() == 7)
+        if(row == 7 || row == 8)
         {
             QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
             spinBox->setValue(index.data(Qt::DisplayRole).toInt());
@@ -205,49 +204,44 @@ public:
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
     {
         int col = index.column();
+        int row = index.row();
 
-        if(index.row() == 0) //Phase and Level
+        if(row == 0 || row == 5) //Time || Duration
         {
             QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
             QTime value = timeEdit->time();
             timeEdit->interpretText();
-            model->setData(index,value.toString("hh:mm"), Qt::EditRole);
+            if(row == 0)
+            {
+                model->setData(index,value.toString("hh:mm"), Qt::EditRole);
+            }
+            else
+            {
+                model->setData(index,value.toString("hh:mm:ss"), Qt::EditRole);
+                model->setData(model->index(10,col),get_workout_pace(model->data(model->index(6,col)).toDouble(),value,model->data(model->index(1,col)).toString(),true));
+            }
         }
-        if(index.row() == 1) //Sport
+        if(row == 1 || row == 2) //Sport || Code
         {
             QComboBox *comboBox = static_cast<QComboBox*>(editor);
             QString value = comboBox->currentText();
             model->setData(index,value, Qt::EditRole);
         }
-        if(index.row() == 2) //WorkoutCode
-        {
-            QComboBox *comboBox = static_cast<QComboBox*>(editor);
-            QString value = comboBox->currentText();
-            model->setData(index,value, Qt::EditRole);
-        }
-        if(index.row() == 3) //Title
+        if(row == 3 || row == 4) //Title || Comment
         {
             QLineEdit *lineEdit = static_cast<QLineEdit*>(editor);
             QString value = lineEdit->text();
             model->setData(index,value);
         }
-        if(index.row() == 4) //Duration
-        {
-            QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
-            QTime value = timeEdit->time();
-            timeEdit->interpretText();
-            model->setData(index,value.toString("hh:mm:ss"), Qt::EditRole);
-            model->setData(model->index(9,col),get_workout_pace(model->data(model->index(5,col)).toDouble(),value,model->data(model->index(1,col)).toString(),true));
-        }
-        if(index.row() == 5) //Distance
+        if(row == 6) //Distance
         {
             QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
             spinBox->interpretText();
             double value = spinBox->value();
             model->setData(index, value, Qt::EditRole);
-            model->setData(model->index(9,col),get_workout_pace(value,QTime::fromString(model->data(model->index(4,col)).toString(),"hh:mm:ss"),model->data(model->index(1,col)).toString(),true));
+            model->setData(model->index(10,col),get_workout_pace(value,QTime::fromString(model->data(model->index(5,col)).toString(),"hh:mm:ss"),model->data(model->index(1,col)).toString(),true));
         }
-        if(index.row() == 6 || index.row() == 7) //Stress && Work(kj)
+        if(row == 7 || row == 8) //Stress && Work(kj)
         {
             QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
             int value = spinBox->value();
@@ -280,35 +274,32 @@ private slots:
     void on_toolButton_editMove_clicked();
     void on_toolButton_copy_clicked();
     void on_toolButton_delete_clicked();
-    void edit_workoutDate(QDate);
     void load_workoutData(int);
     void setNextEditRow();
-    void update_workValues();
+    void read_workValues();
     void on_tableView_day_clicked(const QModelIndex &index);
     void on_toolButton_dayEdit_clicked(bool checked);
     void on_toolButton_upload_clicked();
     void on_comboBox_stdworkout_activated(int index);
     void on_toolButton_map_clicked();
-    void set_addWorkouts(int);
+    void on_dateEdit_workDate_dateChanged(const QDate &date);
 
 private:
     Ui::day_popup *ui;
     schedule *workSched;
     del_daypop daypop_del;
     QStandardItemModel *dayModel,*stdlistModel,*intExport, *sampExport;
-    QSortFilterProxyModel *scheduleProxy;
-    QHash<QString,QString> currWorkout;
+    QHash<QString,QMap<int,QStringList>> workoutMap;
+    QMap<int,QStringList> dayWorkouts;
     QHash<int,QString> stdworkData;
-    QMap<int,bool> addWorkouts;
-    QDate popupDate,newDate;
-    QModelIndex selIndex;
-    QStringList workListHeader;
+    QDate popupDate;
+    QStringList *workListHeader;
     QIcon editIcon,addIcon;
     int selWorkout;
-    bool editMode,addWorkout;
-    QButtonGroup *workoutGroup;
+    bool editMode,moveWorkout;
 
     void init_dayWorkouts(QDate);
+    void update_workouts();
     void set_comboWorkouts(QString,QString);
     void set_controlButtons(bool);
     void set_exportContent();

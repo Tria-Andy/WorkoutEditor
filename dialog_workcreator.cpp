@@ -17,7 +17,7 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     stepProxy = new QSortFilterProxyModel(this);
     stepProxy->setSourceModel(this->workouts_steps);
     schedProxy = new QSortFilterProxyModel(this);
-    schedProxy->setSourceModel(worksched->workout_schedule);
+    schedProxy->setSourceModel(worksched->scheduleModel);
     proxyFilter = new QSortFilterProxyModel(this);
     proxyFilter->setSourceModel(schedProxy);
 

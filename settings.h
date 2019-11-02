@@ -22,6 +22,7 @@
 #include <QtCore>
 #include <QSettings>
 #include <QColor>
+#include <QtXml>
 
 class settings
 {
@@ -32,7 +33,8 @@ private:
     static QStringList setRangeString(QHash<QString,QString>*);
     static QString set_colorString(QColor);
 
-    static QString settingFile,valueFile,valueFilePath,splitter;
+    static QString settingFile,valueFile,valueFilePath,splitter,headerFile;
+    static QHash<QString,QStringList*> headerMap;
     static QStringList table_header,header_swim,header_pm,header_pace,headerTria,header_other;
     static QStringList header_int_time,header_swim_time,triaDistance;
 
@@ -40,7 +42,6 @@ private:
     static QMap<int,double> weightMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,triRange,stgRange,altRange,hfRange;
     static QHash<QString,int> fontMap;
-    static QVector<double> tempVector;
 
     //Getter
     static QColor get_colorRGB(QString,bool);
@@ -50,6 +51,8 @@ private:
     static void fill_mapList(QMap<int,QString>*,QString*);
     static void fill_mapColor(QStringList*,QString*,bool);
     static void fill_mapRange(QHash<QString,QString>*,QString*);
+    static void readHeaderFile(QDomDocument*);
+    static QVector<double> set_doubleValues(QStringList*);
 
 protected:
     static QHash<QString,double> thresholdMap,ltsMap,athleteMap,modeMap,doubleMap;
@@ -74,6 +77,7 @@ public:
     static QStringList get_listValues(QString key) {return listMap.value(key);}
     static QStringList get_triaDistance() {return triaDistance;}
     static QStringList get_jsonTags(QString key) {return jsonTags.value(key);}
+    static QStringList* getHeaderMap(QString key){return headerMap.value(key);}
 
     //Get Map Pointer
     enum lMap {Sample,Interval};
