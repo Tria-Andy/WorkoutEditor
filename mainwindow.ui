@@ -665,9 +665,6 @@
            <item>
             <widget class="QTableWidget" name="tableWidget_schedule"/>
            </item>
-           <item>
-            <widget class="QTableWidget" name="tableWidget_saison"/>
-           </item>
           </layout>
          </widget>
         </item>

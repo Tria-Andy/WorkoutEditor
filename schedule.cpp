@@ -63,6 +63,7 @@ enum {SAISON,SCHEDULE};
 void schedule::freeMem()
 {
     delete saisonsModel;
+    delete phaseModel;
     delete contestModel;
 }
 
@@ -148,11 +149,6 @@ void schedule::delete_Saison(QString saisonName)
     qDebug() << saisonName;
 }
 
-QHash<int, QString> schedule::get_weekList()
-{
-
-}
-
 QModelIndex schedule::get_modelIndex(QStandardItemModel *model,QString searchString, int col)
 {
     QList<QStandardItem*> list;
@@ -169,13 +165,17 @@ QModelIndex schedule::get_modelIndex(QStandardItemModel *model,QString searchStr
     }
 }
 
+QStandardItem* schedule::get_phaseItem(QString phase)
+{
+    return phaseModel->itemFromIndex(get_modelIndex(phaseModel,phase,0));
+}
+
 QMap<int, QStringList> schedule::get_workouts(bool dayWorkouts,QString indexString)
 {
     QMap<int,QStringList> workouts;
     QStringList workItems;
     QStandardItemModel *model;
     int counter = 0;
-    int indexCol = 0;
 
     if(dayWorkouts)
     {
@@ -188,7 +188,7 @@ QMap<int, QStringList> schedule::get_workouts(bool dayWorkouts,QString indexStri
         counter = compTags->count();
     }
 
-    QModelIndex modelIndex = this->get_modelIndex(model,indexString,indexCol);
+    QModelIndex modelIndex = this->get_modelIndex(model,indexString,0);
 
     if(modelIndex.isValid())
     {
@@ -213,7 +213,7 @@ QMap<int, QStringList> schedule::get_workouts(bool dayWorkouts,QString indexStri
 QStringList schedule::get_weekMeta(QString weekID)
 {
     QStringList weekMeta;
-    QModelIndex weekIndex = this->get_modelIndex(phaseModel,weekID,1);
+    QModelIndex weekIndex = this->get_modelIndex(phaseModel,weekID,0);
 
     if(weekIndex.isValid())
     {
@@ -471,8 +471,8 @@ void schedule::update_compValues(QMap<QString,QVector<double>> *compSum,QMap<int
 
 void schedule::set_saisonValues()
 {
-    QString saison;
-    QStringList values;
+    QString mapKey;
+    QStringList mapValues;
 
     for(int saisons = 0; saisons < phaseModel->rowCount(); ++saisons)
     {
@@ -480,16 +480,62 @@ void schedule::set_saisonValues()
         {
             if(col == 0)
             {
-                saison = phaseModel->data(phaseModel->index(saisons,col)).toString();
+                mapKey = phaseModel->data(phaseModel->index(saisons,col)).toString();
             }
             else
             {
-                values << phaseModel->data(phaseModel->index(saisons,col)).toString();
+                mapValues << phaseModel->data(phaseModel->index(saisons,col)).toString();
             }
         }
-        saisonValues.insert(saison,values);
-        values.clear();
+        saisonValues.insert(mapKey,mapValues);
+        mapValues.clear();
+
+        //Fill compWeekMap
+        QStandardItem *saisonItem;
+        saisonItem = phaseModel->item(saisons,0);
+        QVector<double> sportValues(4);
+        QString sportKey;
+        QMap<QString,QVector<double>> compValues;
+
+        if(saisonItem->hasChildren())
+        {
+            for(int phase = 0; phase < saisonItem->rowCount(); ++phase) //Phases
+            {
+                if(saisonItem->child(phase,0)->hasChildren())   //Check Weeks within Phases
+                {
+                    for(int week = 0; week < saisonItem->child(phase,0)->rowCount(); ++week) //Weeks
+                    {
+                        mapKey = saisonItem->child(phase,0)->child(week,0)->data(Qt::DisplayRole).toString();
+
+                        if(saisonItem->child(phase,0)->child(week,0)->hasChildren())    //Check Entries within Weeks
+                        {
+                            for(int comp = 0; comp < saisonItem->child(phase,0)->child(week,0)->rowCount(); ++comp)
+                            {
+                                for(int values = 1; values < compTags->count(); ++values)
+                                {
+                                    if(values == 1)
+                                    {
+                                        sportKey = saisonItem->child(phase,0)->child(week,0)->child(comp,values)->data(Qt::DisplayRole).toString();
+                                    }
+                                    else if(values == 4)
+                                    {
+                                        sportValues[values-2] = get_timesec(saisonItem->child(phase,0)->child(week,0)->child(comp,values)->data(Qt::DisplayRole).toString())*60.0;
+                                    }
+                                    else
+                                    {
+                                        sportValues[values-2] = saisonItem->child(phase,0)->child(week,0)->child(comp,values)->data(Qt::DisplayRole).toDouble();
+                                    }
+                                }
+                                compValues.insert(sportKey,sportValues);
+                            }
+                        }
+                        compWeekMap.insert(mapKey,compValues);
+                    }
+                }
+            }
+        }
     }
+
     this->set_compValues(false,QString(),QMap<int,QStringList>());
 }
 

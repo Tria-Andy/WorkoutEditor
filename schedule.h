@@ -45,6 +45,7 @@ public:
     void deleteWeek(QString);
     QMap<QDate,QPair<double,double> > *get_StressMap() {return &stressValues;}
     QHash<QDate,QMap<QString,QVector<double> >> *get_compValues() {return &compMap;}
+    QHash<QString,QMap<QString,QVector<double> >> *get_compWeekValues() {return &compWeekMap;}
     void updateStress(QString,QPair<double,double>,int);
     bool get_isUpdated() {return isUpdated;}
     void add_newSaison(QStringList);
@@ -53,6 +54,7 @@ public:
     QMap<int,QStringList> get_workouts(bool,QString);
     QStringList get_weekMeta(QString);
     QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
+    QStandardItem *get_phaseItem(QString);
     QMap<QString,QStringList> *get_saisonValues() {return &saisonValues;}
 
 //Workout
@@ -72,6 +74,7 @@ private:
     void update_compValues(QMap<QString,QVector<double>>*,QMap<int,QStringList>*);
     void set_saisonValues();
     QHash<QDate,QMap<QString,QVector<double>>> compMap;
+    QHash<QString,QMap<QString,QVector<double>>> compWeekMap;
     bool isUpdated;
     void read_ltsFile(QDomDocument);   
     void save_ltsValues();

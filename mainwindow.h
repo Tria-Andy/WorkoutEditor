@@ -127,7 +127,6 @@ public:
         painter->setPen(Qt::white);
         painter->drawText(rect_head_text,Qt::AlignLeft | Qt::AlignVCenter, dayDate);
 
-        QString workout;
         temp_value = index.data(Qt::DisplayRole).toString();
         workoutValues = temp_value.split(delimiter,QString::SkipEmptyParts);
         workoutValues.removeFirst();
@@ -191,7 +190,7 @@ public:
         {
             QPainterPath rectPhase;
             temp_value = index.data(Qt::DisplayRole).toString();
-            workoutValues = temp_value.split(delimiter,QString::SkipEmptyParts);
+            workoutValues = index.data(Qt::DisplayRole).toString().split(delimiter,QString::SkipEmptyParts);
             int valueCount = workoutValues.count();
 
             if(!temp_value.isEmpty())
@@ -251,223 +250,26 @@ public:
     }
 };
 
-class calendar_delegate : public QStyledItemDelegate, public calculation
+class saison_delegate : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
 
 public:
-    calendar_delegate(QTableView *parent = nullptr) : QStyledItemDelegate(parent) {}
-
-    void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
-    {
-        painter->save();
-        QPen rectPen;
-        rectPen.setColor(Qt::black);
-        rectPen.setWidth(1);
-        QFont phase_font,content_font,date_font, work_font;
-        QString temp_value,dayDate;
-        QStringList phaseList = settings::get_listValues("Phase");
-        QStringList sportList = settings::get_listValues("Sport");
-        QStringList calendar_values;
-        QString delimiter = "#";
-        QColor rectColor,gradColor;
-        gradColor.setHsv(0,0,180,200);
-        int textMargin = 2;
-        int celloffset = 21;
-        phase_font.setBold(true);
-        phase_font.setPixelSize(settings::get_fontValue("fontBig"));
-        content_font.setBold(false);
-        content_font.setPixelSize(settings::get_fontValue("fontSmall"));
-        date_font.setBold(true);
-        date_font.setPixelSize(settings::get_fontValue("fontMedium"));
-        work_font.setBold(false);
-        work_font.setPixelSize(settings::get_fontValue("fontSmall")-1);
-
-        temp_value = index.data(Qt::DisplayRole).toString();
-        calendar_values = temp_value.split(delimiter);
-        dayDate = calendar_values.at(0);
-        dayDate = dayDate.left(7);
-
-        QLinearGradient rectGradient;
-        rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
-        rectGradient.setSpread(QGradient::RepeatSpread);
-
-        QPainterPath rectHead;
-
-        QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),20);
-        rectHead.addRoundedRect(rect_head,3,3);
-        QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,20);
-
-
-        if(option.state & QStyle::State_Selected)
-        {
-            rectColor.setHsv(240,255,255,180);
-            painter->setPen(Qt::white);
-        }
-        else
-        {
-            if(QDate::fromString(calendar_values.at(0),"dd MMM yy").addYears(100) ==(QDate::currentDate()))
-            {
-                rectColor.setHsv(0,255,255,225);
-            }
-            else
-            {
-                rectColor.setHsv(360,0,85,200);
-            }
-        }
-        rectGradient.setColorAt(0,rectColor);
-        rectGradient.setColorAt(1,gradColor);
-
-        painter->setPen(rectPen);
-        painter->setFont(date_font);
-        painter->setBrush(rectGradient);
-        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-        painter->drawPath(rectHead);
-
-        painter->setPen(Qt::white);
-        painter->drawText(rect_head_text,Qt::AlignLeft | Qt::AlignVCenter, dayDate);
-
-        if(index.column() != 0)
-        {
-            QString workout;
-            temp_value = index.data(Qt::DisplayRole).toString();
-            calendar_values = temp_value.split(delimiter,QString::SkipEmptyParts);
-            calendar_values.removeFirst();
-
-            if(!calendar_values.isEmpty())
-            {
-                int height = static_cast<int>(floor((option.rect.height()- celloffset) / calendar_values.count()));
-                int yPos = (option.rect.y() + celloffset);
-
-                for(int i = 0; i < calendar_values.count(); ++i)
-                {
-                    workout = calendar_values.at(i);
-                    QPainterPath rectWork;
-                    QRect rect_work(option.rect.x(),yPos,option.rect.width(),height-1);
-                    rectWork.addRoundedRect(rect_work,4,4);
-                    QRect rect_work_text(option.rect.x()+textMargin,yPos,option.rect.width()-textMargin,height-1);
-                    yPos += height;
-
-                    for(int pos = 0; pos < sportList.count();++pos)
-                    {
-                        if(workout.contains(sportList.at(pos)))
-                        {
-                            rectColor = settings::get_itemColor(sportList.at(pos)).toHsv();
-                            break;
-                        }
-                    }
-
-                    rectColor.setAlpha(225);
-                    rectGradient.setColorAt(0,rectColor);
-                    rectGradient.setColorAt(1,gradColor);
-
-                    painter->setPen(rectPen);
-                    painter->setFont(work_font);
-                    painter->setBrush(rectGradient);
-                    painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-                    painter->drawPath(rectWork);
-                    painter->setPen(Qt::black);
-                    painter->drawText(rect_work_text,Qt::AlignLeft,workout);
-                }
-            }
-            else
-            {
-                QPainterPath rectDay;
-                QRect rectEmpty(option.rect.x(),option.rect.y()+celloffset,option.rect.width(),option.rect.height()-celloffset-1);
-                rectDay.addRoundedRect(rectEmpty,4,4);
-
-                painter->setPen(rectPen);
-                painter->setBrush(QBrush(gradColor));
-                painter->setRenderHint(QPainter::Antialiasing);
-                painter->drawPath(rectDay);
-            }
-        }
-        else
-        {
-            QPainterPath rectPhase;
-            temp_value = index.data(Qt::DisplayRole).toString();
-            calendar_values = temp_value.split(delimiter,QString::SkipEmptyParts);
-            int valueCount = calendar_values.count();
-
-            QString phase = index.data(Qt::DisplayRole).toString();
-            phase = phase.remove(0,phase.indexOf(delimiter)+1);
-
-            if(!temp_value.isEmpty())
-            {
-                int height = static_cast<int>(floor((option.rect.height()- celloffset) / 3));
-                for(int pos = 0; pos < phaseList.count();++pos)
-                {
-                    if(temp_value.contains(phaseList.at(pos)))
-                    {
-                        rectColor = settings::get_itemColor(phaseList.at(pos)).toHsv();
-                        break;
-                    }
-                    else
-                    {
-                        rectColor = settings::get_itemColor(generalValues->value("empty")).toHsv();
-                    }
-                }
-
-                QRect rect_phase(option.rect.x(),option.rect.y()+celloffset, option.rect.width(),option.rect.height()-celloffset-1);
-                rectPhase.addRoundedRect(rect_phase,4,4);
-                QRect rect_phase_name(option.rect.x()+textMargin,option.rect.y()+celloffset, option.rect.width()-textMargin,height-1);
-                QRect rect_phase_content(option.rect.x()+textMargin,option.rect.y()+height+celloffset, option.rect.width()-textMargin,height-1);
-                QRect rect_phase_goal(option.rect.x()+textMargin,option.rect.y()+(height*2)+celloffset, option.rect.width()-textMargin,height-1);
-
-                rectColor.setAlpha(225);
-                rectGradient.setColorAt(0,rectColor);
-                rectGradient.setColorAt(1,gradColor);
-
-                painter->setPen(rectPen);
-                painter->setFont(phase_font);
-                painter->setBrush(rectGradient);
-                painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-                painter->drawPath(rectPhase);
-                painter->drawText(rect_phase_name,Qt::AlignVCenter,calendar_values.at(1));
-
-                if(valueCount == 2)
-                {
-                    painter->setFont(content_font);
-                    painter->drawText(rect_phase_content,Qt::AlignVCenter,"");
-                    painter->drawText(rect_phase_goal,Qt::AlignVCenter,"");
-                }
-                else if(valueCount == 3)
-                {
-                    painter->setFont(content_font);
-                    painter->drawText(rect_phase_content,Qt::AlignVCenter,calendar_values.at(2));
-                    painter->drawText(rect_phase_goal,Qt::AlignVCenter,"");
-                }
-                else if(valueCount == 4)
-                {
-                    painter->setFont(content_font);
-                    painter->drawText(rect_phase_content,Qt::AlignVCenter,calendar_values.at(2));
-                    painter->drawText(rect_phase_goal,Qt::AlignVCenter | Qt::TextWordWrap,calendar_values.at(3));
-                }
-             }
-        }
-        painter->restore();
-    }
-};
-class week_delegate : public QStyledItemDelegate, public calculation
-{
-    Q_OBJECT
-
-public:
-    week_delegate(QTableView *parent = nullptr) : QStyledItemDelegate(parent) {}
+    saison_delegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
         QFont phase_font,date_font,work_font;
-        QString temp_value,headInfo;
-        QStringList calendar_values;
+        QString delimiter = "#";
+        QStringList saison_values;
         QStringList phaseList = settings::get_listValues("Phase");
         QStringList sportList = settings::get_listValues("Sportuse");
         QColor rectColor,gradColor;
         gradColor.setHsv(0,0,180,200);
         int textMargin = 4;
         int celloffset = 21;
-        QString phase,content;
+
         phase_font.setBold(true);
         phase_font.setPixelSize(settings::get_fontValue("fontBig"));
         date_font.setBold(true);
@@ -478,17 +280,13 @@ public:
         work_font.setPixelSize(settings::get_fontValue("fontSmall"));
         work_font.setStyleHint(QFont::SansSerif);
 
-        temp_value = index.data(Qt::DisplayRole).toString();
-
         QLinearGradient rectGradient;
         rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
         rectGradient.setSpread(QGradient::PadSpread);
 
+        saison_values = index.data(Qt::DisplayRole).toString().split(delimiter);
         if(index.column() == 0)
         {
-            calendar_values = temp_value.split("#");
-            headInfo = calendar_values.at(0) + " - " + calendar_values.at(1) + " - " + calendar_values.at(2);
-
             QPainterPath rectHead;
             QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),20);
             rectHead.addRoundedRect(rect_head,4,4);
@@ -505,14 +303,11 @@ public:
             painter->drawPath(rectHead);
             painter->setPen(Qt::white);
             painter->setFont(date_font);
-            painter->drawText(rect_head_text,Qt::AlignLeft | Qt::AlignVCenter,headInfo);
-
-            phase = calendar_values.at(3);
-            content = calendar_values.at(4);
+            painter->drawText(rect_head_text,Qt::AlignLeft | Qt::AlignVCenter,saison_values.at(0));
 
             for(int pos = 0; pos < phaseList.count();++pos)
             {
-                if(phase.contains(phaseList.at(pos)))
+                if(saison_values.at(1).contains(phaseList.at(pos)))
                 {
                     rectColor = settings::get_itemColor(phaseList.at(pos)).toHsv();
                     break;
@@ -540,17 +335,17 @@ public:
             painter->setPen(Qt::black);
             painter->drawPath(rectPhase);
             painter->setFont(phase_font);
-            painter->drawText(rect_phase_name,Qt::AlignVCenter,phase);
+            painter->drawText(rect_phase_name,Qt::AlignVCenter,saison_values.at(1));
             painter->setFont(work_font);
-            painter->drawText(rect_phase_content,Qt::AlignVCenter,content);
+            painter->drawText(rect_phase_content,Qt::AlignVCenter,saison_values.at(2));
         }
         else
         {
-            for(int pos = 0; pos < sportList.count()+1;++pos)
+            for(int pos = 0; pos < sportList.count();++pos)
             {
                 if(index.column() == pos+1)
                 {
-                    if(index.column() != sportList.count()+1)
+                    if(index.column() != sportList.count())
                     {
                         rectColor = settings::get_itemColor(sportList.at(pos)).toHsv();
                     }
@@ -577,15 +372,14 @@ public:
             rectGradient.setColorAt(0,rectColor);
             rectGradient.setColorAt(1,gradColor);
 
-            calendar_values = temp_value.split("-");
 
-            if(!calendar_values.isEmpty())
+            if(!saison_values.isEmpty())
             {
                 QString phaseValue;
-                phaseValue = calendar_values.at(0) + "\n";
-                phaseValue = phaseValue + calendar_values.at(1) + "\n";
-                phaseValue = phaseValue + calendar_values.at(2) + "\n";
-                phaseValue = phaseValue + calendar_values.at(3);
+                phaseValue = saison_values.at(0) + "\n";
+                phaseValue = phaseValue + saison_values.at(1) + "\n";
+                phaseValue = phaseValue + set_time(saison_values.at(2).toInt()) + "\n";
+                phaseValue = phaseValue + saison_values.at(3);
 
                 QRect rectValues(option.rect.x()+(option.rect.width()/2),option.rect.y()+textMargin,(option.rect.width()/2)-textMargin-1,option.rect.height()-textMargin-2);
 
@@ -1408,8 +1202,8 @@ private:
     jsonHandler *jsonhandler;
     settings editorSettings;
     schedule_delegate schedule_del;
-    calendar_delegate calender_del;
-    week_delegate week_del;
+    saison_delegate saison_del;
+    QAbstractItemDelegate *modeDelegate;
     summery_delegate sum_del;
     del_filelist fileList_del;
     del_treeview tree_del;
@@ -1444,13 +1238,14 @@ private:
     int avgCounter,sportUse;
     QDate selectedDate;
     QString weeknumber,phaseFilter,buttonStyle,viewStyle;
-    int userSetup,selModule,weekRange,weekpos,saisonWeeks,weekDays,foodcopyLine;
-    unsigned int weekCounter,phaseFilterID;
+    int userSetup,weekpos,saisonWeeks,foodcopyLine;
+    unsigned int weekDays,weekCounter,weekRange,phaseFilterID;
     bool isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
 
     void openPreferences();
     void summery_view(QDate);
     QString set_sumValues(bool,int,QMap<QString,QVector<double>>*,QString);
+    void set_saisonValues(QStringList*,QString,int);
     void workoutSchedule(QDate);
     void saisonSchedule(QString);
     void set_ItemHeaderValue(QTableWidgetItem*);

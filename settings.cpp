@@ -34,7 +34,7 @@ bool settings::settingsUpdated;
 QHash<QString,QString> settings::gcInfo;
 QHash<QString,QString> settings::generalMap;
 QHash<QString,QColor> settings::colorMap;
-QHash<QString,int> settings::fontMap;
+QHash<QString,unsigned int> settings::intMap;
 
 QString settings::valueFile;
 QString settings::valueFilePath;
@@ -487,7 +487,7 @@ int settings::loadSettings()
                 athleteMap.insert("currpal",myvalues->value("currpal").toDouble());
                 athleteMap.insert("methode",myvalues->value("calmethode").toDouble());
                 doubleMap.insert("maxworkouts",myvalues->value("maxworkouts").toDouble());
-                doubleMap.insert("weekrange",myvalues->value("weekrange").toDouble());
+                intMap.insert("weekrange",myvalues->value("weekrange").toInt());
             myvalues->endGroup();
 
             myvalues->beginGroup("Sport");
@@ -527,17 +527,17 @@ int settings::loadSettings()
 
         if(screenHeight > 1000)
         {
-            fontMap.insert("weekRange",8);
-            fontMap.insert("fontBig",16);
-            fontMap.insert("fontMedium",14);
-            fontMap.insert("fontSmall",12);
+            intMap.insert("weekRange",8);
+            intMap.insert("fontBig",16);
+            intMap.insert("fontMedium",14);
+            intMap.insert("fontSmall",12);
         }
         else
         {
-            fontMap.insert("weekRange",6);
-            fontMap.insert("fontBig",14);
-            fontMap.insert("fontMedium",12);
-            fontMap.insert("fontSmall",10);
+            intMap.insert("weekRange",6);
+            intMap.insert("fontBig",14);
+            intMap.insert("fontMedium",12);
+            intMap.insert("fontSmall",10);
         }
         delete mysettings; 
     }
