@@ -289,7 +289,7 @@ private:
     schedule *workSched;
     del_daypop daypop_del;
     QStandardItemModel *dayModel,*stdlistModel,*intExport, *sampExport;
-    QHash<QString,QMap<int,QStringList>> workoutMap;
+    QHash<QDate,QMap<int,QStringList>> workoutMap;
     QMap<int,QStringList> dayWorkouts;
     QHash<int,QString> stdworkData;
     QDate popupDate;

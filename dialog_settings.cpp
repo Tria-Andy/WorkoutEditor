@@ -495,13 +495,13 @@ void Dialog_settings::set_hfmodel(double hfThres)
 
 void Dialog_settings::set_ltsList()
 {
-    QMap<QDate,QPair<double,double> > *map = schedule_ptr->get_StressMap();
+    QMap<QDate,QVector<double>> *map = schedule_ptr->get_stressMap();
     QString itemValue;
     ui->listWidget_stressValue->clear();
 
-    for(QMap<QDate,QPair<double,double>>::const_iterator it =  map->cbegin(), end = map->cend(); it != end; ++it)
+    for(QMap<QDate,QVector<double>>::const_iterator it =  map->cbegin(), end = map->cend(); it != end; ++it)
     {
-        itemValue = it.key().toString("dd.MM.yyyy") +" - "+QString::number(it.value().first);
+        itemValue = it.key().toString(dateFormat) +" - "+QString::number(it.value().at(0));
         ui->listWidget_stressValue->addItem(itemValue);
     }
 }
@@ -885,7 +885,7 @@ void Dialog_settings::on_spinBox_hfMax_valueChanged(int value)
 
 void Dialog_settings::on_dateEdit_stress_dateChanged(const QDate &date)
 {
-    ui->spinBox_stress->setValue(schedule_ptr->get_StressMap()->value(date).first);
+    ui->spinBox_stress->setValue(static_cast<int>(schedule_ptr->get_stressMap()->value(date).at(0)));
 }
 
 void Dialog_settings::on_pushButton_stressEdit_clicked()
@@ -894,7 +894,7 @@ void Dialog_settings::on_pushButton_stressEdit_clicked()
     //schedule_ptr->set_stressMap(ui->dateEdit_stress->date(),ui->spinBox_stress->value());
     stressMap.first = ui->spinBox_stress->value();
     stressMap.second = 0.0;
-    schedule_ptr->updateStress(ui->dateEdit_stress->date().toString("dd.MM.yyyy"),stressMap,1);
+
     stressEdit = true;
     this->set_ltsList();
     this->enableSavebutton();
@@ -955,7 +955,7 @@ void Dialog_settings::on_listWidget_stressValue_itemClicked(QListWidgetItem *ite
 {
     QString values = item->data(Qt::DisplayRole).toString();
     QString stress = values.split(" - ").last();
-    ui->dateEdit_stress->setDate(QDate::fromString(values.split(" - ").first(),"dd.MM.yyyy"));
+    ui->dateEdit_stress->setDate(QDate::fromString(values.split(" - ").first(),dateFormat));
     ui->spinBox_stress->setValue(stress.toInt());
 }
 
@@ -1072,7 +1072,7 @@ void Dialog_settings::on_pushButton_addContest_clicked()
         schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,6),ui->spinBox_contestStress->value());
     }
     /*
-    schedule_ptr->scheduleProxy->setFilterFixedString(ui->dateEdit_contest->date().toString("dd.MM.yyyy"));
+    schedule_ptr->scheduleProxy->setFilterFixedString(ui->dateEdit_contest->date().toString(dateFormat));
     schedule_ptr->scheduleProxy->setFilterKeyColumn(1);
     if(schedule_ptr->scheduleProxy->rowCount() == 0)
     {
@@ -1139,8 +1139,8 @@ void Dialog_settings::on_toolButton_updateSaison_clicked()
         {
             QStringList saisonInfo;
             saisonInfo << ui->comboBox_saisons->currentText()
-                       << ui->dateEdit_saisonStart->date().toString("dd.MM.yyyy")
-                       << ui->dateEdit_saisonEnd->date().toString("dd.MM.yyyy")
+                       << ui->dateEdit_saisonStart->date().toString(dateFormat)
+                       << ui->dateEdit_saisonEnd->date().toString(dateFormat)
                        << ui->lineEdit_saisonWeeks->text();
 
             schedule_ptr->add_newSaison(saisonInfo);

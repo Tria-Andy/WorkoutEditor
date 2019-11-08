@@ -65,10 +65,10 @@ void day_popup::init_dayWorkouts(QDate workDate)
     dayModel->clear();
 
     QString viewBackground = "background-color: #e6e6e6";
-    QString workoutDate = workDate.toString("dd.MM.yyyy");
+    QString workoutDate = workDate.toString(dateFormat);
 
     dayWorkouts = workSched->get_workouts(true,workoutDate);
-    workoutMap.insert(workoutDate,dayWorkouts);
+    workoutMap.insert(workDate,dayWorkouts);
 
     int workCount = dayWorkouts.count();
     QStringList workoutHeader;
@@ -226,7 +226,7 @@ void day_popup::set_exportContent()
     QString tempDate,tempTime,sport,stressType,commonRI;
     QString totalWork = dayWorkouts.value(selWorkout).at(8);
 
-    tempDate = popupDate.toString("dd.MM.yyyy");
+    tempDate = popupDate.toString(dateFormat);
     tempTime = dayWorkouts.value(selWorkout).at(0);
 
     workoutTime = QTime::fromString(tempTime,"hh:mm");
@@ -381,22 +381,22 @@ void day_popup::set_result(int result)
     editMode = false;
 
     QStringList moveWorkout;
-    QString moveDate = ui->dateEdit_workDate->date().toString("dd.MM.yyyy");
+    QString moveDate = ui->dateEdit_workDate->date().toString(dateFormat);
     QMap<int,QStringList> valueList;
 
     if(ui->toolButton_dayEdit->isChecked())
     {
         if(result == MOVE || result == COPY)
         {
-            workoutMap.insert(moveDate,dayWorkouts);
+            workoutMap.insert(ui->dateEdit_workDate->date(),dayWorkouts);
             if(result == MOVE)
             {
-                workoutMap.insert(popupDate.toString("dd.MM.yyyy"),valueList);
+                workoutMap.insert(popupDate,valueList);
             }
         }
         if(result == DEL)
         {
-            workoutMap.insert(popupDate.toString("dd.MM.yyyy"),valueList);
+            workoutMap.insert(popupDate,valueList);
         }
     }
     else
@@ -414,7 +414,7 @@ void day_popup::set_result(int result)
             {
                 valueList.insert(valueList.count(),dayWorkouts.value(selWorkout));
             }
-            workoutMap.insert(moveDate,valueList);
+            workoutMap.insert(ui->dateEdit_workDate->date(),valueList);
         }
         if(result == EDIT)
         {
@@ -425,7 +425,7 @@ void day_popup::set_result(int result)
             dayModel->removeColumn(selWorkout);
             this->update_workouts();
         }
-        workoutMap.insert(popupDate.toString("dd.MM.yyyy"),dayWorkouts);
+        workoutMap.insert(popupDate,dayWorkouts);
     }
 
     workSched->set_workoutData(workoutMap);

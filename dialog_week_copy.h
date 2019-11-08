@@ -56,10 +56,10 @@ private:
     Ui::Dialog_week_copy *ui;
     schedule *workSched;
     QStandardItemModel *saveWeekModel,*listModel;
-    QStringList weekList,weekTags;
+    QStringList weekTags;
     QString sourceWeek,schedulePath,saveweekFile;
     QModelIndex listIndex;
-    bool fixWeek,isSaveWeek;
+    bool isSaveWeek;
     int editMode;
 
     void readSaveweeks(QDomDocument);

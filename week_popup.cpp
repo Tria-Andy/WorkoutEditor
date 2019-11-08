@@ -32,25 +32,22 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
 
     barSelection << "Duration" << "Distance" << "Work(kj)" << "Distribution";
     ui->comboBox_yValue->addItems(barSelection);
-    xStress.resize(dayCount);
-    xLTS.resize(dayCount+1);
-    yLTS.resize(dayCount+1);
-    yStress.resize(dayCount);
-    xBar.resize(dayCount);
+    xDates.resize(dayCount);
+    xDateTick.resize(dayCount+1);
+    yWorkouts.resize(dayCount);
+    yStress.resize(dayCount+1);
     yDura.resize(dayCount);
     yDist.resize(dayCount);
-    yWorkKj.resize(dayCount);
-    xWorks.resize(dayCount);
-    yWorks.resize(dayCount);
+    yLTS.resize(dayCount+1);
     yWorkCount.resize(dayCount);
+    yWorkKj.resize(dayCount);
     yValues.resize(dayCount);
     maxValues.resize(4);
     maxValues.fill(0);
 
     levelList = settings::get_listValues("Level");
-    levelCount = levelList.count();
 
-    for(int i = 0; i < levelCount;++i)
+    for(int i = 0; i < levelList.count();++i)
     {
         zoneTime.insert(levelList.at(i),0);
     }
@@ -67,10 +64,11 @@ week_popup::~week_popup()
 
 void week_popup::set_plotValues()
 {
-    workSched->filter_schedule(week_info.at(0),0,false);
+    QStringList weekMeta = workSched->get_weekMeta(week_info.at(0));
+    QHash<QDate,QMap<QString,QVector<double> >> *compMap = workSched->get_compValues();
+    QMap<QString,QVector<double>> workMap;
+    QMap<QDate,QVector<double>> *stressMap = workSched->get_stressMap();
 
-    int proxyCount = 0;
-    QDate tempDate;
     QDateTime workDateTime;
     QStringList workDetails;
     QString currZone,part,parent;
@@ -80,97 +78,46 @@ void week_popup::set_plotValues()
     int factor = 1;
     double timeSum = 0;
     double currTime = 0;
+    int weekWorkouts = 0;
 
-    if(proxyCount > 0)
-    {
-        QDateTime weekStart,workoutDate;
-        QTime wTime;
-        wTime.fromString("00:00:00","hh:mm:ss");
+        QDate workoutDate = QDate::fromString(weekMeta.at(3),dateFormat);
+        QDateTime weekStart;
 
-        weekStart.setDate(tempDate.addDays(1 - tempDate.dayOfWeek()));
-        weekStart.setTime(wTime);
+        weekStart.setDate(QDate::fromString(weekMeta.at(3),dateFormat));
+        weekStart.setTime(QTime::fromString("00:00:00","hh:mm:ss"));
         weekStart.setTimeSpec(Qt::LocalTime);
         firstDay = weekStart;
 
-        for(int i = 0; i < dayCount; ++i)
+        for(int daytick = 0; daytick < dayCount+1; ++daytick)
         {
-            weekDates.insert(i,weekStart.addDays(i));
+            xDateTick[daytick] = weekStart.addDays(daytick-1).toTime_t() + 3600;
+            yStress[daytick] = stressMap->value(workoutDate.addDays(daytick-1)).at(0);
+            yLTS[daytick] = round(stressMap->value(workoutDate.addDays(daytick-1)).at(2));
+            if(maxValues[0] < yStress[daytick]) maxValues[0] = yStress[daytick];
         }
 
-        double stress,dura,dist,workkj;
-
-        ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(proxyCount));
-
-        double dateValue = 0;
-        double ltsDays = ltsValues->value("ltsdays");
-        double lte = (double)exp(-1.0/ltsDays);
-        int ltsStart = -ltsDays;
-        double ltsStress = 0,currStress = 0,pastStress = 0,startLTS = 0;
-        QMap<QDate,QPair<double,double> > *stressMap = workSched->get_StressMap();
-        pastStress = ltsValues->value("lastlts");
-
-        for(QMap<QDate,QPair<double,double> >::const_iterator it = stressMap->cbegin(), end = stressMap->find(weekDates.at(0).date().addDays(ltsStart)); it != end; ++it)
+        for(int day = 0; day < dayCount; ++day)
         {
-            currStress = it.value().first;
-            ltsStress = (currStress * (1.0 - lte)) + (pastStress * lte);
-            pastStress = ltsStress;
-        }
-        startLTS = pastStress;
-        xLTS[0] = weekDates.at(0).addDays(-1).toTime_t();
 
-        for(int i = 0; i < dayCount; ++i)
-        {
-            pastStress = startLTS;
-            dateValue = weekDates.at(i).toTime_t() + 3600;
-            xStress[i] = dateValue;
-            xBar[i] = dateValue;
-            xWorks[i] = dateValue;
-            xLTS[i+1] = dateValue;
-
-            for(int x = ltsStart; x <= 0; ++x)
+            xDates[day] = weekStart.addDays(day).toTime_t() + 3600;
+            workMap = compMap->value(weekStart.addDays(day).date());
+            for(QMap<QString,QVector<double>>::const_iterator it = workMap.cbegin(), end = workMap.cend(); it != end; ++it)
             {
-                if(i == 0 && x == 0) yLTS[0] = round(pastStress);
-                currStress = stressMap->value(weekDates.at(i).date().addDays(x)).first;
-                ltsStress = (currStress * (1.0 - lte)) + (pastStress * lte);
-                pastStress = ltsStress;
-                if(x == ltsStart) startLTS = ltsStress;
-
+                yWorkouts[day] = yWorkouts.at(day) + it.value().at(0);
+                yDura[day] = yDura.at(day) + (it.value().at(1)/60.0);
+                yDist[day] = yDist.at(day) + it.value().at(3);
+                yWorkKj[day] = yWorkKj.at(day) + it.value().at(5);
             }
-            yLTS[i+1] = round(ltsStress);
-        }
 
-        for(int i = 0,day = 0; i < proxyCount; ++i)
-        {
+            weekWorkouts = weekWorkouts + static_cast<int>(yWorkouts.at(day));
+            yWorkCount[day] = yWorkouts.at(day)*10.0;
 
-            workoutDate.setTime(wTime);
-            workoutDate.setTimeSpec(Qt::LocalTime);
-
-            for( ; day < weekDates.count(); ++day)
-            {
-                if(workoutDate == weekDates.at(day))
-                {
-                    yStress[day] = yStress[day] + stress;
-                    yDura[day] = yDura[day] + this->set_doubleValue(dura,false);
-                    yDist[day] = yDist[day] + dist;
-                    yWorkKj[day] = yWorkKj[day] + workkj;
-                    yWorkCount[day] = yWorkCount[day]+1;
-                }
-                if(maxValues[0] < yStress[day]) maxValues[0] = yStress[day];
-                if(maxValues[1] < yDura[day]) maxValues[1] = yDura[day];
-                if(maxValues[2] < yDist[day]) maxValues[2] = yDist[day];
-                if(maxValues[3] < yWorkKj[day]) maxValues[3] = yWorkKj[day];
-            }
-            day = 0;
-        }
-
-        for(int i = 0; i < yWorkCount.count(); ++i)
-        {
-            yWorks[i] = yWorkCount[i]*10;
+            if(maxValues[1] < yDura[day]) maxValues[1] = yDura[day];
+            if(maxValues[2] < yDist[day]) maxValues[2] = yDist[day];
+            if(maxValues[3] < yWorkKj[day]) maxValues[3] = yWorkKj[day];
         }
 
         //Load Level Distribution
-
-
         for(QMap<QDateTime,QStringList>::const_iterator it = weekworkouts.cbegin(), end = weekworkouts.cend(); it != end; ++it)
         {
             this->filter_steps(it.value().at(2),false);
@@ -210,15 +157,12 @@ void week_popup::set_plotValues()
             zoneTime.insert(it.key(),round((it.value() / timeSum)*100.0));
         }
 
+        ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(weekWorkouts));
+
         this->set_graph();
         this->set_weekPlot(0);
-    }
-    else
-    {
-        ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(proxyCount));
-        this->set_graph();
-    }
 }
+
 
 void week_popup::set_graph()
 {
@@ -248,7 +192,7 @@ void week_popup::set_graph()
 }
 
 
-QCPGraph *week_popup::get_QCPLine(QString name,QColor gColor,QVector<double> &xdata,QVector<double> &ydata, bool secondAxis)
+QCPGraph *week_popup::get_QCPLine(QString name,QColor gColor,QVector<double> &xdata, QVector<double> &ydata, bool secondAxis)
 {
     QCPGraph *graph = ui->widget_plot->addGraph();
     if(secondAxis)
@@ -306,7 +250,7 @@ void week_popup::set_itemLineText(QFont lineFont, QVector<double> &xdata,QVector
     itemText->setPadding(QMargins(1, 1, 1, 1));
 }
 
-void week_popup::set_itemBarText(QFont barFont, QColor gColor, QVector<double> &xdata, QVector<double> &ydata,QVector<double> &ytext, int pos, bool secondAxis)
+void week_popup::set_itemBarText(QFont barFont, QColor gColor, QVector<double> &xdata, QVector<double> &ydata, int pos, bool secondAxis)
 {
     double yCords = 0;
 
@@ -328,7 +272,7 @@ void week_popup::set_itemBarText(QFont barFont, QColor gColor, QVector<double> &
     barText->position->setType(QCPItemPosition::ptPlotCoords);
     barText->position->setCoords(xdata[pos],yCords);
 
-    barText->setText(QString::number(ytext[pos]));
+    barText->setText(QString::number(ydata[pos]));
     barText->setFont(barFont);
     barText->setColor(gColor);
 }
@@ -366,7 +310,7 @@ void week_popup::set_weekPlot(int yValue)
 
         for(int i = 0; i < zoneValues.count(); ++i)
         {
-            this->set_itemBarText(barFont,Qt::black,tickCount,zoneValues,zoneValues,i,false);
+            this->set_itemBarText(barFont,Qt::black,tickCount,zoneValues,i,false);
         }
 
         ui->widget_plot->xAxis->setRange(-1,7);
@@ -378,14 +322,14 @@ void week_popup::set_weekPlot(int yValue)
     {
         QCPRange xRange(QCPAxisTickerDateTime::dateTimeToKey(firstDay.addDays(-1)),QCPAxisTickerDateTime::dateTimeToKey(firstDay.addDays(dayCount)));
 
-        QCPGraph *stressLine = this->get_QCPLine("StessScore",QColor(255,0,0),xStress,yStress,false);
+        QCPGraph *stressLine = this->get_QCPLine("StessScore",QColor(255,0,0),xDateTick,yStress,false);
         stressLine->setBrush(QBrush(QColor(255,0,0,50)));
 
-        QCPGraph *ltsLine = this->get_QCPLine("LTS",QColor(0,255,0),xLTS,yLTS,false);
+        QCPGraph *ltsLine = this->get_QCPLine("LTS",QColor(0,255,0),xDateTick,yLTS,false);
 
         QCPBars *workBars = this->get_QCPBar(QColor(225,225,100),3000,dayCount,false);
         workBars->setName("Workouts");
-        workBars->setData(xWorks,yWorks);
+        workBars->setData(xDates,yWorkCount);
 
         QCPBars *scaleBars =  this->get_QCPBar(QColor(0,85,255),6000,dayCount,true);
         scaleBars->setPen(QPen(Qt::darkBlue));
@@ -402,7 +346,7 @@ void week_popup::set_weekPlot(int yValue)
         {
             std::copy(yDura.begin(),yDura.end(),yValues.begin());
             scaleBars->setName(barSelection.at(0)+"(Min)");
-            scaleBars->setData(xBar,yValues);
+            scaleBars->setData(xDates,yValues);
             ui->widget_plot->yAxis2->setRange(0,maxValues[1]+(maxValues[1]*0.1));
             ui->widget_plot->yAxis2->setLabel(barSelection.at(0)+"(Min)");
         }
@@ -410,7 +354,7 @@ void week_popup::set_weekPlot(int yValue)
         {
             std::copy(yDist.begin(),yDist.end(),yValues.begin());
             scaleBars->setName(barSelection.at(1)+"(Km)");
-            scaleBars->setData(xBar,yValues);
+            scaleBars->setData(xDates,yValues);
             ui->widget_plot->yAxis2->setRange(0,maxValues[2]+(maxValues[2]*0.1));
             ui->widget_plot->yAxis2->setLabel(barSelection.at(1)+"(Km)");
         }
@@ -418,23 +362,23 @@ void week_popup::set_weekPlot(int yValue)
         {
             std::copy(yWorkKj.begin(),yWorkKj.end(),yValues.begin());
             scaleBars->setName(barSelection.at(2));
-            scaleBars->setData(xBar,yValues);
+            scaleBars->setData(xDates,yValues);
             ui->widget_plot->yAxis2->setRange(0,maxValues[3]+(maxValues[3]*0.1));
             ui->widget_plot->yAxis2->setLabel(barSelection.at(2));
         }
 
         for(int i = 0; i < dayCount; ++i)
         {
-            this->set_itemTracer(stressLine,xStress,Qt::red,i);
-            this->set_itemLineText(lineFont,xStress,yStress,i);
-            this->set_itemBarText(barFont,Qt::white,xBar,yValues,yValues,i,true);
-            this->set_itemBarText(barFont,Qt::red,xWorks,yWorks,yWorkCount,i,false);
+            this->set_itemBarText(barFont,Qt::white,xDates,yValues,i,true);
+            this->set_itemBarText(barFont,Qt::red,xDates,yWorkouts,i,false);
         }
 
-        for(int i = 0; i < xLTS.count(); ++i)
+        for(int x = 0; x < dayCount+1; ++x)
         {
-            this->set_itemTracer(ltsLine,xLTS,Qt::green,i);
-            this->set_itemLineText(lineFont,xLTS,yLTS,i);
+            this->set_itemTracer(stressLine,xDateTick,Qt::red,x);
+            this->set_itemLineText(lineFont,xDateTick,yStress,x);
+            this->set_itemTracer(ltsLine,xDateTick,Qt::green,x);
+            this->set_itemLineText(lineFont,xDateTick,yLTS,x);
         }
 
         QSharedPointer<QCPAxisTickerDateTime> dateTimeTicker(new QCPAxisTickerDateTime);

@@ -36,12 +36,14 @@ class del_addweek : public QStyledItemDelegate, public calculation
 public:
     explicit del_addweek(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
+    QStringList *sportUse;
+
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
         QFont cFont;
         QString sportname,indexData;
-        QStringList sportuse = settings::get_listValues("Sportuse");
+
         const QAbstractItemModel *model = index.model();
         cFont.setPixelSize(12);
 
@@ -51,16 +53,14 @@ public:
         indexData = index.data().toString();
         painter->setPen(Qt::black);
 
-        if(index.row() == sportuse.count())
+        if(index.row() == sportUse->count())
         {
             rectColor = settings::get_itemColor(generalValues->value("sum")).toHsv();
-            //painter->fillRect(option.rect,QBrush(settings::get_itemColor(gcValues->value("sum"))));
             cFont.setBold(true);
         }
         else
         {
             rectColor = settings::get_itemColor(sportname).toHsv();
-            //painter->fillRect(option.rect,QBrush(settings::get_itemColor(sportname)));
             cFont.setBold(false);
         }
         rectColor.setAlpha(175);
@@ -73,8 +73,7 @@ public:
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         Q_UNUSED(option)
-        QStringList sportList = settings::get_listValues("Sportuse");
-        int listCount = sportList.count();
+        int listCount = sportUse->count();
 
         if((index.column() == 1 || index.column() == 6) && index.row() != listCount)
         {
@@ -87,7 +86,7 @@ public:
         if(index.column() == 2 && index.row() != listCount)
         {
             QTimeEdit *editor = new QTimeEdit(parent);
-            editor->setDisplayFormat("HH:mm");
+            editor->setDisplayFormat("hh:mm:ss");
             editor->setFrame(false);
             return editor;
         }
@@ -101,13 +100,12 @@ public:
             return editor;
         }
 
-        return 0;
+        return nullptr;
     }
 
     void setEditorData(QWidget *editor, const QModelIndex &index) const
     {
-        QStringList sportList = settings::get_listValues("Sportuse");
-        int listCount = sportList.count();
+        int listCount = sportUse->count();
 
         if((index.column() == 1 || index.column() == 6) && index.row() != listCount)
         {
@@ -131,9 +129,7 @@ public:
 
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
     {
-        QStringList sportList = settings::get_listValues("Sportuse");
-
-        int listCount = sportList.count();
+        int listCount = sportUse->count();
         double factor = 1.0;
         QString sport = model->data(model->index(index.row(),0,QModelIndex())).toString();
         QModelIndex sum_index = model->index(listCount,index.column(),QModelIndex());
@@ -148,18 +144,18 @@ public:
             int works = spinBox->value();
             spinBox->interpretText();
             model->setData(index,works);
-            model->setData(sum_index,sum_int(model,&sportList,1));
+            model->setData(sum_index,sum_int(model,sportUse,1));
         }
         if(index.column() == 2 && index.row() != listCount)
         {
             QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
             QTime dura = timeEdit->time();
             timeEdit->interpretText();
-            model->setData(index,dura);
-            model->setData(sum_index,sum_time(model,&sportList,2));
+            model->setData(index,dura.toString("hh:mm:ss"));
+            model->setData(sum_index,sum_time(model,sportUse,2).toString("hh:mm:ss"));
             model->setData(model->index(index.row(),6,QModelIndex()),round(get_timeMin(dura)*factor));
-            model->setData(model->index(listCount,6,QModelIndex()),sum_int(model,&sportList,6));
-            calc_percent(&sportList,model);
+            model->setData(model->index(listCount,6,QModelIndex()),sum_int(model,sportUse,6));
+            calc_percent(sportUse,model);
             setPace(model,index.row());
         }
         if(index.column() == 4 && index.row() != listCount)
@@ -168,7 +164,7 @@ public:
             spinBox->interpretText();
             double dist = spinBox->value();
             model->setData(index, dist, Qt::EditRole);
-            model->setData(sum_index,sum_double(model,&sportList,4));
+            model->setData(sum_index,sum_double(model,sportUse,4));
             setPace(model,index.row());
         }
         if(index.column() == 6 && index.row() != listCount)
@@ -177,7 +173,7 @@ public:
             int stress = spinBox->value();
             spinBox->interpretText();
             model->setData(index,stress);
-            model->setData(sum_index,sum_int(model,&sportList,6));
+            model->setData(sum_index,sum_int(model,sportUse,6));
         }
     }
 
@@ -259,16 +255,14 @@ class Dialog_addweek : public QDialog, public calculation
     Q_OBJECT
 
 public:
-    explicit Dialog_addweek(QWidget *parent = 0,QString sel_week = QString(), schedule *p_sched = 0);
+    explicit Dialog_addweek(QWidget *parent = nullptr,QString sel_week = QString(), schedule *p_sched = nullptr);
     ~Dialog_addweek();
 
 private slots:
     void on_dateEdit_selectDate_dateChanged(const QDate &date);
     void on_toolButton_update_clicked();
     void on_toolButton_close_clicked();
-
     void on_toolButton_copy_clicked();
-
     void on_toolButton_paste_clicked();
 
 private:
@@ -276,16 +270,15 @@ private:
     schedule *workSched;
     del_addweek week_del;
     QStandardItemModel *weekModel;
-    QSortFilterProxyModel *metaProxy,*metaProxyFilter,*contentProxy;
-    QString editWeekID,timeFormat,empty,sumString;
-    QStringList sportuseList,weekHeader,weekMeta,weekContent;
-    QString delimiter;
+    QMap<QString, QVector<double>> compValues;
+    QString editWeekID,timeFormat,empty;
+    QStringList sportuseList,weekMeta;
+    QStringList *weekHeader;
     int sportlistCount;
     bool update;
 
     void fill_values(QString);
-    void get_currentValues();
-    void fill_currentValues();
+    void update_values();
     void fill_weekSumRow(QAbstractItemModel*);
     QStringList create_values();
 };

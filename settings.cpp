@@ -473,6 +473,7 @@ int settings::loadSettings()
                 settingList << myvalues->value("breakname").toString();
                 settingList << myvalues->value("filecount").toString();
                 settingList << myvalues->value("workfactor").toString();
+                generalMap.insert("dateformat", myvalues->value("dateformat").toString());
                 listMap.insert("Misc",settingList);
                 listMap.insert("addworkout",myvalues->value("addworkout").toString().split(splitter));
                 generalMap.insert("sum", settingList.at(0));

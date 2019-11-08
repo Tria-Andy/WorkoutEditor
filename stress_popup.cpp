@@ -8,21 +8,17 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched,const QDate startDa
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    stressMap = p_sched->get_StressMap();
     isLoad = false;
-    ltsValues = settings::getdoubleMapPointer(settings::dMap::LTS);
-    ltsDays = ltsValues->value("ltsdays");
-    stsDays = ltsValues->value("stsdays");
-    lastLTS = ltsValues->value("lastlts");
-    lastSTS = ltsValues->value("laststs");
+    workSched = p_sched;
+
     startDay = startDate.addDays(1-startDate.dayOfWeek());
     firstDay = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
     dateRange = 6;
     showNum = QIcon(":/images/icons/Comment-add.png");
     hideNum = QIcon(":/images/icons/Comment-delete.png");
-    ui->dateEdit_start->setDateRange(firstDay,stressMap->lastKey().addDays(-dateRange));
+    ui->dateEdit_start->setDateRange(firstDay,p_sched->get_stressMap()->lastKey().addDays(-dateRange));
     ui->dateEdit_start->setDate(startDay);
-    ui->dateEdit_end->setDateRange(startDay.addDays(dateRange),stressMap->lastKey());
+    ui->dateEdit_end->setDateRange(startDay.addDays(dateRange),p_sched->get_stressMap()->lastKey());
     ui->dateEdit_end->setDate(startDay.addDays(dateRange));
     ui->pushButton_values->setIcon(hideNum);
 
@@ -93,22 +89,9 @@ void stress_popup::set_graph()
     this->set_stressValues(ui->dateEdit_start->date(),ui->dateEdit_end->date());
 }
 
-double stress_popup::calc_stress(double pastStress, double currStress,double pDays)
-{
-    double stress = 0;
-    double factor = (double)exp(-1.0/pDays);
-
-    stress = (currStress * (1.0 - factor)) + (pastStress * factor);
-
-    return stress;
-}
-
 void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
 {
-    double pastStress,currStress,startStress,calcStress = 0;
-    int ltsStart = -ltsDays;
-    int stsStart = -stsDays;
-    pastStress = lastLTS;
+    QMap<QDate,QVector<double>> *stressMap =  workSched->get_stressMap();
     int dayCount = dateRange+1;
     xDate.resize(dayCount);
     yLTS.resize(dayCount);
@@ -121,14 +104,6 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     tsbMinMax.resize(2);
     tsbMinMax.fill(0);
 
-    for(QMap<QDate,QPair<double,double>>::const_iterator it = stressMap->cbegin(), end = stressMap->find(rangeStart.addDays(ltsStart)); it != end; ++it)
-    {
-        calcStress = calc_stress(pastStress,it.value().first,ltsDays);
-        pastStress = calcStress;
-    }
-    startStress = pastStress;
-
-    double dateValue = 0;
     QDateTime startDate;
     QDate dayDate;
     QTime wTime;
@@ -137,52 +112,17 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     startDate.setTime(wTime);
     startDate.setTimeSpec(Qt::LocalTime);
 
-    for(int i = 0; i < dayCount; ++i)
+    for(int day = 0; day < dayCount; ++day)
     {
-        pastStress = startStress;
-        dateValue = startDate.addDays(i).toTime_t() + 3600;
-        xDate[i] = dateValue;
-        yStress[i] = stressMap->value(startDate.date().addDays(i)).first;
-        yDura[i] = stressMap->value(startDate.date().addDays(i)).second;
-        if(stressMax < yStress[i]) stressMax = yStress[i];
+        xDate[day] = startDate.addDays(day).toTime_t() + 3600;
+        yStress[day] = stressMap->value(startDate.date().addDays(day)).at(0);
+        ySTS[day] = round(stressMap->value(startDate.date().addDays(day)).at(1));
+        yLTS[day] = round(stressMap->value(startDate.date().addDays(day)).at(2));
+        yDura[day] = round(stressMap->value(startDate.date().addDays(day)).at(3)/60.0);
 
-        dayDate = startDate.date().addDays(i);
+        if(stressMax < yStress[day]) stressMax = yStress[day];
 
-        for(int x = ltsStart; x <= 0; ++x)
-        {
-            if(i == 0 && x == 0) yTSB[0] = round(pastStress);
-            currStress = stressMap->value(dayDate.addDays(x)).first;
-            calcStress = calc_stress(pastStress,currStress,ltsDays);
-            pastStress = calcStress;
-            if(x == ltsStart) startStress = calcStress;
-        }
-        yLTS[i] = round(calcStress);
-        if(stressMax < yLTS[i]) stressMax = yLTS[i];
-    }
-    pastStress = lastSTS;
-
-    for(QMap<QDate,QPair<double,double>>::const_iterator it = stressMap->cbegin(), end = stressMap->find(rangeStart.addDays(stsStart)); it != end; ++it)
-    {
-        calcStress = calc_stress(pastStress,it.value().first,stsDays);
-        pastStress = calcStress;
-    }
-    startStress = pastStress;
-
-    for(int i = 0; i < dayCount; ++i)
-    {
-        pastStress = startStress;
-        dayDate = startDate.date().addDays(i);
-
-        for(int x = ltsStart; x <= 0; ++x)
-        {
-            if(i == 0 && x == 0) yTSB[0] = round(yTSB[0]-pastStress);
-            currStress = stressMap->value(dayDate.addDays(x)).first;
-            calcStress = calc_stress(pastStress,currStress,stsDays);
-            pastStress = calcStress;
-            if(x == ltsStart) startStress = calcStress;
-        }
-        ySTS[i] = round(calcStress);
-        if(stressMax < ySTS[i]) stressMax = ySTS[i];
+        dayDate = startDate.date().addDays(day);
     }
 
     for(int i = 1; i < dayCount;++i)
@@ -327,7 +267,7 @@ void stress_popup::set_stressplot(QDate rangeStart,QDate rangeEnd,bool showValue
     }
 
     dateTicker->setTickCount(xTickCount);
-    dayTicker->setTickCount(dayCount);
+    dayTicker->setTickCount(static_cast<int>(dayCount));
 
     ui->widget_stressPlot->yAxis->setRange(0,stressMax+10);
     ui->widget_stressPlot->yAxis2->setRange(tsbMinMax[0]-5,tsbMinMax[1]+5);
@@ -348,12 +288,12 @@ void stress_popup::on_dateEdit_start_dateChanged(const QDate &date)
         if(date > ui->dateEdit_end->date())
         {
             ui->dateEdit_end->setDate(date.addDays(dateRange));
-            dateRange = ui->dateEdit_start->date().daysTo(ui->dateEdit_end->date());
+            dateRange = static_cast<int>(ui->dateEdit_start->date().daysTo(ui->dateEdit_end->date()));
             this->set_stressValues(ui->dateEdit_start->date(),ui->dateEdit_end->date());
         }
         else
         {
-            dateRange = ui->dateEdit_start->date().daysTo(ui->dateEdit_end->date());
+            dateRange = static_cast<int>(ui->dateEdit_start->date().daysTo(ui->dateEdit_end->date()));
             this->set_stressValues(date,ui->dateEdit_end->date());
         }
     }
@@ -365,7 +305,7 @@ void stress_popup::on_dateEdit_end_dateChanged(const QDate &date)
     {
         if(ui->dateEdit_start->date().daysTo(date) > 0)
         {
-            dateRange = ui->dateEdit_start->date().daysTo(date);
+            dateRange = static_cast<int>(ui->dateEdit_start->date().daysTo(date));
             this->set_stressValues(ui->dateEdit_start->date(),date);
         }
         else

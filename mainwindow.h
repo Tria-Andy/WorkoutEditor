@@ -1243,7 +1243,7 @@ private:
     bool isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
 
     void openPreferences();
-    void summery_view(QDate);
+    void summery_Schedule(QDate);
     QString set_sumValues(bool,int,QMap<QString,QVector<double>>*,QString);
     void set_saisonValues(QStringList*,QString,int);
     void workoutSchedule(QDate);
@@ -1318,6 +1318,7 @@ private slots:
     void toolButton_planMode(bool);
     void set_phaseFilter(int);
     void refresh_schedule();
+    void refresh_saison();
 
     //Editor
     void setSelectedIntRow(QModelIndex);
@@ -1374,6 +1375,7 @@ private slots:
     void on_actionfood_History_triggered();
     void on_actionFood_triggered();
     void on_tableWidget_schedule_itemClicked(QTableWidgetItem *item);
+    void on_tableWidget_saison_itemClicked(QTableWidgetItem *item);
 };
 
 #endif // MAINWINDOW_H

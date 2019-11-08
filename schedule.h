@@ -31,38 +31,41 @@ class schedule : public saisons, public calculation
 
 public:
     schedule();
-    QStandardItemModel *scheduleModel,*phaseModel,*week_meta,*week_content;
+    QStandardItemModel *scheduleModel,*phaseModel;
     QHash<QString,QMap<int,QStringList>> workoutList;
     QMap<QDate,QPair<double,double> > stressValues;
     QMap<QString,QStringList> headerList;
-    void freeMem();
-    void filter_schedule(QString,int,bool);
-    void save_workouts(bool);
-    void save_ltsFile(double);
-    void check_workouts(QDate);
+
     QString get_weekPhase(QDate);
-    void copyWeek(QString,QString);
-    void deleteWeek(QString);
-    QMap<QDate,QPair<double,double> > *get_StressMap() {return &stressValues;}
+    QMap<QDate,QVector<double>> *get_stressMap() {return &stressMap;}
     QHash<QDate,QMap<QString,QVector<double> >> *get_compValues() {return &compMap;}
     QHash<QString,QMap<QString,QVector<double> >> *get_compWeekValues() {return &compWeekMap;}
-    void updateStress(QString,QPair<double,double>,int);
-    bool get_isUpdated() {return isUpdated;}
-    void add_newSaison(QStringList);
-    void delete_Saison(QString);
-    QHash<int,QString> get_weekList();
+    QStringList get_weekList();
     QMap<int,QStringList> get_workouts(bool,QString);
     QStringList get_weekMeta(QString);
     QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
     QStandardItem *get_phaseItem(QString);
     QMap<QString,QStringList> *get_saisonValues() {return &saisonValues;}
 
+    void freeMem();
+    void filter_schedule(QString,int,bool);
+    void save_workouts(bool);
+    void save_ltsFile(double);
+    void check_workouts(QDate);  
+    void copyWeek(QString,QString);
+    void add_newSaison(QStringList);
+    void delete_Saison(QString);
+
+    bool get_isUpdated() {return isUpdated;}
+
+
 //Workout
     //Setter
     void set_isUpdated(bool updateFlag) {isUpdated = updateFlag;}
 
     //edit Workouts
-    void set_workoutData(QHash<QString,QMap<int,QStringList>>);
+    void set_workoutData(QHash<QDate,QMap<int,QStringList>>);
+    void set_weekCompValues(QStringList,QMap<QString,QVector<double>>);
 
 private:
     QStringList sportTags;
@@ -70,14 +73,17 @@ private:
     QDomNodeList xmlList;
     QString schedulePath,scheduleFile,phaseFile,ltsFile;
     QMap<QString,QStringList> saisonValues;
-    void set_compValues(bool,QString,QMap<int,QStringList>);
-    void update_compValues(QMap<QString,QVector<double>>*,QMap<int,QStringList>*);
-    void set_saisonValues();
     QHash<QDate,QMap<QString,QVector<double>>> compMap;
     QHash<QString,QMap<QString,QVector<double>>> compWeekMap;
+    QMap<QDate,QVector<double>> stressMap;
     bool isUpdated;
+
+    void set_compValues(bool,QDate,QMap<int,QStringList>);
+    void update_compValues(QMap<QString,QVector<double>>*,QMap<int,QStringList>*);
+    void recalc_stressValues();
+    void set_stressMap(QDate,bool);
+    void set_saisonValues();
     void read_ltsFile(QDomDocument);   
-    void save_ltsValues();
 
     //Workout Var  
 };

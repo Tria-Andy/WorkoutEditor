@@ -37,7 +37,7 @@ year_popup::year_popup(QWidget *parent, QString pInfo,int position,schedule *p_s
 
        if(position == 0)
        {
-           col = workSched->week_content->columnCount()-1;
+           col = workSched->get_weekMeta(phase).count();
        }
        else
        {
@@ -46,12 +46,8 @@ year_popup::year_popup(QWidget *parent, QString pInfo,int position,schedule *p_s
 
        ui->label_info->setText(phaseList.at(phaseindex) +": " + partInfo.at(0) + " Workouts: " + partInfo.at(1) + " - Hours: " + partInfo.at(2) + " - Distance: " + partInfo.at(4));
 
-       metaProxy = new QSortFilterProxyModel(this);
-       metaProxy->setSourceModel(workSched->week_meta);
-       proxyFilter = new QSortFilterProxyModel(this);
-       proxyFilter->setSourceModel(metaProxy);
-       contentProxy = new QSortFilterProxyModel(this);
-       contentProxy->setSourceModel(workSched->week_content);
+
+
 
        this->set_plotValues();
 }

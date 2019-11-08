@@ -4,14 +4,16 @@ calculation::calculation()
 {
     ltsValues = settings::getdoubleMapPointer(settings::dMap::LTS);
     doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
-    gcValues = settings::getStringMapPointer(settings::stingMap::GC);
-    generalValues = settings::getStringMapPointer(settings::stingMap::General);
     firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
+    gcValues = settings::getStringMapPointer(settings::stingMap::GC);
 }
 
 QHash<QString,double>* calculation::thresValues = settings::getdoubleMapPointer(settings::dMap::Threshold);
 QHash<QString,double>* calculation::athleteValues = settings::getdoubleMapPointer(settings::dMap::Athlete);
+QHash<QString,QString>* calculation::generalValues = settings::getStringMapPointer(settings::stingMap::General);
 bool calculation::usePMData = false;
+QString calculation::dateFormat = settings::getStringMapPointer(settings::stingMap::General)->value("dateformat");
+
 
 QString calculation::set_time(int sec)
 {

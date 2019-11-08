@@ -25,13 +25,8 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
 {
     ui->setupUi(this);
     workSched = p_sched;
-    for(int i = 0; i < workSched->week_meta->rowCount(); ++i)
-    {
-        weekList << workSched->week_meta->data(workSched->week_meta->index(i,2,QModelIndex())).toString();
-    }
-    fixWeek = hasWeek;
     isSaveWeek = false;
-    if(fixWeek)
+    if(hasWeek)
     {
         sourceWeek = selected_week.split("#").first();
         ui->lineEdit_currweek->setText(sourceWeek);
@@ -40,13 +35,13 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
     }
     else
     {
-        ui->comboBox_select->addItems(weekList);
+        ui->comboBox_select->addItems(workSched->get_weekList());
         ui->comboBox_select->setVisible(true);
         ui->lineEdit_currweek->setVisible(false);
     }
 
     this->setFixedHeight(400);
-    ui->comboBox_copyto->addItems(weekList);
+    ui->comboBox_copyto->addItems(workSched->get_weekList());
     ui->frame_copy->setVisible(true);
     ui->frame_save->setVisible(false);
     ui->frame_delete->setVisible(false);
@@ -197,7 +192,6 @@ void Dialog_week_copy::on_pushButton_ok_clicked()
                                       );
         if (reply == QMessageBox::Yes)
         {
-            workSched->deleteWeek(sourceWeek);
             accept();
         }
     }

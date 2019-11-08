@@ -1469,7 +1469,7 @@ void Dialog_workCreator::set_workoutModel(QDate cDate)
 
     for(int i = 0; i < proxyFilter->rowCount(); ++i)
     {
-        workDate = QDate::fromString(proxyFilter->data(proxyFilter->index(i,1)).toString(),"dd.MM.yyyy");
+        workDate = QDate::fromString(proxyFilter->data(proxyFilter->index(i,1)).toString(),dateFormat);
 
         if(workDate.operator >(QDate::currentDate()))
         {
@@ -1521,7 +1521,7 @@ void Dialog_workCreator::update_workouts()
 
     for(int i = 0; i < proxyFilter->rowCount(); ++i)
     {
-        wDate = QDate::fromString(proxyFilter->data(proxyFilter->index(i,1)).toString(),"dd.MM.yyyy");
+        wDate = QDate::fromString(proxyFilter->data(proxyFilter->index(i,1)).toString(),dateFormat);
         if(wDate.operator >(QDate::currentDate()))
         {
             stressValue = proxyFilter->data(proxyFilter->index(i,8)).toDouble();

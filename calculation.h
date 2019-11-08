@@ -15,9 +15,10 @@ protected:
     double calc_totalCal(double,double,double);    
     int get_hfvalue(QString);
     QHash<QString,double> *ltsValues,*doubleValues;
-    QHash<QString,QString> *gcValues,*generalValues;
+    QHash<QString,QString> *gcValues;
     QDate firstdayofweek;
 
+    static QString dateFormat;
     static bool usePMData;
     static double calc_totalWork(QString,double,double,int);
     static QString set_time(int);
@@ -42,7 +43,7 @@ protected:
     static double current_dayCalories(QDateTime);
     static QString calc_weekID(QDate);
     static QHash<QString,double> *thresValues, *athleteValues;
-
+    static QHash<QString,QString> *generalValues;
 };
 
 #endif // CALCULATION_H
