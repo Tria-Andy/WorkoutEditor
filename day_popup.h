@@ -217,8 +217,9 @@ public:
             }
             else
             {
+                double timeValue = get_timesec(value.toString("hh:mm:ss"));
                 model->setData(index,value.toString("hh:mm:ss"), Qt::EditRole);
-                model->setData(model->index(10,col),get_workout_pace(model->data(model->index(6,col)).toDouble(),value,model->data(model->index(1,col)).toString(),true));
+                model->setData(model->index(10,col),get_workout_pace(model->data(model->index(6,col)).toDouble(),timeValue,model->data(model->index(1,col)).toString(),true));
             }
         }
         if(row == 1 || row == 2) //Sport || Code
@@ -239,7 +240,7 @@ public:
             spinBox->interpretText();
             double value = spinBox->value();
             model->setData(index, value, Qt::EditRole);
-            model->setData(model->index(10,col),get_workout_pace(value,QTime::fromString(model->data(model->index(5,col)).toString(),"hh:mm:ss"),model->data(model->index(1,col)).toString(),true));
+            model->setData(model->index(10,col),get_workout_pace(value,get_timesec(model->data(model->index(5,col)).toString()),model->data(model->index(1,col)).toString(),true));
         }
         if(row == 7 || row == 8) //Stress && Work(kj)
         {

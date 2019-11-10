@@ -154,7 +154,6 @@ void xmlHandler::read_child(QDomDocument *xmlDoc, QDomElement *xmlElement, QStan
         {
             xmlChild.setAttribute(tagList->at(att),model->data(childIndex.siblingAtColumn(att)).toString());
         }
-
         xmlElement->appendChild(xmlChild);
 
         if(item->hasChildren())

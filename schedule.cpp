@@ -25,7 +25,7 @@ schedule::schedule()
     compTags = settings::getHeaderMap("comp");
     phaseTags = settings::getHeaderMap("micro");
     sportTags = settings::get_listValues("Sportuse");
-    qDebug() << "schedule" << generalValues->value("dateformat");
+
     schedulePath = gcValues->value("schedule");
     //scheduleFile = "workouts_schedule.xml";
     scheduleFile = "scheduleTest.xml";
@@ -94,6 +94,7 @@ void schedule::add_newSaison(QStringList saisonInfo)
     QVector<double> phaseCount = settings::doubleVector.value("Phaseweeks");
     QStringList phaseList = settings::get_listValues("Phase");
     QStringList sportUseList = settings::get_listValues("Sportuse");
+    sportUseList.removeLast();
 
     QList<QStandardItem*> itemList;
     for(int info = 0; info < saisonInfo.count(); ++info)
@@ -107,8 +108,8 @@ void schedule::add_newSaison(QStringList saisonInfo)
 
     for(int meso = 0; meso < phaseList.count(); ++meso)
     {
-        itemList << new QStandardItem(QString::number(meso));
         itemList << new QStandardItem(phaseList.at(meso));
+        itemList << new QStandardItem(QString::number(meso));
 
         macroItem->appendRow(itemList);
         QStandardItem *mesoItem = itemList.at(0);
@@ -117,8 +118,8 @@ void schedule::add_newSaison(QStringList saisonInfo)
         for(int micro = 0; micro < static_cast<int>(phaseCount.at(meso)); ++micro)
         {
             firstday = saisonStart.addDays(7*weekCount++);
-            itemList << new QStandardItem(QString::number(weekCount));
             itemList << new QStandardItem(this->calc_weekID(firstday));
+            itemList << new QStandardItem(QString::number(weekCount));
             itemList << new QStandardItem(phaseList.at(meso)+"_X");
             itemList << new QStandardItem(firstday.toString(dateFormat));
             itemList << new QStandardItem("-");
@@ -142,12 +143,15 @@ void schedule::add_newSaison(QStringList saisonInfo)
             }
         }
     }
+    this->set_saisonValues();
     this->save_workouts(SAISON);
 }
 
 void schedule::delete_Saison(QString saisonName)
 {
-    qDebug() << saisonName;
+   QStandardItem *saisonItem = phaseModel->itemFromIndex(get_modelIndex(phaseModel,saisonName,0));
+   phaseModel->removeRows(0,saisonItem->rowCount());
+   this->save_workouts(SAISON);
 }
 
 QModelIndex schedule::get_modelIndex(QStandardItemModel *model,QString searchString, int col)
@@ -201,7 +205,14 @@ QMap<int, QStringList> schedule::get_workouts(bool dayWorkouts,QString indexStri
             {
                 for(int x = 1; x < counter; ++x)
                 {
-                    workItems << model->data(model->index(work,x,modelIndex)).toString();
+                    if(x == 6)
+                    {
+                        workItems << QString::number(get_timesec(model->data(model->index(work,x,modelIndex)).toString()));
+                    }
+                    else
+                    {
+                        workItems << model->data(model->index(work,x,modelIndex)).toString();
+                    }
                 }
                 workouts.insert(work,workItems);
                 workItems.clear();
@@ -343,18 +354,31 @@ void schedule::set_workoutData(QHash<QDate,QMap<int,QStringList>> workoutMap)
 
 void schedule::copyWeek(QString copyFrom,QString copyTo)
 {
-    QStandardItem *weekItem = scheduleModel->itemFromIndex(get_modelIndex(scheduleModel,copyFrom,0));
-    QHash<QDate,QMap<int,QStringList>> workoutMap;
-    QMap<int,QStringList> workouts;
-    QDate workDate = QDate::fromString(this->get_weekMeta(copyFrom).at(4),dateFormat);
+    QStandardItem *fromItem = scheduleModel->itemFromIndex(get_modelIndex(scheduleModel,copyFrom,0));
 
-    for(int day = 0; day < weekItem->rowCount();++day)
+    QHash<QDate,QMap<int,QStringList>> workoutMap;
+    QDate fromDate = QDate::fromString(this->get_weekMeta(copyFrom).at(3),dateFormat);
+    QDate toDate = QDate::fromString(this->get_weekMeta(copyTo).at(3),dateFormat);
+
+    for(int day = 0; day < fromItem->rowCount();++day)
     {
-        workouts = get_workouts(true,workDate.addDays(day).toString(dateFormat));
-        workoutMap.insert(workDate.addDays(day),workouts);
-        workouts.clear();
+        workoutMap.insert(toDate.addDays(day),get_workouts(true,fromDate.addDays(day).toString(dateFormat)));
     }
-    qDebug() << workoutMap;
+    this->set_workoutData(workoutMap);
+}
+
+void schedule::clearWeek(QString weekID)
+{
+    QStandardItem *clearItem = scheduleModel->itemFromIndex(get_modelIndex(scheduleModel,weekID,0));
+
+    QHash<QDate,QMap<int,QStringList>> workoutMap;
+    QDate date = QDate::fromString(this->get_weekMeta(weekID).at(3),dateFormat);
+
+    for(int day = 0; day < clearItem->rowCount();++day)
+    {
+        workoutMap.insert(date.addDays(day),QMap<int,QStringList>());
+    }
+    this->set_workoutData(workoutMap);
 }
 
 void schedule::set_weekCompValues(QStringList weekMeta,QMap<QString, QVector<double> > compValues)
@@ -370,9 +394,11 @@ void schedule::set_weekCompValues(QStringList weekMeta,QMap<QString, QVector<dou
        phaseModel->setData(weekIndex.siblingAtColumn(meta),weekMeta.at(meta));
     }
 
+    int sportID = 0;
     for(QMap<QString, QVector<double>>::const_iterator it = compValues.cbegin(), vend = compValues.cend(); it != vend; ++it)
     {
         QList<QStandardItem*> itemList;
+        itemList << new QStandardItem(QString::number(sportID++));
         itemList << new QStandardItem(it.key());
         for(int itemValue = 0; itemValue < it.value().count(); ++itemValue)
         {
@@ -453,7 +479,7 @@ void schedule::update_compValues(QMap<QString,QVector<double>> *compSum,QMap<int
         if(compSum->contains(compSport))
         {
             comp[0] = compSum->value(compSport).at(0) + amount;                                 //Workouts
-            comp[1] = compSum->value(compSport).at(1) + this->get_timesec(it.value().at(5));    //Duration
+            comp[1] = compSum->value(compSport).at(1) + it.value().at(5).toDouble();            //Duration
             comp[3] = compSum->value(compSport).at(3) + it.value().at(6).toDouble();            //Distance
             comp[4] = compSum->value(compSport).at(4) + it.value().at(7).toDouble();            //Stress
             comp[5] = compSum->value(compSport).at(5) + it.value().at(8).toDouble();            //Work KJ
@@ -461,11 +487,12 @@ void schedule::update_compValues(QMap<QString,QVector<double>> *compSum,QMap<int
         else
         {
             comp[0] = amount;
-            comp[1] = this->get_timesec(it.value().at(5));
+            comp[1] = it.value().at(5).toDouble();
             comp[3] = it.value().at(6).toDouble();
             comp[4] = it.value().at(7).toDouble();
             comp[5] = it.value().at(8).toDouble();
         }
+
         compSum->insert(compSport,comp);
         comp.fill(0);
     }
@@ -518,7 +545,7 @@ void schedule::set_saisonValues()
         //Fill compWeekMap
         QStandardItem *saisonItem;
         saisonItem = phaseModel->item(saisons,0);
-        QVector<double> sportValues(4);
+        QVector<double> sportValues(5,0);
         QString sportKey;
         QMap<QString,QVector<double>> compValues;
 
@@ -541,10 +568,6 @@ void schedule::set_saisonValues()
                                     if(values == 1)
                                     {
                                         sportKey = saisonItem->child(phase,0)->child(week,0)->child(comp,values)->data(Qt::DisplayRole).toString();
-                                    }
-                                    else if(values == 4)
-                                    {
-                                        sportValues[values-2] = get_timesec(saisonItem->child(phase,0)->child(week,0)->child(comp,values)->data(Qt::DisplayRole).toString())*60.0;
                                     }
                                     else
                                     {

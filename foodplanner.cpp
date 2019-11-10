@@ -3,7 +3,6 @@
 foodplanner::foodplanner(schedule *ptrSchedule)
 {
     schedulePtr = ptrSchedule;
-    qDebug() << "Food" << dateFormat;
     dayTags  << "Day" << "Meal" << "Food";
     weekTags << "id" << "weight" << "base" << "mode" << "year" << "fdw";
     dayHistTags << "id" << "food" << "sport";

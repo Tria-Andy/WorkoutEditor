@@ -41,7 +41,6 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched) :
     ui->dateEdit_workDate->setEnabled(false);
 
     workListHeader = settings::getHeaderMap("workoutlist");
-
     dayModel = new QStandardItemModel(this);
 
     this->init_dayWorkouts(popupDate);
@@ -106,7 +105,7 @@ void day_popup::init_dayWorkouts(QDate workDate)
     ui->tableView_day->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView_day->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_day->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_day->hideRow(worklistCount-2);
+    ui->tableView_day->hideRow(worklistCount-1);
     ui->tableView_day->verticalHeader()->setSectionsClickable(false);
     ui->tableView_day->verticalHeader()->setFixedWidth(100);
     ui->tableView_day->setItemDelegate(&daypop_del);
@@ -117,14 +116,18 @@ void day_popup::init_dayWorkouts(QDate workDate)
     for(QMap<int,QStringList>::const_iterator it = dayWorkouts.cbegin(), end = dayWorkouts.cend(); it != end; ++it)
     {
         for(int row = 0; row < worklistCount; ++row)
-        {
-            if(row < worklistCount-1)
+        {            
+            if(row == 5)
             {
-                dayModel->setData(dayModel->index(row,col),it.value().at(row));
+                dayModel->setData(dayModel->index(row,col),set_time(it.value().at(row).toInt()));
+            }
+            else if(row == 9)
+            {
+                dayModel->setData(dayModel->index(row,col),this->get_workout_pace(it.value().at(6).toDouble(),it.value().at(5).toDouble(),it.value().at(1),true));
             }
             else
             {
-                dayModel->setData(dayModel->index(row,col),this->get_workout_pace(it.value().at(6).toDouble(),QTime::fromString(it.value().at(5),"hh:mm:ss"),it.value().at(1),true));
+                dayModel->setData(dayModel->index(row,col),it.value().at(row));
             }
         }
         ++col;
@@ -579,7 +582,7 @@ void day_popup::on_comboBox_stdworkout_activated(int stdindex)
         }
     }
 
-    dayModel->setData(dayModel->index(10,selWorkout),this->get_workout_pace(dayModel->data(dayModel->index(6,selWorkout)).toDouble(),QTime::fromString(dayModel->data(dayModel->index(5,selWorkout)).toString(),"hh:mm:ss"),dayModel->data(dayModel->index(1,selWorkout)).toString(),true));
+    dayModel->setData(dayModel->index(10,selWorkout),this->get_workout_pace(dayModel->data(dayModel->index(6,selWorkout)).toDouble(),dayModel->data(dayModel->index(5,selWorkout)).toDouble(),dayModel->data(dayModel->index(1,selWorkout)).toString(),true));
     ui->tableView_day->setCurrentIndex(dayModel->index(0,selWorkout));
 }
 

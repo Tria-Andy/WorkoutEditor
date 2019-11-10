@@ -17,12 +17,12 @@ protected:
     QHash<QString,double> *ltsValues,*doubleValues;
     QHash<QString,QString> *gcValues;
     QDate firstdayofweek;
+    QString dateFormat;
 
-    static QString dateFormat;
     static bool usePMData;
     static double calc_totalWork(QString,double,double,int);
     static QString set_time(int);
-    static QString get_workout_pace(double, QTime, QString,bool);
+    static QString get_workout_pace(double, double, QString,bool);
     static double get_speed(QTime,int,QString,bool);
     static double calc_Speed(double,double,double);
     static QString calc_lapSpeed(QString,double);

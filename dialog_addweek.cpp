@@ -87,21 +87,18 @@ void Dialog_addweek::fill_values(QString selWeekID)
         ui->lineEdit_weekGoals->setText(weekMeta.at(5));
         update = true;
 
-        QVector<double> weekComp(4,0);
-        QString dura;
+        QVector<double> weekComp(5,0);
 
         for(int sport = 0; sport < sportlistCount; ++sport)
         {
             weekComp = compValues.value(sportuseList.at(sport));
-            dura = set_time(static_cast<int>((weekComp.at(2))));
-
             weekModel->setData(weekModel->index(sport,0,QModelIndex()),sportuseList.at(sport));
             weekModel->setData(weekModel->index(sport,1,QModelIndex()),weekComp.at(0));
-            weekModel->setData(weekModel->index(sport,2,QModelIndex()),dura);
-            weekModel->setData(weekModel->index(sport,3,QModelIndex()),0.0);
-            weekModel->setData(weekModel->index(sport,4,QModelIndex()),this->set_doubleValue(weekComp.at(1),false));
-            weekModel->setData(weekModel->index(sport,5,QModelIndex()),this->get_workout_pace(weekComp.at(1),QTime::fromString(dura,timeFormat),sportuseList.at(sport),false));
-            weekModel->setData(weekModel->index(sport,6,QModelIndex()),weekComp.at(3));
+            weekModel->setData(weekModel->index(sport,2,QModelIndex()),set_time(static_cast<int>((weekComp.at(1)))));
+            weekModel->setData(weekModel->index(sport,3,QModelIndex()),weekComp.at(2));
+            weekModel->setData(weekModel->index(sport,4,QModelIndex()),this->set_doubleValue(weekComp.at(3),false));
+            weekModel->setData(weekModel->index(sport,5,QModelIndex()),this->get_workout_pace(weekComp.at(3),weekComp.at(1),sportuseList.at(sport),false));
+            weekModel->setData(weekModel->index(sport,6,QModelIndex()),weekComp.at(4));
         }
         this->fill_weekSumRow(ui->tableView_sportValues->model());
 
@@ -115,14 +112,15 @@ void Dialog_addweek::update_values()
 {
     ui->dateEdit_selectDate->setFocus();
 
-    QVector<double> weekData(4,0);
+    QVector<double> weekData(5,0);
     QString sport;
     for(int sport = 0; sport < sportlistCount; ++sport)
     {
         weekData[0] = weekModel->data(weekModel->index(sport,1)).toDouble();
-        weekData[1] = weekModel->data(weekModel->index(sport,4)).toDouble();
-        weekData[2] = get_timesec(weekModel->data(weekModel->index(sport,2)).toString());
-        weekData[3] = weekModel->data(weekModel->index(sport,6)).toDouble();
+        weekData[1] = get_timesec(weekModel->data(weekModel->index(sport,2)).toString());
+        weekData[2] = weekModel->data(weekModel->index(sport,3)).toDouble();
+        weekData[3] = weekModel->data(weekModel->index(sport,4)).toDouble();
+        weekData[4] = weekModel->data(weekModel->index(sport,6)).toDouble();
         compValues.insert(sportuseList.at(sport),weekData);
     }
 

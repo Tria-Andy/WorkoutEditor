@@ -32,9 +32,7 @@ class schedule : public saisons, public calculation
 public:
     schedule();
     QStandardItemModel *scheduleModel,*phaseModel;
-    QHash<QString,QMap<int,QStringList>> workoutList;
     QMap<QDate,QPair<double,double> > stressValues;
-    QMap<QString,QStringList> headerList;
 
     QString get_weekPhase(QDate);
     QMap<QDate,QVector<double>> *get_stressMap() {return &stressMap;}
@@ -42,8 +40,7 @@ public:
     QHash<QString,QMap<QString,QVector<double> >> *get_compWeekValues() {return &compWeekMap;}
     QStringList get_weekList();
     QMap<int,QStringList> get_workouts(bool,QString);
-    QStringList get_weekMeta(QString);
-    QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
+    QStringList get_weekMeta(QString);  
     QStandardItem *get_phaseItem(QString);
     QMap<QString,QStringList> *get_saisonValues() {return &saisonValues;}
 
@@ -51,11 +48,10 @@ public:
     void filter_schedule(QString,int,bool);
     void save_workouts(bool);
     void save_ltsFile(double);
-    void check_workouts(QDate);  
     void copyWeek(QString,QString);
+    void clearWeek(QString);
     void add_newSaison(QStringList);
     void delete_Saison(QString);
-
     bool get_isUpdated() {return isUpdated;}
 
 
@@ -64,7 +60,7 @@ public:
     void set_isUpdated(bool updateFlag) {isUpdated = updateFlag;}
 
     //edit Workouts
-    void set_workoutData(QHash<QDate,QMap<int,QStringList>>);
+    void set_workoutData(QHash<QDate,QMap<int,QStringList>> workoutMap);
     void set_weekCompValues(QStringList,QMap<QString,QVector<double>>);
 
 private:
@@ -76,6 +72,7 @@ private:
     QHash<QDate,QMap<QString,QVector<double>>> compMap;
     QHash<QString,QMap<QString,QVector<double>>> compWeekMap;
     QMap<QDate,QVector<double>> stressMap;
+    QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
     bool isUpdated;
 
     void set_compValues(bool,QDate,QMap<int,QStringList>);
@@ -85,7 +82,8 @@ private:
     void set_saisonValues();
     void read_ltsFile(QDomDocument);   
 
-    //Workout Var  
+    //Deprecate!
+    void check_workouts(QDate);
 };
 
 #endif // SCHEDULE_H

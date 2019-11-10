@@ -6,13 +6,14 @@ calculation::calculation()
     doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
     firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
     gcValues = settings::getStringMapPointer(settings::stingMap::GC);
+    dateFormat = "dd.MM.yyyy";
 }
 
 QHash<QString,double>* calculation::thresValues = settings::getdoubleMapPointer(settings::dMap::Threshold);
 QHash<QString,double>* calculation::athleteValues = settings::getdoubleMapPointer(settings::dMap::Athlete);
 QHash<QString,QString>* calculation::generalValues = settings::getStringMapPointer(settings::stingMap::General);
 bool calculation::usePMData = false;
-QString calculation::dateFormat = settings::getStringMapPointer(settings::stingMap::General)->value("dateformat");
+
 
 
 QString calculation::set_time(int sec)
@@ -60,19 +61,16 @@ int calculation::get_timesec(QString time)
     return sec;
 }
 
-QString calculation::get_workout_pace(double dist, QTime duration,QString sport,bool full_label)
+QString calculation::get_workout_pace(double dist, double duration,QString sport,bool full_label)
 {
     QStringList speedLabel;
     speedLabel << " min/km - " << " km/h" << " min/km" << "no Speed";
     int nr=0;
     double speed = 0;
 
-    int sec = duration.hour()*60*60;
-    sec = sec + duration.minute()*60;
-    sec = sec + duration.second();
+    int sec = duration;
 
-    int min = duration.hour()*60;
-    min = min + duration.minute();
+    int min = duration/60.0;
 
     if(dist != 0.0 || min != 0)
     {

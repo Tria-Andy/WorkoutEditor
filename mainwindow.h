@@ -359,8 +359,9 @@ public:
 
             QString labels;
             labels = "Workouts:\n";
-            labels = labels + "Distance:\n";
             labels = labels + "Duration:\n";
+            labels = labels + "Amount:\n";
+            labels = labels + "Distance:\n";      
             labels = labels + "Stress:";
 
             QPainterPath rectWork;
@@ -377,9 +378,10 @@ public:
             {
                 QString phaseValue;
                 phaseValue = saison_values.at(0) + "\n";
-                phaseValue = phaseValue + saison_values.at(1) + "\n";
-                phaseValue = phaseValue + set_time(saison_values.at(2).toInt()) + "\n";
-                phaseValue = phaseValue + saison_values.at(3);
+                phaseValue = phaseValue + set_time(saison_values.at(1).toInt()) + "\n";
+                phaseValue = phaseValue + saison_values.at(2) + "\n";
+                phaseValue = phaseValue + saison_values.at(3) + "\n";
+                phaseValue = phaseValue + saison_values.at(4);
 
                 QRect rectValues(option.rect.x()+(option.rect.width()/2),option.rect.y()+textMargin,(option.rect.width()/2)-textMargin-1,option.rect.height()-textMargin-2);
 
@@ -474,14 +476,20 @@ public:
 
         if(!sum_values.isEmpty())
         {
-
             QString partValue;
-            partValue = sum_values.at(1) + "\n";
-            partValue = partValue + sum_values.at(2) + "\n";
-            partValue = partValue + sum_values.at(3) + "\n";
-            partValue = partValue + sum_values.at(4) + "\n";
-            partValue = partValue + sum_values.at(5) + "\n";
-            partValue = partValue + sum_values.at(6);
+
+            for(int i = 1; i < sum_values.count(); ++i)
+            {
+                if(i == 2)
+                {
+                    partValue = partValue + set_time(sum_values.at(i).toInt()) + "\n";
+                }
+                else
+                {
+                    partValue = partValue + sum_values.at(i) + "\n";
+                }
+            }
+            partValue.chop(1);
 
             QRect rectValues(option.rect.x()+(option.rect.width()/2),option.rect.y()+celloffset+textMargin,(option.rect.width()/2)-textMargin-1,option.rect.height()-+celloffset-textMargin-2);
 
@@ -1243,8 +1251,9 @@ private:
     bool isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
 
     void openPreferences();
-    void summery_Schedule(QDate);
-    QString set_sumValues(bool,int,QMap<QString,QVector<double>>*,QString);
+    void summery_Set(QDate,QStandardItem*);
+    void summery_calc(QMap<QString,QVector<double>>*,QMap<QString,QVector<double>>*,QStringList*,int);
+    QString set_summeryString(int,QMap<QString,QVector<double>>*,QString);
     void set_saisonValues(QStringList*,QString,int);
     void workoutSchedule(QDate);
     void saisonSchedule(QString);

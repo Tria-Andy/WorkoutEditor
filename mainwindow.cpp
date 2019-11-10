@@ -213,7 +213,6 @@ MainWindow::MainWindow(QWidget *parent) :
         this->set_phaseFilter(1);
         this->loadUISettings();
         this->workoutSchedule(firstdayofweek);
-        this->summery_Schedule(firstdayofweek);
         this->fill_weekTable(this->calc_weekID(firstdayofweek),false);
         this->set_foodWeek(ui->listWidget_weekPlans->item(0)->text());
     }
@@ -245,7 +244,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::loadUISettings()
 {
-        settings::settingsUpdated = false;
+    this->refresh_saisonInfo();
+    settings::settingsUpdated = false;
 }
 
 void MainWindow::freeMem()
@@ -522,59 +522,70 @@ void MainWindow::set_menuItems(int module)
 
 //Planner Functions ***********************************************************************************
 
-void MainWindow::summery_Schedule(QDate date)
+void MainWindow::summery_Set(QDate date,QStandardItem *phaseItem)
 {
-    QHash<QDate,QMap<QString,QVector<double> >> *comp = workSchedule->get_compValues();
-    QStringList sportUseList;
-    sportUseList << generalValues->value("sum");
+    QStringList sportUseList,headerInfo;
+    QString sportUse,headerString;
+    sportUse = generalValues->value("sum");
+    sportUseList << sportUse;
     sportUseList << settings::get_listValues("Sportuse");
-    QString sportUse;
-    int sumCounter = settings::getHeaderMap("summery")->count();
+    int sumCounter = 0;
     QMap<QString,QVector<double>> sportSummery;
-    QMap<QString,QVector<double>> daySummery;
-    QVector<double> weekSum(sumCounter),sportSum(sumCounter);
+    QMap<QString,QVector<double>> calcSummery;
 
-    weekSum.fill(0);
-
-    for(unsigned int day = 0; day < weekDays; ++day)
+    if(isWeekMode)
     {
-        daySummery = comp->value(date.addDays(day));
+        sumCounter = settings::getHeaderMap("summery")->count();
+        sportSummery.insert(sportUse,QVector<double>(sumCounter,0));
 
-        for(QMap<QString,QVector<double>>::const_iterator it = daySummery.cbegin(), end = daySummery.cend(); it != end; ++it)
+        QHash<QDate,QMap<QString,QVector<double> >> *comp = workSchedule->get_compValues();
+        for(unsigned int day = 0; day < weekDays; ++day)
         {
-            sportSum.fill(0);
-            sportUse = it.key();
-            if(sportUseList.contains(sportUse))
+            calcSummery = comp->value(date.addDays(day));
+            this->summery_calc(&calcSummery,&sportSummery,&sportUseList,sumCounter);
+        }
+        headerInfo = workSchedule->get_weekMeta(this->calc_weekID(date));
+        headerString = "Week: " + headerInfo.at(0) + " - " + "Phase: " + headerInfo.at(2);
+    }
+    else
+    {
+        sportUseList.removeLast();
+        sumCounter = settings::getHeaderMap("summery")->count()-1;
+        sportSummery.insert(sportUse,QVector<double>(sumCounter,0));
+
+        QHash<QString,QMap<QString,QVector<double> >> *compWeek = workSchedule->get_compWeekValues();
+        QString weekID;
+        QString saison = ui->comboBox_saisonName->currentText();
+
+        if(phaseGroup->checkedId() == 1)
+        {
+            int weeks = workSchedule->get_saisonValues()->value(saison).at(2).toInt();
+            QDate saisonStart = QDate::fromString(workSchedule->get_saisonValues()->value(saison).at(0),dateFormat);
+
+            for(int week = 0; week < weeks; ++week)
             {
-                for(int values = 0; values < sumCounter; ++values)
-                {
-                    sportSum[values] = it.value().at(values);
-                    weekSum[values] = weekSum.at(values) + sportSum.at(values);
-                }
-                if(sportSummery.contains(sportUse))
-                {
-                    for(int i = 0; i < sumCounter; ++i)
-                    {
-                        sportSum[i] = sportSum.at(i) + sportSummery.value(sportUse).at(i);
-                    }
-                }
-                sportSummery.insert(sportUse,sportSum);
+                weekID = calc_weekID(saisonStart.addDays(week*static_cast<int>(weekDays)));
+                calcSummery = compWeek->value(weekID);
+                this->summery_calc(&calcSummery,&sportSummery,&sportUseList,sumCounter);
             }
-         }
+            headerString = "All Phases - Weeks:" + workSchedule->get_saisonValues()->value(saison).at(2);
+        }
+        else
+        {
+            for(int week = 0; week < phaseItem->rowCount(); ++week)
+            {
+                calcSummery = compWeek->value(phaseItem->child(week,0)->data(Qt::DisplayRole).toString());
+                this->summery_calc(&calcSummery,&sportSummery,&sportUseList,sumCounter);
+            }
+            headerString = "Phase: " + phaseItem->data(Qt::DisplayRole).toString() + " - Weeks" + QString::number(phaseItem->rowCount());
+        }
     }
 
-    sportUse = generalValues->value("sum");
-    sportSummery.insert(sportUse,weekSum);
     QMap<int,QString> sumValues;
-    QStringList weekInfo = workSchedule->get_weekMeta(this->calc_weekID(date));
-    QString valueString;
-
-    valueString = "Week: " + weekInfo.at(0) + " - " + "Phase: " + weekInfo.at(2);
-
     ui->tableWidget_summery->clear();
     ui->tableWidget_summery->setRowCount(sportSummery.count());
     ui->tableWidget_summery->setHorizontalHeaderItem(0,new QTableWidgetItem());
-    ui->tableWidget_summery->horizontalHeaderItem(0)->setData(Qt::EditRole,valueString);
+    ui->tableWidget_summery->horizontalHeaderItem(0)->setData(Qt::EditRole,headerString);
     ui->tableWidget_summery->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignLeft);
 
     for(int sports = 0; sports < sportUseList.count(); ++sports)
@@ -583,7 +594,7 @@ void MainWindow::summery_Schedule(QDate date)
 
         if(sportSummery.contains(sportUse))
         {
-            sumValues.insert(sports,this->set_sumValues(false,sumCounter,&sportSummery,sportUse));
+            sumValues.insert(sports,this->set_summeryString(sumCounter,&sportSummery,sportUse));
         }
     }
 
@@ -595,25 +606,51 @@ void MainWindow::summery_Schedule(QDate date)
     }
 }
 
-QString MainWindow::set_sumValues(bool sportSum,int counter, QMap<QString,QVector<double>> *summery,QString sport)
+void MainWindow::summery_calc(QMap<QString,QVector<double>> *calcSummery,QMap<QString,QVector<double>> *sportSummery,QStringList *sportUseList,int sumCounter)
+{
+    QString sportUse = generalValues->value("sum");
+    QVector<double> calcSum(sumCounter,0),sportSum(sumCounter,0);
+    QMap<int,QString> sumValues;
+    calcSum = sportSummery->value(sportUse);
+
+    for(QMap<QString,QVector<double>>::const_iterator it = calcSummery->cbegin(), end = calcSummery->cend(); it != end; ++it)
+    {
+        sportSum.fill(0);
+        sportUse = it.key();
+        if(sportUseList->contains(sportUse))
+        {
+            for(int values = 0; values < sumCounter; ++values)
+            {
+                sportSum[values] = it.value().at(values);
+                calcSum[values] = calcSum.at(values) + sportSum.at(values);
+            }
+            if(sportSummery->contains(sportUse))
+            {
+                for(int sum = 0; sum < sumCounter; ++sum)
+                {
+                    sportSum[sum] = sportSum.at(sum) + sportSummery->value(sportUse).at(sum);
+                }
+            }
+            sportSummery->insert(sportUse,sportSum);
+            sportSummery->insert(generalValues->value("sum"),calcSum);
+        }
+     }
+}
+
+QString MainWindow::set_summeryString(int counter, QMap<QString,QVector<double>> *summery,QString sport)
 {
     QString valueString = sport;
     double weekComp = summery->value(generalValues->value("sum")).at(1);
     double sportComp = summery->value(sport).at(1);
     double avgValue = weekComp/weekComp;
 
-    if(sportSum)
-    {
-        avgValue = sportComp / weekComp;
-    }
+    //qDebug() << sportComp << weekComp;
+
+    avgValue = sportComp / weekComp;
 
     for(int i = 0; i < counter; ++i)
     {
-        if(i == 1)
-        {
-            valueString = valueString + "-" + this->set_time(static_cast<int>(sportComp));
-        }
-        else if(i == 2)
+        if(i == 2)
         {
             valueString = valueString + "-" + QString::number(this->set_doubleValue(avgValue*100.0,false));
         }
@@ -622,7 +659,6 @@ QString MainWindow::set_sumValues(bool sportSum,int counter, QMap<QString,QVecto
             valueString = valueString + "-" + QString::number(summery->value(sport).at(i));
         }
     }
-
     return valueString;
 }
 
@@ -650,12 +686,11 @@ void MainWindow::workoutSchedule(QDate date)
             {
                 dayWorkouts = workSchedule->get_workouts(true,date.addDays(dayCounter).toString(dateFormat));
                 itemValue = date.addDays(dayCounter).toString("dd MMM yy") +delimiter;
-
                 for(QMap<int,QStringList>::const_iterator it = dayWorkouts.cbegin(), end = dayWorkouts.cend(); it != end; ++it)
                 {
-                    stdConnect = it.value().count() == 10 ? "\n" : "*\n";
+                    stdConnect = it.value().count() == 9 ? "\n" : "*\n";
                     itemValue = itemValue + it.value().at(1) + conString + it.value().at(2) + stdConnect;
-                    itemValue = itemValue + it.value().at(5).left(5) + conString + it.value().at(6) + " km" + delimiter;
+                    itemValue = itemValue + set_time(it.value().at(5).toInt()) + conString + it.value().at(6) + " km" + delimiter;
                 }
                 ++dayCounter;
                 itemValue.chop(1);
@@ -666,6 +701,7 @@ void MainWindow::workoutSchedule(QDate date)
             ui->tableWidget_schedule->setItem(row,col,item);
         }
     }
+    this->summery_Set(date,nullptr);
 }
 
 void MainWindow::set_saisonValues(QStringList *sportList,QString weekID, int week)
@@ -676,9 +712,7 @@ void MainWindow::set_saisonValues(QStringList *sportList,QString weekID, int wee
     QString conString = " - ";
     QString itemValue = QString();
     QString delimiter = "#";
-    QVector<double> sumValues;
-    sumValues.resize(4);
-    sumValues.fill(0);
+    QVector<double> sumValues(5,0);
     int col = 0;
 
     QTableWidgetItem *weekitem = new QTableWidgetItem();
@@ -743,6 +777,7 @@ void MainWindow::saisonSchedule(QString phase)
             weekID = calc_weekID(saisonStart.addDays(week*static_cast<int>(weekDays)));
             this->set_saisonValues(&sportUseList,weekID,week);
         }
+        this->summery_Set(saisonStart,nullptr);
     }
     else
     {
@@ -758,15 +793,14 @@ void MainWindow::saisonSchedule(QString phase)
                 weekID = phaseItem->child(week,0)->data(Qt::DisplayRole).toString();
                 this->set_saisonValues(&sportUseList,weekID,week);
             }
+            this->summery_Set(QDate(),phaseItem);
         }
-
     }
 }
 
 void MainWindow::refresh_schedule()
 {
     this->workoutSchedule(firstdayofweek.addDays(weekCounter*weekDays));
-    this->summery_Schedule(firstdayofweek.addDays(weekCounter*weekDays));
 }
 
 void MainWindow::refresh_saison()
@@ -965,7 +999,7 @@ void MainWindow::on_actionSave_triggered()
 void MainWindow::on_calendarWidget_clicked(const QDate &date)
 {
    weeknumber = this->calc_weekID(date);
-   this->summery_Schedule(date);
+   this->summery_Set(date,nullptr);
 }
 
 
@@ -1830,11 +1864,6 @@ void MainWindow::on_actionPreferences_triggered()
             this->loadUISettings();
         }
     }
-
-    if(workSchedule->newSaison)
-    {
-        this->refresh_saisonInfo();
-    }
 }
 
 void MainWindow::on_actionPace_Calculator_triggered()
@@ -1955,12 +1984,11 @@ void MainWindow::toolButton_planMode(bool checked)
 
         this->workoutSchedule(firstdayofweek);
         this->set_buttons(checked);
-        this->set_phaseFilter(1);
     }
     else
     {  
         planMode->setText(schedMode->at(1));
-        this->saisonSchedule(phaseGroup->button(1)->text());
+        this->saisonSchedule(phaseGroup->checkedButton()->text());
         if(weekpos == 0)
         {
              this->set_buttons(false);
@@ -2003,6 +2031,7 @@ void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value
     else
     {
         workSchedule->set_selSaison(value);
+        this->saisonSchedule(phaseGroup->button(1)->text());
     }
 }
 

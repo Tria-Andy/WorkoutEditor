@@ -192,6 +192,7 @@ void Dialog_week_copy::on_pushButton_ok_clicked()
                                       );
         if (reply == QMessageBox::Yes)
         {
+            workSched->clearWeek(sourceWeek);
             accept();
         }
     }
