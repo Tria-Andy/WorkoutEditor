@@ -7,6 +7,8 @@ calculation::calculation()
     firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
     gcValues = settings::getStringMapPointer(settings::stingMap::GC);
     dateFormat = "dd.MM.yyyy";
+    longTime = settings::get_format("longtime");
+    shortTime = settings::get_format("shorttime");
 }
 
 QHash<QString,double>* calculation::thresValues = settings::getdoubleMapPointer(settings::dMap::Threshold);

@@ -17,7 +17,7 @@ protected:
     QHash<QString,double> *ltsValues,*doubleValues;
     QHash<QString,QString> *gcValues;
     QDate firstdayofweek;
-    QString dateFormat;
+    QString dateFormat,longTime,shortTime;
 
     static bool usePMData;
     static double calc_totalWork(QString,double,double,int);

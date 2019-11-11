@@ -113,6 +113,8 @@ void day_popup::init_dayWorkouts(QDate workDate)
 
     int col = 0;
 
+    qDebug() << "Get" << dayWorkouts;
+
     for(QMap<int,QStringList>::const_iterator it = dayWorkouts.cbegin(), end = dayWorkouts.cend(); it != end; ++it)
     {
         for(int row = 0; row < worklistCount; ++row)
@@ -345,11 +347,15 @@ void day_popup::update_workouts()
 
     for(int work = 0; work < dayModel->columnCount(); ++work)
     {
-        for(int value = 0; value < dayModel->rowCount()-1; ++value)
+        for(int value = 0; value < dayModel->rowCount(); ++value)
         {
             if(value == 0)
             {
                 workTime = QTime::fromString(dayModel->data(dayModel->index(value,work)).toString(),"hh:mm");
+            }
+            else if (value == 5)
+            {
+                valueList << QString::number(get_timesec(dayModel->data(dayModel->index(value,work)).toString()));
             }
             else
             {
@@ -376,6 +382,7 @@ void day_popup::update_workouts()
         dayWorkouts.insert(workCounter++,valueList);
         valueList.clear();
     }
+    qDebug() << "Edit" << dayWorkouts;
 }
 
 

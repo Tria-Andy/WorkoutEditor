@@ -167,12 +167,18 @@ public:
             }
             else
             {
-                timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"hh:mm:ss"));
+                if(index.data(Qt::DisplayRole).toString().length() == 5)
+                {
+                    timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"mm:ss"));
+                }
+                if(index.data(Qt::DisplayRole).toString().length() == 8)
+                {
+                    timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"hh:mm:ss"));
+                }
             }
         }
         if(row == 1 || row == 2)
         {
-            QString value = index.data(Qt::DisplayRole).toString();
             QComboBox *comboBox = static_cast<QComboBox*>(editor);
             if(row == 1)
             {
@@ -182,7 +188,7 @@ public:
             {
                 comboBox->addItems(settings::get_listValues("WorkoutCode"));
             }
-            comboBox->setCurrentText(value);
+            comboBox->setCurrentText(index.data(Qt::DisplayRole).toString());
         }
         if(row == 3 || row == 4)
         {
@@ -219,20 +225,18 @@ public:
             {
                 double timeValue = get_timesec(value.toString("hh:mm:ss"));
                 model->setData(index,value.toString("hh:mm:ss"), Qt::EditRole);
-                model->setData(model->index(10,col),get_workout_pace(model->data(model->index(6,col)).toDouble(),timeValue,model->data(model->index(1,col)).toString(),true));
+                model->setData(model->index(9,col),get_workout_pace(model->data(model->index(6,col)).toDouble(),timeValue,model->data(model->index(1,col)).toString(),true));
             }
         }
         if(row == 1 || row == 2) //Sport || Code
         {
             QComboBox *comboBox = static_cast<QComboBox*>(editor);
-            QString value = comboBox->currentText();
-            model->setData(index,value, Qt::EditRole);
+            model->setData(index,comboBox->currentText(), Qt::EditRole);
         }
         if(row == 3 || row == 4) //Title || Comment
         {
             QLineEdit *lineEdit = static_cast<QLineEdit*>(editor);
-            QString value = lineEdit->text();
-            model->setData(index,value);
+            model->setData(index,lineEdit->text());
         }
         if(row == 6) //Distance
         {
@@ -240,14 +244,13 @@ public:
             spinBox->interpretText();
             double value = spinBox->value();
             model->setData(index, value, Qt::EditRole);
-            model->setData(model->index(10,col),get_workout_pace(value,get_timesec(model->data(model->index(5,col)).toString()),model->data(model->index(1,col)).toString(),true));
+            model->setData(model->index(9,col),get_workout_pace(value,get_timesec(model->data(model->index(5,col)).toString()),model->data(model->index(1,col)).toString(),true));
         }
         if(row == 7 || row == 8) //Stress && Work(kj)
         {
             QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-            int value = spinBox->value();
             spinBox->interpretText();
-            model->setData(index,value, Qt::EditRole);
+            model->setData(index,spinBox->value(), Qt::EditRole);
         }
     }
 

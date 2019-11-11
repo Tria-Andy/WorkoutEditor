@@ -40,7 +40,7 @@ private:
 
     static QMap<int,QString> sampList,intList;
     static QMap<int,double> weightMap;
-    static QHash<QString,QString> swimRange,bikeRange,runRange,triRange,stgRange,altRange,hfRange;
+    static QHash<QString,QString> formatMap,swimRange,bikeRange,runRange,triRange,stgRange,altRange,hfRange;
     static QHash<QString,unsigned int> intMap;
 
     //Getter
@@ -73,6 +73,7 @@ public:
     static QHash<QString,QVector<double>> doubleVector;
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
     static QString get_rangeValue(QString,QString);
+    static QString get_format(QString key) {return formatMap.value(key);}
     static unsigned int get_fontValue(QString key) {return intMap.value(key);}
     static unsigned int get_intValue(QString key) {return intMap.value(key);}
     static QStringList get_listValues(QString key) {return listMap.value(key);}

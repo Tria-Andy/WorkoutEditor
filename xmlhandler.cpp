@@ -52,6 +52,28 @@ void xmlHandler::write_XMLFile(QString path,QDomDocument *xmlDoc,QString fileNam
     xmlFile.close();
 }
 
+QString xmlHandler::timetoSec(QString time)
+{
+    int sec = 0;
+    if(time.length() == 8)
+    {
+        QTime durtime = QTime::fromString(time,"hh:mm:ss");
+        sec = durtime.hour()*60*60;
+        sec = sec + durtime.minute()*60;
+        sec = sec + durtime.second();
+    }
+    if(time.length() == 5)
+    {
+        QTime durtime = QTime::fromString(time,"mm:ss");
+        sec = durtime.minute()*60;
+        sec = sec + durtime.second();
+    }
+
+    return QString::number(sec);
+}
+
+
+
 void xmlHandler::fill_treeModel(QDomNodeList *pList, QStandardItemModel *model)
 {
     QStandardItem *rootItem = model->invisibleRootItem();
@@ -88,7 +110,7 @@ void xmlHandler::add_child(QDomElement element, QStandardItem *item)
     QDomNodeList nodeList = element.childNodes();
     QDomNamedNodeMap nodeMap;
     QStringList *tagList;
-
+    QString timeSec;
     for(int node = 0; node < nodeList.count(); ++node)
     {
         QList<QStandardItem*> cItem;

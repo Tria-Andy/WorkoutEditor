@@ -205,14 +205,7 @@ QMap<int, QStringList> schedule::get_workouts(bool dayWorkouts,QString indexStri
             {
                 for(int x = 1; x < counter; ++x)
                 {
-                    if(x == 6)
-                    {
-                        workItems << QString::number(get_timesec(model->data(model->index(work,x,modelIndex)).toString()));
-                    }
-                    else
-                    {
-                        workItems << model->data(model->index(work,x,modelIndex)).toString();
-                    }
+                   workItems << model->data(model->index(work,x,modelIndex)).toString();
                 }
                 workouts.insert(work,workItems);
                 workItems.clear();
@@ -340,6 +333,7 @@ void schedule::set_workoutData(QHash<QDate,QMap<int,QStringList>> workoutMap)
         for(QMap<int,QStringList>::const_iterator vit = it.value().cbegin(), vend = it.value().cend(); vit != vend; ++vit)
         { 
             QList<QStandardItem*> itemList;
+            qDebug() << vit.value();
             itemList << new QStandardItem(QString::number(vit.key()));
             for(int itemValue = 0; itemValue < vit.value().count(); ++itemValue)
             {

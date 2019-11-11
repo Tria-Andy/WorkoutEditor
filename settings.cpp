@@ -33,6 +33,7 @@ bool settings::settingsUpdated;
 
 QHash<QString,QString> settings::gcInfo;
 QHash<QString,QString> settings::generalMap;
+QHash<QString,QString> settings::formatMap;
 QHash<QString,QColor> settings::colorMap;
 QHash<QString,unsigned int> settings::intMap;
 
@@ -474,6 +475,9 @@ int settings::loadSettings()
                 settingList << myvalues->value("filecount").toString();
                 settingList << myvalues->value("workfactor").toString();
                 generalMap.insert("dateformat", myvalues->value("dateformat").toString());
+                formatMap.insert("dateformat", myvalues->value("dateformat").toString());
+                formatMap.insert("longtime", myvalues->value("longtime").toString());
+                formatMap.insert("shorttime", myvalues->value("shorttime").toString());
                 listMap.insert("Misc",settingList);
                 listMap.insert("addworkout",myvalues->value("addworkout").toString().split(splitter));
                 generalMap.insert("sum", settingList.at(0));

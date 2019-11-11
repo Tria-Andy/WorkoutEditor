@@ -21,6 +21,7 @@ protected:
 
 private:
     QString schedulePath,workoutFile,scheduleFile,metaFile,contentFile,ltsFile;
+    QString timetoSec(QString time);
 };
 
 #endif // XMLHANDLER_H
