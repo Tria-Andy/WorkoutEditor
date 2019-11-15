@@ -35,7 +35,7 @@ QHash<QString,QString> settings::gcInfo;
 QHash<QString,QString> settings::generalMap;
 QHash<QString,QString> settings::formatMap;
 QHash<QString,QColor> settings::colorMap;
-QHash<QString,unsigned int> settings::intMap;
+QHash<QString,int> settings::intMap;
 
 QString settings::valueFile;
 QString settings::valueFilePath;
@@ -52,12 +52,12 @@ QString settings::isOther;
 QHash<QString,QStringList*> settings::headerMap;
 QHash<QString,QStringList> settings::listMap;
 QHash<QString,QStringList> settings::jsonTags;
+QHash<QString,QMap<QString,QString>> settings::sportDistance;
 QHash<QString,QVector<double>> settings::doubleVector;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
 QMap<int,double> settings::weightMap;
 QHash<QString,double> settings::thresholdMap;
-QHash<QString,double> settings::ltsMap;
 QHash<QString,double> settings::athleteMap;
 QHash<QString,double> settings::doubleMap;
 QHash<QString,QString> settings::swimRange;
@@ -78,7 +78,6 @@ QStringList settings::header_pm;
 QStringList settings::header_pace;
 QStringList settings::headerTria;
 QStringList settings::header_other;
-QStringList settings::triaDistance;
 QStringList settings::header_int_time;
 QStringList settings::header_swim_time;
 
@@ -172,6 +171,44 @@ void settings::readHeaderFile(QDomDocument *xmlFile)
 
        headerMap.insert(xmlList.at(row).toElement().tagName(),tagList);
        headerList.clear();
+    }
+}
+
+void settings::fill_sportDistance(QStringList *list, QSettings *key)
+{
+    QMap<QString,QString> raceDist;
+    QStringList raceList,distList;
+    QString sportName;
+
+    for(int sport = 0; sport < list->count(); ++sport)
+    {
+        for(int child = 0; child < key->childKeys().count(); ++child)
+        {
+            if(key->childKeys().at(child).startsWith(list->at(sport),Qt::CaseInsensitive))
+            {
+                sportName = key->childKeys().at(child);
+                if(sportName.contains("race"))
+                {
+                    raceList << key->value(sportName).toString().split(splitter);
+                }
+                if(sportName.contains("dist"))
+                {
+                    distList << key->value(sportName).toString().split(splitter);
+                }
+            }
+            if(!raceList.isEmpty() && !distList.isEmpty())
+            {
+                for(int race = 0; race < raceList.count(); ++race)
+                {
+                    raceDist.insert(raceList.at(race),distList.at(race));
+                }
+                raceList.clear();
+                distList.clear();
+
+            }
+        }
+        sportDistance.insert(list->at(sport),raceDist);
+        raceDist.clear();
     }
 }
 
@@ -309,8 +346,8 @@ int settings::loadSettings()
             athleteMap.insert("sex",myPref->value("sex").toDouble());
             athleteMap.insert("riderfrg",(athleteMap.value("weight")+9.0)*9.81*0.45);
             athleteMap.insert("ridercw",0.2279+(athleteMap.value("weight")/(athleteMap.value("height")*750)));
-            ltsMap.insert("ltsdays",myPref->value("LTSdays").toDouble());
-            ltsMap.insert("stsdays",myPref->value("STSdays").toDouble());
+            intMap.insert("ltsdays",myPref->value("LTSdays").toInt());
+            intMap.insert("stsdays",myPref->value("STSdays").toInt());
             delete myPref;
 
             QStringList settingList,tempList;
@@ -319,10 +356,8 @@ int settings::loadSettings()
             QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
 
             myvalues->beginGroup("Stressterm");
-                if(ltsMap.value("ltsdays") == 0.0) ltsMap.insert("ltsdays",myvalues->value("ltsdays").toDouble());
-                if(ltsMap.value("stsdays") == 0.0) ltsMap.insert("ltsdays",myvalues->value("stsdays").toDouble());
-                ltsMap.insert("lastlts",myvalues->value("lastlts").toDouble());
-                ltsMap.insert("laststs",myvalues->value("laststs").toDouble());
+                if(intMap.value("ltsdays") == 0) intMap.insert("ltsdays",myvalues->value("ltsdays").toInt());
+                if(intMap.value("stsdays") == 0) intMap.insert("ltsdays",myvalues->value("stsdays").toInt());
             myvalues->endGroup();
 
             myvalues->beginGroup("JsonFile");
@@ -491,17 +526,14 @@ int settings::loadSettings()
                 settingList.clear();
                 athleteMap.insert("currpal",myvalues->value("currpal").toDouble());
                 athleteMap.insert("methode",myvalues->value("calmethode").toDouble());
-                doubleMap.insert("maxworkouts",myvalues->value("maxworkouts").toDouble());
+                intMap.insert("maxworkouts",myvalues->value("maxworkouts").toInt());
                 intMap.insert("weekrange",myvalues->value("weekrange").toInt());
+                intMap.insert("weekdays",myvalues->value("weekdays").toInt());
             myvalues->endGroup();
 
             myvalues->beginGroup("Sport");
-                triaDistance << myvalues->value("triathlon").toString().split(splitter);
-                settingList << myvalues->value("triaDist").toString().split(splitter);
-                for(int i = 0; i < settingList.count(); i++)
-                {
-                    triaMap.insert(triaDistance.at(i),settingList.at(i));
-                }
+                settingList << myvalues->value("racesport").toString().split(splitter);
+                fill_sportDistance(&settingList,myvalues);
                 settingList.clear();
                 settingList <<  myvalues->value("sports").toString().split(splitter);
                 listMap.insert("Sport",myvalues->value("sports").toString().split(splitter));
@@ -653,10 +685,8 @@ void settings::saveSettings()
     QSettings *myvalues = new QSettings(valueFilePath,QSettings::IniFormat);
 
     myvalues->beginGroup("Stressterm");
-        myvalues->setValue("ltsdays",ltsMap.value("ltsdays"));
-        myvalues->setValue("stsdays",ltsMap.value("stsdays"));
-        myvalues->setValue("lastlts",ltsMap.value("lastlts"));
-        myvalues->setValue("laststs",ltsMap.value("laststs"));
+        myvalues->setValue("ltsdays",intMap.value("ltsdays"));
+        myvalues->setValue("stsdays",intMap.value("stsdays"));
     myvalues->endGroup();
 
     myvalues->beginGroup("Threshold");
@@ -821,24 +851,3 @@ QStringList settings::get_int_header(QString vSport,bool usePM)
         return table_header << header_other << avg;
     }
 }
-
-int settings::get_timesec(QString time)
-{
-    int sec = 0;
-    if(time.length() == 8)
-    {
-        QTime durtime = QTime::fromString(time,"hh:mm:ss");
-        sec = durtime.hour()*60*60;
-        sec = sec + durtime.minute()*60;
-        sec = sec + durtime.second();
-    }
-    if(time.length() == 5)
-    {
-        QTime durtime = QTime::fromString(time,"mm:ss");
-        sec = durtime.minute()*60;
-        sec = sec + durtime.second();
-    }
-
-    return sec;
-}
-

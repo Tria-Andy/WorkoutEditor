@@ -43,14 +43,16 @@ schedule::schedule()
         this->check_File(schedulePath,scheduleFile);
         xmlList = this->load_XMLFile(schedulePath,scheduleFile).firstChildElement().elementsByTagName("week");
         this->fill_treeModel(&xmlList,scheduleModel);
+        this->remove_WeekofPast(firstdayofweek.addDays(-7));
 
-        //Seasion - Phase
+        //Saison - Phase
         this->check_File(schedulePath,phaseFile);
         xmlList = this->load_XMLFile(schedulePath,phaseFile).firstChildElement().elementsByTagName("macro");
         this->fill_treeModel(&xmlList,phaseModel);
 
-        //Last LTS
-        this->read_ltsFile(this->load_XMLFile(schedulePath,ltsFile));
+        //StressMap
+        this->fill_xmlToList(this->load_XMLFile(schedulePath,ltsFile),&mapList);
+        this->set_stressMap();
 
         this->set_saisonValues();
     }
@@ -62,14 +64,8 @@ enum {SAISON,SCHEDULE};
 
 void schedule::freeMem()
 {
-    delete saisonsModel;
     delete phaseModel;
-    delete contestModel;
-}
-
-void schedule::filter_schedule(QString filterValue, int col, bool fixed)
-{
-    qDebug() << filterValue << col << fixed;
+    delete scheduleModel;
 }
 
 void schedule::save_workouts(bool saveModel)
@@ -82,6 +78,7 @@ void schedule::save_workouts(bool saveModel)
     if(saveModel == SCHEDULE)
     {
         this->read_treeModel(scheduleModel,"schedule",scheduleFile);
+        this->save_ltsFile();
     }
     isUpdated = false;
 }
@@ -230,53 +227,43 @@ QStringList schedule::get_weekMeta(QString weekID)
     return weekMeta;
 }
 
-void schedule::read_ltsFile(QDomDocument stressContent)
+void schedule::save_ltsFile()
 {
-    QDomElement root_lts = stressContent.firstChildElement();
-    QDomNodeList lts_list;
-
-    QVector<double> stress(4);
-    stress.fill(0);
-
-    if(stressContent.hasChildNodes())
-    {
-        lts_list = root_lts.elementsByTagName("StressLTS");
-
-        for(int i = 0; i < lts_list.count(); ++i)
-        {
-            QDomElement stress_element;
-            QDomNode stress_node = lts_list.at(i);
-            stress_element = stress_node.toElement();
-
-            stress[0] = stress_element.attribute("stress").toDouble();
-            stressMap.insert(QDate::fromString(stress_element.attribute("day"),dateFormat),stress);
-        }
-    }
-}
-
-void schedule::save_ltsFile(double ltsDays)
-{
-    QDomDocument xmlDoc;
-    QDomElement xmlRoot,xmlElement;
-    xmlRoot = xmlDoc.createElement("Stress");
-    xmlDoc.appendChild(xmlRoot);
-    QStringList *stressheader = settings::getHeaderMap("stresslts");
-
+    QMap<int,QStringList> saveList;
+    QStringList mapList;
+    int counter = 0;
+    int ltsDays = settings::get_intValue("ltsdays")+1;
 
     for(QMap<QDate,QVector<double>>::const_iterator it = stressMap.find(firstdayofweek.addDays(-ltsDays)), end = stressMap.find(firstdayofweek); it != end; ++it)
     {
-        xmlElement = xmlDoc.createElement("stresslts");
-
-        xmlElement.setAttribute(stressheader->at(0),it.key().toString(dateFormat));
-        xmlElement.setAttribute(stressheader->at(1),QString::number(it.value().at(0)));
-        xmlElement.setAttribute(stressheader->at(2),QString::number(it.value().at(1)));
-        xmlElement.setAttribute(stressheader->at(3),QString::number(it.value().at(2)));
-        xmlElement.setAttribute(stressheader->at(4),QString::number(it.value().at(3)));
-
-        xmlRoot.appendChild(xmlElement);
+        mapList << it.key().toString(dateFormat);
+        for(int value = 0; value < it.value().count(); ++value)
+        {
+            mapList << QString::number(set_doubleValue(it.value().at(value),false));
+        }
+        saveList.insert(counter++,mapList);
+        mapList.clear();
     }
-    this->write_XMLFile(schedulePath,&xmlDoc,ltsFile);
+    this->read_listMap(&saveList,"stressmap",ltsFile);
 }
+
+void schedule::add_contest(QString saison,QDate contestDate, QStringList contestValues)
+{
+    QMap<QDate,QStringList> contest = contestMap.value(saison);
+    contest.insert(contestDate,contestValues);
+    contestMap.insert(saison,contest);
+}
+
+void schedule::remove_contest(QString saison, QDate contestDate)
+{
+    QMap<QDate,QStringList> contest = contestMap.value(saison);
+    contest.remove(contestDate);
+    contestMap.insert(saison,contest);
+
+    QStandardItem *dayItem = scheduleModel->itemFromIndex(get_modelIndex(scheduleModel,contestDate.toString(dateFormat),0));
+    scheduleModel->removeRows(0,dayItem->rowCount(),dayItem->index());
+}
+
 
 void schedule::check_workouts(QDate date)
 {
@@ -284,6 +271,7 @@ void schedule::check_workouts(QDate date)
     QString dateString = date.toString(dateFormat);
     QModelIndex index = this->get_modelIndex(scheduleModel,calc_weekID(date),0);
 
+    //Check if Week and Date available
     if(!index.isValid())
     {
         itemList << new QStandardItem(calc_weekID(date));
@@ -291,16 +279,37 @@ void schedule::check_workouts(QDate date)
         index = this->get_modelIndex(scheduleModel,calc_weekID(date),0);
     }
     itemList.clear();
-    QStandardItem *weekItem = scheduleModel->itemFromIndex(index);
+    QStandardItem *item = scheduleModel->itemFromIndex(index);
 
     index = this->get_modelIndex(scheduleModel,dateString,0);
 
     if(!index.isValid())
     {
         itemList << new QStandardItem(dateString);
-        weekItem->appendRow(itemList);
-        index = this->get_modelIndex(scheduleModel,dateString,0);
-        qDebug() << "Added Day" << scheduleModel->itemFromIndex(index)->data(Qt::DisplayRole).toString() << "to" << weekItem->data(Qt::DisplayRole).toString();
+        item->appendRow(itemList);
+    }
+
+    //Read Contest/Races
+    index = this->get_modelIndex(scheduleModel,dateString,0);
+    QStandardItem *dayItem = scheduleModel->itemFromIndex(index);
+
+    if(dayItem->hasChildren())
+    {
+        for(int work = 0; work < dayItem->rowCount(); ++work)
+        {
+            if(dayItem->child(work,3)->data(Qt::DisplayRole).toString() == "Race")
+            {
+                QStringList contestValues;
+                index = get_modelIndex(phaseModel,calc_weekID(date),0);
+                item = get_phaseItem(index.parent().parent().data(Qt::DisplayRole).toString());
+
+                for(int value = 0; value < workoutTags->count(); ++value)
+                {
+                    contestValues << dayItem->child(work,value)->data(Qt::DisplayRole).toString();
+                }
+                add_contest(item->data(Qt::DisplayRole).toString(),date,contestValues);
+            }
+        }
     }
 }
 
@@ -315,6 +324,19 @@ QStringList schedule::get_weekList()
     QStringList weekList = compWeekMap.keys();
     std::sort(weekList.begin(),weekList.end());
     return weekList;
+}
+
+void schedule::remove_WeekofPast(QDate dayOfWeek)
+{
+    QString weekID = calc_weekID(dayOfWeek);
+    QModelIndex weekIndex = get_modelIndex(scheduleModel,weekID,0);
+
+    if(weekIndex.isValid())
+    {
+        QStandardItem *weekItem = scheduleModel->itemFromIndex(weekIndex);
+        scheduleModel->removeRows(0,weekItem->rowCount(),weekIndex);
+        scheduleModel->removeRow(weekIndex.row(),weekIndex.parent());
+    }
 }
 
 void schedule::set_workoutData(QHash<QDate,QMap<int,QStringList>> workoutMap)
@@ -333,7 +355,6 @@ void schedule::set_workoutData(QHash<QDate,QMap<int,QStringList>> workoutMap)
         for(QMap<int,QStringList>::const_iterator vit = it.value().cbegin(), vend = it.value().cend(); vit != vend; ++vit)
         { 
             QList<QStandardItem*> itemList;
-            qDebug() << vit.value();
             itemList << new QStandardItem(QString::number(vit.key()));
             for(int itemValue = 0; itemValue < vit.value().count(); ++itemValue)
             {
@@ -494,24 +515,45 @@ void schedule::update_compValues(QMap<QString,QVector<double>> *compSum,QMap<int
 
 void schedule::recalc_stressValues()
 {
-    double lte = static_cast<double>(exp(-1.0/ltsValues->value("ltsdays")));
-    double ste = static_cast<double>(exp(-1.0/ltsValues->value("stsdays")));
+    int ltsDays = settings::get_intValue("ltsdays");
+    int stsDays = settings::get_intValue("stsdays");
+
+    double lte = static_cast<double>(exp(-1.0/ltsDays));
+    double ste = static_cast<double>(exp(-1.0/stsDays));
     double ltsStress = 0,stsStress = 0;
     QVector<double> stressValue(4);
 
-    stsStress = ltsValues->value("laststs");
-    ltsStress = ltsValues->value("lastlts");
+    stsStress = stressMap.value(firstdayofweek.addDays(-stsDays-1)).at(1);
+    ltsStress = stressMap.value(firstdayofweek.addDays(-ltsDays-1)).at(2);
 
     for(QMap<QDate,QVector<double>>::const_iterator it = stressMap.cbegin(), end = stressMap.cend(); it != end; ++it)
     {
-        stressValue[0] = it.value().at(0);
-        stressValue[1] = (it.value().at(0) * (1.0 - ste)) + (stsStress * ste);
-        stressValue[2] = (it.value().at(0) * (1.0 - lte)) + (ltsStress * lte);
-        stressValue[3] = it.value().at(3);
-        stsStress = stressValue[1];
-        ltsStress = stressValue[2];
 
-        stressMap.insert(it.key(),stressValue);
+        if(it.key() != firstdayofweek.addDays(-ltsDays-1))
+        {
+            stressValue[0] = it.value().at(0);
+            stressValue[1] = (it.value().at(0) * (1.0 - ste)) + (stsStress * ste);
+            stressValue[2] = (it.value().at(0) * (1.0 - lte)) + (ltsStress * lte);
+            stressValue[3] = it.value().at(3);
+            stsStress = stressValue[1];
+            ltsStress = stressValue[2];
+            stressMap.insert(it.key(),stressValue);
+        }
+    }
+}
+
+void schedule::set_stressMap()
+{
+    QVector<double> stressValue(4,0);
+
+    for(QMap<int,QStringList>::const_iterator it = mapList.cbegin(), end = mapList.cend(); it != end; ++it)
+    {
+        stressValue[0] = it.value().at(1).toDouble();
+        stressValue[1] = it.value().at(2).toDouble();
+        stressValue[2] = it.value().at(3).toDouble();
+        stressValue[3] = it.value().at(4).toDouble();
+        stressMap.insert(QDate::fromString(it.value().at(0),dateFormat),stressValue);
+        stressValue.fill(0);
     }
 }
 

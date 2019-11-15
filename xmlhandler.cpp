@@ -64,8 +64,9 @@ QString xmlHandler::timetoSec(QString time)
     }
     if(time.length() == 5)
     {
-        QTime durtime = QTime::fromString(time,"mm:ss");
-        sec = durtime.minute()*60;
+        QTime durtime = QTime::fromString(time,"hh:mm");
+        sec = durtime.hour()*60*60;
+        sec = sec + durtime.minute()*60;
         sec = sec + durtime.second();
     }
 
@@ -104,13 +105,59 @@ void xmlHandler::fill_treeModel(QDomNodeList *pList, QStandardItemModel *model)
     }
 }
 
+void xmlHandler::fill_xmlToList(QDomDocument xmlDoc,QMap<int,QStringList> *list)
+{
+    QDomElement rootTag,childTag;
+    QDomNodeList xmlList;
+    QDomElement xmlElement;
+    QStringList *tagList;
+    QStringList mapList;
+
+    rootTag = xmlDoc.firstChildElement();
+    childTag = rootTag.firstChild().toElement();
+    xmlList = rootTag.elementsByTagName(childTag.tagName());
+    tagList = settings::getHeaderMap(childTag.tagName());
+
+    for(int counter = 0; counter < xmlList.count(); ++counter)
+    {
+        xmlElement = xmlList.at(counter).toElement();
+        for(int tag = 0; tag < tagList->count(); ++tag)
+        {
+            mapList << xmlElement.attribute(tagList->at(tag));
+        }
+        list->insert(counter,mapList);
+        mapList.clear();
+    }
+}
+
+void xmlHandler::read_listMap(QMap<int, QStringList> *mapList,QString rootTag,QString xmlFile)
+{
+    QDomDocument xmlDoc;
+    QDomElement xmlRoot,xmlElement;
+    QStringList *elementList = settings::getHeaderMap(rootTag);
+    QStringList *tagList = settings::getHeaderMap(elementList->at(0));
+    xmlRoot = xmlDoc.createElement(rootTag);
+    xmlDoc.appendChild(xmlRoot);
+
+    for(QMap<int, QStringList>::const_iterator it = mapList->cbegin(), end = mapList->cend(); it != end; ++it)
+    {
+        xmlElement = xmlDoc.createElement(elementList->at(0));
+        for(int attr = 0; attr < tagList->count(); ++attr)
+        {
+            xmlElement.setAttribute(tagList->at(attr),it.value().at(attr));
+        }
+        xmlRoot.appendChild(xmlElement);
+    }
+    this->write_XMLFile(schedulePath,&xmlDoc,xmlFile);
+}
+
 void xmlHandler::add_child(QDomElement element, QStandardItem *item)
 {
     QDomElement child;
     QDomNodeList nodeList = element.childNodes();
     QDomNamedNodeMap nodeMap;
     QStringList *tagList;
-    QString timeSec;
+
     for(int node = 0; node < nodeList.count(); ++node)
     {
         QList<QStandardItem*> cItem;

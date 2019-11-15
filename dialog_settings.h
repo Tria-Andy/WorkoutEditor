@@ -112,11 +112,12 @@ private slots:
     void on_spinBox_protein_valueChanged(int arg1);
     void on_spinBox_fat_valueChanged(int arg1);
     void enableSavebutton();
+    void on_comboBox_contestsport_currentIndexChanged(const QString &arg1);
+    void on_comboBox_contestdist_currentIndexChanged(const QString &arg1);
 
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;
-    QSortFilterProxyModel *saisonProxy,*contestProxy;
     QModelIndex contestIndex;
     schedule *schedule_ptr;
     foodplanner *food_ptr;

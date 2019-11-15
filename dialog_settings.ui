@@ -1298,13 +1298,7 @@
                   <property name="frameShadow">
                    <enum>QFrame::Raised</enum>
                   </property>
-                  <layout class="QFormLayout" name="formLayout_6">
-                   <property name="horizontalSpacing">
-                    <number>2</number>
-                   </property>
-                   <property name="verticalSpacing">
-                    <number>2</number>
-                   </property>
+                  <layout class="QGridLayout" name="gridLayout_6">
                    <property name="leftMargin">
                     <number>2</number>
                    </property>
@@ -1317,17 +1311,27 @@
                    <property name="bottomMargin">
                     <number>2</number>
                    </property>
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label_41">
+                   <property name="spacing">
+                    <number>2</number>
+                   </property>
+                   <item row="2" column="0">
+                    <widget class="QLabel" name="label_65">
                      <property name="text">
-                      <string>Date:</string>
+                      <string>Distance:</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="1">
-                    <widget class="QDateEdit" name="dateEdit_contest">
-                     <property name="calendarPopup">
-                      <bool>true</bool>
+                   <item row="5" column="0">
+                    <widget class="QLabel" name="label_43">
+                     <property name="text">
+                      <string>Duration:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="0">
+                    <widget class="QLabel" name="label_19">
+                     <property name="text">
+                      <string>Event:</string>
                      </property>
                     </widget>
                    </item>
@@ -1338,41 +1342,54 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="1">
-                    <widget class="QComboBox" name="comboBox_contestsport"/>
-                   </item>
-                   <item row="2" column="0">
-                    <widget class="QLabel" name="label_19">
-                     <property name="text">
-                      <string>Event:</string>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="2" column="1">
-                    <widget class="QLineEdit" name="lineEdit_contest"/>
+                    <widget class="QComboBox" name="comboBox_contestdist"/>
                    </item>
-                   <item row="3" column="0">
-                    <widget class="QLabel" name="label_43">
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_41">
                      <property name="text">
-                      <string>Distance:</string>
+                      <string>Date:</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="1">
-                    <widget class="QDoubleSpinBox" name="doubleSpinBox_contest">
-                     <property name="maximum">
-                      <double>999.990000000000009</double>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="0">
+                   <item row="6" column="0">
                     <widget class="QLabel" name="label_44">
                      <property name="text">
                       <string>Est-Stress:</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="4" column="1">
+                   <item row="2" column="2">
+                    <widget class="QDoubleSpinBox" name="doubleSpinBox_contestdist">
+                     <property name="decimals">
+                      <number>1</number>
+                     </property>
+                     <property name="maximum">
+                      <double>500.000000000000000</double>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1" colspan="2">
+                    <widget class="QDateEdit" name="dateEdit_contest">
+                     <property name="calendarPopup">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1" colspan="2">
+                    <widget class="QComboBox" name="comboBox_contestsport"/>
+                   </item>
+                   <item row="4" column="1" colspan="2">
+                    <widget class="QLineEdit" name="lineEdit_contest"/>
+                   </item>
+                   <item row="5" column="1" colspan="2">
+                    <widget class="QTimeEdit" name="timeEdit_contestdura">
+                     <property name="displayFormat">
+                      <string>HH:mm:ss</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="6" column="1" colspan="2">
                     <widget class="QSpinBox" name="spinBox_contestStress">
                      <property name="maximum">
                       <number>500</number>
@@ -1464,7 +1481,7 @@
               <number>1</number>
              </property>
              <item>
-              <widget class="QTableView" name="tableView_contest">
+              <widget class="QTableWidget" name="tableWidget_contest">
                <property name="font">
                 <font>
                  <pointsize>8</pointsize>
@@ -1533,13 +1550,6 @@
                 <property name="bottomMargin">
                  <number>0</number>
                 </property>
-                <item row="3" column="0">
-                 <widget class="QLabel" name="label_25">
-                  <property name="text">
-                   <string>Last STS:</string>
-                  </property>
-                 </widget>
-                </item>
                 <item row="0" column="0">
                  <widget class="QLabel" name="label_23">
                   <property name="text">
@@ -1547,39 +1557,18 @@
                   </property>
                  </widget>
                 </item>
+                <item row="0" column="1">
+                 <widget class="QSpinBox" name="spinBox_ltsDays"/>
+                </item>
                 <item row="1" column="0">
-                 <widget class="QLabel" name="label_22">
-                  <property name="text">
-                   <string>Last LTS:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QSpinBox" name="spinBox_lastLTS">
-                  <property name="maximum">
-                   <number>999</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
                  <widget class="QLabel" name="label_24">
                   <property name="text">
                    <string>STS Days:</string>
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="1">
-                 <widget class="QSpinBox" name="spinBox_lastSTS">
-                  <property name="maximum">
-                   <number>999</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
+                <item row="1" column="1">
                  <widget class="QSpinBox" name="spinBox_stsDays"/>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QSpinBox" name="spinBox_ltsDays"/>
                 </item>
                </layout>
               </widget>
@@ -2704,49 +2693,15 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>listWidget_useIn</tabstop>
-  <tabstop>spinBox_thresPower</tabstop>
-  <tabstop>timeEdit_thresPace</tabstop>
-  <tabstop>lineEdit_speed</tabstop>
-  <tabstop>doubleSpinBox_factor</tabstop>
-  <tabstop>spinBox_hfThres</tabstop>
-  <tabstop>spinBox_hfMax</tabstop>
-  <tabstop>dateEdit_saisonStart</tabstop>
-  <tabstop>lineEdit_startWeek</tabstop>
-  <tabstop>dateEdit_saisonEnd</tabstop>
-  <tabstop>lineEdit_saisonWeeks</tabstop>
-  <tabstop>spinBox_ltsDays</tabstop>
-  <tabstop>spinBox_lastLTS</tabstop>
-  <tabstop>spinBox_stsDays</tabstop>
-  <tabstop>spinBox_lastSTS</tabstop>
-  <tabstop>dateEdit_stress</tabstop>
-  <tabstop>spinBox_stress</tabstop>
-  <tabstop>pushButton_stressEdit</tabstop>
-  <tabstop>listWidget_stressValue</tabstop>
-  <tabstop>lineEdit_age</tabstop>
-  <tabstop>spinBox_breast</tabstop>
-  <tabstop>spinBox_stomach</tabstop>
-  <tabstop>spinBox_leg</tabstop>
-  <tabstop>spinBox_hip</tabstop>
-  <tabstop>spinBox_armpit</tabstop>
-  <tabstop>spinBox_trizeps</tabstop>
-  <tabstop>spinBox_back</tabstop>
-  <tabstop>toolButton_schedulePath</tabstop>
-  <tabstop>tableView_hf</tabstop>
-  <tabstop>pushButton_up</tabstop>
-  <tabstop>toolButton_gcPath</tabstop>
-  <tabstop>pushButton_down</tabstop>
-  <tabstop>pushButton_save</tabstop>
-  <tabstop>comboBox_thresSport</tabstop>
-  <tabstop>tableView_level</tabstop>
-  <tabstop>toolButton_workoutsPath</tabstop>
-  <tabstop>pushButton_cancel</tabstop>
   <tabstop>tabWidget</tabstop>
-  <tabstop>lineEdit_gcpath</tabstop>
+  <tabstop>toolButton_gcPath</tabstop>
   <tabstop>lineEdit_athlete</tabstop>
   <tabstop>lineEdit_activity</tabstop>
-  <tabstop>lineEdit_schedule</tabstop>
-  <tabstop>lineEdit_standard</tabstop>
+  <tabstop>toolButton_schedulePath</tabstop>
+  <tabstop>toolButton_workoutsPath</tabstop>
+  <tabstop>toolButton_mapPath</tabstop>
+  <tabstop>toolButton_seasonPath</tabstop>
+  <tabstop>toolButton_foodPath</tabstop>
   <tabstop>lineEdit_configfile</tabstop>
   <tabstop>comboBox_selInfo</tabstop>
   <tabstop>lineEdit_addedit</tabstop>
@@ -2755,6 +2710,105 @@
   <tabstop>toolButton_delete</tabstop>
   <tabstop>toolButton_edit</tabstop>
   <tabstop>listWidget_selection</tabstop>
+  <tabstop>listWidget_useIn</tabstop>
+  <tabstop>pushButton_up</tabstop>
+  <tabstop>pushButton_down</tabstop>
+  <tabstop>comboBox_thresSport</tabstop>
+  <tabstop>comboBox_thresBase</tabstop>
+  <tabstop>spinBox_thresPower</tabstop>
+  <tabstop>timeEdit_thresPace</tabstop>
+  <tabstop>lineEdit_speed</tabstop>
+  <tabstop>doubleSpinBox_lowLimit</tabstop>
+  <tabstop>checkBox_usepm</tabstop>
+  <tabstop>doubleSpinBox_factor</tabstop>
+  <tabstop>doubleSpinBox_watttospeed</tabstop>
+  <tabstop>tableView_level</tabstop>
+  <tabstop>spinBox_hfThres</tabstop>
+  <tabstop>spinBox_hfMax</tabstop>
+  <tabstop>tableView_hf</tabstop>
+  <tabstop>comboBox_saisons</tabstop>
+  <tabstop>dateEdit_saisonStart</tabstop>
+  <tabstop>dateEdit_saisonEnd</tabstop>
+  <tabstop>toolButton_addSaison</tabstop>
+  <tabstop>toolButton_updateSaison</tabstop>
+  <tabstop>toolButton_deleteSaison</tabstop>
+  <tabstop>dateEdit_contest</tabstop>
+  <tabstop>comboBox_contestsport</tabstop>
+  <tabstop>comboBox_contestdist</tabstop>
+  <tabstop>doubleSpinBox_contestdist</tabstop>
+  <tabstop>lineEdit_contest</tabstop>
+  <tabstop>timeEdit_contestdura</tabstop>
+  <tabstop>spinBox_contestStress</tabstop>
+  <tabstop>pushButton_addContest</tabstop>
+  <tabstop>pushButton_delContest</tabstop>
+  <tabstop>pushButton_clearContest</tabstop>
+  <tabstop>tableWidget_contest</tabstop>
+  <tabstop>spinBox_ltsDays</tabstop>
+  <tabstop>spinBox_stsDays</tabstop>
+  <tabstop>dateEdit_stress</tabstop>
+  <tabstop>spinBox_stress</tabstop>
+  <tabstop>pushButton_stressEdit</tabstop>
+  <tabstop>listWidget_stressValue</tabstop>
+  <tabstop>comboBox_pointMethode</tabstop>
+  <tabstop>lineEdit_age</tabstop>
+  <tabstop>doubleSpinBox_muscle</tabstop>
+  <tabstop>doubleSpinBox_PALvalue</tabstop>
+  <tabstop>comboBox_methode</tabstop>
+  <tabstop>lineEdit_weight</tabstop>
+  <tabstop>doubleSpinBox_bone</tabstop>
+  <tabstop>lineEdit_currDayCal</tabstop>
+  <tabstop>spinBox_breast</tabstop>
+  <tabstop>spinBox_stomach</tabstop>
+  <tabstop>spinBox_leg</tabstop>
+  <tabstop>spinBox_hip</tabstop>
+  <tabstop>spinBox_armpit</tabstop>
+  <tabstop>spinBox_trizeps</tabstop>
+  <tabstop>spinBox_back</tabstop>
+  <tabstop>lineEdit_fatfree</tabstop>
+  <tabstop>lineEdit_fatweight</tabstop>
+  <tabstop>lineEdit_fatpercent</tabstop>
+  <tabstop>lineEdit_ffmi</tabstop>
+  <tabstop>lineEdit_comment</tabstop>
+  <tabstop>pushButton_calcFat</tabstop>
+  <tabstop>pushButton_clearFat</tabstop>
+  <tabstop>comboBox_food</tabstop>
+  <tabstop>toolButton_mealAdd</tabstop>
+  <tabstop>toolButton_mealDelete</tabstop>
+  <tabstop>toolButton_mealEdit</tabstop>
+  <tabstop>lineEdit_mealEdit</tabstop>
+  <tabstop>spinBox_carbs</tabstop>
+  <tabstop>spinBox_protein</tabstop>
+  <tabstop>spinBox_fat</tabstop>
+  <tabstop>lineEdit_macroSum</tabstop>
+  <tabstop>comboBox_weightmode</tabstop>
+  <tabstop>doubleSpinBox_max</tabstop>
+  <tabstop>doubleSpinBox_high</tabstop>
+  <tabstop>doubleSpinBox_low</tabstop>
+  <tabstop>doubleSpinBox_min</tabstop>
+  <tabstop>toolButton_colormax</tabstop>
+  <tabstop>toolButton_colorhigh</tabstop>
+  <tabstop>toolButton_colorlow</tabstop>
+  <tabstop>toolButton_colormin</tabstop>
+  <tabstop>listWidget_food</tabstop>
+  <tabstop>listWidget_addwork</tabstop>
+  <tabstop>spinBox_addWork</tabstop>
+  <tabstop>checkBox_Work_0</tabstop>
+  <tabstop>checkBox_Work_1</tabstop>
+  <tabstop>checkBox_Work_2</tabstop>
+  <tabstop>checkBox_Work_3</tabstop>
+  <tabstop>checkBox_Work_4</tabstop>
+  <tabstop>checkBox_Work_5</tabstop>
+  <tabstop>checkBox_Work_6</tabstop>
+  <tabstop>pushButton_save</tabstop>
+  <tabstop>pushButton_cancel</tabstop>
+  <tabstop>lineEdit_foodFile</tabstop>
+  <tabstop>lineEdit_gcpath</tabstop>
+  <tabstop>lineEdit_schedule</tabstop>
+  <tabstop>lineEdit_saisonFile</tabstop>
+  <tabstop>lineEdit_maps</tabstop>
+  <tabstop>lineEdit_startWeek</tabstop>
+  <tabstop>lineEdit_standard</tabstop>
+  <tabstop>lineEdit_saisonWeeks</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

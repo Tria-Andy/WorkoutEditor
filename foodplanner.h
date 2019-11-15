@@ -14,47 +14,56 @@ class foodplanner : public xmlHandler, public calculation
 public:
     explicit foodplanner(schedule *ptrSchedule = nullptr);
 
-    QStandardItemModel *weekPlansModel,*weekSumModel,*daySumModel,*mealModel,*estModel,*historyModel;
-    QSortFilterProxyModel *daySumProxy;
-    QStringList planList,mealsHeader,menuHeader,dayHeader,dayListHeader,estHeader;
-    QMap<int,QStringList> foodList;
+    QStandardItemModel *foodPlanModel,*mealModel,*historyModel;
+    QStringList *menuHeader,*foodsumHeader,*foodestHeader,*foodhistHeader;
+    QStringList planList,mealsHeader,dayHeader,dayListHeader;
+    QMap<QDate,QVector<double>> dayTarget;
+    QMap<QDate,QVector<double>> dayMacros;
 
-    void write_foodPlan();
-    void write_meals(bool);
+    QMap<QDate,QVector<double>> *get_daySumMap() {return &daySumMap;}
+    QMap<QDate,QHash<QString,QHash<QString,QVector<double>>>> *get_foodPlanMap() {return &foodPlanMap;}
+    QMap<QDate,QString> *get_foodPlanList() {return &foodPlanList;}
+    QString get_mealName(QString key) {return mealsMap.value(key);}
+    QString get_mode(QDate);
+    QVector<int> get_mealData(QString,bool);
+    void update_foodPlanMap(bool,QDate,QDate,QString,QString);
+
+    void save_foolPlan();
+    void save_mealList();
     void write_foodHistory();
     void edit_mealSection(QString,int);
     void add_meal(QItemSelectionModel*);
     void remove_meal(QItemSelectionModel*);
-    QVector<int> get_mealData(QString,bool);
-    QVector<double> calPercent,defaultCal;
-    void fill_plannerModel();
     void insert_newWeek(QDate);
     void remove_week(QString);
-    void update_sumBySchedule(QDate);
-    void update_sumByMenu(QDate,int, QStringList*,bool);
-    QVector<int> calc_FoodMacros(QString, double);
-    QStringList get_mealList(QString);
-    QMap<QDate,QVector<double>> dayTarget;
-    QMap<QDate,QVector<double>> dayMacros;
-    QDate firstDayWeek;
+
 
 private:
     schedule *schedulePtr;
+    QDomNodeList xmlList;
     QString loadedWeek,filePath,planerXML,mealXML,historyXML;
-    QStringList dayTags,weekTags,dayHistTags,sectionTags,mealTags,sumHeader,daySumHeader,weekSumHeader,histHeader;
+    QStringList dayHistTags;
+    QVector<double> defaultCal;
+    QMap<QDate,QHash<QString,QHash<QString,QVector<double>> > > foodPlanMap;
+    QMap<QDate,QVector<double>> daySumMap;
+    QHash<QString,QString> mealsMap;
+    QMap<QDate,QString> foodPlanList;
 
-    void read_foodPlan(QDomDocument);
-    void read_meals(QDomDocument);
+    QVector<double> get_mealValues(QString,double);
+    void set_headerLabel(QStandardItemModel*, QStringList*,bool);
+    void set_mealsMap();
+    void set_foodPlanMap(bool);
+
+    void set_daySumMap(QDate);
+    void set_foodPlanList(QStandardItem*);
+    void compare_foodToMeal();
+
     void read_history(QDomDocument);
-    void build_weekFoodTree(QDomElement,QStandardItem*);
+
     QStandardItem *create_item(QDomElement,QStandardItem*);
     void fill_planList(QDate,bool);
     void addrow_mealModel(QStandardItem*,QStringList*);
 
-    int read_dayCalories(QDate);
-    void calc_weekGoal();
-    void set_foodMacros(QDate,QString,double);
-    void update_SumModels();
 };
 
 #endif // FOODPLANNER_H

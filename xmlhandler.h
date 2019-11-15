@@ -15,6 +15,8 @@ protected:
     QDomDocument load_XMLFile(QString,QString);
     void write_XMLFile(QString,QDomDocument*,QString);
     void fill_treeModel(QDomNodeList*, QStandardItemModel*);
+    void fill_xmlToList(QDomDocument,QMap<int,QStringList>*);
+    void read_listMap(QMap<int,QStringList>*,QString,QString);
     void add_child(QDomElement,QStandardItem*);
     void read_treeModel(QStandardItemModel*,QString,QString);
     void read_child(QDomDocument*, QDomElement*, QStandardItem *,QStandardItemModel*,QStringList*,int);

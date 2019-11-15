@@ -50,7 +50,6 @@ SOURCES += main.cpp\
     xmlhandler.cpp \
     dialog_workcreator.cpp \
     filereader.cpp \
-    saisons.cpp \
     foodplanner.cpp \
     dialog_map.cpp \
     foodmacro_popup.cpp \
@@ -81,7 +80,6 @@ HEADERS  += mainwindow.h \
     dialog_workcreator.h \
     filereader.h \
     del_mousehover.h \
-    saisons.h \
     foodplanner.h \
     dialog_map.h \
     foodmacro_popup.h \

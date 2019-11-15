@@ -16,11 +16,9 @@ public:
 
     void update_saison(bool,int,QString,QDate,QDate,int);
     void remove_saison(int);
-    QString get_currSaison() {return currSaison;}
     QVariant get_saisonInfo(QString,QString);
 
     void set_selSaison(QString value) {selSaison = value;}
-    QString get_selSaison() {return selSaison;}
     QString saison_atDate(QDate);
     void write_saisonInfo();
 

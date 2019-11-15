@@ -33,7 +33,7 @@ class year_popup : public QDialog, public calculation
     Q_OBJECT
 
 public:
-    explicit year_popup(QWidget *parent = nullptr, QString pInfo = nullptr,int position = 0,schedule *p_sched = nullptr, QString pPhase = nullptr,int pIndex = 0);
+    explicit year_popup(QWidget *parent = nullptr, QString pInfo = nullptr,schedule *p_sched = nullptr, QString pPhase = nullptr);
     ~year_popup();
 
 private slots:
@@ -43,15 +43,16 @@ private slots:
 private:
     Ui::year_popup *ui;
 
-    QStringList partInfo,phaseList,selectList,weekList,sportUseList;
+    QStringList phaseInfo,phaseList,selectList,weekList,sportUseList;
     QSortFilterProxyModel *metaProxy,*proxyFilter,*contentProxy;
-    QString phase;
-    int col,phaseindex,widthFactor,heightFactor,weekcount;
+    QString phaseName;
+    int col,widthFactor,heightFactor,weekcount;
     bool isLoad;
-    double max_stress;
     schedule *workSched;
     QVector<double> xWeeks,yStress,yDura,yDist,yWorks,yValues,maxValues;
 
+    void set_comValues(const QVector<double>,int);
+    void read_compValues(QStandardItem*,QString,int);
     void set_plotValues();
     void set_graph();
     void set_plot(int);

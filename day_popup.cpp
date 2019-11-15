@@ -84,7 +84,7 @@ void day_popup::init_dayWorkouts(QDate workDate)
             workoutHeader << "Workout " + QString::number(i);
         }
 
-        if(workCount < static_cast<int>(doubleValues->value("maxworkouts")))
+        if(workCount < settings::get_intValue("maxworkouts"))
         {
             this->setFixedWidth(250*(workCount+1));
             workoutHeader << "Add";
@@ -112,8 +112,6 @@ void day_popup::init_dayWorkouts(QDate workDate)
     ui->tableView_day->setStyleSheet(viewBackground);
 
     int col = 0;
-
-    qDebug() << "Get" << dayWorkouts;
 
     for(QMap<int,QStringList>::const_iterator it = dayWorkouts.cbegin(), end = dayWorkouts.cend(); it != end; ++it)
     {
@@ -207,7 +205,7 @@ void day_popup::set_exportContent()
 {
     QStringList intLabels,sampLabels;
     QMap<int,QString> *intMap = settings::getListMapPointer(settings::lMap::Interval);
-    int sampCount = get_timesec(dayWorkouts.value(selWorkout).at(5));
+    int sampCount = dayWorkouts.value(selWorkout).at(5).toInt();
     intExport = new QStandardItemModel(1,3,this);
     sampExport = new QStandardItemModel(sampCount,1,this);
 
@@ -382,7 +380,6 @@ void day_popup::update_workouts()
         dayWorkouts.insert(workCounter++,valueList);
         valueList.clear();
     }
-    qDebug() << "Edit" << dayWorkouts;
 }
 
 
@@ -581,15 +578,14 @@ void day_popup::on_comboBox_stdworkout_activated(int stdindex)
     {
         if(it.key() == 1)
         {
-            dayModel->setData(dayModel->index(9,selWorkout),it.value());
+            dayModel->setData(dayModel->index(10,selWorkout),it.value());
         }
         else
         {
             dayModel->setData(dayModel->index(it.key(),selWorkout),it.value());
         }
     }
-
-    dayModel->setData(dayModel->index(10,selWorkout),this->get_workout_pace(dayModel->data(dayModel->index(6,selWorkout)).toDouble(),dayModel->data(dayModel->index(5,selWorkout)).toDouble(),dayModel->data(dayModel->index(1,selWorkout)).toString(),true));
+    dayModel->setData(dayModel->index(9,selWorkout),this->get_workout_pace(dayModel->data(dayModel->index(6,selWorkout)).toDouble(),get_timesec(dayModel->data(dayModel->index(5,selWorkout)).toString()),dayModel->data(dayModel->index(1,selWorkout)).toString(),true));
     ui->tableView_day->setCurrentIndex(dayModel->index(0,selWorkout));
 }
 

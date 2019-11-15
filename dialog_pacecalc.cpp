@@ -34,7 +34,7 @@ Dialog_paceCalc::Dialog_paceCalc(QWidget *parent) :
     paceModel = new QStandardItemModel(this);
     raceModel = new QStandardItemModel(this);
     triaMap = settings::getStringMapPointer(settings::stingMap::Tria);
-    triaDist = settings::get_triaDistance();
+
     this->init_paceView();
     runRaces << "5K" << "10K" << "HM" << "M";
     raceDist << 5.0 << 10.0 << 21.1 << 42.2;

@@ -14,7 +14,7 @@ private:
 protected:
     double calc_totalCal(double,double,double);    
     int get_hfvalue(QString);
-    QHash<QString,double> *ltsValues,*doubleValues;
+    QHash<QString,double> *doubleValues;
     QHash<QString,QString> *gcValues;
     QDate firstdayofweek;
     QString dateFormat,longTime,shortTime;

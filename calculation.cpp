@@ -2,13 +2,14 @@
 
 calculation::calculation()
 {
-    ltsValues = settings::getdoubleMapPointer(settings::dMap::LTS);
-    doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
-    firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
-    gcValues = settings::getStringMapPointer(settings::stingMap::GC);
     dateFormat = "dd.MM.yyyy";
     longTime = settings::get_format("longtime");
     shortTime = settings::get_format("shorttime");
+
+    doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
+    firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
+    gcValues = settings::getStringMapPointer(settings::stingMap::GC);
+
 }
 
 QHash<QString,double>* calculation::thresValues = settings::getdoubleMapPointer(settings::dMap::Threshold);
@@ -70,9 +71,9 @@ QString calculation::get_workout_pace(double dist, double duration,QString sport
     int nr=0;
     double speed = 0;
 
-    int sec = duration;
+    int sec = static_cast<int>(duration);
 
-    int min = duration/60.0;
+    int min = static_cast<int>(duration/60.0);
 
     if(dist != 0.0 || min != 0)
     {

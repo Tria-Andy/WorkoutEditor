@@ -992,8 +992,6 @@ class del_foodSummery : public QStyledItemDelegate, public calculation
 public:
     explicit del_foodSummery(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
-    QVector<double> percent;
-
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
@@ -1003,6 +1001,8 @@ public:
         QFont foodFont;
         foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
+
+        QVector<double> percent = settings::doubleVector.value(index.data(Qt::UserRole).toString());
 
         int dayCal = index.model()->data(index.model()->index(3,index.column())).toInt();
 
@@ -1059,8 +1059,6 @@ class del_foodWeekSum : public QStyledItemDelegate, public calculation
 public:
     explicit del_foodWeekSum(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
-    QVector<double> percent;
-
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
@@ -1070,6 +1068,8 @@ public:
         QFont foodFont;
         foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
+
+        QVector<double> percent = settings::doubleVector.value(index.data(Qt::UserRole).toString());
 
         int weekCal = index.model()->data(index.model()->index(3,index.column())).toInt();
 
@@ -1211,7 +1211,6 @@ private:
     settings editorSettings;
     schedule_delegate schedule_del;
     saison_delegate saison_del;
-    QAbstractItemDelegate *modeDelegate;
     summery_delegate sum_del;
     del_filelist fileList_del;
     del_treeview tree_del;
@@ -1219,10 +1218,10 @@ private:
     del_avgselect avgSelect_del;
     del_level level_del;
     del_avgweek avgweek_del;
-    del_foodplan food_del;
-    del_foodSummery foodSum_del;
+    del_foodplan foodPlan_del;
+    del_foodSummery foodSumDay_del;
     del_foodWeekSum foodSumWeek_del;
-    del_foodDaySum foodDaySum_del;
+    del_foodDaySum foodSumSelect_del;
     del_mousehover mousehover_del;
     QStandardItemModel *sumModel,*fileModel,*infoModel,*avgModel;
     QItemSelectionModel *treeSelection,*mealSelection;
@@ -1243,12 +1242,16 @@ private:
     void set_polishValues(int,double,double,double,int);
     void resetPlot();
 
+    QMap<QString,QStringList> *saisonValues;
     int avgCounter,sportUse;
     QDate selectedDate;
-    QString weeknumber,phaseFilter,buttonStyle,viewStyle;
-    int userSetup,weekpos,saisonWeeks,foodcopyLine;
-    unsigned int weekDays,weekCounter,weekRange,phaseFilterID;
+    QString weeknumber,buttonStyle,viewStyle,dateformat,timeshort,timelong;
+    int userSetup,saisonWeek,saisonWeeks,foodcopyLine;
+    int weekDays,weekCounter,weekRange;
     bool isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
+
+    void set_tableWidgetItems(QTableWidget*,int,int,QAbstractItemDelegate*);
+    void set_tableHeader(QTableWidget*,QStringList*,bool);
 
     void openPreferences();
     void summery_Set(QDate,QStandardItem*);
@@ -1257,9 +1260,9 @@ private:
     void set_saisonValues(QStringList*,QString,int);
     void workoutSchedule(QDate);
     void saisonSchedule(QString);
-    void set_ItemHeaderValue(QTableWidgetItem*);
+    bool check_Date(QDate);
     QString get_weekRange();
-    void set_buttons(bool);
+    void set_buttons(QDate,bool);
     void set_calender();
     void set_phaseButtons();
     void refresh_saisonInfo();
@@ -1284,15 +1287,13 @@ private:
     //Food
     QMap<int,QStringList> selectedLine;
     void fill_selectLine(int,int);
-    void fill_weekTable(QString,bool);
-    void fill_dayTable(int);
-    void set_foodWeek(QString);
+    void fill_foodPlanTable(QDate);
+    void fill_daySumTable(QDate);
+    void fill_foodPlanList(bool);
+
     void calc_foodCalories(int,double,int);
     void set_menuList();
-    QVector<int> calc_menuCal(QString);
     void reset_menuEdit();
-    int checkFoodString(QString);
-
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -1351,9 +1352,8 @@ private slots:
 
     //Food
     void on_toolButton_addMenu_clicked();
-    void on_listWidget_MenuEdit_doubleClicked(const QModelIndex &index);
+    void on_listWidget_menuEdit_doubleClicked(const QModelIndex &index);
     void on_toolButton_menuEdit_clicked();
-    void on_tableWidget_weekPlan_itemClicked(QTableWidgetItem *item);
     void on_toolButton_saveMeals_clicked();
     void on_calendarWidget_Food_clicked(const QDate &date);
     void on_listWidget_weekPlans_clicked(const QModelIndex &index);
@@ -1366,8 +1366,7 @@ private slots:
     void on_treeView_meals_clicked(const QModelIndex &index);
     void setSelectedMeal(QModelIndex);
     void on_treeView_meals_collapsed(const QModelIndex &index);
-    void on_tableWidget_weekPlan_itemChanged(QTableWidgetItem *item);
-    void on_listWidget_MenuEdit_itemClicked(QListWidgetItem *item);
+    void on_listWidget_menuEdit_itemClicked(QListWidgetItem *item);
     void on_treeView_meals_expanded(const QModelIndex &index);
     void mealSave(QStandardItem*);
     void on_toolButton_mealreset_clicked();
@@ -1385,6 +1384,8 @@ private slots:
     void on_actionFood_triggered();
     void on_tableWidget_schedule_itemClicked(QTableWidgetItem *item);
     void on_tableWidget_saison_itemClicked(QTableWidgetItem *item);
+    void on_tableWidget_foodPlan_itemChanged(QTableWidgetItem *item);
+    void on_tableWidget_foodPlan_itemClicked(QTableWidgetItem *item);
 };
 
 #endif // MAINWINDOW_H

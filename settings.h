@@ -36,12 +36,11 @@ private:
     static QString settingFile,valueFile,valueFilePath,splitter,headerFile;
     static QHash<QString,QStringList*> headerMap;
     static QStringList table_header,header_swim,header_pm,header_pace,headerTria,header_other;
-    static QStringList header_int_time,header_swim_time,triaDistance;
+    static QStringList header_int_time,header_swim_time;
 
     static QMap<int,QString> sampList,intList;
     static QMap<int,double> weightMap;
     static QHash<QString,QString> formatMap,swimRange,bikeRange,runRange,triRange,stgRange,altRange,hfRange;
-    static QHash<QString,unsigned int> intMap;
 
     //Getter
     static QColor get_colorRGB(QString,bool);
@@ -52,14 +51,17 @@ private:
     static void fill_mapColor(QStringList*,QString*,bool);
     static void fill_mapRange(QHash<QString,QString>*,QString*);
     static void readHeaderFile(QDomDocument*);
+    static void fill_sportDistance(QStringList*,QSettings*);
     static QVector<double> set_doubleValues(QStringList*);
 
 protected:
-    static QHash<QString,double> thresholdMap,ltsMap,athleteMap,modeMap,doubleMap;
+    static QHash<QString,double> thresholdMap,athleteMap,modeMap,doubleMap;
     static QHash<QString,QString> generalMap,gcInfo,triaMap;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,QStringList> listMap,jsonTags;
+    static QHash<QString,QMap<QString,QString>> sportDistance;
     static QStringList keyList,extkeyList;
+    static QHash<QString,int> intMap;
 
 
 public:
@@ -74,10 +76,10 @@ public:
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
     static QString get_rangeValue(QString,QString);
     static QString get_format(QString key) {return formatMap.value(key);}
-    static unsigned int get_fontValue(QString key) {return intMap.value(key);}
-    static unsigned int get_intValue(QString key) {return intMap.value(key);}
+    static int get_fontValue(QString key) {return intMap.value(key);}
+    static int get_intValue(QString key) {return intMap.value(key);}
     static QStringList get_listValues(QString key) {return listMap.value(key);}
-    static QStringList get_triaDistance() {return triaDistance;}
+    static QMap<QString,QString> get_sportDistance(QString key) {return sportDistance.value(key);}
     static QStringList get_jsonTags(QString key) {return jsonTags.value(key);}
     static QStringList* getHeaderMap(QString key){return headerMap.value(key);}
 
@@ -114,7 +116,7 @@ public:
         return nullptr;
     }
 
-    enum dMap {Threshold,Athlete,LTS,Double};
+    enum dMap {Threshold,Athlete,Double};
     static QHash<QString,double>* getdoubleMapPointer(int map)
     {
         if(map == Threshold)
@@ -125,10 +127,6 @@ public:
         {
             return &athleteMap;
         }
-        if(map == LTS)
-        {
-            return &ltsMap;
-        }
         if(map == Double)
         {
             return &doubleMap;
@@ -138,11 +136,9 @@ public:
 
     //QMap/QHash Setter
     static void set_rangeValue(QString,QString,QString);
-    static void set_ltsValue(QString key,double value) {ltsMap.insert(key,value);}
 
     //common functions
     static QStringList get_int_header(QString,bool);
-    static int get_timesec(QString time);
     static double get_weightforDate(QDateTime);
     static void writeListValues(QHash<QString,QStringList> *plist);
     static void autoSave() {settings::saveSettings();}

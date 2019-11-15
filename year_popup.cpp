@@ -19,35 +19,22 @@
 #include "year_popup.h"
 #include "ui_year_popup.h"
 
-year_popup::year_popup(QWidget *parent, QString pInfo,int position,schedule *p_sched,QString pPhase, int pIndex) :
+year_popup::year_popup(QWidget *parent, QString pInfo,schedule *p_sched,QString pPhase) :
     QDialog(parent),
     ui(new Ui::year_popup)
 {
     ui->setupUi(this);
        setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
        isLoad = false;
-       partInfo = pInfo.split("-");
+       phaseInfo = pInfo.split("-");
        workSched = p_sched;
-       phase = pPhase;
-       phaseindex = pIndex;
+       phaseName = pPhase;
        phaseList << "Year" << settings::get_listValues("Phase");
        selectList << "Duration" << "Distance" << "Workouts";
        ui->comboBox_select->addItems(selectList);
        sportUseList = settings::get_listValues("Sportuse");
 
-       if(position == 0)
-       {
-           col = workSched->get_weekMeta(phase).count();
-       }
-       else
-       {
-           col = position+1;
-       }
-
-       ui->label_info->setText(phaseList.at(phaseindex) +": " + partInfo.at(0) + " Workouts: " + partInfo.at(1) + " - Hours: " + partInfo.at(2) + " - Distance: " + partInfo.at(4));
-
-
-
+       ui->label_info->setText(phaseName +": " + phaseInfo.at(0) + " Workouts: " + phaseInfo.at(1) + " - Hours: " + set_time(phaseInfo.at(2).toInt()) + " - Distance: " + phaseInfo.at(4));
 
        this->set_plotValues();
 }
@@ -59,27 +46,61 @@ year_popup::~year_popup()
     delete ui;
 }
 
+void year_popup::set_comValues(const QVector<double> values,int pos)
+{
+    yWorks[pos] = yWorks.at(pos) + values.at(0);
+    yDura[pos] = yDura.at(pos) + (values.at(1)/60.0/60.0);
+    yDist[pos] = yDist.at(pos) + values.at(3);
+    yStress[pos] = yStress.at(pos) + values.at(4);
+
+    if(maxValues[0] < yDura[pos]) maxValues[0] = yDura.at(pos);
+    if(maxValues[1] < yDist[pos]) maxValues[1] = yDist.at(pos);
+    if(maxValues[2] < yWorks[pos]) maxValues[2] = yWorks.at(pos);
+    if(maxValues[3] < yStress[pos]) maxValues[3] = yStress.at(pos);
+}
+
+
+void year_popup::read_compValues(QStandardItem *phaseItem,QString sport,int pos)
+{
+    QHash<QString,QMap<QString,QVector<double> >> *compWeekMap = workSched->get_compWeekValues();
+    QMap<QString,QVector<double>> compValues;
+
+    if(phaseItem->hasChildren())
+    {
+        for(int week = 0; week < phaseItem->rowCount(); ++week)
+        {
+            compValues = compWeekMap->value(phaseItem->child(week,0)->data(Qt::DisplayRole).toString());
+            weekList << phaseItem->child(week,0)->data(Qt::DisplayRole).toString();
+
+            if(sport == generalValues->value("sum"))
+            {
+                for(QMap<QString,QVector<double>>::const_iterator it = compValues.cbegin(), end = compValues.cend(); it != end; ++it)
+                {
+                    this->set_comValues(it.value(),week+pos);
+                }
+            }
+            else
+            {
+                this->set_comValues(compValues.value(sport),week+pos);
+            }
+        }
+    }
+}
+
 void year_popup::set_plotValues()
 {
-    QString selSaison = workSched->get_selSaison();
+    QStandardItem *phaseItem = nullptr;
 
-    metaProxy->invalidate();
-    metaProxy->setFilterFixedString(selSaison);
-    metaProxy->setFilterKeyColumn(0);
-
-
-    QString weekID;
-
-    if(phaseindex == 0)
+    if(phaseName == "All")
     {
-        weekcount = workSched->get_saisonInfo(selSaison,"weeks").toInt();
+        QString selSaison = workSched->get_selSaison();
+        phaseItem = workSched->get_phaseItem(selSaison);
+        weekcount = workSched->get_saisonValues()->value(selSaison).at(2).toInt();
     }
     else
     {
-        proxyFilter->invalidate();
-        proxyFilter->setFilterFixedString(phase);
-        proxyFilter->setFilterKeyColumn(3);
-        weekcount = proxyFilter->rowCount();
+        phaseItem = workSched->get_phaseItem(phaseName);
+        weekcount = phaseItem->rowCount();
     }
 
     if(weekcount > 40)
@@ -114,13 +135,17 @@ void year_popup::set_plotValues()
     }
 
     this->setFixedWidth(widthFactor*weekcount);
-    maxValues.resize(3);
+    maxValues.resize(4);
     maxValues.fill(0.0);
     xWeeks.resize(weekcount);
     yStress.resize(weekcount);
+    yStress.fill(0);
     yDura.resize(weekcount);
+    yDura.fill(0);
     yDist.resize(weekcount);
+    yDist.fill(0);
     yWorks.resize(weekcount);
+    yWorks.fill(0);
     yValues.resize(weekcount);
 
     for(int i = 1; i <= weekcount; ++i)
@@ -128,36 +153,20 @@ void year_popup::set_plotValues()
         xWeeks[i-1] = i;
     }
 
-    QString sumValue,stress,duration,distance,workouts;
-    QStringList sumValues;
-    max_stress = 0.0;
-
-    for(int week = 0; week < proxyFilter->rowCount(); ++week)
+    if(phaseName == "All")
     {
-        weekID = proxyFilter->data(proxyFilter->index(week,2)).toString();
-        contentProxy->invalidate();
-        contentProxy->setFilterRegExp("\\b"+weekID+"\\b");
-        contentProxy->setFilterKeyColumn(1);
+        int phasePos = 0;
 
-        sumValue = contentProxy->data(contentProxy->index(0,col)).toString();
-        sumValues = sumValue.split("-");
-        workouts = sumValues.at(0);
-        distance = sumValues.at(1);
-        duration = sumValues.at(2);
-        stress = sumValues.at(3);
-
-        yStress[week] = stress.toDouble();
-        if(max_stress < yStress[week]) max_stress = yStress[week];
-
-        yDura[week] = this->set_doubleValue(static_cast<double>(this->get_timesec(duration) / 60.0),false);
-        if(maxValues[0] < yDura[week]) maxValues[0] = yDura[week];
-        yDist[week] = this->set_doubleValue(distance.toDouble(),false);
-        if(maxValues[1] < yDist[week]) maxValues[1] = yDist[week];
-        yWorks[week] = workouts.toDouble();
-        if(maxValues[2] < yWorks[week]) maxValues[2] = yWorks[week];
-        if(phaseindex != 0) weekList << weekID;
+        for(int phase = 0; phase < phaseItem->rowCount(); ++phase)
+        {
+            this->read_compValues(phaseItem->child(phase,0),phaseInfo.at(0),phasePos);
+            phasePos = phasePos + phaseItem->child(phase,0)->rowCount();
+        }
     }
-
+    else
+    {
+        this->read_compValues(phaseItem,phaseInfo.at(0),0);
+    }
     this->set_graph();
 }
 
@@ -198,7 +207,7 @@ void year_popup::set_plot(int yValue)
     tickerList.insert(0,"Start");
 
     QSharedPointer<QCPAxisTickerText> weekTicker(new QCPAxisTickerText);
-    if(phaseindex != 0)
+    if(phaseName != "All")
     {
         for(int i = 1; i <= weekcount; ++i)
         {
@@ -261,7 +270,7 @@ void year_popup::set_plot(int yValue)
 
     bars->setData(xWeeks,yValues);
 
-    if(phaseindex != 0)
+    if(phaseName != "All")
     {
         for(int i = 0; i < weekcount; ++i)
         {
@@ -288,11 +297,11 @@ void year_popup::set_plot(int yValue)
             barText->setFont(barFont);
             barText->setColor(Qt::white);
         }
-        ui->widget_plot->yAxis->setRange(0,max_stress+(weekcount*(heightFactor*10)));
+        ui->widget_plot->yAxis->setRange(0,maxValues.at(3)+(weekcount*(heightFactor*10)));
     }
     else
     {
-        ui->widget_plot->yAxis->setRange(0,max_stress+(max_stress*0.2));
+        ui->widget_plot->yAxis->setRange(0,maxValues.at(3)+(maxValues.at(3)*0.2));
     }
 
     ui->widget_plot->replot();

@@ -30,10 +30,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
 
     schedule_ptr = psched;
     food_ptr = pFood;
-    saisonProxy = new QSortFilterProxyModel(this);
-    saisonProxy->setSourceModel(schedule_ptr->saisonsModel);
-    contestProxy = new QSortFilterProxyModel(this);
-    contestProxy->setSourceModel(schedule_ptr->contestModel);
+
     sportList << settings::isSwim << settings::isBike << settings::isRun;
     colorMapCache = settings::get_colorMap();
     useColor = false;
@@ -42,15 +39,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
     level_model = new QStandardItemModel(this);
     hf_model = new QStandardItemModel(this);
-    ui->tableView_contest->setModel(contestProxy);
-    ui->tableView_contest->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableView_contest->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->tableView_contest->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->tableView_contest->horizontalHeader()->setVisible(false);
-    ui->tableView_contest->horizontalHeader()->setSectionHidden(0,true);
-    ui->tableView_contest->horizontalHeader()->setSectionHidden(1,true);
-    ui->tableView_contest->horizontalHeader()->setStretchLastSection(true);
-    ui->tableView_contest->setGridStyle(Qt::PenStyle::DotLine);
+    //ui->tableView_contest->setModel();
     ui->lineEdit_gcpath->setText(gcValues->value("gcpath"));
     ui->lineEdit_gcpath->setEnabled(false);
     ui->lineEdit_athlete->setText(gcValues->value("athlete"));
@@ -63,15 +52,13 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->lineEdit_foodFile->setText(gcValues->value("foodplanner"));
     ui->spinBox_hfThres->setValue(thresValues->value("hfthres"));
     ui->spinBox_hfMax->setValue(thresValues->value("hfmax"));
-    ui->spinBox_ltsDays->setValue(ltsValues->value("ltsdays"));
-    ui->spinBox_stsDays->setValue(ltsValues->value("stsdays"));
-    ui->spinBox_lastLTS->setValue(ltsValues->value("lastlts"));
-    ui->spinBox_lastSTS->setValue(ltsValues->value("laststs"));
+    ui->spinBox_ltsDays->setValue(intMap.value("ltsdays"));
+    ui->spinBox_stsDays->setValue(intMap.value("stsdays"));
     ui->comboBox_thresSport->addItems(sportList);
     ui->comboBox_thresBase->addItem("Pace");
     ui->comboBox_thresBase->addItem("Power");
     ui->dateEdit_contest->setDate(QDate::currentDate());
-    ui->comboBox_contestsport->addItems(settings::get_listValues("Sport"));
+    ui->comboBox_contestsport->addItems(sportDistance.keys());
     ui->pushButton_clearContest->setEnabled(false);
     ui->pushButton_delContest->setEnabled(false);
     ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
@@ -112,12 +99,16 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
        tempCheck->setChecked(doubleVector.value("Moveday").at(i));
     }
 
+    ui->tableWidget_contest->setColumnCount(6);
+    ui->tableWidget_contest->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_contest->horizontalHeader()->hide();
+
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
     ui->listWidget_stressValue->setItemDelegate(&mousehover_del);
     ui->listWidget_food->setItemDelegate(&mousehover_del);
 
-    connect(ui->tableView_contest->verticalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectContest(int)));
+    connect(ui->tableWidget_contest->verticalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectContest(int)));
 
     this->refresh_saisonCombo();
     this->checkSetup();
@@ -157,31 +148,42 @@ void Dialog_settings::checkSetup()
 
 void Dialog_settings::set_saisonInfo(QString saisonName)
 {
-    saisonProxy->invalidate();
-    saisonProxy->setFilterFixedString(saisonName);
-    saisonProxy->setFilterKeyColumn(0);
-
-    ui->dateEdit_saisonStart->setDate(saisonProxy->data(saisonProxy->index(0,1)).toDate());
-    ui->dateEdit_saisonEnd->setDate(saisonProxy->data(saisonProxy->index(0,2)).toDate());
+    ui->dateEdit_saisonStart->setDate(QDate::fromString(schedule_ptr->get_saisonValues()->value(saisonName).at(0),dateFormat));
+    ui->dateEdit_saisonEnd->setDate(QDate::fromString(schedule_ptr->get_saisonValues()->value(saisonName).at(1),dateFormat));
     ui->lineEdit_startWeek->setText(QString::number(ui->dateEdit_saisonStart->date().weekNumber()));
-    ui->lineEdit_saisonWeeks->setText(QString::number(saisonProxy->data(saisonProxy->index(0,3)).toInt()));
+    ui->lineEdit_saisonWeeks->setText(schedule_ptr->get_saisonValues()->value(saisonName).at(2));
+
+    ui->dateEdit_contest->setMaximumDate(ui->dateEdit_saisonEnd->date());
+    ui->dateEdit_contest->setMinimumDate(ui->dateEdit_saisonStart->date());
 
     this->refresh_contestTable(saisonName);
 }
 
 void Dialog_settings::refresh_contestTable(QString saisonName)
 {
-    contestProxy->invalidate();
-    contestProxy->setFilterFixedString(saisonName);
-    contestProxy->setFilterKeyColumn(1);
-    contestProxy->sort(2);
+    QMap<QDate,QStringList> contestMap = schedule_ptr->get_contestMap().value(saisonName);
 
-    for(int i = 0; i <= contestProxy->rowCount(); ++i)
+    ui->tableWidget_contest->clearContents();
+
+    ui->tableWidget_contest->setRowCount(contestMap.count());
+
+    int row = 0;
+    for(QMap<QDate,QStringList>::const_iterator it = contestMap.cbegin(), end = contestMap.cend(); it != end; ++it,++row)
     {
-        contestProxy->setHeaderData(i,Qt::Orientation::Vertical,i+1);
-    }
+        QTableWidgetItem *dateItem = new QTableWidgetItem();
+        dateItem->setData(Qt::EditRole,it.key().toString(dateFormat));
+        ui->tableWidget_contest->setVerticalHeaderItem(row,dateItem);
 
-    this->reset_contest(false);
+        for(int i = 0, col = 0; i < it.value().count(); ++i)
+        {
+            if(i == 2) ui->tableWidget_contest->setItem(row,col++,new QTableWidgetItem(it.value().at(i)));
+            if(i == 4) ui->tableWidget_contest->setItem(row,col++,new QTableWidgetItem(it.value().at(i)));
+            if(i == 5) ui->tableWidget_contest->setItem(row,col++,new QTableWidgetItem(it.value().at(i)));
+            if(i == 6) ui->tableWidget_contest->setItem(row,col++,new QTableWidgetItem(set_time(it.value().at(i).toInt())));
+            if(i == 7) ui->tableWidget_contest->setItem(row,col++,new QTableWidgetItem(it.value().at(i)));
+            if(i == 8) ui->tableWidget_contest->setItem(row,col++,new QTableWidgetItem(it.value().at(i)));
+        }
+    }
 }
 
 void Dialog_settings::refresh_macros()
@@ -258,11 +260,12 @@ void Dialog_settings::reset_contest(bool setButton)
 {
     ui->lineEdit_contest->clear();
     ui->dateEdit_contest->setDate(QDate::currentDate());
-    ui->doubleSpinBox_contest->setValue(0);
+    ui->comboBox_contestdist->setCurrentIndex(-1);
+    ui->doubleSpinBox_contestdist->setValue(0);
+    ui->timeEdit_contestdura->setTime(ui->timeEdit_contestdura->minimumTime());
     ui->spinBox_contestStress->setValue(0);
     ui->comboBox_contestsport->setCurrentIndex(-1);
-    ui->tableView_contest->clearSelection();
-    ui->tableView_contest->setCurrentIndex(QModelIndex());
+
     ui->pushButton_clearContest->setEnabled(setButton);
     ui->pushButton_delContest->setEnabled(setButton);
     ui->pushButton_addContest->setText("Add");
@@ -339,10 +342,8 @@ void Dialog_settings::writeChangedValues()
     gcInfo.insert("maps",ui->lineEdit_maps->text());
     gcInfo.insert("valuefile",ui->lineEdit_configfile->text());
 
-    ltsMap.insert("ltsdays",ui->spinBox_ltsDays->value());
-    ltsMap.insert("stsdays",ui->spinBox_stsDays->value());
-    ltsMap.insert("lastlts",ui->spinBox_lastLTS->value());
-    ltsMap.insert("laststs",ui->spinBox_lastSTS->value());
+    intMap.insert("ltsdays",ui->spinBox_ltsDays->value());
+    intMap.insert("stsdays",ui->spinBox_stsDays->value());
 
     if(generalValues->value("sum") != listMap.value("Misc").at(0)) generalMap.insert("sum",listMap.value("Misc").at(0));
     if(generalValues->value("empty") != listMap.value("Misc").at(1)) generalMap.insert("empty",listMap.value("Misc").at(1));
@@ -371,9 +372,7 @@ void Dialog_settings::writeChangedValues()
 
     settings::writeListValues(&listMap);
 
-    schedule_ptr->write_saisonInfo();
-
-    if(stressEdit) schedule_ptr->save_ltsFile(ui->spinBox_ltsDays->value());
+    if(stressEdit) schedule_ptr->save_ltsFile();
 
     thresPower = ui->spinBox_thresPower->value();
     thresPace = paceSec;
@@ -407,19 +406,8 @@ void Dialog_settings::writeRangeValues(QString sport)
 
 void Dialog_settings::refresh_saisonCombo()
 {
-    saisonProxy->setFilterFixedString("");
-    saisonProxy->setFilterKeyColumn(0);
-
-    disconnect(ui->comboBox_saisons,SIGNAL(currentIndexChanged(QString)),this,SLOT(on_comboBox_saisons_currentIndexChanged(QString)));
-
     ui->comboBox_saisons->clear();
-    for(int i = 0; i < saisonProxy->rowCount(); ++i)
-    {
-        ui->comboBox_saisons->addItem(saisonProxy->data(saisonProxy->index(i,0)).toString());
-    }
-    ui->comboBox_saisons->setEditable(true);
-
-    connect(ui->comboBox_saisons,SIGNAL(currentIndexChanged(QString)),this,SLOT(on_comboBox_saisons_currentIndexChanged(QString)));
+    ui->comboBox_saisons->addItems(schedule_ptr->get_saisonValues()->keys());
     ui->comboBox_saisons->setCurrentIndex(0);
 }
 
@@ -1047,53 +1035,36 @@ void Dialog_settings::on_pushButton_clearFat_clicked()
 
 void Dialog_settings::on_pushButton_addContest_clicked()
 {
-    int row = 0;
+    QHash<QDate,QMap<int,QStringList>> contestMap;
+    QMap<int,QStringList> contest;
+    QStringList contestValues;
 
-    if(editContest)
-    {
-        row = ui->tableView_contest->currentIndex().row();
-        contestProxy->setData(contestProxy->index(row,1),ui->comboBox_saisons->currentText());
-        contestProxy->setData(contestProxy->index(row,2),ui->dateEdit_contest->date());
-        contestProxy->setData(contestProxy->index(row,3),ui->comboBox_contestsport->currentText());
-        contestProxy->setData(contestProxy->index(row,4),ui->lineEdit_contest->text());
-        contestProxy->setData(contestProxy->index(row,5),ui->doubleSpinBox_contest->value());
-        contestProxy->setData(contestProxy->index(row,6),ui->spinBox_contestStress->value());
-    }
-    else
-    {
-        schedule_ptr->contestModel->insertRow(schedule_ptr->contestModel->rowCount(),QModelIndex());
-        row = schedule_ptr->contestModel->rowCount()-1;
-        schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,0),schedule_ptr->contestModel->rowCount());
-        schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,1),ui->comboBox_saisons->currentText());
-        schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,2),ui->dateEdit_contest->date());
-        schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,3),ui->comboBox_contestsport->currentText());
-        schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,4),ui->lineEdit_contest->text());
-        schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,5),ui->doubleSpinBox_contest->value());
-        schedule_ptr->contestModel->setData(schedule_ptr->contestModel->index(row,6),ui->spinBox_contestStress->value());
-    }
-    /*
-    schedule_ptr->scheduleProxy->setFilterFixedString(ui->dateEdit_contest->date().toString(dateFormat));
-    schedule_ptr->scheduleProxy->setFilterKeyColumn(1);
-    if(schedule_ptr->scheduleProxy->rowCount() == 0)
-    {
-        schedule_ptr->scheduleProxy->setData(schedule_ptr->scheduleProxy->index(0,0),);
-        schedule_ptr->scheduleProxy->setData(schedule_ptr->scheduleProxy->index(0,1),);
-        schedule_ptr->scheduleProxy->setData(schedule_ptr->scheduleProxy->index(0,2),);
-        schedule_ptr->scheduleProxy->setData(schedule_ptr->scheduleProxy->index(0,3),);
-        schedule_ptr->scheduleProxy->setData(schedule_ptr->scheduleProxy->index(0,4),);
-        schedule_ptr->scheduleProxy->setData(schedule_ptr->scheduleProxy->index(0,5),);
-    }
-    schedule_ptr->scheduleProxy->invalidate();
-    */
+    contestValues << "00:00"
+                  << ui->comboBox_contestsport->currentText()
+                  << "Race"
+                  << ui->comboBox_contestdist->currentText()
+                  << ui->lineEdit_contest->text()
+                  << QString::number(get_timesec(ui->timeEdit_contestdura->time().toString("hh:mm:ss")))
+                  << QString::number(ui->doubleSpinBox_contestdist->value())
+                  << QString::number(ui->spinBox_contestStress->value())
+                  << "0"
+                  << "0"
+                  << "-";
 
-    this->reset_contest(false);
+    contest.insert(0,contestValues);
+    contestMap.insert(ui->dateEdit_contest->date(),contest);
+    schedule_ptr->set_workoutData(contestMap);
+
+    contestValues.insert(0,"0");
+    schedule_ptr->add_contest(ui->comboBox_saisons->currentText(),ui->dateEdit_contest->date(),contestValues);
+
     this->refresh_contestTable(ui->comboBox_saisons->currentText());
 }
 
 void Dialog_settings::on_pushButton_delContest_clicked()
 {
-    contestProxy->removeRow(ui->tableView_contest->currentIndex().row());
-
+    schedule_ptr->remove_contest(ui->comboBox_saisons->currentText(),ui->dateEdit_contest->date());
+    this->refresh_contestTable(ui->comboBox_saisons->currentText());
     this->reset_contest(false);
 }
 
@@ -1119,14 +1090,6 @@ void Dialog_settings::on_comboBox_saisons_editTextChanged(const QString &value)
 
 void Dialog_settings::on_toolButton_updateSaison_clicked()
 {
-    schedule_ptr->update_saison(schedule_ptr->newSaison,
-                                ui->comboBox_saisons->currentIndex(),
-                                ui->comboBox_saisons->currentText(),
-                                ui->dateEdit_saisonStart->date(),
-                                ui->dateEdit_saisonEnd->date(),
-                                ui->lineEdit_saisonWeeks->text().toInt()
-                );
-
     if(schedule_ptr->newSaison)
     {
         QMessageBox::StandardButton reply;
@@ -1161,9 +1124,7 @@ void Dialog_settings::on_toolButton_deleteSaison_clicked()
                                   );
     if (reply == QMessageBox::Yes)
     {
-        schedule_ptr->remove_saison(ui->comboBox_saisons->currentIndex());
         schedule_ptr->delete_Saison(ui->comboBox_saisons->currentText());
-        schedule_ptr->write_saisonInfo();
         schedule_ptr->save_workouts(false);
         this->refresh_saisonCombo();
         this->set_saisonInfo(ui->comboBox_saisons->currentText());
@@ -1313,11 +1274,14 @@ void Dialog_settings::on_pushButton_clearContest_clicked()
 
 void Dialog_settings::selectContest(int row)
 {
-    ui->dateEdit_contest->setDate(contestProxy->data(contestProxy->index(row,2)).toDate());
-    ui->comboBox_contestsport->setCurrentText(contestProxy->data(contestProxy->index(row,3)).toString());
-    ui->lineEdit_contest->setText(contestProxy->data(contestProxy->index(row,4)).toString());
-    ui->doubleSpinBox_contest->setValue(contestProxy->data(contestProxy->index(row,5)).toDouble());
-    ui->spinBox_contestStress->setValue(contestProxy->data(contestProxy->index(row,6)).toInt());
+    ui->dateEdit_contest->setDate(QDate::fromString(ui->tableWidget_contest->verticalHeaderItem(row)->data(Qt::DisplayRole).toString(),dateFormat));
+    ui->comboBox_contestsport->setCurrentText(ui->tableWidget_contest->item(row,0)->data(Qt::DisplayRole).toString());
+    ui->comboBox_contestdist->setCurrentText(ui->tableWidget_contest->item(row,1)->data(Qt::DisplayRole).toString());
+    ui->doubleSpinBox_contestdist->setValue(ui->tableWidget_contest->item(row,4)->data(Qt::DisplayRole).toDouble());
+    ui->lineEdit_contest->setText(ui->tableWidget_contest->item(row,2)->data(Qt::DisplayRole).toString());
+    ui->timeEdit_contestdura->setTime(QTime::fromString(ui->tableWidget_contest->item(row,3)->data(Qt::DisplayRole).toString(),"hh:mm:ss"));
+    ui->spinBox_contestStress->setValue(ui->tableWidget_contest->item(row,5)->data(Qt::DisplayRole).toInt());
+
     ui->pushButton_addContest->setText("Edit");
     ui->pushButton_clearContest->setEnabled(true);
     ui->pushButton_delContest->setEnabled(true);
@@ -1340,4 +1304,30 @@ void Dialog_settings::on_spinBox_fat_valueChanged(int value)
 {
      Q_UNUSED(value)
     refresh_macros();
+}
+
+void Dialog_settings::on_comboBox_contestsport_currentIndexChanged(const QString &value)
+{
+    ui->comboBox_contestdist->clear();
+    ui->comboBox_contestdist->addItems(get_sportDistance(value).keys());
+}
+
+void Dialog_settings::on_comboBox_contestdist_currentIndexChanged(const QString &event)
+{
+    QString eventValue = get_sportDistance(ui->comboBox_contestsport->currentText()).value(event);
+    QStringList eventDist = eventValue.split("-");
+    double dist = 0;
+
+    if(eventDist.count() > 1)
+    {
+        for(int i = 0; i < eventDist.count(); ++i)
+        {
+            dist = dist + eventDist.at(i).toDouble();
+        }
+    }
+    else
+    {
+        dist = eventDist.first().toDouble();
+    }
+    ui->doubleSpinBox_contestdist->setValue(dist);
 }
