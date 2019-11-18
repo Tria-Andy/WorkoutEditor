@@ -45,7 +45,8 @@ private slots:
 
 private:
     Ui::week_popup *ui;
-    QStringList week_info,barSelection,levelList;
+    QStringList barSelection,levelList;
+    QString weekID;
     schedule *workSched;
     QDateTime firstDay;
     bool isLoad;

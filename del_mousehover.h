@@ -10,8 +10,6 @@ class del_mousehover : public QStyledItemDelegate
     Q_OBJECT
 public:
     explicit del_mousehover(QObject *parent = 0) : QStyledItemDelegate(parent) {}
-    QStringList groupList;
-
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {

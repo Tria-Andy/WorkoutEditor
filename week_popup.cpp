@@ -19,7 +19,7 @@
 #include "week_popup.h"
 #include "ui_week_popup.h"
 
-week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
+week_popup::week_popup(QWidget *parent,QString weekid,schedule *p_sched) :
     QDialog(parent),
     ui(new Ui::week_popup)
 {
@@ -28,7 +28,7 @@ week_popup::week_popup(QWidget *parent,QString weekinfo,schedule *p_sched) :
     isLoad = false;
     dayCount = 7;
     workSched = p_sched;
-    week_info << weekinfo.split("#");
+    weekID = weekid;
 
     barSelection << "Duration" << "Distance" << "Work(kj)" << "Distribution";
     ui->comboBox_yValue->addItems(barSelection);
@@ -64,7 +64,7 @@ week_popup::~week_popup()
 
 void week_popup::set_plotValues()
 {
-    QStringList weekMeta = workSched->get_weekMeta(week_info.at(0));
+    QStringList weekMeta = workSched->get_weekMeta(weekID);
     QHash<QDate,QMap<QString,QVector<double> >> *compMap = workSched->get_compValues();
     QMap<QString,QVector<double>> workMap;
     QMap<QDate,QVector<double>> *stressMap = workSched->get_stressMap();
@@ -157,7 +157,7 @@ void week_popup::set_plotValues()
             zoneTime.insert(it.key(),round((it.value() / timeSum)*100.0));
         }
 
-        ui->label_weekinfos->setText("Week: " + week_info.at(0) + " - Phase: " + week_info.at(1) + " - Workouts: " + QString::number(weekWorkouts));
+        ui->label_weekinfos->setText("Week: " + weekMeta.at(0) + " - Phase: " + weekMeta.at(2) + " - Workouts: " + QString::number(weekWorkouts));
 
         this->set_graph();
         this->set_weekPlot(0);

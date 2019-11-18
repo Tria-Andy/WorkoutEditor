@@ -150,18 +150,38 @@ void foodplanner::set_foodPlanMap(bool update)
     }
 }
 
-void foodplanner::update_foodPlanMap(bool copy, QDate copyFrom, QDate daytoUpdate, QString section, QString meal)
+void foodplanner::update_foodPlanMap(bool copy, QHash<QString,QMap<QDate,QString>> foodUpdateMap)
 {
+    QHash<QString,QVector<double>> updateMeal;
+    QHash<QString,QHash<QString,QVector<double>>> updateDay;
+    QDate updateDate;
+    QString updateSection;
+
     if(copy)
     {
-        qDebug() << foodPlanMap.value(copyFrom).value(section).value(meal);
-        qDebug() << foodPlanMap.value(daytoUpdate).value(section).value(meal);
+        updateDate = foodUpdateMap.value("CopyTo").firstKey();
+        updateSection =  foodUpdateMap.value("CopyTo").first();
+        updateMeal = foodPlanMap.value(foodUpdateMap.value("CopyFrom").firstKey()).value(foodUpdateMap.value("CopyFrom").first());
+        updateDay = foodPlanMap.value(updateDate);
+        updateDay.insert(updateSection,updateMeal);
+        foodPlanMap.insert(updateDate,updateDay);
     }
     else
     {
-        qDebug() << foodPlanMap.value(daytoUpdate).value(section).value(meal);
+        updateDate = foodUpdateMap.value("Update").firstKey();
+        updateSection = foodUpdateMap.value("Update").first();
+        updateDay = foodPlanMap.value(updateDate);
+        updateDay.insert(updateSection,updateMap.value(updateDate));
+        foodPlanMap.insert(updateDate,updateDay);
     }
 
+}
+
+void foodplanner::set_updateMap(QDate updateDate, QString updateSection)
+{
+    updateMap.clear();
+    QHash<QString,QVector<double>> section = foodPlanMap.value(updateDate).value(updateSection);
+    updateMap.insert(updateDate,section);
 }
 
 
@@ -173,7 +193,6 @@ void foodplanner::set_foodPlanList(QStandardItem *weekItem)
                         weekIndex.siblingAtColumn(0).data(Qt::DisplayRole).toString() +" - "+
                         weekIndex.siblingAtColumn(1).data(Qt::DisplayRole).toDate().toString(dateFormat) +" - "+
                         weekIndex.siblingAtColumn(2).data(Qt::DisplayRole).toString());
-
 }
 
 
@@ -262,7 +281,6 @@ void foodplanner::read_history(QDomDocument xmlDoc)
     int sumSport = 0;
     int sumFood = 0;
     QMap<int,int> calSport,calFood;
-
 
     xmlList = xmlDoc.firstChildElement().elementsByTagName("week");
 
@@ -448,44 +466,20 @@ void foodplanner::remove_meal(QItemSelectionModel *mealSelect)
     mealModel->removeRow(index.row(),index.parent());
 }
 
-QVector<int> foodplanner::get_mealData(QString mealName, bool makros)
+QPair<QString,QVector<int>> foodplanner::get_mealData(QString mealID)
 {
-    QVector<int> mealData;
-    QStandardItem *sectionItem;
-    QModelIndex sectionIndex,mealIndex;
+    QPair<QString,QVector<int>> mealData;
+    QVector<int> mealValues(7,0);
+    QStandardItem *mealItem = mealModel->findItems(mealID,Qt::MatchExactly | Qt::MatchRecursive,1).at(0);
+    QModelIndex mealIndex = mealModel->indexFromItem(mealItem);
+    QString mealName = mealIndex.siblingAtColumn(0).data(Qt::DisplayRole).toString();
 
-    for(int row = 0; row < mealModel->rowCount(); ++row)
+    for(int col = 2; col < mealModel->columnCount(); ++col)
     {
-        sectionItem = mealModel->item(row,0);
-        sectionIndex = sectionItem->index();
-
-        if(sectionItem->hasChildren())
-        {
-            for(int subrow = 0; subrow < sectionItem->rowCount(); ++subrow)
-            {
-                mealIndex = mealModel->index(subrow,0,sectionIndex);
-                if(mealName == mealModel->data(mealIndex).toString())
-                {
-                    if(makros)
-                    {
-                        mealData.resize(5);
-                        mealData[0] = mealModel->data(mealModel->index(subrow,3,sectionIndex)).toInt();
-                        mealData[1] = mealModel->data(mealModel->index(subrow,4,sectionIndex)).toInt();
-                        mealData[2] = mealModel->data(mealModel->index(subrow,5,sectionIndex)).toInt();
-                        mealData[3] = mealModel->data(mealModel->index(subrow,6,sectionIndex)).toInt();
-                        mealData[4] = mealModel->data(mealModel->index(subrow,7,sectionIndex)).toInt();
-                    }
-                    else
-                    {
-                        mealData.resize(2);
-                        mealData[0] = mealModel->data(mealModel->index(subrow,1,sectionIndex)).toInt();
-                        mealData[1] = mealModel->data(mealModel->index(subrow,2,sectionIndex)).toInt();
-                    }
-                    break;
-                }
-            }
-        }
+        mealValues[col-2] = mealIndex.siblingAtColumn(col).data(Qt::DisplayRole).toInt();
     }
+    mealData.first = mealName;
+    mealData.second = mealValues;
     return mealData;
 }
 

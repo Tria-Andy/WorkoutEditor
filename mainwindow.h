@@ -1224,7 +1224,7 @@ private:
     del_foodDaySum foodSumSelect_del;
     del_mousehover mousehover_del;
     QStandardItemModel *sumModel,*fileModel,*infoModel,*avgModel;
-    QItemSelectionModel *treeSelection,*mealSelection;
+    QItemSelectionModel *treeSelection;
     QStringList modus_list,cal_header,y2Label,menuCopy;
     QStringList *schedMode, *avgHeader;
     QLabel *planerMode;
@@ -1245,7 +1245,7 @@ private:
     QMap<QString,QStringList> *saisonValues;
     int avgCounter,sportUse;
     QDate selectedDate;
-    QString weeknumber,buttonStyle,viewStyle,dateformat,timeshort,timelong;
+    QString weeknumber,buttonStyle,dateformat,timeshort,timelong;
     int userSetup,saisonWeek,saisonWeeks,foodcopyLine;
     int weekDays,weekCounter,weekRange;
     bool isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
@@ -1290,9 +1290,9 @@ private:
     void fill_foodPlanTable(QDate);
     void fill_daySumTable(QDate);
     void fill_foodPlanList(bool);
-
+    void setSelectedMeal(QPair<QString,QVector<int>>,double);
     void calc_foodCalories(int,double,int);
-    void set_menuList();
+    void set_menuList(QDate);
     void reset_menuEdit();
 
 public:
@@ -1359,12 +1359,10 @@ private slots:
     void on_listWidget_weekPlans_clicked(const QModelIndex &index);
     void on_toolButton_deleteMenu_clicked();
     void on_doubleSpinBox_portion_valueChanged(double arg1);
-    void on_spinBox_portion_valueChanged(int arg1);
     void on_toolButton_addMeal_clicked();
     void on_toolButton_foodUp_clicked();
     void on_toolButton_foodDown_clicked();
     void on_treeView_meals_clicked(const QModelIndex &index);
-    void setSelectedMeal(QModelIndex);
     void on_treeView_meals_collapsed(const QModelIndex &index);
     void on_listWidget_menuEdit_itemClicked(QListWidgetItem *item);
     void on_treeView_meals_expanded(const QModelIndex &index);
@@ -1377,7 +1375,6 @@ private slots:
     void selectFoodMealWeek(int);
     void selectFoodMealDay(int);
     void on_actionFood_Macros_triggered();
-    void on_toolButton_switch_clicked();
     void on_toolButton_linePaste_clicked();
     void on_pushButton_lineCopy_toggled(bool checked);
     void on_actionfood_History_triggered();

@@ -23,11 +23,13 @@ public:
     QMap<QDate,QVector<double>> *get_daySumMap() {return &daySumMap;}
     QMap<QDate,QHash<QString,QHash<QString,QVector<double>>>> *get_foodPlanMap() {return &foodPlanMap;}
     QMap<QDate,QString> *get_foodPlanList() {return &foodPlanList;}
+    QMap<QDate,QHash<QString,QVector<double>>> *get_updateMap() {return &updateMap;}
     QString get_mealName(QString key) {return mealsMap.value(key);}
     QString get_mode(QDate);
-    QVector<int> get_mealData(QString,bool);
-    void update_foodPlanMap(bool,QDate,QDate,QString,QString);
+    QPair<QString,QVector<int>> get_mealData(QString);
+    void update_foodPlanMap(bool,QHash<QString,QMap<QDate,QString>>);
 
+    void set_updateMap(QDate,QString);
     void save_foolPlan();
     void save_mealList();
     void write_foodHistory();
@@ -45,6 +47,7 @@ private:
     QStringList dayHistTags;
     QVector<double> defaultCal;
     QMap<QDate,QHash<QString,QHash<QString,QVector<double>> > > foodPlanMap;
+    QMap<QDate,QHash<QString,QVector<double>>> updateMap;
     QMap<QDate,QVector<double>> daySumMap;
     QHash<QString,QString> mealsMap;
     QMap<QDate,QString> foodPlanList;

@@ -39,7 +39,7 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
     ui->toolButton_paste->setEnabled(false);
     this->setFixedHeight(100+(35*(sportuseList.count()+1)));
     this->setFixedWidth(650);
-    this->fill_values(sel_week.split("#").first().split(" - ").first());
+    this->fill_values(sel_week);
 }
 
 Dialog_addweek::~Dialog_addweek()
