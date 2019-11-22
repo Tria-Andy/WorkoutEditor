@@ -57,7 +57,7 @@ private:
     schedule *workSched;
     QStandardItemModel *saveWeekModel,*listModel;
     QStringList weekTags;
-    QString sourceWeek,schedulePath,saveweekFile;
+    QString sourceWeek,saveweekFile;
     QModelIndex listIndex;
     bool isSaveWeek;
     int editMode;

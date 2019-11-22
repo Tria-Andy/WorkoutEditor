@@ -53,7 +53,7 @@ private:
     QSortFilterProxyModel *exportProxy;
     QString fileContent;
     int exportMode;
-
+    schedule *workSched;
     void workout_export();
     void set_filecontent(int);
     void set_exportselection(bool,bool);

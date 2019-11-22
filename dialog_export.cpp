@@ -27,13 +27,12 @@ Dialog_export::Dialog_export(QWidget *parent, schedule *p_schedule) :
     ui(new Ui::Dialog_export)
 {
     ui->setupUi(this);
-
+    workSched = p_schedule;
 
     QDate currDate = QDate().currentDate();
-    exportProxy->setFilterRegExp("\\b"+currDate.addDays(1 - currDate.dayOfWeek()).toString(dateFormat)+"\\b");
+    exportProxy->setFilterRegExp("\\b"+currDate.addDays(1 - currDate.dayOfWeek()).toString(workSched->dateFormat)+"\\b");
     exportProxy->setFilterKeyColumn(3);
     exportProxy->sort(0);
-    int weekID = exportProxy->data(exportProxy->index(0,0)).toInt()-1;
 
     exportProxy->invalidate();
     exportMode = 0;
@@ -70,7 +69,7 @@ void Dialog_export::set_filecontent(int row)
     QString tempDate,tempTime,sport,stressType;
 
     tempDate = exportProxy->data(exportProxy->index(row,1)).toString();
-    workoutDate = QDate::fromString(tempDate,dateFormat);
+    workoutDate = QDate::fromString(tempDate,workSched->dateFormat);
 
     tempTime = exportProxy->data(exportProxy->index(row,2)).toString();
     workoutTime = QTime::fromString(tempTime,"hh:mm");
@@ -189,7 +188,7 @@ void Dialog_export::on_radioButton_day_clicked()
     exportMode = ALL;
     ui->progressBar->setValue(0);
     this->set_exportselection(true,false);
-    this->get_exportinfo(ui->dateEdit_export->date().toString(dateFormat),1);
+    this->get_exportinfo(ui->dateEdit_export->date().toString(workSched->dateFormat),1);
 }
 
 void Dialog_export::on_radioButton_week_clicked()
@@ -213,7 +212,7 @@ void Dialog_export::on_comboBox_week_export_currentIndexChanged(const QString &w
 
 void Dialog_export::on_dateEdit_export_dateChanged(const QDate &date)
 {
-    QString selDate = date.toString(dateFormat);
+    QString selDate = date.toString(workSched->dateFormat);
     exportProxy->setFilterRegExp("\\b"+selDate+"\\b");
     exportProxy->setFilterKeyColumn(1);
     ui->progressBar->setValue(0);
@@ -232,5 +231,5 @@ void Dialog_export::on_comboBox_time_export_currentIndexChanged(const QString &v
     {
         exportMode = TIME;
     }
-    this->get_exportinfo(ui->dateEdit_export->date().toString(dateFormat),1);
+    this->get_exportinfo(ui->dateEdit_export->date().toString(workSched->dateFormat),1);
 }

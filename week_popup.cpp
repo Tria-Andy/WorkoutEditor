@@ -80,10 +80,10 @@ void week_popup::set_plotValues()
     double currTime = 0;
     int weekWorkouts = 0;
 
-        QDate workoutDate = QDate::fromString(weekMeta.at(3),dateFormat);
+        QDate workoutDate = QDate::fromString(weekMeta.at(3),workSched->dateFormat);
         QDateTime weekStart;
 
-        weekStart.setDate(QDate::fromString(weekMeta.at(3),dateFormat));
+        weekStart.setDate(QDate::fromString(weekMeta.at(3),workSched->dateFormat));
         weekStart.setTime(QTime::fromString("00:00:00","hh:mm:ss"));
         weekStart.setTimeSpec(Qt::LocalTime);
         firstDay = weekStart;

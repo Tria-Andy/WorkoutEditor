@@ -510,6 +510,7 @@ private:
     QVector<bool> editRow;
     bool isSwim,isBike,isRun,isStrength,isAlt,isOther,isTria;
     bool clearFlag;
+    QString dateFormat,longTime,shortTime;
 
     QDialog *updateDialog;
     QDateTimeEdit *updateFrom,*updateTo;

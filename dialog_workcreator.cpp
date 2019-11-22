@@ -26,6 +26,9 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, schedule *psched) :
     isSeries = "Series";
     isGroup = "Group";
     isBreak = generalValues->value("breakname");
+    dateFormat = settings::get_format("dateformat");
+    longTime = settings::get_format("dateformat");
+    shortTime = settings::get_format("dateformat");
     groupList << isGroup << isSeries;
     levelList = settings::get_listValues("Level");
     ui->listWidget_group->addItems(groupList);

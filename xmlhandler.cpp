@@ -18,6 +18,8 @@ void xmlHandler::check_File(QString path,QString fileName)
 
 QDomDocument xmlHandler::load_XMLFile(QString path,QString fileName)
 {
+    this->check_File(path,fileName);
+
     QFile xmlFile(path + QDir::separator() + fileName);
     QDomDocument xmldoc = QDomDocument();
 
@@ -33,6 +35,7 @@ QDomDocument xmlHandler::load_XMLFile(QString path,QString fileName)
         }
         xmlFile.close();
     }
+    xmlDoc = xmldoc;
     return xmldoc;
 }
 
@@ -73,9 +76,7 @@ QString xmlHandler::timetoSec(QString time)
     return QString::number(sec);
 }
 
-
-
-void xmlHandler::fill_treeModel(QDomNodeList *pList, QStandardItemModel *model)
+void xmlHandler::fill_treeModel(QString xmlFile, QStandardItemModel *model)
 {
     QStandardItem *rootItem = model->invisibleRootItem();
     QDomElement pElement,cElement;
@@ -83,10 +84,15 @@ void xmlHandler::fill_treeModel(QDomNodeList *pList, QStandardItemModel *model)
     QDomNamedNodeMap nodeMap;
     QStringList *tagList;
 
-    for(int parent = 0; parent < pList->count(); ++parent)
+    QDomElement rootTag = this->load_XMLFile(schedulePath,xmlFile).documentElement();
+    rootTagMap.insert(xmlFile,rootTag.tagName());
+
+    QDomNodeList ChildNodes= rootTag.childNodes();
+
+    for(int parent = 0; parent < ChildNodes.count(); ++parent)
     {
         QList<QStandardItem*> pItem;
-        pElement = pList->at(parent).toElement();
+        pElement = ChildNodes.at(parent).toElement();
         nodeMap = pElement.attributes();
 
         tagList = settings::getHeaderMap(pElement.tagName());
@@ -130,13 +136,13 @@ void xmlHandler::fill_xmlToList(QDomDocument xmlDoc,QMap<int,QStringList> *list)
     }
 }
 
-void xmlHandler::read_listMap(QMap<int, QStringList> *mapList,QString rootTag,QString xmlFile)
+void xmlHandler::read_listMap(QMap<int, QStringList> *mapList,QString xmlFile)
 {
     QDomDocument xmlDoc;
     QDomElement xmlRoot,xmlElement;
-    QStringList *elementList = settings::getHeaderMap(rootTag);
+    QStringList *elementList = settings::getHeaderMap(rootTagMap.value(xmlFile));
     QStringList *tagList = settings::getHeaderMap(elementList->at(0));
-    xmlRoot = xmlDoc.createElement(rootTag);
+    xmlRoot = xmlDoc.createElement(rootTagMap.value(xmlFile));
     xmlDoc.appendChild(xmlRoot);
 
     for(QMap<int, QStringList>::const_iterator it = mapList->cbegin(), end = mapList->cend(); it != end; ++it)
@@ -177,14 +183,14 @@ void xmlHandler::add_child(QDomElement element, QStandardItem *item)
     }
 }
 
-void xmlHandler::read_treeModel(QStandardItemModel *model,QString rootTag, QString xmlFile)
+void xmlHandler::read_treeModel(QStandardItemModel *model,QString xmlFile)
 {
     QDomDocument xmlDoc;
     QDomElement xmlRoot,xmlElement;
-    QStringList *elementList = settings::getHeaderMap(rootTag);
+    QStringList *elementList = settings::getHeaderMap(rootTagMap.value(xmlFile));
     QStringList *tagList = settings::getHeaderMap(elementList->at(0));
     QStandardItem *item;
-    xmlRoot = xmlDoc.createElement(rootTag);
+    xmlRoot = xmlDoc.createElement(rootTagMap.value(xmlFile));
     xmlDoc.appendChild(xmlRoot);
 
     for(int row = 0; row < model->rowCount(); ++row)

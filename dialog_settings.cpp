@@ -40,16 +40,16 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     level_model = new QStandardItemModel(this);
     hf_model = new QStandardItemModel(this);
     //ui->tableView_contest->setModel();
-    ui->lineEdit_gcpath->setText(gcValues->value("gcpath"));
+    ui->lineEdit_gcpath->setText(gcInfo.value("gcpath"));
     ui->lineEdit_gcpath->setEnabled(false);
-    ui->lineEdit_athlete->setText(gcValues->value("athlete"));
-    ui->lineEdit_activity->setText(gcValues->value("folder"));
-    ui->lineEdit_schedule->setText(gcValues->value("schedule"));
-    ui->lineEdit_standard->setText(gcValues->value("workouts"));
-    ui->lineEdit_maps->setText(gcValues->value("maps"));
-    ui->lineEdit_saisonFile->setText(gcValues->value("saisons"));
-    ui->lineEdit_configfile->setText(gcValues->value("valuefile"));
-    ui->lineEdit_foodFile->setText(gcValues->value("foodplanner"));
+    ui->lineEdit_athlete->setText(gcInfo.value("athlete"));
+    ui->lineEdit_activity->setText(gcInfo.value("folder"));
+    ui->lineEdit_schedule->setText(gcInfo.value("schedule"));
+    ui->lineEdit_standard->setText(gcInfo.value("workouts"));
+    ui->lineEdit_maps->setText(gcInfo.value("maps"));
+    ui->lineEdit_saisonFile->setText(gcInfo.value("saisons"));
+    ui->lineEdit_configfile->setText(gcInfo.value("valuefile"));
+    ui->lineEdit_foodFile->setText(gcInfo.value("foodplanner"));
     ui->spinBox_hfThres->setValue(thresValues->value("hfthres"));
     ui->spinBox_hfMax->setValue(thresValues->value("hfmax"));
     ui->spinBox_ltsDays->setValue(intMap.value("ltsdays"));
@@ -148,8 +148,8 @@ void Dialog_settings::checkSetup()
 
 void Dialog_settings::set_saisonInfo(QString saisonName)
 {
-    ui->dateEdit_saisonStart->setDate(QDate::fromString(schedule_ptr->get_saisonValues()->value(saisonName).at(0),dateFormat));
-    ui->dateEdit_saisonEnd->setDate(QDate::fromString(schedule_ptr->get_saisonValues()->value(saisonName).at(1),dateFormat));
+    ui->dateEdit_saisonStart->setDate(QDate::fromString(schedule_ptr->get_saisonValues()->value(saisonName).at(0),formatMap.value("dateformat")));
+    ui->dateEdit_saisonEnd->setDate(QDate::fromString(schedule_ptr->get_saisonValues()->value(saisonName).at(1),formatMap.value("dateformat")));
     ui->lineEdit_startWeek->setText(QString::number(ui->dateEdit_saisonStart->date().weekNumber()));
     ui->lineEdit_saisonWeeks->setText(schedule_ptr->get_saisonValues()->value(saisonName).at(2));
 
@@ -171,7 +171,7 @@ void Dialog_settings::refresh_contestTable(QString saisonName)
     for(QMap<QDate,QStringList>::const_iterator it = contestMap.cbegin(), end = contestMap.cend(); it != end; ++it,++row)
     {
         QTableWidgetItem *dateItem = new QTableWidgetItem();
-        dateItem->setData(Qt::EditRole,it.key().toString(dateFormat));
+        dateItem->setData(Qt::EditRole,it.key().toString(formatMap.value("dateformat")));
         ui->tableWidget_contest->setVerticalHeaderItem(row,dateItem);
 
         for(int i = 0, col = 0; i < it.value().count(); ++i)
@@ -489,7 +489,7 @@ void Dialog_settings::set_ltsList()
 
     for(QMap<QDate,QVector<double>>::const_iterator it =  map->cbegin(), end = map->cend(); it != end; ++it)
     {
-        itemValue = it.key().toString(dateFormat) +" - "+QString::number(it.value().at(0));
+        itemValue = it.key().toString(formatMap.value("dateformat") +" - "+QString::number(it.value().at(0)));
         ui->listWidget_stressValue->addItem(itemValue);
     }
 }
@@ -943,7 +943,7 @@ void Dialog_settings::on_listWidget_stressValue_itemClicked(QListWidgetItem *ite
 {
     QString values = item->data(Qt::DisplayRole).toString();
     QString stress = values.split(" - ").last();
-    ui->dateEdit_stress->setDate(QDate::fromString(values.split(" - ").first(),dateFormat));
+    ui->dateEdit_stress->setDate(QDate::fromString(values.split(" - ").first(),formatMap.value("dateformat")));
     ui->spinBox_stress->setValue(stress.toInt());
 }
 
@@ -1102,8 +1102,8 @@ void Dialog_settings::on_toolButton_updateSaison_clicked()
         {
             QStringList saisonInfo;
             saisonInfo << ui->comboBox_saisons->currentText()
-                       << ui->dateEdit_saisonStart->date().toString(dateFormat)
-                       << ui->dateEdit_saisonEnd->date().toString(dateFormat)
+                       << ui->dateEdit_saisonStart->date().toString(formatMap.value("dateformat"))
+                       << ui->dateEdit_saisonEnd->date().toString(formatMap.value("dateformat"))
                        << ui->lineEdit_saisonWeeks->text();
 
             schedule_ptr->add_newSaison(saisonInfo);
@@ -1274,7 +1274,7 @@ void Dialog_settings::on_pushButton_clearContest_clicked()
 
 void Dialog_settings::selectContest(int row)
 {
-    ui->dateEdit_contest->setDate(QDate::fromString(ui->tableWidget_contest->verticalHeaderItem(row)->data(Qt::DisplayRole).toString(),dateFormat));
+    ui->dateEdit_contest->setDate(QDate::fromString(ui->tableWidget_contest->verticalHeaderItem(row)->data(Qt::DisplayRole).toString(),formatMap.value("dateformat")));
     ui->comboBox_contestsport->setCurrentText(ui->tableWidget_contest->item(row,0)->data(Qt::DisplayRole).toString());
     ui->comboBox_contestdist->setCurrentText(ui->tableWidget_contest->item(row,1)->data(Qt::DisplayRole).toString());
     ui->doubleSpinBox_contestdist->setValue(ui->tableWidget_contest->item(row,4)->data(Qt::DisplayRole).toDouble());

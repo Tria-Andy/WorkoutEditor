@@ -1136,13 +1136,8 @@ public:
         foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
 
-        QString sPercent = index.data().toString().split(" ").last();
-
-        sPercent = sPercent.remove("(");
-        sPercent = sPercent.remove(")");
-
-        double percent = sPercent.toDouble();
-        double macroRange = doubleValues->value("Macrorange")/100.0;
+        double percent = index.data(Qt::UserRole).toDouble();
+        double macroRange = settings::getdoubleMapPointer(settings::dMap::Double)->value("Macrorange")/100.0;
         gradColor.setHsv(0,0,200,150);
 
         if(index.column() == 0)
@@ -1233,6 +1228,9 @@ private:
     QWidget *menuSpacer;
     QButtonGroup *phaseGroup;
     QComboBox *modules;
+    QDate firstdayofweek;
+    QString dateFormat,longTime,shortTime;
+    QHash<QString,QString> *gcValues;
 
     //Intervall Chart
     QVector<double> secTicker,speedValues,secondValues,polishValues,speedMinMax,secondMinMax,rangeMinMax;
@@ -1286,13 +1284,11 @@ private:
 
     //Food
     QMap<int,QStringList> selectedLine;
-    void fill_selectLine(int,int);
     void fill_foodPlanTable(QDate);
-    void fill_daySumTable(QDate);
+    void fill_foodSumTable(QDate);
     void fill_foodPlanList(bool);
-    void setSelectedMeal(QPair<QString,QVector<int>>,double);
-    void calc_foodCalories(int,double,int);
-    void set_menuList(QDate);
+    void set_selectedMeal(QPair<QString,QVector<int>>,double);
+    void set_menuList(QDate,QString);
     void reset_menuEdit();
 
 public:
@@ -1356,7 +1352,6 @@ private slots:
     void on_toolButton_menuEdit_clicked();
     void on_toolButton_saveMeals_clicked();
     void on_calendarWidget_Food_clicked(const QDate &date);
-    void on_listWidget_weekPlans_clicked(const QModelIndex &index);
     void on_toolButton_deleteMenu_clicked();
     void on_doubleSpinBox_portion_valueChanged(double arg1);
     void on_toolButton_addMeal_clicked();
@@ -1372,17 +1367,17 @@ private slots:
     void on_toolButton_menuCopy_clicked();
     void on_toolButton_menuPaste_clicked();
     void on_comboBox_weightmode_currentIndexChanged(const QString &arg1);
-    void selectFoodMealWeek(int);
-    void selectFoodMealDay(int);
+    void selectFoodSection(int);
+    void selectFoodDay(int);
     void on_actionFood_Macros_triggered();
     void on_toolButton_linePaste_clicked();
-    void on_pushButton_lineCopy_toggled(bool checked);
     void on_actionfood_History_triggered();
     void on_actionFood_triggered();
     void on_tableWidget_schedule_itemClicked(QTableWidgetItem *item);
     void on_tableWidget_saison_itemClicked(QTableWidgetItem *item);
     void on_tableWidget_foodPlan_itemChanged(QTableWidgetItem *item);
     void on_tableWidget_foodPlan_itemClicked(QTableWidgetItem *item);
+    void on_listWidget_weekPlans_itemClicked(QListWidgetItem *item);
 };
 
 #endif // MAINWINDOW_H

@@ -11,6 +11,7 @@ foodhistory_popup::foodhistory_popup(QWidget *parent,foodplanner *pFood) :
     foodplan = pFood;
     weekCount = foodplan->historyModel->rowCount();
     ui->treeView_foodhistory->setModel(foodplan->historyModel);
+    ui->columnView_foodHistory->setModel(foodplan->historyModel);
     dialogResult = QDialog::Rejected;
     athleteWeight = this->athleteValues->value("weight");
 

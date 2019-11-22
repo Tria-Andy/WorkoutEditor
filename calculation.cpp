@@ -2,13 +2,6 @@
 
 calculation::calculation()
 {
-    dateFormat = "dd.MM.yyyy";
-    longTime = settings::get_format("longtime");
-    shortTime = settings::get_format("shorttime");
-
-    doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
-    firstdayofweek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
-    gcValues = settings::getStringMapPointer(settings::stingMap::GC);
 
 }
 

@@ -49,7 +49,6 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
 
     editMode = 0;
     saveweekFile = "workout_saveweek.xml";
-    schedulePath = gcValues->value("schedule");
     weekTags << "id" << "weekday" << "time" << "sport" << "code" << "title" << "duration" << "distance" << "stress" << "kj";
     saveWeekModel = new QStandardItemModel(this);
     listModel = new QStandardItemModel(this);

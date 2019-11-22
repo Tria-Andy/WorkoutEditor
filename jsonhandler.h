@@ -41,6 +41,7 @@ protected:
     QHash<QString,QString> rideData,tagData,overrideData;
     QStringList intList,sampList;
     QString fileName;
+    QHash<QString,QString> *gcValues;
 
 private:
     QJsonObject activityItem;

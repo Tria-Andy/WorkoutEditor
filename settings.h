@@ -40,7 +40,7 @@ private:
 
     static QMap<int,QString> sampList,intList;
     static QMap<int,double> weightMap;
-    static QHash<QString,QString> formatMap,swimRange,bikeRange,runRange,triRange,stgRange,altRange,hfRange;
+    static QHash<QString,QString> swimRange,bikeRange,runRange,triRange,stgRange,altRange,hfRange;
 
     //Getter
     static QColor get_colorRGB(QString,bool);
@@ -56,7 +56,7 @@ private:
 
 protected:
     static QHash<QString,double> thresholdMap,athleteMap,modeMap,doubleMap;
-    static QHash<QString,QString> generalMap,gcInfo,triaMap;
+    static QHash<QString,QString> generalMap,gcInfo,triaMap,formatMap,fileMap;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,QStringList> listMap,jsonTags;
     static QHash<QString,QMap<QString,QString>> sportDistance;
@@ -66,6 +66,7 @@ protected:
 
 public:
     settings();
+    static QDate firstDayofWeek;
     static bool settingsUpdated;
     static int loadSettings();
     static QString isAlt,isSwim,isBike,isRun,isTria,isStrength,isOther;
@@ -98,7 +99,7 @@ public:
         return nullptr;
     }
 
-    enum stingMap {GC,General,Tria};
+    enum stingMap {GC,General,Tria,File};
     static QHash<QString,QString>* getStringMapPointer(int map)
     {
         if(map == GC)
@@ -113,6 +114,11 @@ public:
         {
             return &triaMap;
         }
+        if(map == File)
+        {
+            return &fileMap;
+        }
+
         return nullptr;
     }
 

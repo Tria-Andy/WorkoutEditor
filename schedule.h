@@ -33,6 +33,7 @@ public:
     schedule();
     bool newSaison;
     QStandardItemModel *scheduleModel,*phaseModel;
+    QString dateFormat,longTime,shortTime;
 
     QString get_weekPhase(QDate);
     QString get_selSaison() {return selSaison;}
@@ -59,8 +60,7 @@ public:
     bool get_isUpdated() {return isUpdated;}
     void set_selSaison(QString value) {selSaison = value;}
 
-
-//Workout
+    //Workout
     //Setter
     void set_isUpdated(bool updateFlag) {isUpdated = updateFlag;}
 
@@ -70,12 +70,20 @@ public:
     void add_contest(QString,QDate,QStringList);
     void remove_contest(QString,QDate);
 
+
+
+protected:
+
+
 private:
     bool isUpdated;
-    QDomNodeList xmlList;
+    QDate firstdayofweek;
+    QHash<QString,double> *doubleValues;
+    QHash<QString,QString> *gcValues,*fileMap;
+
     QStringList sportTags; 
     QStringList *macroTags,*workoutTags,*compTags,*phaseTags;
-    QString selSaison,schedulePath,scheduleFile,phaseFile,ltsFile;
+    QString selSaison;
 
     QMap<QString,QStringList> saisonValues;
     QMap<int,QStringList> mapList;

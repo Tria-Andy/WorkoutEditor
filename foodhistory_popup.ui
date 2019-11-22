@@ -112,6 +112,9 @@
     </widget>
    </item>
    <item>
+    <widget class="QColumnView" name="columnView_foodHistory"/>
+   </item>
+   <item>
     <widget class="QFrame" name="frame_control">
      <property name="frameShape">
       <enum>QFrame::Box</enum>

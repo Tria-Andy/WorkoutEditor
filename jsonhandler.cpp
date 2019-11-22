@@ -21,7 +21,7 @@
 
 jsonHandler::jsonHandler()
 {
-
+    gcValues = settings::getStringMapPointer(settings::stingMap::GC);
 }
 
 void jsonHandler::fill_qmap(QHash<QString, QString> *qmap,QJsonObject *objItem)

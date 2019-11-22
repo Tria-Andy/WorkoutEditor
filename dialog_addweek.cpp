@@ -78,7 +78,7 @@ void Dialog_addweek::fill_values(QString selWeekID)
     if(compValues.count() > 0)
     {
         editWeekID = selWeekID;
-        ui->dateEdit_selectDate->setDate(QDate::fromString(weekMeta.at(3),dateFormat));
+        ui->dateEdit_selectDate->setDate(QDate::fromString(weekMeta.at(3),workSched->dateFormat));
         ui->lineEdit_week->setText(QString::number(ui->dateEdit_selectDate->date().weekNumber()));
 
         ui->comboBox_phase->setCurrentText(weekMeta.at(2).split("_").first());
@@ -126,7 +126,7 @@ void Dialog_addweek::update_values()
 
     weekMeta[0] = calc_weekID(ui->dateEdit_selectDate->date());
     weekMeta[2] = ui->comboBox_phase->currentText() +"_"+ ui->comboBox_cycle->currentText();
-    weekMeta[3] = ui->dateEdit_selectDate->date().toString(dateFormat);
+    weekMeta[3] = ui->dateEdit_selectDate->date().toString(workSched->dateFormat);
     weekMeta[4] = ui->lineEdit_weekContent->text();
     weekMeta[5] = ui->lineEdit_weekGoals->text();
 

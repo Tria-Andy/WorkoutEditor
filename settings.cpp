@@ -26,14 +26,15 @@
 settings::settings()
 {
 }
-
 QString settings::settingFile;
 QString settings::splitter = "/";
 bool settings::settingsUpdated;
+QDate settings::firstDayofWeek;
 
 QHash<QString,QString> settings::gcInfo;
 QHash<QString,QString> settings::generalMap;
 QHash<QString,QString> settings::formatMap;
+QHash<QString,QString> settings::fileMap;
 QHash<QString,QColor> settings::colorMap;
 QHash<QString,int> settings::intMap;
 
@@ -228,6 +229,7 @@ QVector<double> settings::set_doubleValues(QStringList *list)
 
 int settings::loadSettings()
 {
+    firstDayofWeek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
     settingsUpdated = false;
     header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes" << "Work";
     header_pm << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD" << "Work";
@@ -245,9 +247,11 @@ int settings::loadSettings()
             gcInfo.insert("regPath",mysettings->value("regPath").toString());
             gcInfo.insert("dir",mysettings->value("dir").toString());
             gcInfo.insert("athlete",mysettings->value("athlete").toString());
+            gcInfo.insert("athletepref",mysettings->value("athletepref").toString());
             gcInfo.insert("folder",mysettings->value("folder").toString());
             gcInfo.insert("conf",mysettings->value("conf").toString());
             gcInfo.insert("gcpath",mysettings->value("gcpath").toString());
+            gcInfo.insert("bodyfile",mysettings->value("bodyfile").toString());
         mysettings->endGroup();
 
         if(gcInfo.value("gcpath").isEmpty())
@@ -270,13 +274,22 @@ int settings::loadSettings()
             gcInfo.insert("saisons",mysettings->value("saisons").toString());
             gcInfo.insert("foodplanner",mysettings->value("foodplanner").toString());
             gcInfo.insert("maps",mysettings->value("maps").toString());
-            gcInfo.insert("valuefile",mysettings->value("valuefile").toString());
+        mysettings->endGroup();
+
+        mysettings->beginGroup("Files");
             valueFile = mysettings->value("valuefile").toString();
             headerFile = mysettings->value("headerfile").toString();
+            fileMap.insert("schedulefile",mysettings->value("schedulefile").toString());
+            fileMap.insert("saisonfile",mysettings->value("saisonfile").toString());
+            fileMap.insert("stressfile",mysettings->value("stressfile").toString());
+            fileMap.insert("foodplanner",mysettings->value("foodplanner").toString());
+            fileMap.insert("foodfile",mysettings->value("foodfile").toString());
+            fileMap.insert("mealsfile",mysettings->value("mealsfile").toString());
+            fileMap.insert("foodhistory",mysettings->value("foodhistory").toString());
         mysettings->endGroup();
 
 
-        QFile file(gcInfo.value("confpath") + QDir::separator() + "bodymeasures.json");
+        QFile file(gcInfo.value("confpath") + QDir::separator() + gcInfo.value("bodyfile"));
 
         if (!file.open(QFile::ReadOnly | QFile::Text))
         {
@@ -340,7 +353,7 @@ int settings::loadSettings()
 
         if(QFile(valueFilePath).exists())
         {
-            QSettings *myPref = new QSettings(gcInfo.value("confpath") + QDir::separator() + "athlete-preferences.ini",QSettings::IniFormat);
+            QSettings *myPref = new QSettings(gcInfo.value("confpath") + QDir::separator() + gcInfo.value("athletepref"),QSettings::IniFormat);
             athleteMap.insert("yob",myPref->value("dob").toDate().year());
             athleteMap.insert("height",myPref->value("height").toDouble());
             athleteMap.insert("sex",myPref->value("sex").toDouble());
@@ -509,7 +522,6 @@ int settings::loadSettings()
                 settingList << myvalues->value("breakname").toString();
                 settingList << myvalues->value("filecount").toString();
                 settingList << myvalues->value("workfactor").toString();
-                generalMap.insert("dateformat", myvalues->value("dateformat").toString());
                 formatMap.insert("dateformat", myvalues->value("dateformat").toString());
                 formatMap.insert("longtime", myvalues->value("longtime").toString());
                 formatMap.insert("shorttime", myvalues->value("shorttime").toString());

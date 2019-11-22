@@ -25,35 +25,32 @@ schedule::schedule()
     compTags = settings::getHeaderMap("comp");
     phaseTags = settings::getHeaderMap("micro");
     sportTags = settings::get_listValues("Sportuse");
+    firstdayofweek = settings::firstDayofWeek;
+    dateFormat = settings::get_format("dateformat");
+    longTime = settings::get_format("longtime");
+    shortTime = settings::get_format("shorttime");
+    doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
+    gcValues = settings::getStringMapPointer(settings::stingMap::GC);
+    fileMap = settings::getStringMapPointer(settings::stingMap::File);
 
-    schedulePath = gcValues->value("schedule");
-    //scheduleFile = "workouts_schedule.xml";
-    scheduleFile = "scheduleTest.xml";
     scheduleModel = new QStandardItemModel();
     scheduleModel->setColumnCount(workoutTags->count());
-    //phaseFile = "phase_content.xml";
-    phaseFile = "phaseTest.xml";
     phaseModel = new QStandardItemModel();
     phaseModel->setColumnCount(compTags->count());
-    ltsFile = "longtermstress.xml";
 
-    if(!schedulePath.isEmpty())
+    if(!gcValues->value("schedule").isEmpty())
     {
         //Schedule
-        this->check_File(schedulePath,scheduleFile);
-        xmlList = this->load_XMLFile(schedulePath,scheduleFile).firstChildElement().elementsByTagName("week");
-        this->fill_treeModel(&xmlList,scheduleModel);
-        this->remove_WeekofPast(firstdayofweek.addDays(-7));
+        this->fill_treeModel(fileMap->value("schedulefile"),scheduleModel);
 
         //Saison - Phase
-        this->check_File(schedulePath,phaseFile);
-        xmlList = this->load_XMLFile(schedulePath,phaseFile).firstChildElement().elementsByTagName("macro");
-        this->fill_treeModel(&xmlList,phaseModel);
+        this->fill_treeModel(fileMap->value("saisonfile"),phaseModel);
 
         //StressMap
-        this->fill_xmlToList(this->load_XMLFile(schedulePath,ltsFile),&mapList);
+        this->fill_xmlToList(this->load_XMLFile(gcValues->value("schedule"),fileMap->value("stressfile")),&mapList);
         this->set_stressMap();
 
+        this->remove_WeekofPast(firstdayofweek.addDays(-7));
         this->set_saisonValues();
     }
     isUpdated = false;
@@ -72,12 +69,12 @@ void schedule::save_workouts(bool saveModel)
 {
     if(saveModel == SAISON)
     {
-        this->read_treeModel(phaseModel,"saisons",phaseFile);
+        this->read_treeModel(phaseModel,fileMap->value("saisonfile"));
     }
 
     if(saveModel == SCHEDULE)
     {
-        this->read_treeModel(scheduleModel,"schedule",scheduleFile);
+        this->read_treeModel(scheduleModel,fileMap->value("schedulefile"));
         this->save_ltsFile();
     }
     isUpdated = false;
@@ -244,7 +241,7 @@ void schedule::save_ltsFile()
         saveList.insert(counter++,mapList);
         mapList.clear();
     }
-    this->read_listMap(&saveList,"stressmap",ltsFile);
+    this->read_listMap(&saveList,fileMap->value("stressfile"));
 }
 
 void schedule::add_contest(QString saison,QDate contestDate, QStringList contestValues)
@@ -328,8 +325,7 @@ QStringList schedule::get_weekList()
 
 void schedule::remove_WeekofPast(QDate dayOfWeek)
 {
-    QString weekID = calc_weekID(dayOfWeek);
-    QModelIndex weekIndex = get_modelIndex(scheduleModel,weekID,0);
+    QModelIndex weekIndex = get_modelIndex(scheduleModel,calc_weekID(dayOfWeek),0);
 
     if(weekIndex.isValid())
     {

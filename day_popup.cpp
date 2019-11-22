@@ -64,7 +64,7 @@ void day_popup::init_dayWorkouts(QDate workDate)
     dayModel->clear();
 
     QString viewBackground = "background-color: #e6e6e6";
-    QString workoutDate = workDate.toString(dateFormat);
+    QString workoutDate = workDate.toString(workSched->dateFormat);
 
     dayWorkouts = workSched->get_workouts(true,workoutDate);
     workoutMap.insert(workDate,dayWorkouts);
@@ -229,7 +229,7 @@ void day_popup::set_exportContent()
     QString tempDate,tempTime,sport,stressType,commonRI;
     QString totalWork = dayWorkouts.value(selWorkout).at(8);
 
-    tempDate = popupDate.toString(dateFormat);
+    tempDate = popupDate.toString(workSched->dateFormat);
     tempTime = dayWorkouts.value(selWorkout).at(0);
 
     workoutTime = QTime::fromString(tempTime,"hh:mm");
@@ -388,7 +388,7 @@ void day_popup::set_result(int result)
     editMode = false;
 
     QStringList moveWorkout;
-    QString moveDate = ui->dateEdit_workDate->date().toString(dateFormat);
+    QString moveDate = ui->dateEdit_workDate->date().toString(workSched->dateFormat);
     QMap<int,QStringList> valueList;
 
     if(ui->toolButton_dayEdit->isChecked())

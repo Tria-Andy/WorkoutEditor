@@ -14,10 +14,6 @@ private:
 protected:
     double calc_totalCal(double,double,double);    
     int get_hfvalue(QString);
-    QHash<QString,double> *doubleValues;
-    QHash<QString,QString> *gcValues;
-    QDate firstdayofweek;
-    QString dateFormat,longTime,shortTime;
 
     static bool usePMData;
     static double calc_totalWork(QString,double,double,int);
