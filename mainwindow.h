@@ -1290,6 +1290,8 @@ private:
     void set_selectedMeal(QPair<QString,QVector<int>>,double);
     void set_menuList(QDate,QString);
     void reset_menuEdit();
+    void change_foodOrder(int);
+    void set_foodOrder();
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -1348,7 +1350,6 @@ private slots:
 
     //Food
     void on_toolButton_addMenu_clicked();
-    void on_listWidget_menuEdit_doubleClicked(const QModelIndex &index);
     void on_toolButton_menuEdit_clicked();
     void on_toolButton_saveMeals_clicked();
     void on_calendarWidget_Food_clicked(const QDate &date);
@@ -1363,7 +1364,6 @@ private slots:
     void on_treeView_meals_expanded(const QModelIndex &index);
     void mealSave(QStandardItem*);
     void on_toolButton_mealreset_clicked();
-    void on_toolButton_clear_clicked();
     void on_toolButton_menuCopy_clicked();
     void on_toolButton_menuPaste_clicked();
     void on_comboBox_weightmode_currentIndexChanged(const QString &arg1);
@@ -1378,6 +1378,8 @@ private slots:
     void on_tableWidget_foodPlan_itemChanged(QTableWidgetItem *item);
     void on_tableWidget_foodPlan_itemClicked(QTableWidgetItem *item);
     void on_listWidget_weekPlans_itemClicked(QListWidgetItem *item);
+    void on_listWidget_menuEdit_itemDoubleClicked(QListWidgetItem *item);
+    void on_toolButton_menuClear_clicked();
 };
 
 #endif // MAINWINDOW_H

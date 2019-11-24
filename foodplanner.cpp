@@ -263,65 +263,40 @@ void foodplanner::set_foodPlanMap(int update)
     }
 }
 
-//Copy a Meal DragAnDrop and EditMenu
-void foodplanner::update_foodPlanData(QHash<QString,QMap<QDate,QString>> foodUpdateMap)
-{
-    QPair<int,double> posPort;
-    QPair<QString,QPair<int,double>> updateFood;
-    QHash<QString,QPair<QString,QPair<int,double>>> updateMeal;
-    QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>> updateDay;
-    QHash<QString,QVector<double>> tempMap;
-    QDate updateDate;
-    QString updateSection;
-
-    updateDate = foodUpdateMap.value("CopyTo").firstKey();
-    updateSection =  foodUpdateMap.value("CopyTo").first();
-
-    tempMap = foodPlanMap.value(foodUpdateMap.value("CopyFrom").firstKey()).value(foodUpdateMap.value("CopyFrom").first());
-
-    for(QHash<QString,QVector<double>>::const_iterator it = tempMap.cbegin(), end = tempMap.cend(); it != end; ++it)
-    {
-        updateFood.first = mealsMap.value(it.key());
-        posPort.first = static_cast<int>(it.value().at(0));
-        posPort.second = it.value().at(1);
-        updateFood.second = posPort;
-        updateMeal.insert(it.key(),updateFood);
-    }
-
-    updateDay.insert(updateSection,updateMeal);
-    updateMap.insert(qMakePair(true,updateDate),updateDay);
-    this->update_foodPlanModel();
-
-}
-
-//Copy Day into another Day or MealSection into every Day of a Week by Selection
-void foodplanner::update_foodPlanData(QDate copyFromDate,QDate copyToDate)
+void foodplanner::update_foodPlanData(bool singleItem,QDate copyFromDate,QDate copyToDate)
 {
     QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>> updateMealSection;
     QPair<bool,QDate> copyKey(false,copyFromDate);
 
-    if(dayCopy)
+    if(singleItem && copyToDate.isValid())
     {
-        updateMealSection = updateMap.value(copyKey);
-        updateMap.insert(qMakePair(true,copyToDate),updateMealSection);
+         updateMealSection = updateMap.value(copyKey);
+         updateMap.insert(qMakePair(true,copyToDate),updateMealSection);
     }
     else
     {
-        int day = 0;
-        for(QMap<QPair<bool,QDate>,QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>>>::const_iterator it = updateMap.cbegin(), end = updateMap.cend(); it != end; ++it)
+        if(dayMealCopy.first)
         {
-            if(it.key().first)
+            updateMealSection = updateMap.value(copyKey);
+            updateMap.insert(qMakePair(true,copyToDate),updateMealSection);
+        }
+        else if(dayMealCopy.second)
+        {
+            int day = 0;
+            for(QMap<QPair<bool,QDate>,QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>>>::const_iterator it = updateMap.cbegin(), end = updateMap.cend(); it != end; ++it)
             {
-                updateMealSection = it.value();
-                updateMap.insert(qMakePair(true,copyToDate.addDays(day++)),updateMealSection);
+                if(it.key().first)
+                {
+                    updateMealSection = it.value();
+                    updateMap.insert(qMakePair(true,copyToDate.addDays(day++)),updateMealSection);
+                }
             }
         }
     }
-
     this->update_foodPlanModel();
 }
 
-void foodplanner::fill_updateMap(bool singleItem,QDate updateDate, QString updateSection)
+void foodplanner::fill_updateMap(bool singleItem,bool dragDrop,QDate updateDate, QString updateSection)
 {
     QPair<bool,QDate> copyKey(singleItem,updateDate);
     QPair<int,double> posPort;
@@ -332,7 +307,7 @@ void foodplanner::fill_updateMap(bool singleItem,QDate updateDate, QString updat
 
     QHash<QString,QVector<double>> currentMeal = foodPlanMap.value(updateDate).value(updateSection);
 
-    if(singleItem) updateMap.clear();
+    if(singleItem & !dragDrop) updateMap.clear();
 
     for(QHash<QString,QVector<double>>::const_iterator it = currentMeal.cbegin(), end = currentMeal.cend(); it != end; ++it)
     {
@@ -347,19 +322,66 @@ void foodplanner::fill_updateMap(bool singleItem,QDate updateDate, QString updat
     updateMap.insert(copyKey,updateMealSection);
 }
 
-void foodplanner::edit_updateMap(QPair<QDate,QString> dateSection,QString mealID, double factor)
+void foodplanner::change_updateMapOrder(QPair<QDate,QString> dateSection, QMap<QString, int> changeTo)
 {
-    /*
-    QPair<QString,QVector<int>> mealData = this->get_mealData(mealID);
-    QHash<QString,QHash<QString,QVector<double>>> mealSection = updateMap.value(dateSection.first);
-    QHash<QString,QVector<double>> meal = mealSection.value(dateSection.second);
-    QVector<double> mealValues = get_mealValues(mealID,factor);
+    QPair<bool,QDate> updateKey(true,dateSection.first);
+    QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>> editMealSection = updateMap.value(updateKey);
+    QHash<QString,QPair<QString,QPair<int,double>>> editMeal = editMealSection.value(dateSection.second);
+    QPair<QString,QPair<int,double>> editFood;
 
-    mealValues.insert(0,meal.value(mealID).at(0));
-    meal.insert(mealID,mealValues);
-    mealSection.insert(dateSection.second,meal);
-    updateMap.insert(dateSection.first,mealSection);
-    */
+    for(QMap<QString, int>::const_iterator it = changeTo.cbegin(), end = changeTo.cend(); it != end; ++it)
+    {
+        editFood = editMeal.value(it.key());
+        editFood.second.first = it.value();
+        editMeal.insert(it.key(),editFood);
+    }
+    editMealSection.insert(dateSection.second,editMeal);
+    updateMap.insert(updateKey,editMealSection);
+}
+
+void foodplanner::edit_updateMap(int foodEdit,QPair<QDate,QString> dateSection,QString mealID, double factor)
+{
+    QPair<bool,QDate> updateKey(true,dateSection.first);
+    QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>> editMealSection = updateMap.value(updateKey);
+    QHash<QString,QPair<QString,QPair<int,double>>> editMeal = editMealSection.value(dateSection.second);
+    QPair<QString,QPair<int,double>> editFood;
+
+    if(foodEdit == ADD)
+    {
+        editFood.first = mealsMap.value(mealID);
+        editFood.second.first = editMeal.count();
+        editFood.second.second = factor;
+        editMeal.insert(mealID,editFood);
+    }
+    else if(foodEdit == DEL)
+    {
+        editMeal.remove(mealID);
+    }
+    else if(foodEdit == EDIT)
+    {
+        editFood = editMeal.value(mealID);
+        editFood.second.second = factor;
+        editMeal.insert(mealID,editFood);
+    }
+
+    editMealSection.insert(dateSection.second,editMeal);
+    updateMap.insert(updateKey,editMealSection);
+}
+
+void foodplanner::clear_updateMap(QPair<QDate,QString> dateSection)
+{
+    if(dateSection.first.isValid())
+    {
+        QPair<bool,QDate> updateKey(true,dateSection.first);
+        QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>> editMealSection = updateMap.value(updateKey);
+        editMealSection.remove(dateSection.second);
+        updateMap.insert(updateKey,editMealSection);
+    }
+    else
+    {
+        updateMap.clear();
+    }
+
 }
 
 void foodplanner::set_foodPlanList(QStandardItem *weekItem)

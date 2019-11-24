@@ -2885,7 +2885,7 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QToolButton" name="toolButton_clear">
+                      <widget class="QToolButton" name="toolButton_menuClear">
                        <property name="minimumSize">
                         <size>
                          <width>24</width>
@@ -3120,7 +3120,7 @@
      <x>0</x>
      <y>0</y>
      <width>1234</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

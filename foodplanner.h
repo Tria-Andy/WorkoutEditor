@@ -17,7 +17,7 @@ public:
     QStandardItemModel *foodPlanModel,*mealModel,*historyModel;
     QStringList *menuHeader,*foodsumHeader,*foodestHeader,*foodhistHeader;
     QStringList planList,mealsHeader,dayHeader,dayListHeader;
-    bool dayCopy;
+    QPair<bool,bool> dayMealCopy;
     QMap<QDate,QVector<double>> dayTarget;
     QMap<QDate,QVector<double>> dayMacros;
     QHash<QString,QPair<QString,QPair<int,double>>> get_mealtoUpdate(bool,QDate,QString);
@@ -30,11 +30,11 @@ public:
     QString get_mode(QDate);
     QPair<QString,QVector<int>> get_mealData(QString);
 
-    void update_foodPlanData(QHash<QString,QMap<QDate,QString>>);
-    void update_foodPlanData(QDate,QDate);
-    void fill_updateMap(bool,QDate,QString);
-    void edit_updateMap(QPair<QDate,QString>,QString,double);
-    void clear_updateMap() {updateMap.clear();}
+    void update_foodPlanData(bool,QDate,QDate);
+    void set_dragandDrop() {update_foodPlanModel();}
+    void fill_updateMap(bool,bool,QDate,QString);
+    void edit_updateMap(int,QPair<QDate,QString>,QString,double);
+    void clear_updateMap(QPair<QDate,QString>);
     void save_foolPlan();
     void save_mealList();
     void edit_mealSection(QString,int);
@@ -42,6 +42,7 @@ public:
     void remove_meal(QItemSelectionModel*);
     void insert_newWeek(QDate);
     void remove_week(QString);
+    void change_updateMapOrder(QPair<QDate,QString>,QMap<QString,int>);
 
 
 private:
