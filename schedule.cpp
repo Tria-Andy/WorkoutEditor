@@ -47,7 +47,7 @@ schedule::schedule()
         this->fill_treeModel(fileMap->value("saisonfile"),phaseModel);
 
         //StressMap
-        this->fill_xmlToList(this->load_XMLFile(gcValues->value("schedule"),fileMap->value("stressfile")),&mapList);
+        this->fill_xmlToList(fileMap->value("stressfile"),&mapList);
         this->set_stressMap();
 
         this->remove_WeekofPast(firstdayofweek.addDays(-7));
@@ -231,7 +231,7 @@ void schedule::save_ltsFile()
     int counter = 0;
     int ltsDays = settings::get_intValue("ltsdays")+1;
 
-    for(QMap<QDate,QVector<double>>::const_iterator it = stressMap.find(firstdayofweek.addDays(-ltsDays)), end = stressMap.find(firstdayofweek); it != end; ++it)
+    for(QMap<QDate,QVector<double>>::const_iterator it = stressMap.find(firstdayofweek.addDays(-ltsDays)), end = stressMap.find(firstdayofweek.addDays(7)); it != end; ++it)
     {
         mapList << it.key().toString(dateFormat);
         for(int value = 0; value < it.value().count(); ++value)

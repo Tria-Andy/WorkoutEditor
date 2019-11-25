@@ -2406,8 +2406,14 @@ void MainWindow::on_toolButton_mealreset_clicked()
 
 void MainWindow::on_toolButton_menuClear_clicked()
 {
-    ui->listWidget_menuEdit->clear();
-    foodPlan->clear_updateMap(qMakePair(ui->dateEdit_selectDay->date(),ui->lineEdit_editSection->text()));
+    ui->listWidget_menuEdit->clearSelection();
+
+    for(int row = 0; row < ui->listWidget_menuEdit->count(); ++row)
+    {
+        foodPlan->edit_updateMap(DEL,qMakePair(ui->dateEdit_selectDay->date(),ui->lineEdit_editSection->text()),ui->listWidget_menuEdit->item(row)->data(Qt::UserRole).toString(),0);
+    }
+    this->set_menuList(ui->dateEdit_selectDay->date(),ui->lineEdit_editSection->text());
+
 }
 
 void MainWindow::on_toolButton_menuCopy_clicked()
@@ -2449,7 +2455,7 @@ void MainWindow::selectFoodSection(int selectedSection)
     ui->lineEdit_copySection->setVisible(true);
     ui->lineEdit_copySection->setText(foodPlan->mealsHeader.at(selectedSection));
 
-    foodPlan->clear_updateMap(qMakePair(QDate(),QString()));
+    foodPlan->clear_updateMap();
     foodPlan->dayMealCopy.first = false;
     foodPlan->dayMealCopy.second = true;
     for(int day = 0; day < weekDays; ++day)
@@ -2471,7 +2477,7 @@ void MainWindow::selectFoodDay(int selectedDay)
     ui->dateEdit_copyDay->setVisible(true);
     ui->dateEdit_copyDay->setDate(ui->tableWidget_foodPlan->horizontalHeaderItem(selectedDay)->data(Qt::UserRole).toDate());
 
-    foodPlan->clear_updateMap(qMakePair(QDate(),QString()));
+    foodPlan->clear_updateMap();
     foodPlan->dayMealCopy.first = true;
     foodPlan->dayMealCopy.second = false;
     for(int section = 0; section < foodPlan->mealsHeader.count(); ++section)

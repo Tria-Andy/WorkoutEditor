@@ -5,6 +5,7 @@ xmlHandler::xmlHandler()
 {
     schedulePath = settings::getStringMapPointer(settings::stingMap::GC)->value("schedule");
 }
+
 void xmlHandler::check_File(QString path,QString fileName)
 {
     QFile workFile(path + QDir::separator() + fileName);
@@ -111,13 +112,16 @@ void xmlHandler::fill_treeModel(QString xmlFile, QStandardItemModel *model)
     }
 }
 
-void xmlHandler::fill_xmlToList(QDomDocument xmlDoc,QMap<int,QStringList> *list)
+void xmlHandler::fill_xmlToList(QString xmlFile,QMap<int,QStringList> *list)
 {
     QDomElement rootTag,childTag;
     QDomNodeList xmlList;
     QDomElement xmlElement;
     QStringList *tagList;
     QStringList mapList;
+
+    rootTag = this->load_XMLFile(schedulePath,xmlFile).documentElement();
+    rootTagMap.insert(xmlFile,rootTag.tagName());
 
     rootTag = xmlDoc.firstChildElement();
     childTag = rootTag.firstChild().toElement();
@@ -142,6 +146,7 @@ void xmlHandler::read_listMap(QMap<int, QStringList> *mapList,QString xmlFile)
     QDomElement xmlRoot,xmlElement;
     QStringList *elementList = settings::getHeaderMap(rootTagMap.value(xmlFile));
     QStringList *tagList = settings::getHeaderMap(elementList->at(0));
+
     xmlRoot = xmlDoc.createElement(rootTagMap.value(xmlFile));
     xmlDoc.appendChild(xmlRoot);
 

@@ -78,8 +78,6 @@ private slots:
     void on_toolButton_color_clicked();
     void on_spinBox_ltsDays_valueChanged(int arg1);
     void on_spinBox_stsDays_valueChanged(int arg1);
-    void on_spinBox_lastLTS_valueChanged(int arg1);
-    void on_spinBox_lastSTS_valueChanged(int arg1);
     void on_listWidget_stressValue_itemClicked(QListWidgetItem *item);
     void on_tabWidget_tabBarClicked(int index);
     void on_pushButton_calcFat_clicked();

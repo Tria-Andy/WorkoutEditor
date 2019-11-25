@@ -18,8 +18,7 @@ public:
     QStringList *menuHeader,*foodsumHeader,*foodestHeader,*foodhistHeader;
     QStringList planList,mealsHeader,dayHeader,dayListHeader;
     QPair<bool,bool> dayMealCopy;
-    QMap<QDate,QVector<double>> dayTarget;
-    QMap<QDate,QVector<double>> dayMacros;
+    QMap<QDate,QHash<QString,QVector<double>>> dayMacros;
     QHash<QString,QPair<QString,QPair<int,double>>> get_mealtoUpdate(bool,QDate,QString);
     QMap<QDate,QVector<double>> *get_daySumMap() {return &daySumMap;}
     QVector<double> get_mealValues(QString,double);
@@ -34,7 +33,7 @@ public:
     void set_dragandDrop() {update_foodPlanModel();}
     void fill_updateMap(bool,bool,QDate,QString);
     void edit_updateMap(int,QPair<QDate,QString>,QString,double);
-    void clear_updateMap(QPair<QDate,QString>);
+    void clear_updateMap() {updateMap.clear();}
     void save_foolPlan();
     void save_mealList();
     void edit_mealSection(QString,int);

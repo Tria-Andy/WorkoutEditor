@@ -927,18 +927,6 @@ void Dialog_settings::on_spinBox_stsDays_valueChanged(int value)
     this->enableSavebutton();
 }
 
-void Dialog_settings::on_spinBox_lastLTS_valueChanged(int value)
-{
-    Q_UNUSED(value)
-    this->enableSavebutton();
-}
-
-void Dialog_settings::on_spinBox_lastSTS_valueChanged(int value)
-{
-    Q_UNUSED(value)
-    this->enableSavebutton();
-}
-
 void Dialog_settings::on_listWidget_stressValue_itemClicked(QListWidgetItem *item)
 {
     QString values = item->data(Qt::DisplayRole).toString();

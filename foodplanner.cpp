@@ -368,22 +368,6 @@ void foodplanner::edit_updateMap(int foodEdit,QPair<QDate,QString> dateSection,Q
     updateMap.insert(updateKey,editMealSection);
 }
 
-void foodplanner::clear_updateMap(QPair<QDate,QString> dateSection)
-{
-    if(dateSection.first.isValid())
-    {
-        QPair<bool,QDate> updateKey(true,dateSection.first);
-        QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>> editMealSection = updateMap.value(updateKey);
-        editMealSection.remove(dateSection.second);
-        updateMap.insert(updateKey,editMealSection);
-    }
-    else
-    {
-        updateMap.clear();
-    }
-
-}
-
 void foodplanner::set_foodPlanList(QStandardItem *weekItem)
 {
     QModelIndex weekIndex = foodPlanModel->indexFromItem(weekItem);
