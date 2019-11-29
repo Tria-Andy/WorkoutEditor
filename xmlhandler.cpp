@@ -4,6 +4,7 @@
 xmlHandler::xmlHandler()
 {
     schedulePath = settings::getStringMapPointer(settings::stingMap::GC)->value("schedule");
+    attributeCount = 0;
 }
 
 void xmlHandler::check_File(QString path,QString fileName)
@@ -77,89 +78,117 @@ QString xmlHandler::timetoSec(QString time)
     return QString::number(sec);
 }
 
+void xmlHandler::set_xmlTagMap(QString tagName, QString nodeName,int nodePos)
+{  
+    QMap<int,QString> nodeMap = xmlTagMap.value(tagName);
+
+    if(nodeMap.value(nodePos).isEmpty())
+    {
+        nodeMap.insert(nodePos,nodeName);
+        xmlTagMap.insert(tagName,nodeMap);
+    }
+}
+
 void xmlHandler::fill_treeModel(QString xmlFile, QStandardItemModel *model)
 {
     QStandardItem *rootItem = model->invisibleRootItem();
-    QDomElement pElement,cElement;
-    QDomNodeList cList;
+    QDomElement element;
     QDomNamedNodeMap nodeMap;
     QStringList *tagList;
 
     QDomElement rootTag = this->load_XMLFile(schedulePath,xmlFile).documentElement();
-    rootTagMap.insert(xmlFile,rootTag.tagName());
 
-    QDomNodeList ChildNodes= rootTag.childNodes();
+    QDomNodeList childNodes = rootTag.childNodes();
 
-    for(int parent = 0; parent < ChildNodes.count(); ++parent)
+    for(int parent = 0; parent < childNodes.count(); ++parent)
     {
         QList<QStandardItem*> pItem;
-        pElement = ChildNodes.at(parent).toElement();
-        nodeMap = pElement.attributes();
+        element = childNodes.at(parent).toElement();
+        nodeMap = element.attributes();
+        tagList = settings::getHeaderMap(element.tagName());
 
-        tagList = settings::getHeaderMap(pElement.tagName());
+        if(attributeCount < nodeMap.count()) attributeCount = nodeMap.count();
 
         for(int node = 0; node < nodeMap.count(); ++node)
         {
-            pItem << new QStandardItem(pElement.attribute(tagList->at(node)));
+            pItem << new QStandardItem(element.attribute(tagList->at(node)));
+            set_xmlTagMap(element.tagName(),nodeMap.item(node).nodeName(),node);
         }
 
         rootItem->appendRow(pItem);
 
-        if(pElement.hasChildNodes())
+        if(element.hasChildNodes())
         {
-            this->add_child(pElement,pItem.at(0));
+            this->add_child(element,pItem.at(0));
         }
     }
+    rootTagMap.insert(xmlFile,qMakePair(rootTag.tagName(),attributeCount));
+    attributeCount = 0;
 }
 
-void xmlHandler::fill_xmlToList(QString xmlFile,QMap<int,QStringList> *list)
+void xmlHandler::xml_toTreeModel(QString xmlFile, QStandardItemModel *model)
 {
-    QDomElement rootTag,childTag;
-    QDomNodeList xmlList;
-    QDomElement xmlElement;
-    QStringList *tagList;
-    QStringList mapList;
+    QStandardItem *rootItem = model->invisibleRootItem();
+    QDomElement element;
+    QDomNamedNodeMap nodeMap;
 
-    rootTag = this->load_XMLFile(schedulePath,xmlFile).documentElement();
-    rootTagMap.insert(xmlFile,rootTag.tagName());
+    QDomElement rootTag = this->load_XMLFile(schedulePath,xmlFile).documentElement();
 
-    rootTag = xmlDoc.firstChildElement();
-    childTag = rootTag.firstChild().toElement();
-    xmlList = rootTag.elementsByTagName(childTag.tagName());
-    tagList = settings::getHeaderMap(childTag.tagName());
 
-    for(int counter = 0; counter < xmlList.count(); ++counter)
+    QDomNodeList childNodes = rootTag.childNodes();
+
+    for(int parent = 0; parent < childNodes.count(); ++parent)
     {
-        xmlElement = xmlList.at(counter).toElement();
-        for(int tag = 0; tag < tagList->count(); ++tag)
+        QList<QStandardItem*> pItem;
+        element = childNodes.at(parent).toElement();
+        nodeMap = element.attributes();
+
+        if(attributeCount < nodeMap.count()) attributeCount = nodeMap.count();
+
+        for(int nodeAtt = 0; nodeAtt < nodeMap.count(); ++nodeAtt)
         {
-            mapList << xmlElement.attribute(tagList->at(tag));
+            pItem << new QStandardItem(element.attribute(nodeMap.item(nodeAtt).nodeName()));
+            set_xmlTagMap(element.tagName(),nodeMap.item(nodeAtt).nodeName(),nodeAtt);
         }
-        list->insert(counter,mapList);
-        mapList.clear();
+        pItem.at(0)->setData(element.tagName(),Qt::UserRole);
+        rootItem->appendRow(pItem);
+
+        if(element.hasChildNodes())
+        {
+            this->xml_childToTreeModel(element,pItem.at(0));
+        }
     }
+    rootTagMap.insert(xmlFile,qMakePair(rootTag.tagName(),attributeCount));
+    attributeCount = 0;
 }
 
-void xmlHandler::read_listMap(QMap<int, QStringList> *mapList,QString xmlFile)
+void xmlHandler::xml_childToTreeModel(QDomElement element, QStandardItem *item)
 {
-    QDomDocument xmlDoc;
-    QDomElement xmlRoot,xmlElement;
-    QStringList *elementList = settings::getHeaderMap(rootTagMap.value(xmlFile));
-    QStringList *tagList = settings::getHeaderMap(elementList->at(0));
+    QDomElement child;
+    QDomNodeList nodeList = element.childNodes();
+    QDomNamedNodeMap nodeMap;
 
-    xmlRoot = xmlDoc.createElement(rootTagMap.value(xmlFile));
-    xmlDoc.appendChild(xmlRoot);
-
-    for(QMap<int, QStringList>::const_iterator it = mapList->cbegin(), end = mapList->cend(); it != end; ++it)
+    for(int node = 0; node < nodeList.count(); ++node)
     {
-        xmlElement = xmlDoc.createElement(elementList->at(0));
-        for(int attr = 0; attr < tagList->count(); ++attr)
+        QList<QStandardItem*> cItem;
+        child = nodeList.at(node).toElement();
+        nodeMap = child.attributes();
+
+        if(attributeCount < nodeMap.count()) attributeCount = nodeMap.count();
+
+        for(int nodeAtt = 0; nodeAtt < nodeMap.count(); ++nodeAtt)
         {
-            xmlElement.setAttribute(tagList->at(attr),it.value().at(attr));
+            cItem << new QStandardItem(child.attribute(nodeMap.item(nodeAtt).nodeName()));
+            set_xmlTagMap(child.tagName(),nodeMap.item(nodeAtt).nodeName(),nodeAtt);
         }
-        xmlRoot.appendChild(xmlElement);
+        cItem.at(0)->setData(child.tagName(),Qt::UserRole);
+        item->appendRow(cItem);
+
+        if(child.hasChildNodes())
+        {
+            xml_childToTreeModel(child,cItem.at(0));
+        }
     }
-    this->write_XMLFile(schedulePath,&xmlDoc,xmlFile);
 }
 
 void xmlHandler::add_child(QDomElement element, QStandardItem *item)
@@ -174,10 +203,14 @@ void xmlHandler::add_child(QDomElement element, QStandardItem *item)
         QList<QStandardItem*> cItem;
         child = nodeList.at(node).toElement();
         nodeMap = child.attributes();
+
+        if(attributeCount < nodeMap.count()) attributeCount = nodeMap.count();
+
         tagList = settings::getHeaderMap(child.tagName());
         for(int nodeAtt = 0; nodeAtt < nodeMap.count(); ++nodeAtt)
         {
             cItem << new QStandardItem(child.attribute(tagList->at(nodeAtt)));
+            set_xmlTagMap(child.tagName(),nodeMap.item(nodeAtt).nodeName(),nodeAtt);
         }
 
         item->appendRow(cItem);
@@ -188,14 +221,70 @@ void xmlHandler::add_child(QDomElement element, QStandardItem *item)
     }
 }
 
+void xmlHandler::fill_xmlToList(QString xmlFile,QMap<int,QStringList> *list)
+{
+    QDomElement rootTag,childTag;
+    QDomNodeList xmlList;
+    QDomElement xmlElement;
+    QStringList *tagList;
+    QStringList mapList;
+
+    rootTag = this->load_XMLFile(schedulePath,xmlFile).documentElement();
+
+    rootTag = xmlDoc.firstChildElement();
+    childTag = rootTag.firstChild().toElement();
+    xmlList = rootTag.elementsByTagName(childTag.tagName());
+    tagList = settings::getHeaderMap(childTag.tagName());
+
+    for(int counter = 0; counter < xmlList.count(); ++counter)
+    {
+        xmlElement = xmlList.at(counter).toElement();
+
+        if(attributeCount < tagList->count()) attributeCount = tagList->count();
+
+        for(int tag = 0; tag < tagList->count(); ++tag)
+        {
+            mapList << xmlElement.attribute(tagList->at(tag));
+        }
+        list->insert(counter,mapList);
+        mapList.clear();
+    }
+    rootTagMap.insert(xmlFile,qMakePair(rootTag.tagName(),attributeCount));
+    attributeCount = 0;
+}
+
+void xmlHandler::read_listMap(QMap<int, QStringList> *mapList,QString xmlFile)
+{
+    QDomDocument xmlDoc;
+    QDomElement xmlRoot,xmlElement;
+    QStringList *elementList = settings::getHeaderMap(rootTagMap.value(xmlFile).first);
+    QStringList *tagList = settings::getHeaderMap(elementList->at(0));
+
+    xmlRoot = xmlDoc.createElement(rootTagMap.value(xmlFile).first);
+    xmlDoc.appendChild(xmlRoot);
+
+    for(QMap<int, QStringList>::const_iterator it = mapList->cbegin(), end = mapList->cend(); it != end; ++it)
+    {
+        xmlElement = xmlDoc.createElement(elementList->at(0));
+        for(int attr = 0; attr < tagList->count(); ++attr)
+        {
+            xmlElement.setAttribute(tagList->at(attr),it.value().at(attr));
+        }
+        xmlRoot.appendChild(xmlElement);
+    }
+    this->write_XMLFile(schedulePath,&xmlDoc,xmlFile);
+}
+
+
+
 void xmlHandler::read_treeModel(QStandardItemModel *model,QString xmlFile)
 {
     QDomDocument xmlDoc;
     QDomElement xmlRoot,xmlElement;
-    QStringList *elementList = settings::getHeaderMap(rootTagMap.value(xmlFile));
+    QStringList *elementList = settings::getHeaderMap(rootTagMap.value(xmlFile).first);
     QStringList *tagList = settings::getHeaderMap(elementList->at(0));
     QStandardItem *item;
-    xmlRoot = xmlDoc.createElement(rootTagMap.value(xmlFile));
+    xmlRoot = xmlDoc.createElement(rootTagMap.value(xmlFile).first);
     xmlDoc.appendChild(xmlRoot);
 
     for(int row = 0; row < model->rowCount(); ++row)
@@ -242,3 +331,28 @@ void xmlHandler::read_child(QDomDocument *xmlDoc, QDomElement *xmlElement, QStan
         }
     }
 }
+
+/*
+void xmlHandler::xml_toTreeModel(QString fileName, QStandardItemModel *model)
+{
+    QFile xmlFile(schedulePath + QDir::separator() + fileName);
+
+    if(!xmlFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qDebug() << "File not open:"+fileName;
+    }
+
+    QXmlStreamReader xml;
+    xml.setDevice(&xmlFile);
+    while (xml.readNextStartElement())
+    {
+        qDebug() << xml.name();
+        for(int i = 0; i < xml.attributes().count(); ++i)
+        {
+            qDebug() << xml.attributes().at(i).name();
+            qDebug() << xml.attributes().at(i).value();
+        }
+    }
+
+}
+*/

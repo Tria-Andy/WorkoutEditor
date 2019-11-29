@@ -32,7 +32,7 @@ protected:
     static double set_doubleValue(double,bool);
     static double get_thresPercent(QString,QString,bool);
     static double calc_distance(QString, double);
-    static double estimate_stress(QString,QString,int,int);
+    static double estimate_stress(QString,int,int,bool);
     static double calc_swim_xpower(double,double,double,double);
     static double get_corrected_MET(double,int);
     static double calc_lnp(double,double,double);

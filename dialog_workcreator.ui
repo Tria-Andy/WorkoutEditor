@@ -245,7 +245,7 @@
            <number>1</number>
           </property>
           <item>
-           <widget class="QListView" name="listView_workouts">
+           <widget class="QListWidget" name="listWidget_workouts">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -724,7 +724,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QTreeWidget" name="treeWidget_intervall">
+              <widget class="QTreeWidget" name="treeWidget_workoutTree">
                <property name="frameShape">
                 <enum>QFrame::Panel</enum>
                </property>

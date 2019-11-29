@@ -16,19 +16,26 @@ protected:
     void write_XMLFile(QString,QDomDocument*,QString);
 
     void fill_treeModel(QString,QStandardItemModel*);
-    void add_child(QDomElement,QStandardItem*);
+    void xml_toTreeModel(QString,QStandardItemModel*);
+
     void read_treeModel(QStandardItemModel*,QString);
     void read_child(QDomDocument*, QDomElement*, QStandardItem *,QStandardItemModel*,QStringList*,int);
 
     void fill_xmlToList(QString,QMap<int,QStringList>*);
     void read_listMap(QMap<int,QStringList>*,QString);
 
-    QHash<QString,QString> rootTagMap;
-    QString schedulePath,metaFile;
+    QHash<QString,QPair<QString,int>> rootTagMap;
+    QHash<QString,QMap<int,QString>> xmlTagMap;
+    QString schedulePath;
 
 private:
+    void xml_childToTreeModel(QDomElement,QStandardItem*);
+    void add_child(QDomElement,QStandardItem*);
     QString timetoSec(QString time);
+    void set_xmlTagMap(QString,QString,int);
     QDomDocument xmlDoc;
+    int attributeCount;
+
 
 };
 

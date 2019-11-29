@@ -1535,13 +1535,13 @@ void Activity::updateSampleModel(int sampRowCount)
           sampleModel->setData(sampleModel->index(row,3,QModelIndex()),calcCadence[row]);
         }
         this->hasOverride = true;
-        sportValue = round(this->estimate_stress(settings::isSwim,this->set_time(this->get_int_pace(0,settings::isSwim)/10),this->get_int_duration(0),hasPMData));
+        sportValue = round(this->estimate_stress(settings::isSwim,this->get_int_pace(0,settings::isSwim)/10,this->get_int_duration(0),hasPMData));
         this->overrideData.insert("swimscore",QString::number(sportValue));
         triValue = triValue + sportValue;
-        sportValue = round(this->estimate_stress(settings::isBike,QString::number(this->get_int_value(2,4)),this->get_int_duration(2),hasPMData));
+        sportValue = round(this->estimate_stress(settings::isBike,this->get_int_value(2,4),this->get_int_duration(2),hasPMData));
         this->overrideData.insert("skiba_bike_score",QString::number(sportValue));
         triValue = triValue + sportValue;
-        sportValue = round(this->estimate_stress(settings::isRun,this->set_time(this->get_int_pace(4,settings::isRun)),this->get_int_duration(4),hasPMData));
+        sportValue = round(this->estimate_stress(settings::isRun,this->get_int_pace(4,settings::isRun),this->get_int_duration(4),hasPMData));
         this->overrideData.insert("govss",QString::number(sportValue));
         triValue = triValue + sportValue;
         this->overrideData.insert("triscore",QString::number(triValue));

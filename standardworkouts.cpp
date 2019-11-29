@@ -28,11 +28,17 @@ standardWorkouts::standardWorkouts()
     metaFile = "standard_workouts_meta.xml";
     stepFile = "standard_workouts_steps.xml";
 
+    stdWorkoutFile = "standard_workouts.xml";
+    stdWorkoutsModel = new QStandardItemModel();
+    selectedModel = new QStandardItemModel();
     if(!workoutPath.isEmpty())
     {
+
         this->check_File(workoutPath,metaFile);
         this->check_File(workoutPath,stepFile);
         this->read_standard_workouts(this->load_XMLFile(workoutPath,metaFile),this->load_XMLFile(workoutPath,stepFile));
+        this->xml_toTreeModel(stdWorkoutFile,stdWorkoutsModel);
+        this->fill_workoutMap();
     }
 }
 
@@ -83,8 +89,129 @@ void standardWorkouts::read_standard_workouts(QDomDocument meta_doc,QDomDocument
     metaProxy->setSourceModel(workouts_meta);
     stepProxy = new QSortFilterProxyModel();
     stepProxy->setSourceModel(workouts_steps);
-
     this->set_workoutIds();
+}
+
+void standardWorkouts::fill_workoutMap()
+{
+    QStandardItem *sportItem,*workItem;
+    QHash<QString,QVector<QString>> workoutInfo;
+    QVector<QString> workoutMeta(7);
+    QString sportName,workID;
+
+    for(int sport = 0; sport < stdWorkoutsModel->rowCount(); ++sport)
+    {        
+        sportItem = stdWorkoutsModel->item(sport,0);
+        sportName = sportItem->index().siblingAtColumn(xmlTagMap.value(sportItem->data(Qt::UserRole).toString()).key("sport")).data(Qt::DisplayRole).toString();
+
+        if(sportItem->hasChildren())
+        {    
+            for(int work = 0; work < sportItem->rowCount(); ++work)
+            {
+                workItem = sportItem->child(work,0);
+                workID = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("name")).data(Qt::DisplayRole).toString();
+                workoutMeta[0] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("code")).data(Qt::DisplayRole).toString();
+                workoutMeta[1] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("title")).data(Qt::DisplayRole).toString();
+                workoutMeta[2] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("duration")).data(Qt::DisplayRole).toString();
+                workoutMeta[3] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("distance")).data(Qt::DisplayRole).toString();
+                workoutMeta[4] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("stress")).data(Qt::DisplayRole).toString();
+                workoutMeta[5] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("work")).data(Qt::DisplayRole).toString();
+                workoutMeta[6] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("timebase")).data(Qt::DisplayRole).toString();
+                workoutIndex.insert(workID,workItem->index());
+                workoutInfo.insert(workID,workoutMeta);
+            }
+        }
+        workoutMap.insert(sportName,workoutInfo);
+        workoutInfo.clear();
+    }
+}
+
+QStandardItemModel *standardWorkouts::get_selectedWorkout(QString workID)
+{
+    selectedModel->clear();
+    QStandardItem *targetItem = selectedModel->invisibleRootItem();
+
+    QModelIndex sourceIndex = workoutIndex.value(workID);
+    QStandardItem *sourceItem = stdWorkoutsModel->itemFromIndex(sourceIndex);
+
+    for(int step = 0; step < sourceItem->rowCount(); ++step)
+    {
+        if(sourceItem->child(step,0)->hasChildren())
+        {
+            read_childFromModel(sourceItem->child(step,0),this->set_childtoModel(sourceItem->child(step,0),targetItem));
+        }
+        else
+        {
+            this->set_childtoModel(sourceItem->child(step,0),targetItem);
+        }
+    }
+    return selectedModel;
+}
+
+void standardWorkouts::save_selectedWorkout(QString workoutID)
+{
+    QModelIndex workIndex = workoutIndex.value(workoutID);
+    QStandardItem *workoutItem = stdWorkoutsModel->itemFromIndex(workIndex);
+    QList<QStandardItem*> itemList;
+
+    stdWorkoutsModel->removeRows(0,workoutItem->rowCount(),workIndex);
+    for(int row = 0; row < selectedModel->rowCount(); ++row)
+    {
+
+    }
+}
+
+QString standardWorkouts::get_newWorkoutID(QString sport)
+{
+    QHash<QString,QVector<QString>> sportID = workoutMap.value(sport);
+    QString workID;
+    int counter;
+
+    for(counter = 1; counter < sportID.count()+1; ++counter)
+    {
+        if(!sportID.contains(sport+"_"+QString::number(counter)))
+        {
+            workID = sport+"_"+QString::number(counter);
+        }
+    }
+    if(workID.isEmpty()) workID = sport+"_"+QString::number(counter);
+
+    return workID;
+}
+
+void standardWorkouts::read_childFromModel(QStandardItem *sourceItem,QStandardItem *targetItem)
+{
+    QStandardItem *childSourceItem;
+
+    if(sourceItem->hasChildren())
+    {
+        for(int row = 0; row < sourceItem->rowCount(); ++row)
+        {
+            childSourceItem = sourceItem->child(row,0);
+            if(childSourceItem->hasChildren())
+            {
+                this->read_childFromModel(childSourceItem,this->set_childtoModel(childSourceItem,targetItem));
+            }
+            else
+            {
+                this->set_childtoModel(childSourceItem,targetItem);
+            }
+        }
+    }
+}
+
+QStandardItem* standardWorkouts::set_childtoModel(QStandardItem *source,QStandardItem *target)
+{
+    QList<QStandardItem*> itemList;
+    int attCount = xmlTagMap.value(source->data(Qt::UserRole).toString()).count();
+
+    for(int att = 0; att < attCount; ++att)
+    {
+        itemList << source->model()->itemFromIndex(source->index().siblingAtColumn(att))->clone();
+    }
+
+    target->appendRow(itemList);
+    return itemList.at(0);
 }
 
 void standardWorkouts::write_standard_workouts()
@@ -168,6 +295,31 @@ void standardWorkouts::filter_workout(QString filterValue,int col,bool fixed)
     }
 
     metaProxy->setFilterKeyColumn(col);
+}
+
+QModelIndex standardWorkouts::get_modelIndex(QString searchString,int col)
+{
+    QList<QStandardItem*> list;
+
+    list = stdWorkoutsModel->findItems(searchString,Qt::MatchExactly | Qt::MatchRecursive,col);
+
+    if(list.count() > 0)
+    {
+        return stdWorkoutsModel->indexFromItem(list.at(0));
+    }
+    else
+    {
+        return QModelIndex();
+    }
+}
+
+QStandardItem *standardWorkouts::get_modelItem(QString searchString, int col)
+{
+    QList<QStandardItem*> list;
+
+    list = stdWorkoutsModel->findItems(searchString,Qt::MatchExactly | Qt::MatchRecursive,col);
+
+    return list.at(0);
 }
 
 void standardWorkouts::delete_stdWorkout(QString workID,bool isdelete)

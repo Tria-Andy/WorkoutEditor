@@ -10,8 +10,6 @@ QHash<QString,double>* calculation::athleteValues = settings::getdoubleMapPointe
 QHash<QString,QString>* calculation::generalValues = settings::getStringMapPointer(settings::stingMap::General);
 bool calculation::usePMData = false;
 
-
-
 QString calculation::set_time(int sec)
 {
     QTime vTime;
@@ -212,6 +210,7 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,int
     double weight = settings::get_weightforDate(QDateTime::currentDateTime());
     double height = athleteValues->value("height");
     double mSec = pValue*factor/3600.0;
+    double totalWork = 0;
 
     if(sport == settings::isSwim)
     {
@@ -228,23 +227,23 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,int
         }
         correctMet = get_corrected_MET(weight,tempID)+sriFactor;
 
-        return (correctMet * 3.5 * weight / 200.0) * (dura/60.0);
+        totalWork = (correctMet * 3.5 * weight / 200.0) * (dura/60.0);
     }
     if(sport == settings::isBike)
     {
-        return dura * pValue / factor;
+        totalWork = (dura * pValue) / factor;
     }
     if(sport == settings::isRun)
     {
         double bodyHub = (height * 0.0543) + (((3600/thresValues->value("runpace")) / pValue) / 100.0);
-        return (weight * grav * mSec * bodyHub) * dura / factor;
+        totalWork = (weight * grav * mSec * bodyHub) * dura / factor;
     }
     if(sport == settings::isStrength || sport == settings::isAlt)
     {
-        return (weight * grav * mSec * 0.145) * dura / factor;
+        totalWork = (weight * grav * mSec * 0.145) * dura / factor;
     }
 
-    return 0;
+    return set_doubleValue(totalWork,false);
 }
 
 QString calculation::threstopace(double thresPace, double percent)
@@ -402,7 +401,7 @@ double calculation::get_corrected_MET(double weight, int style)
     }
 }
 
-double calculation::estimate_stress(QString sport, QString p_goal, int duration,int usePM)
+double calculation::estimate_stress(QString sport, int p_goal, int duration,bool usePM)
 {
     double goal = 0;
     double est_stress = 0;
@@ -415,30 +414,37 @@ double calculation::estimate_stress(QString sport, QString p_goal, int duration,
 
     if(sport == settings::isSwim)
     {
-        goal = get_timesec(p_goal);
+        goal = p_goal;
     }
     if(sport == settings::isBike)
     {
-        if(usePM == 0)
+        if(usePM)
         {
-            goal = get_speed(QTime::fromString(p_goal,"mm:ss"),0,settings::isRun,true)/3.6;
+            goal = p_goal;
         }
         else
         {
-            goal = p_goal.toDouble();
+            goal = get_speed(QTime::fromString(set_time(p_goal),"mm:ss"),0,settings::isRun,true)/3.6;
         }
     }
     if(sport == settings::isRun)
     {
-        goal = get_speed(QTime::fromString(p_goal,"mm:ss"),0,settings::isRun,true)/3.6;
+        if(usePM)
+        {
+            goal = p_goal;
+        }
+        else
+        {
+            goal = get_speed(QTime::fromString(set_time(p_goal),"mm:ss"),0,settings::isRun,true)/3.6;
+        }
     }
     if(sport == settings::isStrength)
     {
-        goal = p_goal.toDouble();
+        goal = p_goal;
     }
     if(sport == settings::isAlt)
     {
-        goal = p_goal.toDouble();
+        goal = p_goal;
     }
 
     if(goal > 0)

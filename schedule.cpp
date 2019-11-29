@@ -34,6 +34,7 @@ schedule::schedule()
     fileMap = settings::getStringMapPointer(settings::stingMap::File);
 
     scheduleModel = new QStandardItemModel();
+    //xmlTagMap.value("workout").count();
     scheduleModel->setColumnCount(workoutTags->count());
     phaseModel = new QStandardItemModel();
     phaseModel->setColumnCount(compTags->count());
@@ -179,6 +180,7 @@ QMap<int, QStringList> schedule::get_workouts(bool dayWorkouts,QString indexStri
     if(dayWorkouts)
     {
         model = scheduleModel;
+        //qDebug() << indexString << xmlTagMap.value("workout").value(indexString);
         counter = workoutTags->count();
     }
     else
@@ -186,6 +188,8 @@ QMap<int, QStringList> schedule::get_workouts(bool dayWorkouts,QString indexStri
         model = phaseModel;
         counter = compTags->count();
     }
+
+
 
     QModelIndex modelIndex = this->get_modelIndex(model,indexString,0);
 

@@ -32,20 +32,42 @@ public:
     QStandardItemModel *workouts_meta, *workouts_steps;
     QSortFilterProxyModel *metaProxy,*stepProxy;
 
-    void delete_stdWorkout(QString,bool);
+    QStandardItemModel *stdWorkoutsModel,*selectedModel;
+    QHash<QString,QHash<QString,QVector<QString>>> *get_workoutMap() {return &workoutMap;}
+    QStandardItemModel *get_selectedWorkout(QString);
+    QHash<QString,QMap<int,QString>> *get_xmlTagMap() {return &xmlTagMap;}
+
+
+    void save_selectedWorkout(QString);
+
+    QString get_newWorkoutID(QString);
     QStringList get_workoutIds() {return workoutIDs;}
 
-protected:
+    void create_newWorkout(QString);
+    void delete_stdWorkout(QString,bool);
     void write_standard_workouts();
+
+protected:
     void filter_steps(QString,bool);
     void filter_workout(QString,int,bool);
 
 private:
     QStringList meta_tags,step_tags,workoutIDs;
-    QString workoutPath,metaFile,stepFile;
+    QString workoutPath,metaFile,stepFile,stdWorkoutFile;
+
+    QHash<QString,QHash<QString,QVector<QString>>> workoutMap;
+    QHash<QString,QModelIndex> workoutIndex;
+    QModelIndex get_modelIndex(QString,int);
+    QStandardItem *get_modelItem(QString,int);
+    QHash<QString,QMap<int,QString>> modelOrder;
+
+    void fill_workoutMap();
+    void read_childFromModel(QStandardItem*,QStandardItem*);
+    QStandardItem* set_childtoModel(QStandardItem*,QStandardItem*);
     void check_workoutFiles();
     void read_standard_workouts(QDomDocument,QDomDocument);
     void set_workoutIds();
+    void create_stdTree();
 };
 
 #endif // STANDARDWORKOUTS_H

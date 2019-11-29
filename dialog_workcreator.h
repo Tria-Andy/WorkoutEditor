@@ -393,11 +393,11 @@ public:
     {
         if(sport == settings::isBike || sport == settings::isStrength || sport == settings::isAlt)
         {
-            model->setData(model->index(6,0),estimate_stress(sport,model->data(model->index(4,0)).toString(),get_timesec(model->data(model->index(5,0)).toString()),1));
+            model->setData(model->index(6,0),estimate_stress(sport,model->data(model->index(4,0)).toInt(),get_timesec(model->data(model->index(5,0)).toString()),1));
         }
         else if(sport == settings::isRun || sport == settings::isSwim)
         {
-            model->setData(model->index(6,0),estimate_stress(sport,model->data(model->index(3,0)).toString(),get_timesec(model->data(model->index(5,0)).toString()),0));
+            model->setData(model->index(6,0),estimate_stress(sport,model->data(model->index(3,0)).toInt(),get_timesec(model->data(model->index(5,0)).toString()),0));
         }
     }
 
@@ -458,25 +458,24 @@ namespace Ui {
 class Dialog_workCreator;
 }
 
-class Dialog_workCreator : public QDialog, public calculation, public standardWorkouts
+class Dialog_workCreator : public QDialog, public calculation
 {
     Q_OBJECT
 
 public:
-    explicit Dialog_workCreator(QWidget *parent = nullptr,schedule *psched = nullptr);
+    explicit Dialog_workCreator(QWidget *parent = nullptr,standardWorkouts *pworkouts = nullptr, schedule *psched = nullptr);
     ~Dialog_workCreator();
 
 private slots:
-    void on_treeWidget_intervall_itemChanged(QTreeWidgetItem *item, int column);
-    void on_treeWidget_intervall_itemClicked(QTreeWidgetItem *item, int column);
+    void on_treeWidget_workoutTree_itemChanged(QTreeWidgetItem *item, int column);
+    void on_treeWidget_workoutTree_itemClicked(QTreeWidgetItem *item, int column);
     void on_comboBox_sport_currentTextChanged(const QString &arg1);
-    void on_listView_workouts_clicked(const QModelIndex &index);
     void on_pushButton_clear_clicked();
     void on_toolButton_update_clicked();
     void on_toolButton_remove_clicked();
     void on_toolButton_up_clicked();
     void on_toolButton_down_clicked();
-    void on_treeWidget_intervall_itemSelectionChanged();
+    void on_treeWidget_workoutTree_itemSelectionChanged();
     void on_toolButton_save_clicked();
     void on_toolButton_copy_clicked();
     void on_toolButton_delete_clicked();
@@ -490,15 +489,33 @@ private slots:
     void on_pushButton_sync_clicked();
     void on_checkBox_timebased_clicked(bool checked);
     void on_toolButton_map_clicked();
+    void on_listWidget_workouts_itemClicked(QListWidgetItem *item);
 
 private:
     Ui::Dialog_workCreator *ui;
 
     schedule *worksched;
+    standardWorkouts *stdWorkouts;
     QString isSeries,isGroup,currentSport,currentWorkID,isBreak,viewBackground,workMap;
-    QStandardItemModel *plotModel,*valueModel,*listModel,*workoutModel;
+    bool usePM;
+    int thresPower,thresPace,thresValue;
+    double workFactor;
+    QString sportMark;
+    QHash<QString,QHash<QString,QVector<QString>>> *workoutMap;
+    QHash<QString,QMap<int,QString>> *xmlTagMap;
+
+    void load_selectedWorkout(QString);
+    void read_selectedChild(QStandardItem*,QTreeWidgetItem*);
+    QTreeWidgetItem* set_selectedData(QStandardItem*,QTreeWidgetItem*);
+    QVariant get_modelValue(QStandardItem*,QString);
+    void set_sportData(QString);
+    QString calc_threshold(double);
+
+
+
+    QStandardItemModel *plotModel,*valueModel,*workoutModel;
+    QStandardItemModel *selworkModel;
     QSortFilterProxyModel *metaProxy,*stepProxy, *schedProxy, *proxyFilter;
-    QMap<QString,QString> workoutMap;
     QMap<int,QString> dataPoint;
     QStringList modelHeader,phaseList,groupList,levelList;
     QTreeWidgetItem *currentItem;
@@ -506,7 +523,6 @@ private:
     del_workcreatoredit edit_del;
     del_mousehover mousehover_del;
     double timeSum,distSum,stressSum,workSum,thresSpeed;
-    int thresPace,thresPower;
     QVector<bool> editRow;
     bool isSwim,isBike,isRun,isStrength,isAlt,isOther,isTria;
     bool clearFlag;
@@ -532,7 +548,6 @@ private:
     void get_workouts(QString);
     QString get_workoutTime(double);
     void clearIntTree();
-    void open_stdWorkout(QString);
     void set_plotModel();
     void add_to_plot(QTreeWidgetItem *item,int);
     void set_plotGraphic(int);
