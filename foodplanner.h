@@ -18,9 +18,9 @@ public:
     QStringList *menuHeader,*foodsumHeader,*foodestHeader,*foodhistHeader;
     QStringList planList,mealsHeader,dayHeader,dayListHeader;
     QPair<bool,bool> dayMealCopy;
-    QMap<QDate,QHash<QString,QVector<double>>> dayMacros;
     QHash<QString,QPair<QString,QPair<int,double>>> get_mealtoUpdate(bool,QDate,QString);
     QMap<QDate,QVector<double>> *get_daySumMap() {return &daySumMap;}
+    QMap<QDate,QHash<QString,QVector<double>>> *get_dayMacroMap() {return &dayMacroMap;}
     QVector<double> get_mealValues(QString,double);
     QMap<QDate,QHash<QString,QHash<QString,QVector<double>>>> *get_foodPlanMap() {return &foodPlanMap;}
     QMap<QDate,QVector<QString>> *get_foodPlanList() {return &foodPlanList;}
@@ -49,8 +49,10 @@ private:
     QMap<QDate,QHash<QString,QHash<QString,QVector<double>> > > foodPlanMap;
     QMap<QPair<bool,QDate>,QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>>> updateMap;
     QMap<QDate,QVector<double>> daySumMap;
+    QMap<QDate,QHash<QString,QVector<double>>> dayMacroMap;
     QHash<QString,QString> mealsMap;
     QHash<QString,QString> *fileMap;
+    QHash<QString,double> *doubleValues;
     QMap<QDate,QVector<QString>> foodPlanList;
     QDate firstdayofweek;
     QString dateFormat;

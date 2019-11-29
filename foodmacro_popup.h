@@ -74,6 +74,7 @@ private:
     QVector<double> carbValues,proteinValues, fatValues, fiberValues,sugarValues,xValues;
     QVector<double> carbMarco,proteinMacro, fatMacro, fiberMacro,sugarMacro;
     QMap<QString,QColor> macroColors;
+    void set_tableItem(QVector<double>,int,int);
     void set_plotValues(QDate);
     void set_graph(QDate);
 };

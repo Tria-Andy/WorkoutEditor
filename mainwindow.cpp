@@ -47,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent) :
         saisonValues = workSchedule->get_saisonValues();
         schedMode = settings::getHeaderMap("mode");
 
+        stdWorkouts = new standardWorkouts();
+
         selectedDate = QDate::currentDate();
         foodPlan = new foodplanner(workSchedule);
         weeknumber = this->calc_weekID(selectedDate);
@@ -1874,7 +1876,7 @@ void MainWindow::on_toolButton_clearSelect_clicked()
 void MainWindow::on_actionIntervall_Editor_triggered()
 {
     int dialog_code;
-    Dialog_workCreator workCreator(this,workSchedule);
+    Dialog_workCreator workCreator(this,stdWorkouts,workSchedule);
     workCreator.setModal(true);
     dialog_code = workCreator.exec();
 

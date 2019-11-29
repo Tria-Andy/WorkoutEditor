@@ -9,7 +9,7 @@ foodmacro_popup::foodmacro_popup(QWidget *parent,foodplanner *pFood,const QDate 
     this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     foodplan = pFood;
     startDay = startDate.addDays(1-startDate.dayOfWeek());
-    dayCount = 7;
+    dayCount = settings::get_intValue("weekdays");
     carbValues.resize(dayCount);
     proteinValues.resize(dayCount);
     fatValues.resize(dayCount);
@@ -50,11 +50,20 @@ void foodmacro_popup::on_toolButton_close_clicked()
     reject();
 }
 
+void foodmacro_popup::set_tableItem(QVector<double> macros,int row,int col)
+{
+    for(int macro = 0; macro < macros.count(); ++macro)
+    {
+        QTableWidgetItem *item = new QTableWidgetItem(QString::number(macros.at(macro)));
+        ui->tableWidget_macros->setItem(row,col,item);
+        row = row+2;
+    }
+}
+
 void foodmacro_popup::set_plotValues(QDate startDate)
 {   
     ui->widget_plot->xAxis->setLabel("Day");
     ui->widget_plot->yAxis->setLabel("Gramms");
-
     ui->widget_plot->legend->setVisible(true);
 
     QCPLayoutGrid *subLayout = new QCPLayoutGrid;
@@ -70,70 +79,52 @@ void foodmacro_popup::set_plotValues(QDate startDate)
     weekStart.setTime(wTime);
     weekStart.setTimeSpec(Qt::LocalTime);
 
-    for(int i = 0; i < dayCount; ++i)
-    {
-        weekDates.insert(i,weekStart.addDays(i));
-        carbValues[i] = foodplan->dayTarget.value(startDate.addDays(i)).at(0);
-        carbMarco[i] = foodplan->dayMacros.value(startDate.addDays(i)).at(0);
-        proteinValues[i] = foodplan->dayTarget.value(startDate.addDays(i)).at(1);
-        proteinMacro[i] = foodplan->dayMacros.value(startDate.addDays(i)).at(1);
-        fatValues[i] = foodplan->dayTarget.value(startDate.addDays(i)).at(2);
-        fatMacro[i] = foodplan->dayMacros.value(startDate.addDays(i)).at(2);
-        fiberValues[i] = foodplan->dayTarget.value(startDate.addDays(i)).at(3);
-        fiberMacro[i] = foodplan->dayMacros.value(startDate.addDays(i)).at(3);
-        sugarValues[i] = foodplan->dayTarget.value(startDate.addDays(i)).at(4);
-        sugarMacro[i] = foodplan->dayMacros.value(startDate.addDays(i)).at(4);
-        xValues[i] = weekDates.at(i).toTime_t() + 3600;
-    }
 
-    for(QMap<QDate,QVector<double>>::const_iterator it = foodplan->dayTarget.cbegin(), end = foodplan->dayTarget.cend(); it != end; ++it )
+    QMap<QDate,QHash<QString,QVector<double>>> *dayMacroMap = foodplan->get_dayMacroMap();
+    int day = 0;
+
+    for(QMap<QDate,QHash<QString,QVector<double>>>::const_iterator daystart = dayMacroMap->find(startDay) , dayend = dayMacroMap->find(startDay.addDays(7)); daystart != dayend; ++daystart )
     {
-        for(int i = 0; i < 5; ++i)
+        dateHeader << QLocale().dayName(day+1,QLocale::ShortFormat) + " " + daystart.key().toString("dd.MM");
+
+        for(QHash<QString,QVector<double>>::const_iterator macrostart = daystart->cbegin() , macroend = daystart->cend(); macrostart != macroend; ++macrostart )
         {
-            if(it.value().at(i) > yMax)
+            if(macrostart.key() == "Target")
             {
-                yMax = it.value().at(i);
+                carbValues[day] = macrostart.value().at(0);
+                proteinValues[day] = macrostart.value().at(1);
+                fatValues[day] = macrostart.value().at(2);
+                fiberValues[day] = macrostart.value().at(3);
+                sugarValues[day] = macrostart.value().at(4);
+                this->set_tableItem(macrostart.value(),0,day);
+            }
+
+            if(macrostart.key() == "Day")
+            {
+                carbMarco[day] = macrostart.value().at(0);
+                proteinMacro[day] = macrostart.value().at(1);
+                fatMacro[day] = macrostart.value().at(2);
+                fiberMacro[day] = macrostart.value().at(3);
+                sugarMacro[day] = macrostart.value().at(4);
+                this->set_tableItem(macrostart.value(),1,day);
+            }
+
+            for(int i = 0; i < macrostart.value().count(); ++i)
+            {
+                if(macrostart.value().at(i) > yMax)
+                {
+                    yMax = macrostart.value().at(i);
+                }
             }
         }
-    }
-
-    for(QMap<QDate,QVector<double>>::const_iterator it = foodplan->dayMacros.cbegin(), end = foodplan->dayMacros.cend(); it != end; ++it )
-    {
-        for(int i = 0; i < 5; ++i)
-        {
-            if(it.value().at(i) > yMax)
-            {
-                yMax = it.value().at(i);
-            }
-        }
-    }
-
-    for(int day = 0,pos = 0; day < dayCount; ++day)
-    {
-        dateHeader << QLocale().dayName(day+1,QLocale::ShortFormat) + " " +weekDates.at(day).toString("dd.MM");
-
-        for(int mac = 0; mac < macroHeader.count(); ++mac)
-        {
-            QTableWidgetItem *item = new QTableWidgetItem();
-
-            if(mac %2 == 0)
-            {
-                itemValue = QString::number(foodplan->dayTarget.value(weekDates.at(day).date()).at(pos));
-            }
-            else
-            {
-                itemValue = QString::number(foodplan->dayMacros.value(weekDates.at(day).date()).at(pos));
-            }
-
-            if(mac %2 == 1) ++pos;
-
-            item->setText(itemValue);
-            ui->tableWidget_macros->setItem(mac,day,item);
-        }
-        pos = 0;
+        xValues[day] = weekStart.addDays(day).toTime_t() + 3600;
+        ++day;
     }
 
     dateHeader << "Summery";
+
+    ui->tableWidget_macros->setHorizontalHeaderLabels(dateHeader);
+    ui->tableWidget_macros->setVerticalHeaderLabels(macroHeader);
 
     int macValue = 0;
 
@@ -149,9 +140,6 @@ void foodmacro_popup::set_plotValues(QDate startDate)
         ui->tableWidget_macros->setItem(row,dayCount,item);
         macValue = 0;
     }
-
-    ui->tableWidget_macros->setHorizontalHeaderLabels(dateHeader);
-    ui->tableWidget_macros->setVerticalHeaderLabels(macroHeader);
 
     set_graph(startDate);
 }

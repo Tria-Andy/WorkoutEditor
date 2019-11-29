@@ -34,6 +34,7 @@
 #include "day_popup.h"
 #include "week_popup.h"
 #include "year_popup.h"
+#include "standardworkouts.h"
 #include "stress_popup.h"
 #include "foodmacro_popup.h"
 #include "foodhistory_popup.h"
@@ -1200,6 +1201,7 @@ private:
     Ui::MainWindow *ui;
 
     schedule *workSchedule;
+    standardWorkouts *stdWorkouts;
     Activity *curr_activity;
     foodplanner *foodPlan;
     jsonHandler *jsonhandler;

@@ -13,6 +13,7 @@ foodplanner::foodplanner(schedule *p_Schedule)
     foodhistHeader = settings::getHeaderMap("foodhistheader");
     mealsHeader = settings::get_listValues("Meals");
     fileMap = settings::getStringMapPointer(settings::stingMap::File);
+    doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
 
     dayListHeader << "Cal (%)"
                   << "Carbs ("+QString::number(settings::doubleVector.value("Macros").at(0))+"%)"
@@ -25,12 +26,9 @@ foodplanner::foodplanner(schedule *p_Schedule)
     }
 
     mealModel = new QStandardItemModel();
-    mealModel->setColumnCount(menuHeader->count());
     this->set_headerLabel(mealModel,menuHeader,false);
 
     foodPlanModel = new QStandardItemModel();
-    foodPlanModel->setColumnCount(settings::getHeaderMap("fooditem")->count());
-
     historyModel = new QStandardItemModel();
     historyModel->setColumnCount(foodhistHeader->count());
     this->set_headerLabel(historyModel,foodhistHeader,false);
@@ -38,8 +36,11 @@ foodplanner::foodplanner(schedule *p_Schedule)
     if(!settings::getStringMapPointer(settings::stingMap::GC)->value("foodplanner").isEmpty())
     {
         this->fill_treeModel(fileMap->value("mealsfile"),mealModel);
+        //mealModel->setColumnCount(rootTagMap.value(fileMap->value("mealsfile")).second);
         this->set_mealsMap();
         this->fill_treeModel(fileMap->value("foodfile"),foodPlanModel);
+        foodPlanModel->setColumnCount(rootTagMap.value(fileMap->value("foodfile")).second);
+
         this->fill_treeModel(fileMap->value("foodhistory"),historyModel);
         this->check_foodPlan();
     }
@@ -181,8 +182,10 @@ void foodplanner::set_dayFoodValues(QStandardItem *dayItem)
 {
     QStandardItem *mealItem;
     QHash<QString,QVector<double>> foodCal;
+    QHash<QString,QVector<double>> foodMacros;
     QHash<QString,QHash<QString,QVector<double>>> mealCal;
     QVector<double> mealValues(7,0);
+    QVector<double> macroValues(5,0);
 
     for(int meal = 0; meal < dayItem->rowCount(); ++meal)
     {
@@ -192,10 +195,16 @@ void foodplanner::set_dayFoodValues(QStandardItem *dayItem)
             mealValues = this->get_mealValues(mealItem->child(food,0)->data(Qt::DisplayRole).toString(),mealItem->child(food,2)->data(Qt::DisplayRole).toDouble());
             mealValues.insert(0,mealItem->child(food,3)->data(Qt::DisplayRole).toDouble());
             foodCal.insert(mealItem->child(food,0)->data(Qt::DisplayRole).toString(),mealValues);
+            for(int macro = 0; macro < macroValues.count(); ++macro)
+            {
+                macroValues[macro] = macroValues.at(macro) + mealValues.at(macro+3);
+            }
         }
         mealCal.insert(mealItem->data(Qt::DisplayRole).toString(),foodCal);
         foodCal.clear();
     }
+    foodMacros.insert("Day",macroValues);
+    dayMacroMap.insert(dayItem->data(Qt::DisplayRole).toDate(),foodMacros);
     foodPlanMap.insert(dayItem->data(Qt::DisplayRole).toDate(),mealCal);
     this->set_daySumMap(dayItem->data(Qt::DisplayRole).toDate());
     mealCal.clear();
@@ -382,7 +391,7 @@ void foodplanner::set_foodPlanList(QStandardItem *weekItem)
 
 void foodplanner::set_daySumMap(QDate day)
 {
-    QVector<double> values(5,0);
+    QVector<double> values(5,0); 
     values[1] = round(this->current_dayCalories(QDateTime(day)) * athleteValues->value("currpal"));
 
     QMap<QString,QVector<double>> sportValues = schedulePtr->get_compValues()->value(day);
@@ -405,8 +414,20 @@ void foodplanner::set_daySumMap(QDate day)
     values[4] = values.at(3) - values.at(0);
 
     daySumMap.insert(day,values);
-
     if(day >= firstdayofweek && day < firstdayofweek.addDays(7)) this->add_toHistory(day);
+
+    //Set Target Macro Values
+    QHash<QString,QVector<double>> foodMacros = dayMacroMap.value(day);
+    QVector<double> macroValues(5,0);
+
+    macroValues[0] = round(values.at(3) * (settings::doubleVector.value("Macros").at(0) / 100.0) / 4.1);
+    macroValues[1] = round(values.at(3) * (settings::doubleVector.value("Macros").at(1) / 100.0) / 4.1);
+    macroValues[2] = round(values.at(3) * (settings::doubleVector.value("Macros").at(2) / 100.0) / 9.3);
+    macroValues[3] = ceil(athleteValues->value("weight") * (doubleValues->value("DayFiber") /100.0));
+    macroValues[4] = round(values.at(3) * (doubleValues->value("DaySugar") / 100.0) / 4.1);
+
+    foodMacros.insert("Target",macroValues);
+    dayMacroMap.insert(day,foodMacros);
 }
 
 void foodplanner::check_foodPlan()
