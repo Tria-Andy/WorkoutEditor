@@ -60,10 +60,12 @@ private:
     QModelIndex get_modelIndex(QString,int);
     QStandardItem *get_modelItem(QString,int);
     QHash<QString,QMap<int,QString>> modelOrder;
+    QStandardItem* set_childtoModel(QStandardItem*,QStandardItem*);
+    QString get_modelValue(QStandardItem*,QString);
+
 
     void fill_workoutMap();
     void read_childFromModel(QStandardItem*,QStandardItem*);
-    QStandardItem* set_childtoModel(QStandardItem*,QStandardItem*);
     void check_workoutFiles();
     void read_standard_workouts(QDomDocument,QDomDocument);
     void set_workoutIds();

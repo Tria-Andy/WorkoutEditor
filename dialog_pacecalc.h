@@ -101,7 +101,7 @@ class del_racecalc : public QStyledItemDelegate, public calculation
         }
 
 
-        return 0;
+        return nullptr;
     }
 
     void setEditorData(QWidget *editor, const QModelIndex &index) const

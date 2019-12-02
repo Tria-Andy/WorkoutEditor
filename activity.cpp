@@ -77,7 +77,7 @@ void Activity::readJsonFile(QString jsonfile,bool intAct)
 
 void Activity::prepareData()
 {
-    calculation::usePMData = hasPMData;
+    usePMData = hasPMData;
     isSwim = isBike = isRun = isTria = isStrength = false;
     itemHeader.insert(0,QStringList() << "Name:" << "Type:" << "Distance (M):" << "Duration (Sec):" << "Pace/100m:" << "Speed km/h:" << "Strokes:");
     itemHeader.insert(1,QStringList() << "Name:" << "Start:" << "Distance:" << "Duration:" << "Pace:" << "Speed km/h:");

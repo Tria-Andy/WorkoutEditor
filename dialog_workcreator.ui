@@ -986,19 +986,137 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QListView" name="listView_values">
-                     <property name="font">
-                      <font>
-                       <family>MS Shell Dlg 2</family>
-                       <pointsize>10</pointsize>
-                      </font>
-                     </property>
+                    <widget class="QFrame" name="frame_partEdit">
                      <property name="frameShape">
-                      <enum>QFrame::Panel</enum>
+                      <enum>QFrame::StyledPanel</enum>
                      </property>
-                     <property name="editTriggers">
-                      <set>QAbstractItemView::CurrentChanged|QAbstractItemView::EditKeyPressed</set>
+                     <property name="frameShadow">
+                      <enum>QFrame::Raised</enum>
                      </property>
+                     <layout class="QVBoxLayout" name="verticalLayout_8">
+                      <property name="spacing">
+                       <number>1</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>1</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>1</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>1</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>1</number>
+                      </property>
+                      <item>
+                       <widget class="QComboBox" name="comboBox_partName"/>
+                      </item>
+                      <item>
+                       <widget class="QSpinBox" name="spinBox_repeats"/>
+                      </item>
+                     </layout>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="verticalSpacer">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>20</width>
+                       <height>40</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="QFrame" name="frame_stepEdit">
+                     <property name="frameShape">
+                      <enum>QFrame::StyledPanel</enum>
+                     </property>
+                     <property name="frameShadow">
+                      <enum>QFrame::Raised</enum>
+                     </property>
+                     <layout class="QVBoxLayout" name="verticalLayout_2">
+                      <property name="spacing">
+                       <number>1</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>1</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>1</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>1</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>1</number>
+                      </property>
+                      <item>
+                       <widget class="QComboBox" name="comboBox_stepName"/>
+                      </item>
+                      <item>
+                       <widget class="QComboBox" name="comboBox_levelName"/>
+                      </item>
+                      <item>
+                       <widget class="QSpinBox" name="spinBox_level">
+                        <property name="maximum">
+                         <number>500</number>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QTimeEdit" name="timeEdit_pace">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
+                        <property name="displayFormat">
+                         <string>mm:ss</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="lineEdit_power">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QTimeEdit" name="timeEdit_lapTime">
+                        <property name="displayFormat">
+                         <string>mm:ss</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QDoubleSpinBox" name="doubleSpinBox_stressScore">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QDoubleSpinBox" name="doubleSpinBox_work">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QDoubleSpinBox" name="doubleSpinBox_distance"/>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="lineEdit_speed">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
                     </widget>
                    </item>
                    <item>

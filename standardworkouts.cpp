@@ -109,14 +109,14 @@ void standardWorkouts::fill_workoutMap()
             for(int work = 0; work < sportItem->rowCount(); ++work)
             {
                 workItem = sportItem->child(work,0);
-                workID = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("name")).data(Qt::DisplayRole).toString();
-                workoutMeta[0] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("code")).data(Qt::DisplayRole).toString();
-                workoutMeta[1] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("title")).data(Qt::DisplayRole).toString();
-                workoutMeta[2] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("duration")).data(Qt::DisplayRole).toString();
-                workoutMeta[3] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("distance")).data(Qt::DisplayRole).toString();
-                workoutMeta[4] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("stress")).data(Qt::DisplayRole).toString();
-                workoutMeta[5] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("work")).data(Qt::DisplayRole).toString();
-                workoutMeta[6] = workItem->index().siblingAtColumn(xmlTagMap.value(workItem->data(Qt::UserRole).toString()).key("timebase")).data(Qt::DisplayRole).toString();
+                workID = this->get_modelValue(workItem,"name");
+                workoutMeta[0] = this->get_modelValue(workItem,"code");
+                workoutMeta[1] = this->get_modelValue(workItem,"title");
+                workoutMeta[2] = this->get_modelValue(workItem,"duration");
+                workoutMeta[3] = this->get_modelValue(workItem,"distance");
+                workoutMeta[4] = this->get_modelValue(workItem,"stress");
+                workoutMeta[5] = this->get_modelValue(workItem,"work");
+                workoutMeta[6] = this->get_modelValue(workItem,"timebase");
                 workoutIndex.insert(workID,workItem->index());
                 workoutInfo.insert(workID,workoutMeta);
             }
@@ -124,6 +124,11 @@ void standardWorkouts::fill_workoutMap()
         workoutMap.insert(sportName,workoutInfo);
         workoutInfo.clear();
     }
+}
+
+QString standardWorkouts::get_modelValue(QStandardItem *item, QString tag)
+{
+    return item->index().siblingAtColumn(xmlTagMap.value(item->data(Qt::UserRole).toString()).key(tag)).data(Qt::DisplayRole).toString();
 }
 
 QStandardItemModel *standardWorkouts::get_selectedWorkout(QString workID)
@@ -155,6 +160,7 @@ void standardWorkouts::save_selectedWorkout(QString workoutID)
     QList<QStandardItem*> itemList;
 
     stdWorkoutsModel->removeRows(0,workoutItem->rowCount(),workIndex);
+
     for(int row = 0; row < selectedModel->rowCount(); ++row)
     {
 
