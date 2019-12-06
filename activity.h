@@ -31,14 +31,14 @@ class Activity : public jsonHandler
 private:
     QList<QStandardItem*> setIntRow(int);
     QStandardItem *rootItem;
-    QString v_date,curr_sport,intLabel,breakName;
+    QString v_date,intLabel,breakName;
     QMap<int,QStringList> itemHeader,avgHeader;
     QHash<QString,int> paceTimeInZone,hfTimeInZone,hfZoneAvg;
     QHash<QString,QPair<double,double>> rangeLevels;
     QHash<QString,QVector<double>> swimHFZoneFactor;
     QStringList ride_items,swimType,levels;
     QVector<double> calcSpeed,calcCadence,swimTime,newDist;
-    double thresSpeed,thresLimit,swimTrack,polishFactor,hfThreshold,hfMax,actWeight;
+    double thresLimit,swimTrack,polishFactor,hfThreshold,hfMax,actWeight;
     int distFactor,avgCounter,zoneCount,moveTime,intListCount;
     bool changeRowCount,isUpdated,selectInt,isTimeBased;
     QVector<bool> editRow;
@@ -94,7 +94,7 @@ public:
 
     //Value Getter and Setter
     void set_polishFactor(double vFactor) {polishFactor = vFactor;}
-    QString get_sport() {return curr_sport;}
+    QString get_sport() {return currentSport;}
 
     //Averages
     void reset_avgSelection();

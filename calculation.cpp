@@ -7,6 +7,20 @@ calculation::calculation()
     generalValues = settings::getStringMapPointer(settings::stingMap::General);
 }
 
+void calculation::set_currentSport(QString sport)
+{
+    currentSport = sport;
+    isSwim = isBike = isRun = isStrength = isAlt = isOther = isTria = false;
+
+    if(currentSport == settings::SwimLabel) isSwim = true;
+    if(currentSport == settings::BikeLabel) isBike = true;
+    if(currentSport == settings::RunLabel) isRun = true;
+    if(currentSport == settings::StrengthLabel) isStrength = true;
+    if(currentSport == settings::AltLabel) isAlt = true;
+    if(currentSport == settings::OtherLabel) isOther = true;
+    if(currentSport == settings::TriaLabel) isTria = true;
+}
+
 QString calculation::set_time(int sec) const
 {
     QTime vTime;
@@ -115,7 +129,7 @@ QString calculation::get_workout_pace(double dist, double duration,QString sport
     return speedLabel.at(3);
 }
 
-double calculation::get_speed(QTime pace,int dist,QString sport,bool fixdist) const
+double calculation::get_speed(QTime pace,double dist,bool fixdist) const
 {
     int sec = pace.minute()*60;
     sec = sec + pace.second();
@@ -165,9 +179,8 @@ QString calculation::calc_lapSpeed(double sec) const
     }
 }
 
-int calculation::calc_lapPace(QString sport, int duration, double distance) const
+int calculation::calc_lapPace(int duration, double distance) const
 {
-    sport = "";
     int pace;
     if(distance > 0)
     {
@@ -200,6 +213,18 @@ int calculation::get_secFromTime(QTime pTime) const
     sec = sec + pTime.second();
 
     return  sec;
+}
+
+int calculation::get_baseValue(double percent)
+{
+    if(usePMData)
+    {
+        return this->calc_thresPower(percent);
+    }
+    else
+    {
+        return this->calc_thresPace(percent);
+    }
 }
 
 double calculation::calc_totalCal(double weight,double avgHF, double moveTime) const
@@ -259,11 +284,6 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,int
     return set_doubleValue(totalWork,false);
 }
 
-QString calculation::threstopace(double thresPace, double percent) const
-{
-    return set_time(static_cast<int>(round(thresPace / (percent/100.0))));
-}
-
 double calculation::wattToSpeed(double thresPower,double currWatt) const
 {
     double diff = 0;
@@ -310,11 +330,11 @@ double calculation::calc_thresSpeed(double percent) const
     }
 }
 
-double calculation::calc_thresPower(double percent) const
+int calculation::calc_thresPower(double percent) const
 {
     if(percent > 0)
     {
-        return round(thresPower *(percent/100.0));
+        return static_cast<int>(round(thresPower *(percent/100.0)));
     }
     else
     {
@@ -322,26 +342,33 @@ double calculation::calc_thresPower(double percent) const
     }
 }
 
-double calculation::calc_distance(QString duration, double pace) const
+double calculation::calc_distance(int duration, double pace) const
 {
     if(pace > 0)
     {
-        return set_doubleValue(get_timesec(duration) / pace,true);
+        return set_doubleValue(duration / pace,true);
     }
     return 0;
 }
 
-QString calculation::calc_duration(double dist, QString pace) const
+QTime calculation::calc_duration(double dist, int pace) const
 {
+    QTime duration;
+    int sec = 0;
+
     if(isSwim)
     {
-        return set_time(static_cast<int>(get_timesec(pace) * (dist*10)));
+        sec = static_cast<int>(pace * (dist*10));
     }
     else
     {
-        return set_time(static_cast<int>(get_timesec(pace) * dist));
+        sec = static_cast<int>(pace * dist);
     }
+
+    duration.setHMS(0,sec/60,sec%60);
+    return duration;
 }
+
 
 double calculation::calc_lnp(double speed,double athleteHeight,double athleteWeight) const
 {
@@ -521,7 +548,7 @@ double calculation::estimate_stress(QString sport, int p_goal, int duration,bool
         }
         else
         {
-            goal = get_speed(QTime::fromString(set_time(p_goal),"mm:ss"),0,settings::isRun,true)/3.6;
+            goal = get_speed(QTime::fromString(set_time(p_goal),"mm:ss"),0,true)/3.6;
         }
     }
     if(isRun)
@@ -532,7 +559,7 @@ double calculation::estimate_stress(QString sport, int p_goal, int duration,bool
         }
         else
         {
-            goal = get_speed(QTime::fromString(set_time(p_goal),"mm:ss"),0,settings::isRun,true)/3.6;
+            goal = get_speed(QTime::fromString(set_time(p_goal),"mm:ss"),0,true)/3.6;
         }
     }
     if(isStrength)
@@ -594,9 +621,9 @@ double calculation::set_doubleValue(double value, bool setthree) const
     }
 }
 
-int calculation::get_thresPercent(QString sport, QString level, bool max) const
+int calculation::get_thresPercent(QString level, bool max) const
 {
-    QString range = settings::get_rangeValue(sport,level);
+    QString range = settings::get_rangeValue(currentSport,level);
 
     if(max)
     {

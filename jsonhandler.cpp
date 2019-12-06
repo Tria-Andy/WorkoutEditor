@@ -258,13 +258,13 @@ void jsonHandler::write_actModel(QString tagName, QStandardItemModel *model, QSt
     activityItem[tagName] = modelToJson(model,list);
 }
 
-void jsonHandler::write_xdataModel(QString sport, QStandardItemModel *model)
+void jsonHandler::write_xdataModel(QStandardItemModel *model)
 {
     QJsonArray item_xdata,intArray,value_array;
     QJsonObject xdataObj,item_array;
     int offset;
     int xdataCol;
-    if(sport == settings::isSwim)
+    if(isSwim)
     {
         offset = 3;
         xdataCol = 1;

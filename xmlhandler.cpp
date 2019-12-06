@@ -126,6 +126,36 @@ void xmlHandler::fill_treeModel(QString xmlFile, QStandardItemModel *model)
     attributeCount = 0;
 }
 
+void xmlHandler::add_child(QDomElement element, QStandardItem *item)
+{
+    QDomElement child;
+    QDomNodeList nodeList = element.childNodes();
+    QDomNamedNodeMap nodeMap;
+    QStringList *tagList;
+
+    for(int node = 0; node < nodeList.count(); ++node)
+    {
+        QList<QStandardItem*> cItem;
+        child = nodeList.at(node).toElement();
+        nodeMap = child.attributes();
+
+        if(attributeCount < nodeMap.count()) attributeCount = nodeMap.count();
+
+        tagList = settings::getHeaderMap(child.tagName());
+        for(int nodeAtt = 0; nodeAtt < nodeMap.count(); ++nodeAtt)
+        {
+            cItem << new QStandardItem(child.attribute(tagList->at(nodeAtt)));
+            set_xmlTagMap(child.tagName(),nodeMap.item(nodeAtt).nodeName(),nodeAtt);
+        }
+
+        item->appendRow(cItem);
+        if(child.hasChildNodes())
+        {
+            add_child(child,cItem.at(0));
+        }
+    }
+}
+
 void xmlHandler::xml_toTreeModel(QString xmlFile, QStandardItemModel *model)
 {
     QStandardItem *rootItem = model->invisibleRootItem();
@@ -133,7 +163,6 @@ void xmlHandler::xml_toTreeModel(QString xmlFile, QStandardItemModel *model)
     QDomNamedNodeMap nodeMap;
 
     QDomElement rootTag = this->load_XMLFile(schedulePath,xmlFile).documentElement();
-
 
     QDomNodeList childNodes = rootTag.childNodes();
 
@@ -147,10 +176,11 @@ void xmlHandler::xml_toTreeModel(QString xmlFile, QStandardItemModel *model)
 
         for(int nodeAtt = 0; nodeAtt < nodeMap.count(); ++nodeAtt)
         {
-            pItem << new QStandardItem(element.attribute(nodeMap.item(nodeAtt).nodeName()));
+            pItem.insert(nodeAtt,new QStandardItem(element.attribute(nodeMap.item(nodeAtt).nodeName())));
+            pItem.at(nodeAtt)->setData(nodeMap.item(nodeAtt).nodeName(),Qt::AccessibleDescriptionRole);
             set_xmlTagMap(element.tagName(),nodeMap.item(nodeAtt).nodeName(),nodeAtt);
         }
-        pItem.at(0)->setData(element.tagName(),Qt::UserRole);
+        pItem.at(0)->setData(element.tagName(),Qt::AccessibleTextRole);
         rootItem->appendRow(pItem);
 
         if(element.hasChildNodes())
@@ -178,45 +208,16 @@ void xmlHandler::xml_childToTreeModel(QDomElement element, QStandardItem *item)
 
         for(int nodeAtt = 0; nodeAtt < nodeMap.count(); ++nodeAtt)
         {
-            cItem << new QStandardItem(child.attribute(nodeMap.item(nodeAtt).nodeName()));
+            cItem.insert(nodeAtt,new QStandardItem(child.attribute(nodeMap.item(nodeAtt).nodeName())));
+            cItem.at(nodeAtt)->setData(nodeMap.item(nodeAtt).nodeName(),Qt::AccessibleDescriptionRole);
             set_xmlTagMap(child.tagName(),nodeMap.item(nodeAtt).nodeName(),nodeAtt);
         }
-        cItem.at(0)->setData(child.tagName(),Qt::UserRole);
+        cItem.at(0)->setData(child.tagName(),Qt::AccessibleTextRole);
         item->appendRow(cItem);
 
         if(child.hasChildNodes())
         {
             xml_childToTreeModel(child,cItem.at(0));
-        }
-    }
-}
-
-void xmlHandler::add_child(QDomElement element, QStandardItem *item)
-{
-    QDomElement child;
-    QDomNodeList nodeList = element.childNodes();
-    QDomNamedNodeMap nodeMap;
-    QStringList *tagList;
-
-    for(int node = 0; node < nodeList.count(); ++node)
-    {
-        QList<QStandardItem*> cItem;
-        child = nodeList.at(node).toElement();
-        nodeMap = child.attributes();
-
-        if(attributeCount < nodeMap.count()) attributeCount = nodeMap.count();
-
-        tagList = settings::getHeaderMap(child.tagName());
-        for(int nodeAtt = 0; nodeAtt < nodeMap.count(); ++nodeAtt)
-        {
-            cItem << new QStandardItem(child.attribute(tagList->at(nodeAtt)));
-            set_xmlTagMap(child.tagName(),nodeMap.item(nodeAtt).nodeName(),nodeAtt);
-        }
-
-        item->appendRow(cItem);
-        if(child.hasChildNodes())
-        {
-            add_child(child,cItem.at(0));
         }
     }
 }
@@ -275,8 +276,6 @@ void xmlHandler::read_listMap(QMap<int, QStringList> *mapList,QString xmlFile)
     this->write_XMLFile(schedulePath,&xmlDoc,xmlFile);
 }
 
-
-
 void xmlHandler::read_treeModel(QStandardItemModel *model,QString xmlFile)
 {
     QDomDocument xmlDoc;
@@ -331,28 +330,3 @@ void xmlHandler::read_child(QDomDocument *xmlDoc, QDomElement *xmlElement, QStan
         }
     }
 }
-
-/*
-void xmlHandler::xml_toTreeModel(QString fileName, QStandardItemModel *model)
-{
-    QFile xmlFile(schedulePath + QDir::separator() + fileName);
-
-    if(!xmlFile.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qDebug() << "File not open:"+fileName;
-    }
-
-    QXmlStreamReader xml;
-    xml.setDevice(&xmlFile);
-    while (xml.readNextStartElement())
-    {
-        qDebug() << xml.name();
-        for(int i = 0; i < xml.attributes().count(); ++i)
-        {
-            qDebug() << xml.attributes().at(i).name();
-            qDebug() << xml.attributes().at(i).value();
-        }
-    }
-
-}
-*/

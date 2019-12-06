@@ -125,7 +125,7 @@ private:
     QStringList sportList,model_header,contestTags;
     del_level level_del;
     del_mousehover mousehover_del;
-    double thresPower,thresPace,sportFactor;
+    double sportFactor;
     QString getDirectory(QString);
     QColor openColor(QColor);
     bool useColor,stressEdit,editContest;

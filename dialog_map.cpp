@@ -1,7 +1,7 @@
 #include "dialog_map.h"
 #include "ui_dialog_map.h"
 
-Dialog_map::Dialog_map(QWidget *parent, QSortFilterProxyModel *workMeta,QString workID,QString mapPix) :
+Dialog_map::Dialog_map(QWidget *parent,QString workID,QString mapPix) :
     QDialog(parent),
     ui(new Ui::Dialog_map)
 {
@@ -9,7 +9,6 @@ Dialog_map::Dialog_map(QWidget *parent, QSortFilterProxyModel *workMeta,QString 
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     mapPath = settings::getStringMapPointer(settings::stingMap::GC)->value("maps");
     workoutID = workID;
-    metaProxy = workMeta;
 
     if(!mapPix.isEmpty())
     {
@@ -61,11 +60,9 @@ void Dialog_map::on_toolButton_map_clicked()
 void Dialog_map::on_toolButton_save_clicked()
 {
     ui->progressBar_save->setValue(10);
-    metaProxy->invalidate();
-    metaProxy->setFilterRegExp("\\b"+workoutID+"\\b");
-    metaProxy->setFilterKeyColumn(1);
+
     ui->progressBar_save->setValue(50);
-    metaProxy->setData(metaProxy->index(0,9),ui->label_imageName->text());
+
     ui->progressBar_save->setValue(100);
     QTimer::singleShot(2000,ui->progressBar_save,SLOT(reset()));
 }

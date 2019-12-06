@@ -117,7 +117,7 @@ void week_popup::set_plotValues()
             if(maxValues[3] < yWorkKj[day]) maxValues[3] = yWorkKj[day];
         }
 
-        //Load Level Distribution
+        /*Load Level Distribution
         for(QMap<QDateTime,QStringList>::const_iterator it = weekworkouts.cbegin(), end = weekworkouts.cend(); it != end; ++it)
         {
             this->filter_steps(it.value().at(2),false);
@@ -156,7 +156,7 @@ void week_popup::set_plotValues()
         {
             zoneTime.insert(it.key(),round((it.value() / timeSum)*100.0));
         }
-
+        */
         ui->label_weekinfos->setText("Week: " + weekMeta.at(0) + " - Phase: " + weekMeta.at(2) + " - Workouts: " + QString::number(weekWorkouts));
 
         this->set_graph();

@@ -76,12 +76,12 @@ public:
         {
             max_index = model->index(index.row()-1,3,QModelIndex());
             model->setData(max_index,value,Qt::EditRole);
-            if(thresSelect == settings::isBike || thresSelect == "HF")
+            if(thresSelect == settings::BikeLabel || thresSelect == "HF")
             {
                 model->setData(model->index(index.row(),2),round(threshold * perc));
                 model->setData(model->index(index.row()-1,4),round(threshold * perc));
             }
-            if(thresSelect == settings::isSwim || thresSelect == settings::isRun)
+            if(thresSelect == settings::SwimLabel || thresSelect == settings::RunLabel)
             {
                 model->setData(model->index(index.row(),2),calculation::set_time(static_cast<int>(round(threshold / perc))));
                 model->setData(model->index(index.row()-1,4),calculation::set_time(static_cast<int>(round(threshold / perc))));

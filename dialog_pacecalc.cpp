@@ -26,7 +26,7 @@ Dialog_paceCalc::Dialog_paceCalc(QWidget *parent) :
     ui(new Ui::Dialog_paceCalc)
 {
     ui->setupUi(this);
-    sportList << settings::isSwim << settings::isBike << settings::isRun;
+    sportList << settings::SwimLabel << settings::BikeLabel << settings::RunLabel;
     model_header << "Distance" << "Duration";
     race_header << "Lap" << "Distance" << "Pace" << "Speed" << "Duration";
     dist <<25<<50<<100<<200<<300<<400<<500<<600<<800<<1000;
@@ -42,11 +42,11 @@ Dialog_paceCalc::Dialog_paceCalc(QWidget *parent) :
     ui->comboBox_race->addItem("---");
     for(int i = 0; i < runRaces.count(); ++i)
     {
-        ui->comboBox_race->addItem(settings::isRun +" "+runRaces.at(i));
+        ui->comboBox_race->addItem(settings::RunLabel +" "+runRaces.at(i));
     }
     for(int i = 0; i < triaDist.count(); ++i)
     {
-        ui->comboBox_race->addItem(settings::isTria +" "+triaDist.at(i)+ ": "+triaMap->value(triaDist.at(i)));
+        ui->comboBox_race->addItem(settings::TriaLabel +" "+triaDist.at(i)+ ": "+triaMap->value(triaDist.at(i)));
     }
     ui->tableView_raceCalc->setItemDelegate(&race_del);
 }
@@ -83,7 +83,7 @@ void Dialog_paceCalc::set_pace()
 
     for(int i = 0; i < 10; ++i)
     {
-        if(ui->comboBox_sport->currentText() == settings::isSwim)
+        if(ui->comboBox_sport->currentText() == settings::SwimLabel)
         {
             paceModel->setData(paceModel->index(i,0,QModelIndex()),dist[i]*distFactor);
             paceModel->setData(paceModel->index(i,1,QModelIndex()),this->set_time(static_cast<int>(round(pace * (dist[i]*distFactor)/100))));
@@ -100,7 +100,7 @@ void Dialog_paceCalc::set_freeField(int dist)
 {
     int pace = this->get_timesec(ui->timeEdit_pace->time().toString("mm:ss"));
 
-    if(ui->comboBox_sport->currentText() == settings::isSwim)
+    if(ui->comboBox_sport->currentText() == settings::SwimLabel)
     {
         ui->lineEdit_dura->setText(this->set_time(pace * dist/100));
     }
@@ -112,7 +112,9 @@ void Dialog_paceCalc::set_freeField(int dist)
 
 void Dialog_paceCalc::on_comboBox_sport_currentTextChanged(const QString &sport)
 {
-    if(sport == settings::isSwim)
+    this->set_currentSport(sport);
+
+    if(isSwim)
     {
         ui->label_pace->setText("/100m");
     }
@@ -122,14 +124,14 @@ void Dialog_paceCalc::on_comboBox_sport_currentTextChanged(const QString &sport)
     }
 
     this->set_pace();
-    ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_pace->time(),0,sport,true)));
+    ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_pace->time(),0,true)));
     this->set_freeField(ui->lineEdit_dist->text().toInt());
 }
 
 
 void Dialog_paceCalc::on_timeEdit_pace_timeChanged(const QTime &time)
 {
-    ui->lineEdit_speed->setText(QString::number(this->get_speed(time,0,ui->comboBox_sport->currentText(),true)));
+    ui->lineEdit_speed->setText(QString::number(this->get_speed(time,0,true)));
     this->set_freeField(ui->lineEdit_dist->text().toInt());
     this->set_pace();
 }
@@ -148,12 +150,12 @@ void Dialog_paceCalc::on_spinBox_factor_valueChanged(int value)
 
 void Dialog_paceCalc::on_timeEdit_intTime_timeChanged(const QTime &time)
 {
-    ui->lineEdit_IntSpeed->setText(QString::number(this->get_speed(time,ui->spinBox_IntDist->value(),ui->comboBox_sport->currentText(),false)));
+    ui->lineEdit_IntSpeed->setText(QString::number(this->get_speed(time,ui->spinBox_IntDist->value(),false)));
 }
 
 void Dialog_paceCalc::on_spinBox_IntDist_valueChanged(int dist)
 {
-    ui->lineEdit_IntSpeed->setText(QString::number(this->get_speed(ui->timeEdit_intTime->time(),dist,ui->comboBox_sport->currentText(),false)));
+    ui->lineEdit_IntSpeed->setText(QString::number(this->get_speed(ui->timeEdit_intTime->time(),dist,false)));
 }
 
 void Dialog_paceCalc::on_pushButton_clicked()
@@ -185,37 +187,37 @@ void Dialog_paceCalc::on_toolButton_copy_clicked()
 
 void Dialog_paceCalc::set_raceTable(QString label)
 {
-    if(label.contains(settings::isSwim))
+    if(label.contains(settings::SwimLabel))
     {
 
     }
-    else if(label.contains(settings::isBike))
+    else if(label.contains(settings::BikeLabel))
     {
 
     }
-    else if(label.contains(settings::isRun))
+    else if(label.contains(settings::RunLabel))
     {
         raceModel->insertRow(0,QModelIndex());
-        raceModel->setData(raceModel->index(0,0,QModelIndex()),settings::isRun);
+        raceModel->setData(raceModel->index(0,0,QModelIndex()),settings::RunLabel);
         int raceIndex = runRaces.indexOf(label.split(" ").at(1));
         raceModel->setData(raceModel->index(0,1,QModelIndex()),raceDist[raceIndex]);
     }
-    else if(label.contains(settings::isTria))
+    else if(label.contains(settings::TriaLabel))
     {
         QString vtria = label.split(" ").at(1);
         QStringList triaDistance;
         triaDistance << triaMap->value(vtria.remove(":")).split("-");
 
         raceModel->insertRows(0,5,QModelIndex());
-        raceModel->setData(raceModel->index(0,0,QModelIndex()),settings::isSwim);
+        raceModel->setData(raceModel->index(0,0,QModelIndex()),settings::SwimLabel);
         raceModel->setData(raceModel->index(0,1,QModelIndex()),triaDistance.at(0));
         raceModel->setData(raceModel->index(1,0,QModelIndex()),"T1");
         raceModel->setData(raceModel->index(1,1,QModelIndex()),0.0);
-        raceModel->setData(raceModel->index(2,0,QModelIndex()),settings::isBike);
+        raceModel->setData(raceModel->index(2,0,QModelIndex()),settings::BikeLabel);
         raceModel->setData(raceModel->index(2,1,QModelIndex()),triaDistance.at(1));
         raceModel->setData(raceModel->index(3,0,QModelIndex()),"T2");
         raceModel->setData(raceModel->index(3,1,QModelIndex()),0.0);
-        raceModel->setData(raceModel->index(4,0,QModelIndex()),settings::isRun);
+        raceModel->setData(raceModel->index(4,0,QModelIndex()),settings::RunLabel);
         raceModel->setData(raceModel->index(4,1,QModelIndex()),triaDistance.at(2));
 
     }

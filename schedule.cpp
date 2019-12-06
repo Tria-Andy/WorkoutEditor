@@ -34,6 +34,7 @@ schedule::schedule()
     fileMap = settings::getStringMapPointer(settings::stingMap::File);
 
     scheduleModel = new QStandardItemModel();
+    scheduleModel->setColumnCount(workoutTags->count());
     //xmlTagMap.value("workout").count();
     scheduleModel->setColumnCount(workoutTags->count());
     phaseModel = new QStandardItemModel();
@@ -271,6 +272,7 @@ void schedule::check_workouts(QDate date)
     QList<QStandardItem*> itemList;
     QString dateString = date.toString(dateFormat);
     QModelIndex index = this->get_modelIndex(scheduleModel,calc_weekID(date),0);
+    QMap<QString,int> linkMap;
 
     //Check if Week and Date available
     if(!index.isValid())
@@ -309,6 +311,17 @@ void schedule::check_workouts(QDate date)
                     contestValues << dayItem->child(work,value)->data(Qt::DisplayRole).toString();
                 }
                 add_contest(item->data(Qt::DisplayRole).toString(),date,contestValues);
+            }
+            if(linkStdWorkouts.contains(dayItem->child(work,11)->data(Qt::DisplayRole).toString()))
+            {
+                linkMap = linkStdWorkouts.value(dayItem->child(work,11)->data(Qt::DisplayRole).toString());
+                linkMap.insert(dayItem->data(Qt::DisplayRole).toString(),dayItem->child(work,0)->data(Qt::DisplayRole).toInt());
+                linkStdWorkouts.insert(dayItem->child(work,11)->data(Qt::DisplayRole).toString(),linkMap);
+            }
+            else
+            {
+                linkMap.insert(dayItem->data(Qt::DisplayRole).toString(),dayItem->child(work,0)->data(Qt::DisplayRole).toInt());
+                linkStdWorkouts.insert(dayItem->child(work,11)->data(Qt::DisplayRole).toString(),linkMap);
             }
         }
     }

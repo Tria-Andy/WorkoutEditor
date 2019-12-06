@@ -893,13 +893,13 @@ public:
     void setPace(QAbstractItemModel *model,int sec) const
     {
         double dist = model->data(model->index(2,0)).toDouble();
-        model->setData(model->index(4,0),set_time(calc_lapPace(sport,sec,dist)));
+        model->setData(model->index(4,0),set_time(calc_lapPace(sec,dist)));
         setSpeed(model,sec);
     }
 
     void setSpeed(QAbstractItemModel *model,int sec) const
     {
-        double factor = sport == settings::isSwim ? 1000.0 : 1.0;
+        double factor = sport == settings::SwimLabel ? 1000.0 : 1.0;
         double dist = model->data(model->index(2,0)).toDouble();
         model->setData(model->index(5,0),set_doubleValue(calc_Speed(sec,dist,factor),true));
     }

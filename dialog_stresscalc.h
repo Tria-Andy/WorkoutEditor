@@ -38,18 +38,15 @@ public:
 private slots:
     void on_pushButton_close_clicked();
     void on_pushButton_calc_clicked();
-    void on_comboBox_sport_currentIndexChanged(int index);
     void on_pushButton_clear_clicked();
+    void on_comboBox_sport_currentIndexChanged(const QString &arg1);
 
 private:
     Ui::Dialog_stresscalc *ui;
     QStringList combo_sport;
-    QString sport;
     QString lab_power,lab_workout;
-    double thresPower,thresPace;
 
-    int sport_index,est_stress;
-    double *t_pace;
+    int est_stress;
     double est_power,raw_effort,cv_effort;
 
     void read_threshold_values();

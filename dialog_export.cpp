@@ -80,10 +80,10 @@ void Dialog_export::set_filecontent(int row)
     sport = exportProxy->data(exportProxy->index(row,3)).toString();
     tempTime = exportProxy->data(exportProxy->index(row,6)).toString();
 
-    if(sport == settings::isSwim) stressType = "swimscore";
-    if(sport == settings::isBike) stressType = "skiba_bike_score";
-    if(sport == settings::isRun) stressType = "govss";
-    if(sport == settings::isAlt || sport == settings::isStrength) stressType = "triscore";
+    if(sport == settings::SwimLabel) stressType = "swimscore";
+    if(sport == settings::BikeLabel) stressType = "skiba_bike_score";
+    if(sport == settings::RunLabel) stressType = "govss";
+    if(sport == settings::AltLabel || sport == settings::StrengthLabel) stressType = "triscore";
 
 
     this->rideData.insert("STARTTIME",workoutDateTime.toString("yyyy/MM/dd hh:mm:ss UTC"));
@@ -112,7 +112,7 @@ void Dialog_export::workout_export()
 
     for(int i = 0; i < exportProxy->rowCount(); ++i)
     {
-        if(exportProxy->data(exportProxy->index(i,3,QModelIndex())).toString() != settings::isOther)
+        if(exportProxy->data(exportProxy->index(i,3,QModelIndex())).toString() != settings::OtherLabel)
         {
             if(exportMode == ALL || exportMode == WEEK)
             {
@@ -170,7 +170,7 @@ void Dialog_export::get_exportinfo(QString filterValue,int filterCol)
     {
         for(int i = 0; i < workouts; i++)
         {
-            if(exportProxy->data(exportProxy->index(i,3,QModelIndex())).toString() != settings::isOther)
+            if(exportProxy->data(exportProxy->index(i,3,QModelIndex())).toString() != settings::OtherLabel)
             {
                 ++workcount;
             }

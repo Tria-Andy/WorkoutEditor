@@ -130,9 +130,9 @@ public:
         QString sport = model->data(model->index(index.row(),0,QModelIndex())).toString();
         QModelIndex sum_index = model->index(listCount,index.column(),QModelIndex());
 
-        if(sport == settings::isSwim) factor = thresValues->value("swimfactor");
-        if(sport == settings::isBike) factor = thresValues->value("bikefactor");
-        if(sport == settings::isRun) factor = thresValues->value("runfactor");
+        if(sport == settings::SwimLabel) factor = thresValues->value("swimfactor");
+        if(sport == settings::BikeLabel) factor = thresValues->value("bikefactor");
+        if(sport == settings::RunLabel) factor = thresValues->value("runfactor");
 
         if(index.column() == 1 && index.row() != listCount)
         {

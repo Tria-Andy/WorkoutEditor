@@ -18,7 +18,7 @@ class Dialog_map : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_map(QWidget *parent = nullptr,QSortFilterProxyModel *workMeta = nullptr, QString workID = nullptr,QString mapPix = nullptr);
+    explicit Dialog_map(QWidget *parent = nullptr, QString workID = nullptr,QString mapPix = nullptr);
     ~Dialog_map();
 
 private slots:
@@ -30,7 +30,6 @@ private slots:
 private:
     Ui::Dialog_map *ui;
     QString mapImage,mapPath,workoutID;
-    QSortFilterProxyModel *metaProxy;
     void openFile();
     void setImage(QString);
 };

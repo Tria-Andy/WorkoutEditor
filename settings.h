@@ -33,8 +33,9 @@ private:
     static QStringList setRangeString(QHash<QString,QString>*);
     static QString set_colorString(QColor);
 
-    static QString settingFile,valueFile,valueFilePath,splitter,headerFile;
-    static QHash<QString,QStringList*> headerMap;
+    static QString settingFile,valueFile,valueFilePath,splitter;
+    static QHash<QString,QStringList*> headerMap,xmlTagMap;
+    static QHash<QString,QHash<QString,QString>> xmlmapping;
     static QStringList table_header,header_swim,header_pm,header_pace,headerTria,header_other;
     static QStringList header_int_time,header_swim_time;
 
@@ -51,6 +52,7 @@ private:
     static void fill_mapColor(QStringList*,QString*,bool);
     static void fill_mapRange(QHash<QString,QString>*,QString*);
     static void readHeaderFile(QDomDocument*);
+    static void read_xmlMapping(QDomDocument*);
     static void fill_sportDistance(QStringList*,QSettings*);
     static QVector<double> set_doubleValues(QStringList*);
 
@@ -69,7 +71,7 @@ public:
     static QDate firstDayofWeek;
     static bool settingsUpdated;
     static int loadSettings();
-    static QString isAlt,isSwim,isBike,isRun,isTria,isStrength,isOther;
+    static QString AltLabel,SwimLabel,BikeLabel,RunLabel,TriaLabel,StrengthLabel,OtherLabel;
 
     //QMap/QHash Getter
     static QHash<QString,QColor> get_colorMap() {return colorMap;}
@@ -77,12 +79,14 @@ public:
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
     static QString get_rangeValue(QString,QString);
     static QString get_format(QString key) {return formatMap.value(key);}
-    static int get_fontValue(QString key) {return intMap.value(key);}
-    static int get_intValue(QString key) {return intMap.value(key);}
     static QStringList get_listValues(QString key) {return listMap.value(key);}
     static QMap<QString,QString> get_sportDistance(QString key) {return sportDistance.value(key);}
     static QStringList get_jsonTags(QString key) {return jsonTags.value(key);}
     static QStringList* getHeaderMap(QString key){return headerMap.value(key);}
+    static QHash<QString,QString> get_xmlMapping(QString key) {return xmlmapping.value(key);}
+
+    static int get_fontValue(QString key) {return intMap.value(key);}
+    static int get_intValue(QString key) {return intMap.value(key);}
 
     //Get Map Pointer
     enum lMap {Sample,Interval};

@@ -40,17 +40,17 @@ QHash<QString,int> settings::intMap;
 
 QString settings::valueFile;
 QString settings::valueFilePath;
-QString settings::headerFile;
 
-QString settings::isSwim;
-QString settings::isBike;
-QString settings::isRun;
-QString settings::isStrength;
-QString settings::isAlt;
-QString settings::isTria;
-QString settings::isOther;
+QString settings::SwimLabel;
+QString settings::BikeLabel;
+QString settings::RunLabel;
+QString settings::StrengthLabel;
+QString settings::AltLabel;
+QString settings::TriaLabel;
+QString settings::OtherLabel;
 
 QHash<QString,QStringList*> settings::headerMap;
+QHash<QString,QHash<QString,QString>> settings::xmlmapping;
 QHash<QString,QStringList> settings::listMap;
 QHash<QString,QStringList> settings::jsonTags;
 QHash<QString,QMap<QString,QString>> settings::sportDistance;
@@ -175,6 +175,29 @@ void settings::readHeaderFile(QDomDocument *xmlFile)
     }
 }
 
+void settings::read_xmlMapping(QDomDocument *xmlFile)
+{
+    QDomNodeList xmlList;
+    QDomElement xmlElement,childElement;
+    QHash<QString,QString> xmlTagMap;
+
+    xmlList = xmlFile->firstChild().childNodes();
+
+    for(int row = 0; row < xmlList.count(); ++row)
+    {
+       xmlElement =  xmlList.at(row).toElement();
+
+       for(int i = 0; i < xmlElement.childNodes().count(); ++i)
+       {
+           childElement = xmlElement.childNodes().at(i).toElement();
+           xmlTagMap.insert(childElement.attribute("label"),childElement.attribute("tag"));
+       }
+
+       xmlmapping.insert(xmlList.at(row).toElement().tagName(),xmlTagMap);
+       xmlTagMap.clear();
+    }
+}
+
 void settings::fill_sportDistance(QStringList *list, QSettings *key)
 {
     QMap<QString,QString> raceDist;
@@ -278,8 +301,10 @@ int settings::loadSettings()
 
         mysettings->beginGroup("Files");
             valueFile = mysettings->value("valuefile").toString();
-            headerFile = mysettings->value("headerfile").toString();
+            fileMap.insert("headerfile",mysettings->value("headerfile").toString());
+            fileMap.insert("xmlmapping",mysettings->value("xmlmapping").toString());
             fileMap.insert("schedulefile",mysettings->value("schedulefile").toString());
+            fileMap.insert("standardworkoutfile",mysettings->value("standardworkoutfile").toString());
             fileMap.insert("saisonfile",mysettings->value("saisonfile").toString());
             fileMap.insert("stressfile",mysettings->value("stressfile").toString());
             fileMap.insert("foodplanner",mysettings->value("foodplanner").toString());
@@ -336,7 +361,14 @@ int settings::loadSettings()
 
         //Read Header values
         QDomDocument xmlDoc;
-        QFile xmlFile(gcInfo.value("schedule") + QDir::separator() + headerFile);
+        QFile headerFile(gcInfo.value("schedule") + QDir::separator() + fileMap.value("headerfile"));
+
+        xmlDoc.setContent(&headerFile);
+        readHeaderFile(&xmlDoc);
+        xmlDoc.clear();
+        headerFile.close();
+
+        QFile xmlFile(gcInfo.value("schedule") + QDir::separator() + fileMap.value("xmlmapping"));
         xmlDoc.setContent(&xmlFile);
         readHeaderFile(&xmlDoc);
         xmlFile.close();
@@ -556,13 +588,13 @@ int settings::loadSettings()
 
             for(int i = 0; i < settingList.count(); ++i)
             {
-                if(settingList.at(i) == "Swim") isSwim = settingList.at(i);
-                else if(settingList.at(i) == "Bike") isBike = settingList.at(i);
-                else if(settingList.at(i) == "Run") isRun = settingList.at(i);
-                else if(settingList.at(i) == "Strength" || settingList.at(i) == "Power") isStrength = settingList.at(i);
-                else if(settingList.at(i) == "Alt" || settingList.at(i) == "Alternative") isAlt = settingList.at(i);
-                else if(settingList.at(i) == "Tria" || settingList.at(i) == "Triathlon") isTria = settingList.at(i);
-                else if(settingList.at(i) == "Other") isOther = settingList.at(i);
+                if(settingList.at(i) == "Swim") SwimLabel = settingList.at(i);
+                else if(settingList.at(i) == "Bike") BikeLabel = settingList.at(i);
+                else if(settingList.at(i) == "Run") RunLabel = settingList.at(i);
+                else if(settingList.at(i) == "Strength" || settingList.at(i) == "Power") StrengthLabel = settingList.at(i);
+                else if(settingList.at(i) == "Alt" || settingList.at(i) == "Alternative") AltLabel = settingList.at(i);
+                else if(settingList.at(i) == "Tria" || settingList.at(i) == "Triathlon") TriaLabel = settingList.at(i);
+                else if(settingList.at(i) == "Other") OtherLabel = settingList.at(i);
             }
             delete myvalues;
         }
@@ -623,12 +655,12 @@ double settings::get_weightforDate(QDateTime actDate)
 
 QString settings::get_rangeValue(QString map, QString key)
 {
-    if(map == settings::isSwim) return swimRange.value(key);
-    if(map == settings::isBike) return bikeRange.value(key);
-    if(map == settings::isRun) return runRange.value(key);
-    if(map == settings::isStrength) return stgRange.value(key);
-    if(map == settings::isAlt) return altRange.value(key);
-    if(map == settings::isTria) return triRange.value(key);
+    if(map == SwimLabel) return swimRange.value(key);
+    if(map == BikeLabel) return bikeRange.value(key);
+    if(map == RunLabel) return runRange.value(key);
+    if(map == StrengthLabel) return stgRange.value(key);
+    if(map == AltLabel) return altRange.value(key);
+    if(map == TriaLabel) return triRange.value(key);
     if(map == "HF") return hfRange.value(key);
 
     return nullptr;
@@ -636,10 +668,10 @@ QString settings::get_rangeValue(QString map, QString key)
 
 void settings::set_rangeValue(QString map, QString key,QString value)
 {
-    if(map == settings::isSwim) swimRange.insert(key,value);
-    if(map == settings::isBike) bikeRange.insert(key,value);
-    if(map == settings::isRun)  runRange.insert(key,value);
-    if(map == settings::isStrength) stgRange.insert(key,value);
+    if(map == SwimLabel) swimRange.insert(key,value);
+    if(map == BikeLabel) bikeRange.insert(key,value);
+    if(map == RunLabel)  runRange.insert(key,value);
+    if(map == StrengthLabel) stgRange.insert(key,value);
     if(map == "HF") hfRange.insert(key,value);
 }
 
@@ -838,11 +870,11 @@ QStringList settings::get_int_header(QString vSport,bool usePM)
 {
     QString avg = "Avg";
     table_header.clear();
-    if(vSport == isSwim)
+    if(vSport == SwimLabel)
     {
         return table_header << header_swim << avg;
     }
-    else if(vSport == isBike || vSport == isRun)
+    else if(vSport == BikeLabel || vSport == RunLabel)
     {
         if(usePM)
         {
@@ -854,7 +886,7 @@ QStringList settings::get_int_header(QString vSport,bool usePM)
         }
 
     }
-    else if(vSport == isTria)
+    else if(vSport == TriaLabel)
     {
         return table_header << headerTria << avg;
     }

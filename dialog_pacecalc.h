@@ -148,31 +148,27 @@ class del_racecalc : public QStyledItemDelegate, public calculation
 
     void setLapData(int col,QAbstractItemModel *model, const QModelIndex &index) const
     {
-        QString sPace;
-        QTime pace;
+        int pace = 0;
         QString sport = model->data(model->index(index.row(),0)).toString();
         double dist = model->data(model->index(index.row(),1)).toDouble();
         double factor = 1.0;
 
-        if(sport == settings::isSwim) factor = 1000.0;
+        if(sport == settings::SwimLabel) factor = 1000.0;
 
         if(col == 2 && col != model->columnCount()-1)
         {
-            sPace = model->data(model->index(index.row(),2)).toString();
-            pace =  QTime::fromString(sPace,"mm:ss");
-            model->setData(model->index(index.row(),3),set_doubleValue(get_speed(pace,0,sport,true),false));
+            //model->setData(model->index(index.row(),3),set_doubleValue(get_speed(pace,0,true),false));
         }
         else
         {
             double speed = model->data(model->index(index.row(),3)).toDouble();
-            int calcTime = dist / speed * 60*60;
-            model->setData(model->index(index.row(),2),set_time(calc_lapPace(sport,calcTime,dist*factor)));
-            sPace = model->data(model->index(index.row(),2)).toString();
+            int calcTime = static_cast<int>(dist / speed * 60*60);
+            //model->setData(model->index(index.row(),2),set_time(calc_lapPace(sport,calcTime,dist*factor)));
         }
 
         if(col != 4)
         {
-            model->setData(model->index(index.row(),4),calc_duration(sport,dist,sPace));
+            model->setData(model->index(index.row(),4),calc_duration(dist,pace));
         }
 
         QTime timeSum;

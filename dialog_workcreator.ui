@@ -210,6 +210,12 @@
          <enum>Qt::Horizontal</enum>
         </property>
         <widget class="QFrame" name="frame_workList">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>250</width>
@@ -308,6 +314,12 @@
           </property>
           <item>
            <widget class="QFrame" name="frame_info">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -701,6 +713,12 @@
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>450</height>
+             </size>
+            </property>
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
             </property>
@@ -758,7 +776,7 @@
                <property name="maximumSize">
                 <size>
                  <width>125</width>
-                 <height>16777215</height>
+                 <height>450</height>
                 </size>
                </property>
                <property name="frameShape">
@@ -1010,10 +1028,24 @@
                        <number>1</number>
                       </property>
                       <item>
-                       <widget class="QComboBox" name="comboBox_partName"/>
+                       <widget class="QComboBox" name="comboBox_partName">
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </widget>
                       </item>
                       <item>
-                       <widget class="QSpinBox" name="spinBox_repeats"/>
+                       <widget class="QSpinBox" name="spinBox_repeats">
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </widget>
                       </item>
                      </layout>
                     </widget>
@@ -1056,13 +1088,38 @@
                        <number>1</number>
                       </property>
                       <item>
-                       <widget class="QComboBox" name="comboBox_stepName"/>
+                       <widget class="QComboBox" name="comboBox_stepName">
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                        <property name="font">
+                         <font>
+                          <pointsize>8</pointsize>
+                         </font>
+                        </property>
+                       </widget>
                       </item>
                       <item>
-                       <widget class="QComboBox" name="comboBox_levelName"/>
+                       <widget class="QComboBox" name="comboBox_levelName">
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </widget>
                       </item>
                       <item>
                        <widget class="QSpinBox" name="spinBox_level">
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
+                        </property>
                         <property name="maximum">
                          <number>500</number>
                         </property>
@@ -1072,6 +1129,12 @@
                        <widget class="QTimeEdit" name="timeEdit_pace">
                         <property name="enabled">
                          <bool>false</bool>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
                         </property>
                         <property name="displayFormat">
                          <string>mm:ss</string>
@@ -1083,10 +1146,22 @@
                         <property name="enabled">
                          <bool>false</bool>
                         </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
+                        </property>
                        </widget>
                       </item>
                       <item>
                        <widget class="QTimeEdit" name="timeEdit_lapTime">
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
+                        </property>
                         <property name="displayFormat">
                          <string>mm:ss</string>
                         </property>
@@ -1097,6 +1172,12 @@
                         <property name="enabled">
                          <bool>false</bool>
                         </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
+                        </property>
                        </widget>
                       </item>
                       <item>
@@ -1104,15 +1185,40 @@
                         <property name="enabled">
                          <bool>false</bool>
                         </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                        <property name="minimum">
+                         <double>0.000000000000000</double>
+                        </property>
+                        <property name="maximum">
+                         <double>999.990000000000009</double>
+                        </property>
                        </widget>
                       </item>
                       <item>
-                       <widget class="QDoubleSpinBox" name="doubleSpinBox_distance"/>
+                       <widget class="QDoubleSpinBox" name="doubleSpinBox_distance">
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </widget>
                       </item>
                       <item>
                        <widget class="QLineEdit" name="lineEdit_speed">
                         <property name="enabled">
                          <bool>false</bool>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
                         </property>
                        </widget>
                       </item>
@@ -1121,6 +1227,12 @@
                    </item>
                    <item>
                     <widget class="QFrame" name="frame_move">
+                     <property name="maximumSize">
+                      <size>
+                       <width>16777215</width>
+                       <height>25</height>
+                      </size>
+                     </property>
                      <property name="frameShape">
                       <enum>QFrame::Panel</enum>
                      </property>

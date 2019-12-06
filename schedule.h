@@ -46,7 +46,7 @@ public:
     QMap<int,QStringList> get_workouts(bool,QString);
     QMap<QString,QStringList> *get_saisonValues() {return &saisonValues;}
     QMap<QDate,QPair<double,double> > stressValues;
-
+    QMap<QString,int> get_linkStdWorkouts(QString key) {return linkStdWorkouts.value(key);}
     QHash<QDate,QMap<QString,QVector<double> >> *get_compValues() {return &compMap;}
     QHash<QString,QMap<QString,QVector<double> >> *get_compWeekValues() {return &compWeekMap;}
 
@@ -91,7 +91,7 @@ private:
     QHash<QString,QMap<QDate,QStringList>> contestMap;
     QHash<QDate,QMap<QString,QVector<double>>> compMap;
     QHash<QString,QMap<QString,QVector<double>>> compWeekMap;
-
+    QHash<QString,QMap<QString,int>> linkStdWorkouts;
     QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
 
     void set_compValues(bool,QDate,QMap<int,QStringList>);

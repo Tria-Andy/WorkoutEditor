@@ -35,7 +35,7 @@ protected:
     void init_xdataModel(QStandardItemModel*);
     void init_jsonFile();
     void write_actModel(QString,QStandardItemModel*,QStringList*);
-    void write_xdataModel(QString,QStandardItemModel*);
+    void write_xdataModel(QStandardItemModel*);
     void write_jsonFile();
     bool hasXdata,hasOverride,hasPMData;
     QHash<QString,QString> rideData,tagData,overrideData;

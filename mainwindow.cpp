@@ -993,7 +993,7 @@ void MainWindow::on_actionSave_triggered()
                                           );
         if (reply == QMessageBox::Yes)
         {
-            if(curr_activity->get_sport() == settings::isSwim)
+            if(curr_activity->get_sport() == settings::SwimLabel)
             {
                 curr_activity->updateXDataModel();
             }
@@ -1304,7 +1304,7 @@ void MainWindow::setSelectedIntRow(QModelIndex index)
     intLabel << "Swim Lap" << "Interval";
     bool isInt = true;
     bool isSwim = false;
-    if(curr_activity->get_sport() == settings::isSwim) isSwim = true;
+    if(curr_activity->get_sport() == settings::SwimLabel) isSwim = true;
 
     treeSelection->select(index,QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
     QString lapIdent = treeSelection->selectedRows(0).at(0).data().toString().trimmed();
@@ -1329,7 +1329,7 @@ void MainWindow::setSelectedIntRow(QModelIndex index)
     }
     else
     {
-        if(curr_activity->get_sport() != settings::isTria)
+        if(curr_activity->get_sport() != settings::TriaLabel)
         {
             ui->horizontalSlider_factor->setEnabled(true);
         }
@@ -1498,12 +1498,12 @@ void MainWindow::set_speedValues(int index)
         if(secondMinMax[1] < second) secondMinMax[1] = second;
     }
 
-    if(curr_activity->get_sport() != settings::isSwim)
+    if(curr_activity->get_sport() != settings::SwimLabel)
     {
         intSpeed = treeSelection->selectedRows(6).at(0).data().toDouble();
         intDist = treeSelection->selectedRows(4).at(0).data().toDouble();
 
-        if(curr_activity->get_sport() == settings::isRun)
+        if(curr_activity->get_sport() == settings::RunLabel)
         {
             ui->horizontalSlider_factor->setEnabled(true);
             double factor = static_cast<double>(ui->horizontalSlider_factor->value())/100;
@@ -1579,7 +1579,7 @@ void MainWindow::set_speedPlot(double avgSpeed,double intdist,int yPos)
     avgLineP->setName("Avg Speed");
     avgLineP->setPen(QPen(QColor(0,0,255),2));
 
-    if(curr_activity->get_sport() != settings::isSwim)
+    if(curr_activity->get_sport() != settings::SwimLabel)
     {
         QCPGraph *polishLine = ui->widget_plot->addGraph();
         polishLine->setName("Polished Speed");
@@ -1672,7 +1672,7 @@ void MainWindow::fill_WorkoutContent()
         contentValue = QString::number(dist)+label;
     }
 
-    if(curr_activity->get_sport() == settings::isSwim)
+    if(curr_activity->get_sport() == settings::SwimLabel)
     {        
         if(avgCounter > 1)
         {
@@ -1684,7 +1684,7 @@ void MainWindow::fill_WorkoutContent()
         }
     }
 
-    if(curr_activity->get_sport() == settings::isBike)
+    if(curr_activity->get_sport() == settings::BikeLabel)
     {
         QString watts = avgModel->data(avgModel->index(4,0)).toString();
 
@@ -1698,7 +1698,7 @@ void MainWindow::fill_WorkoutContent()
         }
     }
 
-    if(curr_activity->get_sport() == settings::isRun)
+    if(curr_activity->get_sport() == settings::RunLabel)
     {
         if(avgCounter > 1)
         {

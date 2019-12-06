@@ -21,83 +21,27 @@
 
 standardWorkouts::standardWorkouts()
 {
-    meta_tags << "sport" << "id" << "code" << "title" << "comment" << "duration" << "distance" << "stress" << "work" << "timebase" << "pic";
-    step_tags << "sport-id" << "id" << "part" << "level" << "threshold" << "int-time" << "int-dist" << "repeats" << "parent";
     workoutPath = settings::getStringMapPointer(settings::stingMap::GC)->value("workouts");
-
-    metaFile = "standard_workouts_meta.xml";
-    stepFile = "standard_workouts_steps.xml";
-
-    stdWorkoutFile = "standard_workouts.xml";
+    fileMap = settings::getStringMapPointer(settings::stingMap::File);
     stdWorkoutsModel = new QStandardItemModel();
     selectedModel = new QStandardItemModel();
+
     if(!workoutPath.isEmpty())
     {
-
-        this->check_File(workoutPath,metaFile);
-        this->check_File(workoutPath,stepFile);
-        this->read_standard_workouts(this->load_XMLFile(workoutPath,metaFile),this->load_XMLFile(workoutPath,stepFile));
-        this->xml_toTreeModel(stdWorkoutFile,stdWorkoutsModel);
+        //this->fill_treeModel(fileMap->value("standardworkoutfile"),stdWorkoutsModel);
+        this->xml_toTreeModel(fileMap->value("standardworkoutfile"),stdWorkoutsModel);
         this->fill_workoutMap();
     }
-}
-
-void standardWorkouts::read_standard_workouts(QDomDocument meta_doc,QDomDocument step_doc)
-{
-    workouts_meta = new QStandardItemModel(0,meta_tags.count());
-    workouts_steps = new QStandardItemModel(0,step_tags.count());
-    QDomElement rootTag;
-    QDomNodeList xmlList;
-    QDomElement xmlElement;
-
-    rootTag = meta_doc.firstChildElement();
-    xmlList = rootTag.elementsByTagName("workout");
-
-    //META
-    for(int row = 0; row < xmlList.count(); ++row)
-    {
-        xmlElement = xmlList.at(row).toElement();
-        workouts_meta->insertRows(row,1,QModelIndex());
-        for(int col = 0; col < workouts_meta->columnCount(); ++col)
-        {
-            workouts_meta->setData(workouts_meta->index(row,col,QModelIndex()),xmlElement.attribute(meta_tags.at(col)));
-        }
-    }
-
-    rootTag = step_doc.firstChildElement();
-    xmlList = rootTag.elementsByTagName("step");
-
-    //Steps
-    for(int row = 0; row < xmlList.count(); ++row)
-    {
-        xmlElement = xmlList.at(row).toElement();
-        workouts_steps->insertRows(row,1,QModelIndex());
-        for(int col = 0; col < workouts_steps->columnCount(); ++col)
-        {
-            if(col == 1)
-            {
-                workouts_steps->setData(workouts_steps->index(row,col,QModelIndex()),xmlElement.attribute(step_tags.at(col)).toInt());
-            }
-            else
-            {
-                workouts_steps->setData(workouts_steps->index(row,col,QModelIndex()),xmlElement.attribute(step_tags.at(col)));
-            }
-        }
-    }
-
-    metaProxy =  new QSortFilterProxyModel();
-    metaProxy->setSourceModel(workouts_meta);
-    stepProxy = new QSortFilterProxyModel();
-    stepProxy->setSourceModel(workouts_steps);
-    this->set_workoutIds();
 }
 
 void standardWorkouts::fill_workoutMap()
 {
     QStandardItem *sportItem,*workItem;
     QHash<QString,QVector<QString>> workoutInfo;
-    QVector<QString> workoutMeta(7);
+    QVector<QString> workoutMeta(8);
     QString sportName,workID;
+
+    workoutMapping = settings::get_xmlMapping("standardworkout");
 
     for(int sport = 0; sport < stdWorkoutsModel->rowCount(); ++sport)
     {        
@@ -109,14 +53,15 @@ void standardWorkouts::fill_workoutMap()
             for(int work = 0; work < sportItem->rowCount(); ++work)
             {
                 workItem = sportItem->child(work,0);
-                workID = this->get_modelValue(workItem,"name");
-                workoutMeta[0] = this->get_modelValue(workItem,"code");
-                workoutMeta[1] = this->get_modelValue(workItem,"title");
-                workoutMeta[2] = this->get_modelValue(workItem,"duration");
-                workoutMeta[3] = this->get_modelValue(workItem,"distance");
-                workoutMeta[4] = this->get_modelValue(workItem,"stress");
-                workoutMeta[5] = this->get_modelValue(workItem,"work");
-                workoutMeta[6] = this->get_modelValue(workItem,"timebase");
+                workID = this->get_accessibleValue(workItem,workoutMapping.value("WorkID"));
+                workoutMeta[0] = this->get_accessibleValue(workItem,workoutMapping.value("WorkCode"));
+                workoutMeta[1] = this->get_accessibleValue(workItem,workoutMapping.value("WorkTitle"));
+                workoutMeta[2] = this->get_accessibleValue(workItem,workoutMapping.value("WorkTime"));
+                workoutMeta[3] = this->get_accessibleValue(workItem,workoutMapping.value("WorkDist"));
+                workoutMeta[4] = this->get_accessibleValue(workItem,workoutMapping.value("WorkStress"));
+                workoutMeta[5] = this->get_accessibleValue(workItem,workoutMapping.value("WorkKJ"));
+                workoutMeta[6] = this->get_accessibleValue(workItem,workoutMapping.value("WorkBase"));
+                workoutMeta[7] = this->get_accessibleValue(workItem,workoutMapping.value("WorkPic"));
                 workoutIndex.insert(workID,workItem->index());
                 workoutInfo.insert(workID,workoutMeta);
             }
@@ -126,9 +71,9 @@ void standardWorkouts::fill_workoutMap()
     }
 }
 
-QString standardWorkouts::get_modelValue(QStandardItem *item, QString tag)
+QString standardWorkouts::get_accessibleValue(QStandardItem *item,QString tagName)
 {
-    return item->index().siblingAtColumn(xmlTagMap.value(item->data(Qt::UserRole).toString()).key(tag)).data(Qt::DisplayRole).toString();
+    return item->index().siblingAtColumn(xmlTagMap.value(item->data(Qt::AccessibleTextRole).toString()).key(tagName)).data(Qt::DisplayRole).toString();
 }
 
 QStandardItemModel *standardWorkouts::get_selectedWorkout(QString workID)
@@ -151,38 +96,6 @@ QStandardItemModel *standardWorkouts::get_selectedWorkout(QString workID)
         }
     }
     return selectedModel;
-}
-
-void standardWorkouts::save_selectedWorkout(QString workoutID)
-{
-    QModelIndex workIndex = workoutIndex.value(workoutID);
-    QStandardItem *workoutItem = stdWorkoutsModel->itemFromIndex(workIndex);
-    QList<QStandardItem*> itemList;
-
-    stdWorkoutsModel->removeRows(0,workoutItem->rowCount(),workIndex);
-
-    for(int row = 0; row < selectedModel->rowCount(); ++row)
-    {
-
-    }
-}
-
-QString standardWorkouts::get_newWorkoutID(QString sport)
-{
-    QHash<QString,QVector<QString>> sportID = workoutMap.value(sport);
-    QString workID;
-    int counter;
-
-    for(counter = 1; counter < sportID.count()+1; ++counter)
-    {
-        if(!sportID.contains(sport+"_"+QString::number(counter)))
-        {
-            workID = sport+"_"+QString::number(counter);
-        }
-    }
-    if(workID.isEmpty()) workID = sport+"_"+QString::number(counter);
-
-    return workID;
 }
 
 void standardWorkouts::read_childFromModel(QStandardItem *sourceItem,QStandardItem *targetItem)
@@ -220,87 +133,36 @@ QStandardItem* standardWorkouts::set_childtoModel(QStandardItem *source,QStandar
     return itemList.at(0);
 }
 
-void standardWorkouts::write_standard_workouts()
+void standardWorkouts::save_selectedWorkout(QString workoutID)
 {
-    QModelIndex index;
-    QDomDocument xmlDoc;
+    QModelIndex workIndex = workoutIndex.value(workoutID);
+    QStandardItem *workoutItem = stdWorkoutsModel->itemFromIndex(workIndex);
+    QList<QStandardItem*> itemList;
 
-    QDomElement xmlRoot,xmlElement;
-    xmlRoot = xmlDoc.createElement("workouts");
-    xmlDoc.appendChild(xmlRoot);
+    stdWorkoutsModel->removeRows(0,workoutItem->rowCount(),workIndex);
 
-    //Meta
-    for(int i = 0; i < workouts_meta->rowCount(); ++i)
+    for(int row = 0; row < selectedModel->rowCount(); ++row)
     {
-        index = workouts_meta->index(i,2,QModelIndex());
-        xmlElement = xmlDoc.createElement("workout");
 
-        for(int x = 0; x < workouts_meta->columnCount(); ++x)
+    }
+}
+
+QString standardWorkouts::get_newWorkoutID(QString sport)
+{
+    QHash<QString,QVector<QString>> sportID = workoutMap.value(sport);
+    QString workID;
+    int counter;
+
+    for(counter = 1; counter < sportID.count()+1; ++counter)
+    {
+        if(!sportID.contains(sport+"_"+QString::number(counter)))
         {
-            index = workouts_meta->index(i,x,QModelIndex());
-            xmlElement.setAttribute(meta_tags.at(x),workouts_meta->data(index,Qt::DisplayRole).toString());
+            workID = sport+"_"+QString::number(counter);
         }
-        xmlRoot.appendChild(xmlElement);
     }
-    this->write_XMLFile(workoutPath,&xmlDoc,metaFile);
-    xmlDoc.clear();
+    if(workID.isEmpty()) workID = sport+"_"+QString::number(counter);
 
-    //Steps
-    xmlRoot = xmlDoc.createElement("steps");
-    xmlDoc.appendChild(xmlRoot);
-
-    for(int i = 0; i < workouts_steps->rowCount(); ++i)
-    {
-        index = workouts_steps->index(i,2,QModelIndex());
-        xmlElement = xmlDoc.createElement("step");
-
-        for(int x = 0; x < workouts_steps->columnCount(); ++x)
-        {
-            index = workouts_steps->index(i,x,QModelIndex());
-            xmlElement.setAttribute(step_tags.at(x),workouts_steps->data(index,Qt::DisplayRole).toString());
-        }
-        xmlRoot.appendChild(xmlElement);
-    }
-    this->write_XMLFile(workoutPath,&xmlDoc,stepFile);
-}
-
-void standardWorkouts::set_workoutIds()
-{
-    workoutIDs = QStringList();
-    for(int i = 0; i < workouts_meta->rowCount(); ++i)
-    {
-        workoutIDs << workouts_meta->data(workouts_meta->index(i,1,QModelIndex())).toString();
-    }
-}
-
-void standardWorkouts::filter_steps(QString workID,bool fixed)
-{
-    stepProxy->invalidate();
-    if(fixed)
-    {
-        stepProxy->setFilterFixedString(workID);
-    }
-    else
-    {
-        stepProxy->setFilterRegExp("\\b"+workID+"\\b");
-    }
-    stepProxy->setFilterKeyColumn(0);
-    stepProxy->sort(1);
-}
-
-void standardWorkouts::filter_workout(QString filterValue,int col,bool fixed)
-{
-    metaProxy->invalidate();
-    if(fixed)
-    {
-        metaProxy->setFilterFixedString(filterValue);
-    }
-    else
-    {
-        metaProxy->setFilterRegExp("\\b"+filterValue+"\\b");
-    }
-
-    metaProxy->setFilterKeyColumn(col);
+    return workID;
 }
 
 QModelIndex standardWorkouts::get_modelIndex(QString searchString,int col)
@@ -330,12 +192,6 @@ QStandardItem *standardWorkouts::get_modelItem(QString searchString, int col)
 
 void standardWorkouts::delete_stdWorkout(QString workID,bool isdelete)
 {
-    this->filter_workout(workID,1,false);
-    metaProxy->removeRow(0,QModelIndex());
+    get_modelIndex(workID,0);
 
-    this->filter_steps(workID,false);
-    stepProxy->removeRows(0,stepProxy->rowCount(),QModelIndex());
-
-    if(isdelete) this->set_workoutIds();
-    this->write_standard_workouts();
 }

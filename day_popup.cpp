@@ -155,6 +155,8 @@ void day_popup::set_comboWorkouts(QString workoutSport, QString stdid)
 {
     ui->comboBox_stdworkout->blockSignals(true);
     ui->comboBox_stdworkout->clear();
+
+    /*
     int comboIndex = -1;
 
     if(!workoutSport.isEmpty())
@@ -190,6 +192,7 @@ void day_popup::set_comboWorkouts(QString workoutSport, QString stdid)
         ui->comboBox_stdworkout->setCurrentIndex(comboIndex);
     }
     ui->comboBox_stdworkout->blockSignals(false);
+    */
 }
 
 void day_popup::set_controlButtons(bool active)
@@ -238,13 +241,13 @@ void day_popup::set_exportContent()
 
     sport = dayWorkouts.value(selWorkout).at(1);
 
-    if(sport == settings::isSwim) stressType = "swimscore";
-    if(sport == settings::isBike) stressType = "skiba_bike_score";
-    if(sport == settings::isRun) stressType = "govss";
-    if(sport == settings::isAlt || sport == settings::isStrength)
+    if(sport == settings::SwimLabel) stressType = "swimscore";
+    if(sport == settings::BikeLabel) stressType = "skiba_bike_score";
+    if(sport == settings::RunLabel) stressType = "govss";
+    if(sport == settings::AltLabel || sport == settings::StrengthLabel)
     {
         commonRI = QString::number(set_doubleValue(totalWork.toDouble() / this->calc_totalWork(sport,10.0,sampCount,0)*10.0,false));
-        if(sport == settings::isStrength) commonRI = "4.0";
+        if(sport == settings::StrengthLabel) commonRI = "4.0";
         stressType = "triscore";
     }
 
@@ -595,7 +598,7 @@ void day_popup::on_toolButton_map_clicked()
     this->set_proxyFilter(workoutID,1,false);
     QString image = metaProxy->data(metaProxy->index(0,9)).toString();
 
-    Dialog_map dialogMap(this,metaProxy,workoutID,image);
+    Dialog_map dialogMap(this,workoutID,image);
     dialogMap.setModal(true);
     dialogMap.exec();
 }

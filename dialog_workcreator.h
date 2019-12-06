@@ -23,17 +23,15 @@ class del_workcreator : public QStyledItemDelegate
     Q_OBJECT
 public:
     explicit del_workcreator(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
-    QStringList groupList;
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
         const QAbstractItemModel *model = index.model();
 
-        QString levelName;
+        QString levelName;        
         if(index.parent().isValid())
         {
-            //levelName = index.parent().child(index.row(),1).data().toString();
             levelName = model->index(index.row(),1,index.parent()).data().toString();
         }
         else
@@ -102,7 +100,6 @@ private slots:
     void on_toolButton_cancel_clicked();
     void set_controlButtons(bool);
     void set_updateDates(bool);
-    void set_workoutModel(QDate);
     void update_workouts();
     void on_pushButton_sync_clicked();
     void on_checkBox_timebased_clicked(bool checked);
@@ -110,40 +107,57 @@ private slots:
     void on_listWidget_workouts_itemClicked(QListWidgetItem *item);
     void on_spinBox_level_valueChanged(int arg1);
     void on_comboBox_levelName_currentTextChanged(const QString &arg1);
+    void on_doubleSpinBox_distance_valueChanged(double arg1);
+    void on_checkBox_timebased_stateChanged(int arg1);
+    void on_timeEdit_lapTime_userTimeChanged(const QTime &time);
 
 private:
     Ui::Dialog_workCreator *ui;
 
     schedule *worksched;
     standardWorkouts *stdWorkouts;
-    QString isSeries,isGroup,currentWorkID,isBreak,viewBackground,workMap;
+    QString isSeries,isGroup,currentWorkID,isBreak,viewBackground;
     int thresValue;
     double workFactor;
     QString sportMark;
-    QHash<QString,QHash<QString,QVector<QString>>> *workoutMap;
     QHash<QString,QMap<int,QString>> *xmlTagMap;
+    QMap<int,QPair<QString,QVector<double>>> plotMap;
+    QMap<QString,QPair<int,int>> plotRange;
+    QMap<QString,int> stdWorkoutMapping;
+    QVector<double> lastPlotValues;
+    QSet<QString> workoutTitle;
+
+    QTreeWidgetItem* set_selectedData(QStandardItem*,QTreeWidgetItem*);
+    QVariant get_modelValue(QStandardItem*,QString);
+    QVariant get_accessibleValue(QStandardItem*,QString);
+    int get_modelPosition(QString,QString);
 
     void load_selectedWorkout(QString);
     void read_selectedChild(QStandardItem*,QTreeWidgetItem*);
-    QTreeWidgetItem* set_selectedData(QStandardItem*,QTreeWidgetItem*);
-    QVariant get_modelValue(QStandardItem*,QString);
     void set_sportData(QString);
-    QString calc_threshold(double);
     int get_swimStyleID(QString);
     void edit_selectedStep(QTreeWidgetItem*);
+    void update_selectedStep();
     void refresh_editStep();
+    void read_currentWorkTree();
+    void read_currentChild(QTreeWidgetItem*,QString,int);
+    void read_currentData(QTreeWidgetItem*);
+    void save_selectedWorkout();
+    void read_childToWorkout(QTreeWidgetItem*,QStandardItem*,int);
+    QStandardItem* add_itemToWorkout(QTreeWidgetItem*,QStandardItem*,int);
+    void draw_plotGraphic(int);
+    void set_itemDataRange(QTreeWidgetItem *item);
+    void get_workouts(QString);
 
-    QStandardItemModel *plotModel,*valueModel,*workoutModel;
+
     QStandardItemModel *selworkModel;
-    QSortFilterProxyModel *metaProxy,*stepProxy, *schedProxy, *proxyFilter;
-    QMap<int,QString> dataPoint;
-    QStringList modelHeader,phaseList,groupList,levelList;
+    QStringList groupList,levelList;
+    QStringList *workoutHeader;
+    QHash<QString,QString> modelMapping;
     QTreeWidgetItem *currentItem;
     del_workcreator workTree_del;
     del_mousehover mousehover_del;
-    double timeSum,distSum,stressSum,workSum;
-    QVector<bool> editRow;
-    bool clearFlag;
+    bool clearFlag,isWorkLoaded;
     QString dateFormat,longTime,shortTime;
 
     QDialog *updateDialog;
@@ -154,24 +168,14 @@ private:
     QListView *workoutView;
     QProgressBar *updateProgess;
 
-    QString get_treeValue(int,int,int,int,int);
-
     void control_editPanel(bool);
     void resetAxis();
-    void set_itemData(QTreeWidgetItem *item);
-    void set_selectData(QTreeWidgetItem *item);
+
     QTreeWidgetItem* move_item(bool,QTreeWidgetItem*);
     void set_defaultData(QTreeWidgetItem *item,bool);
-    void get_workouts(QString);
-    QString get_workoutTime(double);
+
     void clearIntTree();
-    void set_plotModel();
-    void add_to_plot(QTreeWidgetItem *item,int);
-    void set_plotGraphic(int);
-    void save_workout();
-    void save_workout_values(QStringList,QStandardItemModel *);
     void update_workoutsSchedule(int,QDate,QPair<double,double>,int);
-    void set_metaFilter(QString,int,bool);
 };
 
 #endif // DIALOG_WORKCREATOR_H
