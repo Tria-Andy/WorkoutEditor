@@ -82,7 +82,7 @@ private:
     QHash<QString,QString> *gcValues,*fileMap;
 
     QStringList sportTags; 
-    QStringList *macroTags,*workoutTags,*compTags,*phaseTags;
+    QStringList *macroTags,*scheduleTags,*saisonTags;
     QString selSaison;
 
     QMap<QString,QStringList> saisonValues;

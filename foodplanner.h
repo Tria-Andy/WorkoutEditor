@@ -15,7 +15,7 @@ public:
     explicit foodplanner(schedule *ptrSchedule = nullptr);
 
     QStandardItemModel *foodPlanModel,*mealModel,*historyModel;
-    QStringList *menuHeader,*foodsumHeader,*foodestHeader,*foodhistHeader;
+    QStringList *menuHeader,*foodPlanTags,*foodHistTags,*foodsumHeader,*foodestHeader,*foodhistHeader;
     QStringList planList,mealsHeader,dayHeader,dayListHeader;
     QPair<bool,bool> dayMealCopy;
     QHash<QString,QPair<QString,QPair<int,double>>> get_mealtoUpdate(bool,QDate,QString);

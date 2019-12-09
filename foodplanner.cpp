@@ -7,6 +7,8 @@ foodplanner::foodplanner(schedule *p_Schedule)
     firstdayofweek = settings::firstDayofWeek;
     dateFormat = settings::get_format("dateformat");
     dateSaveFormat = "yyyy-MM-dd";
+    foodPlanTags = settings::get_xmlMapping("foodplan");
+    foodHistTags = settings::get_xmlMapping("histweeks");
     menuHeader = settings::getHeaderMap("menuheader");
     foodsumHeader = settings::getHeaderMap("foodsumheader");
     foodestHeader = settings::getHeaderMap("foodestheader");
@@ -35,13 +37,10 @@ foodplanner::foodplanner(schedule *p_Schedule)
 
     if(!settings::getStringMapPointer(settings::stingMap::GC)->value("foodplanner").isEmpty())
     {
-        this->fill_treeModel(fileMap->value("mealsfile"),mealModel);
-        //mealModel->setColumnCount(rootTagMap.value(fileMap->value("mealsfile")).second);
+        this->xml_toTreeModel(fileMap->value("mealsfile"),mealModel);
         this->set_mealsMap();
-        this->fill_treeModel(fileMap->value("foodfile"),foodPlanModel);
-        foodPlanModel->setColumnCount(rootTagMap.value(fileMap->value("foodfile")).second);
-
-        this->fill_treeModel(fileMap->value("foodhistory"),historyModel);
+        this->xml_toTreeModel(fileMap->value("foodfile"),foodPlanModel);
+        this->xml_toTreeModel(fileMap->value("foodhistory"),historyModel);
         this->check_foodPlan();
     }
 }
@@ -107,8 +106,7 @@ void foodplanner::set_mealsMap()
 
 void foodplanner::update_foodPlanModel()
 {
-    QStandardItem *dayItem,*mealItem;
-
+    QStandardItem *dayItem,*mealItem;    
     for(QMap<QPair<bool,QDate>,QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>>>::const_iterator daystart = updateMap.cbegin(), dayend = updateMap.cend(); daystart != dayend; ++daystart)
     {
         if(daystart.key().first)
@@ -116,19 +114,20 @@ void foodplanner::update_foodPlanModel()
             dayItem = this->get_modelItem(foodPlanModel,daystart.key().second.toString(dateSaveFormat));
             for(QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>>::const_iterator mealstart = daystart.value().cbegin(), mealend = daystart.value().cend(); mealstart != mealend; ++mealstart)
             {
-                    mealItem = dayItem->child(mealsHeader.indexOf(mealstart.key()));
-                    foodPlanModel->removeRows(0,mealItem->rowCount(),mealItem->index());
+                mealItem = dayItem->child(mealsHeader.indexOf(mealstart.key()));
+                foodPlanModel->removeRows(0,mealItem->rowCount(),mealItem->index());
 
-                    for(QHash<QString,QPair<QString,QPair<int,double>>>::const_iterator foodstart = mealstart.value().cbegin(), foodend = mealstart.value().cend(); foodstart != foodend; ++foodstart)
-                    {
-                        QList<QStandardItem*> mealList;
-                        mealList << new QStandardItem(foodstart.key());
-                        mealList << new QStandardItem(foodstart->first);
-                        mealList << new QStandardItem(QString::number(foodstart->second.second));
-                        mealList << new QStandardItem(QString::number(foodstart->second.first));
-                        mealList << new QStandardItem("0");
-                        mealItem->appendRow(mealList);
-                    }
+                for(QHash<QString,QPair<QString,QPair<int,double>>>::const_iterator foodstart = mealstart.value().cbegin(), foodend = mealstart.value().cend(); foodstart != foodend; ++foodstart)
+                {
+                    QList<QStandardItem*> foodList;
+                    foodList << new QStandardItem(foodstart.key());
+                    foodList << new QStandardItem(foodstart->first);
+                    foodList << new QStandardItem(QString::number(foodstart->second.second));
+                    foodList << new QStandardItem(QString::number(foodstart->second.first));
+                    foodList << new QStandardItem("0");
+                    foodList.at(0)->setData(foodPlanTags->at(2),Qt::AccessibleTextRole);
+                    mealItem->appendRow(foodList);
+                }
             }
             this->set_dayFoodValues(dayItem);
         }
@@ -235,12 +234,14 @@ void foodplanner::add_toHistory(QDate day)
             weekList << new QStandardItem(foodPlanList.value(day).at(3));
             weekList << new QStandardItem(QString::number(daySumMap.value(day).at(1)));
             weekList << new QStandardItem(foodPlanList.value(day).at(2));
+            weekList.at(0)->setData(foodHistTags->at(0),Qt::AccessibleTextRole);
             rootItem->appendRow(weekList);
 
             QList<QStandardItem*> dayValueList;
             dayValueList << new QStandardItem(QString::number(day.dayOfWeek()-1));
             dayValueList << new QStandardItem(QString::number(daySumMap.value(day).at(2)));
             dayValueList << new QStandardItem(QString::number(daySumMap.value(day).at(0)));
+            dayValueList.at(0)->setData(foodHistTags->at(1),Qt::AccessibleTextRole);
             weekList.at(0)->appendRow(dayValueList);
         }
         else
@@ -250,6 +251,7 @@ void foodplanner::add_toHistory(QDate day)
             dayValueList << new QStandardItem(QString::number(day.dayOfWeek()-1));
             dayValueList << new QStandardItem(QString::number(daySumMap.value(day).at(2)));
             dayValueList << new QStandardItem(QString::number(daySumMap.value(day).at(0)));
+            dayValueList.at(0)->setData(foodHistTags->at(1),Qt::AccessibleTextRole);
             weekItem->appendRow(dayValueList);
         }
     }
@@ -526,8 +528,6 @@ void foodplanner::add_meal(QItemSelectionModel *mealSelect)
     QList<QStandardItem*> mealItems;
     QStandardItem *SectionItem = mealModel->itemFromIndex(mealSelect->currentIndex());
 
-    qDebug() << SectionItem->data(Qt::DisplayRole).toString() +"_"+ QString::number(SectionItem->rowCount()+1);
-
     mealItems << new QStandardItem("NewMeal");
     mealItems << new QStandardItem("0");
     mealItems << new QStandardItem("0");
@@ -536,7 +536,7 @@ void foodplanner::add_meal(QItemSelectionModel *mealSelect)
     mealItems << new QStandardItem("0");
     mealItems << new QStandardItem("0");
     mealItems << new QStandardItem("0");
-
+    mealItems.at(0)->setData(settings::get_xmlMapping("meals")->at(1),Qt::AccessibleTextRole);
     SectionItem->insertRow(0,mealItems);
 }
 
@@ -566,17 +566,20 @@ void foodplanner::insert_newWeek(QDate firstday)
 {
     QStandardItem *rootItem = foodPlanModel->invisibleRootItem();
     QString mealDefault;
+
     QList<QStandardItem*> weekList;
     weekList << new QStandardItem(this->calc_weekID(firstday));
     weekList << new QStandardItem(firstday.toString(dateSaveFormat));
     weekList << new QStandardItem(settings::get_listValues("Mode").at(0));
     weekList << new QStandardItem(rootItem->child(rootItem->rowCount()-1,3)->data(Qt::DisplayRole).toString());
+    weekList.at(0)->setData(foodPlanTags->at(0),Qt::AccessibleTextRole);
 
     for(int day = 0; day < dayHeader.count(); ++day)
     {
         QList<QStandardItem*> dayItem;
         dayItem << new QStandardItem(firstday.addDays(day).toString(dateSaveFormat));
         dayItem << new QStandardItem(QString::number(day));
+        dayItem.at(0)->setData(foodPlanTags->at(1),Qt::AccessibleTextRole);
         weekList.at(0)->appendRow(dayItem);
 
         for(int meals = 0; meals < mealsHeader.count(); ++meals)
@@ -584,7 +587,7 @@ void foodplanner::insert_newWeek(QDate firstday)
             QList<QStandardItem*> mealsItem;
             mealsItem << new QStandardItem(mealsHeader.at(meals));
             mealsItem << new QStandardItem(QString::number(meals));
-
+            mealsItem.at(0)->setData(foodPlanTags->at(2),Qt::AccessibleTextRole);
             mealDefault = "100-"+QString::number(meals);
 
             QList<QStandardItem*> foodItem;
@@ -593,7 +596,7 @@ void foodplanner::insert_newWeek(QDate firstday)
             foodItem << new QStandardItem(QString::number(get_mealData(mealDefault).second.at(0)));
             foodItem << new QStandardItem("0");
             foodItem << new QStandardItem(QString::number(get_mealData(mealDefault).second.at(1)));
-
+            foodItem.at(0)->setData(foodPlanTags->at(2),Qt::AccessibleTextRole);
             mealsItem.at(0)->appendRow(foodItem);
             dayItem.at(0)->appendRow(mealsItem);
         }

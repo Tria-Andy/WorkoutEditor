@@ -20,10 +20,9 @@
 
 schedule::schedule()
 {
-    macroTags = settings::getHeaderMap("macro");
-    workoutTags = settings::getHeaderMap("workout");
-    compTags = settings::getHeaderMap("comp");
-    phaseTags = settings::getHeaderMap("micro");
+    macroTags = settings::get_xmlMapping("macro");
+    scheduleTags = settings::get_xmlMapping("schedule");
+    saisonTags = settings::get_xmlMapping("saisons");
     sportTags = settings::get_listValues("Sportuse");
     firstdayofweek = settings::firstDayofWeek;
     dateFormat = settings::get_format("dateformat");
@@ -34,22 +33,16 @@ schedule::schedule()
     fileMap = settings::getStringMapPointer(settings::stingMap::File);
 
     scheduleModel = new QStandardItemModel();
-    scheduleModel->setColumnCount(workoutTags->count());
-    //xmlTagMap.value("workout").count();
-    scheduleModel->setColumnCount(workoutTags->count());
     phaseModel = new QStandardItemModel();
-    phaseModel->setColumnCount(compTags->count());
 
     if(!gcValues->value("schedule").isEmpty())
     {
         //Schedule
-        this->fill_treeModel(fileMap->value("schedulefile"),scheduleModel);
-
+        this->xml_toTreeModel(fileMap->value("schedulefile"),scheduleModel);
         //Saison - Phase
-        this->fill_treeModel(fileMap->value("saisonfile"),phaseModel);
-
+        this->xml_toTreeModel(fileMap->value("saisonfile"),phaseModel);
         //StressMap
-        this->fill_xmlToList(fileMap->value("stressfile"),&mapList);
+        this->xml_toListMap(fileMap->value("stressfile"),&mapList);
         this->set_stressMap();
 
         this->remove_WeekofPast(firstdayofweek.addDays(-7));
@@ -71,12 +64,12 @@ void schedule::save_workouts(bool saveModel)
 {
     if(saveModel == SAISON)
     {
-        this->read_treeModel(phaseModel,fileMap->value("saisonfile"));
+        this->treeModel_toXml(phaseModel,fileMap->value("saisonfile"));
     }
 
     if(saveModel == SCHEDULE)
     {
-        this->read_treeModel(scheduleModel,fileMap->value("schedulefile"));
+        this->treeModel_toXml(scheduleModel,fileMap->value("schedulefile"));
         this->save_ltsFile();
     }
     isUpdated = false;
@@ -97,6 +90,7 @@ void schedule::add_newSaison(QStringList saisonInfo)
     {
         itemList << new QStandardItem(saisonInfo.at(info));
     }
+    itemList.at(0)->setData(saisonTags->at(0),Qt::AccessibleTextRole);
     phaseModel->invisibleRootItem()->appendRow(itemList);
 
     QStandardItem *macroItem = itemList.at(0);
@@ -107,6 +101,7 @@ void schedule::add_newSaison(QStringList saisonInfo)
         itemList << new QStandardItem(phaseList.at(meso));
         itemList << new QStandardItem(QString::number(meso));
 
+        itemList.at(0)->setData(saisonTags->at(1),Qt::AccessibleTextRole);
         macroItem->appendRow(itemList);
         QStandardItem *mesoItem = itemList.at(0);
         itemList.clear();
@@ -121,6 +116,7 @@ void schedule::add_newSaison(QStringList saisonInfo)
             itemList << new QStandardItem("-");
             itemList << new QStandardItem("-");
 
+            itemList.at(0)->setData(saisonTags->at(2),Qt::AccessibleTextRole);
             mesoItem->appendRow(itemList);
             QStandardItem *microItem = itemList.at(0);
             itemList.clear();
@@ -134,6 +130,7 @@ void schedule::add_newSaison(QStringList saisonInfo)
                 itemList << new QStandardItem("00:00");
                 itemList << new QStandardItem("0");
 
+                itemList.at(0)->setData(saisonTags->at(3),Qt::AccessibleTextRole);
                 microItem->appendRow(itemList);
                 itemList.clear();
             }
@@ -176,18 +173,14 @@ QMap<int, QStringList> schedule::get_workouts(bool dayWorkouts,QString indexStri
     QMap<int,QStringList> workouts;
     QStringList workItems;
     QStandardItemModel *model;
-    int counter = 0;
 
     if(dayWorkouts)
     {
         model = scheduleModel;
-        //qDebug() << indexString << xmlTagMap.value("workout").value(indexString);
-        counter = workoutTags->count();
     }
     else
     {
         model = phaseModel;
-        counter = compTags->count();
     }
 
 
@@ -202,7 +195,7 @@ QMap<int, QStringList> schedule::get_workouts(bool dayWorkouts,QString indexStri
         {
             for(int work = 0; work < parent->rowCount(); ++work)
             {
-                for(int x = 1; x < counter; ++x)
+                for(int x = 1; x < model->columnCount(); ++x)
                 {
                    workItems << model->data(model->index(work,x,modelIndex)).toString();
                 }
@@ -221,7 +214,7 @@ QStringList schedule::get_weekMeta(QString weekID)
 
     if(weekIndex.isValid())
     {
-        for(int meta = 0; meta < phaseTags->count(); ++meta)
+        for(int meta = 0; meta < phaseModel->columnCount(); ++meta)
         {
             weekMeta << phaseModel->data(weekIndex.siblingAtColumn(meta)).toString();
         }
@@ -246,7 +239,7 @@ void schedule::save_ltsFile()
         saveList.insert(counter++,mapList);
         mapList.clear();
     }
-    this->read_listMap(&saveList,fileMap->value("stressfile"));
+    this->listMap_toXml(&saveList,fileMap->value("stressfile"));
 }
 
 void schedule::add_contest(QString saison,QDate contestDate, QStringList contestValues)
@@ -306,7 +299,7 @@ void schedule::check_workouts(QDate date)
                 index = get_modelIndex(phaseModel,calc_weekID(date),0);
                 item = get_phaseItem(index.parent().parent().data(Qt::DisplayRole).toString());
 
-                for(int value = 0; value < workoutTags->count(); ++value)
+                for(int value = 0; value < scheduleModel->columnCount(); ++value)
                 {
                     contestValues << dayItem->child(work,value)->data(Qt::DisplayRole).toString();
                 }
@@ -373,6 +366,7 @@ void schedule::set_workoutData(QHash<QDate,QMap<int,QStringList>> workoutMap)
             {
                 itemList << new QStandardItem(vit.value().at(itemValue));
             }
+            itemList.at(0)->setData(scheduleTags->at(2),Qt::AccessibleTextRole);
             dayItem->appendRow(itemList);
         }
     }
@@ -612,7 +606,7 @@ void schedule::set_saisonValues()
                         {
                             for(int comp = 0; comp < saisonItem->child(phase,0)->child(week,0)->rowCount(); ++comp)
                             {
-                                for(int values = 1; values < compTags->count(); ++values)
+                                for(int values = 1; values < phaseModel->columnCount(); ++values)
                                 {
                                     if(values == 1)
                                     {

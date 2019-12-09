@@ -50,7 +50,7 @@ QString settings::TriaLabel;
 QString settings::OtherLabel;
 
 QHash<QString,QStringList*> settings::headerMap;
-QHash<QString,QHash<QString,QString>> settings::xmlmapping;
+QHash<QString,QStringList*> settings::xmlmapping;
 QHash<QString,QStringList> settings::listMap;
 QHash<QString,QStringList> settings::jsonTags;
 QHash<QString,QMap<QString,QString>> settings::sportDistance;
@@ -145,7 +145,7 @@ QColor settings::get_colorRGB(QString colorValue,bool trans)
     return color;
 }
 
-void settings::readHeaderFile(QDomDocument *xmlFile)
+void settings::readMappingFile(QDomDocument *xmlFile,QHash<QString,QStringList*> *valueMap)
 {
     QDomNodeList xmlList;
     QDomElement xmlElement,childElement;
@@ -170,31 +170,8 @@ void settings::readHeaderFile(QDomDocument *xmlFile)
            tagList->append(it.value());
        }
 
-       headerMap.insert(xmlList.at(row).toElement().tagName(),tagList);
+       valueMap->insert(xmlList.at(row).toElement().tagName(),tagList);
        headerList.clear();
-    }
-}
-
-void settings::read_xmlMapping(QDomDocument *xmlFile)
-{
-    QDomNodeList xmlList;
-    QDomElement xmlElement,childElement;
-    QHash<QString,QString> xmlTagMap;
-
-    xmlList = xmlFile->firstChild().childNodes();
-
-    for(int row = 0; row < xmlList.count(); ++row)
-    {
-       xmlElement =  xmlList.at(row).toElement();
-
-       for(int i = 0; i < xmlElement.childNodes().count(); ++i)
-       {
-           childElement = xmlElement.childNodes().at(i).toElement();
-           xmlTagMap.insert(childElement.attribute("label"),childElement.attribute("tag"));
-       }
-
-       xmlmapping.insert(xmlList.at(row).toElement().tagName(),xmlTagMap);
-       xmlTagMap.clear();
     }
 }
 
@@ -364,13 +341,13 @@ int settings::loadSettings()
         QFile headerFile(gcInfo.value("schedule") + QDir::separator() + fileMap.value("headerfile"));
 
         xmlDoc.setContent(&headerFile);
-        readHeaderFile(&xmlDoc);
+        readMappingFile(&xmlDoc,&headerMap);
         xmlDoc.clear();
         headerFile.close();
 
         QFile xmlFile(gcInfo.value("schedule") + QDir::separator() + fileMap.value("xmlmapping"));
         xmlDoc.setContent(&xmlFile);
-        readHeaderFile(&xmlDoc);
+        readMappingFile(&xmlDoc,&xmlmapping);
         xmlFile.close();
 
         //Sport Value Settings

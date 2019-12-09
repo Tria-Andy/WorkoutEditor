@@ -32,12 +32,11 @@ public:
 
     QStandardItemModel *stdWorkoutsModel,*selectedModel;
     QHash<QString,QHash<QString,QVector<QString>>> *get_workoutMap() {return &workoutMap;}
-    QStandardItemModel *get_selectedWorkout(QString);
-    QHash<QString,QMap<int,QString>> *get_xmlTagMap() {return &xmlTagMap;}
-    QString get_newWorkoutID(QString);
+    QStandardItem *get_selectedWorkout(QString);
+    void update_selectedWorkout(QString);
+    QString create_newWorkout(QString,QList<QStandardItem*>);
 
-    void save_selectedWorkout(QString);
-    void create_newWorkout(QString);
+    void save_selectedWorkout(QString,QString);
     void delete_stdWorkout(QString,bool);
     void write_standard_workouts();
 
@@ -57,9 +56,9 @@ private:
     QStandardItem *get_modelItem(QString,int);
 
     QStandardItem* set_childtoModel(QStandardItem*,QStandardItem*);
-    QString get_accessibleValue(QStandardItem*,QString);
 
     void fill_workoutMap();
+    void add_workoutToMap(QStandardItem*,QString);
     void read_childFromModel(QStandardItem*,QStandardItem*);
     void read_standard_workouts(QDomDocument,QDomDocument);
 };

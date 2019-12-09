@@ -53,8 +53,6 @@ enum {EDIT,MOVE,COPY,DEL};
 
 day_popup::~day_popup()
 {
-    delete workouts_meta;
-    delete workouts_steps;
     delete ui;
 }
 
@@ -448,22 +446,6 @@ void day_popup::set_result(int result)
     this->set_comboWorkouts(QString(),QString());
 }
 
-void day_popup::set_proxyFilter(QString filterTo, int col,bool fixString)
-{
-    metaProxy->invalidate();
-
-    if(fixString)
-    {
-        metaProxy->setFilterFixedString(filterTo);
-    }
-    else
-    {
-        metaProxy->setFilterRegExp("\\b"+filterTo+"\\b");
-    }
-
-    metaProxy->setFilterKeyColumn(col);
-}
-
 void day_popup::setNextEditRow()
 {
     if(ui->toolButton_dayEdit->isChecked())
@@ -570,12 +552,6 @@ void day_popup::on_comboBox_stdworkout_activated(int stdindex)
     QString workoutID = ui->comboBox_stdworkout->model()->data(ui->comboBox_stdworkout->model()->index(stdindex,1)).toString();
 
     stdworkData.clear();
-    this->set_proxyFilter(workoutID,1,false);
-
-    for(int i = 1; i < metaProxy->columnCount()-2; ++i)
-    {
-        stdworkData.insert(i,metaProxy->data(metaProxy->index(0,i)).toString());
-    }
 
     for(QHash<int,QString>::const_iterator it = stdworkData.cbegin(), end = stdworkData.cend(); it != end; ++it)
     {
@@ -595,9 +571,7 @@ void day_popup::on_comboBox_stdworkout_activated(int stdindex)
 void day_popup::on_toolButton_map_clicked()
 {
     QString workoutID = ui->comboBox_stdworkout->model()->data(ui->comboBox_stdworkout->model()->index(ui->comboBox_stdworkout->currentIndex(),1)).toString();
-    this->set_proxyFilter(workoutID,1,false);
-    QString image = metaProxy->data(metaProxy->index(0,9)).toString();
-
+    QString image;
     Dialog_map dialogMap(this,workoutID,image);
     dialogMap.setModal(true);
     dialogMap.exec();

@@ -57,7 +57,7 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
     ui->listView_weeks->setModel(listModel);
     ui->listView_weeks->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->check_File(schedulePath,saveweekFile);
-    this->readSaveweeks(this->load_XMLFile(schedulePath,saveweekFile));
+    //this->readSaveweeks(this->load_XMLFile(schedulePath,saveweekFile));
 }
 
 enum {COPY,CLEAR,SAVE,LOAD,DEL};

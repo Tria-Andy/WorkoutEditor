@@ -312,7 +312,7 @@ void jsonHandler::write_jsonFile()
     //QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName); //Test
     if(!file.open(QFile::WriteOnly))
     {
-        qDebug() << "File not open!";
+        qDebug() << "File not open!" + fileName;
         return;
     }
 

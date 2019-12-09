@@ -127,10 +127,9 @@ private:
     QVector<double> lastPlotValues;
     QSet<QString> workoutTitle;
 
-    QTreeWidgetItem* set_selectedData(QStandardItem*,QTreeWidgetItem*);
+    QTreeWidgetItem* set_itemToWidget(QStandardItem*,QTreeWidgetItem*);
     QVariant get_modelValue(QStandardItem*,QString);
-    QVariant get_accessibleValue(QStandardItem*,QString);
-    int get_modelPosition(QString,QString);
+    QVariant get_itemValue(QStandardItem*,QStringList*,QString);
 
     void load_selectedWorkout(QString);
     void read_selectedChild(QStandardItem*,QTreeWidgetItem*);
@@ -149,10 +148,8 @@ private:
     void set_itemDataRange(QTreeWidgetItem *item);
     void get_workouts(QString);
 
-
-    QStandardItemModel *selworkModel;
     QStringList groupList,levelList;
-    QStringList *workoutHeader;
+    QStringList *workoutHeader,*workoutTags,*stdWorkTags,*partTags,*stepTags;
     QHash<QString,QString> modelMapping;
     QTreeWidgetItem *currentItem;
     del_workcreator workTree_del;
@@ -171,7 +168,7 @@ private:
     void control_editPanel(bool);
     void resetAxis();
 
-    QTreeWidgetItem* move_item(bool,QTreeWidgetItem*);
+    QTreeWidgetItem* move_item(int,QTreeWidgetItem*);
     void set_defaultData(QTreeWidgetItem *item,bool);
 
     void clearIntTree();
