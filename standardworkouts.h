@@ -20,47 +20,43 @@
 #define STANDARDWORKOUTS_H
 
 #include <QStandardItemModel>
-#include <QtXml>
 #include "settings.h"
 #include "calculation.h"
-#include "xmlhandler.h"
+#include "datahandler.h"
 
-class standardWorkouts : public xmlHandler
+class standardWorkouts : public datahandler
 {
 public:
     standardWorkouts();
 
-    QStandardItemModel *stdWorkoutsModel,*selectedModel;
     QHash<QString,QHash<QString,QVector<QString>>> *get_workoutMap() {return &workoutMap;}
     QStandardItem *get_selectedWorkout(QString);
-    void update_selectedWorkout(QString);
-    QString create_newWorkout(QString,QList<QStandardItem*>);
-
+    QString get_workoutCount(QString);
+    QPair<int,QString> create_newWorkout(QString);
+    QVector<double> get_workLevelLoad(QString key) {return levelLoadMap.value(key);}
+    void update_selectedWorkout(QString,QList<QStandardItem*>);
     void save_selectedWorkout(QString,QString);
     void delete_stdWorkout(QString,bool);
-    void write_standard_workouts();
+    void save_workouts();
 
 protected:
-    void filter_steps(QString,bool);
-    void filter_workout(QString,int,bool);
 
 private:
-    QString workoutPath;
-    QHash<QString,QString> *fileMap;
-    QHash<QString,QMap<int,QString>> modelOrder;
     QHash<QString,QHash<QString,QVector<QString>>> workoutMap;
     QHash<QString,QModelIndex> workoutIndex;
     QHash<QString,QString> workoutMapping;
+    QHash<QString,QVector<double>> levelLoadMap;
+    bool workoutUpdate;
 
     QModelIndex get_modelIndex(QString,int);
     QStandardItem *get_modelItem(QString,int);
-
-    QStandardItem* set_childtoModel(QStandardItem*,QStandardItem*);
+    QString add_workoutToMap(QStandardItem*,QString);
 
     void fill_workoutMap();
-    void add_workoutToMap(QStandardItem*,QString);
-    void read_childFromModel(QStandardItem*,QStandardItem*);
-    void read_standard_workouts(QDomDocument,QDomDocument);
+    void read_levelLoad();
+    void read_childFromModel(QStandardItem*,QString,int);
+    void set_levelLoadValues(QStandardItem*,QString,int);
+    void check_workouts();
 };
 
 #endif // STANDARDWORKOUTS_H

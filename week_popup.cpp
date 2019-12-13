@@ -19,7 +19,7 @@
 #include "week_popup.h"
 #include "ui_week_popup.h"
 
-week_popup::week_popup(QWidget *parent,QString weekid,schedule *p_sched) :
+week_popup::week_popup(QWidget *parent,QString weekid,schedule *p_sched,standardWorkouts *stdWork) :
     QDialog(parent),
     ui(new Ui::week_popup)
 {
@@ -28,6 +28,7 @@ week_popup::week_popup(QWidget *parent,QString weekid,schedule *p_sched) :
     isLoad = false;
     dayCount = 7;
     workSched = p_sched;
+    stdWorkouts = stdWork;
     weekID = weekid;
 
     barSelection << "Duration" << "Distance" << "Work(kj)" << "Distribution";
@@ -49,7 +50,7 @@ week_popup::week_popup(QWidget *parent,QString weekid,schedule *p_sched) :
 
     for(int i = 0; i < levelList.count();++i)
     {
-        zoneTime.insert(levelList.at(i),0);
+        zoneTime.insert(i,0);
     }
 
     this->set_plotValues();
@@ -68,99 +69,82 @@ void week_popup::set_plotValues()
     QHash<QDate,QMap<QString,QVector<double> >> *compMap = workSched->get_compValues();
     QMap<QString,QVector<double>> workMap;
     QMap<QDate,QVector<double>> *stressMap = workSched->get_stressMap();
+    QMap<int, QStringList> dayWorkouts;
+    QMap<int,QString> weekWorkouts;
 
-    QDateTime workDateTime;
-    QStringList workDetails;
-    QString currZone,part,parent;
-    QMap<QString,int> factorMap;
-    int groupFactor = 1;
-    int seriesFactor = 1;
-    int factor = 1;
-    double timeSum = 0;
-    double currTime = 0;
-    int weekWorkouts = 0;
+    QDate workoutDate = QDate::fromString(weekMeta.at(3),workSched->dateFormat);
+    QDateTime weekStart;
 
-        QDate workoutDate = QDate::fromString(weekMeta.at(3),workSched->dateFormat);
-        QDateTime weekStart;
+    weekStart.setDate(QDate::fromString(weekMeta.at(3),workSched->dateFormat));
+    weekStart.setTime(QTime::fromString("00:00:00","hh:mm:ss"));
+    weekStart.setTimeSpec(Qt::LocalTime);
+    firstDay = weekStart;
+    int workoutCount = 0;
 
-        weekStart.setDate(QDate::fromString(weekMeta.at(3),workSched->dateFormat));
-        weekStart.setTime(QTime::fromString("00:00:00","hh:mm:ss"));
-        weekStart.setTimeSpec(Qt::LocalTime);
-        firstDay = weekStart;
+    for(int daytick = 0; daytick < dayCount+1; ++daytick)
+    {
+        xDateTick[daytick] = weekStart.addDays(daytick-1).toTime_t() + 3600;
+        yStress[daytick] = stressMap->value(workoutDate.addDays(daytick-1)).at(0);
+        yLTS[daytick] = round(stressMap->value(workoutDate.addDays(daytick-1)).at(2));
+        if(maxValues[0] < yStress[daytick]) maxValues[0] = yStress[daytick];
+    }
 
-        for(int daytick = 0; daytick < dayCount+1; ++daytick)
+    for(int day = 0; day < dayCount; ++day)
+    {
+        xDates[day] = weekStart.addDays(day).toTime_t() + 3600;
+        workMap = compMap->value(weekStart.addDays(day).date());
+
+        dayWorkouts = workSched->get_workouts(true,workoutDate.addDays(day).toString(workSched->dateFormat));
+        for(QMap<int, QStringList>::const_iterator it = dayWorkouts.cbegin(), end = dayWorkouts.cend(); it != end; ++it)
         {
-            xDateTick[daytick] = weekStart.addDays(daytick-1).toTime_t() + 3600;
-            yStress[daytick] = stressMap->value(workoutDate.addDays(daytick-1)).at(0);
-            yLTS[daytick] = round(stressMap->value(workoutDate.addDays(daytick-1)).at(2));
-            if(maxValues[0] < yStress[daytick]) maxValues[0] = yStress[daytick];
+            weekWorkouts.insert(workoutCount++,it.value().last());
         }
 
-        for(int day = 0; day < dayCount; ++day)
+        for(QMap<QString,QVector<double>>::const_iterator it = workMap.cbegin(), end = workMap.cend(); it != end; ++it)
         {
+            yWorkouts[day] = yWorkouts.at(day) + it.value().at(0);
+            yDura[day] = yDura.at(day) + (it.value().at(1)/60.0);
+            yDist[day] = yDist.at(day) + it.value().at(3);
+            yWorkKj[day] = yWorkKj.at(day) + it.value().at(5);
+        }
 
-            xDates[day] = weekStart.addDays(day).toTime_t() + 3600;
-            workMap = compMap->value(weekStart.addDays(day).date());
-            for(QMap<QString,QVector<double>>::const_iterator it = workMap.cbegin(), end = workMap.cend(); it != end; ++it)
+        yWorkCount[day] = yWorkouts.at(day)*10.0;
+
+        if(maxValues[1] < yDura[day]) maxValues[1] = yDura[day];
+        if(maxValues[2] < yDist[day]) maxValues[2] = yDist[day];
+        if(maxValues[3] < yWorkKj[day]) maxValues[3] = yWorkKj[day];
+    }
+
+    //Load Level Distribution
+    QVector<double> workLoad(levelList.count(),0);
+    double zoneValue = 0;
+    double weekSum = 0;
+
+    for( QMap<int,QString>::const_iterator it = weekWorkouts.cbegin(), end = weekWorkouts.cend(); it != end; ++it)
+    {
+        workLoad = stdWorkouts->get_workLevelLoad(it.value());
+        if(workLoad.count() > 0)
+        {
+            for(int level = 0; level < levelList.count(); ++level)
             {
-                yWorkouts[day] = yWorkouts.at(day) + it.value().at(0);
-                yDura[day] = yDura.at(day) + (it.value().at(1)/60.0);
-                yDist[day] = yDist.at(day) + it.value().at(3);
-                yWorkKj[day] = yWorkKj.at(day) + it.value().at(5);
+                weekSum = weekSum + workLoad.at(level);
+                zoneValue = zoneTime.value(level) + workLoad.at(level);
+                zoneTime.insert(level,zoneValue);
             }
-
-            weekWorkouts = weekWorkouts + static_cast<int>(yWorkouts.at(day));
-            yWorkCount[day] = yWorkouts.at(day)*10.0;
-
-            if(maxValues[1] < yDura[day]) maxValues[1] = yDura[day];
-            if(maxValues[2] < yDist[day]) maxValues[2] = yDist[day];
-            if(maxValues[3] < yWorkKj[day]) maxValues[3] = yWorkKj[day];
         }
-
-        /*Load Level Distribution
-        for(QMap<QDateTime,QStringList>::const_iterator it = weekworkouts.cbegin(), end = weekworkouts.cend(); it != end; ++it)
+    }
+    for( QMap<int,double>::const_iterator it = zoneTime.cbegin(), end = zoneTime.cend(); it != end; ++it)
+    {
+        if(it.value() > 0)
         {
-            this->filter_steps(it.value().at(2),false);
-
-            for(int x = 0; x < stepProxy->rowCount(); ++x)
-            {
-                currZone = stepProxy->data(stepProxy->index(x,3)).toString();
-                part = stepProxy->data(stepProxy->index(x,2)).toString();
-                parent = stepProxy->data(stepProxy->index(x,8)).toString();
-
-                if(part.contains("Group") || part.contains("Series"))
-                {
-                    factorMap.insert(part,stepProxy->data(stepProxy->index(x,7)).toInt());
-                }
-
-                if(parent.contains("Group") && part.contains("Series"))
-                {
-                    groupFactor = factorMap.value(parent);
-                    seriesFactor = factorMap.value(part);
-                    factorMap.insert(part,groupFactor*seriesFactor);
-                    factor = factorMap.value(parent);
-                }
-                else
-                {
-                    factor = 1;
-                }
-
-                currTime = this->get_timesec(stepProxy->data(stepProxy->index(x,5)).toString())*factor;
-                zoneTime.insert(currZone,zoneTime.value(currZone) + currTime);
-                timeSum = timeSum + currTime;
-            }
-            factorMap.clear();
+            zoneTime.insert(it.key(),round((it.value()/weekSum)*100.0));
         }
+    }
 
-        for(QMap<QString,double>::const_iterator it = zoneTime.cbegin(), end = zoneTime.cend(); it != end; ++it)
-        {
-            zoneTime.insert(it.key(),round((it.value() / timeSum)*100.0));
-        }
-        */
-        ui->label_weekinfos->setText("Week: " + weekMeta.at(0) + " - Phase: " + weekMeta.at(2) + " - Workouts: " + QString::number(weekWorkouts));
+    ui->label_weekinfos->setText("Week: " + weekMeta.at(0) + " - Phase: " + weekMeta.at(2) + " - Workouts: " + QString::number(workoutCount));
 
-        this->set_graph();
-        this->set_weekPlot(0);
+    this->set_graph();
+    this->set_weekPlot(0);
 }
 
 
@@ -296,7 +280,7 @@ void week_popup::set_weekPlot(int yValue)
         {
             tickCount << i;
             zoneLabel << levelList.at(i);
-            zoneValues << zoneTime.value(levelList.at(i));
+            zoneValues << zoneTime.value(i);
         }
 
         QSharedPointer<QCPAxisTickerText> zoneTicker(new QCPAxisTickerText);

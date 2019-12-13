@@ -44,12 +44,12 @@ private:
     Ui::year_popup *ui;
 
     QStringList phaseInfo,phaseList,selectList,weekList,sportUseList;
-    QSortFilterProxyModel *metaProxy,*proxyFilter,*contentProxy;
     QString phaseName;
     int col,widthFactor,heightFactor,weekcount;
     bool isLoad;
     schedule *workSched;
     QVector<double> xWeeks,yStress,yDura,yDist,yWorks,yValues,maxValues;
+    QHash<QString,QString> *generalValues;
 
     void set_comValues(const QVector<double>,int);
     void read_compValues(QStandardItem*,QString,int);

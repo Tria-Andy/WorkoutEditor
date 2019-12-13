@@ -31,9 +31,9 @@
 #include <QJsonDocument>
 #include <QDateTime>
 
-Activity::Activity(QString jsonfile,bool intAct)
+Activity::Activity()
 {
-    this->readJsonFile(jsonfile,intAct);
+
 }
 
 void Activity::readJsonFile(QString jsonfile,bool intAct)

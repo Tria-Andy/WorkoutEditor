@@ -22,6 +22,61 @@
 jsonHandler::jsonHandler()
 {
     gcValues = settings::getStringMapPointer(settings::stingMap::GC);
+    generalValues = settings::getStringMapPointer(settings::stingMap::General);
+}
+
+void jsonHandler::readJsonFiles(QStandardItem *rootItem)
+{
+    QFile file;
+    QString filePath;
+    int jsonMaxFiles = generalValues->value("filecount").toInt();
+    QDir directory(gcValues->value("actpath"));
+    directory.setSorting(QDir::Name | QDir::Reversed);
+    directory.setFilter(QDir::Files);
+    QFileInfoList fileList = directory.entryInfoList();
+    int fileCount = fileList.count() > jsonMaxFiles ? jsonMaxFiles : fileList.count();
+
+    for(int i = 0; i < fileCount; ++i)
+    {
+        filePath = fileList.at(i).path()+QDir::separator()+fileList.at(i).fileName();
+        file.setFileName(filePath);
+        file.open(QFile::ReadOnly | QFile::Text);
+        rootItem->appendRow(this->readFileContent(file.readAll(),filePath));
+        file.close();
+    }
+}
+
+QList<QStandardItem *> jsonHandler::readFileContent(QString jsonfile,QString filePath)
+{
+    QList<QStandardItem *> listItems;
+    QStringList valueList;
+
+    valueList = settings::get_listValues("JsonFile");
+    QDateTime workDateTime;
+    workDateTime.setTimeSpec(Qt::UTC);
+
+    QDateTime localTime(QDateTime::currentDateTime());
+    localTime.setTimeSpec(Qt::LocalTime);
+
+    QJsonObject rideObject,tagObject;
+    QJsonDocument d = QJsonDocument::fromJson(jsonfile.toUtf8());
+    QJsonObject jsonobj = d.object();
+
+    rideObject = jsonobj.value(QString("RIDE")).toObject();
+    this->fill_qmap(&actInfo,&rideObject);
+
+    tagObject = rideObject.value(QString("TAGS")).toObject();
+    this->fill_qmap(&actInfo,&tagObject);
+
+    workDateTime = QDateTime::fromString(actInfo.value("STARTTIME"),"yyyy/MM/dd hh:mm:ss UTC").addSecs(localTime.offsetFromUtc());
+
+    listItems << new QStandardItem(QLocale().dayName(workDateTime.date().dayOfWeek(),QLocale::ShortFormat));
+    listItems << new QStandardItem(workDateTime.toString("dd.MM.yyyy hh:mm:ss"));
+    listItems << new QStandardItem(actInfo.value("Sport"));
+    listItems << new QStandardItem(actInfo.value("Workout Code"));
+    listItems << new QStandardItem(filePath);
+
+    return listItems;
 }
 
 void jsonHandler::fill_qmap(QHash<QString, QString> *qmap,QJsonObject *objItem)
@@ -262,8 +317,9 @@ void jsonHandler::write_xdataModel(QStandardItemModel *model)
 {
     QJsonArray item_xdata,intArray,value_array;
     QJsonObject xdataObj,item_array;
-    int offset;
-    int xdataCol;
+    int offset = 3;
+    int xdataCol = 1;
+    /*
     if(isSwim)
     {
         offset = 3;
@@ -274,7 +330,7 @@ void jsonHandler::write_xdataModel(QStandardItemModel *model)
         offset = 2;
         xdataCol = 0;
     }
-
+    */
     xdataObj.insert("NAME",xData.value("NAME"));
     xdataObj.insert("UNITS",listToJson(&xdataUnits));
     xdataObj.insert("VALUES",listToJson(&xdataValues));

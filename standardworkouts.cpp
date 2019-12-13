@@ -21,22 +21,15 @@
 
 standardWorkouts::standardWorkouts()
 {
-    workoutPath = settings::getStringMapPointer(settings::stingMap::GC)->value("workouts");
-    fileMap = settings::getStringMapPointer(settings::stingMap::File);
-    stdWorkoutsModel = new QStandardItemModel();
-    selectedModel = new QStandardItemModel();
-
-    if(!workoutPath.isEmpty())
-    {
-        this->xml_toTreeModel(fileMap->value("standardworkoutfile"),stdWorkoutsModel);
-        this->fill_workoutMap();
-    }
+    fill_workoutMap();
 }
 
 void standardWorkouts::fill_workoutMap()
 {
+    workoutUpdate = false;
     QStandardItem *sportItem;
     QString sportName;
+    QVector<double> loadValues(settings::get_listValues("Level").count(),0);
 
     for(int sport = 0; sport < stdWorkoutsModel->rowCount(); ++sport)
     {        
@@ -47,13 +40,16 @@ void standardWorkouts::fill_workoutMap()
         {    
             for(int work = 0; work < sportItem->rowCount(); ++work)
             {
-                this->add_workoutToMap(sportItem->child(work,0),sportName);
+                workoutIndex.insert(this->add_workoutToMap(sportItem->child(work,0),sportName),sportItem->child(work,0)->index());
+                levelLoadMap.insert(sportItem->child(work,1)->data(Qt::DisplayRole).toString(),loadValues);
+                this->read_childFromModel(sportItem->child(work,0),sportItem->child(work,1)->data(Qt::DisplayRole).toString(),1);
+                loadValues.fill(0);
             }
         }
     }
 }
 
-void standardWorkouts::add_workoutToMap(QStandardItem *workitem,QString sport)
+QString standardWorkouts::add_workoutToMap(QStandardItem *workitem,QString sport)
 {
     QHash<QString,QVector<QString>> workoutInfo = workoutMap.value(sport);
     QVector<QString> workoutMeta(9);
@@ -70,9 +66,10 @@ void standardWorkouts::add_workoutToMap(QStandardItem *workitem,QString sport)
     workoutMeta[7] = workitem->index().siblingAtColumn(9).data(Qt::DisplayRole).toString();
     workoutMeta[8] = workitem->index().siblingAtColumn(0).data(Qt::DisplayRole).toString();
 
-    workoutIndex.insert(workID,workitem->index());
     workoutInfo.insert(workID,workoutMeta);
     workoutMap.insert(sport,workoutInfo);
+
+    return workID;
 }
 
 QStandardItem *standardWorkouts::get_selectedWorkout(QString workID)
@@ -80,55 +77,84 @@ QStandardItem *standardWorkouts::get_selectedWorkout(QString workID)
     return stdWorkoutsModel->itemFromIndex(workoutIndex.value(workID));
 }
 
-void standardWorkouts::update_selectedWorkout(QString workoutID)
+QString standardWorkouts::get_workoutCount(QString workID)
+{
+    return stdWorkoutsModel->itemFromIndex(workoutIndex.value(workID))->data(Qt::DisplayRole).toString();
+}
+
+void standardWorkouts::update_selectedWorkout(QString workoutID,QList<QStandardItem*> metaList)
 {
     QModelIndex workIndex = workoutIndex.value(workoutID);
     QStandardItem *workoutItem = stdWorkoutsModel->itemFromIndex(workIndex);
+
     if(workoutItem->hasChildren())
     {
         stdWorkoutsModel->removeRows(0,workoutItem->rowCount(),workIndex);
     }
+
+    QStandardItem *sportItem = workoutItem->parent();
+
+    for(int item = 0; item < metaList.count(); ++item)
+    {
+        sportItem->setChild(workIndex.row(),item,metaList.at(item));
+    }
+    this->add_workoutToMap(sportItem->child(workIndex.row(),0),sportItem->index().siblingAtColumn(1).data(Qt::DisplayRole).toString());
+    workoutUpdate = true;
 }
 
-void standardWorkouts::read_childFromModel(QStandardItem *sourceItem,QStandardItem *targetItem)
-{
-    QStandardItem *childSourceItem;
 
-    if(sourceItem->hasChildren())
+void standardWorkouts::read_childFromModel(QStandardItem *item,QString workID,int reps)
+{
+    if(item->hasChildren())
     {
-        for(int row = 0; row < sourceItem->rowCount(); ++row)
+        for(int row = 0; row < item->rowCount(); ++row)
         {
-            childSourceItem = sourceItem->child(row,0);
-            if(childSourceItem->hasChildren())
+            if(item->child(row,0)->hasChildren())
             {
-                this->read_childFromModel(childSourceItem,this->set_childtoModel(childSourceItem,targetItem));
+                this->read_childFromModel(item->child(row,0),workID,item->child(row,2)->data(Qt::DisplayRole).toInt());
             }
             else
             {
-                this->set_childtoModel(childSourceItem,targetItem);
+                this->set_levelLoadValues(item->child(row,0),workID,reps);
             }
         }
     }
 }
 
-QStandardItem* standardWorkouts::set_childtoModel(QStandardItem *source,QStandardItem *target)
+void standardWorkouts::set_levelLoadValues(QStandardItem *item,QString workID,int reps)
 {
-    QList<QStandardItem*> itemList;
-    int attCount = settings::get_xmlMapping(source->data(Qt::AccessibleTextRole).toString())->count();
+    QVector<double> levelValues = levelLoadMap.value(workID);
 
-    for(int att = 0; att < attCount; ++att)
-    {
-        itemList << source->model()->itemFromIndex(source->index().siblingAtColumn(att))->clone();
-    }
+    int pos = settings::get_listValues("Level").indexOf(item->index().siblingAtColumn(4).data(Qt::DisplayRole).toString());
+    double levelValue = levelValues.at(pos) + (item->index().siblingAtColumn(3).data(Qt::DisplayRole).toDouble() * reps);
 
-    target->appendRow(itemList);
-    return itemList.at(0);
+    levelValues[pos] = levelValue;
+    levelLoadMap.insert(workID,levelValues);
 }
 
-QString standardWorkouts::create_newWorkout(QString sport,QList<QStandardItem*> metaList)
+void standardWorkouts::check_workouts()
+{
+    QStandardItem *sportItem;
+    QModelIndex workIndex;
+    for(int sport = 0; sport < stdWorkoutsModel->rowCount(); ++sport)
+    {
+        sportItem = stdWorkoutsModel->item(sport,0);
+        for(int work = 0; work < sportItem->rowCount(); ++work)
+        {
+            workIndex = sportItem->child(work,0)->index();
+            for(int item = 0; item < 9; ++item)
+            {
+                qDebug() << workIndex.siblingAtColumn(item).data(Qt::DisplayRole);
+            }
+        }
+    }
+}
+
+QPair<int,QString> standardWorkouts::create_newWorkout(QString sport)
 {
     QHash<QString,QVector<QString>> sportID = workoutMap.value(sport);
     QString workID;
+    QList<QStandardItem*> metaList;
 
     int counter;
 
@@ -139,20 +165,23 @@ QString standardWorkouts::create_newWorkout(QString sport,QList<QStandardItem*> 
             workID = sport+"_"+QString::number(counter);
         }
     }
+
     if(workID.isEmpty()) workID = sport+"_"+QString::number(counter);
 
+    metaList.insert(0,new QStandardItem(QString::number(counter-1)));
+    metaList.insert(1,new QStandardItem(workID));
 
-    //Append new Workout to TreeModel
-    metaList.at(0)->setData("standardworkout",Qt::AccessibleTextRole);
-    metaList.at(0)->setData(QString::number(workoutMap.value(sport).count()),Qt::DisplayRole);
-    metaList.at(1)->setData(workID,Qt::DisplayRole);
+    for(int item = 2; item < 8; ++item)
+    {
+        metaList.insert(item, new QStandardItem(""));
+    }
 
-    QStandardItem *sportItem = stdWorkoutsModel->findItems(sport,Qt::MatchExactly | Qt::MatchRecursive,1).at(0);
-
+    QStandardItem *sportItem = stdWorkoutsModel->item(this->get_modelIndex(sport,1).row(),0);
     sportItem->appendRow(metaList);
-    this->add_workoutToMap(stdWorkoutsModel->findItems(workID,Qt::MatchExactly | Qt::MatchRecursive,1).at(0),sport);
 
-    return workID;
+    workoutIndex.insert(workID,sportItem->child(sportItem->rowCount()-1,0)->index());
+
+    return qMakePair(counter-1,workID);
 }
 
 QModelIndex standardWorkouts::get_modelIndex(QString searchString,int col)
@@ -184,4 +213,13 @@ void standardWorkouts::delete_stdWorkout(QString workID,bool isdelete)
 {
     get_modelIndex(workID,0);
 
+}
+
+void standardWorkouts::save_workouts()
+{
+    if(workoutUpdate)
+    {
+        this->save_data(2);
+    }
+    workoutUpdate = false;
 }

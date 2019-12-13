@@ -24,8 +24,9 @@
 #include <QStandardItemModel>
 #include "settings.h"
 #include "jsonhandler.h"
+#include "calculation.h"
 
-class Activity : public jsonHandler
+class Activity : public jsonHandler, public calculation
 {
 
 private:
@@ -44,7 +45,6 @@ private:
     QVector<bool> editRow;
 
     //Functions
-    void readJsonFile(QString,bool);
     void prepareData();
     void build_intTree();
     QString build_lapName(QString,int,double);
@@ -66,8 +66,9 @@ private:
     int get_zone_values(double,int,bool);
 
 public:
-    explicit Activity(QString jsonfile = QString(),bool intAct = false);
+    explicit Activity();
 
+    void readJsonFile(QString,bool);
     void set_selectedItem(QItemSelectionModel*);
     void set_editRow(QString,bool);
     void showSwimLap(bool);

@@ -265,12 +265,12 @@ namespace Ui {
 class day_popup;
 }
 
-class day_popup : public QDialog, public jsonHandler, public standardWorkouts
+class day_popup : public QDialog, public schedule, public jsonHandler
 {
     Q_OBJECT
 
 public:
-    explicit day_popup(QWidget *parent = nullptr, const QDate w_date = QDate(), schedule *p_sched = nullptr);
+    explicit day_popup(QWidget *parent = nullptr, const QDate w_date = QDate(), standardWorkouts *p_stdWorkout = nullptr);
     ~day_popup();
 
 private slots:
@@ -290,13 +290,12 @@ private slots:
 
 private:
     Ui::day_popup *ui;
-    schedule *workSched;
+    standardWorkouts *stdWorkouts;
     del_daypop daypop_del;
-    QStandardItemModel *dayModel,*stdlistModel,*intExport, *sampExport;
-    QHash<QDate,QMap<int,QStringList>> workoutMap;
-    QMap<int,QStringList> dayWorkouts;
-    QHash<int,QString> stdworkData;
+    QStandardItemModel *dayModel,*intExport, *sampExport;
+
     QDate popupDate;
+    QMap<int,QStringList> workoutMap;
     QStringList *workListHeader;
     QIcon editIcon,addIcon;
     int selWorkout;
@@ -304,7 +303,7 @@ private:
 
     void init_dayWorkouts(QDate);
     void update_workouts();
-    void set_comboWorkouts(QString,QString);
+    void set_comboWorkouts(QString);
     void set_controlButtons(bool);
     void set_exportContent();
     void set_result(int);

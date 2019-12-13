@@ -52,7 +52,6 @@ protected:
     double current_dayCalories(QDateTime) const;
     QString calc_weekID(QDate);
     QHash<QString,double> *thresValues, *athleteValues;
-    QHash<QString,QString> *generalValues;
 };
 
 #endif // CALCULATION_H

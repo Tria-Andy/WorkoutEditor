@@ -46,7 +46,6 @@
 #include "dialog_week_copy.h"
 #include "settings.h"
 #include "jsonhandler.h"
-#include "filereader.h"
 #include "activity.h"
 #include "calculation.h"
 #include "logger.h"
@@ -58,6 +57,8 @@ class schedule_delegate : public QStyledItemDelegate, public calculation
 
 public:
     schedule_delegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
+
+    QHash<QString,QString>* generalValues = settings::getStringMapPointer(settings::stingMap::General);
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -258,6 +259,8 @@ class saison_delegate : public QStyledItemDelegate, public calculation
 public:
     saison_delegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
+    QHash<QString,QString>* generalValues = settings::getStringMapPointer(settings::stingMap::General);
+
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
@@ -405,6 +408,8 @@ class summery_delegate : public QStyledItemDelegate, public calculation
 public:
     summery_delegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
+    QHash<QString,QString>* generalValues = settings::getStringMapPointer(settings::stingMap::General);
+
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
@@ -511,6 +516,8 @@ class del_treeview : public QStyledItemDelegate, public calculation
 
 public:
     explicit del_treeview(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
+
+    QHash<QString,QString>* generalValues = settings::getStringMapPointer(settings::stingMap::General);
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -663,6 +670,8 @@ public:
     enum{SwimLap,Interval};
     int intType;
     QString sport;
+
+    QHash<QString,QString>* generalValues = settings::getStringMapPointer(settings::stingMap::General);
 
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
@@ -914,6 +923,8 @@ class del_avgweek : public QStyledItemDelegate, public calculation
     Q_OBJECT
 public:
     explicit del_avgweek(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
+
+    QHash<QString,QString>* generalValues = settings::getStringMapPointer(settings::stingMap::General);
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -1193,7 +1204,7 @@ namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow, public fileReader
+class MainWindow : public QMainWindow, public calculation
 {
     Q_OBJECT
 
@@ -1232,7 +1243,7 @@ private:
     QComboBox *modules;
     QDate firstdayofweek;
     QString dateFormat,longTime,shortTime;
-    QHash<QString,QString> *gcValues;
+    QHash<QString,QString> *gcValues,*generalValues;
 
     //Intervall Chart
     QVector<double> secTicker,speedValues,secondValues,polishValues,speedMinMax,secondMinMax,rangeMinMax;

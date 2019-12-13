@@ -74,7 +74,7 @@ namespace Ui {
 class Dialog_workCreator;
 }
 
-class Dialog_workCreator : public QDialog, public calculation
+class Dialog_workCreator : public QDialog, public calculation, public standardWorkouts
 {
     Q_OBJECT
 
@@ -123,13 +123,17 @@ private:
     QHash<QString,QMap<int,QString>> *xmlTagMap;
     QMap<int,QPair<QString,QVector<double>>> plotMap;
     QMap<QString,QPair<int,int>> plotRange;
-    QMap<QString,int> stdWorkoutMapping;
+    QMap<QDate,int> stdWorkoutMapping;
     QVector<double> lastPlotValues;
     QSet<QString> workoutTitle;
+    QVector<QString> metaValues;
+    QHash<QString,QString> *gcValues,*generalValues;
+
 
     QTreeWidgetItem* set_itemToWidget(QStandardItem*,QTreeWidgetItem*);
     QVariant get_modelValue(QStandardItem*,QString);
     QVariant get_itemValue(QStandardItem*,QStringList*,QString);
+    QStandardItem* add_itemToWorkout(QTreeWidgetItem*,QStandardItem*,int);
 
     void load_selectedWorkout(QString);
     void read_selectedChild(QStandardItem*,QTreeWidgetItem*);
@@ -143,14 +147,12 @@ private:
     void read_currentData(QTreeWidgetItem*);
     void save_selectedWorkout();
     void read_childToWorkout(QTreeWidgetItem*,QStandardItem*,int);
-    QStandardItem* add_itemToWorkout(QTreeWidgetItem*,QStandardItem*,int);
     void draw_plotGraphic(int);
     void set_itemDataRange(QTreeWidgetItem *item);
     void get_workouts(QString);
 
     QStringList groupList,levelList;
     QStringList *workoutHeader,*workoutTags,*stdWorkTags,*partTags,*stepTags;
-    QHash<QString,QString> modelMapping;
     QTreeWidgetItem *currentItem;
     del_workcreator workTree_del;
     del_mousehover mousehover_del;
@@ -162,13 +164,15 @@ private:
     QRadioButton *updateAll, *updateRange;
     QPushButton *updateClose;
     QToolButton *updateOk;
-    QListView *workoutView;
+    QListWidget *workoutUpdateWidget;
     QProgressBar *updateProgess;
 
     void control_editPanel(bool);
+    void set_sumLabel(bool);
     void resetAxis();
 
     QTreeWidgetItem* move_item(int,QTreeWidgetItem*);
+    int round_workValue(int);
     void set_defaultData(QTreeWidgetItem *item,bool);
 
     void clearIntTree();

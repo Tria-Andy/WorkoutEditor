@@ -31,7 +31,7 @@ namespace Ui {
 class Dialog_export;
 }
 
-class Dialog_export : public QDialog, public jsonHandler
+class Dialog_export : public QDialog, public jsonHandler, public calculation
 {
     Q_OBJECT
 

@@ -4,7 +4,6 @@ calculation::calculation()
 {
     thresValues = settings::getdoubleMapPointer(settings::dMap::Threshold);
     athleteValues = settings::getdoubleMapPointer(settings::dMap::Athlete);
-    generalValues = settings::getStringMapPointer(settings::stingMap::General);
 }
 
 void calculation::set_currentSport(QString sport)
@@ -239,8 +238,6 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,int
     double factor = 1000.0;
     double grav = 9.81;
     double weight = settings::get_weightforDate(QDateTime::currentDateTime());
-    double height = athleteValues->value("height");
-    double mSec = pValue*factor/3600.0;
     double totalWork = 0;
     sport = "";
     if(isSwim)
@@ -271,14 +268,20 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,int
         }
         else
         {
-            double bodyHub = (height * 0.0543) + (((3600/thresPace) / pValue) / 100.0);
+            double mSec = pValue/3600.0;
+            double bodyHub = (athleteValues->value("height") * 0.0543) + (((3600/thresPace) / pValue) / 100.0);
             totalWork = (weight * grav * mSec * bodyHub) * dura / factor;
         }
-
     }
-    else if(isStrength || isAlt)
+    else if(isStrength)
     {
-        totalWork = (weight * grav * mSec * 0.145) * dura / factor;
+        //double mSec = pValue/3600.0;
+        //totalWork = (weight * grav * mSec * 0.145) * dura / factor;
+        totalWork = (dura * pValue) / factor;
+    }
+    else if(isAlt)
+    {
+        totalWork = (dura * pValue) / factor;
     }
 
     return set_doubleValue(totalWork,false);
@@ -414,8 +417,6 @@ QString calculation::calc_weekID(QDate workoutDate)
     {
         weeknumber = weeknumber+"_"+QString::number(workoutDate.year());
     }
-
-    //qDebug() << workoutDate << weeknumber;
 
     return weeknumber;
 }

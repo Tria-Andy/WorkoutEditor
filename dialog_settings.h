@@ -119,7 +119,6 @@ private:
     QModelIndex contestIndex;
     schedule *schedule_ptr;
     foodplanner *food_ptr;
-    saisons *saisons_ptr;
     QHash<QString,QColor> colorMapCache;
     QCheckBox *tempCheck;
     QStringList sportList,model_header,contestTags;

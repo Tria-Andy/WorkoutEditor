@@ -25,6 +25,7 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    generalValues = settings::getStringMapPointer(settings::stingMap::General);
     workSched = p_sched;
     ui->comboBox_phase->addItems(settings::get_listValues("Phase"));
     ui->comboBox_cycle->addItems(settings::get_listValues("Cycle"));

@@ -21,15 +21,17 @@
 #include <QMap>
 #include <QHash>
 #include <QStandardItemModel>
-#include "calculation.h"
+#include <QJsonObject>
 
-class jsonHandler : public calculation
+class jsonHandler
 {
 public:
     jsonHandler();
+    void readJsonFiles(QStandardItem *);
 
 protected:
     QString readJsonContent(QString);
+
     void fill_qmap(QHash<QString,QString>*,QJsonObject*);
     void init_actModel(QString,QMap<int,QString> *,QStandardItemModel*,QStringList*,int);
     void init_xdataModel(QStandardItemModel*);
@@ -41,13 +43,15 @@ protected:
     QHash<QString,QString> rideData,tagData,overrideData;
     QStringList intList,sampList;
     QString fileName;
-    QHash<QString,QString> *gcValues;
+    QHash<QString,QString> *gcValues,*generalValues;
 
 private:
     QJsonObject activityItem;
     QString jsonFile;
     QStringList xdataValues,xdataUnits;
     QHash<QString,QString> xData;
+    QList<QStandardItem *> readFileContent(QString,QString);
+    QHash<QString,QString> actInfo;
 
     void fill_keyList(QStringList*,QMap<int,QString>*,QStringList*);
     void fill_model(QStandardItemModel*,QJsonArray*,QStringList*);

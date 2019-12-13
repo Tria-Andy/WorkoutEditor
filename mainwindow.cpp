@@ -28,9 +28,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     //Settings
     userSetup = settings::loadSettings();
+    datahandler::load_data();
 
     if(userSetup == 0)
     {
+        generalValues = settings::getStringMapPointer(settings::stingMap::General);
         gcValues = settings::getStringMapPointer(settings::stingMap::GC);
         sportUse = settings::get_listValues("Sportuse").count();
         ui->lineEdit_athlete->setText(gcValues->value("athlete"));
@@ -44,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent) :
         //Planning Mode
         graphLoaded = false;
         workSchedule = new schedule();
+        workSchedule->init_scheduleData();
+        curr_activity = new Activity();
         saisonValues = workSchedule->get_saisonValues();
         schedMode = settings::getHeaderMap("mode");
 
@@ -246,7 +250,7 @@ void MainWindow::freeMem()
 {
     if(userSetup == 0)
     {
-        workSchedule->freeMem();
+        //workSchedule->freeMem();
         delete workSchedule;
         delete sumModel;
         delete fileModel;
@@ -431,7 +435,7 @@ void MainWindow::read_activityFiles()
     ui->lineEdit_workContent->clear();
     ui->progressBar_fileState->setValue(20);
     QStandardItem *rootItem = fileModel->invisibleRootItem();
-    this->readJsonFiles(rootItem);
+    curr_activity->readJsonFiles(rootItem);
     ui->progressBar_fileState->setValue(75);
     this->loadfile(fileModel->data(fileModel->index(0,4)).toString());
     actLoaded = true;
@@ -457,11 +461,6 @@ void MainWindow::clearActivtiy()
         delete curr_activity->intTreeModel;
         delete curr_activity->avgModel;
         delete curr_activity->selItemModel;
-        if(hasXdata)
-        {
-            //delete curr_activity->xdataModel;
-        }
-
         delete curr_activity;
     }
     actLoaded = false;
@@ -942,7 +941,7 @@ void MainWindow::on_actionNew_triggered()
     {
         if(isWeekMode)
         {
-            day_popup day_pop(this,QDate::currentDate(),workSchedule);
+            day_popup day_pop(this,QDate::currentDate());
             day_pop.setModal(true);
             dialog_code = day_pop.exec();
             if(dialog_code == QDialog::Rejected)
@@ -1200,7 +1199,8 @@ void MainWindow::loadfile(const QString &filename)
            return;
         }
         filecontent = file.readAll();
-        curr_activity = new Activity(filecontent,true);
+        curr_activity->readJsonFile(filecontent,true);
+
         actLoaded = true;
         file.close();
 
@@ -2598,7 +2598,7 @@ void MainWindow::on_tableWidget_schedule_itemClicked(QTableWidgetItem *item)
     if(item->column() == 0)
     {
        QString selected_week =  item->data(Qt::UserRole).toString();
-       week_popup week_pop(this,selected_week,workSchedule);
+       week_popup week_pop(this,selected_week,workSchedule,stdWorkouts);
        week_pop.setModal(true);
        dialog_code = week_pop.exec();
 
@@ -2617,13 +2617,16 @@ void MainWindow::on_tableWidget_schedule_itemClicked(QTableWidgetItem *item)
     }
     else
     {
-        day_popup day_pop(this,item->data(Qt::UserRole).toDate(),workSchedule);
+        QDate selectedDate = item->data(Qt::UserRole).toDate();
+        day_popup day_pop(this,selectedDate,stdWorkouts);
         day_pop.setModal(true);
         dialog_code = day_pop.exec();
 
         if(dialog_code == QDialog::Rejected)
         {
             ui->actionSave->setEnabled(workSchedule->get_isUpdated());
+            foodPlan->set_daySumMap(selectedDate);
+            this->fill_foodSumTable(selectedDate.addDays(1 - selectedDate.dayOfWeek()));
         }
     }
 

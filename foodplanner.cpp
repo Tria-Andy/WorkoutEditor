@@ -486,13 +486,13 @@ void foodplanner::check_foodPlan()
 
 void foodplanner::save_foolPlan()
 {
-    this->read_treeModel(foodPlanModel,fileMap->value("foodfile"));
-    this->read_treeModel(historyModel,fileMap->value("foodhistory"));
+    this->treeModel_toXml(foodPlanModel,fileMap->value("foodfile"));
+    this->treeModel_toXml(historyModel,fileMap->value("foodhistory"));
 }
 
 void foodplanner::save_mealList()
 {
-    this->read_treeModel(mealModel,fileMap->value("mealsfile"));
+    this->treeModel_toXml(mealModel,fileMap->value("mealsfile"));
 }
 
 void foodplanner::edit_mealSection(QString sectionName,int mode)

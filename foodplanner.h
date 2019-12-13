@@ -4,11 +4,10 @@
 #include <QStandardItemModel>
 #include <QStyledItemDelegate>
 #include <QtXml>
-#include "xmlhandler.h"
 #include "schedule.h"
 #include "settings.h"
 
-class foodplanner : public xmlHandler, public calculation
+class foodplanner : public datahandler, public calculation
 {
 
 public:
@@ -30,6 +29,7 @@ public:
     QPair<QString,QVector<int>> get_mealData(QString);
 
     void update_foodPlanData(bool,QDate,QDate);
+    void set_daySumMap(QDate);
     void set_dragandDrop() {update_foodPlanModel();}
     void fill_updateMap(bool,bool,QDate,QString);
     void edit_updateMap(int,QPair<QDate,QString>,QString,double);
@@ -67,7 +67,6 @@ private:
     void set_dayFoodValues(QStandardItem*);
     void set_foodPlanData(QStandardItem*);
     void add_toHistory(QDate);
-    void set_daySumMap(QDate);
     void set_foodPlanList(QStandardItem*);
     void check_foodPlan();
 };

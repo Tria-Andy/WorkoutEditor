@@ -345,9 +345,9 @@ void Dialog_settings::writeChangedValues()
     intMap.insert("ltsdays",ui->spinBox_ltsDays->value());
     intMap.insert("stsdays",ui->spinBox_stsDays->value());
 
-    if(generalValues->value("sum") != listMap.value("Misc").at(0)) generalMap.insert("sum",listMap.value("Misc").at(0));
-    if(generalValues->value("empty") != listMap.value("Misc").at(1)) generalMap.insert("empty",listMap.value("Misc").at(1));
-    if(generalValues->value("breakname") != listMap.value("Misc").at(2)) generalMap.insert("breakname",listMap.value("Misc").at(2));
+    if(generalMap.value("sum") != listMap.value("Misc").at(0)) generalMap.insert("sum",listMap.value("Misc").at(0));
+    if(generalMap.value("empty") != listMap.value("Misc").at(1)) generalMap.insert("empty",listMap.value("Misc").at(1));
+    if(generalMap.value("breakname") != listMap.value("Misc").at(2)) generalMap.insert("breakname",listMap.value("Misc").at(2));
 
     athleteMap.insert("currpal",ui->doubleSpinBox_PALvalue->value());
 
@@ -1027,7 +1027,6 @@ void Dialog_settings::on_pushButton_clearFat_clicked()
 
 void Dialog_settings::on_pushButton_addContest_clicked()
 {
-    QHash<QDate,QMap<int,QStringList>> contestMap;
     QMap<int,QStringList> contest;
     QStringList contestValues;
 
@@ -1044,8 +1043,8 @@ void Dialog_settings::on_pushButton_addContest_clicked()
                   << "-";
 
     contest.insert(0,contestValues);
-    contestMap.insert(ui->dateEdit_contest->date(),contest);
-    schedule_ptr->set_workoutData(contestMap);
+    schedule_ptr->workoutUpdates.insert(ui->dateEdit_contest->date(),contest);
+    schedule_ptr->set_workoutData();
 
     contestValues.insert(0,"0");
     schedule_ptr->add_contest(ui->comboBox_saisons->currentText(),ui->dateEdit_contest->date(),contestValues);

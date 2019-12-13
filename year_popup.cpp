@@ -26,6 +26,7 @@ year_popup::year_popup(QWidget *parent, QString pInfo,schedule *p_sched,QString 
     ui->setupUi(this);
        setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
        isLoad = false;
+       generalValues = settings::getStringMapPointer(settings::stingMap::General);
        phaseInfo = pInfo.split("-");
        workSched = p_sched;
        phaseName = pPhase;

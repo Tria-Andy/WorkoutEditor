@@ -30,12 +30,12 @@ namespace Ui {
 class week_popup;
 }
 
-class week_popup : public QDialog, public calculation,public standardWorkouts
+class week_popup : public QDialog, public calculation
 {
     Q_OBJECT
 
 public:
-    explicit week_popup(QWidget *parent = nullptr,QString weekinfo = nullptr,schedule *p_sched = nullptr);
+    explicit week_popup(QWidget *parent = nullptr,QString weekinfo = nullptr,schedule *p_sched = nullptr,standardWorkouts *p_stdWork = nullptr);
     ~week_popup();
 
 private slots:
@@ -48,11 +48,11 @@ private:
     QStringList barSelection,levelList;
     QString weekID;
     schedule *workSched;
+    standardWorkouts *stdWorkouts;
     QDateTime firstDay;
     bool isLoad;
     QVector<double> xDates,xDateTick,maxValues,yWorkouts,yWorkCount,yStress,yDura,yDist,yWorkKj,yLTS,yValues;
-    QMap<QDateTime,QStringList> weekworkouts;
-    QMap<QString,double> zoneTime;
+    QMap<int,double> zoneTime;
     int dayCount;
     QCPGraph *get_QCPLine(QString,QColor,QVector<double> &xdata,QVector<double> &ydata,bool);
     QCPBars *get_QCPBar(QColor,int,int,bool);

@@ -37,6 +37,8 @@ public:
     explicit del_addweek(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
     QStringList *sportUse;
+    QHash<QString,QString>* generalValues = settings::getStringMapPointer(settings::stingMap::General);
+
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -268,7 +270,7 @@ private:
     QStringList *weekHeader;
     int sportlistCount;
     bool update;
-
+    QHash<QString,QString> *generalValues;
     void fill_values(QString);
     void update_values();
     void fill_weekSumRow(QAbstractItemModel*);

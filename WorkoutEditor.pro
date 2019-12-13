@@ -27,6 +27,7 @@ VERSION = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
 VERSION_PE_HEADER = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
 
 SOURCES += main.cpp\
+    datahandler.cpp \
         mainwindow.cpp \
     settings.cpp \
     dialog_export.cpp \
@@ -49,13 +50,13 @@ SOURCES += main.cpp\
     calculation.cpp \
     xmlhandler.cpp \
     dialog_workcreator.cpp \
-    filereader.cpp \
     foodplanner.cpp \
     dialog_map.cpp \
     foodmacro_popup.cpp \
     foodhistory_popup.cpp
 
 HEADERS  += mainwindow.h \
+    datahandler.h \
     settings.h \
     dialog_export.h \
     activity.h \
@@ -78,7 +79,6 @@ HEADERS  += mainwindow.h \
     calculation.h \
     xmlhandler.h \
     dialog_workcreator.h \
-    filereader.h \
     del_mousehover.h \
     foodplanner.h \
     dialog_map.h \
@@ -109,3 +109,6 @@ RESOURCES += \
 win32 {
     RC_FILE = WorkoutEditor.rc
 }
+
+DISTFILES += \
+    editormodel.qmodel

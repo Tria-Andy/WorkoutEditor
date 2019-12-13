@@ -32,6 +32,7 @@
 class del_racecalc : public QStyledItemDelegate, public calculation
 {
     const QString trans = "T";
+    QHash<QString,QString>* generalValues = settings::getStringMapPointer(settings::stingMap::General);
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {

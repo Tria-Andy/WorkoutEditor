@@ -30,48 +30,27 @@ schedule::schedule()
     shortTime = settings::get_format("shorttime");
     doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
     gcValues = settings::getStringMapPointer(settings::stingMap::GC);
-    fileMap = settings::getStringMapPointer(settings::stingMap::File);
 
-    scheduleModel = new QStandardItemModel();
-    phaseModel = new QStandardItemModel();
-
-    if(!gcValues->value("schedule").isEmpty())
-    {
-        //Schedule
-        this->xml_toTreeModel(fileMap->value("schedulefile"),scheduleModel);
-        //Saison - Phase
-        this->xml_toTreeModel(fileMap->value("saisonfile"),phaseModel);
-        //StressMap
-        this->xml_toListMap(fileMap->value("stressfile"),&mapList);
-        this->set_stressMap();
-
-        this->remove_WeekofPast(firstdayofweek.addDays(-7));
-        this->set_saisonValues();
-    }
     isUpdated = false;
 }
 
 enum {ADD,EDIT,COPY,DEL};
 enum {SAISON,SCHEDULE};
 
-void schedule::freeMem()
+void schedule::init_scheduleData()
 {
-    delete phaseModel;
-    delete scheduleModel;
+    if(!gcValues->value("schedule").isEmpty())
+    {
+        this->set_stressMap();
+        this->remove_WeekofPast(firstdayofweek.addDays(-7));
+        this->set_saisonValues();
+    }
 }
 
 void schedule::save_workouts(bool saveModel)
 {
-    if(saveModel == SAISON)
-    {
-        this->treeModel_toXml(phaseModel,fileMap->value("saisonfile"));
-    }
-
-    if(saveModel == SCHEDULE)
-    {
-        this->treeModel_toXml(scheduleModel,fileMap->value("schedulefile"));
-        this->save_ltsFile();
-    }
+    this->save_data(saveModel);
+    if(saveModel == SCHEDULE) this->save_ltsFile();
     isUpdated = false;
 }
 
@@ -163,27 +142,34 @@ QModelIndex schedule::get_modelIndex(QStandardItemModel *model,QString searchStr
     }
 }
 
+void schedule::update_linkedWorkouts(QDate workDate, QString workID,int pos,bool add)
+{
+    QMap<QDate,int> linkMap = linkedWorkouts.value(workID);
+
+    if(add)
+    {
+        linkMap.insert(workDate,pos);
+    }
+    else
+    {
+        linkMap.remove(workDate);
+    }
+    linkedWorkouts.insert(workID,linkMap);
+}
+
 QStandardItem* schedule::get_phaseItem(QString phase)
 {
     return phaseModel->itemFromIndex(get_modelIndex(phaseModel,phase,0));
 }
 
-QMap<int, QStringList> schedule::get_workouts(bool dayWorkouts,QString indexString)
+QMap<int, QStringList> schedule::get_workouts(int dataSource,QString indexString)
 {
     QMap<int,QStringList> workouts;
     QStringList workItems;
-    QStandardItemModel *model;
 
-    if(dayWorkouts)
-    {
-        model = scheduleModel;
-    }
-    else
-    {
-        model = phaseModel;
-    }
-
-
+    QStandardItemModel *model = nullptr;
+    if(dataSource == SAISON) model = phaseModel;
+    else if (dataSource == SCHEDULE) model = scheduleModel;
 
     QModelIndex modelIndex = this->get_modelIndex(model,indexString,0);
 
@@ -265,7 +251,7 @@ void schedule::check_workouts(QDate date)
     QList<QStandardItem*> itemList;
     QString dateString = date.toString(dateFormat);
     QModelIndex index = this->get_modelIndex(scheduleModel,calc_weekID(date),0);
-    QMap<QString,int> linkMap;
+
 
     //Check if Week and Date available
     if(!index.isValid())
@@ -305,17 +291,8 @@ void schedule::check_workouts(QDate date)
                 }
                 add_contest(item->data(Qt::DisplayRole).toString(),date,contestValues);
             }
-            if(linkStdWorkouts.contains(dayItem->child(work,11)->data(Qt::DisplayRole).toString()))
-            {
-                linkMap = linkStdWorkouts.value(dayItem->child(work,11)->data(Qt::DisplayRole).toString());
-                linkMap.insert(dayItem->data(Qt::DisplayRole).toString(),dayItem->child(work,0)->data(Qt::DisplayRole).toInt());
-                linkStdWorkouts.insert(dayItem->child(work,11)->data(Qt::DisplayRole).toString(),linkMap);
-            }
-            else
-            {
-                linkMap.insert(dayItem->data(Qt::DisplayRole).toString(),dayItem->child(work,0)->data(Qt::DisplayRole).toInt());
-                linkStdWorkouts.insert(dayItem->child(work,11)->data(Qt::DisplayRole).toString(),linkMap);
-            }
+
+            this->update_linkedWorkouts(date,dayItem->child(work,11)->data(Qt::DisplayRole).toString(),dayItem->child(work,0)->data(Qt::DisplayRole).toInt(),true);
         }
     }
 }
@@ -345,13 +322,13 @@ void schedule::remove_WeekofPast(QDate dayOfWeek)
     }
 }
 
-void schedule::set_workoutData(QHash<QDate,QMap<int,QStringList>> workoutMap)
+void schedule::set_workoutData()
 {
     QString workoutStress;
     QModelIndex dayIndex;
     QStandardItem *dayItem = nullptr;
 
-    for(QHash<QDate,QMap<int,QStringList>>::const_iterator it =  workoutMap.cbegin(), end = workoutMap.cend(); it != end; ++it)
+    for(QHash<QDate,QMap<int,QStringList>>::const_iterator it =  workoutUpdates.cbegin(), end = workoutUpdates.cend(); it != end; ++it)
     {
         dayIndex = this->get_modelIndex(scheduleModel,it.key().toString(dateFormat),0);
         dayItem = scheduleModel->itemFromIndex(dayIndex);
@@ -367,9 +344,11 @@ void schedule::set_workoutData(QHash<QDate,QMap<int,QStringList>> workoutMap)
                 itemList << new QStandardItem(vit.value().at(itemValue));
             }
             itemList.at(0)->setData(scheduleTags->at(2),Qt::AccessibleTextRole);
+            this->update_linkedWorkouts(it.key(),vit.value().last(),vit.key(),true);
             dayItem->appendRow(itemList);
         }
     }
+
     isUpdated = true;
 }
 
@@ -378,29 +357,27 @@ void schedule::copyWeek(QString copyFrom,QString copyTo)
 {
     QStandardItem *fromItem = scheduleModel->itemFromIndex(get_modelIndex(scheduleModel,copyFrom,0));
 
-    QHash<QDate,QMap<int,QStringList>> workoutMap;
     QDate fromDate = QDate::fromString(this->get_weekMeta(copyFrom).at(3),dateFormat);
     QDate toDate = QDate::fromString(this->get_weekMeta(copyTo).at(3),dateFormat);
 
     for(int day = 0; day < fromItem->rowCount();++day)
     {
-        workoutMap.insert(toDate.addDays(day),get_workouts(true,fromDate.addDays(day).toString(dateFormat)));
+        workoutUpdates.insert(toDate.addDays(day),get_workouts(true,fromDate.addDays(day).toString(dateFormat)));
     }
-    this->set_workoutData(workoutMap);
+    this->set_workoutData();
 }
 
 void schedule::clearWeek(QString weekID)
 {
     QStandardItem *clearItem = scheduleModel->itemFromIndex(get_modelIndex(scheduleModel,weekID,0));
 
-    QHash<QDate,QMap<int,QStringList>> workoutMap;
     QDate date = QDate::fromString(this->get_weekMeta(weekID).at(3),dateFormat);
 
     for(int day = 0; day < clearItem->rowCount();++day)
     {
-        workoutMap.insert(date.addDays(day),QMap<int,QStringList>());
+        workoutUpdates.insert(date.addDays(day),QMap<int,QStringList>());
     }
-    this->set_workoutData(workoutMap);
+    this->set_workoutData();
 }
 
 void schedule::set_weekCompValues(QStringList weekMeta,QMap<QString, QVector<double> > compValues)
@@ -484,6 +461,7 @@ void schedule::set_compValues(bool update,QDate workDate,QMap<int,QStringList> v
             }
         }
     }
+
     this->recalc_stressValues();
 }
 

@@ -461,6 +461,19 @@
          <property name="verticalSpacing">
           <number>5</number>
          </property>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="comboBox_stdworkout">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>3</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="currentIndex">
+            <number>-1</number>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label_5">
            <property name="minimumSize">
@@ -476,14 +489,7 @@
             </size>
            </property>
            <property name="text">
-            <string>Std-Work:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="comboBox_stdworkout">
-           <property name="currentIndex">
-            <number>-1</number>
+            <string>Workouts:</string>
            </property>
           </widget>
          </item>
