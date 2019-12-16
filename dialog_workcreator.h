@@ -74,7 +74,7 @@ namespace Ui {
 class Dialog_workCreator;
 }
 
-class Dialog_workCreator : public QDialog, public calculation, public standardWorkouts
+class Dialog_workCreator : public QDialog, public calculation
 {
     Q_OBJECT
 
@@ -118,8 +118,6 @@ private:
     standardWorkouts *stdWorkouts;
     QString isSeries,isGroup,currentWorkID,isBreak,viewBackground;
     int thresValue;
-    double workFactor;
-    QString sportMark;
     QHash<QString,QMap<int,QString>> *xmlTagMap;
     QMap<int,QPair<QString,QVector<double>>> plotMap;
     QMap<QString,QPair<int,int>> plotRange;

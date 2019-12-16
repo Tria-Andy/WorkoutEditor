@@ -25,6 +25,39 @@ jsonHandler::jsonHandler()
     generalValues = settings::getStringMapPointer(settings::stingMap::General);
 }
 
+
+QVector<QString> jsonHandler::read_activityMeta(QString jsonfile,QString filePath)
+{
+    QVector<QString> actValues(5);
+
+    QDateTime workDateTime;
+    workDateTime.setTimeSpec(Qt::UTC);
+
+    QDateTime localTime(QDateTime::currentDateTime());
+    localTime.setTimeSpec(Qt::LocalTime);
+
+    QJsonObject rideObject,tagObject;
+    QJsonDocument d = QJsonDocument::fromJson(jsonfile.toUtf8());
+    QJsonObject jsonobj = d.object();
+
+    rideObject = jsonobj.value(QString("RIDE")).toObject();
+    this->fill_qmap(&actInfo,&rideObject);
+
+    tagObject = rideObject.value(QString("TAGS")).toObject();
+    this->fill_qmap(&actInfo,&tagObject);
+
+    workDateTime = QDateTime::fromString(actInfo.value("STARTTIME"),"yyyy/MM/dd hh:mm:ss UTC").addSecs(localTime.offsetFromUtc());
+
+    actValues.insert(0,QLocale().dayName(workDateTime.date().dayOfWeek(),QLocale::ShortFormat));
+    actValues.insert(1,workDateTime.toString("dd.MM.yyyy hh:mm"));
+    actValues.insert(2,actInfo.value("Sport"));
+    actValues.insert(3,actInfo.value("Workout Code"));
+    actValues.insert(4,filePath);
+
+    return actValues;
+}
+
+
 void jsonHandler::readJsonFiles(QStandardItem *rootItem)
 {
     QFile file;

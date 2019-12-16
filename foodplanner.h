@@ -7,7 +7,7 @@
 #include "schedule.h"
 #include "settings.h"
 
-class foodplanner : public datahandler, public calculation
+class foodplanner : public xmlHandler, public calculation
 {
 
 public:

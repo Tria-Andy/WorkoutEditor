@@ -1183,9 +1183,16 @@ void Dialog_workCreator::on_checkBox_timebased_clicked(bool checked)
 
 void Dialog_workCreator::on_toolButton_map_clicked()
 {
-    Dialog_map dialogMap(this,currentWorkID,ui->toolButton_map->property("Image").toString());
+    int dialog_code;
+    Dialog_map dialogMap(this,stdWorkouts,ui->toolButton_map->property("Image").toString());
     dialogMap.setModal(true);
-    dialogMap.exec();
+    dialog_code = dialogMap.exec();
+
+    if(dialog_code == QDialog::Accepted)
+    {
+        ui->toolButton_map->setProperty("Image",stdWorkouts->get_workoutImage());
+    }
+
 }
 
 void Dialog_workCreator::on_spinBox_level_valueChanged(int value)

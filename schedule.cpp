@@ -30,6 +30,26 @@ schedule::schedule()
     shortTime = settings::get_format("shorttime");
     doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
     gcValues = settings::getStringMapPointer(settings::stingMap::GC);
+    fileMap = settings::getStringMapPointer(settings::stingMap::File);
+
+    scheduleModel = new QStandardItemModel();
+    phaseModel = new QStandardItemModel();
+
+       if(!gcValues->value("schedule").isEmpty())
+       {
+           //Schedule
+           this->xml_toTreeModel(fileMap->value("schedulefile"),scheduleModel);
+           //Saison - Phase
+           this->xml_toTreeModel(fileMap->value("saisonfile"),phaseModel);
+           //StressMap
+           this->xml_toListMap(fileMap->value("stressfile"),&mapList);
+           this->set_stressMap();
+
+           this->remove_WeekofPast(firstdayofweek.addDays(-7));
+           this->set_saisonValues();
+       }
+       isUpdated = false;
+
 
     isUpdated = false;
 }
@@ -37,20 +57,19 @@ schedule::schedule()
 enum {ADD,EDIT,COPY,DEL};
 enum {SAISON,SCHEDULE};
 
-void schedule::init_scheduleData()
-{
-    if(!gcValues->value("schedule").isEmpty())
-    {
-        this->set_stressMap();
-        this->remove_WeekofPast(firstdayofweek.addDays(-7));
-        this->set_saisonValues();
-    }
-}
 
 void schedule::save_workouts(bool saveModel)
 {
-    this->save_data(saveModel);
-    if(saveModel == SCHEDULE) this->save_ltsFile();
+    if(saveModel == SAISON)
+    {
+        this->treeModel_toXml(phaseModel,fileMap->value("saisonfile"));
+    }
+
+    if(saveModel == SCHEDULE)
+    {
+        this->treeModel_toXml(scheduleModel,fileMap->value("schedulefile"));
+        this->save_ltsFile();
+    }
     isUpdated = false;
 }
 

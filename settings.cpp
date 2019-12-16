@@ -580,8 +580,7 @@ int settings::loadSettings()
             return VALERROR;
         }
 
-        QDesktopWidget desk;
-        int screenHeight = desk.screenGeometry(0).height();
+        int screenHeight = 1024;
 
         if(screenHeight > 1000)
         {

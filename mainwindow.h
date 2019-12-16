@@ -1213,7 +1213,7 @@ private:
 
     schedule *workSchedule;
     standardWorkouts *stdWorkouts;
-    Activity *curr_activity;
+    Activity *loadActivity;
     foodplanner *foodPlan;
     jsonHandler *jsonhandler;
     settings editorSettings;

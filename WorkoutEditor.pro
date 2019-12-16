@@ -27,7 +27,6 @@ VERSION = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
 VERSION_PE_HEADER = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
 
 SOURCES += main.cpp\
-    datahandler.cpp \
         mainwindow.cpp \
     settings.cpp \
     dialog_export.cpp \
@@ -56,7 +55,6 @@ SOURCES += main.cpp\
     foodhistory_popup.cpp
 
 HEADERS  += mainwindow.h \
-    datahandler.h \
     settings.h \
     dialog_export.h \
     activity.h \

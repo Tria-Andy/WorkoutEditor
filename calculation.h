@@ -12,8 +12,9 @@ public:
 private:
 
 protected:
-    QString currentSport;
+    QString currentSport,sportMark;
     int thresPower,thresPace,thresSpeed;
+    double workFactor;
     bool usePMData,isSwim,isBike,isRun,isStrength,isAlt,isOther,isTria;
     void set_currentSport(QString);
 

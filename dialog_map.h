@@ -18,18 +18,18 @@ class Dialog_map : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_map(QWidget *parent = nullptr, QString workID = nullptr,QString mapPix = nullptr);
+    explicit Dialog_map(QWidget *parent = nullptr, standardWorkouts *p_stdWork = nullptr,QString mapPix = nullptr);
     ~Dialog_map();
 
 private slots:
     void on_toolButton_close_clicked();
     void on_toolButton_map_clicked();
-
     void on_toolButton_save_clicked();
 
 private:
     Ui::Dialog_map *ui;
-    QString mapImage,mapPath,workoutID;
+    standardWorkouts *stdWorkouts;
+    QString mapImage,mapPath,selPic;
     void openFile();
     void setImage(QString);
 };

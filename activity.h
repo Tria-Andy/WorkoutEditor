@@ -24,19 +24,30 @@
 #include <QStandardItemModel>
 #include "settings.h"
 #include "jsonhandler.h"
+#include "xmlhandler.h"
 #include "calculation.h"
 
-class Activity : public jsonHandler, public calculation
+class Activity : public jsonHandler, public xmlHandler, public calculation
 {
 
 private:
+    QMap<int,QVector<QString>> activtiyMap;
+    QStack<QString> jsonFiles;
+
+    void fill_actMap();
+
     QList<QStandardItem*> setIntRow(int);
+
     QStandardItem *rootItem;
-    QString v_date,intLabel,breakName;
+    QString actFile, v_date,intLabel,breakName;
+    QHash<QString,QString> *fileMap;
+
+
     QMap<int,QStringList> itemHeader,avgHeader;
     QHash<QString,int> paceTimeInZone,hfTimeInZone,hfZoneAvg;
     QHash<QString,QPair<double,double>> rangeLevels;
     QHash<QString,QVector<double>> swimHFZoneFactor;
+
     QStringList ride_items,swimType,levels;
     QVector<double> calcSpeed,calcCadence,swimTime,newDist;
     double thresLimit,swimTrack,polishFactor,hfThreshold,hfMax,actWeight;
@@ -45,6 +56,7 @@ private:
     QVector<bool> editRow;
 
     //Functions
+    void read_gcActivities();
     void prepareData();
     void build_intTree();
     QString build_lapName(QString,int,double);
@@ -79,6 +91,7 @@ public:
     void writeChangedData();
     QHash<int,QModelIndex> selItem,avgItems;
     QHash<QString,int> swimPace,swimHF;
+    QStandardItemModel *activityModel;
     QStandardItemModel *intModel,*sampleModel,*xdataModel,*intTreeModel,*selItemModel,*avgModel;
     QMap<QString,QString> ride_info;
     QVector<double> sampSpeed,sampSecond,avgValues;

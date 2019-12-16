@@ -21,7 +21,14 @@
 
 standardWorkouts::standardWorkouts()
 {
-    fill_workoutMap();
+    fileMap = settings::getStringMapPointer(settings::stingMap::File);
+    stdWorkoutsModel = new QStandardItemModel();
+
+    if(!settings::getStringMapPointer(settings::stingMap::GC)->value("workouts").isEmpty())
+    {
+        this->xml_toTreeModel(fileMap->value("standardworkoutfile"),stdWorkoutsModel);
+        this->fill_workoutMap();
+    }
 }
 
 void standardWorkouts::fill_workoutMap()
@@ -219,7 +226,7 @@ void standardWorkouts::save_workouts()
 {
     if(workoutUpdate)
     {
-        this->save_data(2);
+        this->treeModel_toXml(stdWorkoutsModel,fileMap->value("standardworkoutfile"));
     }
     workoutUpdate = false;
 }

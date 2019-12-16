@@ -33,8 +33,34 @@
 
 Activity::Activity()
 {
+    fileMap = settings::getStringMapPointer(settings::stingMap::File);
+    this->read_gcActivities();
 
 }
+
+void Activity::read_gcActivities()
+{
+    int maxFileCount = generalValues->value("filecount").toInt();
+    QDir directory(gcValues->value("actpath"));
+    directory.setSorting(QDir::Name | QDir::Reversed);
+    directory.setFilter(QDir::Files);
+    QFileInfoList fileList = directory.entryInfoList();
+    maxFileCount = fileList.count() > maxFileCount ? maxFileCount : fileList.count();
+
+    for(int fileCount = 0; fileCount < maxFileCount; ++fileCount)
+    {
+        jsonFiles.push(fileList.at(fileCount).fileName());
+    }
+}
+
+void Activity::fill_actMap()
+{
+    QVector<QString> actValues(5);
+
+
+
+}
+
 
 void Activity::readJsonFile(QString jsonfile,bool intAct)
 {

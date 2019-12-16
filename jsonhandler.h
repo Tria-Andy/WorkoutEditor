@@ -31,6 +31,8 @@ public:
 
 protected:
     QString readJsonContent(QString);
+    QVector<QString> read_activityMeta(QString,QString);
+
 
     void fill_qmap(QHash<QString,QString>*,QJsonObject*);
     void init_actModel(QString,QMap<int,QString> *,QStandardItemModel*,QStringList*,int);

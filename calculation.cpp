@@ -284,7 +284,7 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,int
         totalWork = (dura * pValue) / factor;
     }
 
-    return set_doubleValue(totalWork,false);
+    return set_doubleValue(totalWork*workFactor,false);
 }
 
 double calculation::wattToSpeed(double thresPower,double currWatt) const
@@ -521,7 +521,6 @@ double calculation::calc_stressScore(double baseValue, int duration) const
     est_stress = (raw_effort / cv_effort) * 100;
 
     return set_doubleValue(est_stress,false);
-
 }
 
 

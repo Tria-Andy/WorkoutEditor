@@ -24,14 +24,15 @@
 #include <QMessageBox>
 #include "settings.h"
 #include "calculation.h"
-#include "datahandler.h"
+#include "xmlhandler.h"
 
-class schedule : public datahandler, public calculation
+class schedule : public xmlHandler, public calculation
 {
 
 public:
     schedule();
     bool newSaison;
+    QStandardItemModel *scheduleModel,*phaseModel;
     QString dateFormat,longTime,shortTime;
     QHash<QDate,QMap<int,QStringList>> workoutUpdates;
 
@@ -78,16 +79,18 @@ private:
     bool isUpdated;
     QDate firstdayofweek;
     QHash<QString,double> *doubleValues;
-    QHash<QString,QString> *gcValues;
+    QHash<QString,QString> *gcValues,*fileMap;
 
     QStringList sportTags; 
     QStringList *macroTags,*scheduleTags,*saisonTags;
     QString selSaison;
 
     QMap<QString,QStringList> saisonValues;
+    QMap<int,QStringList> mapList;
     QHash<QString,QMap<QDate,QStringList>> contestMap;
     QHash<QDate,QMap<QString,QVector<double>>> compMap;
     QHash<QString,QMap<QString,QVector<double>>> compWeekMap;
+    QMap<QDate,QVector<double>> stressMap;
     QHash<QString,QMap<QDate,int>> linkedWorkouts;
     QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
 

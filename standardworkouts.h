@@ -21,19 +21,22 @@
 
 #include <QStandardItemModel>
 #include "settings.h"
-#include "calculation.h"
-#include "datahandler.h"
+#include "xmlhandler.h"
 
-class standardWorkouts : public datahandler
+class standardWorkouts : public xmlHandler
 {
 public:
     standardWorkouts();
 
+    QStandardItemModel *stdWorkoutsModel;
     QHash<QString,QHash<QString,QVector<QString>>> *get_workoutMap() {return &workoutMap;}
     QStandardItem *get_selectedWorkout(QString);
     QString get_workoutCount(QString);
+
     QPair<int,QString> create_newWorkout(QString);
     QVector<double> get_workLevelLoad(QString key) {return levelLoadMap.value(key);}
+    QString get_workoutImage() {return workoutImage;}
+    void set_image(QString imageName) {workoutImage = imageName;}
     void update_selectedWorkout(QString,QList<QStandardItem*>);
     void save_selectedWorkout(QString,QString);
     void delete_stdWorkout(QString,bool);
@@ -42,6 +45,8 @@ public:
 protected:
 
 private:
+    QString workoutImage;
+    QHash<QString,QString> *fileMap;
     QHash<QString,QHash<QString,QVector<QString>>> workoutMap;
     QHash<QString,QModelIndex> workoutIndex;
     QHash<QString,QString> workoutMapping;

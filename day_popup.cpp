@@ -20,7 +20,7 @@
 #include "day_popup.h"
 #include "ui_day_popup.h"
 
-day_popup::day_popup(QWidget *parent, const QDate w_date, standardWorkouts *p_stdWorkout) :
+day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched,standardWorkouts *p_stdWorkout) :
     QDialog(parent),
     ui(new Ui::day_popup)
 {
@@ -30,7 +30,7 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, standardWorkouts *p_st
     editMode = false;
     popupDate = w_date;
     stdWorkouts = p_stdWorkout;
-
+    workSchedule = p_sched;
     moveWorkout = false;
     editIcon = QIcon(":/images/icons/Modify.png");
     addIcon = QIcon(":/images/icons/Create.png");
@@ -44,7 +44,7 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, standardWorkouts *p_st
     dayModel = new QStandardItemModel(this);
 
     this->init_dayWorkouts(popupDate);
-    ui->lineEdit_workoutInfo->setText(this->get_weekPhase(w_date)+" - Week: "+ QString::number(w_date.weekNumber()));
+    ui->lineEdit_workoutInfo->setText(workSchedule->get_weekPhase(w_date)+" - Week: "+ QString::number(w_date.weekNumber()));
     connect(ui->tableView_day->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(load_workoutData(int)));
     connect(ui->tableView_day->itemDelegate(),SIGNAL(closeEditor(QWidget *,QAbstractItemDelegate::EndEditHint)),this,SLOT(setNextEditRow()));
 }
@@ -63,8 +63,8 @@ void day_popup::init_dayWorkouts(QDate workDate)
     dayModel->clear();
 
     QString viewBackground = "background-color: #e6e6e6";
-    QString workoutDate = workDate.toString(dateFormat);
-    workoutMap = get_workouts(true,workoutDate);
+    QString workoutDate = workDate.toString(workSchedule->dateFormat);
+    workoutMap = workSchedule->get_workouts(true,workoutDate);
     int workCount = workoutMap.count();
 
     QStringList workoutHeader;
@@ -92,7 +92,7 @@ void day_popup::init_dayWorkouts(QDate workDate)
         }
     }
 
-    ui->label_weekinfo->setText(workoutDate + " - Phase: " + get_weekPhase(workDate));
+    ui->label_weekinfo->setText(workoutDate + " - Phase: " + workSchedule->get_weekPhase(workDate));
 
     int worklistCount = workListHeader->count();
     dayModel->setColumnCount(workoutHeader.count());
@@ -112,7 +112,7 @@ void day_popup::init_dayWorkouts(QDate workDate)
 
     for(QMap<int,QStringList>::const_iterator it = workoutMap.cbegin(), end = workoutMap.cend(); it != end; ++it)
     {
-        set_currentSport(it.value().at(1));
+        this->set_currentSport(it.value().at(1));
 
         for(int row = 0; row < worklistCount; ++row)
         {            
@@ -164,6 +164,16 @@ void day_popup::set_comboWorkouts(QString stdworkID)
     }
     ui->comboBox_stdworkout->model()->sort(0);
     ui->comboBox_stdworkout->setCurrentIndex(ui->comboBox_stdworkout->findData(stdworkID,Qt::UserRole));
+
+    if(!workoutMap.value(stdworkID).isEmpty())
+    {
+        ui->toolButton_map->setProperty("Image",workoutMap.value(stdworkID).at(7));
+    }
+    else
+    {
+        ui->toolButton_map->setProperty("Image","none.png");
+    }
+
     ui->comboBox_stdworkout->blockSignals(false);
 }
 
@@ -205,7 +215,7 @@ void day_popup::set_exportContent()
     QString tempDate,tempTime,sport,stressType,commonRI;
     QString totalWork = selectedWorkout.at(8);
 
-    tempDate = popupDate.toString(dateFormat);
+    tempDate = popupDate.toString(workSchedule->dateFormat);
     tempTime = selectedWorkout.at(0);
 
     workoutTime = QTime::fromString(tempTime,"hh:mm");
@@ -355,7 +365,7 @@ void day_popup::update_workouts()
         dayWorkouts.insert(workCounter++,valueList);
         valueList.clear();
     }
-    workoutUpdates.insert(popupDate,dayWorkouts);
+    workSchedule->workoutUpdates.insert(popupDate,dayWorkouts);
 }
 
 void day_popup::set_result(int result)
@@ -367,22 +377,22 @@ void day_popup::set_result(int result)
     {
         if(result == MOVE || result == COPY)
         {
-            workoutUpdates.insert(ui->dateEdit_workDate->date(),workoutMap);
+            workSchedule->workoutUpdates.insert(ui->dateEdit_workDate->date(),workoutMap);
             if(result == MOVE)
             {
-                workoutUpdates.insert(popupDate,valueList);
+                workSchedule->workoutUpdates.insert(popupDate,valueList);
             }
         }
         if(result == DEL)
         {
-            workoutUpdates.insert(popupDate,valueList);
+            workSchedule->workoutUpdates.insert(popupDate,valueList);
         }
     }
     else
     {
         if(result == MOVE || result == COPY)
         {
-            valueList = get_workouts(SCHEDULE,ui->dateEdit_workDate->date().toString(dateFormat));
+            valueList = workSchedule->get_workouts(SCHEDULE,ui->dateEdit_workDate->date().toString(workSchedule->dateFormat));
 
             if(result == MOVE)
             {
@@ -394,7 +404,7 @@ void day_popup::set_result(int result)
             {
                 valueList.insert(valueList.count(),workoutMap.value(selWorkout));
             }
-            workoutUpdates.insert(ui->dateEdit_workDate->date(),valueList);
+            workSchedule->workoutUpdates.insert(ui->dateEdit_workDate->date(),valueList);
 
         }
         if(result == EDIT)
@@ -403,13 +413,13 @@ void day_popup::set_result(int result)
         }
         if(result == DEL)
         {
-            update_linkedWorkouts(popupDate,dayModel->data(dayModel->index(10,selWorkout)).toString(),selWorkout,false);
+            workSchedule->update_linkedWorkouts(popupDate,dayModel->data(dayModel->index(10,selWorkout)).toString(),selWorkout,false);
             dayModel->removeColumn(selWorkout);
             this->update_workouts();
         }
     }
 
-    set_workoutData();
+    workSchedule->set_workoutData();
 
     ui->dateEdit_workDate->setEnabled(false);
     this->set_controlButtons(false);
@@ -539,20 +549,19 @@ void day_popup::on_comboBox_stdworkout_activated(int index)
 
     dayModel->setData(dayModel->index(9,selWorkout),this->get_workout_pace(stdWorkoutData.at(3).toDouble(),stdWorkoutData.at(2).toInt(),currentSport,true));
     ui->tableView_day->setCurrentIndex(dayModel->index(0,selWorkout));
+    ui->toolButton_map->setProperty("Image",stdWorkoutData.at(7));
 }
 
 void day_popup::on_toolButton_map_clicked()
 {
-    QString workoutID = ui->comboBox_stdworkout->model()->data(ui->comboBox_stdworkout->model()->index(ui->comboBox_stdworkout->currentIndex(),1)).toString();
-    QString image;
-    Dialog_map dialogMap(this,workoutID,image);
+    Dialog_map dialogMap(this,stdWorkouts,ui->toolButton_map->property("Image").toString());
     dialogMap.setModal(true);
     dialogMap.exec();
 }
 
 void day_popup::on_dateEdit_workDate_dateChanged(const QDate &date)
 {
-    ui->lineEdit_workoutInfo->setText(get_weekPhase(date)+" - Week: "+ QString::number(date.weekNumber()));
+    ui->lineEdit_workoutInfo->setText(workSchedule->get_weekPhase(date)+" - Week: "+ QString::number(date.weekNumber()));
 
     QString weekNumber = this->calc_weekID(date);
 
