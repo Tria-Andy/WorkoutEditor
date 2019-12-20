@@ -31,78 +31,75 @@ class Activity : public jsonHandler, public xmlHandler, public calculation
 {
 
 private:
-    QMap<int,QVector<QString>> activtiyMap;
-    QStack<QString> jsonFiles;
-
     void fill_actMap();
 
+    QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>> ActivityMap;
     QList<QStandardItem*> setIntRow(int);
-
-    QStandardItem *rootItem;
-    QString actFile, v_date,intLabel,breakName;
+    QString actFile, v_date,intLabel;
     QHash<QString,QString> *fileMap;
-
 
     QMap<int,QStringList> itemHeader,avgHeader;
     QHash<QString,int> paceTimeInZone,hfTimeInZone,hfZoneAvg;
     QHash<QString,QPair<double,double>> rangeLevels;
     QHash<QString,QVector<double>> swimHFZoneFactor;
-
+    QStandardItem *rootItem;
     QStringList ride_items,swimType,levels;
     QVector<double> calcSpeed,calcCadence,swimTime,newDist;
     double thresLimit,swimTrack,polishFactor,hfThreshold,hfMax,actWeight;
-    int distFactor,avgCounter,zoneCount,moveTime,intListCount;
+    int distFactor,avgCounter,moveTime,intListCount;
     bool changeRowCount,isUpdated,selectInt,isTimeBased;
     QVector<bool> editRow;
 
     //Functions
     void read_gcActivities();
-    void prepareData();
-    void build_intTree();
+    void save_actvitiyFile();
+    QMap<int,QVector<double>> get_xData(QPair<int,int>);
+    QMap<QPair<int,QString>,QVector<double>> get_swimLapData(int,QPair<int,int>);
+    QMap<QPair<int,QString>,QVector<double>> get_intervalData(int,QPair<int,int>);
+    void set_activityHeader(QString,QStringList*);
+
+
+    QString set_intervalName(int,int,double);
     QString build_lapName(QString,int,double);
-    void updateSwimLap();
-    void updateSwimInt(QModelIndex,QItemSelectionModel*);
-    void updateSwimBreak(QModelIndex,QItemSelectionModel*,int);
     void updateInterval();
     void recalcIntTree();
     void updateSampleModel(int);
     void calcAvgValues();
-    double get_int_value(int,int);
     double interpolate_speed(int,int,double);
 
     //Swim Calculations
     void swimhfTimeInZone(bool);
     void swimTimeInZone(int,double);
     void fillRangeLevel(double,bool);
-    QString checkRangeLevel(double);
     int get_zone_values(double,int,bool);
 
 public:
     explicit Activity();
 
-    void readJsonFile(QString,bool);
-    void set_selectedItem(QItemSelectionModel*);
-    void set_editRow(QString,bool);
-    void showSwimLap(bool);
-    void showInterval(bool);
-    void updateIntModel(int,int);
-    void set_workoutContent(QString);
-    void updateXDataModel();
-    void writeChangedData();
-    QHash<int,QModelIndex> selItem,avgItems;
-    QHash<QString,int> swimPace,swimHF;
-    QStandardItemModel *activityModel;
-    QStandardItemModel *intModel,*sampleModel,*xdataModel,*intTreeModel,*selItemModel,*avgModel;
+    QMap<QString,QVector<QString>> gcActivtiesMap;
     QMap<QString,QString> ride_info;
+    QStringList averageHeader,activityHeader;
     QVector<double> sampSpeed,sampSecond,avgValues;
+    QStringList *infoHeader;
+    QString breakName;
+    double poolLength;
+
+
+    QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>>* get_activityMap() {return &ActivityMap;}
+    QString get_swimType(int key) {return swimType.at(key);}
+    QString checkRangeLevel(double);
+    QPair<int,int> get_intervalData(int key) {return intervallMap.value(key);}
+
+    void clear_loadedActivity();
+    bool read_jsonFile(QString);
+    void set_activityData();
+    void prepare_baseData();
+    void set_intervalData(int,int,int);
+    void set_workoutContent(QString);
+
+    void writeChangedData();
 
     //Recalculation
-    void updateRow_intTree(QItemSelectionModel *);
-    void addRow_intTree(QItemSelectionModel *);
-    void removeRow_intTree(QItemSelectionModel *);
-    double get_int_distance(int,int);
-    int get_int_duration(int);
-    int get_int_pace(int,QString);
     double get_int_speed(int);
     double polish_SpeedValues(double,double,double,bool);
 

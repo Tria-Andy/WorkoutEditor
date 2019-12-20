@@ -510,33 +510,22 @@ public:
         painter->restore();
     }
 };
-class del_treeview : public QStyledItemDelegate, public calculation
+class del_treeview : public QStyledItemDelegate
 {
     Q_OBJECT
 
 public:
     explicit del_treeview(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
-    QHash<QString,QString>* generalValues = settings::getStringMapPointer(settings::stingMap::General);
-
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
-        const QAbstractItemModel *model = index.model();
         QString lapName;
-        QString breakName = generalValues->value("breakname");
+        QString breakName = "Break";
         QStringList levels = settings::get_listValues("Level");
         QString levelName = breakName;
 
-        if(index.parent().isValid())
-        {
-            //lapName = index.parent().child(index.row(),0).data().toString();
-            lapName = model->index(index.row(),0,index.parent()).data().toString();
-        }
-        else
-        {
-            lapName = model->data(model->index(index.row(),0,QModelIndex())).toString();
-        }
+        lapName = index.siblingAtColumn(0).data(Qt::DisplayRole).toString();
 
         for(int i = 0; i < levels.count(); ++i)
         {
@@ -577,6 +566,7 @@ public:
         QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
         painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->restore();
+
     }
 
 };
@@ -1215,14 +1205,11 @@ private:
     standardWorkouts *stdWorkouts;
     Activity *loadActivity;
     foodplanner *foodPlan;
-    jsonHandler *jsonhandler;
-    settings editorSettings;
     schedule_delegate schedule_del;
     saison_delegate saison_del;
     summery_delegate sum_del;
     del_filelist fileList_del;
     del_treeview tree_del;
-    del_intselect intSelect_del;
     del_avgselect avgSelect_del;
     del_level level_del;
     del_avgweek avgweek_del;
@@ -1231,8 +1218,6 @@ private:
     del_foodWeekSum foodSumWeek_del;
     del_foodDaySum foodSumSelect_del;
     del_mousehover mousehover_del;
-    QStandardItemModel *sumModel,*fileModel,*infoModel,*avgModel;
-    QItemSelectionModel *treeSelection;
     QStringList modus_list,cal_header,y2Label,menuCopy;
     QStringList *schedMode, *avgHeader;
     QLabel *planerMode;
@@ -1252,6 +1237,9 @@ private:
     void set_speedPlot(double,double,int);
     void set_polishValues(int,double,double,double,int);
     void resetPlot();
+    void set_activityTree();
+    QTreeWidgetItem* set_activityLaps(QPair<int,QString>,QVector<double>,int);
+
 
     QMap<QString,QStringList> *saisonValues;
     int avgCounter,sportUse;
@@ -1281,18 +1269,16 @@ private:
 
     //Editor
     void select_activityFile();
-    void read_activityFiles();
+    void activityList(int);
     void clearActivtiy();
-    void loadfile(const QString &filename);
+    void load_activity(const QString &filename);
     void selectAvgValues(QModelIndex,int);
-    void setCurrentTreeIndex(bool);
     void init_editorViews();
     void init_controlStyleSheets();
-    void update_infoModel();
+    void set_activityInfo();
     void fill_WorkoutContent();
     void unselect_intRow(bool);
     void set_menuItems(int);
-    void reset_jsontext();
     void freeMem();
 
     //Food
@@ -1342,9 +1328,7 @@ private slots:
     void refresh_saison();
 
     //Editor
-    void setSelectedIntRow(QModelIndex);
     void on_horizontalSlider_factor_valueChanged(int value);
-    void on_treeView_intervall_clicked(const QModelIndex &index);
     void on_lineEdit_workContent_textChanged(const QString &arg1);
     void on_toolButton_sync_clicked();
     void on_toolButton_clearContent_clicked();  
@@ -1355,7 +1339,6 @@ private slots:
     void on_toolButton_downInt_clicked();
     void on_toolButton_addSelect_clicked();
     void on_toolButton_clearSelect_clicked();
-    void on_treeView_files_clicked(const QModelIndex &index);
     void on_actionRefresh_Filelist_triggered();
     void on_comboBox_saisonName_currentIndexChanged(const QString &arg1);
     void on_actionSave_triggered();
@@ -1393,6 +1376,8 @@ private slots:
     void on_listWidget_weekPlans_itemClicked(QListWidgetItem *item);
     void on_listWidget_menuEdit_itemDoubleClicked(QListWidgetItem *item);
     void on_toolButton_menuClear_clicked();
+    void on_treeWidget_activityfiles_itemClicked(QTreeWidgetItem *item, int column);
+    void on_treeWidget_activity_itemClicked(QTreeWidgetItem *item, int column);
 };
 
 #endif // MAINWINDOW_H

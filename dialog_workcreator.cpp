@@ -342,7 +342,7 @@ QTreeWidgetItem* Dialog_workCreator::set_itemToWidget(QStandardItem *item,QTreeW
         stepitem->setData(4,Qt::DisplayRole,this->calc_thresPower(this->get_itemValue(item,stepTags,stepTags->at(2)).toDouble()));
         stepitem->setData(5,Qt::DisplayRole,set_time(this->get_itemValue(item,stepTags,stepTags->at(3)).toInt()));
         stepitem->setData(6,Qt::DisplayRole,this->calc_stressScore(this->get_itemValue(item,stepTags,stepTags->at(2)).toDouble(),this->get_itemValue(item,stepTags,stepTags->at(3)).toInt()));
-        stepitem->setData(7,Qt::DisplayRole,this->calc_totalWork(currentSport,this->get_baseValue(this->get_itemValue(item,stepTags,stepTags->at(2)).toDouble()),this->get_itemValue(item,stepTags,stepTags->at(3)).toInt(),this->get_swimStyleID(this->get_itemValue(item,stepTags,stepTags->at(1)).toString())));
+        stepitem->setData(7,Qt::DisplayRole,this->calc_totalWork(this->get_baseValue(this->get_itemValue(item,stepTags,stepTags->at(2)).toDouble()),this->get_itemValue(item,stepTags,stepTags->at(3)).toInt(),this->get_swimStyleID(this->get_itemValue(item,stepTags,stepTags->at(1)).toString()))*workFactor);
         stepitem->setData(8,Qt::DisplayRole,this->get_itemValue(item,stepTags,stepTags->at(5)).toDouble());
     }
     return stepitem;
@@ -357,8 +357,27 @@ void Dialog_workCreator::set_sportData(QString sport)
 {
     this->set_currentSport(sport);
 
-    ui->doubleSpinBox_distance->setSingleStep(0.1);
+    if(isSwim)
+    {
+        ui->doubleSpinBox_distance->setSingleStep(0.05);
+    }
+    else
+    {
+        ui->doubleSpinBox_distance->setSingleStep(0.1);
+    }
 
+    if(usePMData)
+    {
+        thresValue = thresPower;
+        ui->label_threshold->setText(QString::number(thresPower) + sportMark);
+    }
+    else
+    {
+        thresValue = thresPace;
+        ui->label_threshold->setText(this->set_time(thresPace) + sportMark);
+    }
+
+    /*
     if(isSwim)
     {
         usePMData = static_cast<bool>(thresValues->value("swimpm"));
@@ -425,17 +444,7 @@ void Dialog_workCreator::set_sportData(QString sport)
         workFactor = 0;
         sportMark = "-";
     }
-
-    if(usePMData)
-    {
-        thresValue = thresPower;
-        ui->label_threshold->setText(QString::number(thresPower) + sportMark);
-    }
-    else
-    {
-        thresValue = thresPace;
-        ui->label_threshold->setText(this->set_time(thresPace) + sportMark);
-    }
+    */
 }
 
 int Dialog_workCreator::get_swimStyleID(QString partName)
@@ -532,7 +541,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasChilds)
         item->setData(4,Qt::DisplayRole,QString::number(this->calc_thresPower(percent)));
         item->setData(5,Qt::DisplayRole,defaultTime.toString(shortTime));
         item->setData(6,Qt::DisplayRole,this->calc_stressScore(percent,this->get_secFromTime(defaultTime)));
-        item->setData(7,Qt::DisplayRole,this->set_doubleValue(this->calc_totalWork(currentSport,pValue,this->get_secFromTime(defaultTime),tempID),false));
+        item->setData(7,Qt::DisplayRole,this->set_doubleValue(this->calc_totalWork(pValue,this->get_secFromTime(defaultTime),tempID)*workFactor,false));
         item->setData(8,Qt::DisplayRole,defaultDist);
     }
     ui->treeWidget_workoutTree->expandAll();
@@ -606,7 +615,7 @@ void Dialog_workCreator::refresh_editStep()
     }
 
     ui->doubleSpinBox_stressScore->setValue(this->calc_stressScore(ui->spinBox_level->value(),this->get_timesec(ui->timeEdit_lapTime->time().toString("mm:ss"))));
-    ui->doubleSpinBox_work->setValue(this->calc_totalWork(currentSport,this->get_baseValue(ui->spinBox_level->value()),this->get_secFromTime(ui->timeEdit_lapTime->time()),this->get_swimStyleID(ui->comboBox_stepName->currentText())));
+    ui->doubleSpinBox_work->setValue(this->calc_totalWork(this->get_baseValue(ui->spinBox_level->value()),this->get_secFromTime(ui->timeEdit_lapTime->time()),this->get_swimStyleID(ui->comboBox_stepName->currentText()))*workFactor);
     ui->lineEdit_speed->setText(QString::number(this->set_doubleValue(this->get_speed(ui->timeEdit_pace->time(),ui->doubleSpinBox_distance->value(),true),true))+" km/h");
 }
 

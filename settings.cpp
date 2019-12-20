@@ -73,15 +73,6 @@ QHash<QString,QString> settings::triaMap;
 QStringList settings::keyList;
 QStringList settings::extkeyList;
 
-QStringList settings::table_header;
-QStringList settings::header_swim;
-QStringList settings::header_pm;
-QStringList settings::header_pace;
-QStringList settings::headerTria;
-QStringList settings::header_other;
-QStringList settings::header_int_time;
-QStringList settings::header_swim_time;
-
 enum {LOADED,INITERROR,GCERROR,VALERROR};
 enum {SPORT,LEVEL,PHASE,CYCLE,WCODE,JFILE,EDITOR};
 enum {SPORTUSE};
@@ -231,11 +222,6 @@ int settings::loadSettings()
 {
     firstDayofWeek = QDate::currentDate().addDays(1 - QDate::currentDate().dayOfWeek());
     settingsUpdated = false;
-    header_swim << "Interval" << "Type" << "Laps" << "Distance" << "Duration" << "Start" << "Pace" << "Speed" << "Strokes" << "Work";
-    header_pm << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "CAD" << "Work";
-    header_pace << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Work";
-    headerTria << "Interval" << "Duration" << "Start"<< "Distance" << "Distance (Int)" << "Pace" << "Speed" << "Watt" << "Work";
-    header_other << "Interval" << "Duration" << "Start" << "Distance" << "Work";
 
     settingFile = QApplication::applicationDirPath() + QDir::separator() +"WorkoutEditor.ini";
 
@@ -282,6 +268,7 @@ int settings::loadSettings()
             fileMap.insert("xmlmapping",mysettings->value("xmlmapping").toString());
             fileMap.insert("schedulefile",mysettings->value("schedulefile").toString());
             fileMap.insert("standardworkoutfile",mysettings->value("standardworkoutfile").toString());
+            fileMap.insert("activityfile",mysettings->value("activityfile").toString());
             fileMap.insert("saisonfile",mysettings->value("saisonfile").toString());
             fileMap.insert("stressfile",mysettings->value("stressfile").toString());
             fileMap.insert("foodplanner",mysettings->value("foodplanner").toString());
@@ -840,34 +827,4 @@ void settings::saveSettings()
 QString settings::set_colorString(QColor color)
 {
     return QString::number(color.red())+"-"+QString::number(color.green())+"-"+QString::number(color.blue());
-}
-
-QStringList settings::get_int_header(QString vSport,bool usePM)
-{
-    QString avg = "Avg";
-    table_header.clear();
-    if(vSport == SwimLabel)
-    {
-        return table_header << header_swim << avg;
-    }
-    else if(vSport == BikeLabel || vSport == RunLabel)
-    {
-        if(usePM)
-        {
-            return table_header << header_pm << avg;
-        }
-        else
-        {
-            return table_header << header_pace << avg;
-        }
-
-    }
-    else if(vSport == TriaLabel)
-    {
-        return table_header << headerTria << avg;
-    }
-    else
-    {
-        return table_header << header_other << avg;
-    }
 }

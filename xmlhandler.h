@@ -17,10 +17,11 @@ protected:
     void xml_toTreeModel(QString,QStandardItemModel*);
     void treeModel_toXml(QStandardItemModel*,QString);
 
-    void xml_toListMap(QString,QMap<int,QStringList>*);
-    void listMap_toXml(QMap<int,QStringList>*,QString);
+    void xml_toListMap(QString);
+    void listMap_toXml(QString);
 
     QHash<QString,QPair<QString,int>> rootTagMap;
+    QMap<int,QStringList> mapList;
     QString schedulePath;
 
 private:

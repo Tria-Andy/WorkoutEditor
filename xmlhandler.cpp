@@ -203,13 +203,13 @@ void xmlHandler::treeModelChild_toXml(QDomDocument *xmlDoc, QDomElement *xmlElem
     }
 }
 
-void xmlHandler::xml_toListMap(QString xmlFile,QMap<int,QStringList> *list)
+void xmlHandler::xml_toListMap(QString xmlFile)
 {
     QDomElement rootTag,childTag;
     QDomNodeList xmlList;
     QDomElement xmlElement;
     QStringList *tagList;
-    QStringList mapList;
+    QStringList listValues;
 
     rootTag = this->load_XMLFile(schedulePath,xmlFile).documentElement();
 
@@ -226,16 +226,16 @@ void xmlHandler::xml_toListMap(QString xmlFile,QMap<int,QStringList> *list)
 
         for(int tag = 0; tag < tagList->count(); ++tag)
         {
-            mapList << xmlElement.attribute(tagList->at(tag));
+            listValues << xmlElement.attribute(tagList->at(tag));
         }
-        list->insert(counter,mapList);
-        mapList.clear();
+        mapList.insert(counter,listValues);
+        listValues.clear();
     }
     rootTagMap.insert(xmlFile,qMakePair(rootTag.tagName(),attributeCount));
     attributeCount = 0;
 }
 
-void xmlHandler::listMap_toXml(QMap<int, QStringList> *mapList,QString xmlFile)
+void xmlHandler::listMap_toXml(QString xmlFile)
 {
     QDomDocument xmlDoc;
     QDomElement xmlRoot,xmlElement;
@@ -245,7 +245,7 @@ void xmlHandler::listMap_toXml(QMap<int, QStringList> *mapList,QString xmlFile)
     xmlRoot = xmlDoc.createElement(rootTagMap.value(xmlFile).first);
     xmlDoc.appendChild(xmlRoot);
 
-    for(QMap<int, QStringList>::const_iterator it = mapList->cbegin(), end = mapList->cend(); it != end; ++it)
+    for(QMap<int, QStringList>::const_iterator it = mapList.cbegin(), end = mapList.cend(); it != end; ++it)
     {
         xmlElement = xmlDoc.createElement(elementList->at(0));
         for(int attr = 0; attr < tagList->count(); ++attr)

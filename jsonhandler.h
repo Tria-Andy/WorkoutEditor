@@ -20,6 +20,7 @@
 #define JSONHANDLER_H
 #include <QMap>
 #include <QHash>
+#include <QSet>
 #include <QStandardItemModel>
 #include <QJsonObject>
 
@@ -27,11 +28,24 @@ class jsonHandler
 {
 public:
     jsonHandler();
-    void readJsonFiles(QStandardItem *);
 
 protected:
-    QString readJsonContent(QString);
-    QVector<QString> read_activityMeta(QString,QString);
+    QSet<QString> activityKeys;
+    QMap<int,QVector<double>> xDataMap;
+    QMap<int,QPair<int,int>> intervallMap;
+    QMap<int,QVector<double>> sampleMap;
+
+
+
+    QString read_jsonContent(QString);
+    QVector<QString> read_activityMeta(QString,int);
+
+    bool hasXdata,hasOverride,hasPMData;
+    QHash<QString,QString> rideData,tagData,overrideData;
+    QStringList *modelHeader,*xdataHeader,*xValuesHeader;
+    QStringList intList,sampList;
+    QString fileName;
+    QHash<QString,QString> *gcValues,*generalValues;
 
 
     void fill_qmap(QHash<QString,QString>*,QJsonObject*);
@@ -41,20 +55,16 @@ protected:
     void write_actModel(QString,QStandardItemModel*,QStringList*);
     void write_xdataModel(QStandardItemModel*);
     void write_jsonFile();
-    bool hasXdata,hasOverride,hasPMData;
-    QHash<QString,QString> rideData,tagData,overrideData;
-    QStringList intList,sampList;
-    QString fileName;
-    QHash<QString,QString> *gcValues,*generalValues;
+
 
 private:
     QJsonObject activityItem;
-    QString jsonFile;
     QStringList xdataValues,xdataUnits;
     QHash<QString,QString> xData;
-    QList<QStandardItem *> readFileContent(QString,QString);
-    QHash<QString,QString> actInfo;
 
+    void read_jsonArray(QString,QJsonArray);
+
+    void check_keyList(QStringList*,QStringList*,QStringList*);
     void fill_keyList(QStringList*,QMap<int,QString>*,QStringList*);
     void fill_model(QStandardItemModel*,QJsonArray*,QStringList*);
     void fill_list(QJsonArray*,QStringList*);

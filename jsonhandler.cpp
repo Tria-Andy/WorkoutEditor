@@ -23,12 +23,16 @@ jsonHandler::jsonHandler()
 {
     gcValues = settings::getStringMapPointer(settings::stingMap::GC);
     generalValues = settings::getStringMapPointer(settings::stingMap::General);
+    hasOverride = hasXdata = false;
 }
 
 
-QVector<QString> jsonHandler::read_activityMeta(QString jsonfile,QString filePath)
+QVector<QString> jsonHandler::read_activityMeta(QString filePath, int counter)
 {
-    QVector<QString> actValues(5);
+    QFile file(filePath);
+    file.open(QFile::ReadOnly | QFile::Text);
+    QString jsonfile = file.readAll();
+    file.close();
 
     QDateTime workDateTime;
     workDateTime.setTimeSpec(Qt::UTC);
@@ -36,80 +40,134 @@ QVector<QString> jsonHandler::read_activityMeta(QString jsonfile,QString filePat
     QDateTime localTime(QDateTime::currentDateTime());
     localTime.setTimeSpec(Qt::LocalTime);
 
-    QJsonObject rideObject,tagObject;
-    QJsonDocument d = QJsonDocument::fromJson(jsonfile.toUtf8());
-    QJsonObject jsonobj = d.object();
+    QJsonObject actObject,tagObject;
+    QJsonObject jsonobj = QJsonDocument::fromJson(jsonfile.toUtf8()).object();
 
-    rideObject = jsonobj.value(QString("RIDE")).toObject();
-    this->fill_qmap(&actInfo,&rideObject);
+    actObject = jsonobj.value(QString("RIDE")).toObject();
+    tagObject = actObject.value(QString("TAGS")).toObject();
 
-    tagObject = rideObject.value(QString("TAGS")).toObject();
-    this->fill_qmap(&actInfo,&tagObject);
+    workDateTime = QDateTime::fromString(actObject.value("STARTTIME").toString().trimmed(),"yyyy/MM/dd hh:mm:ss UTC").addSecs(localTime.offsetFromUtc());
 
-    workDateTime = QDateTime::fromString(actInfo.value("STARTTIME"),"yyyy/MM/dd hh:mm:ss UTC").addSecs(localTime.offsetFromUtc());
-
+    QVector<QString> actValues;
     actValues.insert(0,QLocale().dayName(workDateTime.date().dayOfWeek(),QLocale::ShortFormat));
     actValues.insert(1,workDateTime.toString("dd.MM.yyyy hh:mm"));
-    actValues.insert(2,actInfo.value("Sport"));
-    actValues.insert(3,actInfo.value("Workout Code"));
-    actValues.insert(4,filePath);
+    actValues.insert(2,tagObject.value("Sport").toString().trimmed());
+    actValues.insert(3,tagObject.value("Workout Code").toString().trimmed());
+    actValues.insert(4,QString::number(counter));
 
     return actValues;
 }
 
-
-void jsonHandler::readJsonFiles(QStandardItem *rootItem)
+QString jsonHandler::read_jsonContent(QString jsonfile)
 {
-    QFile file;
-    QString filePath;
-    int jsonMaxFiles = generalValues->value("filecount").toInt();
-    QDir directory(gcValues->value("actpath"));
-    directory.setSorting(QDir::Name | QDir::Reversed);
-    directory.setFilter(QDir::Files);
-    QFileInfoList fileList = directory.entryInfoList();
-    int fileCount = fileList.count() > jsonMaxFiles ? jsonMaxFiles : fileList.count();
+    QFile file(gcValues->value("actpath")+QDir::separator()+jsonfile);
 
-    for(int i = 0; i < fileCount; ++i)
+    if (!file.open(QFile::ReadOnly | QFile::Text))
     {
-        filePath = fileList.at(i).path()+QDir::separator()+fileList.at(i).fileName();
-        file.setFileName(filePath);
-        file.open(QFile::ReadOnly | QFile::Text);
-        rootItem->appendRow(this->readFileContent(file.readAll(),filePath));
-        file.close();
+        qDebug() << "File not open:"+jsonfile;
     }
-}
+    else
+    {
+        QString jsonContent = file.readAll();
+        QJsonObject activityObject = QJsonDocument::fromJson(jsonContent.toUtf8()).object();
+        file.close();
 
-QList<QStandardItem *> jsonHandler::readFileContent(QString jsonfile,QString filePath)
-{
-    QList<QStandardItem *> listItems;
-    QStringList valueList;
+        QJsonObject itemObject,objValue;
+        QJsonArray itemArray;
+        QStringList *mapList = settings::get_xmlMapping("jsonfile");
+        QStringList *keyList;
 
-    valueList = settings::get_listValues("JsonFile");
-    QDateTime workDateTime;
-    workDateTime.setTimeSpec(Qt::UTC);
+        //Fill RIDE Map
+        activityItem = activityObject.value(mapList->at(0)).toObject();
+        this->fill_qmap(&rideData,&activityItem);
 
-    QDateTime localTime(QDateTime::currentDateTime());
-    localTime.setTimeSpec(Qt::LocalTime);
+        //Fill TAGS Map
+        itemObject = activityItem.value(mapList->at(1)).toObject();
+        this->fill_qmap(&tagData,&itemObject);
 
-    QJsonObject rideObject,tagObject;
-    QJsonDocument d = QJsonDocument::fromJson(jsonfile.toUtf8());
-    QJsonObject jsonobj = d.object();
+        //Check if File contains OVERRIDES
+        if(activityItem.contains(mapList->at(2)))
+        {
+            hasOverride = true;
+            itemArray = activityItem[mapList->at(2)].toArray();
 
-    rideObject = jsonobj.value(QString("RIDE")).toObject();
-    this->fill_qmap(&actInfo,&rideObject);
+            for(int i = 0; i < itemArray.count(); ++i)
+            {
+                itemObject = itemArray.at(i).toObject();
+                objValue = itemObject[itemObject.keys().first()].toObject();
+                overrideData.insert(itemObject.keys().first(),objValue["value"].toString());
+            }
+        }
 
-    tagObject = rideObject.value(QString("TAGS")).toObject();
-    this->fill_qmap(&actInfo,&tagObject);
+        //Fill IntervallMap
+        itemArray = activityItem.value(mapList->at(3)).toArray();
+        keyList = settings::get_xmlMapping("intervals");
 
-    workDateTime = QDateTime::fromString(actInfo.value("STARTTIME"),"yyyy/MM/dd hh:mm:ss UTC").addSecs(localTime.offsetFromUtc());
+        for(int i = 0; i < itemArray.count(); ++i)
+        {
+            itemObject = itemArray.at(i).toObject();
+            intervallMap.insert(i,qMakePair(itemObject[keyList->at(1)].toInt(),itemObject[keyList->at(2)].toInt()));
+        }
 
-    listItems << new QStandardItem(QLocale().dayName(workDateTime.date().dayOfWeek(),QLocale::ShortFormat));
-    listItems << new QStandardItem(workDateTime.toString("dd.MM.yyyy hh:mm:ss"));
-    listItems << new QStandardItem(actInfo.value("Sport"));
-    listItems << new QStandardItem(actInfo.value("Workout Code"));
-    listItems << new QStandardItem(filePath);
+        //Fill SampleMap
+        itemArray = activityItem.value(mapList->at(4)).toArray();
+        keyList = settings::get_xmlMapping("samples");
+        QStringList sampleKeys = itemArray.first().toObject().keys();
+        QStringList useKeys;
 
-    return listItems;
+        this->check_keyList(&useKeys,keyList,&sampleKeys);
+        if(useKeys.contains(keyList->at(5))) hasPMData = true;
+
+        QVector<double> sampleValues(useKeys.count()-1,0);
+
+        for(int i = 0; i < itemArray.count(); ++i)
+        {
+            itemObject = itemArray.at(i).toObject();
+            for(int value = 1; value < useKeys.count(); ++value)
+            {
+                sampleValues[value-1] = itemObject[useKeys.at(value)].toDouble();
+            }
+            sampleMap.insert(itemObject[useKeys.at(0)].toInt(),sampleValues);
+        }
+
+        //Check and Fill XDATA Map
+        if(activityItem.contains(mapList->at(5)))
+        {
+            hasXdata = true;
+            xdataHeader = settings::get_xmlMapping("xdata");
+            xValuesHeader = settings::get_xmlMapping("xdatavalues");
+
+            itemObject = activityItem[mapList->at(5)].toArray().at(0).toObject();
+            this->fill_qmap(&xData,&itemObject);
+
+            itemArray = itemObject[xdataHeader->at(2)].toArray();
+            this->fill_list(&itemArray,&xdataUnits);
+
+            itemArray = itemObject[xdataHeader->at(1)].toArray();
+            this->fill_list(&itemArray,&xdataValues);
+
+            QVector<double> xDataValues(xdataUnits.count()+1,0);
+            itemArray = itemObject[xdataHeader->at(3)].toArray();
+            QJsonArray arrValues;
+
+            for(int value = 0; value < itemArray.count(); ++value)
+            {
+                itemObject = itemArray.at(value).toObject();
+                arrValues = itemObject[xdataHeader->at(1)].toArray();
+                xDataValues[0] = itemObject[xValuesHeader->at(1)].toDouble();
+
+                for(int x = 0; x < arrValues.count(); ++x)
+                {
+                    xDataValues[x+1] = arrValues.at(x).toDouble();
+                }
+                xDataMap.insert(itemObject[xValuesHeader->at(0)].toInt(),xDataValues);
+            }
+        }
+
+        return tagData.value("Sport");
+    }
+
+    return QString();
 }
 
 void jsonHandler::fill_qmap(QHash<QString, QString> *qmap,QJsonObject *objItem)
@@ -119,9 +177,38 @@ void jsonHandler::fill_qmap(QHash<QString, QString> *qmap,QJsonObject *objItem)
     {
         keyValue = objItem->keys().at(i);
         qmap->insert(keyValue,objItem->value(keyValue).toString().trimmed());
-        if(keyValue == "OVERRIDES") hasOverride = true;
     }
 }
+
+void jsonHandler::check_keyList(QStringList *targetList,QStringList *map, QStringList *list)
+{
+    for(int i = 0; i < map->count(); ++i)
+    {
+        if(list->contains(map->value(i)))
+        {
+            targetList->insert(i,map->value(i));
+        }
+        else
+        {
+            if(map->value(i) == map->at(1))
+            {
+               targetList->insert(i,map->at(1));
+            }
+            if(map->value(i) == map->at(2))
+            {
+               targetList->insert(i,map->at(2));
+            }
+        }
+    }
+    for(int x = 0; x < list->count();++x)
+    {
+        if(!targetList->contains(list->at(x)))
+        {
+            (*targetList) << list->at(x);
+        }
+    }
+}
+
 
 void jsonHandler::fill_keyList(QStringList *targetList,QMap<int, QString> *map, QStringList *list)
 {
@@ -232,40 +319,6 @@ QJsonArray jsonHandler::modelToJson(QStandardItemModel *model, QStringList *list
         valueMap.clear();
     }
     return jArray;
-}
-
-QString jsonHandler::readJsonContent(QString jsonfile)
-{
-    hasOverride = hasXdata = false;
-    QJsonObject itemObject;
-    QJsonArray itemArray;
-
-    QJsonDocument d = QJsonDocument::fromJson(jsonfile.toUtf8());
-    QJsonObject jsonobj = d.object();
-
-    activityItem = jsonobj.value(QString("RIDE")).toObject();
-    this->fill_qmap(&rideData,&activityItem);
-
-    itemObject = activityItem.value(QString("TAGS")).toObject();
-    this->fill_qmap(&tagData,&itemObject);
-
-    if(hasOverride)
-    {
-        QJsonObject objOverride,objValue;
-        itemArray = activityItem["OVERRIDES"].toArray();
-
-        for(int i = 0; i < itemArray.count(); ++i)
-        {
-            objOverride = itemArray.at(i).toObject();
-            objValue = objOverride[objOverride.keys().first()].toObject();
-            overrideData.insert(objOverride.keys().first(),objValue["value"].toString());
-        }
-    }
-    if(activityItem.contains("XDATA")) hasXdata = true;
-
-    fileName = tagData.value("Filename").trimmed();
-
-    return tagData.value("Sport");
 }
 
 void jsonHandler::init_actModel(QString tagName, QMap<int,QString> *mapValues,QStandardItemModel *model, QStringList *list,int addCol)

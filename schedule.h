@@ -86,7 +86,6 @@ private:
     QString selSaison;
 
     QMap<QString,QStringList> saisonValues;
-    QMap<int,QStringList> mapList;
     QHash<QString,QMap<QDate,QStringList>> contestMap;
     QHash<QDate,QMap<QString,QVector<double>>> compMap;
     QHash<QString,QMap<QString,QVector<double>>> compWeekMap;

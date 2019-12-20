@@ -42,7 +42,7 @@ schedule::schedule()
            //Saison - Phase
            this->xml_toTreeModel(fileMap->value("saisonfile"),phaseModel);
            //StressMap
-           this->xml_toListMap(fileMap->value("stressfile"),&mapList);
+           this->xml_toListMap(fileMap->value("stressfile"));
            this->set_stressMap();
 
            this->remove_WeekofPast(firstdayofweek.addDays(-7));
@@ -229,22 +229,22 @@ QStringList schedule::get_weekMeta(QString weekID)
 
 void schedule::save_ltsFile()
 {
-    QMap<int,QStringList> saveList;
-    QStringList mapList;
+    QStringList listValues;
     int counter = 0;
     int ltsDays = settings::get_intValue("ltsdays")+1;
+    mapList.clear();
 
     for(QMap<QDate,QVector<double>>::const_iterator it = stressMap.find(firstdayofweek.addDays(-ltsDays)), end = stressMap.find(firstdayofweek.addDays(7)); it != end; ++it)
     {
-        mapList << it.key().toString(dateFormat);
+        listValues << it.key().toString(dateFormat);
         for(int value = 0; value < it.value().count(); ++value)
         {
-            mapList << QString::number(set_doubleValue(it.value().at(value),false));
+            listValues << QString::number(set_doubleValue(it.value().at(value),false));
         }
-        saveList.insert(counter++,mapList);
-        mapList.clear();
+        mapList.insert(counter++,listValues);
+        listValues.clear();
     }
-    this->listMap_toXml(&saveList,fileMap->value("stressfile"));
+    this->listMap_toXml(fileMap->value("stressfile"));
 }
 
 void schedule::add_contest(QString saison,QDate contestDate, QStringList contestValues)

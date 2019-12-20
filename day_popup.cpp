@@ -229,7 +229,7 @@ void day_popup::set_exportContent()
     if(sport == settings::RunLabel) stressType = "govss";
     if(sport == settings::AltLabel || sport == settings::StrengthLabel)
     {
-        commonRI = QString::number(set_doubleValue(totalWork.toDouble() / this->calc_totalWork(sport,10.0,sampCount,0)*10.0,false));
+        commonRI = QString::number(set_doubleValue(totalWork.toDouble() / this->calc_totalWork(10.0,sampCount,0)*10.0,false));
         if(sport == settings::StrengthLabel) commonRI = "4.0";
         stressType = "triscore";
     }

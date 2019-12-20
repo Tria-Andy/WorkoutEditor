@@ -35,8 +35,6 @@ private:
 
     static QString settingFile,valueFile,valueFilePath,splitter;
     static QHash<QString,QStringList*> headerMap,xmlmapping;
-    static QStringList table_header,header_swim,header_pm,header_pace,headerTria,header_other;
-    static QStringList header_int_time,header_swim_time;
 
     static QMap<int,QString> sampList,intList;
     static QMap<int,double> weightMap;
@@ -146,7 +144,6 @@ public:
     static void set_rangeValue(QString,QString,QString);
 
     //common functions
-    static QStringList get_int_header(QString,bool);
     static double get_weightforDate(QDateTime);
     static void writeListValues(QHash<QString,QStringList> *plist);
     static void autoSave() {settings::saveSettings();}

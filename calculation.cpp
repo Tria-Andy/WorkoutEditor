@@ -11,13 +11,77 @@ void calculation::set_currentSport(QString sport)
     currentSport = sport;
     isSwim = isBike = isRun = isStrength = isAlt = isOther = isTria = false;
 
-    if(currentSport == settings::SwimLabel) isSwim = true;
-    if(currentSport == settings::BikeLabel) isBike = true;
-    if(currentSport == settings::RunLabel) isRun = true;
-    if(currentSport == settings::StrengthLabel) isStrength = true;
-    if(currentSport == settings::AltLabel) isAlt = true;
-    if(currentSport == settings::OtherLabel) isOther = true;
-    if(currentSport == settings::TriaLabel) isTria = true;
+    if(currentSport == settings::SwimLabel)
+    {
+        isSwim = true;
+        usePMData = static_cast<bool>(thresValues->value("swimpm"));
+        thresPower = static_cast<int>(thresValues->value("swimpower"));
+        thresPace = static_cast<int>(thresValues->value("swimpace"));
+        workFactor = thresValues->value("swimfactor");
+        sportMark = "/100m";
+    }
+    else if(currentSport == settings::BikeLabel)
+    {
+        isBike = true;
+        usePMData = static_cast<bool>(thresValues->value("bikepm"));
+        thresPower = static_cast<int>(thresValues->value("bikepower"));
+        thresPace = static_cast<int>(thresValues->value("bikepace"));
+        thresSpeed = static_cast<int>(thresValues->value("bikespeed"));
+        workFactor = thresValues->value("bikefactor");
+        sportMark = " Watt";
+    }
+    else if(currentSport == settings::RunLabel)
+    {
+        isRun = true;
+        usePMData = static_cast<bool>(thresValues->value("runpm"));
+        thresPower = static_cast<int>(thresValues->value("runcp"));
+        thresPace = static_cast<int>(thresValues->value("runpace"));
+        workFactor = thresValues->value("runfactor");
+        if(usePMData)
+        {
+            sportMark = " Watt";
+        }
+        else
+        {
+            sportMark = "/km";
+        }
+    }
+    else if(currentSport == settings::StrengthLabel)
+    {
+        isStrength = true;
+        usePMData = true;
+        thresPower = static_cast<int>(thresValues->value("stgpower"));
+        workFactor = 0;
+        thresPace = 0;
+        sportMark = " Watt";
+    }
+    else if(currentSport == settings::AltLabel)
+    {
+        isAlt = true;
+        usePMData = true;
+        thresPower = static_cast<int>(thresValues->value("runcp"));
+        thresPace = 0;
+        workFactor = 0;
+        sportMark = " Watt";
+    }
+    else if(currentSport == settings::TriaLabel)
+    {
+        isTria = true;
+        usePMData = true;
+        thresPower = static_cast<int>(thresValues->value("stgpower"));
+        thresPace = 0;
+        workFactor = 0;
+        sportMark = " Watt";
+    }
+    else if(currentSport == settings::OtherLabel)
+    {
+        isOther = true;
+        usePMData = false;
+        thresPower = 0;
+        thresPace = 0;
+        workFactor = 0;
+        sportMark = "-";
+    }
 }
 
 QString calculation::set_time(int sec) const
@@ -159,7 +223,7 @@ double calculation::get_speed(QTime pace,double dist,bool fixdist) const
 
 double calculation::calc_Speed(double sec, double dist, double factor) const
 {
-    return 3600.0 / (sec / (dist/factor));
+    return set_doubleValue(3600.0 / (sec / (dist/factor)),true);
 }
 
 QString calculation::calc_lapSpeed(double sec) const
@@ -180,18 +244,16 @@ QString calculation::calc_lapSpeed(double sec) const
 
 int calculation::calc_lapPace(int duration, double distance) const
 {
-    int pace;
     if(distance > 0)
     {
         if (isSwim)
         {
-            pace = static_cast<int>(duration * (100.0/distance));
+            return static_cast<int>(duration * (100.0/distance));
         }
         else
         {
-            pace = static_cast<int>(duration / distance);
+            return static_cast<int>(duration / distance);
         }
-        return pace;
     }
     else
     {
@@ -233,13 +295,13 @@ double calculation::calc_totalCal(double weight,double avgHF, double moveTime) c
     return ceil(((-55.0969 + (0.6309 * avgHF) + (0.1988 * weight) + (0.2017 * age))/4.184) * moveTime/60);
 }
 
-double calculation::calc_totalWork(QString sport, double pValue, double dura,int tempID) const
+double calculation::calc_totalWork(double pValue, double dura,int tempID) const
 {
     double factor = 1000.0;
     double grav = 9.81;
     double weight = settings::get_weightforDate(QDateTime::currentDateTime());
     double totalWork = 0;
-    sport = "";
+
     if(isSwim)
     {
         double correctMet = 1;
@@ -284,7 +346,7 @@ double calculation::calc_totalWork(QString sport, double pValue, double dura,int
         totalWork = (dura * pValue) / factor;
     }
 
-    return set_doubleValue(totalWork*workFactor,false);
+    return set_doubleValue(totalWork,false);
 }
 
 double calculation::wattToSpeed(double thresPower,double currWatt) const

@@ -8,6 +8,10 @@ class calculation
 {
 public:
     calculation();
+    bool usePMData,isSwim,isBike,isRun,isStrength,isAlt,isOther,isTria;
+    QString calc_lapSpeed(double) const;
+    int calc_lapPace(int,double) const;
+    double calc_totalWork(double,double,int) const;
 
 private:
 
@@ -15,7 +19,7 @@ protected:
     QString currentSport,sportMark;
     int thresPower,thresPace,thresSpeed;
     double workFactor;
-    bool usePMData,isSwim,isBike,isRun,isStrength,isAlt,isOther,isTria;
+    //bool usePMData,isSwim,isBike,isRun,isStrength,isAlt,isOther,isTria;
     void set_currentSport(QString);
 
     int calc_thresPace(double) const;
@@ -29,7 +33,7 @@ protected:
     double calc_swim_xpower(double,double,double,double) const;    
     double calc_thresSpeed(double) const;
     double get_corrected_MET(double,int) const;
-    double calc_totalWork(QString,double,double,int) const;
+
     double calc_distance(int, double) const;
 
     QTime calc_duration(double,int) const;
@@ -39,8 +43,6 @@ protected:
     QString get_workout_pace(double, double, QString,bool) const;
     double get_speed(QTime,double,bool) const;
     double calc_Speed(double,double,double) const;
-    QString calc_lapSpeed(double) const;
-    int calc_lapPace(int,double) const;
 
     double wattToSpeed(double,double) const;
     int get_timesec(QString time) const;
