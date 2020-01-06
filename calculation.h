@@ -12,14 +12,15 @@ public:
     QString calc_lapSpeed(double) const;
     int calc_lapPace(int,double) const;
     double calc_totalWork(double,double,int) const;
+    double get_speed(QTime,double,bool) const;
+    QString currentSport;
 
 private:
 
 protected:
-    QString currentSport,sportMark;
-    int thresPower,thresPace,thresSpeed;
+    QString sportMark;
+    int thresPower,thresPace,thresSpeed,hfThreshold;
     double workFactor;
-    //bool usePMData,isSwim,isBike,isRun,isStrength,isAlt,isOther,isTria;
     void set_currentSport(QString);
 
     int calc_thresPace(double) const;
@@ -38,12 +39,10 @@ protected:
 
     QTime calc_duration(double,int) const;
     QTime set_sectoTime(int);
-
     QString set_time(int) const;
     QString get_workout_pace(double, double, QString,bool) const;
-    double get_speed(QTime,double,bool) const;
-    double calc_Speed(double,double,double) const;
 
+    double calc_Speed(double,double,double) const;
     double wattToSpeed(double,double) const;
     int get_timesec(QString time) const;
     double set_doubleValue(double,bool) const;

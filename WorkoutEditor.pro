@@ -29,7 +29,6 @@ VERSION_PE_HEADER = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
 SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
-    dialog_export.cpp \
     activity.cpp \
     dialog_stresscalc.cpp \
     qcustomplot.cpp \
@@ -56,7 +55,6 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     settings.h \
-    dialog_export.h \
     activity.h \
     dialog_stresscalc.h \
     qcustomplot.h \

@@ -121,11 +121,11 @@ void foodplanner::update_foodPlanModel()
                 {
                     QList<QStandardItem*> foodList;
                     foodList << new QStandardItem(foodstart.key());
-                    foodList << new QStandardItem(foodstart->first);
-                    foodList << new QStandardItem(QString::number(foodstart->second.second));
-                    foodList << new QStandardItem(QString::number(foodstart->second.first));
-                    foodList << new QStandardItem("0");
-                    foodList.at(0)->setData(foodPlanTags->at(2),Qt::AccessibleTextRole);
+                    foodList << new QStandardItem(foodstart.value().first);
+                    foodList << new QStandardItem(QString::number(foodstart.value().second.second));
+                    foodList << new QStandardItem(QString::number(foodstart.value().second.first));
+                    foodList.at(0)->setData(foodPlanTags->at(3),Qt::AccessibleTextRole);
+
                     mealItem->appendRow(foodList);
                 }
             }
@@ -595,8 +595,7 @@ void foodplanner::insert_newWeek(QDate firstday)
             foodItem << new QStandardItem(mealsMap.value(mealDefault));
             foodItem << new QStandardItem(QString::number(get_mealData(mealDefault).second.at(0)));
             foodItem << new QStandardItem("0");
-            foodItem << new QStandardItem(QString::number(get_mealData(mealDefault).second.at(1)));
-            foodItem.at(0)->setData(foodPlanTags->at(2),Qt::AccessibleTextRole);
+            foodItem.at(0)->setData(foodPlanTags->at(3),Qt::AccessibleTextRole);
             mealsItem.at(0)->appendRow(foodItem);
             dayItem.at(0)->appendRow(mealsItem);
         }

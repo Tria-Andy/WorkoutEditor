@@ -58,7 +58,7 @@
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="schedule">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -1231,7 +1231,7 @@
                 </property>
                 <layout class="QFormLayout" name="formLayout_2">
                  <item row="0" column="0">
-                  <widget class="QLabel" name="label_7">
+                  <widget class="QLabel" name="label_swimType">
                    <property name="text">
                     <string>Type:</string>
                    </property>
@@ -1248,10 +1248,21 @@
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="doubleSpinBox_intDistance"/>
+                  <widget class="QDoubleSpinBox" name="doubleSpinBox_intDistance">
+                   <property name="decimals">
+                    <number>3</number>
+                   </property>
+                   <property name="maximum">
+                    <double>1999.990000000000009</double>
+                   </property>
+                  </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QTimeEdit" name="timeEdit_intDuration"/>
+                  <widget class="QTimeEdit" name="timeEdit_intDuration">
+                   <property name="displayFormat">
+                    <string>mm:ss</string>
+                   </property>
+                  </widget>
                  </item>
                  <item row="2" column="0">
                   <widget class="QLabel" name="label_9">
@@ -1267,24 +1278,10 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1">
-                  <widget class="QLineEdit" name="lineEdit_intPace">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="4" column="0">
                   <widget class="QLabel" name="label_11">
                    <property name="text">
                     <string>Speed:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
-                  <widget class="QLineEdit" name="lineEdit_intSpeed">
-                   <property name="enabled">
-                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>
@@ -1295,6 +1292,26 @@
                   <widget class="QLabel" name="label_cad">
                    <property name="text">
                     <string>Strokes/CAD:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QTimeEdit" name="timeEdit_intPace">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="displayFormat">
+                    <string>mm:ss</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBox_intSpeed">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="decimals">
+                    <number>3</number>
                    </property>
                   </widget>
                  </item>
@@ -1379,19 +1396,18 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="Line" name="line_20">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
                   <widget class="QToolButton" name="toolButton_split">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                      <horstretch>1</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>25</width>
+                     <height>25</height>
+                    </size>
                    </property>
                    <property name="toolTip">
                     <string>Split</string>
@@ -1849,40 +1865,43 @@
                   <item>
                    <widget class="QLabel" name="label_2">
                     <property name="text">
-                     <string>Min Speed:</string>
+                     <string>Speed Min:</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_polMin">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBox_polMin">
                     <property name="enabled">
                      <bool>false</bool>
                     </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>100</width>
-                      <height>16777215</height>
-                     </size>
+                    <property name="prefix">
+                     <string/>
+                    </property>
+                    <property name="decimals">
+                     <number>3</number>
+                    </property>
+                    <property name="maximum">
+                     <double>999.990000000000009</double>
                     </property>
                    </widget>
                   </item>
                   <item>
                    <widget class="QLabel" name="label_3">
                     <property name="text">
-                     <string>Max Speed:</string>
+                     <string> - Max</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_polMax">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBox_polMax">
                     <property name="enabled">
                      <bool>false</bool>
                     </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>100</width>
-                      <height>16777215</height>
-                     </size>
+                    <property name="decimals">
+                     <number>3</number>
+                    </property>
+                    <property name="maximum">
+                     <double>999.990000000000009</double>
                     </property>
                    </widget>
                   </item>
@@ -3357,7 +3376,6 @@
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionEdit_Week"/>
-    <addaction name="actionExport_to_Golden_Cheetah"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuModus">
@@ -3498,15 +3516,6 @@
    </property>
    <property name="text">
     <string>Stress Calculator</string>
-   </property>
-  </action>
-  <action name="actionExport_to_Golden_Cheetah">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Upload.png</normaloff>:/images/icons/Upload.png</iconset>
-   </property>
-   <property name="text">
-    <string>Export to Golden Cheetah</string>
    </property>
   </action>
   <action name="actionEditor">

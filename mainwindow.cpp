@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
         //Planning Mode
         graphLoaded = false;
         workSchedule = new schedule();
-        loadActivity = new Activity();
+        currActivity = new Activity();
         stdWorkouts = new standardWorkouts();
 
         saisonValues = workSchedule->get_saisonValues();
@@ -98,27 +98,38 @@ MainWindow::MainWindow(QWidget *parent) :
         avgHeader = settings::getHeaderMap("average");
 
         //Editor Mode
-        avgCounter = 0;
         actLoaded = false;
 
-        this->set_tableWidgetItems(ui->tableWidget_actInfo,loadActivity->infoHeader->count(),1,&avgSelect_del);
+        this->set_tableWidgetItems(ui->tableWidget_actInfo,currActivity->infoHeader->count(),1,&avgSelect_del);
         ui->tableWidget_actInfo->setEditTriggers(QAbstractItemView::NoEditTriggers);
         ui->tableWidget_actInfo->horizontalHeader()->setVisible(false);
         ui->tableWidget_actInfo->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableWidget_actInfo->verticalHeader()->setSectionsClickable(false);
-        this->set_tableHeader(ui->tableWidget_actInfo,loadActivity->infoHeader,true);
+        this->set_tableHeader(ui->tableWidget_actInfo,currActivity->infoHeader,true);
 
         ui->treeWidget_activityfiles->setEditTriggers(QAbstractItemView::NoEditTriggers);
         ui->treeWidget_activityfiles->header()->setSectionResizeMode(QHeaderView::Stretch);
         ui->treeWidget_activityfiles->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
-        ui->treeWidget_activityfiles->setColumnCount(loadActivity->gcActivtiesMap.last().count());
+        ui->treeWidget_activityfiles->setColumnCount(currActivity->gcActivtiesMap.last().count());
         ui->treeWidget_activityfiles->setHeaderHidden(true);
         ui->treeWidget_activityfiles->setItemDelegate(&fileList_del);
 
         ui->treeWidget_activity->setEditTriggers(QAbstractItemView::NoEditTriggers);
         ui->treeWidget_activity->header()->setSectionResizeMode(QHeaderView::Stretch);
-        ui->treeWidget_activity->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
+        ui->treeWidget_activity->header()->setVisible(false);
         ui->treeWidget_activity->setItemDelegate(&tree_del);
+
+        ui->tableWidget_avgValues->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        ui->tableWidget_avgValues->verticalHeader()->setFixedWidth(100);
+        ui->tableWidget_avgValues->verticalHeader()->setMaximumSectionSize(25);
+        ui->tableWidget_avgValues->verticalHeader()->setSectionsClickable(false);
+        ui->tableWidget_avgValues->horizontalHeader()->setVisible(false);
+        ui->tableWidget_avgValues->setItemDelegate(&avgSelect_del);
+
+        ui->comboBox_swimType->addItems(settings::get_listValues("SwimStyle"));
+        ui->comboBox_swimType->setVisible(false);
+        ui->label_swimType->setVisible(false);
+        ui->toolButton_split->setVisible(false);
 
         connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
         connect(planMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_planMode(bool)));
@@ -217,7 +228,7 @@ MainWindow::MainWindow(QWidget *parent) :
         foodcopyMode = lineSelected = dayLineSelected = false;
 
         this->reset_menuEdit();
-        this->set_speedgraph();
+        this->init_polishgraph();
         this->resetPlot();
         this->loadUISettings();
         this->activityList(ui->treeWidget_activityfiles->columnCount()-1);
@@ -261,10 +272,12 @@ void MainWindow::loadUISettings()
 
 void MainWindow::freeMem()
 {
+    this->clearActivtiy();
+
     if(userSetup == 0)
     {
         delete workSchedule;
-        delete loadActivity;
+        delete currActivity;
         delete stdWorkouts;
         delete foodPlan;
     }
@@ -441,11 +454,15 @@ void MainWindow::fill_foodPlanList(bool newWeek)
     }
 }
 
-void MainWindow::clearActivtiy()
+bool MainWindow::clearActivtiy()
 {
     this->resetPlot();
     ui->treeWidget_activity->clear();
-    loadActivity->clear_loadedActivity();
+    ui->treeWidget_activity->header()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->treeWidget_activity->header()->setVisible(false);
+    ui->tableWidget_avgValues->clear();
+    ui->tableWidget_avgValues->horizontalHeader()->setVisible(false);
+    ui->tableWidget_actInfo->clearContents();
 
     QString viewBackground = "background-color: #e6e6e6";
 
@@ -456,6 +473,8 @@ void MainWindow::clearActivtiy()
 
     ui->actionSelect_File->setEnabled(true);
     ui->actionReset->setEnabled(false);
+
+    return currActivity->clear_loadedActivity();
 }
 
 void MainWindow::openPreferences()
@@ -472,7 +491,6 @@ void MainWindow::set_menuItems(int module)
         ui->menuWorkout->setEnabled(true);
         ui->actionPMC->setVisible(true);
         ui->actionIntervall_Editor->setVisible(true);
-        ui->actionExport_to_Golden_Cheetah->setVisible(true);
         ui->actionPace_Calculator->setVisible(true);
         ui->actionStress_Calculator->setVisible(true);
         ui->actionNew->setVisible(true);
@@ -502,7 +520,6 @@ void MainWindow::set_menuItems(int module)
 
         ui->actionfood_History->setVisible(false);
         ui->actionFood_Macros->setVisible(false);
-        ui->actionSelect_File->setVisible(false);
         ui->actionDelete->setVisible(false);
     }
     if(module == FOOD)
@@ -974,17 +991,8 @@ void MainWindow::on_actionSave_triggered()
                                           );
         if (reply == QMessageBox::Yes)
         {
-            if(loadActivity->get_sport() == settings::SwimLabel)
-            {
-
-            }
-            else
-            {
-
-            }
-            ui->progressBar_fileState->setValue(25);
-            loadActivity->writeChangedData();
-            ui->progressBar_fileState->setValue(75);
+            currActivity->prepare_save();
+            this->save_activity();
         }
         ui->progressBar_fileState->setValue(100);
         QTimer::singleShot(2000,ui->progressBar_fileState,SLOT(reset()));
@@ -1131,42 +1139,35 @@ void MainWindow::on_toolButton_weekFour_clicked()
         this->set_buttons(QDate(),false);
     }
 }
-void MainWindow::on_actionExport_to_Golden_Cheetah_triggered()
-{
-    Dialog_export export_workout(this,workSchedule);
-    export_workout.setModal(true);
-    export_workout.exec();
-}
 
 //EDITOR Functions *****************************************************************************
 
-void MainWindow::select_activityFile()
+void MainWindow::reset_avgSelection()
 {
-    QMessageBox::StandardButton reply;
-    QString filename = QFileDialog::getOpenFileName(
-                this,
-                tr("Select GC JSON File"),
-                gcValues->value("actpath"),
-                "JSON Files (*.json)"
-                );
+    int col = currActivity->activityHeader.count()-1;
 
-    if(filename != "")
+    for(int row = 0; row < ui->treeWidget_activity->topLevelItemCount(); ++row)
     {
-        reply = QMessageBox::question(this,
-                                  tr("Open Selected File!"),
-                                  filename,
-                                  QMessageBox::Yes|QMessageBox::No
-                                  );
-        if (reply == QMessageBox::Yes)
+        if(ui->treeWidget_activity->topLevelItem(row)->data(0,Qt::DisplayRole).toString() != currActivity->breakName)
         {
-            this->load_activity(filename);
+            if(ui->treeWidget_activity->topLevelItem(row)->data(col,Qt::UserRole).toBool())
+            {
+                currActivity->set_averageMap(ui->treeWidget_activity->topLevelItem(row),col);
+            }
         }
     }
+
+    for(int i = 0; i < currActivity->averageHeader.count(); ++i)
+    {
+        ui->tableWidget_avgValues->item(i,0)->setData(Qt::DisplayRole,"-");
+    }
+
+    ui->toolButton_clearSelect->setEnabled(false);
 }
 
 void MainWindow::activityList(int sortCol)
 {
-    for(QMap<QString,QVector<QString>>::const_iterator it = loadActivity->gcActivtiesMap.cbegin(), end = loadActivity->gcActivtiesMap.cend(); it != end; ++it)
+    for(QMap<QString,QVector<QString>>::const_iterator it = currActivity->gcActivtiesMap.cbegin(), end = currActivity->gcActivtiesMap.cend(); it != end; ++it)
     {
         QTreeWidgetItem *item = new QTreeWidgetItem();
         item->setData(0,Qt::UserRole,it.key());
@@ -1183,45 +1184,39 @@ void MainWindow::activityList(int sortCol)
     ui->treeWidget_activityfiles->hideColumn(sortCol);
 }
 
-void MainWindow::load_activity(const QString &filename)
+void MainWindow::load_activity(const QString &filename,bool fullPath)
 {
     QFileInfo fileinfo(filename);
 
     if(fileinfo.suffix() == "json")
     {
-        actLoaded = loadActivity->read_jsonFile(filename);
+        actLoaded = currActivity->read_jsonFile(filename,fullPath);
 
         if(actLoaded)
         {
-            loadActivity->prepare_baseData();
-            loadActivity->set_activityData();
+            currActivity->prepare_baseData();
+            currActivity->set_activityData();
             ui->actionSelect_File->setEnabled(false);
             ui->actionReset->setEnabled(true);
-            avgSelect_del.sport = loadActivity->get_sport();
-            this->set_menuItems(EDITOR);
+            avgSelect_del.sport = currActivity->currentSport;
 
-            this->init_editorViews();
+            this->set_menuItems(EDITOR);
             this->set_activityTree();
             this->set_activityInfo();
 
+            ui->treeWidget_activity->setHeaderLabels(currActivity->activityHeader);
+            ui->treeWidget_activity->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
+            ui->treeWidget_activity->header()->setVisible(true);
+            ui->tableWidget_avgValues->horizontalHeader()->setVisible(true);
+            ui->comboBox_swimType->setVisible(currActivity->isSwim);
+            ui->label_swimType->setVisible(currActivity->isSwim);
+            ui->doubleSpinBox_intDistance->setEnabled(!currActivity->isSwim);
+            this->set_tableWidgetItems(ui->tableWidget_avgValues,currActivity->averageHeader.count(),1,nullptr);
+            this->set_tableHeader(ui->tableWidget_avgValues,&currActivity->averageHeader,true);
+
+            this->init_controlStyleSheets();
         }
      }
-}
-
-void MainWindow::init_editorViews()
-{
-    ui->treeWidget_activity->setHeaderLabels(loadActivity->activityHeader);
-
-    ui->tableWidget_avgValues->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableWidget_avgValues->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableWidget_avgValues->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->tableWidget_avgValues->verticalHeader()->setFixedWidth(100);
-    ui->tableWidget_avgValues->verticalHeader()->setMaximumSectionSize(25);
-    ui->tableWidget_avgValues->verticalHeader()->setSectionsClickable(false);
-    ui->tableWidget_avgValues->horizontalHeader()->setVisible(false);
-    ui->tableWidget_avgValues->setItemDelegate(&avgSelect_del);
-
-    this->init_controlStyleSheets();
 }
 
 void MainWindow::init_controlStyleSheets()
@@ -1248,94 +1243,56 @@ void MainWindow::set_activityInfo()
 {
     ui->tableWidget_actInfo->clearContents();
 
-    for(int row = 0; row < loadActivity->ride_info.count();++row)
+    for(int row = 0; row < currActivity->activityInfo.count();++row)
     {
         QTableWidgetItem *item = new QTableWidgetItem();
-        item->setData(Qt::DisplayRole,loadActivity->ride_info.value(loadActivity->infoHeader->at(row)));
+        item->setData(Qt::DisplayRole,currActivity->activityInfo.value(currActivity->infoHeader->at(row)));
         ui->tableWidget_actInfo->setItem(row,0,item);
     }
     ui->actionSave->setEnabled(true);
 }
 
-void MainWindow::selectAvgValues(QModelIndex index, int avgCol)
+void MainWindow::recalc_selectedInt(QTime lapTime, double lapDist)
 {
-    bool checkAvg;
+    ui->timeEdit_intPace->setTime(QTime::fromString(set_time(currActivity->calc_lapPace(get_secFromTime(lapTime),lapDist)),shortTime));
+    ui->doubleSpinBox_intSpeed->setValue(this->set_doubleValue(currActivity->get_speed(ui->timeEdit_intPace->time(),lapDist,true),true));
 
-    /*
-    if(checkAvg == false)
+    this->set_polishMinMax(ui->doubleSpinBox_intSpeed->value());
+}
+
+
+void MainWindow::set_polishMinMax(double speed)
+{
+    QPair<double,double> avgMinMax;
+    if(currActivity->isBike || currActivity->isRun)
     {
-        loadActivity->avgItems.insert(index.row(),index);
-        loadActivity->activityModel->setData(index,"+");
-        loadActivity->activityModel->setData(index,1,Qt::UserRole+1);
-        loadActivity->set_avgValues(++avgCounter,1);
+        avgMinMax = currActivity->get_polishMinMax(speed);
     }
     else
     {
-        loadActivity->avgItems.remove(index.row());
-        loadActivity->activityModel->setData(index,"-");
-        loadActivity->activityModel->setData(index,0,Qt::UserRole+1);
-        loadActivity->set_avgValues(--avgCounter,-1);
+        avgMinMax.first = 0;
+        avgMinMax.second = 0;
     }
-    */
-    if(avgCounter > 0)
-    {
-        ui->toolButton_addSelect->setEnabled(true);
-        ui->toolButton_clearSelect->setEnabled(true);
-        ui->toolButton_clearContent->setEnabled(true);
-    }
-    else
-    {
-        ui->toolButton_addSelect->setEnabled(false);
-        ui->toolButton_clearSelect->setEnabled(false);
-        ui->toolButton_clearContent->setEnabled(false);
-        ui->toolButton_sync->setEnabled(false);
-    }
+    ui->doubleSpinBox_polMin->setValue(avgMinMax.first);
+    ui->doubleSpinBox_polMax->setValue(avgMinMax.second);
 }
 
-void MainWindow::set_polishValues(int lap,double intDist, double avgSpeed,double factor,int ypos)
-{
-
-    for(int i = 0; i < speedValues.count(); ++i)
-    {
-        if(lap == 0 && i < 5)
-        {
-            polishValues[i] = speedValues[i];
-        }
-        else
-        {
-            polishValues[i] = loadActivity->polish_SpeedValues(speedValues[i],avgSpeed,0.10-factor,true);
-        }
-    }
-
-    this->set_speedPlot(avgSpeed,intDist,ypos);
-}
 
 void MainWindow::on_horizontalSlider_factor_valueChanged(int value)
 {
     ui->label_factorValue->setText(QString::number(10-value) + "%");
-    double factor = static_cast<double>(value)/100;
-    loadActivity->set_polishFactor(0.1-factor);
-    /*
-    this->set_polishValues(ui->treeWidget_activity->currentIndex().row(),intDist,intSpeed,factor,0);
-    rangeMinMax[0] = loadActivity->polish_SpeedValues(1.0,intSpeed,0.1-factor,false);
-    rangeMinMax[1] = loadActivity->polish_SpeedValues(50.0,intSpeed,0.1-factor,false);
+    currActivity->set_polishFactor(value);
 
-    ui->lineEdit_polMin->setText(QString::number(rangeMinMax[0]));
-    ui->lineEdit_polMax->setText(QString::number(rangeMinMax[1]));
-    */
+    this->set_polishMinMax(ui->doubleSpinBox_intSpeed->value());
+    this->set_polishPlot(selectedInt);
 }
 
 void MainWindow::resetPlot()
 {
     ui->widget_plot->clearPlottables();
     ui->widget_plot->clearItems();
-    speedValues.resize(100);
-    secTicker.resize(100);
-    secTicker.fill(0);
-    speedValues.fill(0);
     QCPGraph *resetLine = ui->widget_plot->addGraph();
     resetLine->setPen(QPen(QColor(255,255,255),2));
-    resetLine->setData(secTicker,speedValues);
     resetLine->setName("-");
     ui->widget_plot->xAxis->setRange(0,100);
     ui->widget_plot->xAxis2->setRange(0,1);
@@ -1344,12 +1301,35 @@ void MainWindow::resetPlot()
     ui->widget_plot->replot();
 }
 
+QTreeWidgetItem* MainWindow::set_activityLaps(QPair<int,QString> lapKey, QVector<double> lapData,int lastSplit)
+{
+    QTreeWidgetItem *lapItem = new QTreeWidgetItem();
+    int lapPace = currActivity->calc_lapPace(lapData.at(2),currActivity->poolLength);
+
+    lapItem->setData(0,Qt::AccessibleTextRole,lapKey.first);
+    lapItem->setData(0,Qt::UserRole,lapData.at(0));
+    lapItem->setData(0,Qt::DisplayRole,lapKey.second);
+    lapItem->setData(1,Qt::DisplayRole,currActivity->get_swimType(lapData.at(1)));
+    lapItem->setData(1,Qt::UserRole,lapData.at(1));
+    lapItem->setData(3,Qt::DisplayRole,currActivity->poolLength);
+    lapItem->setData(4,Qt::DisplayRole,set_time(lapData.at(2)));
+    lapItem->setData(5,Qt::DisplayRole,set_time(lapData.at(2)+lastSplit));
+    lapItem->setData(5,Qt::UserRole,lapData.at(2)+lastSplit);
+    lapItem->setData(6,Qt::DisplayRole,set_time(lapPace));
+    lapItem->setData(7,Qt::DisplayRole,calc_Speed(lapData.at(2),currActivity->poolLength,1000.0));
+    lapItem->setData(8,Qt::DisplayRole,lapData.at(3));
+    lapItem->setData(9,Qt::DisplayRole,currActivity->calc_totalWork(lapPace,lapData.at(2),lapData.at(1)));
+
+     return lapItem;
+}
+
+
 void MainWindow::set_activityTree()
 {
     ui->treeWidget_activity->clear();
     QTreeWidgetItem *rootItem = ui->treeWidget_activity->invisibleRootItem();
 
-    QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>> *activityMap = loadActivity->get_activityMap();
+    QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>> *activityMap = currActivity->get_activityMap();
     QPair<int,int> intStartStop;
     double distSplit = 0;
     int totalWork = 0;
@@ -1358,16 +1338,17 @@ void MainWindow::set_activityTree()
     for(QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>>::const_iterator intStart = activityMap->cbegin(), intEnd = activityMap->cend(); intStart != intEnd; ++intStart)
     {
         QTreeWidgetItem *intItem = new QTreeWidgetItem();
-        intStartStop = loadActivity->get_intervalData(intStart.key().first);
+        intStartStop = currActivity->get_intervalData(intStart.key().first);
         double lapWork = 0;
 
-        if(loadActivity->isSwim)
+        if(currActivity->isSwim)
         {
             QVector<int> lapValues(6,0);
+            double completeDist = 0;
             int lapStyle = intStart.value().first().at(1);
             int lastSplit = 0;
 
-            if(intStart.key().second != loadActivity->breakName)
+            if(intStart.key().second != currActivity->breakName)
             {
                 for(QMap<QPair<int,QString>,QVector<double>>::const_iterator lapsStart = intStart.value().cbegin(), lapsEnd = intStart.value().cend(); lapsStart != lapsEnd; ++lapsStart)
                 {
@@ -1376,164 +1357,338 @@ void MainWindow::set_activityTree()
                     lapValues[3] = lapValues.at(3) + lapsStart.value().at(3);
                     if(lapStyle != lapsStart.value().at(1)) lapStyle = 6;
                     lastSplit = lastSplit + lapsStart.value().at(2);
-                    lapWork = lapWork + loadActivity->calc_totalWork(loadActivity->calc_lapPace(lapsStart.value().at(2),loadActivity->poolLength),lapsStart.value().at(2),lapsStart.value().at(1));
+                    lapWork = lapWork + currActivity->calc_totalWork(currActivity->calc_lapPace(lapsStart.value().at(2),currActivity->poolLength),lapsStart.value().at(2),lapsStart.value().at(1));
                 }
 
                 lapValues[1] = intStart.value().count();
-                lapValues[2] = lapValues.at(1)*loadActivity->poolLength;
-                lapValues[4] = loadActivity->calc_lapPace(lapValues.at(0),lapValues.at(2));
+                lapValues[2] = lapValues.at(1)*currActivity->poolLength;
+                lapValues[4] = currActivity->calc_lapPace(intStartStop.second - intStartStop.first,lapValues.at(2));
 
-                intItem->setData(0,Qt::DisplayRole,intStart.key().second+"_"+loadActivity->checkRangeLevel(lapValues.at(4)));
-                intItem->setData(1,Qt::DisplayRole,loadActivity->get_swimType(lapStyle));
+                completeDist = completeDist + (lapValues.at(2) / 1000.0);
+
+                intItem->setData(0,Qt::DisplayRole,intStart.key().second+"_"+currActivity->checkRangeLevel(lapValues.at(4)));
+                intItem->setData(0,Qt::UserRole,completeDist);
+                intItem->setData(1,Qt::DisplayRole,currActivity->get_swimType(lapStyle));
                 intItem->setData(2,Qt::DisplayRole,lapValues.at(1));
                 intItem->setData(3,Qt::DisplayRole,lapValues.at(2));
-                intItem->setData(4,Qt::DisplayRole,set_time(intStartStop.second - intStartStop.first));
+                intItem->setData(4,Qt::DisplayRole,set_time(lapValues.at(0)));
+                intItem->setData(4,Qt::UserRole,intStartStop.second);
                 intItem->setData(5,Qt::DisplayRole,set_time(intStartStop.first));
+                intItem->setData(5,Qt::UserRole,intStartStop.first);
                 intItem->setData(6,Qt::DisplayRole,set_time(lapValues.at(4)));
                 intItem->setData(7,Qt::DisplayRole,calc_Speed(lapValues.at(0),lapValues.at(2),1000.0));
                 intItem->setData(8,Qt::DisplayRole,lapValues.at(3));
                 intItem->setData(9,Qt::DisplayRole,set_doubleValue(lapWork,false));
                 intItem->setData(10,Qt::DisplayRole,"-");
+                intItem->setData(10,Qt::UserRole,false);
             }
             else
             {
-                lapWork = loadActivity->calc_totalWork(0,intStartStop.second - intStartStop.first,0);
+                lapWork = currActivity->calc_totalWork(0,intStartStop.second - intStartStop.first,0);
                 intItem->setData(0,Qt::DisplayRole,intStart.key().second);
+                intItem->setData(0,Qt::UserRole,completeDist);
                 intItem->setData(4,Qt::DisplayRole,set_time(intStartStop.second - intStartStop.first));
                 intItem->setData(5,Qt::DisplayRole,set_time(intStartStop.first));
                 intItem->setData(9,Qt::DisplayRole,lapWork);
             }
+            intItem->setData(0,Qt::AccessibleTextRole,QString::number(intStart.key().first)+"-"+intStart.key().second);
             totalWork = totalWork + lapWork;
         }
         else
         {
             for(QMap<QPair<int,QString>,QVector<double>>::const_iterator lapsStart = intStart.value().cbegin(), lapsEnd = intStart.value().cend(); lapsStart != lapsEnd; ++lapsStart)
             {
-                lapPace = loadActivity->calc_lapPace(lapsStart.value().at(0),lapsStart.value().at(1));
+                lapPace = currActivity->calc_lapPace(lapsStart.value().at(0),lapsStart.value().at(1));
 
-                if(loadActivity->usePMData)
-                {
-                    lapWork = round(loadActivity->calc_totalWork(lapsStart.value().at(3),lapsStart.value().at(0),0));
-                }
-                else
-                {
-                    lapWork = round(loadActivity->calc_totalWork(lapPace,lapsStart.value().at(0),0));
-                }
-
+                intItem->setData(0,Qt::AccessibleTextRole,QString::number(intStart.key().first)+"-"+intStart.key().second);
+                intItem->setData(0,Qt::UserRole,lapsStart.key().first);
                 intItem->setData(0,Qt::DisplayRole,QString::number(lapsStart.key().first)+"_"+lapsStart.key().second);
                 intItem->setData(1,Qt::DisplayRole,set_time(lapsStart.value().at(0)));
                 intItem->setData(2,Qt::DisplayRole,set_time(intStartStop.first));
                 intItem->setData(3,Qt::DisplayRole,set_doubleValue(lapsStart.value().at(1)+distSplit,true));
-                intItem->setData(4,Qt::DisplayRole,set_doubleValue(lapsStart.value().at(1),true));
-                intItem->setData(5,Qt::DisplayRole,set_time(lapPace));
-                intItem->setData(6,Qt::DisplayRole,set_doubleValue(lapsStart.value().at(2),false));
-                intItem->setData(7,Qt::DisplayRole,round(lapsStart.value().at(3)));
-                intItem->setData(8,Qt::DisplayRole,round(lapsStart.value().at(4)));
-                intItem->setData(9,Qt::DisplayRole,lapWork);
-                intItem->setData(10,Qt::DisplayRole,"-");
+
+                if(currActivity->usePMData)
+                {
+                    lapWork = currActivity->calc_totalWork(lapsStart.value().at(3),lapsStart.value().at(0),0);
+                }
+                else
+                {
+                    lapWork = currActivity->calc_totalWork(lapPace,lapsStart.value().at(0),0);
+                }
+
+                if(currActivity->isBike || currActivity->isRun)
+                {
+                    intItem->setData(4,Qt::DisplayRole,set_doubleValue(lapsStart.value().at(1),true));
+                    intItem->setData(5,Qt::DisplayRole,set_time(lapPace));
+                    intItem->setData(6,Qt::DisplayRole,set_doubleValue(lapsStart.value().at(2),false));
+                    intItem->setData(7,Qt::DisplayRole,round(lapsStart.value().at(3)));
+                    intItem->setData(8,Qt::DisplayRole,round(lapsStart.value().at(4)));
+                    intItem->setData(9,Qt::DisplayRole,lapWork);
+                    intItem->setData(10,Qt::DisplayRole,"-");
+                    intItem->setData(10,Qt::UserRole,false);
+                }
+                else
+                {
+                    intItem->setData(4,Qt::DisplayRole,lapWork);
+                    intItem->setData(5,Qt::DisplayRole,"-");
+                    intItem->setData(5,Qt::UserRole,false);
+                }
 
                 distSplit = distSplit + lapsStart.value().at(1);
-
             }
             totalWork = totalWork + lapWork;
         }
         rootItem->addChild(intItem);
     }
-    loadActivity->ride_info.insert("Total Work",QString::number(ceil(totalWork)));
+    currActivity->activityInfo.insert("Total Work",QString::number(ceil(totalWork)));
 }
 
-QTreeWidgetItem* MainWindow::set_activityLaps(QPair<int,QString> lapKey, QVector<double> lapData,int lastSplit)
+void MainWindow::set_selecteditem(QTreeWidgetItem *selItem, int column)
 {
-    QTreeWidgetItem *lapItem = new QTreeWidgetItem();
-    int lapPace = loadActivity->calc_lapPace(lapData.at(2),loadActivity->poolLength);
-
-    lapItem->setData(0,Qt::UserRole,lapKey.first);
-    lapItem->setData(0,Qt::DisplayRole,lapKey.second);
-    lapItem->setData(1,Qt::DisplayRole,loadActivity->get_swimType(lapData.at(1)));
-    lapItem->setData(3,Qt::DisplayRole,loadActivity->poolLength);
-    lapItem->setData(4,Qt::DisplayRole,set_time(lapData.at(2)));
-    lapItem->setData(5,Qt::DisplayRole,set_time(lapData.at(2)+lastSplit));
-    lapItem->setData(6,Qt::DisplayRole,set_time(lapPace));
-    lapItem->setData(7,Qt::DisplayRole,calc_Speed(lapData.at(2),loadActivity->poolLength,1000.0));
-    lapItem->setData(8,Qt::DisplayRole,lapData.at(3));
-    lapItem->setData(9,Qt::DisplayRole,loadActivity->calc_totalWork(lapPace,lapData.at(2),lapData.at(1)));
-
-     return lapItem;
-}
-
-void MainWindow::set_speedValues(int index)
-{
-    int lapLen;
-    int vSize;
-    double current = 0;
-    double second = 0;
-    int yPos = 0;
-    double intSpeed,intDist;
-
-    int start = 0;
-    int stop = 0;
-    speedMinMax.resize(2);
-    secondMinMax.resize(2);
-    rangeMinMax.resize(2);
-    speedMinMax[0] = 40.0;
-    speedMinMax[1] = 0.0;
-    secondMinMax[0] = 10.0;
-    secondMinMax[1] = 0.0;
-    lapLen = stop-start;
-    vSize = lapLen+1;
-    polishValues.clear();
-
-    speedValues.resize(vSize);
-    secondValues.resize(vSize);
-    polishValues.resize(vSize);
-    secTicker.resize(vSize);
-
-    for(int i = start, pos=0; i <= stop; ++i,++pos)
+    if(column != currActivity->activityHeader.count()-1)
     {
-        current = loadActivity->sampSpeed[i];
-        second = loadActivity->sampSecond[i];
-        secTicker[pos] = pos;
-        speedValues[pos] = current;
-        secondValues[pos] = second;
-        if(speedMinMax[0] > current) rangeMinMax[0] = speedMinMax[0] = current;
-        if(speedMinMax[1] < current) rangeMinMax[1] = speedMinMax[1] = current;
-        if(secondMinMax[0] > second) secondMinMax[0] = second;
-        if(secondMinMax[1] < second) secondMinMax[1] = second;
-    }
+        selectedInt = ui->treeWidget_activity->invisibleRootItem()->indexOfChild(selItem);
+        ui->label_lapType->setText(selItem->data(0,Qt::DisplayRole).toString());
 
-    if(loadActivity->get_sport() != settings::SwimLabel)
-    {
-        //intSpeed = treeSelection->selectedRows(6).at(0).data().toDouble();
-        //intDist = treeSelection->selectedRows(4).at(0).data().toDouble();
+        if(currActivity->isSwim)
+        {
+            if(selItem->childCount() > 0)
+            {
+                ui->timeEdit_intDuration->setEnabled(false);
+                selItem->setExpanded(true);
+                ui->toolButton_split->setVisible(false);
+                ui->toolButton_add->setVisible(true);
+            }
+            else
+            {
+                ui->timeEdit_intDuration->setEnabled(true);
+                ui->toolButton_split->setVisible(true);
+                ui->toolButton_add->setVisible(false);
+            }
 
-        if(loadActivity->get_sport() == settings::RunLabel)
-        {
-            ui->horizontalSlider_factor->setEnabled(true);
-            double factor = static_cast<double>(ui->horizontalSlider_factor->value())/100;
-            this->set_polishValues(index,intDist,intSpeed,factor,yPos);
+            ui->comboBox_swimType->setCurrentText(selItem->data(1,Qt::DisplayRole).toString());
+            ui->doubleSpinBox_intDistance->setValue(selItem->data(3,Qt::DisplayRole).toDouble());
+            ui->timeEdit_intDuration->setTime(QTime::fromString(selItem->data(4,Qt::DisplayRole).toString(),shortTime));
+            ui->timeEdit_intPace->setTime(QTime::fromString(selItem->data(6,Qt::DisplayRole).toString(),shortTime));
+            ui->doubleSpinBox_intSpeed->setValue(selItem->data(7,Qt::DisplayRole).toDouble());
+            ui->spinBox_intCAD->setValue(selItem->data(8,Qt::DisplayRole).toUInt());
+            ui->timeEdit_intDuration->setFocus();
         }
-        if(loadActivity->isIndoor)
+        else
         {
-            ui->horizontalSlider_factor->setEnabled(false);
+            ui->doubleSpinBox_intDistance->blockSignals(true);
+            ui->timeEdit_intDuration->blockSignals(true);
+            ui->doubleSpinBox_intDistance->setValue(selItem->data(4,Qt::DisplayRole).toDouble());
+            ui->timeEdit_intDuration->setTime(QTime::fromString(selItem->data(1,Qt::DisplayRole).toString(),shortTime));
+            ui->spinBox_intCAD->setValue(selItem->data(8,Qt::DisplayRole).toUInt());
+            ui->doubleSpinBox_intDistance->setFocus();
+            if(currActivity->usePMData)
+            {
+
+            }
         }
-        yPos = calculation::usePMData ? 1 : 0;
+        this->recalc_selectedInt(ui->timeEdit_intDuration->time(),ui->doubleSpinBox_intDistance->value());
+        this->set_polishPlot(selectedInt);
+        ui->doubleSpinBox_intDistance->blockSignals(false);
+        ui->timeEdit_intDuration->blockSignals(false);
     }
     else
     {
-        ui->horizontalSlider_factor->setEnabled(false);
-        //intSpeed = treeSelection->selectedRows(7).at(0).data().toDouble();
-        //intDist = treeSelection->selectedRows(3).at(0).data().toDouble();
-        yPos = 2;
+        QPair<int,QVector<double>> averageData = currActivity->set_averageMap(selItem,column);
+
+        bool avgData = averageData.first > 0 ? true : false;
+
+        ui->toolButton_addSelect->setEnabled(avgData);
+        ui->toolButton_clearSelect->setEnabled(avgData);
+        ui->toolButton_clearContent->setEnabled(avgData);
+        ui->toolButton_sync->setEnabled(avgData);
+
+        if(avgData)
+        {
+            ui->tableWidget_avgValues->item(0,0)->setData(Qt::DisplayRole,averageData.first);
+            ui->tableWidget_avgValues->item(1,0)->setData(Qt::DisplayRole,set_time(averageData.second.at(0)));
+            ui->tableWidget_avgValues->item(1,0)->setData(Qt::UserRole,averageData.second.at(0));
+            ui->tableWidget_avgValues->item(2,0)->setData(Qt::DisplayRole,set_time(averageData.second.at(1)));
+            ui->tableWidget_avgValues->item(2,0)->setData(Qt::UserRole,averageData.second.at(1));
+            ui->tableWidget_avgValues->item(4,0)->setData(Qt::DisplayRole,round(averageData.second.at(3)));
+
+            if(currActivity->isSwim)
+            {
+                ui->tableWidget_avgValues->item(3,0)->setData(Qt::DisplayRole,round(averageData.second.at(2)));
+                ui->tableWidget_avgValues->item(5,0)->setData(Qt::DisplayRole,round(averageData.second.at(4)));
+                ui->tableWidget_avgValues->item(6,0)->setData(Qt::DisplayRole,set_doubleValue(averageData.second.at(5),false));
+            }
+            else
+            {
+                ui->tableWidget_avgValues->item(3,0)->setData(Qt::DisplayRole,set_doubleValue(averageData.second.at(2),true));
+
+                if(currActivity->isRun)
+                {
+                    ui->tableWidget_avgValues->item(5,0)->setData(Qt::DisplayRole,round(averageData.second.at(4)*2));
+                }
+                else
+                {
+                    ui->tableWidget_avgValues->item(5,0)->setData(Qt::DisplayRole,round(averageData.second.at(4)));
+                }
+            }
+        }
     }
-    this->set_speedPlot(intSpeed,intDist,yPos);
 }
 
-void MainWindow::set_speedgraph()
+void MainWindow::set_polishPlot(int lapIndex)
+{
+    QPair<int,int> intStartStop = currActivity->get_intervalData(lapIndex);
+    QMap<int,QVector<double>> *polishData = currActivity->get_polishData();
+    QVector<double> secTicker,speedValues,powerValues,hfValues,polishValues;
+    QPair<double,double> speedMinMax,powerMinMax,hfMinMax,rangeMinMax;
+    QStringList label;
+
+    int pos = 0;
+    double intDist = 0;
+    double avgSpeed = 0;
+
+    speedMinMax.first = 50.0;
+    speedMinMax.second = 0.0;
+    powerMinMax.first = 500.0;
+    powerMinMax.second = 0.0;
+    hfMinMax.first = 80.0;
+    hfMinMax.second = 0.0;
+
+    int vSize = intStartStop.second-intStartStop.first+1;
+
+    secTicker.resize(vSize);
+    speedValues.resize(vSize);
+    powerValues.resize(vSize);
+    hfValues.resize(vSize);
+    polishValues.resize(vSize);
+
+    for(QMap<int,QVector<double>>::const_iterator intStart = polishData->lowerBound(intStartStop.first), intEnd = polishData->lowerBound(intStartStop.second); intStart != intEnd; ++intStart)
+    {
+        secTicker[pos] = pos;
+        speedValues[pos] = intStart.value().at(0);
+        powerValues[pos] = intStart.value().at(1);
+        hfValues[pos] = intStart.value().at(2);
+
+        if(speedMinMax.first > intStart.value().at(0))  speedMinMax.first = intStart.value().at(0);
+        if(speedMinMax.second < intStart.value().at(0)) speedMinMax.second = intStart.value().at(0);
+        if(powerMinMax.first > intStart.value().at(1)) powerMinMax.first = intStart.value().at(1);
+        if(powerMinMax.second < intStart.value().at(1)) powerMinMax.second = intStart.value().at(1);
+        ++pos;
+    }
+
+    if(!currActivity->isSwim)
+    {
+        label << "Speed" << "Watts" << "HF";
+        avgSpeed = ui->doubleSpinBox_intSpeed->value();
+        intDist = ui->doubleSpinBox_intDistance->value();
+
+        if(currActivity->isRun)
+        {
+            ui->horizontalSlider_factor->setEnabled(true);
+            for(int i = 0; i < speedValues.count(); ++i)
+            {
+                if(lapIndex == 0 && i < 5)
+                {
+                    polishValues[i] = speedValues[i];
+                }
+                else
+                {
+                    polishValues[i] = currActivity->polish_SpeedValues(speedValues[i],avgSpeed,true);
+                }
+            }
+        }
+
+        rangeMinMax.first = ui->doubleSpinBox_polMin->value();
+        rangeMinMax.second = ui->doubleSpinBox_polMax->value();
+
+        if(currActivity->isIndoor)
+        {
+            ui->horizontalSlider_factor->setEnabled(false);
+        }
+        ui->widget_plot->yAxis2->setLabel("Watts / HF");
+    }
+    else
+    {
+        label << "Speed" << "Strokes" << "-";
+        ui->widget_plot->yAxis2->setLabel(label.at(1));
+        ui->horizontalSlider_factor->setEnabled(false);
+        avgSpeed = ui->doubleSpinBox_intSpeed->value();
+        intDist = ui->doubleSpinBox_intDistance->value();
+    }
+
+    ui->widget_plot->clearPlottables();
+    ui->widget_plot->clearItems();
+    ui->widget_plot->legend->setFillOrder(QCPLegend::foColumnsFirst);
+    ui->widget_plot->plotLayout()->setRowStretchFactor(1,0.0001);
+
+    QCPGraph *speedLine = ui->widget_plot->addGraph();
+    speedLine->setName(label.at(0));
+    speedLine->setLineStyle(QCPGraph::lsLine);
+    speedLine->setData(secTicker,speedValues);
+    speedLine->setPen(QPen(QColor(0,255,0),2));
+
+    QCPGraph *powerLine = ui->widget_plot->addGraph(ui->widget_plot->xAxis,ui->widget_plot->yAxis2);
+    powerLine->setName(label.at(1));
+    powerLine->setLineStyle(QCPGraph::lsLine);
+    powerLine->setData(secTicker,powerValues);
+    powerLine->setPen(QPen(QColor(255,0,0),2));
+
+    QCPGraph *hfLine = ui->widget_plot->addGraph(ui->widget_plot->xAxis,ui->widget_plot->yAxis2);
+    hfLine->setName(label.at(2));
+    hfLine->setLineStyle(QCPGraph::lsLine);
+    hfLine->setData(secTicker,hfValues);
+    hfLine->setPen(QPen(QColor(0,170,255),2));
+
+    QCPItemLine *avgLine = new QCPItemLine(ui->widget_plot);
+    avgLine->start->setCoords(0,avgSpeed);
+    avgLine->end->setCoords(speedValues.count(),avgSpeed);
+    avgLine->setPen(QPen(QColor(0,0,255),2));
+
+    QCPGraph *avgLineP = ui->widget_plot->addGraph();
+    avgLineP->setName("Avg Speed");
+    avgLineP->setPen(QPen(QColor(0,0,255),2));
+
+    if(currActivity->currentSport != settings::SwimLabel)
+    {
+        QCPGraph *polishLine = ui->widget_plot->addGraph();
+        polishLine->setName("Polished Speed");
+        polishLine->setLineStyle(QCPGraph::lsLine);
+        polishLine->setData(secTicker,polishValues);
+        polishLine->setPen(QPen(QColor(255,200,0),2));
+
+        QCPGraph *polishRangeP = ui->widget_plot->addGraph();
+        polishRangeP->setName("Polish Range");
+        polishRangeP->setPen(QPen(QColor(225,225,0),2));
+
+        QCPItemRect *polishRange = new QCPItemRect(ui->widget_plot);
+        polishRange->topLeft->setCoords(0,rangeMinMax.second);
+        polishRange->bottomRight->setCoords(speedValues.count(),rangeMinMax.first);
+        polishRange->setPen(QPen(QColor(225,225,0),2));
+        polishRange->setBrush(QBrush(QColor(255,255,0,50)));
+    }
+
+    double yAxisMin = 0,yAxisMax = 0,yAxix2Min = 0, yAxix2Max = 0;
+
+    if(speedMinMax.first > 0) yAxisMin = speedMinMax.first*0.1;
+    yAxisMax = speedMinMax.second*0.1;
+
+    if(powerMinMax.first > 0) yAxix2Min = powerMinMax.second*0.25;
+    yAxix2Max = powerMinMax.second*0.1;
+
+    ui->widget_plot->xAxis->setRange(0,speedValues.count());
+    ui->widget_plot->xAxis2->setRange(0,intDist);
+    ui->widget_plot->yAxis->setRange(speedMinMax.first-yAxisMin,speedMinMax.second+yAxisMax);
+    ui->widget_plot->yAxis2->setRange(powerMinMax.first-yAxix2Min,powerMinMax.second+yAxix2Max);
+
+    ui->widget_plot->replot();
+
+}
+
+void MainWindow::init_polishgraph()
 {
     QFont plotFont;
     plotFont.setBold(true);
     plotFont.setPointSize(8);
-    y2Label << "HF" << "Watts" << "Strokes";
 
     ui->widget_plot->xAxis->setLabel("Seconds");
     ui->widget_plot->xAxis->setLabelFont(plotFont);
@@ -1554,88 +1709,25 @@ void MainWindow::set_speedgraph()
     subLayout->addElement(0,0,ui->widget_plot->legend);
 }
 
-void MainWindow::set_speedPlot(double avgSpeed,double intdist,int yPos)
-{
-    ui->widget_plot->clearPlottables();
-    ui->widget_plot->clearItems();
-    ui->widget_plot->legend->setFillOrder(QCPLegend::foColumnsFirst);
-    ui->widget_plot->plotLayout()->setRowStretchFactor(1,0.0001);
-
-    QCPGraph *speedLine = ui->widget_plot->addGraph();
-    speedLine->setName("Speed");
-    speedLine->setLineStyle(QCPGraph::lsLine);
-    speedLine->setData(secTicker,speedValues);
-    speedLine->setPen(QPen(QColor(0,255,0),2));
-
-    QCPGraph *secondLine = ui->widget_plot->addGraph(ui->widget_plot->xAxis,ui->widget_plot->yAxis2);
-    secondLine->setName(y2Label.at(yPos));
-    secondLine->setLineStyle(QCPGraph::lsLine);
-    secondLine->setData(secTicker,secondValues);
-    secondLine->setPen(QPen(QColor(255,0,0),2));
-
-    QCPItemLine *avgLine = new QCPItemLine(ui->widget_plot);
-    avgLine->start->setCoords(0,avgSpeed);
-    avgLine->end->setCoords(speedValues.count(),avgSpeed);
-    avgLine->setPen(QPen(QColor(0,0,255),2));
-
-    QCPGraph *avgLineP = ui->widget_plot->addGraph();
-    avgLineP->setName("Avg Speed");
-    avgLineP->setPen(QPen(QColor(0,0,255),2));
-
-    if(loadActivity->get_sport() != settings::SwimLabel)
-    {
-        QCPGraph *polishLine = ui->widget_plot->addGraph();
-        polishLine->setName("Polished Speed");
-        polishLine->setLineStyle(QCPGraph::lsLine);
-        polishLine->setData(secTicker,polishValues);
-        polishLine->setPen(QPen(QColor(255,200,0),2));
-
-        QCPGraph *polishRangeP = ui->widget_plot->addGraph();
-        polishRangeP->setName("Polish Range");
-        polishRangeP->setPen(QPen(QColor(225,225,0),2));
-
-        QCPItemRect *polishRange = new QCPItemRect(ui->widget_plot);
-        polishRange->topLeft->setCoords(0,rangeMinMax[1]);
-        polishRange->bottomRight->setCoords(speedValues.count(),rangeMinMax[0]);
-        polishRange->setPen(QPen(QColor(225,225,0),2));
-        polishRange->setBrush(QBrush(QColor(255,255,0,50)));
-    }
-
-    double yMin = 0,yMax = 0,y2Min = 0, y2Max = 0;
-
-    if(speedMinMax[0] > 0) yMin = speedMinMax[0]*0.1;
-    yMax =  speedMinMax[1]*0.1;
-
-    if(secondMinMax[0] > 0) y2Min = secondMinMax[0]*0.1;
-    y2Max = secondMinMax[1]*0.1;
-
-    ui->widget_plot->xAxis->setRange(0,speedValues.count());
-    ui->widget_plot->xAxis2->setRange(0,intdist);
-    ui->widget_plot->yAxis->setRange(speedMinMax[0]-yMin,speedMinMax[1]+yMax);
-    ui->widget_plot->yAxis2->setRange(secondMinMax[0]-y2Min,secondMinMax[1]+y2Max);
-
-    ui->widget_plot->replot();
-}
-
 void MainWindow::fill_WorkoutContent()
 {
     QString content,newEntry,contentValue,label;
     content = ui->lineEdit_workContent->text();
 
-    QString avgTime;
-    QString avgPace;
-    double dist;
+    int intCount = ui->tableWidget_avgValues->item(0,0)->data(Qt::DisplayRole).toInt();
+
+    double dist = 0;
     int time = 0;
 
     if(ui->radioButton_time->isChecked())
     {
         if(ui->checkBox_exact->isChecked())
         {
-            time = this->get_timesec(avgTime);
+            time = ui->tableWidget_avgValues->item(1,0)->data(Qt::UserRole).toInt();
         }
         else
         {
-            time = (ceil(this->get_timesec(avgTime)/10.0)*10);
+            time = round(ui->tableWidget_avgValues->item(1,0)->data(Qt::UserRole).toDouble() /10.0)*10.0;
         }
 
         if(time >= 60)
@@ -1654,11 +1746,11 @@ void MainWindow::fill_WorkoutContent()
     {
         if(ui->checkBox_exact->isChecked())
         {
-            dist = round(dist*1000)/1000.0;
+            dist = round(ui->tableWidget_avgValues->item(3,0)->data(Qt::DisplayRole).toDouble()*1000)/1000.0;
         }
         else
         {
-            dist = ceil(dist*10)/10.0;
+            dist = ceil(ui->tableWidget_avgValues->item(3,0)->data(Qt::DisplayRole).toDouble()*10)/10.0;
         }
 
         if(dist < 1)
@@ -1674,46 +1766,43 @@ void MainWindow::fill_WorkoutContent()
         contentValue = QString::number(dist)+label;
     }
 
-    if(loadActivity->get_sport() == settings::SwimLabel)
+    if(currActivity->isSwim)
     {        
-        if(avgCounter > 1)
+        if(intCount > 1)
         {
-            newEntry = QString::number(avgCounter)+"x"+QString::number(dist)+"/"+avgTime;
+            newEntry = QString::number(intCount)+"x"+QString::number(dist)+"/"+ui->tableWidget_avgValues->item(1,0)->data(Qt::DisplayRole).toString();
         }
         else
         {
-            newEntry = QString::number(dist)+"-"+avgTime;
+            newEntry = QString::number(dist)+"-"+ui->tableWidget_avgValues->item(1,0)->data(Qt::DisplayRole).toString();
         }
     }
 
-    if(loadActivity->get_sport() == settings::BikeLabel)
+    if(currActivity->isBike)
     {
-        QString watts;
-
-        if(avgCounter > 1)
+        if(intCount > 1)
         {
-            newEntry = QString::number(avgCounter)+"x"+contentValue+"/" +watts+"W";
+            newEntry = QString::number(intCount)+"x"+contentValue+"/" +ui->tableWidget_avgValues->item(4,0)->data(Qt::DisplayRole).toString()+"W";
         }
         else
         {
-            newEntry = contentValue+"-" +watts+"W";
+            newEntry = contentValue+"-" +ui->tableWidget_avgValues->item(4,0)->data(Qt::DisplayRole).toString()+"W";
         }
     }
 
-    if(loadActivity->get_sport() == settings::RunLabel)
+    if(currActivity->isRun)
     {
-        if(avgCounter > 1)
+        if(intCount > 1)
         {
-            newEntry = QString::number(avgCounter)+"x"+contentValue+"-" +avgPace+"/km";
+            newEntry = QString::number(intCount)+"x"+contentValue+"-" +ui->tableWidget_avgValues->item(2,0)->data(Qt::DisplayRole).toString()+"/km";
         }
         else
         {
-            newEntry = contentValue+"-" +avgPace+"/km";
+            newEntry = contentValue+"-" +ui->tableWidget_avgValues->item(2,0)->data(Qt::DisplayRole).toString()+"/km";
         }
-        if(usePMData)
+        if(currActivity->usePMData)
         {
-            QString watts = "W";
-            newEntry = newEntry+"-"+watts;
+            newEntry = newEntry+"-"+ui->tableWidget_avgValues->item(4,0)->data(Qt::DisplayRole).toString()+"W";
         }
     }
 
@@ -1727,31 +1816,301 @@ void MainWindow::fill_WorkoutContent()
         ui->lineEdit_workContent->setText(content+" | "+newEntry);
     }
 
-    loadActivity->set_workoutContent(ui->lineEdit_workContent->text());
+    currActivity->set_workoutContent(ui->lineEdit_workContent->text());
 
 }
 
-void MainWindow::unselect_intRow(bool setToolButton)
+void MainWindow::save_activity()
 {
-    loadActivity->reset_avgSelection();
-    avgCounter = 0;
-    ui->toolButton_addSelect->setEnabled(setToolButton);
-    ui->toolButton_clearSelect->setEnabled(setToolButton);
-    ui->toolButton_clearContent->setEnabled(setToolButton);
-    ui->toolButton_sync->setEnabled(setToolButton);
+    QTreeWidgetItem *rootItem = ui->treeWidget_activity->invisibleRootItem();
+    QTreeWidgetItem *intItem;
+    int intCount = 100 / rootItem->childCount();
+
+    QPair<int, QString> intKey,lapKey;
+    QMap<QPair<int, QString>, QVector<double>> intValues;
+    QPair<int,int> intStartStop;
+    QVector<double> lapValues(7);
+    QVector<double> xdataValues(4);
+
+    for(int row = 0; row < rootItem->childCount(); ++row)
+    {
+       intItem = rootItem->child(row);
+       intKey.first = row;
+       intKey.second = intItem->data(0,Qt::DisplayRole).toString();
+
+       lapValues.fill(0);
+       intValues.clear();
+
+       if(currActivity->isSwim)
+       {
+           intStartStop.first = intItem->data(5,Qt::UserRole).toInt();
+           intStartStop.second = intItem->data(4,Qt::UserRole).toInt();
+           currActivity->update_intervalMap(row,intItem->data(0,Qt::DisplayRole).toString(),intStartStop);
+
+           if(intItem->childCount() > 0)
+           {
+               for(int child = 0; child < intItem->childCount(); ++child)
+               {
+                   lapKey.first = child;
+                   lapKey.second = intItem->child(child)->data(0,Qt::DisplayRole).toString();
+
+                   lapValues[0] = intItem->child(child)->data(5,Qt::UserRole).toInt();
+                   lapValues[1] = intItem->child(child)->data(0,Qt::UserRole).toDouble();
+                   lapValues[2] = intItem->child(child)->data(1,Qt::UserRole).toInt();
+                   lapValues[3] = intItem->child(child)->data(4,Qt::UserRole).toInt();
+                   lapValues[4] = intItem->child(child)->data(8,Qt::DisplayRole).toInt();
+                   lapValues[5] = intItem->child(child)->data(7,Qt::DisplayRole).toDouble();
+                   lapValues[6] = currActivity->poolLength / intItem->child(child)->data(4,Qt::UserRole).toInt() / 1000.0;
+
+                   intValues.insert(lapKey,lapValues);
+               }
+           }
+           else
+           {
+                lapKey.first = row;
+                lapKey.second = intItem->data(0,Qt::AccessibleTextRole).toString();
+
+                lapValues[0] = intItem->data(5,Qt::UserRole).toInt();
+                lapValues[1] = intItem->data(0,Qt::UserRole).toDouble();
+                lapValues[2] = 0;
+                lapValues[3] = intItem->data(5,Qt::UserRole+1).toInt();
+                lapValues[4] = 0;
+
+                intValues.insert(lapKey,lapValues);
+           }  
+           currActivity->update_activityMap(intKey,intValues);
+       }
+       else
+       {
+           intStartStop.first = intItem->data(2,Qt::UserRole).toInt();
+           intStartStop.second = intItem->data(3,Qt::UserRole).toInt();
+           currActivity->update_intervalMap(row,intItem->data(0,Qt::DisplayRole).toString(),intStartStop);
+
+           lapKey.first = row;
+           lapKey.second = intItem->data(0,Qt::AccessibleTextRole).toString();
+
+           lapValues[0] = intItem->data(4,Qt::DisplayRole).toDouble();
+           lapValues[1] = (intItem->data(4,Qt::UserRole).toDouble() / intItem->data(1,Qt::UserRole).toInt()) / 1000.0;
+           lapValues[2] = intItem->data(6,Qt::DisplayRole).toDouble();
+
+           intValues.insert(lapKey,lapValues);
+
+           currActivity->update_activityMap(intKey,intValues);
+       }
+       ui->progressBar_fileState->setValue(row*intCount);
+    }
+    currActivity->prepare_mapToJson();
+}
+
+void MainWindow::updated_changedInterval(QTreeWidgetItem *updateItem)
+{
+    if(currActivity->isSwim)
+    {
+        QTreeWidgetItem *parentItem = updateItem->parent();
+        //Set Lap
+        int calcTime = get_timesec(updateItem->data(4,Qt::DisplayRole).toString());
+        int calcPace = currActivity->calc_lapPace(calcTime,currActivity->poolLength);
+
+        QPair<QString,QString> levelChange;
+        levelChange.first = updateItem->data(0,Qt::DisplayRole).toString().split("_").last();
+        levelChange.second = currActivity->checkRangeLevel(calcPace);
+        currActivity->update_paceInZone(levelChange,calcTime);
+
+        QStringList intKey = parentItem->data(0,Qt::AccessibleTextRole).toString().split("-");
+        QString intCount = intKey.at(1).split("_").first();
+
+        QString lapName = intCount+"_"+QString::number(updateItem->data(0,Qt::AccessibleTextRole).toInt() * currActivity->poolLength)+"_"+
+                          currActivity->checkRangeLevel(calcPace);
+
+        updateItem->setData(0,Qt::DisplayRole,lapName);
+        updateItem->setData(6,Qt::DisplayRole,set_time(calcPace));
+        updateItem->setData(9,Qt::DisplayRole,currActivity->calc_totalWork(calcPace,calcTime,updateItem->data(1,Qt::UserRole).toInt()));
+
+        //Set Interval
+        int intDistance = parentItem->childCount()*currActivity->poolLength;
+        calcTime = get_timesec(parentItem->data(4,Qt::DisplayRole).toString());
+        calcPace = currActivity->calc_lapPace(calcTime,intDistance);
+
+        parentItem->setData(2,Qt::DisplayRole,parentItem->childCount());
+        parentItem->setData(3,Qt::DisplayRole,intDistance);
+        parentItem->setData(6,Qt::DisplayRole,set_time(calcPace));
+
+        lapName = intCount+"_Int_"+QString::number(intDistance);
+
+        parentItem->setData(0,Qt::AccessibleTextRole,intKey.first()+"-"+lapName);
+        parentItem->setData(0,Qt::DisplayRole,lapName+"_"+currActivity->checkRangeLevel(calcPace));
+    }
 }
 
 void MainWindow::on_toolButton_update_clicked()
 {
-    ui->treeWidget_activity->setFocus();
+    QTreeWidgetItem *selItem = ui->treeWidget_activity->currentItem();
+
+    selItem->setData(currActivity->activityHeader.indexOf("Pace"),Qt::DisplayRole,ui->timeEdit_intPace->time().toString(shortTime));
+
+    if(currActivity->isSwim)
+    {
+        if(selItem->childCount() > 0)
+        {
+            selItem->setData(1,Qt::DisplayRole,ui->comboBox_swimType->currentText());
+            for(int childs = 0; childs < selItem->childCount(); ++childs)
+            {
+                selItem->child(childs)->setData(1,Qt::DisplayRole,ui->comboBox_swimType->currentText());
+                selItem->child(childs)->setData(1,Qt::UserRole,ui->comboBox_swimType->currentIndex());
+                this->updated_changedInterval(selItem->child(childs));
+            }
+        }
+        else
+        {
+            selItem->setData(1,Qt::DisplayRole,ui->comboBox_swimType->currentText());
+            selItem->setData(1,Qt::UserRole,ui->comboBox_swimType->currentIndex());
+            selItem->setData(4,Qt::DisplayRole,ui->timeEdit_intDuration->time().toString(shortTime));
+            selItem->setData(7,Qt::DisplayRole,ui->doubleSpinBox_intSpeed->value());
+            selItem->setData(8,Qt::DisplayRole,ui->spinBox_intCAD->value());
+            this->updated_changedInterval(selItem);
+        }
+
+    }
+    else
+    {
+        QString lapName;
+        selItem->setData(5,Qt::UserRole,get_timesec(selItem->data(5,Qt::DisplayRole).toString()));
+
+        if(currActivity->usePMData)
+        {
+            lapName = selItem->data(0,Qt::UserRole).toString()+"_"+currActivity->checkRangeLevel(selItem->data(7,Qt::DisplayRole).toDouble());
+        }
+        else
+        {
+            lapName = selItem->data(0,Qt::UserRole).toString()+"_"+currActivity->checkRangeLevel(selItem->data(5,Qt::UserRole).toDouble());
+        }
+
+        selItem->setData(0,Qt::DisplayRole,lapName);
+        selItem->setData(currActivity->activityHeader.indexOf("Distance (Int)"),Qt::DisplayRole,ui->doubleSpinBox_intDistance->value());
+    }
+
+    this->refresh_activityTree();
+}
+
+void MainWindow::on_toolButton_split_clicked()
+{
+    QTreeWidgetItem *selItem = ui->treeWidget_activity->currentItem();
+
+    int lapTime = get_timesec(selItem->data(4,Qt::DisplayRole).toString()) / 2;
+    double lapSpeed = selItem->data(7,Qt::DisplayRole).toDouble() * 2.0;
+    int splitTime = get_timesec(selItem->data(5,Qt::DisplayRole).toString());
+    int strokes = selItem->data(8,Qt::DisplayRole).toInt() / 2;
+
+    selItem->setData(4,Qt::DisplayRole,set_time(lapTime));
+    selItem->setData(7,Qt::DisplayRole,set_doubleValue(lapSpeed,true));
+    selItem->setData(8,Qt::DisplayRole,strokes);
+
+    QTreeWidgetItem *newItem = selItem->clone();
+    selItem->parent()->addChild(newItem);
+
+    selItem->setData(5,Qt::DisplayRole,set_time(splitTime-lapTime));
+    newItem->setData(0,Qt::AccessibleTextRole,selItem->parent()->indexOfChild(newItem)+1);
+
+    this->updated_changedInterval(selItem);
+    this->updated_changedInterval(newItem);
+    this->refresh_activityTree();
+    this->set_selecteditem(selItem,0);
+}
+
+void MainWindow::refresh_activityTree()
+{
+    QTreeWidgetItem *rootItem = ui->treeWidget_activity->invisibleRootItem();
+    QTreeWidgetItem *lapItem;
+    QPair<int,int> lapStartStop;
+    QString swimType;
+
+    double poolLength = currActivity->poolLength / 1000.0;
+    double completeDist = 0,totalWork = 0,intWork = 0;
+    int completeTime = -1,breakTime = 0,intTime = 0,lapTime = 0,intStrokes = 0;
+
+    for(int row = 0; row < rootItem->childCount(); ++row)
+    {
+        lapItem = rootItem->child(row);
+        lapStartStop = currActivity->get_intervalData(lapItem->data(0,Qt::AccessibleTextRole).toString().split("-").first().toInt());
+
+        if(currActivity->isSwim)
+        {
+            lapItem->setData(5,Qt::DisplayRole,set_time(++completeTime));
+            lapItem->setData(5,Qt::UserRole,completeTime);
+            intTime = 0;
+
+            if(lapItem->childCount() > 0)
+            {
+                intWork = 0;
+                intStrokes = 0;
+
+                for(int child = 0; child < lapItem->childCount(); ++child)
+                {
+                    if(swimType !=  lapItem->child(child)->data(1,Qt::DisplayRole).toString()) swimType = currActivity->swimType.at(6);
+                    if(child > 0) completeDist = completeDist + poolLength;
+
+                    lapItem->child(child)->setData(5,Qt::UserRole,completeTime);
+                    lapTime = get_timesec(lapItem->child(child)->data(4,Qt::DisplayRole).toString());
+                    lapItem->child(child)->setData(4,Qt::UserRole,lapTime);
+                    completeTime = completeTime + lapTime;
+                    totalWork = totalWork + lapItem->child(child)->data(9,Qt::DisplayRole).toDouble();
+                    intTime = intTime + lapTime;
+
+                    intWork = intWork + lapItem->child(child)->data(9,Qt::DisplayRole).toDouble();
+                    intStrokes = intStrokes + lapItem->child(child)->data(8,Qt::DisplayRole).toInt();
+
+                    lapItem->child(child)->setData(0,Qt::UserRole,completeDist);
+                    lapItem->child(child)->setData(5,Qt::DisplayRole,set_time(intTime));
+
+                    swimType = lapItem->child(child)->data(1,Qt::DisplayRole).toString();
+                }
+
+                lapItem->setData(1,Qt::DisplayRole,swimType);
+                lapItem->setData(1,Qt::UserRole,currActivity->swimType.indexOf(swimType));
+                lapItem->setData(4,Qt::DisplayRole,set_time(intTime));
+                lapItem->setData(4,Qt::UserRole,completeTime);
+                lapItem->setData(8,Qt::DisplayRole,intStrokes);
+                lapItem->setData(9,Qt::DisplayRole,set_doubleValue(intWork,false));
+            }
+            else
+            {
+                completeDist = completeDist + poolLength;
+                intTime = (lapStartStop.second - lapStartStop.first) + (lapStartStop.first - completeTime);
+                totalWork = totalWork + lapItem->data(9,Qt::DisplayRole).toDouble();
+                lapItem->setData(0,Qt::UserRole,completeDist);
+                lapItem->setData(4,Qt::DisplayRole,set_time(intTime));
+                lapItem->setData(5,Qt::UserRole,completeTime);
+                lapItem->setData(5,Qt::UserRole+1,intTime);
+                completeTime = completeTime + get_timesec(lapItem->data(4,Qt::DisplayRole).toString())+1;
+                lapItem->setData(4,Qt::UserRole,completeTime);
+                breakTime = breakTime + get_timesec(lapItem->data(4,Qt::DisplayRole).toString())+1;
+            }
+        }
+        else
+        {
+            lapItem->setData(2,Qt::DisplayRole,set_time(++completeTime));
+            lapItem->setData(2,Qt::UserRole,completeTime);
+            intTime = get_timesec(lapItem->data(1,Qt::DisplayRole).toString());
+            completeTime = completeTime + intTime;
+            totalWork = totalWork + lapItem->data(9,Qt::DisplayRole).toDouble();
+            completeDist = completeDist + lapItem->data(4,Qt::DisplayRole).toDouble();
+
+            lapItem->setData(1,Qt::UserRole,intTime);
+            lapItem->setData(3,Qt::DisplayRole,set_doubleValue(completeDist,true));
+            lapItem->setData(3,Qt::UserRole,completeTime);
+            lapItem->setData(4,Qt::UserRole,set_doubleValue(lapItem->data(4,Qt::DisplayRole).toDouble()*1000.0,true));
+        }
+    }
+    if(currActivity->isSwim) currActivity->update_moveTime(completeTime-breakTime);
+    currActivity->activityInfo.insert("Distance",QString::number(set_doubleValue(completeDist+poolLength,true)));
+    currActivity->activityInfo.insert("Total Work",QString::number(ceil(totalWork)));
+    currActivity->set_swimTimeInZone(true);
 
     this->set_activityInfo();
-
 }
 
 void MainWindow::on_toolButton_delete_clicked()
 {
-
     this->set_activityInfo();
 }
 
@@ -1812,7 +2171,7 @@ void MainWindow::on_actionExit_triggered()
     }
     else
     {
-        //close();
+        this->freeMem();
         QApplication::exit(EXIT_FAILURE);
     }
 }
@@ -1825,20 +2184,39 @@ void MainWindow::on_actionExit_and_Save_triggered()
 
 void MainWindow::on_actionSelect_File_triggered()
 {
-    this->select_activityFile();
+    QMessageBox::StandardButton reply;
+
+    QString filename = QFileDialog::getOpenFileName(
+                this,
+                tr("Select GC JSON File"),
+                gcValues->value("actpath"),
+                "JSON Files (*.json)"
+                );
+
+    if(filename != "")
+    {
+        reply = QMessageBox::question(this,
+                                  tr("Open Selected File!"),
+                                  filename,
+                                  QMessageBox::Yes|QMessageBox::No
+                                  );
+        if (reply == QMessageBox::Yes)
+        {
+            this->load_activity(filename,true);
+        }
+    }
 }
 
 void MainWindow::on_actionReset_triggered()
 {
     this->clearActivtiy();
     avgSelect_del.sport = QString();
-    avgCounter = 0;
     ui->horizontalSlider_factor->setEnabled(false);
 }
 
 void MainWindow::on_toolButton_clearSelect_clicked()
 {
-    this->unselect_intRow(false);
+    this->reset_avgSelection();
 }
 
 void MainWindow::on_actionIntervall_Editor_triggered()
@@ -1943,7 +2321,7 @@ void MainWindow::on_toolButton_addSelect_clicked()
 
 void MainWindow::on_toolButton_sync_clicked()
 {
-    loadActivity->set_workoutContent(ui->lineEdit_workContent->text());
+    currActivity->set_workoutContent(ui->lineEdit_workContent->text());
     ui->toolButton_sync->setEnabled(false);
 }
 
@@ -2107,7 +2485,6 @@ void MainWindow::on_listWidget_weekPlans_itemClicked(QListWidgetItem *item)
 void MainWindow::on_toolButton_addMenu_clicked()
 {
     ui->toolButton_saveMeals->setEnabled(true);
-
 }
 
 void MainWindow::on_listWidget_menuEdit_itemDoubleClicked(QListWidgetItem *item)
@@ -2605,18 +2982,22 @@ void MainWindow::on_treeWidget_activityfiles_itemClicked(QTreeWidgetItem *item, 
 {
     Q_UNUSED(column)
     ui->lineEdit_workContent->clear();
-    this->clearActivtiy();
-    this->load_activity(item->data(0,Qt::UserRole).toString());
+
+    if(this->clearActivtiy()) this->load_activity(item->data(0,Qt::UserRole).toString(),false);
+
 }
 
 void MainWindow::on_treeWidget_activity_itemClicked(QTreeWidgetItem *item, int column)
 {
-    if(column != loadActivity->activityHeader.count()-1)
-    {
-        qDebug() << "Load" << item->data(0,Qt::DisplayRole);
-    }
-    else
-    {
-        qDebug() << "Set Avg";
-    }
+    this->set_selecteditem(item,column);
+}
+
+void MainWindow::on_timeEdit_intDuration_userTimeChanged(const QTime &time)
+{
+    this->recalc_selectedInt(time,ui->doubleSpinBox_intDistance->value());
+}
+
+void MainWindow::on_doubleSpinBox_intDistance_valueChanged(double dist)
+{
+    this->recalc_selectedInt(ui->timeEdit_intDuration->time(),dist);
 }

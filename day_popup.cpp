@@ -188,38 +188,29 @@ void day_popup::set_controlButtons(bool active)
 
 void day_popup::set_exportContent()
 {
-    QStringList intLabels,sampLabels;
-    QMap<int,QString> *intMap = settings::getListMapPointer(settings::lMap::Interval);
     QStringList selectedWorkout = workoutMap.value(selWorkout);
     int sampCount = selectedWorkout.at(5).toInt();
-    intExport = new QStandardItemModel(1,3,this);
-    sampExport = new QStandardItemModel(sampCount,1,this);
+    QVector<double> sampleValues(2,0);
 
-    intExport->setData(intExport->index(0,0),"Workout");
-    intExport->setData(intExport->index(0,1),0);
-    intExport->setData(intExport->index(0,2),sampCount);
+    intervallMap.insert(0,qMakePair(0,sampCount));
+    intNameMap.insert(0,"Workout");
 
-    for(int i = 0; i < intMap->count(); ++i)
-    {
-        intLabels << intMap->value(i);
-    }
-
-    sampLabels << "SECS";
+    sampleUseKeys.insert(0,"SECS");
     for(int i = 0; i < sampCount; ++i)
     {
-       sampExport->setData(sampExport->index(i,0),i);
+        sampleMap.insert(i,sampleValues);
     }
 
     QTime workoutTime;
     QDateTime workoutDateTime;
     QString tempDate,tempTime,sport,stressType,commonRI;
     QString totalWork = selectedWorkout.at(8);
-
+    QString jsonFile;
     tempDate = popupDate.toString(workSchedule->dateFormat);
     tempTime = selectedWorkout.at(0);
 
     workoutTime = QTime::fromString(tempTime,"hh:mm");
-    fileName = popupDate.toString("yyyy_MM_dd_") + workoutTime.toString("hh_mm_ss") +".json";
+    jsonFile = popupDate.toString("yyyy_MM_dd_") + workoutTime.toString("hh_mm_ss") +".json";
     workoutDateTime = QDateTime::fromString(tempDate+"T"+tempTime+":00","dd.MM.yyyyThh:mm:ss").toUTC();
 
     sport = selectedWorkout.at(1);
@@ -241,7 +232,7 @@ void day_popup::set_exportContent()
 
     this->tagData.insert("Sport",sport);
     this->tagData.insert("Athlete",jsonHandler::gcValues->value("athlete"));
-    this->tagData.insert("Filename",fileName);
+    this->tagData.insert("Filename",jsonFile);
     this->tagData.insert("CommonRI",commonRI);
     this->tagData.insert("Device","Manual Import");
     this->tagData.insert("Workout Code",selectedWorkout.at(2));
@@ -260,13 +251,8 @@ void day_popup::set_exportContent()
     overrideData.insert("total_work",totalWork);
     overrideData.insert(stressType,selectedWorkout.at(7));
 
-    this->init_jsonFile();
-    this->write_actModel("INTERVALS",intExport,&intLabels);
-    this->write_actModel("SAMPLES",sampExport,&sampLabels);
-    this->write_jsonFile();
+    this->prepareWrite_JsonFile();
 
-    delete intExport;
-    delete sampExport;
     QMessageBox::information(this,"Export Workout","Workout Informations Exported!",QMessageBox::Ok);
 }
 

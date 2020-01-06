@@ -33,6 +33,7 @@ class del_racecalc : public QStyledItemDelegate, public calculation
 {
     const QString trans = "T";
     QHash<QString,QString>* generalValues = settings::getStringMapPointer(settings::stingMap::General);
+    QString sport;
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
@@ -164,7 +165,7 @@ class del_racecalc : public QStyledItemDelegate, public calculation
         {
             double speed = model->data(model->index(index.row(),3)).toDouble();
             int calcTime = static_cast<int>(dist / speed * 60*60);
-            //model->setData(model->index(index.row(),2),set_time(calc_lapPace(sport,calcTime,dist*factor)));
+            model->setData(model->index(index.row(),2),set_time(calc_lapPace(calcTime,dist*factor)));
         }
 
         if(col != 4)

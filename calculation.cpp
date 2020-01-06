@@ -10,6 +10,7 @@ void calculation::set_currentSport(QString sport)
 {
     currentSport = sport;
     isSwim = isBike = isRun = isStrength = isAlt = isOther = isTria = false;
+    hfThreshold = thresValues->value("hfthres");
 
     if(currentSport == settings::SwimLabel)
     {
@@ -51,7 +52,7 @@ void calculation::set_currentSport(QString sport)
         isStrength = true;
         usePMData = true;
         thresPower = static_cast<int>(thresValues->value("stgpower"));
-        workFactor = 0;
+        workFactor = 1;
         thresPace = 0;
         sportMark = " Watt";
     }
@@ -61,7 +62,7 @@ void calculation::set_currentSport(QString sport)
         usePMData = true;
         thresPower = static_cast<int>(thresValues->value("runcp"));
         thresPace = 0;
-        workFactor = 0;
+        workFactor = 1;
         sportMark = " Watt";
     }
     else if(currentSport == settings::TriaLabel)
@@ -70,7 +71,7 @@ void calculation::set_currentSport(QString sport)
         usePMData = true;
         thresPower = static_cast<int>(thresValues->value("stgpower"));
         thresPace = 0;
-        workFactor = 0;
+        workFactor = 1;
         sportMark = " Watt";
     }
     else if(currentSport == settings::OtherLabel)

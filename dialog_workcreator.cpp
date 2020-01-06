@@ -1206,7 +1206,7 @@ void Dialog_workCreator::on_toolButton_map_clicked()
 
 void Dialog_workCreator::on_spinBox_level_valueChanged(int value)
 {
-    ui->timeEdit_pace->setTime(QTime::fromString(set_time(this->calc_thresPace(value)),"mm:ss"));
+    ui->timeEdit_pace->setTime(QTime::fromString(set_time(this->calc_thresPace(value)),shortTime));
     ui->lineEdit_power->setText(QString::number(this->calc_thresPower(value)));
     this->refresh_editStep();
 }

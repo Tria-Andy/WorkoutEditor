@@ -51,7 +51,7 @@
 #include "logger.h"
 
 
-class schedule_delegate : public QStyledItemDelegate, public calculation
+class schedule_delegate : public QStyledItemDelegate
 {
     Q_OBJECT
 
@@ -1203,7 +1203,7 @@ private:
 
     schedule *workSchedule;
     standardWorkouts *stdWorkouts;
-    Activity *loadActivity;
+    Activity *currActivity;
     foodplanner *foodPlan;
     schedule_delegate schedule_del;
     saison_delegate saison_del;
@@ -1218,7 +1218,7 @@ private:
     del_foodWeekSum foodSumWeek_del;
     del_foodDaySum foodSumSelect_del;
     del_mousehover mousehover_del;
-    QStringList modus_list,cal_header,y2Label,menuCopy;
+    QStringList modus_list,cal_header,menuCopy;
     QStringList *schedMode, *avgHeader;
     QLabel *planerMode;
     QToolButton *planMode;
@@ -1231,22 +1231,17 @@ private:
     QHash<QString,QString> *gcValues,*generalValues;
 
     //Intervall Chart
-    QVector<double> secTicker,speedValues,secondValues,polishValues,speedMinMax,secondMinMax,rangeMinMax;
-    void set_speedValues(int);
-    void set_speedgraph();
+    void set_polishPlot(int);
+    void init_polishgraph();
     void set_speedPlot(double,double,int);
-    void set_polishValues(int,double,double,double,int);
+    void set_polishMinMax(double);
     void resetPlot();
-    void set_activityTree();
-    QTreeWidgetItem* set_activityLaps(QPair<int,QString>,QVector<double>,int);
-
 
     QMap<QString,QStringList> *saisonValues;
-    int avgCounter,sportUse;
+
     QDate selectedDate;
     QString weeknumber,buttonStyle,dateformat,timeshort,timelong;
-    int userSetup,saisonWeek,saisonWeeks,foodcopyLine;
-    int weekDays,weekCounter,weekRange;
+    int userSetup,saisonWeek,saisonWeeks,weekDays,weekCounter,weekRange,sportUse,selectedInt;
     bool isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
 
     void set_tableWidgetItems(QTableWidget*,int,int,QAbstractItemDelegate*);
@@ -1268,16 +1263,20 @@ private:
     void loadUISettings();
 
     //Editor
-    void select_activityFile();
+    bool clearActivtiy();
+    void save_activity();
+    QTreeWidgetItem* set_activityLaps(QPair<int,QString>,QVector<double>,int);
+    void updated_changedInterval(QTreeWidgetItem*);
+    void set_activityTree();
+    void set_selecteditem(QTreeWidgetItem*,int);
+    void refresh_activityTree();
+    void reset_avgSelection();
     void activityList(int);
-    void clearActivtiy();
-    void load_activity(const QString &filename);
-    void selectAvgValues(QModelIndex,int);
-    void init_editorViews();
+    void load_activity(const QString &filename,bool);
+    void recalc_selectedInt(QTime,double);
     void init_controlStyleSheets();
     void set_activityInfo();
     void fill_WorkoutContent();
-    void unselect_intRow(bool);
     void set_menuItems(int);
     void freeMem();
 
@@ -1302,7 +1301,6 @@ private slots:
     void on_actionPlaner_triggered();
     void on_actionExit_triggered();
     void on_actionNew_triggered();
-    void on_actionExport_to_Golden_Cheetah_triggered();
     void on_actionExit_and_Save_triggered();
     void on_actionSelect_File_triggered();
     void on_actionReset_triggered();
@@ -1378,6 +1376,9 @@ private slots:
     void on_toolButton_menuClear_clicked();
     void on_treeWidget_activityfiles_itemClicked(QTreeWidgetItem *item, int column);
     void on_treeWidget_activity_itemClicked(QTreeWidgetItem *item, int column);
+    void on_timeEdit_intDuration_userTimeChanged(const QTime &time);
+    void on_doubleSpinBox_intDistance_valueChanged(double arg1);
+    void on_toolButton_split_clicked();
 };
 
 #endif // MAINWINDOW_H

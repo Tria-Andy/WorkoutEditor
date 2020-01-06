@@ -33,85 +33,76 @@ class Activity : public jsonHandler, public xmlHandler, public calculation
 private:
     void fill_actMap();
 
-    QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>> ActivityMap;
-    QList<QStandardItem*> setIntRow(int);
-    QString actFile, v_date,intLabel;
+    QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>> activityMap;
     QHash<QString,QString> *fileMap;
-
+    QMap<QString,QVector<double>> averageMap;
+    QMap<int,QVector<double>> polishData;
     QMap<int,QStringList> itemHeader,avgHeader;
     QHash<QString,int> paceTimeInZone,hfTimeInZone,hfZoneAvg;
     QHash<QString,QPair<double,double>> rangeLevels;
     QHash<QString,QVector<double>> swimHFZoneFactor;
-    QStandardItem *rootItem;
-    QStringList ride_items,swimType,levels;
-    QVector<double> calcSpeed,calcCadence,swimTime,newDist;
-    double thresLimit,swimTrack,polishFactor,hfThreshold,hfMax,actWeight;
-    int distFactor,avgCounter,moveTime,intListCount;
-    bool changeRowCount,isUpdated,selectInt,isTimeBased;
-    QVector<bool> editRow;
+    QStringList levels;
+    double polishFactor,hfMax,actWeight;
+    int distFactor,moveTime;
+    bool isUpdated,isTimeBased;
+
 
     //Functions
-    void read_gcActivities();
-    void save_actvitiyFile();
     QMap<int,QVector<double>> get_xData(QPair<int,int>);
     QMap<QPair<int,QString>,QVector<double>> get_swimLapData(int,QPair<int,int>);
     QMap<QPair<int,QString>,QVector<double>> get_intervalData(int,QPair<int,int>);
-    void set_activityHeader(QString,QStringList*);
-
-
-    QString set_intervalName(int,int,double);
+    QMap<QPair<int,QString>,QVector<double>> get_simpleData(int,QPair<int,int>);
+    QString set_intervalInfo(QTreeWidgetItem *,bool);
     QString build_lapName(QString,int,double);
-    void updateInterval();
-    void recalcIntTree();
-    void updateSampleModel(int);
-    void calcAvgValues();
+    QVector<double> calc_avgValues(QTreeWidgetItem*);
     double interpolate_speed(int,int,double);
-
-    //Swim Calculations
-    void swimhfTimeInZone(bool);
-    void swimTimeInZone(int,double);
-    void fillRangeLevel(double,bool);
-    int get_zone_values(double,int,bool);
+    void set_activityHeader(QString,QStringList*);
+    void set_polishData();
+    void extend_activityHeader();
+    void read_gcActivities();
+    void save_actvitiyFile();
+    void fill_rangeLevel(bool);
 
 public:
     explicit Activity();
 
     QMap<QString,QVector<QString>> gcActivtiesMap;
-    QMap<QString,QString> ride_info;
-    QStringList averageHeader,activityHeader;
-    QVector<double> sampSpeed,sampSecond,avgValues;
+    QMap<QString,QString> activityInfo;
+    QStringList averageHeader,activityHeader,swimType;
+    QVector<double> sampSpeed,sampSecond;
     QStringList *infoHeader;
     QString breakName;
     double poolLength;
+    bool isIndoor;
 
-
-    QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>>* get_activityMap() {return &ActivityMap;}
-    QString get_swimType(int key) {return swimType.at(key);}
+    QPair<int,QVector<double>> set_averageMap(QTreeWidgetItem*,int);
+    QPair<double,double> get_polishMinMax(double);
+    double polish_SpeedValues(double,double,bool);
     QString checkRangeLevel(double);
-    QPair<int,int> get_intervalData(int key) {return intervallMap.value(key);}
+    bool clear_loadedActivity();
+    bool read_jsonFile(QString,bool);
 
-    void clear_loadedActivity();
-    bool read_jsonFile(QString);
+    void update_activityMap(QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>);
+    void update_intervalMap(int,QString,QPair<int,int>);
+    void update_xDataMap(int,QVector<double>);
+    void update_paceInZone(QPair<QString,QString>,int);
+    void update_moveTime(int value) {moveTime = value;}
+    void set_swimTimeInZone(bool);
+    void prepare_save();
     void set_activityData();
     void prepare_baseData();
     void set_intervalData(int,int,int);
     void set_workoutContent(QString);
+    void prepare_mapToJson();
+    void set_polishFactor(double vFactor) {polishFactor = 0.1-vFactor/100;}
 
-    void writeChangedData();
+    QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>>* get_activityMap() {return &activityMap;}
+    QMap<int,QVector<double>>* get_polishData() {return &polishData;}
+    QMap<QString,QVector<double>>* get_averageMap() {return &averageMap;}
+    QString get_swimType(int key) {return swimType.at(key);}
+    QPair<int,int> get_intervalData(int key) {return intervallMap.value(key);}
+    QVector<double> get_sampleData(int key) {return sampleMap.value(key);}
 
-    //Recalculation
-    double get_int_speed(int);
-    double polish_SpeedValues(double,double,double,bool);
-
-    //Value Getter and Setter
-    void set_polishFactor(double vFactor) {polishFactor = vFactor;}
-    QString get_sport() {return currentSport;}
-
-    //Averages
-    void reset_avgSelection();
-    void set_avgValues(int,int);
-
-    bool isIndoor;
 };
 
 #endif // ACTIVITY_H

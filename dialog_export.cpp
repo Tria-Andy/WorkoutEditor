@@ -101,8 +101,6 @@ void Dialog_export::set_filecontent(int row)
     overrideData.insert("workout_time",QString::number(this->get_timesec(tempTime)));
     overrideData.insert(stressType,exportProxy->data(exportProxy->index(row,8)).toString());
 
-    this->init_jsonFile();
-    this->write_jsonFile();
 }
 
 void Dialog_export::workout_export()

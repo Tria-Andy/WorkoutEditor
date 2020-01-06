@@ -42,9 +42,10 @@ QVector<QString> jsonHandler::read_activityMeta(QString filePath, int counter)
 
     QJsonObject actObject,tagObject;
     QJsonObject jsonobj = QJsonDocument::fromJson(jsonfile.toUtf8()).object();
+    QStringList *mapList = settings::get_xmlMapping("jsonfile");
 
-    actObject = jsonobj.value(QString("RIDE")).toObject();
-    tagObject = actObject.value(QString("TAGS")).toObject();
+    actObject = jsonobj.value(QString(mapList->at(0))).toObject();
+    tagObject = actObject.value(QString(mapList->at(1))).toObject();
 
     workDateTime = QDateTime::fromString(actObject.value("STARTTIME").toString().trimmed(),"yyyy/MM/dd hh:mm:ss UTC").addSecs(localTime.offsetFromUtc());
 
@@ -58,9 +59,18 @@ QVector<QString> jsonHandler::read_activityMeta(QString filePath, int counter)
     return actValues;
 }
 
-QString jsonHandler::read_jsonContent(QString jsonfile)
+QString jsonHandler::read_jsonContent(QString jsonfile,bool fullPath)
 {
-    QFile file(gcValues->value("actpath")+QDir::separator()+jsonfile);
+    QFile file;
+
+    if(fullPath)
+    {
+        file.setFileName(jsonfile);
+    }
+    else
+    {
+        file.setFileName(gcValues->value("actpath")+QDir::separator()+jsonfile);
+    }
 
     if (!file.open(QFile::ReadOnly | QFile::Text))
     {
@@ -69,27 +79,29 @@ QString jsonHandler::read_jsonContent(QString jsonfile)
     else
     {
         QString jsonContent = file.readAll();
-        QJsonObject activityObject = QJsonDocument::fromJson(jsonContent.toUtf8()).object();
+        QJsonObject actObject = QJsonDocument::fromJson(jsonContent.toUtf8()).object();
         file.close();
 
-        QJsonObject itemObject,objValue;
+        QJsonObject  activityObject,itemObject,objValue;
         QJsonArray itemArray;
         QStringList *mapList = settings::get_xmlMapping("jsonfile");
         QStringList *keyList;
 
         //Fill RIDE Map
-        activityItem = activityObject.value(mapList->at(0)).toObject();
-        this->fill_qmap(&rideData,&activityItem);
+        activityObject = actObject.value(mapList->at(0)).toObject();
+        this->fill_qmap(&rideData,&activityObject);
+        //this->fill_activityData(mapList->at(0),&activityObject);
 
         //Fill TAGS Map
-        itemObject = activityItem.value(mapList->at(1)).toObject();
+        itemObject = activityObject.value(mapList->at(1)).toObject();
         this->fill_qmap(&tagData,&itemObject);
+        //this->fill_activityData(mapList->at(1),&itemObject);
 
         //Check if File contains OVERRIDES
-        if(activityItem.contains(mapList->at(2)))
+        if(activityObject.keys().contains(mapList->at(2)))
         {
             hasOverride = true;
-            itemArray = activityItem[mapList->at(2)].toArray();
+            itemArray = activityObject[mapList->at(2)].toArray();
 
             for(int i = 0; i < itemArray.count(); ++i)
             {
@@ -100,74 +112,105 @@ QString jsonHandler::read_jsonContent(QString jsonfile)
         }
 
         //Fill IntervallMap
-        itemArray = activityItem.value(mapList->at(3)).toArray();
+        itemArray = activityObject.value(mapList->at(3)).toArray();
         keyList = settings::get_xmlMapping("intervals");
+        int intStop = rand();
 
         for(int i = 0; i < itemArray.count(); ++i)
         {
             itemObject = itemArray.at(i).toObject();
-            intervallMap.insert(i,qMakePair(itemObject[keyList->at(1)].toInt(),itemObject[keyList->at(2)].toInt()));
+
+            if(intStop == itemObject[keyList->at(1)].toInt())
+            {
+                intervallMap.insert(i,qMakePair(itemObject[keyList->at(1)].toInt(),itemObject[keyList->at(2)].toInt()-1));
+            }
+            else
+            {
+                intervallMap.insert(i,qMakePair(itemObject[keyList->at(1)].toInt(),itemObject[keyList->at(2)].toInt()));
+            }
+            intStop = itemObject[keyList->at(2)].toInt();
         }
 
         //Fill SampleMap
-        itemArray = activityItem.value(mapList->at(4)).toArray();
+        itemArray = activityObject.value(mapList->at(4)).toArray();
         keyList = settings::get_xmlMapping("samples");
         QStringList sampleKeys = itemArray.first().toObject().keys();
-        QStringList useKeys;
 
-        this->check_keyList(&useKeys,keyList,&sampleKeys);
-        if(useKeys.contains(keyList->at(5))) hasPMData = true;
+        if(sampleKeys.count() <= 1)
+        {
+            sampleKeys << keyList->at(1);
+        }
 
-        QVector<double> sampleValues(useKeys.count()-1,0);
+        this->check_keyList(&sampleUseKeys,keyList,&sampleKeys);
+        powerFlag = sampleUseKeys.contains(keyList->at(5));
+
+        QVector<double> sampleValues(sampleUseKeys.count()-1,0);
 
         for(int i = 0; i < itemArray.count(); ++i)
         {
             itemObject = itemArray.at(i).toObject();
-            for(int value = 1; value < useKeys.count(); ++value)
+            for(int value = 1; value < sampleUseKeys.count(); ++value)
             {
-                sampleValues[value-1] = itemObject[useKeys.at(value)].toDouble();
+                sampleValues[value-1] = itemObject[sampleUseKeys.at(value)].toDouble();
             }
-            sampleMap.insert(itemObject[useKeys.at(0)].toInt(),sampleValues);
+            sampleMap.insert(itemObject[sampleUseKeys.at(0)].toInt(),sampleValues);
         }
 
+        //Adjust Fist and Last Interval
+        intervallMap.insert(intervallMap.firstKey(),qMakePair(0,intervallMap.first().second));
+        intervallMap.insert(intervallMap.lastKey(),qMakePair(intervallMap.last().first,sampleMap.lastKey()));
+
         //Check and Fill XDATA Map
-        if(activityItem.contains(mapList->at(5)))
+        if(activityObject.keys().contains(mapList->at(5)))
         {
             hasXdata = true;
             xdataHeader = settings::get_xmlMapping("xdata");
-            xValuesHeader = settings::get_xmlMapping("xdatavalues");
+            xValuesKeys = settings::get_xmlMapping("xdatavalues");
+            QVector<double> dataValues;
 
-            itemObject = activityItem[mapList->at(5)].toArray().at(0).toObject();
-            this->fill_qmap(&xData,&itemObject);
+            itemArray = activityObject[mapList->at(5)].toArray();
 
-            itemArray = itemObject[xdataHeader->at(2)].toArray();
-            this->fill_list(&itemArray,&xdataUnits);
-
-            itemArray = itemObject[xdataHeader->at(1)].toArray();
-            this->fill_list(&itemArray,&xdataValues);
-
-            QVector<double> xDataValues(xdataUnits.count()+1,0);
-            itemArray = itemObject[xdataHeader->at(3)].toArray();
-            QJsonArray arrValues;
-
-            for(int value = 0; value < itemArray.count(); ++value)
+            for(int item = 0; item < itemArray.count(); ++item)
             {
-                itemObject = itemArray.at(value).toObject();
-                arrValues = itemObject[xdataHeader->at(1)].toArray();
-                xDataValues[0] = itemObject[xValuesHeader->at(1)].toDouble();
+                itemObject = itemArray.at(item).toObject();
+                xDataMap.insert(item,itemObject.toVariantMap());
+            }
 
-                for(int x = 0; x < arrValues.count(); ++x)
+            dataValues.resize(xDataMap.first().value(xdataHeader->at(1)).toList().count()+1);
+            QList<QVariant> xdataList = xDataMap.first().value(xdataHeader->at(3)).toList();
+            QMap<QString,QVariant> xdataMap;
+
+            for(int xdata = 0; xdata < xdataList.count();++xdata)
+            {
+                xdataMap = xdataList.at(xdata).toMap();
+
+                dataValues[0] = xdataMap.value(xValuesKeys->at(1)).toDouble();
+
+                for(int value = 0; value < xdataMap.value(xdataHeader->at(1)).toList().toVector().count(); ++value)
                 {
-                    xDataValues[x+1] = arrValues.at(x).toDouble();
+                    dataValues[value+1] = xdataMap.value(xdataHeader->at(1)).toList().toVector().at(value).toDouble();
                 }
-                xDataMap.insert(itemObject[xValuesHeader->at(0)].toInt(),xDataValues);
+                xDataValues.insert(xdataMap.value(xValuesKeys->at(0)).toInt(),dataValues);
             }
         }
-
+        //activityData.value(mapList->at(1)).value("Sport").toString().trimmed();
         return tagData.value("Sport");
     }
 
     return QString();
+}
+
+void jsonHandler::fill_activityData(QString jsonTag, QJsonObject *jsonObject)
+{
+    QString tagKey;
+    QHash<QString,QVariant> actDataValues;
+
+    for(int i = 0; i < jsonObject->keys().count(); ++i)
+    {
+        tagKey = jsonObject->keys().at(i);
+        actDataValues.insert(tagKey,jsonObject->value(tagKey));
+    }
+    activityData.insert(jsonTag,actDataValues);
 }
 
 void jsonHandler::fill_qmap(QHash<QString, QString> *qmap,QJsonObject *objItem)
@@ -209,61 +252,121 @@ void jsonHandler::check_keyList(QStringList *targetList,QStringList *map, QStrin
     }
 }
 
-
-void jsonHandler::fill_keyList(QStringList *targetList,QMap<int, QString> *map, QStringList *list)
+void jsonHandler::prepareWrite_JsonFile()
 {
-    for(int i = 0; i < map->count(); ++i)
+    QString jsonFile = tagData.value("Filename");
+    tagData.insert("Updated","1");
+    QJsonArray jsonArray;
+    QStringList *mapList = settings::get_xmlMapping("jsonfile");
+    QStringList *valueList = settings::get_xmlMapping("intervals");
+    QJsonObject activityItem = QJsonObject();
+    activityItem = mapToJson(&rideData);
+    activityItem[mapList->at(1)] = mapToJson(&tagData);
+
+    int counter = 0;
+
+    if(hasOverride)
     {
-        if(list->contains(map->value(i)))
+        for(QHash<QString,QString>::const_iterator it =  overrideData.cbegin(), end = overrideData.cend(); it != end; ++it)
         {
-            targetList->insert(i,map->value(i));
-
-            if(map->value(i) == "WATTS")
-            {
-                hasPMData = true;
-            }
+            QJsonObject objOverride,objValue;
+            objValue.insert("value",it.value());
+            objOverride.insert(it.key(),objValue);
+            jsonArray.insert(counter++,objOverride);
         }
-        else
-        {
-            if(map->value(i) == "KM")
-            {
-               targetList->insert(i,"KM");
-            }
-            if(map->value(i) == "KPH")
-            {
-               targetList->insert(i,"KPH");
-            }
-        }
+        activityItem[mapList->at(2)] = jsonArray;
     }
-    for(int x = 0; x < list->count();++x)
+
+    jsonArray = QJsonArray();
+    QVariantHash valueMap;
+
+    //Set Intervalls
+    for(QMap<int,QPair<int,int>>::const_iterator interval = intervallMap.cbegin(), end = intervallMap.cend(); interval != end; ++interval)
     {
-        if(!targetList->contains(list->at(x)))
-        {
-            (*targetList) << list->at(x);
-        }
+        valueMap.insert(valueList->at(0),intNameMap.value(interval.key()));
+        valueMap.insert(valueList->at(1),interval.value().first);
+        valueMap.insert(valueList->at(2),interval.value().second);
+        jsonArray.insert(interval.key(),QJsonObject::fromVariantHash(valueMap));
+        valueMap.clear();
     }
-}
 
-void jsonHandler::fill_model(QStandardItemModel *model, QJsonArray *jArray, QStringList *list)
-{
-    QJsonObject objItem;
+    activityItem[mapList->at(3)] = jsonArray;
+    jsonArray = QJsonArray();
 
-    for(int row = 0; row < jArray->count(); ++row)
+    //Set Sample
+    for(QMap<int,QVector<double>>::const_iterator sampleSec = sampleMap.cbegin(), end = sampleMap.cend(); sampleSec != end; ++sampleSec)
     {
-        objItem = jArray->at(row).toObject();
+        valueMap.insert(sampleUseKeys.at(0),sampleSec.key());
 
-        for(int col = 0; col < list->count(); ++col)
+        for(int value = 1; value < sampleUseKeys.count(); ++value)
         {
-            if(objItem[list->at(col)].isNull())
-            {
-                model->setData(model->index(row,col,QModelIndex()),0);
-            }
-            else
-            {
-                model->setData(model->index(row,col,QModelIndex()),objItem[list->at(col)].toVariant());
-            }
+                valueMap.insert(sampleUseKeys.at(value),sampleSec.value().at(value-1));
         }
+
+        jsonArray.insert(sampleSec.key(),QJsonObject::fromVariantHash(valueMap));
+        valueMap.clear();
     }
+    activityItem[mapList->at(4)] = jsonArray;
+    jsonArray = QJsonArray();
+
+    //Set XDATA
+    counter = 0;
+
+    if(hasXdata)
+    {
+        QStringList *xdataKeys = settings::get_xmlMapping("xdata");
+        valueList = settings::get_xmlMapping("xdatavalues");
+
+        QVector<QVariant> xdataValue(xDataValues.first().count()-1);
+        QVariantMap xdataMap,xdataUpdateMap;
+        QList<QVariant> xdataList;
+
+        for(QMap<int,QVector<double>>::const_iterator xdata = xDataValues.cbegin(), end = xDataValues.cend(); xdata != end; ++xdata)
+        {
+            xdataMap.insert(valueList->at(0),xdata.key());
+            xdataMap.insert(valueList->at(1),xdata.value().at(0));
+
+            for(int i = 1,pos = 0; i < xdata.value().count(); ++i,++pos)
+            {
+                xdataValue[pos] = xdata.value().at(i);
+            }
+
+            xdataMap.insert(xdataKeys->at(1),xdataValue.toList());
+            xdataList.append(xdataMap);
+            xdataMap.clear();
+        }
+        xdataUpdateMap = xDataMap.first();
+        xdataUpdateMap.insert(xdataKeys->at(3),xdataList);
+        xDataMap.insert(0,xdataUpdateMap);
+
+        for(QMap<int,QVariantMap>::const_iterator it = xDataMap.cbegin(), end = xDataMap.cend(); it != end; ++it)
+        {
+            jsonArray.insert(counter++,QJsonObject::fromVariantMap(it.value()));
+        }
+
+        activityItem[mapList->at(5)] = jsonArray;
+    }
+
+    QJsonDocument jsonDoc;
+    QJsonObject activityFile;
+
+    activityFile[mapList->at(0)] = activityItem;
+    jsonDoc.setObject(activityFile);
+
+    //QFile file(gcValues->value("actpath") + QDir::separator() + jsonFile);
+    QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + jsonFile); //Test
+
+    if(!file.open(QFile::WriteOnly))
+    {
+        qDebug() << "File not open!" + jsonFile;
+        return;
+    }
+
+    //file.write(jsonDoc.toJson(QJsonDocument::Compact));
+    file.write(jsonDoc.toJson()); //Test
+    file.flush();
+    file.close();
+
 }
 
 void jsonHandler::fill_list(QJsonArray *jArray,QStringList *list)
@@ -290,176 +393,4 @@ QJsonObject jsonHandler::mapToJson(QHash<QString,QString> *map)
         }
     }
     return item;
-}
-
-QJsonArray jsonHandler::listToJson(QStringList *list)
-{
-    QJsonArray jArray;
-
-    for(int i = 0; i < list->count(); ++i)
-    {
-        jArray.insert(i,list->at(i));
-    }
-    return jArray;
-}
-
-QJsonArray jsonHandler::modelToJson(QStandardItemModel *model, QStringList *list)
-{
-    QJsonArray jArray;
-    QVariant modelValue;
-    QVariantHash valueMap;
-
-    for(int row = 0; row < model->rowCount(); ++row)
-    {
-        for(int col = 0; col < list->count(); ++col)
-        {
-            valueMap.insert(list->at(col),model->data(model->index(row,col)));
-        }
-        jArray.insert(row,QJsonObject::fromVariantHash(valueMap));
-        valueMap.clear();
-    }
-    return jArray;
-}
-
-void jsonHandler::init_actModel(QString tagName, QMap<int,QString> *mapValues,QStandardItemModel *model, QStringList *list,int addCol)
-{
-    QStringList valueList;
-    QJsonArray itemArray;
-
-    itemArray = activityItem[tagName].toArray();
-    valueList << itemArray.at(0).toObject().keys();
-
-    this->fill_keyList(list,mapValues,&valueList);
-
-    model->setRowCount(itemArray.count());
-    model->setColumnCount(list->count()+addCol);
-
-    this->fill_model(model,&itemArray,list);
-}
-
-void jsonHandler::init_xdataModel(QStandardItemModel *model)
-{
-    QStringList xdataList = settings::get_jsonTags("xdata");
-
-    QJsonArray itemArray;
-    QJsonObject item_xdata = activityItem["XDATA"].toArray().at(0).toObject();
-    this->fill_qmap(&xData,&item_xdata);
-
-    itemArray = item_xdata[xdataList.at(2)].toArray();
-    this->fill_list(&itemArray,&xdataUnits);
-
-    itemArray = QJsonArray();
-    itemArray = item_xdata[xdataList.at(1)].toArray();
-    this->fill_list(&itemArray,&xdataValues);
-
-    itemArray = QJsonArray();
-    itemArray = item_xdata[xdataList.at(3)].toArray();
-    QJsonObject obj_xdata = itemArray.at(0).toObject();
-
-    model->setRowCount(itemArray.count());
-    model->setColumnCount((obj_xdata.keys().count()+xdataValues.count()));
-
-
-    for(int i = 0; i < itemArray.count(); ++i)
-    {
-        obj_xdata = itemArray.at(i).toObject();
-        QJsonArray arrValues = obj_xdata[xdataList.at(1)].toArray();
-        model->setData(model->index(i,0,QModelIndex()),obj_xdata["SECS"].toInt());
-        model->setData(model->index(i,1,QModelIndex()),obj_xdata["KM"].toDouble());
-        for(int x = 0; x < arrValues.count(); ++x)
-        {
-            model->setData(model->index(i,x+2,QModelIndex()),arrValues.at(x).toVariant());
-        }
-    }
-}
-
-void jsonHandler::init_jsonFile()
-{
-    QJsonArray intArray;
-    activityItem = QJsonObject();
-    activityItem = mapToJson(&rideData);
-    activityItem["TAGS"] = mapToJson(&tagData);
-
-    if(hasOverride)
-    {
-        int i = 0;
-        for(QHash<QString,QString>::const_iterator it =  overrideData.cbegin(), end = overrideData.cend(); it != end; ++it,++i)
-        {
-            QJsonObject objOverride,objValue;
-            objValue.insert("value",it.value());
-            objOverride.insert(it.key(),objValue);
-            intArray.insert(i,objOverride);
-        }
-        activityItem["OVERRIDES"] = intArray;
-    }
-}
-
-void jsonHandler::write_actModel(QString tagName, QStandardItemModel *model, QStringList *list)
-{
-    activityItem[tagName] = modelToJson(model,list);
-}
-
-void jsonHandler::write_xdataModel(QStandardItemModel *model)
-{
-    QJsonArray item_xdata,intArray,value_array;
-    QJsonObject xdataObj,item_array;
-    int offset = 3;
-    int xdataCol = 1;
-    /*
-    if(isSwim)
-    {
-        offset = 3;
-        xdataCol = 1;
-    }
-    else
-    {
-        offset = 2;
-        xdataCol = 0;
-    }
-    */
-    xdataObj.insert("NAME",xData.value("NAME"));
-    xdataObj.insert("UNITS",listToJson(&xdataUnits));
-    xdataObj.insert("VALUES",listToJson(&xdataValues));
-
-    for(int i = 0; i < model->rowCount(); ++i)
-    {
-        item_array.insert("SECS",QJsonValue::fromVariant(model->data(model->index(i,xdataCol,QModelIndex()))));
-        item_array.insert("KM",QJsonValue::fromVariant(model->data(model->index(i,xdataCol+1,QModelIndex()))));
-
-        for(int x = 0; x < xdataValues.count(); ++x)
-        {
-            value_array.insert(x,QJsonValue::fromVariant(model->data(model->index(i,x+offset,QModelIndex()))));
-        }
-
-        item_array["VALUES"] = value_array;
-        intArray.insert(i,item_array);
-        item_array = QJsonObject();
-        value_array = QJsonArray();
-    }
-
-    xdataObj.insert("SAMPLES",intArray);
-    item_xdata.insert(0,xdataObj);
-    activityItem["XDATA"] = item_xdata;
-}
-
-void jsonHandler::write_jsonFile()
-{
-    QJsonDocument jsonDoc;
-    QJsonObject rideFile;
-
-    rideFile["RIDE"] = activityItem;
-    jsonDoc.setObject(rideFile);
-
-    QFile file(gcValues->value("actpath") + QDir::separator() + fileName);
-    //QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + fileName); //Test
-    if(!file.open(QFile::WriteOnly))
-    {
-        qDebug() << "File not open!" + fileName;
-        return;
-    }
-
-    file.write(jsonDoc.toJson(QJsonDocument::Compact));
-    //file.write(jsonDoc.toJson()); //Test
-    file.flush();
-    file.close();
 }

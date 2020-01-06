@@ -31,46 +31,31 @@ public:
 
 protected:
     QSet<QString> activityKeys;
-    QMap<int,QVector<double>> xDataMap;
+    QMap<int,QVector<double>> xDataValues;
+    QMap<int,QVariantMap> xDataMap;
     QMap<int,QPair<int,int>> intervallMap;
+    QMap<int,QString> intNameMap;
     QMap<int,QVector<double>> sampleMap;
 
-
-
-    QString read_jsonContent(QString);
-    QVector<QString> read_activityMeta(QString,int);
-
-    bool hasXdata,hasOverride,hasPMData;
+    bool hasXdata,hasOverride,powerFlag;
     QHash<QString,QString> rideData,tagData,overrideData;
-    QStringList *modelHeader,*xdataHeader,*xValuesHeader;
-    QStringList intList,sampList;
-    QString fileName;
+    QHash<QString,QHash<QString,QVariant>> activityData;
+
+    QStringList *xdataHeader,*xValuesKeys;
+    QStringList sampleUseKeys;
     QHash<QString,QString> *gcValues,*generalValues;
 
-
-    void fill_qmap(QHash<QString,QString>*,QJsonObject*);
-    void init_actModel(QString,QMap<int,QString> *,QStandardItemModel*,QStringList*,int);
-    void init_xdataModel(QStandardItemModel*);
-    void init_jsonFile();
-    void write_actModel(QString,QStandardItemModel*,QStringList*);
-    void write_xdataModel(QStandardItemModel*);
-    void write_jsonFile();
+    QString read_jsonContent(QString,bool);
+    QVector<QString> read_activityMeta(QString,int);
+    void prepareWrite_JsonFile();
 
 
 private:
-    QJsonObject activityItem;
-    QStringList xdataValues,xdataUnits;
-    QHash<QString,QString> xData;
-
-    void read_jsonArray(QString,QJsonArray);
-
     void check_keyList(QStringList*,QStringList*,QStringList*);
-    void fill_keyList(QStringList*,QMap<int,QString>*,QStringList*);
-    void fill_model(QStandardItemModel*,QJsonArray*,QStringList*);
+    void fill_activityData(QString,QJsonObject*);
+    void fill_qmap(QHash<QString,QString>*,QJsonObject*);
     void fill_list(QJsonArray*,QStringList*);
     QJsonObject mapToJson(QHash<QString,QString>*);
-    QJsonArray listToJson(QStringList*);
-    QJsonArray modelToJson(QStandardItemModel*,QStringList*);
 };
 
 #endif // JSONHANDLER_H
