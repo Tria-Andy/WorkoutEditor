@@ -53,13 +53,11 @@ private:
     QMap<QPair<int,QString>,QVector<double>> get_intervalData(int,QPair<int,int>);
     QMap<QPair<int,QString>,QVector<double>> get_simpleData(int,QPair<int,int>);
     QString set_intervalInfo(QTreeWidgetItem *,bool);
-    QString build_lapName(QString,int,double);
     QVector<double> calc_avgValues(QTreeWidgetItem*);
     double interpolate_speed(int,int,double);
     void set_activityHeader(QString,QStringList*);
     void set_polishData();
     void extend_activityHeader();
-    void read_gcActivities();
     void save_actvitiyFile();
     void fill_rangeLevel(bool);
 
@@ -77,10 +75,13 @@ public:
 
     QPair<int,QVector<double>> set_averageMap(QTreeWidgetItem*,int);
     QPair<double,double> get_polishMinMax(double);
-    double polish_SpeedValues(double,double,bool);
     QString checkRangeLevel(double);
+    QString set_intervalName(QTreeWidgetItem*,bool);
+    double polish_SpeedValues(double,double,bool);
+
     bool clear_loadedActivity();
     bool read_jsonFile(QString,bool);
+    bool check_activityFiles();
 
     void update_activityMap(QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>);
     void update_intervalMap(int,QString,QPair<int,int>);
@@ -92,6 +93,7 @@ public:
     void set_activityData();
     void prepare_baseData();
     void set_intervalData(int,int,int);
+    void set_overrideData(QString key, QString value) {overrideData.insert(key,value);}
     void set_workoutContent(QString);
     void prepare_mapToJson();
     void set_polishFactor(double vFactor) {polishFactor = 0.1-vFactor/100;}

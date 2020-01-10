@@ -18,21 +18,24 @@
 
 #include "mainwindow.h"
 #include <QApplication>
+#include <QScreen>
 
 int main(int argc, char *argv[])
 {
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
+    QCoreApplication::setOrganizationName("QT Project");
+    QCoreApplication::setApplicationName("Triathlon WorkoutEditor");
 
     QFont font("Segoe UI");
-    font.setPixelSize(12);
-    a.setStyle(QStyleFactory::create("Fusion"));
-    a.setFont(font);
+    font.setPointSize(10);
+    app.setStyle(QStyleFactory::create("Fusion"));
+    app.setFont(font);
     QFile file(":/style/qss/style.qss");
     file.open(QFile::ReadOnly);
     QString styleSheet = QLatin1String(file.readAll());
-    a.setStyleSheet(styleSheet);
+    app.setStyleSheet(styleSheet);
     file.close();
 
     MainWindow w;
@@ -40,5 +43,5 @@ int main(int argc, char *argv[])
     w.setStyleSheet(styleSheet);
     w.showMaximized();
 
-    return a.exec();
+    return app.exec();
 }

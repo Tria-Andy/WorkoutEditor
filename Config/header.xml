@@ -1,0 +1,157 @@
+<header>
+	<mode>
+		<value id="0" tag="Week"/>
+		<value id="1" tag="Year"/>
+	</mode>
+	<average>
+		<value id="0" tag="Sport"/>
+		<value id="1" tag="Workouts"/>
+		<value id="2" tag="Duration"/>
+		<value id="3" tag="Distance"/>
+	</average>
+	<activityinfo>
+		<value id="0" tag="Athlete"/>
+		<value id="1" tag="Date"/>
+		<value id="2" tag="Device"/>
+		<value id="3" tag="Sport"/>
+		<value id="4" tag="Distance"/>
+		<value id="5" tag="Duration"/>
+		<value id="6" tag="AvgHF"/>
+		<value id="7" tag="Total Work"/>
+		<value id="8" tag="Total Cal"/>
+		<value id="9" tag="Workout Code"/>
+		<value id="10" tag="Workout Content"/>
+	</activityinfo>
+	<baseheader>
+		<value id="0" tag="Intervall"/>
+		<value id="1" tag="Duration"/>
+		<value id="2" tag="Start"/>
+		<value id="3" tag="Distance"/>
+		<value id="4" tag="Work"/>
+		<value id="5" tag="Avg"/>
+	</baseheader>
+	<swimheader>
+		<value id="0" tag="Intervall"/>
+		<value id="1" tag="Type"/>
+		<value id="2" tag="Laps"/>
+		<value id="3" tag="Distance"/>
+		<value id="4" tag="Duration"/>
+		<value id="5" tag="Split"/>
+		<value id="6" tag="Pace"/>
+		<value id="7" tag="Speed"/>
+		<value id="8" tag="Strokes"/>
+		<value id="9" tag="Work"/>
+		<value id="10" tag="Avg"/>
+	</swimheader>
+	<powerheader>
+		<value id="0" tag="Distance (Int)"/>
+		<value id="1" tag="Pace"/>
+		<value id="2" tag="Speed"/>
+		<value id="3" tag="Watt"/>
+		<value id="4" tag="CAD"/>
+	</powerheader>
+	<paceheader>
+		<value id="0" tag="Distance (Int)"/>
+		<value id="1" tag="Pace"/>
+		<value id="2" tag="Speed"/>
+	</paceheader>
+	<triaheader>
+		<value id="0" tag="Distance (Int)"/>
+		<value id="1" tag="Pace"/>
+		<value id="2" tag="Speed"/>
+		<value id="3" tag="Watt"/>
+	</triaheader>
+	<averagepace>
+		<value id="0" tag="Intervalls:"/>
+		<value id="1" tag="Duration:"/>
+		<value id="2" tag="Pace:"/>
+		<value id="3" tag="Distance:"/>
+	</averagepace>
+	<averagepower>
+		<value id="0" tag="Watts:"/>
+		<value id="1" tag="CAD:"/>
+	</averagepower>
+	<averageswim>
+		<value id="0" tag="Strokes:"/>
+		<value id="1" tag="SWOLF:"/>
+		<value id="2" tag="Cycletime:"/>
+	</averageswim>
+	<summery>
+		<value id="0" tag="Workouts:"/>
+		<value id="1" tag="Duration(Hours):"/>
+		<value id="2" tag="Amount(%):"/>
+		<value id="3" tag="Distance(Km):"/>
+		<value id="4" tag="Stress(TSS):"/>
+		<value id="5" tag="Calories(KJ):"/>
+	</summery>
+	<workoutlist>
+		<value id="0" tag="Time"/>
+		<value id="1" tag="Sport"/>
+		<value id="2" tag="Code"/>
+		<value id="3" tag="Title"/>
+		<value id="4" tag="Comment"/>
+		<value id="5" tag="Duration"/>
+		<value id="6" tag="Distance"/>
+		<value id="7" tag="Stress"/>
+		<value id="8" tag="Work(kj)"/>
+		<value id="9" tag="Pace"/>
+		<value id="10" tag="StdId"/>	
+	</workoutlist>
+	<workouteditor>
+		<value id="0" tag="Phase"/>
+		<value id="1" tag="Level"/>
+		<value id="2" tag="Threshold %"/>
+		<value id="3" tag="Pace"/>
+		<value id="4" tag="Power"/>
+		<value id="5" tag="Time"/>
+		<value id="6" tag="TSS"/>
+		<value id="7" tag="Work"/>
+		<value id="8" tag="Distance"/>
+		<value id="9" tag="Repeats"/>
+	</workouteditor>
+	<addweek>
+		<value id="0" tag="Sport"/>
+		<value id="1" tag="Workouts"/>
+		<value id="2" tag="Duration"/>
+		<value id="3" tag="%"/>
+		<value id="4" tag="Distance"/>
+		<value id="5" tag="Pace"/>
+		<value id="6" tag="Stress"/>
+	</addweek>
+	<menuheader>
+		<value id="0" tag="Name"/>
+		<value id="1" tag="MealID"/>
+		<value id="2" tag="Port"/>
+		<value id="3" tag="Cal"/>
+		<value id="4" tag="Carb"/>
+		<value id="5" tag="Protein"/>
+		<value id="6" tag="Fat"/>
+		<value id="7" tag="Fiber"/>
+		<value id="8" tag="Sugar"/>	
+	</menuheader>
+	<foodsumheader>
+		<value id="0" tag="Calories Food:"/>
+		<value id="1" tag="Conversion Base:"/>
+		<value id="2" tag="Conversion Sport:"/>
+		<value id="3" tag="Summery:"/>
+		<value id="4" tag="Difference:"/>
+	</foodsumheader>
+	<foodestheader>
+		<value id="0" tag="Weight at Weekstart:"/>
+		<value id="1" tag="Avg Daily Calories:"/>
+		<value id="2" tag="Avg Daily Conversion:"/>
+		<value id="3" tag="Avg Daily Diff:"/>
+		<value id="4" tag="Weight Change:"/>
+		<value id="5" tag="Weight at Weekend:"/>
+	</foodestheader>
+	<foodhistheader>
+		<value id="0" tag="Week-Day"/>
+		<value id="1" tag="Date"/>
+		<value id="2" tag="Weight"/>
+		<value id="3" tag="Metabolic Rate"/>
+		<value id="4" tag="Sport"/>
+		<value id="5" tag="Food"/>
+		<value id="6" tag="Diff"/>
+		<value id="7" tag="Mode"/>
+	</foodhistheader>
+</header>

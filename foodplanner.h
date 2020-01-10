@@ -27,6 +27,8 @@ public:
     QString get_mealName(QString key) {return mealsMap.value(key);}
     QString get_mode(QDate);
     QPair<QString,QVector<int>> get_mealData(QString);
+    QMap<QDate,double> get_lastFoodWeek(QDate);
+
 
     void update_foodPlanData(bool,QDate,QDate);
     void set_daySumMap(QDate);

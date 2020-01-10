@@ -103,7 +103,7 @@ void week_popup::set_plotValues()
         for(QMap<QString,QVector<double>>::const_iterator it = workMap.cbegin(), end = workMap.cend(); it != end; ++it)
         {
             yWorkouts[day] = yWorkouts.at(day) + it.value().at(0);
-            yDura[day] = yDura.at(day) + (it.value().at(1)/60.0);
+            yDura[day] = yDura.at(day) + round((it.value().at(1)/60.0));
             yDist[day] = yDist.at(day) + it.value().at(3);
             yWorkKj[day] = yWorkKj.at(day) + it.value().at(5);
         }

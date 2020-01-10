@@ -342,7 +342,7 @@ QTreeWidgetItem* Dialog_workCreator::set_itemToWidget(QStandardItem *item,QTreeW
         stepitem->setData(4,Qt::DisplayRole,this->calc_thresPower(this->get_itemValue(item,stepTags,stepTags->at(2)).toDouble()));
         stepitem->setData(5,Qt::DisplayRole,set_time(this->get_itemValue(item,stepTags,stepTags->at(3)).toInt()));
         stepitem->setData(6,Qt::DisplayRole,this->calc_stressScore(this->get_itemValue(item,stepTags,stepTags->at(2)).toDouble(),this->get_itemValue(item,stepTags,stepTags->at(3)).toInt()));
-        stepitem->setData(7,Qt::DisplayRole,this->calc_totalWork(this->get_baseValue(this->get_itemValue(item,stepTags,stepTags->at(2)).toDouble()),this->get_itemValue(item,stepTags,stepTags->at(3)).toInt(),this->get_swimStyleID(this->get_itemValue(item,stepTags,stepTags->at(1)).toString()))*workFactor);
+        stepitem->setData(7,Qt::DisplayRole,this->set_doubleValue(this->calc_totalWork(this->get_baseValue(this->get_itemValue(item,stepTags,stepTags->at(2)).toDouble()),this->get_itemValue(item,stepTags,stepTags->at(3)).toInt(),this->get_swimStyleID(this->get_itemValue(item,stepTags,stepTags->at(1)).toString()))*workFactor,false));
         stepitem->setData(8,Qt::DisplayRole,this->get_itemValue(item,stepTags,stepTags->at(5)).toDouble());
     }
     return stepitem;
@@ -614,9 +614,9 @@ void Dialog_workCreator::refresh_editStep()
         ui->timeEdit_lapTime->setTime(this->calc_duration(ui->doubleSpinBox_distance->value(),this->get_secFromTime(ui->timeEdit_pace->time())));
     }
 
-    ui->doubleSpinBox_stressScore->setValue(this->calc_stressScore(ui->spinBox_level->value(),this->get_timesec(ui->timeEdit_lapTime->time().toString("mm:ss"))));
+    ui->doubleSpinBox_stressScore->setValue(this->calc_stressScore(ui->spinBox_level->value(),this->get_secFromTime(ui->timeEdit_lapTime->time())));
     ui->doubleSpinBox_work->setValue(this->calc_totalWork(this->get_baseValue(ui->spinBox_level->value()),this->get_secFromTime(ui->timeEdit_lapTime->time()),this->get_swimStyleID(ui->comboBox_stepName->currentText()))*workFactor);
-    ui->lineEdit_speed->setText(QString::number(this->set_doubleValue(this->get_speed(ui->timeEdit_pace->time(),ui->doubleSpinBox_distance->value(),true),true))+" km/h");
+    ui->lineEdit_speed->setText(QString::number(this->get_speed(ui->timeEdit_pace->time(),ui->doubleSpinBox_distance->value(),true))+" km/h");
 }
 
 void Dialog_workCreator::read_currentWorkTree()

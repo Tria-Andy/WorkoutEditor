@@ -18,6 +18,7 @@
 
 #include "settings.h"
 #include <QApplication>
+#include <QScreen>
 #include <QDebug>
 #include <QDateTime>
 #include <QDesktopWidget>
@@ -567,9 +568,9 @@ int settings::loadSettings()
             return VALERROR;
         }
 
-        int screenHeight = 1024;
-
-        if(screenHeight > 1000)
+        QScreen *desktop = QGuiApplication::primaryScreen();
+        //qDebug() << desktop->size();
+        if(desktop->size().height() > 1280)
         {
             intMap.insert("weekRange",8);
             intMap.insert("fontBig",16);

@@ -67,8 +67,15 @@ bool foodplanner::updateMap_hasData()
 
 QString foodplanner::get_mode(QDate startDate)
 {
-    QModelIndex weekIndex = foodPlanModel->indexFromItem(foodPlanModel->findItems(calc_weekID(startDate),Qt::MatchExactly,0).at(0));
-    return foodPlanModel->data(foodPlanModel->index(weekIndex.row(),2)).toString();
+    if(foodPlanModel->findItems(calc_weekID(startDate),Qt::MatchExactly,0).isEmpty())
+    {
+        return settings::get_listValues("Mode").at(0);
+    }
+    else
+    {
+        QModelIndex weekIndex = foodPlanModel->indexFromItem(foodPlanModel->findItems(calc_weekID(startDate),Qt::MatchExactly,0).at(0));
+        return foodPlanModel->data(foodPlanModel->index(weekIndex.row(),2)).toString();
+    }
 }
 
 void foodplanner::set_headerLabel(QStandardItemModel *model, QStringList *list, bool vert)
@@ -142,7 +149,15 @@ QVector<double> foodplanner::get_mealValues(QString mealId,double factor)
 
     for(int value = 2; value < mealModel->columnCount(); ++value)
     {
-        mealValues[value-2] = round(mealIndex.siblingAtColumn(value).data(Qt::DisplayRole).toInt()*(factor/mealIndex.siblingAtColumn(2).data(Qt::DisplayRole).toDouble()));
+        if(value > 2)
+        {
+            mealValues[value-2] = round(mealIndex.siblingAtColumn(value).data(Qt::DisplayRole).toInt()*(factor/mealIndex.siblingAtColumn(2).data(Qt::DisplayRole).toDouble()));
+        }
+        else
+        {
+            mealValues[value-2] = mealIndex.siblingAtColumn(value).data(Qt::DisplayRole).toInt()*(factor/mealIndex.siblingAtColumn(2).data(Qt::DisplayRole).toDouble());
+        }
+
     }
     return mealValues;
 }
@@ -247,6 +262,9 @@ void foodplanner::add_toHistory(QDate day)
         else
         {
             QStandardItem *weekItem = historyModel->item(historyModel->rowCount()-1,0);
+
+            if(weekItem->child(day.dayOfWeek()-1) != 0) weekItem->removeRow(day.dayOfWeek()-1);
+
             QList<QStandardItem*> dayValueList;
             dayValueList << new QStandardItem(QString::number(day.dayOfWeek()-1));
             dayValueList << new QStandardItem(QString::number(daySumMap.value(day).at(2)));
@@ -560,6 +578,24 @@ QPair<QString,QVector<int>> foodplanner::get_mealData(QString mealID)
     }
     mealData.second = mealValues;
     return mealData;
+}
+
+QMap<QDate, double> foodplanner::get_lastFoodWeek(QDate firstDay)
+{
+    QMap<QDate,double> dayValues;
+
+    QStandardItem *weekItem = historyModel->findItems(firstDay.toString(dateFormat),Qt::MatchExactly | Qt::MatchRecursive,2).at(0);
+    QModelIndex weekIndex = historyModel->indexFromItem(weekItem).siblingAtColumn(0);
+
+    weekItem = historyModel->itemFromIndex(weekIndex);
+    int baseCal = weekIndex.siblingAtColumn(4).data(Qt::DisplayRole).toInt();
+
+    for(int i = 0; i < 7;++i)
+    {
+        dayValues.insert(firstDay.addDays(i),(weekItem->child(i,1)->data(Qt::DisplayRole).toInt()+baseCal) - weekItem->child(i,2)->data(Qt::DisplayRole).toInt());
+    }
+
+    return dayValues;
 }
 
 void foodplanner::insert_newWeek(QDate firstday)

@@ -124,12 +124,14 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tableWidget_avgValues->verticalHeader()->setMaximumSectionSize(25);
         ui->tableWidget_avgValues->verticalHeader()->setSectionsClickable(false);
         ui->tableWidget_avgValues->horizontalHeader()->setVisible(false);
+        ui->tableWidget_avgValues->verticalHeader()->setVisible(false);
         ui->tableWidget_avgValues->setItemDelegate(&avgSelect_del);
 
         ui->comboBox_swimType->addItems(settings::get_listValues("SwimStyle"));
         ui->comboBox_swimType->setVisible(false);
         ui->label_swimType->setVisible(false);
         ui->toolButton_split->setVisible(false);
+        ui->toolButton_merge->setVisible(false);
 
         connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
         connect(planMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_planMode(bool)));
@@ -145,7 +147,6 @@ MainWindow::MainWindow(QWidget *parent) :
         this->set_tableWidgetItems(ui->tableWidget_schedule,weekRange,cal_header.count(),&schedule_del);
         this->set_tableHeader(ui->tableWidget_schedule,&cal_header,false);
         ui->tableWidget_schedule->verticalHeader()->hide();
-
         ui->tableWidget_saison->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableWidget_saison->setItemDelegate(&saison_del);
         ui->tableWidget_saison->verticalHeader()->hide();
@@ -195,7 +196,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->treeView_meals->sortByColumn(0,Qt::AscendingOrder);
         ui->treeView_meals->hideColumn(1);
         //ui->treeView_meals->setItemDelegate(&mousehover_del);
-        ui->treeView_meals->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        //ui->treeView_meals->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
         connect(foodPlan->mealModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(mealSave(QStandardItem*)));
         connect(ui->tableWidget_foodPlan->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodDay(int)));
@@ -377,6 +378,7 @@ void MainWindow::fill_foodPlanTable(QDate startDate)
 void MainWindow::fill_foodSumTable(QDate startDate)
 {
     QMap<QDate,QVector<double>> *daySumMap = foodPlan->get_daySumMap();
+    QMap<QDate,double> slidingValues;
     int day = 0;
     QPair<double,double> minMax;
     QVector<double> weekValues(5,0);
@@ -384,6 +386,18 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     QString mode = foodPlan->get_mode(startDate);
     minMax.first = settings::doubleVector.value(mode).at(2)/100.0;
     minMax.second = settings::doubleVector.value(mode).at(1)/100.0;
+
+    if(startDate == firstdayofweek)
+    {
+        slidingValues = foodPlan->get_lastFoodWeek(startDate.addDays(-7));
+    }
+    else
+    {
+        for(QMap<QDate,QVector<double>>::const_iterator it = daySumMap->find(startDate.addDays(-3)), end = daySumMap->find(startDate); it != end; ++it)
+        {
+            slidingValues.insert(it.key(),it.value().at(4));
+        }
+    }
 
     QTableWidgetItem *item;
 
@@ -439,7 +453,14 @@ void MainWindow::fill_foodPlanList(bool newWeek)
         QListWidgetItem *item = new QListWidgetItem();
         item->setData(Qt::DisplayRole,weekString);
         item->setData(Qt::UserRole,it.key());
-        item->setData(Qt::UserRole+1,it.value().at(3).toDouble());
+        if(it.key() == firstdayofweek)
+        {
+            item->setData(Qt::UserRole+1,athleteValues->value("weight"));
+        }
+        else
+        {
+            item->setData(Qt::UserRole+1,it.value().at(3).toDouble());
+        }
         ui->listWidget_weekPlans->addItem(item);
     }
 
@@ -1254,8 +1275,8 @@ void MainWindow::set_activityInfo()
 
 void MainWindow::recalc_selectedInt(QTime lapTime, double lapDist)
 {
-    ui->timeEdit_intPace->setTime(QTime::fromString(set_time(currActivity->calc_lapPace(get_secFromTime(lapTime),lapDist)),shortTime));
-    ui->doubleSpinBox_intSpeed->setValue(this->set_doubleValue(currActivity->get_speed(ui->timeEdit_intPace->time(),lapDist,true),true));
+    ui->timeEdit_intPace->setTime(set_sectoTime(currActivity->calc_lapPace(get_secFromTime(lapTime),lapDist)));
+    ui->doubleSpinBox_intSpeed->setValue(currActivity->get_speed(ui->timeEdit_intPace->time(),lapDist,true));
 
     this->set_polishMinMax(ui->doubleSpinBox_intSpeed->value());
 }
@@ -1309,18 +1330,27 @@ QTreeWidgetItem* MainWindow::set_activityLaps(QPair<int,QString> lapKey, QVector
     lapItem->setData(0,Qt::AccessibleTextRole,lapKey.first);
     lapItem->setData(0,Qt::UserRole,lapData.at(0));
     lapItem->setData(0,Qt::DisplayRole,lapKey.second);
+
     lapItem->setData(1,Qt::DisplayRole,currActivity->get_swimType(lapData.at(1)));
     lapItem->setData(1,Qt::UserRole,lapData.at(1));
+
     lapItem->setData(3,Qt::DisplayRole,currActivity->poolLength);
+
     lapItem->setData(4,Qt::DisplayRole,set_time(lapData.at(2)));
+
     lapItem->setData(5,Qt::DisplayRole,set_time(lapData.at(2)+lastSplit));
     lapItem->setData(5,Qt::UserRole,lapData.at(2)+lastSplit);
+
     lapItem->setData(6,Qt::DisplayRole,set_time(lapPace));
-    lapItem->setData(7,Qt::DisplayRole,calc_Speed(lapData.at(2),currActivity->poolLength,1000.0));
+    lapItem->setData(6,Qt::UserRole,lapPace);
+
+    lapItem->setData(7,Qt::DisplayRole,currActivity->get_speed(QTime::fromString(set_time(lapPace),shortTime),currActivity->poolLength,true));
+
     lapItem->setData(8,Qt::DisplayRole,lapData.at(3));
+
     lapItem->setData(9,Qt::DisplayRole,currActivity->calc_totalWork(lapPace,lapData.at(2),lapData.at(1)));
 
-     return lapItem;
+    return lapItem;
 }
 
 
@@ -1332,7 +1362,7 @@ void MainWindow::set_activityTree()
     QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>> *activityMap = currActivity->get_activityMap();
     QPair<int,int> intStartStop;
     double distSplit = 0;
-    int totalWork = 0;
+    double totalWork = 0;
     int lapPace = 0;
 
     for(QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>>::const_iterator intStart = activityMap->cbegin(), intEnd = activityMap->cend(); intStart != intEnd; ++intStart)
@@ -1357,7 +1387,7 @@ void MainWindow::set_activityTree()
                     lapValues[3] = lapValues.at(3) + lapsStart.value().at(3);
                     if(lapStyle != lapsStart.value().at(1)) lapStyle = 6;
                     lastSplit = lastSplit + lapsStart.value().at(2);
-                    lapWork = lapWork + currActivity->calc_totalWork(currActivity->calc_lapPace(lapsStart.value().at(2),currActivity->poolLength),lapsStart.value().at(2),lapsStart.value().at(1));
+                    lapWork = lapWork + intItem->child(lapsStart.key().first-1)->data(9,Qt::DisplayRole).toDouble();
                 }
 
                 lapValues[1] = intStart.value().count();
@@ -1368,17 +1398,28 @@ void MainWindow::set_activityTree()
 
                 intItem->setData(0,Qt::DisplayRole,intStart.key().second+"_"+currActivity->checkRangeLevel(lapValues.at(4)));
                 intItem->setData(0,Qt::UserRole,completeDist);
+
                 intItem->setData(1,Qt::DisplayRole,currActivity->get_swimType(lapStyle));
+
                 intItem->setData(2,Qt::DisplayRole,lapValues.at(1));
+
                 intItem->setData(3,Qt::DisplayRole,lapValues.at(2));
+
                 intItem->setData(4,Qt::DisplayRole,set_time(lapValues.at(0)));
                 intItem->setData(4,Qt::UserRole,intStartStop.second);
+
                 intItem->setData(5,Qt::DisplayRole,set_time(intStartStop.first));
                 intItem->setData(5,Qt::UserRole,intStartStop.first);
+
                 intItem->setData(6,Qt::DisplayRole,set_time(lapValues.at(4)));
-                intItem->setData(7,Qt::DisplayRole,calc_Speed(lapValues.at(0),lapValues.at(2),1000.0));
+                intItem->setData(6,Qt::UserRole,lapValues.at(4));
+
+                intItem->setData(7,Qt::DisplayRole,currActivity->get_speed(QTime::fromString(set_time(lapValues.at(4)),shortTime),lapValues.at(2),true));
+
                 intItem->setData(8,Qt::DisplayRole,lapValues.at(3));
+
                 intItem->setData(9,Qt::DisplayRole,set_doubleValue(lapWork,false));
+
                 intItem->setData(10,Qt::DisplayRole,"-");
                 intItem->setData(10,Qt::UserRole,false);
             }
@@ -1387,8 +1428,11 @@ void MainWindow::set_activityTree()
                 lapWork = currActivity->calc_totalWork(0,intStartStop.second - intStartStop.first,0);
                 intItem->setData(0,Qt::DisplayRole,intStart.key().second);
                 intItem->setData(0,Qt::UserRole,completeDist);
+
                 intItem->setData(4,Qt::DisplayRole,set_time(intStartStop.second - intStartStop.first));
+
                 intItem->setData(5,Qt::DisplayRole,set_time(intStartStop.first));
+
                 intItem->setData(9,Qt::DisplayRole,lapWork);
             }
             intItem->setData(0,Qt::AccessibleTextRole,QString::number(intStart.key().first)+"-"+intStart.key().second);
@@ -1402,10 +1446,15 @@ void MainWindow::set_activityTree()
 
                 intItem->setData(0,Qt::AccessibleTextRole,QString::number(intStart.key().first)+"-"+intStart.key().second);
                 intItem->setData(0,Qt::UserRole,lapsStart.key().first);
-                intItem->setData(0,Qt::DisplayRole,QString::number(lapsStart.key().first)+"_"+lapsStart.key().second);
+
                 intItem->setData(1,Qt::DisplayRole,set_time(lapsStart.value().at(0)));
+                intItem->setData(1,Qt::UserRole,lapsStart.value().at(0));
+
                 intItem->setData(2,Qt::DisplayRole,set_time(intStartStop.first));
+                intItem->setData(2,Qt::UserRole,intStartStop.first);
+
                 intItem->setData(3,Qt::DisplayRole,set_doubleValue(lapsStart.value().at(1)+distSplit,true));
+                intItem->setData(3,Qt::UserRole,intStartStop.second);
 
                 if(currActivity->usePMData)
                 {
@@ -1419,21 +1468,29 @@ void MainWindow::set_activityTree()
                 if(currActivity->isBike || currActivity->isRun)
                 {
                     intItem->setData(4,Qt::DisplayRole,set_doubleValue(lapsStart.value().at(1),true));
+
                     intItem->setData(5,Qt::DisplayRole,set_time(lapPace));
+                    intItem->setData(5,Qt::UserRole,lapPace);
+
                     intItem->setData(6,Qt::DisplayRole,set_doubleValue(lapsStart.value().at(2),false));
+
                     intItem->setData(7,Qt::DisplayRole,round(lapsStart.value().at(3)));
+
                     intItem->setData(8,Qt::DisplayRole,round(lapsStart.value().at(4)));
+
                     intItem->setData(9,Qt::DisplayRole,lapWork);
+
                     intItem->setData(10,Qt::DisplayRole,"-");
                     intItem->setData(10,Qt::UserRole,false);
                 }
                 else
                 {
                     intItem->setData(4,Qt::DisplayRole,lapWork);
+
                     intItem->setData(5,Qt::DisplayRole,"-");
                     intItem->setData(5,Qt::UserRole,false);
                 }
-
+                intItem->setData(0,Qt::DisplayRole,currActivity->set_intervalName(intItem,true));
                 distSplit = distSplit + lapsStart.value().at(1);
             }
             totalWork = totalWork + lapWork;
@@ -1441,6 +1498,7 @@ void MainWindow::set_activityTree()
         rootItem->addChild(intItem);
     }
     currActivity->activityInfo.insert("Total Work",QString::number(ceil(totalWork)));
+    this->refresh_activityTree();
 }
 
 void MainWindow::set_selecteditem(QTreeWidgetItem *selItem, int column)
@@ -1457,19 +1515,23 @@ void MainWindow::set_selecteditem(QTreeWidgetItem *selItem, int column)
                 ui->timeEdit_intDuration->setEnabled(false);
                 selItem->setExpanded(true);
                 ui->toolButton_split->setVisible(false);
+                ui->toolButton_merge->setVisible(false);
                 ui->toolButton_add->setVisible(true);
+                ui->toolButton_delete->setVisible(true);
             }
             else
             {
                 ui->timeEdit_intDuration->setEnabled(true);
                 ui->toolButton_split->setVisible(true);
+                ui->toolButton_merge->setVisible(true);
                 ui->toolButton_add->setVisible(false);
+                ui->toolButton_delete->setVisible(false);
             }
 
             ui->comboBox_swimType->setCurrentText(selItem->data(1,Qt::DisplayRole).toString());
             ui->doubleSpinBox_intDistance->setValue(selItem->data(3,Qt::DisplayRole).toDouble());
             ui->timeEdit_intDuration->setTime(QTime::fromString(selItem->data(4,Qt::DisplayRole).toString(),shortTime));
-            ui->timeEdit_intPace->setTime(QTime::fromString(selItem->data(6,Qt::DisplayRole).toString(),shortTime));
+            ui->timeEdit_intPace->setTime(set_sectoTime(selItem->data(6,Qt::UserRole).toInt()));
             ui->doubleSpinBox_intSpeed->setValue(selItem->data(7,Qt::DisplayRole).toDouble());
             ui->spinBox_intCAD->setValue(selItem->data(8,Qt::DisplayRole).toUInt());
             ui->timeEdit_intDuration->setFocus();
@@ -1767,7 +1829,9 @@ void MainWindow::fill_WorkoutContent()
     }
 
     if(currActivity->isSwim)
-    {        
+    {
+        dist = ui->tableWidget_avgValues->item(3,0)->data(Qt::DisplayRole).toInt();
+
         if(intCount > 1)
         {
             newEntry = QString::number(intCount)+"x"+QString::number(dist)+"/"+ui->tableWidget_avgValues->item(1,0)->data(Qt::DisplayRole).toString();
@@ -1919,12 +1983,14 @@ void MainWindow::updated_changedInterval(QTreeWidgetItem *updateItem)
         QStringList intKey = parentItem->data(0,Qt::AccessibleTextRole).toString().split("-");
         QString intCount = intKey.at(1).split("_").first();
 
-        QString lapName = intCount+"_"+QString::number(updateItem->data(0,Qt::AccessibleTextRole).toInt() * currActivity->poolLength)+"_"+
-                          currActivity->checkRangeLevel(calcPace);
-
-        updateItem->setData(0,Qt::DisplayRole,lapName);
         updateItem->setData(6,Qt::DisplayRole,set_time(calcPace));
+        updateItem->setData(6,Qt::UserRole,calcPace);
         updateItem->setData(9,Qt::DisplayRole,currActivity->calc_totalWork(calcPace,calcTime,updateItem->data(1,Qt::UserRole).toInt()));
+
+        for(int lap = 0; lap < parentItem->childCount(); ++lap)
+        {
+            parentItem->child(lap)->setData(0,Qt::DisplayRole,currActivity->set_intervalName(parentItem->child(lap),false));
+        }
 
         //Set Interval
         int intDistance = parentItem->childCount()*currActivity->poolLength;
@@ -1934,11 +2000,13 @@ void MainWindow::updated_changedInterval(QTreeWidgetItem *updateItem)
         parentItem->setData(2,Qt::DisplayRole,parentItem->childCount());
         parentItem->setData(3,Qt::DisplayRole,intDistance);
         parentItem->setData(6,Qt::DisplayRole,set_time(calcPace));
+        parentItem->setData(6,Qt::UserRole,calcPace);
+        parentItem->setData(7,Qt::DisplayRole,currActivity->get_speed(QTime::fromString(set_time(calcPace),shortTime),intDistance,true));
 
-        lapName = intCount+"_Int_"+QString::number(intDistance);
+        QString lapName = currActivity->set_intervalName(parentItem,true);
 
         parentItem->setData(0,Qt::AccessibleTextRole,intKey.first()+"-"+lapName);
-        parentItem->setData(0,Qt::DisplayRole,lapName+"_"+currActivity->checkRangeLevel(calcPace));
+        parentItem->setData(0,Qt::DisplayRole,lapName);
     }
 }
 
@@ -1969,24 +2037,12 @@ void MainWindow::on_toolButton_update_clicked()
             selItem->setData(8,Qt::DisplayRole,ui->spinBox_intCAD->value());
             this->updated_changedInterval(selItem);
         }
-
     }
     else
     {
-        QString lapName;
         selItem->setData(5,Qt::UserRole,get_timesec(selItem->data(5,Qt::DisplayRole).toString()));
-
-        if(currActivity->usePMData)
-        {
-            lapName = selItem->data(0,Qt::UserRole).toString()+"_"+currActivity->checkRangeLevel(selItem->data(7,Qt::DisplayRole).toDouble());
-        }
-        else
-        {
-            lapName = selItem->data(0,Qt::UserRole).toString()+"_"+currActivity->checkRangeLevel(selItem->data(5,Qt::UserRole).toDouble());
-        }
-
-        selItem->setData(0,Qt::DisplayRole,lapName);
         selItem->setData(currActivity->activityHeader.indexOf("Distance (Int)"),Qt::DisplayRole,ui->doubleSpinBox_intDistance->value());
+        selItem->setData(0,Qt::DisplayRole,currActivity->set_intervalName(selItem,true));
     }
 
     this->refresh_activityTree();
@@ -2037,13 +2093,10 @@ void MainWindow::refresh_activityTree()
         {
             lapItem->setData(5,Qt::DisplayRole,set_time(++completeTime));
             lapItem->setData(5,Qt::UserRole,completeTime);
-            intTime = 0;
+            intTime = intWork = intStrokes = 0;
 
             if(lapItem->childCount() > 0)
             {
-                intWork = 0;
-                intStrokes = 0;
-
                 for(int child = 0; child < lapItem->childCount(); ++child)
                 {
                     if(swimType !=  lapItem->child(child)->data(1,Qt::DisplayRole).toString()) swimType = currActivity->swimType.at(6);
@@ -2074,13 +2127,16 @@ void MainWindow::refresh_activityTree()
             }
             else
             {
+
                 completeDist = completeDist + poolLength;
                 intTime = (lapStartStop.second - lapStartStop.first) + (lapStartStop.first - completeTime);
-                totalWork = totalWork + lapItem->data(9,Qt::DisplayRole).toDouble();
+                intWork = currActivity->calc_totalWork(0,intTime,0);
+                totalWork = totalWork + intWork;
                 lapItem->setData(0,Qt::UserRole,completeDist);
                 lapItem->setData(4,Qt::DisplayRole,set_time(intTime));
                 lapItem->setData(5,Qt::UserRole,completeTime);
                 lapItem->setData(5,Qt::UserRole+1,intTime);
+                lapItem->setData(9,Qt::DisplayRole,intWork);
                 completeTime = completeTime + get_timesec(lapItem->data(4,Qt::DisplayRole).toString())+1;
                 lapItem->setData(4,Qt::UserRole,completeTime);
                 breakTime = breakTime + get_timesec(lapItem->data(4,Qt::DisplayRole).toString())+1;
@@ -2101,32 +2157,64 @@ void MainWindow::refresh_activityTree()
             lapItem->setData(4,Qt::UserRole,set_doubleValue(lapItem->data(4,Qt::DisplayRole).toDouble()*1000.0,true));
         }
     }
-    if(currActivity->isSwim) currActivity->update_moveTime(completeTime-breakTime);
+    if(currActivity->isSwim)
+    {
+        currActivity->update_moveTime(completeTime-breakTime);
+        currActivity->set_overrideData("total_work",QString::number(ceil(totalWork)));
+        currActivity->set_swimTimeInZone(true);
+    }
     currActivity->activityInfo.insert("Distance",QString::number(set_doubleValue(completeDist+poolLength,true)));
     currActivity->activityInfo.insert("Total Work",QString::number(ceil(totalWork)));
-    currActivity->set_swimTimeInZone(true);
 
     this->set_activityInfo();
+}
+
+void MainWindow::on_toolButton_merge_clicked()
+{
+    QTreeWidgetItem *item = ui->treeWidget_activity->currentItem();
+    QTreeWidgetItem *mergeItem = ui->treeWidget_activity->itemBelow(item);
+    QTreeWidgetItem *parent = item->parent();
+
+    int mergeValue;
+
+    mergeValue = get_timesec(item->data(4,Qt::DisplayRole).toString());
+    mergeValue = mergeValue + get_timesec(mergeItem->data(4,Qt::DisplayRole).toString());
+    mergeItem->setData(4,Qt::DisplayRole,set_time(mergeValue));
+
+    mergeValue = item->data(8,Qt::DisplayRole).toInt();
+    mergeValue = mergeValue + mergeItem->data(8,Qt::DisplayRole).toInt();
+    mergeItem->setData(8,Qt::DisplayRole,mergeValue);
+
+    parent->removeChild(item);
+
+    this->updated_changedInterval(mergeItem);
+    this->refresh_activityTree();
+    ui->treeWidget_activity->setCurrentItem(mergeItem);
 }
 
 void MainWindow::on_toolButton_delete_clicked()
 {
-    this->set_activityInfo();
+    ui->treeWidget_activity->takeTopLevelItem(selectedInt);
 }
 
 void MainWindow::on_toolButton_add_clicked()
 {
-
+    QTreeWidgetItem *item = new QTreeWidgetItem();
+    ui->treeWidget_activity->insertTopLevelItem(selectedInt,item);
 }
 
 void MainWindow::on_toolButton_upInt_clicked()
 {
-
+    QTreeWidgetItem *item = ui->treeWidget_activity->itemAbove(ui->treeWidget_activity->currentItem());
+    ui->treeWidget_activity->setCurrentItem(item);
+    this->set_selecteditem(item,0);
 }
 
 void MainWindow::on_toolButton_downInt_clicked()
 {
-
+    QTreeWidgetItem *item = ui->treeWidget_activity->itemBelow(ui->treeWidget_activity->currentItem());
+    ui->treeWidget_activity->setCurrentItem(item);
+    this->set_selecteditem(item,0);
 }
 
 void MainWindow::on_actionPlaner_triggered()
@@ -2297,7 +2385,6 @@ void MainWindow::set_phaseFilter(int phaseID)
         this->set_buttons(QDate(),true);
         saisonWeek = 0;
     }
-
 }
 
 void MainWindow::on_actionVersion_triggered()
@@ -2390,8 +2477,11 @@ void MainWindow::toolButton_planMode(bool checked)
 
 void MainWindow::on_actionRefresh_Filelist_triggered()
 {
+    ui->treeWidget_activityfiles->clear();
+    ui->treeWidget_activityfiles->setColumnCount(currActivity->gcActivtiesMap.last().count());
     ui->progressBar_fileState->setValue(10);
-
+    currActivity->check_activityFiles();
+    this->activityList(ui->treeWidget_activityfiles->columnCount()-1);
     ui->progressBar_fileState->setValue(100);
     QTimer::singleShot(2000,ui->progressBar_fileState,SLOT(reset()));
 }
@@ -2433,7 +2523,6 @@ void MainWindow::set_menuList(QDate selectDay,QString section)
             menuSum[4] = menuSum[4] + mealValues.at(5);
             menuSum[5] = menuSum[5] + mealValues.at(6);
             foodEntries.insert(static_cast<int>(it.value().second.first),foodData);
-
     }
 
     for(QMap<int,QVector<QString>>::const_iterator it = foodEntries.cbegin(), end = foodEntries.cend(); it != end; ++it)
@@ -2504,7 +2593,6 @@ void MainWindow::on_toolButton_menuEdit_clicked()
     ui->label_menuEdit->setText("Edit: -");
     ui->actionSave->setEnabled(true);
     this->reset_menuEdit();
-
 }
 
 void MainWindow::on_toolButton_saveMeals_clicked()
@@ -2548,7 +2636,6 @@ void MainWindow::on_doubleSpinBox_portion_valueChanged(double value)
     ui->lineEdit_calories->setText(QString::number(round(value *ui->spinBox_calories->value()/ui->spinBox_portFactor->value())));
 }
 
-
 void MainWindow::on_toolButton_addMeal_clicked()
 {
     if(ui->toolButton_addMeal->property("Editmode") == EDIT)
@@ -2570,7 +2657,6 @@ void MainWindow::change_foodOrder(int moveID)
     ui->listWidget_menuEdit->insertItem(currentindex+moveID,currentItem);
     ui->listWidget_menuEdit->setCurrentRow(currentindex+moveID);
     this->set_foodOrder();
-
 }
 
 void MainWindow::set_foodOrder()
@@ -2625,6 +2711,7 @@ void MainWindow::on_listWidget_menuEdit_itemClicked(QListWidgetItem *item)
 void MainWindow::on_treeView_meals_clicked(const QModelIndex &index)
 {
     ui->listWidget_menuEdit->clearSelection();
+    bool addnew = true;
 
     if(index.parent() == foodPlan->mealModel->invisibleRootItem()->index())
     {
@@ -2642,11 +2729,12 @@ void MainWindow::on_treeView_meals_clicked(const QModelIndex &index)
                 ui->listWidget_menuEdit->itemClicked(ui->listWidget_menuEdit->currentItem());
                 ui->listWidget_menuEdit->item(row)->setSelected(true);
                 ui->toolButton_addMeal->setProperty("Editmode",EDIT);
+                addnew = false;
                 break;
             }
         }
 
-        if(ui->toolButton_addMeal->property("Editmode") == DEL)
+        if(addnew)
         {
             ui->toolButton_addMeal->setProperty("Editmode",ADD);
             this->set_selectedMeal(mealData,index.siblingAtColumn(2).data(Qt::DisplayRole).toDouble());
@@ -2723,8 +2811,6 @@ void MainWindow::on_tableWidget_foodPlan_itemChanged(QTableWidgetItem *item)
     ui->actionSave->setEnabled(true);
 }
 
-
-
 void MainWindow::on_treeView_meals_expanded(const QModelIndex &index)
 {
     Q_UNUSED(index)
@@ -2734,7 +2820,19 @@ void MainWindow::on_treeView_meals_expanded(const QModelIndex &index)
 
 void MainWindow::mealSave(QStandardItem *item)
 {
-    Q_UNUSED(item)
+    int calories = 0;
+    QStandardItem *calItem = foodPlan->mealModel->itemFromIndex(item->index().siblingAtColumn(3));
+
+    QVector<int> mealMacros(4,0);
+
+    mealMacros[0] = round(item->index().siblingAtColumn(4).data(Qt::DisplayRole).toInt() * 4.1);
+    mealMacros[1] = round(item->index().siblingAtColumn(5).data(Qt::DisplayRole).toInt() * 4.1);
+    mealMacros[2] = round(item->index().siblingAtColumn(6).data(Qt::DisplayRole).toInt() * 9.3);
+    mealMacros[3] = round(item->index().siblingAtColumn(7).data(Qt::DisplayRole).toInt());
+
+    calories = mealMacros.at(0) + mealMacros.at(1) + mealMacros.at(2) - mealMacros.at(3);
+    calItem->setData(calories,Qt::DisplayRole);
+
     ui->toolButton_saveMeals->setEnabled(true);
 }
 
@@ -2752,7 +2850,6 @@ void MainWindow::on_toolButton_menuClear_clicked()
         foodPlan->edit_updateMap(DEL,qMakePair(ui->dateEdit_selectDay->date(),ui->lineEdit_editSection->text()),ui->listWidget_menuEdit->item(row)->data(Qt::UserRole).toString(),0);
     }
     this->set_menuList(ui->dateEdit_selectDay->date(),ui->lineEdit_editSection->text());
-
 }
 
 void MainWindow::on_toolButton_menuCopy_clicked()
@@ -2984,7 +3081,6 @@ void MainWindow::on_treeWidget_activityfiles_itemClicked(QTreeWidgetItem *item, 
     ui->lineEdit_workContent->clear();
 
     if(this->clearActivtiy()) this->load_activity(item->data(0,Qt::UserRole).toString(),false);
-
 }
 
 void MainWindow::on_treeWidget_activity_itemClicked(QTreeWidgetItem *item, int column)

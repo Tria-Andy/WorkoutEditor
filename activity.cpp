@@ -98,17 +98,22 @@ void Activity::save_actvitiyFile()
 {
     QStringList listValues;
     int counter = 0;
+    int maxFileCount = generalValues->value("filecount").toInt();
+    int writeEntry = gcActivtiesMap.last().at(4).toInt() - maxFileCount;
     mapList.clear();
 
     for(QMap<QString,QVector<QString>>::const_iterator it = gcActivtiesMap.cbegin(), end = gcActivtiesMap.cend(); it != end; ++it)
     {
-        listValues << it.key();
-        for(int value = 0; value < it.value().count(); ++value)
+        if(it.value().at(4).toInt() >= writeEntry)
         {
-            listValues << it.value().at(value);
+            listValues << it.key();
+            for(int value = 0; value < it.value().count(); ++value)
+            {
+                listValues << it.value().at(value);
+            }
+            mapList.insert(counter++,listValues);
+            listValues.clear();
         }
-        mapList.insert(counter++,listValues);
-        listValues.clear();
     }
     this->listMap_toXml(fileMap->value("activityfile"));
 }
@@ -133,6 +138,7 @@ void Activity::prepare_mapToJson()
 
                 if(interval.key().second != breakName)
                 {
+                    distStep = distStep + 0.001;
                     for(int intSec = lapStart.value().at(0); intSec <  lapStart.value().at(0)+lapStart.value().at(3); ++intSec)
                     {
                         sampleValues[0] = distStep;
@@ -166,7 +172,7 @@ void Activity::prepare_mapToJson()
         {
             for(QMap<QPair<int,QString>,QVector<double>>::const_iterator lapStart = interval.value().cbegin(), lapEnd = interval.value().cend(); lapStart != lapEnd; ++lapStart)
             {
-                for(int intSec = intervallMap.value(interval.key().first).first; intSec <= intervallMap.value(interval.key().first).second; ++intSec)
+                for(int intSec = intervallMap.value(interval.key().first).first; intSec < intervallMap.value(interval.key().first).second; ++intSec)
                 {
                     sampleValues = sampleMap.value(intSec);
                     sampleValues[0] = distStep;
@@ -180,10 +186,10 @@ void Activity::prepare_mapToJson()
     this->prepareWrite_JsonFile();
 }
 
-void Activity::read_gcActivities()
+bool Activity::check_activityFiles()
 {
-    QString jsonFile;
     QString filePath;
+    QString jsonFile;
     bool newActivity = false;
     int maxFileCount = generalValues->value("filecount").toInt();
     QDir directory(gcValues->value("actpath"));
@@ -197,32 +203,43 @@ void Activity::read_gcActivities()
         filePath = fileList.at(fileCount).path()+QDir::separator()+fileList.at(fileCount).fileName();
         jsonFile = fileList.at(fileCount).fileName();
 
-         if(!gcActivtiesMap.contains(jsonFile))
-         {
+        if(!gcActivtiesMap.contains(jsonFile))
+        {
             gcActivtiesMap.insert(jsonFile,this->read_activityMeta(filePath,gcActivtiesMap.count()));
             newActivity = true;
-         }
+        }
     }
 
-    if(newActivity) save_actvitiyFile();
+    return newActivity;
 }
+
 
 void Activity::fill_actMap()
 {
     QVector<QString> actValues;
-    QString jsonFile;
+    QDir directory(gcValues->value("actpath"));
+
+    bool refresh = false;
+
     for(QMap<int,QStringList>::const_iterator it = mapList.cbegin(), end = mapList.cend(); it != end; ++it)
     {
-        jsonFile = it.value().at(0);
         actValues.insert(0,it.value().at(1));
         actValues.insert(1,it.value().at(2));
         actValues.insert(2,it.value().at(3));
         actValues.insert(3,it.value().at(4));
         actValues.insert(4,QString::number(it.key()));
-        gcActivtiesMap.insert(jsonFile,actValues);
+
+        for(int i = 0; i < it.value().count(); ++i)
+        {
+            if(it.value().at(i).isEmpty()) refresh = true;
+        }
+
+        if(refresh) actValues = read_activityMeta(directory.path()+QDir::separator()+it.value().at(0),it.key());
+
+        gcActivtiesMap.insert(it.value().at(0),actValues);
         actValues.clear();
     }
-    this->read_gcActivities();
+    if(this->check_activityFiles() || refresh) save_actvitiyFile();
 }
 
 
@@ -304,8 +321,18 @@ QMap<QPair<int, QString>, QVector<double> > Activity::get_intervalData(int intCo
 
     if(intKey.first < 0) intKey.first = 0;
 
+    int lapOffSet;
+    if(sampleMap.lastKey() < intKey.second+1)
+    {
+        lapOffSet = intKey.second;
+    }
+    else
+    {
+        lapOffSet = intKey.second+1;
+    }
+
     intervalSum[0] = intKey.second - intKey.first;
-    intervalSum[1] = sampleMap.value(intKey.second).at(0) - sampleMap.value(intKey.first).at(0);
+    intervalSum[1] = sampleMap.value(lapOffSet).at(0) - sampleMap.value(intKey.first).at(0);
 
     for(QMap<int,QVector<double>>::const_iterator sampleData = sampleMap.lowerBound(intKey.first), end = sampleMap.lowerBound(intKey.second); sampleData != end; ++sampleData)
     {
@@ -477,6 +504,7 @@ void Activity::set_activityData()
         activityInfo.insert("Total Cal",QString::number(totalCal));
         activityInfo.insert("AvgHF",QString::number(avgHF));
     }
+    qDebug() << activityInfo;
 }
 
 void Activity::prepare_baseData()
@@ -580,7 +608,6 @@ void Activity::prepare_baseData()
         activityHeader.move(4,activityHeader.count()-1);
         activityHeader.move(4,activityHeader.count()-1);
     }
-
     activityInfo.insert("Duration",QDateTime::fromTime_t(sampleMap.count()).toUTC().toString("hh:mm:ss"));
 }
 
@@ -631,44 +658,6 @@ void Activity::set_swimTimeInZone(bool recalc)
     }
 }
 
-QString Activity::build_lapName(QString lapName,int lapTime, double lapDist)
-{
-    QString label;
-
-    if(isTimeBased)
-    {
-        if(lapTime < 60)
-        {
-            label = "Sec";
-            lapTime = ceil(lapTime);
-        }
-        else
-        {
-            label = "Min";
-            lapTime = (ceil(lapTime/10.0)*10)/60.0;
-        }
-
-        lapName = lapName + "-"+QString::number(lapTime)+label;
-    }
-    else
-    {
-        lapDist = (round(lapDist*10)/10.0);
-        if(lapDist < 1)
-        {
-            label = "M";
-            lapDist = ceil(lapDist*1000.0);
-        }
-        else
-        {
-            label = "K";
-        }
-
-        lapName = lapName + "-"+QString::number(lapDist)+label;
-    }
-
-    return lapName;
-}
-
 void Activity::fill_rangeLevel(bool isPower)
 {
     QPair<double,double> zoneValues;
@@ -703,6 +692,79 @@ QString Activity::checkRangeLevel(double lapValue)
         if(lapValue <= it.value().first && lapValue > it.value().second) return it.key();
     }
     return levels.first();
+}
+
+QString Activity::set_intervalName(QTreeWidgetItem *item,bool isInterval)
+{
+    QString lapName;
+
+    if(isSwim)
+    {
+        if(isInterval)
+        {
+            lapName = item->data(0,Qt::AccessibleTextRole).toString().split("-").last().split("_").first()+"_Int_"+
+                      item->data(3,Qt::DisplayRole).toString()+"_"+
+                      checkRangeLevel(item->data(6,Qt::UserRole).toInt());
+        }
+        else
+        {
+            QTreeWidgetItem *parent = item->parent();
+            int lapCount = parent->indexOfChild(item)+1;
+            lapName = parent->data(0,Qt::AccessibleTextRole).toString().split("-").last().split("_").first()+"_"+
+                      QString::number(lapCount * poolLength)+"_"+
+                      checkRangeLevel(item->data(6,Qt::UserRole).toInt());
+        }
+    }
+    else
+    {
+        if(usePMData)
+        {
+            lapName = item->data(0,Qt::UserRole).toString()+"_"+checkRangeLevel(item->data(7,Qt::DisplayRole).toDouble());
+        }
+        else
+        {
+            lapName = item->data(0,Qt::UserRole).toString()+"_"+checkRangeLevel(item->data(5,Qt::UserRole).toDouble());
+        }
+
+        QString label;
+
+        if(isTimeBased)
+        {
+            int lapTime = item->data(1,Qt::UserRole).toInt();
+
+            if(lapTime < 60)
+            {
+                label = "Sec";
+                lapTime = ceil(lapTime);
+            }
+            else
+            {
+                label = "Min";
+                lapTime = (ceil(lapTime/10.0)*10)/60.0;
+            }
+
+            lapName = lapName + "-"+QString::number(lapTime)+label;
+        }
+        else
+        {
+            double lapDist = item->data(activityHeader.indexOf("Distance (Int)"),Qt::DisplayRole).toDouble();
+
+            lapDist = (round(lapDist*10)/10.0);
+            if(lapDist < 1)
+            {
+                label = "M";
+                lapDist = ceil(lapDist*1000.0);
+            }
+            else
+            {
+                label = "K";
+            }
+
+            lapName = lapName + "-"+QString::number(lapDist)+label;
+        }
+    }
+
+    return lapName;
 }
 
 void Activity::prepare_save()

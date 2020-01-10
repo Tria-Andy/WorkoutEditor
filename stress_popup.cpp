@@ -92,7 +92,7 @@ void stress_popup::set_graph()
 void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
 {
     QMap<QDate,QVector<double>> *stressMap =  workSched->get_stressMap();
-    int dayCount = dateRange+1;
+    int dayCount = rangeStart.addDays(-1).daysTo(rangeEnd.addDays(1));
     xDate.resize(dayCount);
     yLTS.resize(dayCount);
     ySTS.resize(dayCount);
@@ -105,29 +105,25 @@ void stress_popup::set_stressValues(QDate rangeStart, QDate rangeEnd)
     tsbMinMax.fill(0);
 
     QDateTime startDate;
-    QDate dayDate;
     QTime wTime;
     wTime.fromString("00:00:00","hh:mm:ss");
     startDate.setDate(rangeStart);
     startDate.setTime(wTime);
     startDate.setTimeSpec(Qt::LocalTime);
+    int day = 0;
 
-    for(int day = 0; day < dayCount; ++day)
+    for(QMap<QDate,QVector<double>>::const_iterator stressStart = stressMap->find(rangeStart.addDays(-1)), end = stressMap->find(rangeEnd.addDays(1)); stressStart != end; ++stressStart)
     {
-        xDate[day] = startDate.addDays(day).toTime_t() + 3600;
-        yStress[day] = stressMap->value(startDate.date().addDays(day)).at(0);
-        ySTS[day] = round(stressMap->value(startDate.date().addDays(day)).at(1));
-        yLTS[day] = round(stressMap->value(startDate.date().addDays(day)).at(2));
-        yDura[day] = round(stressMap->value(startDate.date().addDays(day)).at(3)/60.0);
+        startDate.setDate(stressStart.key());
+        xDate[day] = startDate.toTime_t() + 3600;
+        yStress[day] = stressStart.value().at(0);
+        ySTS[day] = round(stressStart.value().at(1));
+        yLTS[day] = round(stressStart.value().at(2));
+        yDura[day] = round(stressStart.value().at(3)/60.0);
 
         if(stressMax < yStress[day]) stressMax = yStress[day];
-
-        dayDate = startDate.date().addDays(day);
-    }
-
-    for(int i = 1; i < dayCount;++i)
-    {
-        yTSB[i] = yLTS[i-1] - ySTS[i-1];
+        if(day > 0) yTSB[day] = yLTS[day-1] - ySTS[day-1];
+        ++day;
     }
 
     this->set_stressplot(rangeStart,rangeEnd,ui->pushButton_values->isChecked());

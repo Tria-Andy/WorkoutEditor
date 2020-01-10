@@ -1,0 +1,213 @@
+<xmlmapping>
+	<saisons>
+		<value id="0" tag="macro"/>
+		<value id="1" tag="meso"/>
+		<value id="2" tag="micro"/>
+		<value id="3" tag="comp"/>
+	</saisons>
+	<macro>
+		<value id="0" tag="name"/>
+		<value id="1" tag="start"/>
+		<value id="2" tag="end"/>
+		<value id="3" tag="weeks"/>
+	</macro>
+	<meso>
+		<value id="0" tag="name"/>
+		<value id="1" tag="id"/>
+	</meso>
+	<micro>
+		<value id="0" tag="week"/>
+		<value id="1" tag="id"/>
+		<value id="2" tag="name"/>
+		<value id="3" tag="fdw"/>
+		<value id="4" tag="content"/>
+		<value id="5" tag="goal"/>
+	</micro>
+	<comp>
+		<value id="0" tag="id"/>
+		<value id="1" tag="sport"/>
+		<value id="2" tag="workouts"/>
+		<value id="3" tag="duration"/>
+		<value id="4" tag="amount"/>
+		<value id="5" tag="distance"/>
+		<value id="6" tag="stress"/>
+	</comp>
+	<schedule>
+		<value id="0" tag="week"/>
+		<value id="1" tag="day"/>
+		<value id="2" tag="workout"/>
+	</schedule>
+	<week>
+		<value id="0" tag="name"/>
+	</week>
+	<day>
+		<value id="0" tag="date"/>
+	</day>
+	<workout>
+		<value id="0" tag="id"/>
+		<value id="1" tag="time"/>
+		<value id="2" tag="sport"/>
+		<value id="3" tag="code"/>
+		<value id="4" tag="title"/>
+		<value id="5" tag="comment"/>
+		<value id="6" tag="duration"/>
+		<value id="7" tag="distance"/>
+		<value id="8" tag="stress"/>
+		<value id="9" tag="kj"/>
+		<value id="10" tag="pace"/>
+		<value id="11" tag="stdid"/>
+	</workout>
+	<stressmap>
+		<value id="0" tag="stresslts"/>
+	</stressmap>
+	<stresslts>
+		<value id="0" tag="date"/>
+		<value id="1" tag="tss"/>
+		<value id="2" tag="sts"/>
+		<value id="3" tag="lts"/>
+		<value id="4" tag="duration"/>
+	</stresslts>
+	<standardworkouts>
+		<value id="0" tag="discipline"/>
+		<value id="1" tag="standardworkout"/>
+		<value id="2" tag="part"/>
+		<value id="3" tag="step"/>
+	</standardworkouts>
+	<discipline>
+		<value id="0" tag="id"/>
+		<value id="1" tag="sport"/>
+	</discipline>
+	<standardworkout>
+		<value id="0" tag="id"/>
+		<value id="1" tag="name"/>
+		<value id="2" tag="code"/>
+		<value id="3" tag="title"/>
+		<value id="4" tag="duration"/>
+		<value id="5" tag="distance"/>
+		<value id="6" tag="stress"/>
+		<value id="7" tag="work"/>
+		<value id="8" tag="timebase"/>
+		<value id="9" tag="image"/>
+	</standardworkout>
+	<part>
+		<value id="0" tag="id"/>
+		<value id="1" tag="name"/>
+		<value id="2" tag="repeat"/>
+	</part>
+	<step>
+		<value id="0" tag="id"/>
+		<value id="1" tag="name"/>
+		<value id="2" tag="threshold"/>
+		<value id="3" tag="duration"/>
+		<value id="4" tag="level"/>
+		<value id="5" tag="distance"/>
+	</step>
+	<activities>
+		<value id="0" tag="activity"/>
+	</activities>
+	<activity>
+		<value id="0" tag="file"/>
+		<value id="1" tag="dayshort"/>
+		<value id="2" tag="datetime"/>
+		<value id="3" tag="sport"/>
+		<value id="4" tag="code"/>
+	</activity>
+	<jsonfile>
+		<value id="0" tag="RIDE"/>
+		<value id="1" tag="TAGS"/>
+		<value id="2" tag="OVERRIDES"/>
+		<value id="3" tag="INTERVALS"/>
+		<value id="4" tag="SAMPLES"/>
+		<value id="5" tag="XDATA"/>
+	</jsonfile>
+	<intervals>
+		<value id="0" tag="NAME"/>
+		<value id="1" tag="START"/>
+		<value id="2" tag="STOP"/>
+		<value id="3" tag="COLOR"/>
+		<value id="4" tag="PTEST"/>
+	</intervals>
+	<samples>
+		<value id="0" tag="SECS"/>
+		<value id="1" tag="KM"/>
+		<value id="2" tag="KPH"/>
+		<value id="3" tag="CAD"/>
+		<value id="4" tag="RCAD"/>
+		<value id="5" tag="WATTS"/>
+		<value id="6" tag="HR"/>
+		<value id="7" tag="RVERT"/>
+		<value id="8" tag="RCON"/>
+	</samples>
+	<xdata>
+		<value id="0" tag="NAME"/>
+		<value id="1" tag="VALUES"/>
+		<value id="2" tag="UNITS"/>
+		<value id="3" tag="SAMPLES"/>
+	</xdata>
+	<xdatavalues>
+		<value id="0" tag="SECS"/>
+		<value id="1" tag="KM"/>
+	</xdatavalues>
+	<foodplan>
+		<value id="0" tag="foodweek"/>
+		<value id="1" tag="foodday"/>
+		<value id="2" tag="mealtime"/>
+		<value id="3" tag="fooditem"/>
+	</foodplan>
+	<foodweek>
+		<value id="0" tag="name"/>
+		<value id="1" tag="fdw"/>
+		<value id="2" tag="mode"/>
+		<value id="3" tag="weight"/>
+	</foodweek>
+	<foodday>
+		<value id="0" tag="date"/>
+		<value id="1" tag="id"/>
+	</foodday>
+	<mealtime>
+		<value id="0" tag="name"/>
+		<value id="1" tag="id"/>
+	</mealtime>
+	<fooditem>
+		<value id="0" tag="mealid"/>
+		<value id="1" tag="name"/>
+		<value id="2" tag="port"/>
+		<value id="3" tag="id"/>
+	</fooditem>
+	<histweeks>
+		<value id="0" tag="histweek"/>
+		<value id="1" tag="histday"/>
+	</histweeks>
+	<histweek>
+		<value id="0" tag="id"/>
+		<value id="1" tag="year"/>
+		<value id="2" tag="fdw"/>
+		<value id="3" tag="weight"/>
+		<value id="4" tag="base"/>
+		<value id="5" tag="mode"/>
+	</histweek>
+	<histday>
+		<value id="0" tag="id"/>
+		<value id="1" tag="sport"/>
+		<value id="2" tag="food"/>
+	</histday>
+	<meals>
+		<value id="0" tag="mealsection"/>
+		<value id="1" tag="mealitem"/>
+	</meals>
+	<mealsection>
+		<value id="0" tag="name"/>
+		<value id="1" tag="id"/>
+	</mealsection>
+	<mealitem>
+		<value id="0" tag="name"/>
+		<value id="1" tag="mealid"/>
+		<value id="2" tag="port"/>
+		<value id="3" tag="cal"/>
+		<value id="4" tag="carb"/>
+		<value id="5" tag="protein"/>
+		<value id="6" tag="fat"/>
+		<value id="7" tag="fiber"/>
+		<value id="8" tag="sugar"/>	
+	</mealitem>
+</xmlmapping>

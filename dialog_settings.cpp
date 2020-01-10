@@ -39,7 +39,6 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     model_header << "Level" << "Low %" << "Low" << "High %" << "High";
     level_model = new QStandardItemModel(this);
     hf_model = new QStandardItemModel(this);
-    //ui->tableView_contest->setModel();
     ui->lineEdit_gcpath->setText(gcInfo.value("gcpath"));
     ui->lineEdit_gcpath->setEnabled(false);
     ui->lineEdit_athlete->setText(gcInfo.value("athlete"));
@@ -99,13 +98,24 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
        tempCheck->setChecked(doubleVector.value("Moveday").at(i));
     }
 
+    stressHeader = settings::getHeaderMap("stresslist");
+    QTreeWidgetItem *headerItem = new QTreeWidgetItem();
+
+    for(int i = 0; i < stressHeader->count(); ++i)
+    {
+        headerItem->setData(i,Qt::DisplayRole,stressHeader->at(i));
+    }
+    ui->treeWidget_stressValue->setHeaderItem(headerItem);
+    ui->treeWidget_stressValue->header()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->treeWidget_stressValue->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
+    ui->treeWidget_stressValue->setItemDelegate(&mousehover_del);
+
     ui->tableWidget_contest->setColumnCount(6);
     ui->tableWidget_contest->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_contest->horizontalHeader()->hide();
 
     ui->listWidget_selection->setItemDelegate(&mousehover_del);
     ui->listWidget_useIn->setItemDelegate(&mousehover_del);
-    ui->listWidget_stressValue->setItemDelegate(&mousehover_del);
     ui->listWidget_food->setItemDelegate(&mousehover_del);
 
     connect(ui->tableWidget_contest->verticalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectContest(int)));
@@ -299,7 +309,6 @@ void Dialog_settings::writeChangedValues()
     double paceSec = (ui->timeEdit_thresPace->time().minute()*60) + ui->timeEdit_thresPace->time().second();
     QVector<double> saveVector;
 
-
     if(isSwim)
     {        
         thresholdMap.insert("swimpower",ui->spinBox_thresPower->value());
@@ -486,13 +495,20 @@ void Dialog_settings::set_hfmodel(double hfThres)
 void Dialog_settings::set_ltsList()
 {
     QMap<QDate,QVector<double>> *map = schedule_ptr->get_stressMap();
-    QString itemValue;
-    ui->listWidget_stressValue->clear();
+    ui->treeWidget_stressValue->clear();
+    ui->treeWidget_stressValue->setColumnCount(map->first().count()+1);
+    QTreeWidgetItem *item;
 
     for(QMap<QDate,QVector<double>>::const_iterator it =  map->cbegin(), end = map->cend(); it != end; ++it)
     {
-        itemValue = it.key().toString(formatMap.value("dateformat") +" - "+QString::number(it.value().at(0)));
-        ui->listWidget_stressValue->addItem(itemValue);
+        item = new QTreeWidgetItem();
+        item->setData(0,Qt::DisplayRole,it.key().toString(formatMap.value("dateformat")));
+        item->setData(1,Qt::DisplayRole,it.value().at(0));
+        item->setData(2,Qt::DisplayRole,set_doubleValue(it.value().at(1),false));
+        item->setData(3,Qt::DisplayRole,set_doubleValue(it.value().at(2),false));
+        item->setData(4,Qt::DisplayRole,set_time(it.value().at(3)));
+        item->setData(4,Qt::UserRole,it.value().at(3));
+        ui->treeWidget_stressValue->invisibleRootItem()->addChild(item);
     }
 }
 
@@ -877,15 +893,19 @@ void Dialog_settings::on_spinBox_hfMax_valueChanged(int value)
 
 void Dialog_settings::on_dateEdit_stress_dateChanged(const QDate &date)
 {
-    ui->spinBox_stress->setValue(static_cast<int>(schedule_ptr->get_stressMap()->value(date).at(0)));
+    ui->doubleSpinBox_stress->setValue(static_cast<int>(schedule_ptr->get_stressMap()->value(date).at(0)));
 }
 
 void Dialog_settings::on_pushButton_stressEdit_clicked()
 {
-    QPair<double,double> stressMap;
-    //schedule_ptr->set_stressMap(ui->dateEdit_stress->date(),ui->spinBox_stress->value());
-    stressMap.first = ui->spinBox_stress->value();
-    stressMap.second = 0.0;
+    QTime tempTime(0,0,0);
+
+    QVector<double> stressValues;
+    stressValues[0] = ui->doubleSpinBox_stress->value();
+    stressValues[1] = ui->doubleSpinBox_sts->value();
+    stressValues[2] = ui->doubleSpinBox_lts->value();
+    stressValues[3] = get_secFromTime(ui->timeEdit_duration->time());
+    schedule_ptr->update_stressMap(ui->dateEdit_stress->date(),stressValues);
 
     stressEdit = true;
     this->set_ltsList();
@@ -931,12 +951,14 @@ void Dialog_settings::on_spinBox_stsDays_valueChanged(int value)
     this->enableSavebutton();
 }
 
-void Dialog_settings::on_listWidget_stressValue_itemClicked(QListWidgetItem *item)
+void Dialog_settings::on_treeWidget_stressValue_itemClicked(QTreeWidgetItem *item, int column)
 {
-    QString values = item->data(Qt::DisplayRole).toString();
-    QString stress = values.split(" - ").last();
-    ui->dateEdit_stress->setDate(QDate::fromString(values.split(" - ").first(),formatMap.value("dateformat")));
-    ui->spinBox_stress->setValue(stress.toInt());
+    Q_UNUSED(column)
+    ui->dateEdit_stress->setDate(QDate::fromString(item->data(0,Qt::DisplayRole).toString(),formatMap.value("dateformat")));
+    ui->doubleSpinBox_stress->setValue(item->data(1,Qt::DisplayRole).toDouble());
+    ui->doubleSpinBox_sts->setValue(item->data(2,Qt::DisplayRole).toDouble());
+    ui->doubleSpinBox_lts->setValue(item->data(3,Qt::DisplayRole).toDouble());
+    ui->timeEdit_duration->setTime(set_sectoTime(item->data(4,Qt::UserRole).toInt()));
 }
 
 void Dialog_settings::on_tabWidget_tabBarClicked(int index)
@@ -1160,6 +1182,7 @@ void Dialog_settings::on_comboBox_food_currentIndexChanged(const QString &value)
     ui->listWidget_food->clear();
     ui->listWidget_food->addItems(listMap.value(value));
 }
+
 
 void Dialog_settings::on_listWidget_food_itemClicked(QListWidgetItem *item)
 {

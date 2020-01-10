@@ -42,7 +42,6 @@ protected:
     QString set_time(int) const;
     QString get_workout_pace(double, double, QString,bool) const;
 
-    double calc_Speed(double,double,double) const;
     double wattToSpeed(double,double) const;
     int get_timesec(QString time) const;
     double set_doubleValue(double,bool) const;

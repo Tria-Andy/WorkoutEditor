@@ -145,6 +145,12 @@ void schedule::delete_Saison(QString saisonName)
    this->save_workouts(SAISON);
 }
 
+void schedule::update_stressMap(QDate stressDate, QVector<double> stressValues)
+{
+    stressMap.insert(stressDate,stressValues);
+    this->recalc_stressValues();
+}
+
 QModelIndex schedule::get_modelIndex(QStandardItemModel *model,QString searchString, int col)
 {
     QList<QStandardItem*> list;

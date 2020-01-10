@@ -216,15 +216,10 @@ double calculation::get_speed(QTime pace,double dist,bool fixdist) const
         {
             speed = (3600.0/sec) / (1000.0/dist);
         }
-        return speed;
+        return set_doubleValue(speed,true);
     }
 
     return 0;
-}
-
-double calculation::calc_Speed(double sec, double dist, double factor) const
-{
-    return set_doubleValue(3600.0 / (sec / (dist/factor)),true);
 }
 
 QString calculation::calc_lapSpeed(double sec) const
@@ -271,10 +266,7 @@ int calculation::get_hfvalue(QString percent) const
 
 int calculation::get_secFromTime(QTime pTime) const
 {
-    int sec = pTime.minute()*60;
-    sec = sec + pTime.second();
-
-    return  sec;
+    return  QTime(0,0,0).secsTo(pTime);
 }
 
 int calculation::get_baseValue(double percent)
@@ -433,6 +425,11 @@ QTime calculation::calc_duration(double dist, int pace) const
 
     duration.setHMS(0,sec/60,sec%60);
     return duration;
+}
+
+QTime calculation::set_sectoTime(int timeSec)
+{    
+    return QTime(0,0,0).addSecs(timeSec);
 }
 
 

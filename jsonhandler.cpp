@@ -353,8 +353,8 @@ void jsonHandler::prepareWrite_JsonFile()
     activityFile[mapList->at(0)] = activityItem;
     jsonDoc.setObject(activityFile);
 
-    //QFile file(gcValues->value("actpath") + QDir::separator() + jsonFile);
-    QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + jsonFile); //Test
+    QFile file(gcValues->value("actpath") + QDir::separator() + jsonFile);
+    //QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + jsonFile); //Test
 
     if(!file.open(QFile::WriteOnly))
     {
@@ -362,8 +362,8 @@ void jsonHandler::prepareWrite_JsonFile()
         return;
     }
 
-    //file.write(jsonDoc.toJson(QJsonDocument::Compact));
-    file.write(jsonDoc.toJson()); //Test
+    file.write(jsonDoc.toJson(QJsonDocument::Compact));
+    //file.write(jsonDoc.toJson(QJsonDocument::Indented)); //Test
     file.flush();
     file.close();
 

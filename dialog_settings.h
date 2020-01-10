@@ -78,7 +78,6 @@ private slots:
     void on_toolButton_color_clicked();
     void on_spinBox_ltsDays_valueChanged(int arg1);
     void on_spinBox_stsDays_valueChanged(int arg1);
-    void on_listWidget_stressValue_itemClicked(QListWidgetItem *item);
     void on_tabWidget_tabBarClicked(int index);
     void on_pushButton_calcFat_clicked();
     void on_pushButton_clearFat_clicked();
@@ -113,6 +112,8 @@ private slots:
     void on_comboBox_contestsport_currentIndexChanged(const QString &arg1);
     void on_comboBox_contestdist_currentIndexChanged(const QString &arg1);
 
+    void on_treeWidget_stressValue_itemClicked(QTreeWidgetItem *item, int column);
+
 private:
     Ui::Dialog_settings *ui;
     QStandardItemModel *level_model,*hf_model;
@@ -121,6 +122,7 @@ private:
     foodplanner *food_ptr;
     QHash<QString,QColor> colorMapCache;
     QCheckBox *tempCheck;
+    QStringList *stressHeader;
     QStringList sportList,model_header,contestTags;
     del_level level_del;
     del_mousehover mousehover_del;

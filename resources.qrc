@@ -49,6 +49,8 @@
         <file>icons/Map.png</file>
         <file>icons/Load.png</file>
         <file>icons/Left-right.png</file>
+        <file>icons/merge.png</file>
+        <file>icons/split.png</file>
     </qresource>
     <qresource prefix="/style">
         <file>qss/style.qss</file>

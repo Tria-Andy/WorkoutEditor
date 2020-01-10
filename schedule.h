@@ -60,6 +60,7 @@ public:
     void delete_Saison(QString);
     bool get_isUpdated() {return isUpdated;}
     void set_selSaison(QString value) {selSaison = value;}
+    void update_stressMap(QDate,QVector<double>);
 
     //Workout
     //Setter
