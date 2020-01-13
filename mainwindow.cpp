@@ -381,11 +381,11 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     QMap<QDate,double> slidingValues;
     int day = 0;
     QPair<double,double> minMax;
-    QVector<double> weekValues(5,0);
 
     QString mode = foodPlan->get_mode(startDate);
     minMax.first = settings::doubleVector.value(mode).at(2)/100.0;
     minMax.second = settings::doubleVector.value(mode).at(1)/100.0;
+    QVector<double> weekValues(5,0);
 
     if(startDate == firstdayofweek)
     {
@@ -398,20 +398,30 @@ void MainWindow::fill_foodSumTable(QDate startDate)
             slidingValues.insert(it.key(),it.value().at(4));
         }
     }
-
+    int slidingSum = 0;
     QTableWidgetItem *item;
 
     for(QMap<QDate,QVector<double>>::const_iterator it = daySumMap->find(startDate), end = daySumMap->find(startDate.addDays(7)); it != end; ++it,++day)
     {
+        slidingValues.insert(it.key(),it.value().at(4));
+        slidingSum = 0;
+        for(QMap<QDate,double>::const_iterator lastDay = slidingValues.find(it.key().addDays(-2)); lastDay != slidingValues.find(it.key());++lastDay)
+        {
+            slidingSum = slidingSum + lastDay.value();
+        }
+
+        slidingSum = (slidingSum + it.value().at(4)) / 3;
+
         for(int row = 0; row < it.value().count(); ++row)
         {
             item = ui->tableWidget_daySum->item(row,day);
             ui->tableWidget_daySum->openPersistentEditor(item);
             item->setData(Qt::UserRole,mode);
-            item->setData(Qt::EditRole,QString::number(it.value().at(row)));
+            item->setData(Qt::DisplayRole,QString::number(it.value().at(row)));
             if(row == it.value().count()-1)
             {
                 item->setData(Qt::ToolTipRole,"Range: "+QString::number(round(it.value().at(3) * minMax.first))+"-"+QString::number(round(it.value().at(3) * minMax.second)));
+                item->setData(Qt::DisplayRole,QString::number(it.value().at(4)) +" - "+QString::number(slidingSum));
             }
             ui->tableWidget_daySum->closePersistentEditor(item);
 
@@ -424,19 +434,21 @@ void MainWindow::fill_foodSumTable(QDate startDate)
         }
     }
 
+
+    //Fill WeekSum
+    QVector<double> weekSumValues = foodPlan->get_weekSumMap()->value(startDate);
     item = ui->tableWidget_forecast->item(0,0);
-    item->setData(Qt::DisplayRole,ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole+1).toString()+" kg");
+    item->setData(Qt::DisplayRole,QString::number(weekSumValues.at(0))+" kg");
     item = ui->tableWidget_forecast->item(1,0);
-    item->setData(Qt::DisplayRole,QString::number(round(weekValues.at(0) / weekDays))+" Cal");
+    item->setData(Qt::DisplayRole,QString::number(weekSumValues.at(1))+" Cal");
     item = ui->tableWidget_forecast->item(2,0);
-    item->setData(Qt::DisplayRole,QString::number(round(weekValues.at(3) / weekDays))+" Cal");
+    item->setData(Qt::DisplayRole,QString::number(weekSumValues.at(2))+" Cal");
     item = ui->tableWidget_forecast->item(3,0);
-    item->setData(Qt::DisplayRole,QString::number(round((weekValues.at(4) / weekDays)*-1))+" Cal");
+    item->setData(Qt::DisplayRole,QString::number(weekSumValues.at(3))+" Cal");
     item = ui->tableWidget_forecast->item(4,0);
-    item->setData(Qt::DisplayRole,QString::number(set_doubleValue(weekValues.at(4) / athleteValues->value("BodyFatCal") / 1000.0,true)*-1)+" kg");
-    item->setData(Qt::UserRole,set_doubleValue(weekValues.at(4) / athleteValues->value("BodyFatCal") / 1000.0,true));
+    item->setData(Qt::DisplayRole,QString::number(weekSumValues.at(4))+" kg");
     item = ui->tableWidget_forecast->item(5,0);
-    item->setData(Qt::DisplayRole,QString::number(set_doubleValue(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole+1).toDouble() - ui->tableWidget_forecast->item(4,0)->data(Qt::UserRole).toDouble(),false))+" kg");
+    item->setData(Qt::DisplayRole,QString::number(weekSumValues.at(5))+" kg");
 
 }
 
@@ -482,7 +494,7 @@ bool MainWindow::clearActivtiy()
     ui->treeWidget_activity->header()->setSectionResizeMode(QHeaderView::Stretch);
     ui->treeWidget_activity->header()->setVisible(false);
     ui->tableWidget_avgValues->clear();
-    ui->tableWidget_avgValues->horizontalHeader()->setVisible(false);
+    ui->tableWidget_avgValues->verticalHeader()->setVisible(false);
     ui->tableWidget_actInfo->clearContents();
 
     QString viewBackground = "background-color: #e6e6e6";
@@ -1228,7 +1240,7 @@ void MainWindow::load_activity(const QString &filename,bool fullPath)
             ui->treeWidget_activity->setHeaderLabels(currActivity->activityHeader);
             ui->treeWidget_activity->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
             ui->treeWidget_activity->header()->setVisible(true);
-            ui->tableWidget_avgValues->horizontalHeader()->setVisible(true);
+            ui->tableWidget_avgValues->verticalHeader()->setVisible(true);
             ui->comboBox_swimType->setVisible(currActivity->isSwim);
             ui->label_swimType->setVisible(currActivity->isSwim);
             ui->doubleSpinBox_intDistance->setEnabled(!currActivity->isSwim);
@@ -2756,7 +2768,7 @@ void MainWindow::set_selectedMeal(QPair<QString,QVector<int>> mealData,double po
     }
     else if(mealData.second.at(0) == 100)
     {
-        ui->doubleSpinBox_portion->setRange(0.0,500.0);
+        ui->doubleSpinBox_portion->setRange(0.0,2000.0);
         ui->doubleSpinBox_portion->setSingleStep(5.0);
         ui->label_portInfo->setText("Gramm");
     }
@@ -2780,6 +2792,9 @@ void MainWindow::on_treeView_meals_collapsed(const QModelIndex &index)
 
 void MainWindow::on_tableWidget_foodPlan_itemClicked(QTableWidgetItem *item)
 {
+    foodPlan->clear_updateMap();
+    foodPlan->dayMealCopy.first = false;
+    foodPlan->dayMealCopy.second = false;
     foodPlan->fill_updateMap(true,false,item->data(Qt::UserRole).toDate(),foodPlan->mealsHeader.at(item->row()));
 
     ui->frame_dayShow->setVisible(false);

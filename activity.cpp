@@ -172,8 +172,9 @@ void Activity::prepare_mapToJson()
         {
             for(QMap<QPair<int,QString>,QVector<double>>::const_iterator lapStart = interval.value().cbegin(), lapEnd = interval.value().cend(); lapStart != lapEnd; ++lapStart)
             {
-                for(int intSec = intervallMap.value(interval.key().first).first; intSec < intervallMap.value(interval.key().first).second; ++intSec)
+                for(int intSec = intervallMap.value(interval.key().first).first; intSec <= intervallMap.value(interval.key().first).second; ++intSec)
                 {
+                    qDebug() << intSec;
                     sampleValues = sampleMap.value(intSec);
                     sampleValues[0] = distStep;
                     sampleValues[1] = this->polish_SpeedValues(sampleValues.at(1),lapStart.value().at(2),true);
@@ -197,17 +198,24 @@ bool Activity::check_activityFiles()
     directory.setFilter(QDir::Files);
     QFileInfoList fileList = directory.entryInfoList();
     maxFileCount = fileList.count() > maxFileCount ? maxFileCount : fileList.count();
+    QSet<QString> currentFiles;
 
     for(int fileCount = 0; fileCount < maxFileCount; ++fileCount)
     {
         filePath = fileList.at(fileCount).path()+QDir::separator()+fileList.at(fileCount).fileName();
         jsonFile = fileList.at(fileCount).fileName();
+        currentFiles.insert(jsonFile);
 
         if(!gcActivtiesMap.contains(jsonFile))
         {
             gcActivtiesMap.insert(jsonFile,this->read_activityMeta(filePath,gcActivtiesMap.count()));
             newActivity = true;
         }
+    }
+
+    for(QMap<QString,QVector<QString>>::const_iterator  it = gcActivtiesMap.cbegin(); it != gcActivtiesMap.cend(); ++it)
+    {
+        //if(!currentFiles.contains(it.key())) gcActivtiesMap.remove(it.key());
     }
 
     return newActivity;
@@ -504,7 +512,6 @@ void Activity::set_activityData()
         activityInfo.insert("Total Cal",QString::number(totalCal));
         activityInfo.insert("AvgHF",QString::number(avgHF));
     }
-    qDebug() << activityInfo;
 }
 
 void Activity::prepare_baseData()

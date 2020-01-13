@@ -748,8 +748,6 @@ public:
         foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
 
-        QVector<double> percent = settings::doubleVector.value(index.data(Qt::UserRole).toString());
-
         int dayCal = index.model()->data(index.model()->index(3,index.column())).toInt();
 
         gradColor.setHsv(0,0,200,150);
@@ -765,26 +763,19 @@ public:
             painter->setPen(Qt::white);
         }
         else if(index.row() == 4)
-        {
-            if(index.data().toInt() >= (dayCal*(percent.at(0)/100.0)))
+        {            
+            QMap<int,QPair<int,QColor>> colorMap;
+            colorMap.insert(0,get_color(index.data().toString().split(" - ").first().toInt(),dayCal,index.data(Qt::UserRole).toString()));
+            colorMap.insert(1,get_color(index.data().toString().split(" - ").last().toInt(),dayCal,index.data(Qt::UserRole).toString()));
+
+            if(colorMap.value(0).first == colorMap.value(1).first)
             {
-                itemColor = settings::get_itemColor("max").toHsv();
-                painter->setPen(Qt::black);
+                itemColor = colorMap.value(0).second;
             }
-            if(index.data().toInt() < (dayCal*(percent.at(0)/100.0)) && index.data().toInt() > (dayCal*(percent.at(1)/100.0)))
+            else
             {
-                itemColor = settings::get_itemColor("high").toHsv();
-                painter->setPen(Qt::black);
-            }
-            if(index.data().toInt() <= (dayCal*(percent.at(1)/100.0)) && index.data().toInt() > (dayCal*(percent.at(2)/100.0)))
-            {
-                itemColor = settings::get_itemColor("low").toHsv();
-                painter->setPen(Qt::black);
-            }
-            if(index.data().toInt() <= (dayCal*(percent.at(2)/100.0)))
-            {
-                itemColor = settings::get_itemColor("min").toHsv();
-                painter->setPen(Qt::black);
+                itemColor = colorMap.value(1).second;
+                gradColor = colorMap.value(0).second;
             }
         }
 
@@ -797,6 +788,35 @@ public:
         painter->drawText(rect_text,index.data().toString(),QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 
         painter->restore();
+    }
+
+    QPair<int,QColor> get_color(int dataValue, int dayCal,QString mode) const
+    {
+        QVector<double> percent = settings::doubleVector.value(mode);
+        QPair<int,QColor> colorMap;
+
+        if(dataValue >= (dayCal*(percent.at(0)/100.0)))
+        {
+            colorMap.first = 0;
+            colorMap.second = settings::get_itemColor("max").toHsv();
+        }
+        if(dataValue < (dayCal*(percent.at(0)/100.0)) && dataValue > (dayCal*(percent.at(1)/100.0)))
+        {
+            colorMap.first = 1;
+            colorMap.second = settings::get_itemColor("high").toHsv();
+        }
+        if(dataValue <= (dayCal*(percent.at(1)/100.0)) && dataValue > (dayCal*(percent.at(2)/100.0)))
+        {
+            colorMap.first = 2;
+            colorMap.second = settings::get_itemColor("low").toHsv();
+        }
+        if(dataValue <= (dayCal*(percent.at(2)/100.0)))
+        {
+            colorMap.first = 3;
+            colorMap.second = settings::get_itemColor("min").toHsv();
+        }
+
+        return colorMap;
     }
 };
 class del_foodWeekSum : public QStyledItemDelegate, public calculation

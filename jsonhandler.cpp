@@ -114,7 +114,7 @@ QString jsonHandler::read_jsonContent(QString jsonfile,bool fullPath)
         //Fill IntervallMap
         itemArray = activityObject.value(mapList->at(3)).toArray();
         keyList = settings::get_xmlMapping("intervals");
-        int intStop = rand();
+        int intStop = -2;
 
         for(int i = 0; i < itemArray.count(); ++i)
         {
@@ -122,7 +122,7 @@ QString jsonHandler::read_jsonContent(QString jsonfile,bool fullPath)
 
             if(intStop == itemObject[keyList->at(1)].toInt())
             {
-                intervallMap.insert(i,qMakePair(itemObject[keyList->at(1)].toInt(),itemObject[keyList->at(2)].toInt()-1));
+                intervallMap.insert(i,qMakePair(itemObject[keyList->at(1)].toInt()+1,itemObject[keyList->at(2)].toInt()));
             }
             else
             {
