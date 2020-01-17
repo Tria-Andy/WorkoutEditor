@@ -1105,6 +1105,7 @@ private slots:
     void on_comboBox_saisonName_currentIndexChanged(const QString &arg1);
     void on_actionSave_triggered();
     void on_actionDelete_triggered();
+    void activityTreeSection(int);
 
     //Food
     void on_toolButton_addMenu_clicked();
@@ -1144,6 +1145,7 @@ private slots:
     void on_doubleSpinBox_intDistance_valueChanged(double arg1);
     void on_toolButton_split_clicked();
     void on_toolButton_merge_clicked();
+    void on_actionExpand_Activity_Tree_triggered();
 };
 
 #endif // MAINWINDOW_H

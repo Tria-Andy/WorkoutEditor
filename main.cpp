@@ -18,15 +18,11 @@
 
 #include "mainwindow.h"
 #include <QApplication>
-#include <QScreen>
 
 int main(int argc, char *argv[])
 {
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
     QApplication app(argc, argv);
-    QCoreApplication::setOrganizationName("QT Project");
-    QCoreApplication::setApplicationName("Triathlon WorkoutEditor");
 
     QFont font("Segoe UI");
     font.setPointSize(10);

@@ -138,10 +138,16 @@ void Activity::prepare_mapToJson()
 
                 if(interval.key().second != breakName)
                 {
-                    distStep = distStep + 0.001;
                     for(int intSec = lapStart.value().at(0); intSec <  lapStart.value().at(0)+lapStart.value().at(3); ++intSec)
                     {
-                        sampleValues[0] = distStep;
+                        if(intSec == lapStart.value().at(0))
+                        {
+                            sampleValues[0] = distStep + (lapStart.value().at(6)/2);
+                        }
+                        else
+                        {
+                            sampleValues[0] = distStep;
+                        }
                         sampleValues[1] = lapStart.value().at(5);
                         sampleValues[2] = lapStart.value().at(4);
                         distStep = distStep + lapStart.value().at(6);
@@ -162,7 +168,7 @@ void Activity::prepare_mapToJson()
 
             if(interval.key().second != breakName)
             {
-                sampleValues[0] = interval->last().at(1) + (poolLength/1000.0);
+                sampleValues[0] = interval->last().at(1)-(interval->last().at(6)/2) + (poolLength/1000.0);
                 sampleValues[1] = interval->last().at(5);
                 sampleValues[2] = interval->last().at(4);
                 sampleMap.insert(intervallMap.value(interval.key().first).second ,sampleValues);
@@ -174,7 +180,6 @@ void Activity::prepare_mapToJson()
             {
                 for(int intSec = intervallMap.value(interval.key().first).first; intSec <= intervallMap.value(interval.key().first).second; ++intSec)
                 {
-                    qDebug() << intSec;
                     sampleValues = sampleMap.value(intSec);
                     sampleValues[0] = distStep;
                     sampleValues[1] = this->polish_SpeedValues(sampleValues.at(1),lapStart.value().at(2),true);
@@ -295,18 +300,21 @@ QMap<QPair<int,QString>,QVector<double>> Activity::get_swimLapData(int intCount,
     int lapCount = 1;
     QString lapLevel;
     int timezone = 0;
+    int lapTime = 0;
 
     for(QMap<int,QVector<double>>::const_iterator xdata = xDataValues.lowerBound(intKey.first), end = xDataValues.lowerBound(intKey.second); xdata != end; ++xdata)
     {
+        lapTime = round(xdata.value().at(2));
+
         if(xdata.value().at(1) != 0)
         {
-            lapLevel = this->checkRangeLevel(this->calc_lapPace(xdata.value().at(2),poolLength));
+            lapLevel = this->checkRangeLevel(this->calc_lapPace(lapTime,poolLength));
             timezone = paceTimeInZone.value(lapLevel);
             xDataKey.first = lapCount;
             xDataKey.second = QString::number(intCount)+"_"+QString::number((lapCount++)*poolLength)+"_"+lapLevel;
             xDataValue.insert(xDataKey,xdata.value());
-            paceTimeInZone.insert(lapLevel,timezone+xdata.value().at(2));
-            moveTime = moveTime + xdata.value().at(2);
+            paceTimeInZone.insert(lapLevel,timezone+lapTime);
+            moveTime = moveTime + lapTime;
         }
         else
         {
@@ -314,7 +322,7 @@ QMap<QPair<int,QString>,QVector<double>> Activity::get_swimLapData(int intCount,
             xDataKey.first = 0;
             xDataKey.second = breakName;
             xDataValue.insert(xDataKey,xdata.value());
-            paceTimeInZone.insert(levels.at(0),timezone+xdata.value().at(2));
+            paceTimeInZone.insert(levels.at(0),timezone+lapTime);
         }
     }
 
@@ -330,7 +338,7 @@ QMap<QPair<int, QString>, QVector<double> > Activity::get_intervalData(int intCo
     if(intKey.first < 0) intKey.first = 0;
 
     int lapOffSet;
-    if(sampleMap.lastKey() < intKey.second+1)
+    if((sampleMap.lastKey() < intKey.second+1) || isUpdated)
     {
         lapOffSet = intKey.second;
     }

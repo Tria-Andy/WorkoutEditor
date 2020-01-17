@@ -37,6 +37,7 @@ private:
     static QHash<QString,QStringList*> headerMap,xmlmapping;
 
     static QMap<int,QString> sampList,intList;
+
     static QMap<int,double> weightMap;
     static QHash<QString,QString> swimRange,bikeRange,runRange,triRange,stgRange,altRange,hfRange;
 
@@ -66,6 +67,7 @@ public:
     settings();
     static QDate firstDayofWeek;
     static bool settingsUpdated;
+    static QHash<QString,QIcon> sportIcon;
     static int loadSettings();
     static QString AltLabel,SwimLabel,BikeLabel,RunLabel,TriaLabel,StrengthLabel,OtherLabel;
 

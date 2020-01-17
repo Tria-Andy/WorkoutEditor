@@ -277,7 +277,6 @@ void schedule::check_workouts(QDate date)
     QString dateString = date.toString(dateFormat);
     QModelIndex index = this->get_modelIndex(scheduleModel,calc_weekID(date),0);
 
-
     //Check if Week and Date available
     if(!index.isValid())
     {
@@ -299,6 +298,7 @@ void schedule::check_workouts(QDate date)
     //Read Contest/Races
     index = this->get_modelIndex(scheduleModel,dateString,0);
     QStandardItem *dayItem = scheduleModel->itemFromIndex(index);
+    QString workTime;
 
     if(dayItem->hasChildren())
     {

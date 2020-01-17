@@ -94,6 +94,7 @@ private:
     QHash<QString,QMap<QDate,int>> linkedWorkouts;
     QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
 
+    void reset_workTime();
     void set_compValues(bool,QDate,QMap<int,QStringList>);
     void update_compValues(QMap<QString,QVector<double>>*,QMap<int,QStringList>*);
     void recalc_stressValues();

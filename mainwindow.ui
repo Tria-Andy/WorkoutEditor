@@ -3481,6 +3481,7 @@
    <addaction name="separator"/>
    <addaction name="actionReset"/>
    <addaction name="separator"/>
+   <addaction name="actionExpand_Activity_Tree"/>
    <addaction name="actionIntervall_Editor"/>
    <addaction name="actionPace_Calculator"/>
    <addaction name="actionStress_Calculator"/>
@@ -3698,6 +3699,18 @@
    </property>
    <property name="toolTip">
     <string>Food History</string>
+   </property>
+  </action>
+  <action name="actionExpand_Activity_Tree">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/images/icons/tree.png</normaloff>:/images/icons/tree.png</iconset>
+   </property>
+   <property name="text">
+    <string>Expand Activity Tree</string>
+   </property>
+   <property name="toolTip">
+    <string>Expand</string>
    </property>
   </action>
  </widget>

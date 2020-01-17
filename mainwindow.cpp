@@ -147,6 +147,7 @@ MainWindow::MainWindow(QWidget *parent) :
         this->set_tableWidgetItems(ui->tableWidget_schedule,weekRange,cal_header.count(),&schedule_del);
         this->set_tableHeader(ui->tableWidget_schedule,&cal_header,false);
         ui->tableWidget_schedule->verticalHeader()->hide();
+        //ui->tableWidget_schedule->setMouseTracking(true);
         ui->tableWidget_saison->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableWidget_saison->setItemDelegate(&saison_del);
         ui->tableWidget_saison->verticalHeader()->hide();
@@ -378,6 +379,8 @@ void MainWindow::fill_foodPlanTable(QDate startDate)
 void MainWindow::fill_foodSumTable(QDate startDate)
 {
     QMap<QDate,QVector<double>> *daySumMap = foodPlan->get_daySumMap();
+    QTableWidgetItem *item;
+
     QMap<QDate,double> slidingValues;
     int day = 0;
     QPair<double,double> minMax;
@@ -386,6 +389,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     minMax.first = settings::doubleVector.value(mode).at(2)/100.0;
     minMax.second = settings::doubleVector.value(mode).at(1)/100.0;
     QVector<double> weekValues(5,0);
+
 
     if(startDate == firstdayofweek)
     {
@@ -399,7 +403,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
         }
     }
     int slidingSum = 0;
-    QTableWidgetItem *item;
+
 
     for(QMap<QDate,QVector<double>>::const_iterator it = daySumMap->find(startDate), end = daySumMap->find(startDate.addDays(7)); it != end; ++it,++day)
     {
@@ -434,7 +438,6 @@ void MainWindow::fill_foodSumTable(QDate startDate)
         }
     }
 
-
     //Fill WeekSum
     QVector<double> weekSumValues = foodPlan->get_weekSumMap()->value(startDate);
     item = ui->tableWidget_forecast->item(0,0);
@@ -449,7 +452,6 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     item->setData(Qt::DisplayRole,QString::number(weekSumValues.at(4))+" kg");
     item = ui->tableWidget_forecast->item(5,0);
     item->setData(Qt::DisplayRole,QString::number(weekSumValues.at(5))+" kg");
-
 }
 
 void MainWindow::fill_foodPlanList(bool newWeek)
@@ -539,11 +541,13 @@ void MainWindow::set_menuItems(int module)
         ui->actionDelete->setVisible(false);
         ui->actionRefresh_Filelist->setVisible(false);
         ui->actionReset->setVisible(false);
+        ui->actionExpand_Activity_Tree->setVisible(false);
     }
     if(module == EDITOR)
     {
         ui->actionRefresh_Filelist->setVisible(true);
         ui->actionIntervall_Editor->setVisible(true);
+        ui->actionExpand_Activity_Tree->setVisible(true);
         ui->actionReset->setVisible(true);
         ui->actionSelect_File->setVisible(true);
         ui->actionReset->setEnabled(actLoaded);
@@ -570,6 +574,7 @@ void MainWindow::set_menuItems(int module)
         ui->actionStress_Calculator->setVisible(false);
         ui->actionIntervall_Editor->setVisible(false);
         ui->actionRefresh_Filelist->setVisible(false);
+        ui->actionExpand_Activity_Tree->setVisible(false);
         planerMode->setVisible(false);
         planMode->setEnabled(false);
     }
@@ -1337,7 +1342,8 @@ void MainWindow::resetPlot()
 QTreeWidgetItem* MainWindow::set_activityLaps(QPair<int,QString> lapKey, QVector<double> lapData,int lastSplit)
 {
     QTreeWidgetItem *lapItem = new QTreeWidgetItem();
-    int lapPace = currActivity->calc_lapPace(lapData.at(2),currActivity->poolLength);
+    int lapTime = round(lapData.at(2));
+    int lapPace = currActivity->calc_lapPace(lapTime,currActivity->poolLength);
 
     lapItem->setData(0,Qt::AccessibleTextRole,lapKey.first);
     lapItem->setData(0,Qt::UserRole,lapData.at(0));
@@ -1348,10 +1354,11 @@ QTreeWidgetItem* MainWindow::set_activityLaps(QPair<int,QString> lapKey, QVector
 
     lapItem->setData(3,Qt::DisplayRole,currActivity->poolLength);
 
-    lapItem->setData(4,Qt::DisplayRole,set_time(lapData.at(2)));
+    lapItem->setData(4,Qt::DisplayRole,set_time(lapTime));
+    lapItem->setData(4,Qt::UserRole,lapTime);
 
-    lapItem->setData(5,Qt::DisplayRole,set_time(lapData.at(2)+lastSplit));
-    lapItem->setData(5,Qt::UserRole,lapData.at(2)+lastSplit);
+    lapItem->setData(5,Qt::DisplayRole,set_time(lapTime+lastSplit));
+    lapItem->setData(5,Qt::UserRole,lapTime+lastSplit);
 
     lapItem->setData(6,Qt::DisplayRole,set_time(lapPace));
     lapItem->setData(6,Qt::UserRole,lapPace);
@@ -1360,7 +1367,7 @@ QTreeWidgetItem* MainWindow::set_activityLaps(QPair<int,QString> lapKey, QVector
 
     lapItem->setData(8,Qt::DisplayRole,lapData.at(3));
 
-    lapItem->setData(9,Qt::DisplayRole,currActivity->calc_totalWork(lapPace,lapData.at(2),lapData.at(1)));
+    lapItem->setData(9,Qt::DisplayRole,currActivity->calc_totalWork(lapPace,lapTime,lapData.at(1)));
 
     return lapItem;
 }
@@ -1397,9 +1404,16 @@ void MainWindow::set_activityTree()
                     intItem->addChild(this->set_activityLaps(lapsStart.key(),lapsStart.value(),lastSplit));
                     lapValues[0] = lapValues.at(0) + lapsStart.value().at(2);
                     lapValues[3] = lapValues.at(3) + lapsStart.value().at(3);
-                    if(lapStyle != lapsStart.value().at(1)) lapStyle = 6;
                     lastSplit = lastSplit + lapsStart.value().at(2);
                     lapWork = lapWork + intItem->child(lapsStart.key().first-1)->data(9,Qt::DisplayRole).toDouble();
+                    if(lapStyle == lapsStart.value().at(1))
+                    {
+                        lapStyle = lapsStart.value().at(1);
+                    }
+                    else
+                    {
+                        lapStyle = 6;
+                    }
                 }
 
                 lapValues[1] = intStart.value().count();
@@ -1525,7 +1539,15 @@ void MainWindow::set_selecteditem(QTreeWidgetItem *selItem, int column)
             if(selItem->childCount() > 0)
             {
                 ui->timeEdit_intDuration->setEnabled(false);
-                selItem->setExpanded(true);
+                if(selItem->isExpanded())
+                {
+                    selItem->setExpanded(false);
+                }
+                else
+                {
+                    selItem->setExpanded(true);
+                }
+
                 ui->toolButton_split->setVisible(false);
                 ui->toolButton_merge->setVisible(false);
                 ui->toolButton_add->setVisible(true);
@@ -1984,7 +2006,7 @@ void MainWindow::updated_changedInterval(QTreeWidgetItem *updateItem)
     {
         QTreeWidgetItem *parentItem = updateItem->parent();
         //Set Lap
-        int calcTime = get_timesec(updateItem->data(4,Qt::DisplayRole).toString());
+        int calcTime = updateItem->data(4,Qt::UserRole).toInt();
         int calcPace = currActivity->calc_lapPace(calcTime,currActivity->poolLength);
 
         QPair<QString,QString> levelChange;
@@ -1999,14 +2021,17 @@ void MainWindow::updated_changedInterval(QTreeWidgetItem *updateItem)
         updateItem->setData(6,Qt::UserRole,calcPace);
         updateItem->setData(9,Qt::DisplayRole,currActivity->calc_totalWork(calcPace,calcTime,updateItem->data(1,Qt::UserRole).toInt()));
 
-        for(int lap = 0; lap < parentItem->childCount(); ++lap)
+        calcTime = 0;
+        int lapCount = parentItem->childCount();
+
+        for(int lap = 0; lap < lapCount; ++lap)
         {
             parentItem->child(lap)->setData(0,Qt::DisplayRole,currActivity->set_intervalName(parentItem->child(lap),false));
+            calcTime = calcTime + parentItem->child(lap)->data(4,Qt::UserRole).toInt();
         }
 
         //Set Interval
-        int intDistance = parentItem->childCount()*currActivity->poolLength;
-        calcTime = get_timesec(parentItem->data(4,Qt::DisplayRole).toString());
+        int intDistance = lapCount*currActivity->poolLength;
         calcPace = currActivity->calc_lapPace(calcTime,intDistance);
 
         parentItem->setData(2,Qt::DisplayRole,parentItem->childCount());
@@ -2045,6 +2070,7 @@ void MainWindow::on_toolButton_update_clicked()
             selItem->setData(1,Qt::DisplayRole,ui->comboBox_swimType->currentText());
             selItem->setData(1,Qt::UserRole,ui->comboBox_swimType->currentIndex());
             selItem->setData(4,Qt::DisplayRole,ui->timeEdit_intDuration->time().toString(shortTime));
+            selItem->setData(4,Qt::UserRole,get_secFromTime(ui->timeEdit_intDuration->time()));
             selItem->setData(7,Qt::DisplayRole,ui->doubleSpinBox_intSpeed->value());
             selItem->setData(8,Qt::DisplayRole,ui->spinBox_intCAD->value());
             this->updated_changedInterval(selItem);
@@ -2064,12 +2090,13 @@ void MainWindow::on_toolButton_split_clicked()
 {
     QTreeWidgetItem *selItem = ui->treeWidget_activity->currentItem();
 
-    int lapTime = get_timesec(selItem->data(4,Qt::DisplayRole).toString()) / 2;
+    int lapTime = selItem->data(4,Qt::UserRole).toInt() / 2;
     double lapSpeed = selItem->data(7,Qt::DisplayRole).toDouble() * 2.0;
     int splitTime = get_timesec(selItem->data(5,Qt::DisplayRole).toString());
     int strokes = selItem->data(8,Qt::DisplayRole).toInt() / 2;
 
     selItem->setData(4,Qt::DisplayRole,set_time(lapTime));
+    selItem->setData(4,Qt::UserRole,lapTime);
     selItem->setData(7,Qt::DisplayRole,set_doubleValue(lapSpeed,true));
     selItem->setData(8,Qt::DisplayRole,strokes);
 
@@ -2109,14 +2136,23 @@ void MainWindow::refresh_activityTree()
 
             if(lapItem->childCount() > 0)
             {
+                swimType = lapItem->data(1,Qt::DisplayRole).toString();
+
                 for(int child = 0; child < lapItem->childCount(); ++child)
                 {
-                    if(swimType !=  lapItem->child(child)->data(1,Qt::DisplayRole).toString()) swimType = currActivity->swimType.at(6);
+                    if(swimType ==  lapItem->child(child)->data(1,Qt::DisplayRole).toString())
+                    {
+                        swimType = lapItem->child(child)->data(1,Qt::DisplayRole).toString();
+                    }
+                    else
+                    {
+                        swimType = currActivity->swimType.at(6);
+                    }
+
                     if(child > 0) completeDist = completeDist + poolLength;
 
                     lapItem->child(child)->setData(5,Qt::UserRole,completeTime);
-                    lapTime = get_timesec(lapItem->child(child)->data(4,Qt::DisplayRole).toString());
-                    lapItem->child(child)->setData(4,Qt::UserRole,lapTime);
+                    lapTime = lapItem->child(child)->data(4,Qt::UserRole).toInt();
                     completeTime = completeTime + lapTime;
                     totalWork = totalWork + lapItem->child(child)->data(9,Qt::DisplayRole).toDouble();
                     intTime = intTime + lapTime;
@@ -2126,8 +2162,6 @@ void MainWindow::refresh_activityTree()
 
                     lapItem->child(child)->setData(0,Qt::UserRole,completeDist);
                     lapItem->child(child)->setData(5,Qt::DisplayRole,set_time(intTime));
-
-                    swimType = lapItem->child(child)->data(1,Qt::DisplayRole).toString();
                 }
 
                 lapItem->setData(1,Qt::DisplayRole,swimType);
@@ -2713,6 +2747,11 @@ void MainWindow::on_actionDelete_triggered()
     }
 }
 
+void MainWindow::activityTreeSection(int section)
+{
+    qDebug() << "Clicked" << section;
+}
+
 void MainWindow::on_listWidget_menuEdit_itemClicked(QListWidgetItem *item)
 {
     QPair<QString,QVector<int>> mealData = foodPlan->get_mealData(item->data(Qt::UserRole).toString());
@@ -2889,11 +2928,11 @@ void MainWindow::on_comboBox_weightmode_currentIndexChanged(const QString &value
 {
     if(ui->listWidget_weekPlans->selectedItems().count() == 1)
     {
-        int modelRow = ui->listWidget_weekPlans->currentRow();
-        ui->listWidget_weekPlans->currentItem()->setData(Qt::EditRole,ui->label_foodWeekInfo->text()+" - "+value);
-        foodPlan->foodPlanModel->setData(foodPlan->foodPlanModel->index(modelRow,1),value);
+        foodPlan->update_foodMode(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate(),value);
         ui->comboBox_weightmode->setEnabled(false);
         ui->actionSave->setEnabled(true);
+        this->fill_foodPlanList(false);
+        this->fill_foodSumTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
     }
 }
 
@@ -3074,8 +3113,11 @@ void MainWindow::on_tableWidget_schedule_itemClicked(QTableWidgetItem *item)
         if(dialog_code == QDialog::Rejected)
         {
             ui->actionSave->setEnabled(workSchedule->get_isUpdated());
-            foodPlan->set_daySumMap(selectedDate);
-            this->fill_foodSumTable(selectedDate.addDays(1 - selectedDate.dayOfWeek()));
+            if(foodPlan->get_daySumMap()->contains(selectedDate))
+            {
+                foodPlan->set_daySumMap(selectedDate);
+                this->fill_foodSumTable(selectedDate.addDays(1 - selectedDate.dayOfWeek()));
+            }
         }
     }
 }
@@ -3111,4 +3153,9 @@ void MainWindow::on_timeEdit_intDuration_userTimeChanged(const QTime &time)
 void MainWindow::on_doubleSpinBox_intDistance_valueChanged(double dist)
 {
     this->recalc_selectedInt(ui->timeEdit_intDuration->time(),dist);
+}
+
+void MainWindow::on_actionExpand_Activity_Tree_triggered()
+{
+    ui->treeWidget_activity->collapseAll();
 }

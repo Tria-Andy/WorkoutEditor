@@ -40,6 +40,7 @@ public:
     void clear_updateMap() {updateMap.clear();}
     void save_foolPlan();
     void save_mealList();
+    void update_foodMode(QDate,QString);
     void edit_mealSection(QString,int);
     void add_meal(QItemSelectionModel*);
     void remove_meal(QItemSelectionModel*);
@@ -63,15 +64,15 @@ private:
     QString dateFormat;
     QString dateSaveFormat;
 
-    QModelIndex get_modelIndex(QStandardItemModel*,QString);
-    QStandardItem *get_modelItem(QStandardItemModel*,QString);
+    QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
+    QStandardItem *get_modelItem(QStandardItemModel*,QString,int);
     void set_headerLabel(QStandardItemModel*, QStringList*,bool);
     void set_mealsMap();
     void update_foodPlanModel();
     void set_foodPlanMap(int);
     void set_dayFoodValues(QStandardItem*);
     void set_foodPlanData(QStandardItem*);
-    void add_toHistory(QDate);
+    void update_foodHistory(QDate);
     void check_foodPlan();
 };
 

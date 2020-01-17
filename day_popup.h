@@ -42,16 +42,23 @@ class del_daypop: public QStyledItemDelegate, public calculation
 
 public:
     explicit del_daypop(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
-    int selCol;
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
          painter->save();
-         const QAbstractItemModel *model = index.model();
          int textMargin = 2;
+         QFont headFont,workFont;
          QPainterPath rectRow;
-         QString sport = model->data(model->index(1,index.column())).toString();
-         QString workEntry = index.data(Qt::DisplayRole).toString();
+         int celloffset = 21;
+         QString sport = index.data(Qt::AccessibleTextRole).toString();
+         QStringList workValues = index.data(Qt::DisplayRole).toString().split("#");
+         QIcon sportIcon = settings::sportIcon.value(sport);
+
+         headFont.setBold(true);
+         headFont.setPixelSize(settings::get_fontValue("fontBig"));
+         workFont.setBold(false);
+         workFont.setPixelSize(settings::get_fontValue("fontMedium"));
+
          QRect rectEntry(option.rect.x(),option.rect.y(), option.rect.width(),option.rect.height());
          rectRow.addRoundedRect(rectEntry,2,2);
          QRect rectText(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,option.rect.height());
@@ -61,203 +68,52 @@ public:
          rectGradient.setSpread(QGradient::RepeatSpread);
          QColor gradColor;
          gradColor.setHsv(0,0,180,200);
-         QColor rectColor;
+         QColor rectColor = settings::get_itemColor(sport).toHsv();
 
-         if(option.state & QStyle::State_Selected)
-         {
-             rectColor.setHsv(240,255,150,200);
-             rectColor.setAlpha(200);
-             rectGradient.setColorAt(0,rectColor);
-             rectGradient.setColorAt(1,gradColor);
-             painter->setPen(Qt::white);
-         }
-         else
-         {
-             if(sport.isEmpty())
-             {
-                rectColor.setHsv(0,0,220);
-             }
-             else
-             {
-                rectColor = settings::get_itemColor(sport).toHsv();
-             }
-             rectColor.setAlpha(200);
-             rectGradient.setColorAt(0,rectColor);
-             rectGradient.setColorAt(1,gradColor);
-             painter->setPen(Qt::black);
-         }
+         rectColor.setAlpha(225);
+         rectGradient.setColorAt(0,rectColor);
+         rectGradient.setColorAt(1,gradColor);
 
+         QPainterPath rectHead;
+         QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),20);
+         rectHead.addRoundedRect(rect_head,4,4);
+         QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,20);
+         //QRect rectIcon(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,20);
+
+         painter->setPen(Qt::black);
          painter->setBrush(rectGradient);
          painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-         painter->drawPath(rectRow);
-         painter->drawText(rectText,Qt::AlignLeft | Qt::AlignVCenter, workEntry);
+         painter->drawPath(rectHead);
+         painter->setFont(headFont);
+         painter->drawText(rect_head_text,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(0));
+
+         QPainterPath rectWork;
+         QRect rectWorkout(option.rect.x(),option.rect.y()+celloffset,option.rect.width(),option.rect.height()-celloffset-1);
+         rectWork.addRoundedRect(rectWorkout,5,5);
+         QRect rectLabel(option.rect.x()+textMargin,option.rect.y()+celloffset+textMargin,(option.rect.width()/2)-textMargin,option.rect.height()-celloffset-textMargin-1);
+
+         rectGradient.setColorAt(0,rectColor);
+         rectGradient.setColorAt(1,gradColor);
+
+         if(!workValues.isEmpty())
+         {
+             QString partValue;
+
+             for(int i = 1; i < workValues.count(); ++i)
+             {
+                partValue = partValue + workValues.at(i) + "\n";
+             }
+             partValue.chop(1);
+
+             QRect rectValues(option.rect.x()+textMargin,option.rect.y()+celloffset+textMargin,option.rect.width()-textMargin,option.rect.height()-celloffset-textMargin-2);
+             painter->setBrush(rectGradient);
+             painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+             painter->setPen(Qt::black);
+             painter->drawPath(rectWork);
+             painter->setFont(workFont);
+             painter->drawText(rectValues,Qt::AlignLeft,partValue);
+         }
          painter->restore();
-    }
-
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
-    {
-        Q_UNUSED(option)
-        int row = index.row();
-        int col = index.column();
-
-        if(row == 0 && col == selCol)    //Time
-        {
-            QTimeEdit *editor = new QTimeEdit(parent);
-            editor->setDisplayFormat("hh:mm");
-            editor->setFrame(true);
-            return editor;
-        }
-        if((row == 1 || row == 2) && col == selCol)    //Sport || Code
-        {
-            QComboBox *editor = new QComboBox(parent);
-            editor->setFrame(false);
-            return editor;
-        }
-        if((row == 3 || row == 4) && col == selCol)    //Title || Comment
-        {
-            QLineEdit *editor = new QLineEdit(parent);
-            editor->setFrame(true);
-            return editor;
-        }
-        if(row ==  5 && col == selCol)
-        {
-            QTimeEdit *editor = new QTimeEdit(parent);
-            editor->setDisplayFormat("hh:mm:ss");
-            editor->setFrame(true);
-            return editor;
-        }
-        if(row == 6 && col == selCol)
-        {
-            QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
-            editor->setFrame(true);
-            editor->setDecimals(3);
-            editor->setMinimum(0.0);
-            editor->setMaximum(500.0);
-            editor->setSingleStep(0.100);
-            return editor;
-        }
-        if(row == 7 && col == selCol)
-        {
-            QSpinBox *editor = new QSpinBox(parent);
-            editor->setFrame(true);
-            editor->setMinimum(0);
-            editor->setMaximum(500);
-            return editor;
-        }
-        if(row == 8 && col == selCol)
-        {
-            QSpinBox *editor = new QSpinBox(parent);
-            editor->setFrame(true);
-            editor->setMinimum(0);
-            editor->setMaximum(5000);
-            return editor;
-        }
-        return nullptr;
-    }
-
-    void setEditorData(QWidget *editor, const QModelIndex &index) const
-    {
-        int row = index.row();
-        if(row == 0 || row == 5)
-        {
-            QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
-            if(row == 0)
-            {
-                timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"hh:mm"));
-            }
-            else
-            {
-                if(index.data(Qt::DisplayRole).toString().length() == 5)
-                {
-                    timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"mm:ss"));
-                }
-                if(index.data(Qt::DisplayRole).toString().length() == 8)
-                {
-                    timeEdit->setTime(QTime::fromString(index.data(Qt::DisplayRole).toString(),"hh:mm:ss"));
-                }
-            }
-        }
-        if(row == 1 || row == 2)
-        {
-            QComboBox *comboBox = static_cast<QComboBox*>(editor);
-            if(row == 1)
-            {
-                comboBox->addItems(settings::get_listValues("Sport"));
-            }
-            else
-            {
-                comboBox->addItems(settings::get_listValues("WorkoutCode"));
-            }
-            comboBox->setCurrentText(index.data(Qt::DisplayRole).toString());
-        }
-        if(row == 3 || row == 4)
-        {
-            QLineEdit *lineEdit = static_cast<QLineEdit*>(editor);
-            lineEdit->setText(index.data().toString());
-        }
-        if(row == 6)
-        {
-            QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
-            spinBox->setValue(index.data(Qt::DisplayRole).toDouble());
-        }
-        if(row == 7 || row == 8)
-        {
-            QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-            spinBox->setValue(index.data(Qt::DisplayRole).toInt());
-        }
-    }
-
-    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
-    {
-        int col = index.column();
-        int row = index.row();
-
-        if(row == 0 || row == 5) //Time || Duration
-        {
-            QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
-            QTime value = timeEdit->time();
-            timeEdit->interpretText();
-            if(row == 0)
-            {
-                model->setData(index,value.toString("hh:mm"), Qt::EditRole);
-            }
-            else
-            {
-                double timeValue = get_timesec(value.toString("hh:mm:ss"));
-                model->setData(index,value.toString("hh:mm:ss"), Qt::EditRole);
-                model->setData(model->index(9,col),get_workout_pace(model->data(model->index(6,col)).toDouble(),timeValue,model->data(model->index(1,col)).toString(),true));
-            }
-        }
-        if(row == 1 || row == 2) //Sport || Code
-        {
-            QComboBox *comboBox = static_cast<QComboBox*>(editor);
-            model->setData(index,comboBox->currentText(), Qt::EditRole);
-        }
-        if(row == 3 || row == 4) //Title || Comment
-        {
-            QLineEdit *lineEdit = static_cast<QLineEdit*>(editor);
-            model->setData(index,lineEdit->text());
-        }
-        if(row == 6) //Distance
-        {
-            QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
-            spinBox->interpretText();
-            double value = spinBox->value();
-            model->setData(index, value, Qt::EditRole);
-            model->setData(model->index(9,col),get_workout_pace(value,get_timesec(model->data(model->index(5,col)).toString()),model->data(model->index(1,col)).toString(),true));
-        }
-        if(row == 7 || row == 8) //Stress && Work(kj)
-        {
-            QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-            spinBox->interpretText();
-            model->setData(index,spinBox->value(), Qt::EditRole);
-        }
-    }
-
-    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
-    {
-        Q_UNUSED(index)
-        editor->setGeometry(option.rect);
     }
 };
 
@@ -278,37 +134,43 @@ private slots:
     void on_toolButton_editMove_clicked();
     void on_toolButton_copy_clicked();
     void on_toolButton_delete_clicked();
-    void load_workoutData(int);
-    void setNextEditRow();
-    void read_workValues();
-    void on_tableView_day_clicked(const QModelIndex &index);
     void on_toolButton_dayEdit_clicked(bool checked);
     void on_toolButton_upload_clicked();
-    void on_comboBox_stdworkout_activated(int index);
     void on_toolButton_map_clicked();
     void on_dateEdit_workDate_dateChanged(const QDate &date);
+    void on_comboBox_stdworkout_currentIndexChanged(int index);
+    void on_tableWidget_day_itemClicked(QTableWidgetItem *item);
+    void on_toolButton_title_clicked();
+    void on_toolButton_comment_clicked();
+    void on_toolButton_addWorkout_clicked();
+
+    void on_toolButton_clearMask_clicked();
+
+    void on_comboBox_workSport_currentIndexChanged(const QString &arg1);
 
 private:
     Ui::day_popup *ui;
     standardWorkouts *stdWorkouts;
     schedule *workSchedule;
     del_daypop daypop_del;
-    QStandardItemModel *dayModel,*intExport, *sampExport;
 
     QDate popupDate;
     QMap<int,QStringList> workoutMap;
     QStringList *workListHeader;
     QIcon editIcon,addIcon;
-    int selWorkout;
-    bool editMode,moveWorkout;
+    bool moveWorkout;
+    int maxWorkouts;
+
+    QMap<int,QStringList> reorder_workouts(QMap<int,QStringList>*);
 
     void init_dayWorkouts(QDate);
-    void update_workouts();
+    void copy_workoutValue(QString);
     void set_comboWorkouts(QString);
-    void set_controlButtons(bool);
+    void set_controls(bool);
     void set_exportContent();
     void set_result(int);
-    void set_proxyFilter(QString,int,bool);
+    void reset_controls();
+
 
 };
 

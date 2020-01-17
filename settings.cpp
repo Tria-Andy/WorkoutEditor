@@ -23,6 +23,7 @@
 #include <QDateTime>
 #include <QDesktopWidget>
 #include <QMessageBox>
+#include <QIcon>
 
 settings::settings()
 {
@@ -38,7 +39,7 @@ QHash<QString,QString> settings::formatMap;
 QHash<QString,QString> settings::fileMap;
 QHash<QString,QColor> settings::colorMap;
 QHash<QString,int> settings::intMap;
-
+QHash<QString,QIcon> settings::sportIcon;
 QString settings::valueFile;
 QString settings::valueFilePath;
 
@@ -561,6 +562,14 @@ int settings::loadSettings()
                 else if(settingList.at(i) == "Tria" || settingList.at(i) == "Triathlon") TriaLabel = settingList.at(i);
                 else if(settingList.at(i) == "Other") OtherLabel = settingList.at(i);
             }
+
+            sportIcon.insert(SwimLabel,QIcon(":/images/icons/Swimming.png"));
+            sportIcon.insert(BikeLabel,QIcon(":/images/icons/Biking.png"));
+            sportIcon.insert(RunLabel,QIcon(":/images/icons/Running.png"));
+            sportIcon.insert(StrengthLabel,QIcon(":/images/icons/Strength.png"));
+            sportIcon.insert(AltLabel,QIcon(":/images/icons/Strength.png"));
+            sportIcon.insert(TriaLabel,QIcon(":/images/icons/Triathlon.png"));
+
             delete myvalues;
         }
         else
