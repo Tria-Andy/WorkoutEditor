@@ -1048,7 +1048,7 @@ private:
     QMap<int,QStringList> selectedLine;
     void fill_foodPlanTable(QDate);
     void fill_foodSumTable(QDate);
-    void fill_foodPlanList(bool);
+    void fill_foodPlanList(bool,int);
     void set_selectedMeal(QPair<QString,QVector<int>>,double);
     void set_menuList(QDate,QString);
     void reset_menuEdit();

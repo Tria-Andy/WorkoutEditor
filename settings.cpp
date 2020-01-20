@@ -39,7 +39,7 @@ QHash<QString,QString> settings::formatMap;
 QHash<QString,QString> settings::fileMap;
 QHash<QString,QColor> settings::colorMap;
 QHash<QString,int> settings::intMap;
-QHash<QString,QIcon> settings::sportIcon;
+QHash<QString,QString> settings::sportIcon;
 QString settings::valueFile;
 QString settings::valueFilePath;
 
@@ -399,6 +399,7 @@ int settings::loadSettings()
                 thresholdMap.insert("bikefactor",myvalues->value("bikefactor").toDouble());
                 thresholdMap.insert("wattfactor",myvalues->value("wattfactor").toDouble());
                 thresholdMap.insert("runfactor",myvalues->value("runfactor").toDouble());
+                thresholdMap.insert("runstress",myvalues->value("runstress").toDouble());
                 thresholdMap.insert("swimpace",myvalues->value("swimpace").toDouble());
                 thresholdMap.insert("bikepace",myvalues->value("bikepace").toDouble());
                 thresholdMap.insert("bikespeed",myvalues->value("bikespeed").toDouble());
@@ -563,12 +564,12 @@ int settings::loadSettings()
                 else if(settingList.at(i) == "Other") OtherLabel = settingList.at(i);
             }
 
-            sportIcon.insert(SwimLabel,QIcon(":/images/icons/Swimming.png"));
-            sportIcon.insert(BikeLabel,QIcon(":/images/icons/Biking.png"));
-            sportIcon.insert(RunLabel,QIcon(":/images/icons/Running.png"));
-            sportIcon.insert(StrengthLabel,QIcon(":/images/icons/Strength.png"));
-            sportIcon.insert(AltLabel,QIcon(":/images/icons/Strength.png"));
-            sportIcon.insert(TriaLabel,QIcon(":/images/icons/Triathlon.png"));
+            sportIcon.insert(SwimLabel,":/images/icons/Swimming.png");
+            sportIcon.insert(BikeLabel,":/images/icons/Biking.png");
+            sportIcon.insert(RunLabel,":/images/icons/Running.png");
+            sportIcon.insert(StrengthLabel,":/images/icons/Strength.png");
+            sportIcon.insert(AltLabel,":/images/icons/SportIcon.png");
+            sportIcon.insert(TriaLabel,":/images/icons/Triathlon.png");
 
             delete myvalues;
         }

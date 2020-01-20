@@ -11,6 +11,7 @@ void calculation::set_currentSport(QString sport)
     currentSport = sport;
     isSwim = isBike = isRun = isStrength = isAlt = isOther = isTria = false;
     hfThreshold = thresValues->value("hfthres");
+    stressFactor = 1.0;
 
     if(currentSport == settings::SwimLabel)
     {
@@ -38,6 +39,8 @@ void calculation::set_currentSport(QString sport)
         thresPower = static_cast<int>(thresValues->value("runcp"));
         thresPace = static_cast<int>(thresValues->value("runpace"));
         workFactor = thresValues->value("runfactor");
+        stressFactor = thresValues->value("runstress");
+
         if(usePMData)
         {
             sportMark = " Watt";
@@ -562,7 +565,7 @@ double calculation::calc_stressScore(double baseValue, int duration) const
         {
             baseCalc = calc_thresPower(baseValue);
             est_stress = 0.03 * duration * pow((baseCalc/thresPower),3.5);
-            return set_doubleValue(est_stress,false);
+            return set_doubleValue(est_stress*stressFactor,false);
         }
         else
         {

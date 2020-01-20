@@ -57,6 +57,7 @@
         <file>icons/Swimming.png</file>
         <file>icons/Strength.png</file>
         <file>icons/Triathlon.png</file>
+        <file>icons/SportIcon.png</file>
     </qresource>
     <qresource prefix="/style">
         <file>qss/style.qss</file>

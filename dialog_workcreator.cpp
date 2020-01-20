@@ -298,6 +298,7 @@ void Dialog_workCreator::load_selectedWorkout(QString workID)
     }
     ui->treeWidget_workoutTree->expandAll();
     this->read_currentWorkTree();
+    this->set_controlButtons(true);
     ui->treeWidget_workoutTree->blockSignals(false);
 }
 
@@ -376,75 +377,6 @@ void Dialog_workCreator::set_sportData(QString sport)
         thresValue = thresPace;
         ui->label_threshold->setText(this->set_time(thresPace) + sportMark);
     }
-
-    /*
-    if(isSwim)
-    {
-        usePMData = static_cast<bool>(thresValues->value("swimpm"));
-        thresPower = static_cast<int>(thresValues->value("swimpower"));
-        thresPace = static_cast<int>(thresValues->value("swimpace"));
-        workFactor = thresValues->value("swimfactor");
-        sportMark = "/100m";
-        ui->doubleSpinBox_distance->setSingleStep(0.05);
-    }
-    else if(isBike)
-    {
-        usePMData = static_cast<bool>(thresValues->value("bikepm"));
-        thresPower = static_cast<int>(thresValues->value("bikepower"));
-        thresPace = static_cast<int>(thresValues->value("bikepace"));
-        thresSpeed = static_cast<int>(thresValues->value("bikespeed"));
-        workFactor = thresValues->value("bikefactor");
-        sportMark = " Watt";
-    }
-    else if(isRun)
-    {
-        usePMData = static_cast<bool>(thresValues->value("runpm"));
-        thresPower = static_cast<int>(thresValues->value("runcp"));
-        thresPace = static_cast<int>(thresValues->value("runpace"));
-        workFactor = thresValues->value("runfactor");
-        if(usePMData)
-        {
-            sportMark = " Watt";
-        }
-        else
-        {
-            sportMark = "/km";
-        }
-
-    }
-    else if(isStrength)
-    {
-        usePMData = true;
-        thresPower = static_cast<int>(thresValues->value("stgpower"));
-        workFactor = 0;
-        thresPace = 0;
-        sportMark = " Watt";
-    }
-    else if(isAlt)
-    {
-        usePMData = true;
-        thresPower = static_cast<int>(thresValues->value("runcp"));
-        thresPace = 0;
-        workFactor = 0;
-        sportMark = " Watt";
-    }
-    else if(isTria)
-    {
-       usePMData = true;
-       thresPower = static_cast<int>(thresValues->value("stgpower"));
-       thresPace = 0;
-       workFactor = 0;
-       sportMark = " Watt";
-    }
-    else
-    {
-        usePMData = false;
-        thresPower = 0;
-        thresPace = 0;
-        workFactor = 0;
-        sportMark = "-";
-    }
-    */
 }
 
 int Dialog_workCreator::get_swimStyleID(QString partName)
@@ -563,6 +495,12 @@ void Dialog_workCreator::edit_selectedStep(QTreeWidgetItem *item)
     }
     else
     {
+        if(item->data(0,Qt::DisplayRole).toString() == isBreak)
+        {
+            ui->spinBox_level->setEnabled(true);
+            ui->timeEdit_lapTime->setEnabled(true);
+        }
+
         ui->frame_partEdit->setVisible(false);
         ui->frame_stepEdit->setVisible(true);
         ui->comboBox_stepName->setCurrentText(item->data(0,Qt::DisplayRole).toString());
@@ -611,7 +549,10 @@ void Dialog_workCreator::refresh_editStep()
     }
     else
     {
-        ui->timeEdit_lapTime->setTime(this->calc_duration(ui->doubleSpinBox_distance->value(),this->get_secFromTime(ui->timeEdit_pace->time())));
+        if(ui->comboBox_stepName->currentText() != isBreak)
+        {
+            ui->timeEdit_lapTime->setTime(this->calc_duration(ui->doubleSpinBox_distance->value(),this->get_secFromTime(ui->timeEdit_pace->time())));
+        }
     }
 
     ui->doubleSpinBox_stressScore->setValue(this->calc_stressScore(ui->spinBox_level->value(),this->get_secFromTime(ui->timeEdit_lapTime->time())));
@@ -703,13 +644,13 @@ void Dialog_workCreator::read_currentData(QTreeWidgetItem *item)
     plotRange.insertMulti(item->data(0,Qt::UserRole).toString(),qMakePair(row,row+1));
 }
 
-void Dialog_workCreator::save_selectedWorkout()
+void Dialog_workCreator::save_selectedWorkout(bool copyWorkout)
 {
     QString currentSport = ui->comboBox_sport->currentText();
     QTreeWidgetItem *rootItem = ui->treeWidget_workoutTree->invisibleRootItem();
     QString workCount;
 
-    if(currentWorkID.isEmpty())
+    if(currentWorkID.isEmpty() || copyWorkout)
     {
         QPair<int,QString> newWorkID = stdWorkouts->create_newWorkout(currentSport);
         workCount = QString::number(newWorkID.first);
@@ -1080,13 +1021,14 @@ void Dialog_workCreator::control_editPanel(bool setedit)
 
 void Dialog_workCreator::on_toolButton_save_clicked()
 {
-    this->save_selectedWorkout();
+    this->save_selectedWorkout(false);
     ui->toolButton_delete->setEnabled(true);
     ui->toolButton_save->setEnabled(false);
 }
 
 void Dialog_workCreator::on_toolButton_copy_clicked()
 {
+    this->save_selectedWorkout(true);
     ui->toolButton_copy->setEnabled(false);
 }
 

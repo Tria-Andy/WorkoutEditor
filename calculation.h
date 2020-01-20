@@ -20,7 +20,7 @@ private:
 protected:
     QString sportMark;
     int thresPower,thresPace,thresSpeed,hfThreshold;
-    double workFactor;
+    double workFactor,stressFactor;
     void set_currentSport(QString);
 
     int calc_thresPace(double) const;

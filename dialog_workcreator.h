@@ -143,7 +143,7 @@ private:
     void read_currentWorkTree();
     void read_currentChild(QTreeWidgetItem*,QString,int);
     void read_currentData(QTreeWidgetItem*);
-    void save_selectedWorkout();
+    void save_selectedWorkout(bool);
     void read_childToWorkout(QTreeWidgetItem*,QStandardItem*,int);
     void draw_plotGraphic(int);
     void set_itemDataRange(QTreeWidgetItem *item);

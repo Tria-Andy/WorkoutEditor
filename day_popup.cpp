@@ -211,17 +211,13 @@ void day_popup::set_exportContent()
         sampleMap.insert(i,sampleValues);
     }
 
-    QTime workoutTime;
-    QDateTime workoutDateTime;
-    QString tempDate,tempTime,sport,stressType,commonRI;
+    QDateTime workoutDateTime(popupDate,set_sectoTime(selectedWorkout.at(0).toInt()));
+    QString sport,stressType,commonRI;
     QString totalWork = selectedWorkout.at(8);
     QString jsonFile;
-    tempDate = popupDate.toString(workSchedule->dateFormat);
-    tempTime = selectedWorkout.at(0);
 
-    workoutTime = QTime::fromString(tempTime,"hh:mm");
-    jsonFile = popupDate.toString("yyyy_MM_dd_") + workoutTime.toString("hh_mm_ss") +".json";
-    workoutDateTime = QDateTime::fromString(tempDate+"T"+tempTime+":00","dd.MM.yyyyThh:mm:ss").toUTC();
+    jsonFile = popupDate.toString("yyyy_MM_dd_") + workoutDateTime.time().toString("hh_mm_ss") +".json";
+    workoutDateTime = workoutDateTime.toUTC();
 
     sport = selectedWorkout.at(1);
 
@@ -326,6 +322,7 @@ void day_popup::set_result(int result)
             {
                 valueList.insert(valueList.count(), workoutMap.value(ui->spinBox_selWorkout->value()));
                 workoutMap.remove(ui->spinBox_selWorkout->value());
+                this->reset_controls();
             }
             else
             {
@@ -351,12 +348,14 @@ void day_popup::set_result(int result)
 
             workoutMap.insert(ui->spinBox_selWorkout->value(),updateValues);
             workSchedule->workoutUpdates.insert(popupDate,this->reorder_workouts(&workoutMap));
+            this->reset_controls();
         }
         if(result == DEL)
         {
             workSchedule->update_linkedWorkouts(popupDate,ui->lineEdit_stdWorkID->text(),ui->spinBox_selWorkout->value(),false);
             workoutMap.remove(ui->spinBox_selWorkout->value());
             workSchedule->workoutUpdates.insert(popupDate,this->reorder_workouts(&workoutMap));
+            this->reset_controls();
         }
     }
 

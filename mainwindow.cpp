@@ -237,7 +237,7 @@ MainWindow::MainWindow(QWidget *parent) :
         this->set_menuItems(0);
         this->set_phaseFilter(1);   
         this->set_buttons(firstdayofweek,false);
-        this->fill_foodPlanList(false);
+        this->fill_foodPlanList(false,0);
         this->fill_foodPlanTable(firstdayofweek);
     }
     else
@@ -364,10 +364,11 @@ void MainWindow::fill_foodPlanTable(QDate startDate)
     }
     ui->tableWidget_foodPlan->blockSignals(false);
 
-    QStringList weekInfo = ui->listWidget_weekPlans->currentIndex().data(Qt::DisplayRole).toString().split(" - ");
-    ui->label_foodWeekInfo->setText(weekInfo.at(0)+" - "+weekInfo.at(1));
+    QListWidgetItem *weekItem = ui->listWidget_weekPlans->currentItem();
+    ui->lineEdit_selectWeek->setText(weekItem->data(Qt::AccessibleTextRole).toString());
+    ui->dateEdit_selectWeek->setDate(weekItem->data(Qt::UserRole).toDate());
     ui->label_foodWeek->setText("Kw "+ ui->listWidget_weekPlans->currentIndex().data(Qt::DisplayRole).toString());
-    ui->comboBox_weightmode->setCurrentText(weekInfo.at(2));
+    ui->comboBox_weightmode->setCurrentText(weekItem->data(Qt::AccessibleDescriptionRole).toString());
     ui->comboBox_weightmode->setEnabled(true);
     ui->actionDelete->setEnabled(true);
     ui->calendarWidget_Food->setSelectedDate(ui->listWidget_weekPlans->currentIndex().data(Qt::UserRole).toDate());
@@ -454,7 +455,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     item->setData(Qt::DisplayRole,QString::number(weekSumValues.at(5))+" kg");
 }
 
-void MainWindow::fill_foodPlanList(bool newWeek)
+void MainWindow::fill_foodPlanList(bool newWeek,int currentIndex)
 {
     QMap<QDate,QVector<QString>> *foodListMap = foodPlan->get_foodPlanList();
     QString weekString;
@@ -466,7 +467,10 @@ void MainWindow::fill_foodPlanList(bool newWeek)
         weekString = it.value().at(0) +" - "+it.value().at(1)+" - "+it.value().at(2);
         QListWidgetItem *item = new QListWidgetItem();
         item->setData(Qt::DisplayRole,weekString);
+        item->setData(Qt::AccessibleTextRole,it.value().at(0));
+        item->setData(Qt::AccessibleDescriptionRole,it.value().at(2));
         item->setData(Qt::UserRole,it.key());
+
         if(it.key() == firstdayofweek)
         {
             item->setData(Qt::UserRole+1,athleteValues->value("weight"));
@@ -485,7 +489,7 @@ void MainWindow::fill_foodPlanList(bool newWeek)
     }
     else
     {
-        ui->listWidget_weekPlans->setCurrentItem(ui->listWidget_weekPlans->item(0));
+        ui->listWidget_weekPlans->setCurrentItem(ui->listWidget_weekPlans->item(currentIndex));
     }
 }
 
@@ -991,7 +995,7 @@ void MainWindow::on_actionNew_triggered()
     if(ui->stackedWidget->currentIndex() == FOOD)
     {
         foodPlan->insert_newWeek(ui->calendarWidget_Food->selectedDate().addDays(1 - ui->calendarWidget_Food->selectedDate().dayOfWeek()));
-        this->fill_foodPlanList(true);
+        this->fill_foodPlanList(true,0);
     }
 }
 
@@ -2665,7 +2669,8 @@ void MainWindow::on_calendarWidget_Food_clicked(const QDate &date)
         else
         {
             ui->listWidget_weekPlans->clearSelection();
-            ui->label_foodWeekInfo->setText("Add Week: " + calc_weekID(date));
+            ui->lineEdit_selectWeek->setText("Add: " + calc_weekID(date));
+            ui->dateEdit_selectWeek->setDate(date);
             ui->comboBox_weightmode->setCurrentIndex(0);
             ui->actionNew->setEnabled(true);
         }
@@ -2926,12 +2931,12 @@ void MainWindow::on_toolButton_menuPaste_clicked()
 
 void MainWindow::on_comboBox_weightmode_currentIndexChanged(const QString &value)
 {
-    if(ui->listWidget_weekPlans->selectedItems().count() == 1)
+    if(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate() == ui->dateEdit_selectDay->date())
     {
         foodPlan->update_foodMode(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate(),value);
         ui->comboBox_weightmode->setEnabled(false);
         ui->actionSave->setEnabled(true);
-        this->fill_foodPlanList(false);
+        this->fill_foodPlanList(false,ui->listWidget_weekPlans->currentRow());
         this->fill_foodSumTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
     }
 }

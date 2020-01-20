@@ -49,10 +49,10 @@ public:
          int textMargin = 2;
          QFont headFont,workFont;
          QPainterPath rectRow;
-         int celloffset = 21;
+         int celloffset = 27;
          QString sport = index.data(Qt::AccessibleTextRole).toString();
          QStringList workValues = index.data(Qt::DisplayRole).toString().split("#");
-         QIcon sportIcon = settings::sportIcon.value(sport);
+         QString sportIcon = settings::sportIcon.value(sport);
 
          headFont.setBold(true);
          headFont.setPixelSize(settings::get_fontValue("fontBig"));
@@ -75,10 +75,10 @@ public:
          rectGradient.setColorAt(1,gradColor);
 
          QPainterPath rectHead;
-         QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),20);
+         QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),26);
          rectHead.addRoundedRect(rect_head,4,4);
-         QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,20);
-         //QRect rectIcon(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,20);
+         QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,26);
+         QRect rectIcon(option.rect.x()+(option.rect.width()-30),option.rect.y(), 25,25);
 
          painter->setPen(Qt::black);
          painter->setBrush(rectGradient);
@@ -86,6 +86,7 @@ public:
          painter->drawPath(rectHead);
          painter->setFont(headFont);
          painter->drawText(rect_head_text,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(0));
+         painter->drawPixmap(rectIcon,sportIcon);
 
          QPainterPath rectWork;
          QRect rectWorkout(option.rect.x(),option.rect.y()+celloffset,option.rect.width(),option.rect.height()-celloffset-1);

@@ -67,7 +67,7 @@ public:
     settings();
     static QDate firstDayofWeek;
     static bool settingsUpdated;
-    static QHash<QString,QIcon> sportIcon;
+    static QHash<QString,QString> sportIcon;
     static int loadSettings();
     static QString AltLabel,SwimLabel,BikeLabel,RunLabel,TriaLabel,StrengthLabel,OtherLabel;
 
