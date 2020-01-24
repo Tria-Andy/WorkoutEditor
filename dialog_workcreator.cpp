@@ -8,6 +8,8 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, standardWorkouts *pworko
     ui->setupUi(this);
     this->setStyleSheet(parent->styleSheet());
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    this->setFixedSize(settings::screenSize.first/1.4,settings::screenSize.second/1.5);
+
     stdWorkouts = pworkouts;
     worksched = psched;
     generalValues = settings::getStringMapPointer(settings::stingMap::General);

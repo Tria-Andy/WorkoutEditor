@@ -922,6 +922,36 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tableWidget_day</tabstop>
+  <tabstop>lineEdit_selected</tabstop>
+  <tabstop>toolButton_addWorkout</tabstop>
+  <tabstop>toolButton_clearMask</tabstop>
+  <tabstop>spinBox_selWorkout</tabstop>
+  <tabstop>timeEdit_workTime</tabstop>
+  <tabstop>comboBox_workSport</tabstop>
+  <tabstop>comboBox_workCode</tabstop>
+  <tabstop>lineEdit_workTitle</tabstop>
+  <tabstop>toolButton_title</tabstop>
+  <tabstop>lineEdit_workComment</tabstop>
+  <tabstop>toolButton_comment</tabstop>
+  <tabstop>timeEdit_workDuration</tabstop>
+  <tabstop>doubleSpinBox_workDistance</tabstop>
+  <tabstop>spinBox_workStress</tabstop>
+  <tabstop>spinBox_workKJoule</tabstop>
+  <tabstop>lineEdit_workPace</tabstop>
+  <tabstop>lineEdit_stdWorkID</tabstop>
+  <tabstop>comboBox_stdworkout</tabstop>
+  <tabstop>toolButton_map</tabstop>
+  <tabstop>dateEdit_workDate</tabstop>
+  <tabstop>lineEdit_workoutInfo</tabstop>
+  <tabstop>toolButton_editMove</tabstop>
+  <tabstop>toolButton_copy</tabstop>
+  <tabstop>toolButton_delete</tabstop>
+  <tabstop>toolButton_upload</tabstop>
+  <tabstop>toolButton_dayEdit</tabstop>
+  <tabstop>toolButton_close</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

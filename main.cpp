@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     QFont font("Segoe UI");
-    font.setPointSize(10);
+    font.setPointSize(8);
     app.setStyle(QStyleFactory::create("Fusion"));
     app.setFont(font);
     QFile file(":/style/qss/style.qss");

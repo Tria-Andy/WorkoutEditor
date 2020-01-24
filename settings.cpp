@@ -32,6 +32,7 @@ QString settings::settingFile;
 QString settings::splitter = "/";
 bool settings::settingsUpdated;
 QDate settings::firstDayofWeek;
+QPair<int,int> settings::screenSize;
 
 QHash<QString,QString> settings::gcInfo;
 QHash<QString,QString> settings::generalMap;
@@ -579,6 +580,9 @@ int settings::loadSettings()
         }
 
         QScreen *desktop = QGuiApplication::primaryScreen();
+        screenSize.first = desktop->size().width();
+        screenSize.second = desktop->size().height();
+
         //qDebug() << desktop->size();
         if(desktop->size().height() > 1280)
         {

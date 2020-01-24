@@ -39,205 +39,99 @@ public:
     QStringList *sportUse;
     QHash<QString,QString>* generalValues = settings::getStringMapPointer(settings::stingMap::General);
 
-
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
-        QFont cFont;
-        QString indexData;
+        int textMargin = option.rect.width()/50;
+        int iconMargin = 2;
+        QFont headFont,workFont;
+        QString sport = index.data(Qt::AccessibleTextRole).toString();
+        QStringList sportValues = index.data(Qt::DisplayRole).toString().split("#");
+        QString sportIcon = settings::sportIcon.value(sport);
+        QString timeIcon = ":/images/icons/Timewatch.png";
+        QString energyIcon = ":/images/icons/Battery.png";
+        QString distIcon = ":/images/icons/Kilometer.png";
+        QString percentIcon = ":/images/icons/Percent.png";
 
-        const QAbstractItemModel *model = index.model();
-        cFont.setPixelSize(12);
+        headFont.setBold(true);
+        headFont.setPixelSize(settings::get_fontValue("fontBig"));
+        workFont.setBold(false);
+        workFont.setPixelSize(settings::get_fontValue("fontMedium"));
 
-        QColor rectColor;
-        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
-        indexData = index.data().toString();
+        QLinearGradient rectGradient;
+        rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
+        rectGradient.setSpread(QGradient::RepeatSpread);
+        QColor gradColor;
+        gradColor.setHsv(0,0,180,200);
+        QColor rectColor = settings::get_itemColor(sport).toHsv();
+
+        rectColor.setAlpha(225);
+        rectGradient.setColorAt(0,rectColor);
+        rectGradient.setColorAt(1,gradColor);
+
+        QPainterPath sportPath;
+        QRect workHead(option.rect.x(),option.rect.y(), option.rect.width(),option.rect.height()*0.3);
+        sportPath.addRoundedRect(workHead,5,5);
+        int headerHeight = workHead.height();
+
+        QRect sportImage(option.rect.x(),option.rect.y(), headerHeight-iconMargin,headerHeight-iconMargin);
+        QRect sportTitle(sportImage.right()+textMargin,option.rect.y(),(option.rect.width()-headerHeight-textMargin)*0.5,workHead.height());
+        QRect sportCount(sportTitle.right(),option.rect.y(),(option.rect.width()-headerHeight-textMargin)*0.5,workHead.height());
+
+        painter->setBrush(rectGradient);
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
         painter->setPen(Qt::black);
+        painter->setFont(headFont);
+        painter->drawPath(sportPath);
+        painter->drawPixmap(sportImage,sportIcon);
+        painter->drawText(sportTitle,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(0));
+        painter->drawText(sportCount,Qt::AlignRight | Qt::AlignVCenter,sportValues.at(1));
 
-        if(index.row() == sportUse->count())
+        QPainterPath bodyPath;
+        QRect sportMeta(option.rect.x(),workHead.bottom(),option.rect.width(),option.rect.height()*0.7);
+        bodyPath.addRoundedRect(sportMeta,5,5);
+
+        rectGradient.setColorAt(0,rectColor);
+        rectGradient.setColorAt(1,gradColor);
+
+        if(!sportValues.isEmpty())
         {
-            rectColor = settings::get_itemColor(generalValues->value("sum")).toHsv();
-            cFont.setBold(true);
+         int rectHeight = sportMeta.height()*0.5;
+         int rectwidth = (sportMeta.width()-rectHeight)*0.5;
+
+         QRect rectTime(option.rect.x(),workHead.bottom(),rectHeight-iconMargin,rectHeight-iconMargin);
+         QRect rectAmount(rectTime.right()+textMargin,workHead.bottom(),rectwidth,rectHeight);
+
+         QRect rectPercentIcon(rectAmount.right(),workHead.bottom(),rectHeight-iconMargin,rectHeight-iconMargin);
+         QRect rectPercent(rectPercentIcon.right()+textMargin,workHead.bottom(),rectwidth,rectHeight);
+
+         QRect rectDistIcon(option.rect.x(),rectAmount.bottom(),rectHeight-iconMargin,rectHeight-iconMargin);
+         QRect rectDist(rectDistIcon.right()+textMargin,rectAmount.bottom(),rectwidth,rectHeight);
+
+         QRect rectEngeryIcon(rectDist.right(),rectAmount.bottom(),rectHeight-iconMargin,rectHeight-iconMargin);
+         QRect rectEnergy(rectEngeryIcon.right()+textMargin,rectAmount.bottom(),rectwidth,rectHeight);
+
+         painter->setBrush(rectGradient);
+         painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+         painter->setPen(Qt::black);
+         painter->setFont(workFont);
+         painter->drawPath(bodyPath);
+
+         painter->drawPixmap(rectTime,timeIcon);
+         painter->drawText(rectAmount,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(2));
+
+         painter->drawPixmap(rectDistIcon,distIcon);
+         painter->drawText(rectDist,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(3));
+
+         painter->drawPixmap(rectPercentIcon,percentIcon);
+         painter->drawText(rectPercent,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(4));
+
+         painter->drawPixmap(rectEngeryIcon,energyIcon);
+         painter->drawText(rectEnergy,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(5));
         }
-        else
-        {
-            rectColor = settings::get_itemColor(model->data(model->index(index.row(),0,QModelIndex())).toString().trimmed()).toHsv();
-            cFont.setBold(false);
-        }
-        rectColor.setAlpha(175);
-        painter->fillRect(option.rect,rectColor);
-        painter->setFont(cFont);
-        painter->drawText(rect_text,indexData,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->restore();
     }
 
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
-    {
-        Q_UNUSED(option)
-        int listCount = sportUse->count();
-
-        if((index.column() == 1 || index.column() == 6) && index.row() != listCount)
-        {
-            QSpinBox *editor = new QSpinBox(parent);
-            editor->setFrame(false);
-            editor->setMinimum(0);
-            editor->setMaximum(1000);
-            return editor;
-        }
-        if(index.column() == 2 && index.row() != listCount)
-        {
-            QTimeEdit *editor = new QTimeEdit(parent);
-            editor->setDisplayFormat("hh:mm:ss");
-            editor->setFrame(false);
-            return editor;
-        }
-        if(index.column() == 4 && index.row() != listCount)
-        {
-            QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
-            editor->setFrame(false);
-            editor->setDecimals(2);
-            editor->setMinimum(0.0);
-            editor->setMaximum(500.0);
-            return editor;
-        }
-
-        return nullptr;
-    }
-
-    void setEditorData(QWidget *editor, const QModelIndex &index) const
-    {
-        int listCount = sportUse->count();
-
-        if((index.column() == 1 || index.column() == 6) && index.row() != listCount)
-        {
-            QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-            spinBox->setValue(index.model()->data(index, Qt::EditRole).toInt());
-        }
-        if(index.column() == 2 && index.row() != listCount)
-        {
-            QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
-            timeEdit->setTime(index.model()->data(index,Qt::EditRole).toTime());
-        }
-        if(index.column() == 4 && index.row() != listCount)
-        {
-            QDoubleSpinBox *doublespinBox = static_cast<QDoubleSpinBox*>(editor);
-            doublespinBox->setValue(index.model()->data(index, Qt::EditRole).toDouble());
-        }
-    }
-
-    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
-    {
-        int listCount = sportUse->count();
-        double factor = 1.0;
-        QString sport = model->data(model->index(index.row(),0,QModelIndex())).toString();
-        QModelIndex sum_index = model->index(listCount,index.column(),QModelIndex());
-
-        if(sport == settings::SwimLabel) factor = thresValues->value("swimfactor");
-        if(sport == settings::BikeLabel) factor = thresValues->value("bikefactor");
-        if(sport == settings::RunLabel) factor = thresValues->value("runfactor");
-
-        if(index.column() == 1 && index.row() != listCount)
-        {
-            QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-            spinBox->interpretText();
-            model->setData(index,spinBox->value());
-            model->setData(sum_index,sum_int(model,sportUse,1));
-        }
-        if(index.column() == 2 && index.row() != listCount)
-        {
-            QTimeEdit *timeEdit = static_cast<QTimeEdit*>(editor);
-            QTime dura = timeEdit->time();
-            timeEdit->interpretText();
-            model->setData(index,dura.toString("hh:mm:ss"));
-            model->setData(sum_index,sum_time(model,sportUse,2).toString("hh:mm:ss"));
-            model->setData(model->index(index.row(),6,QModelIndex()),round(get_timeMin(dura)*factor));
-            model->setData(model->index(listCount,6,QModelIndex()),sum_int(model,sportUse,6));
-            calc_percent(sportUse,model);
-            setPace(model,index.row());
-        }
-        if(index.column() == 4 && index.row() != listCount)
-        {
-            QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
-            spinBox->interpretText();
-            model->setData(index, spinBox->value(), Qt::EditRole);
-            model->setData(sum_index,sum_double(model,sportUse,4));
-            setPace(model,index.row());
-        }
-        if(index.column() == 6 && index.row() != listCount)
-        {
-            QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-            int stress = spinBox->value();
-            spinBox->interpretText();
-            model->setData(index,stress);
-            model->setData(sum_index,sum_int(model,sportUse,6));
-        }
-    }
-
-    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
-    {
-        Q_UNUSED(index)
-        editor->setGeometry(option.rect);
-    }
-
-    int get_timeMin(QTime time) const
-    {
-        int minutes;
-        minutes = time.hour() * 60;
-        minutes = minutes + time.minute();
-        return minutes;
-    }
-
-    void setPace(QAbstractItemModel *model,int row) const
-    {
-        model->setData(model->index(row,5,QModelIndex()),
-                       get_workout_pace(model->data(model->index(row,4,QModelIndex())).toDouble(),
-                       get_timesec(model->data(model->index(row,2,QModelIndex())).toString()),
-                       model->data(model->index(row,0,QModelIndex())).toString(),false));
-    }
-
-    void calc_percent(QStringList *list,QAbstractItemModel *model) const
-    {
-        int sum = 0;
-        sum = get_timeMin(model->data(model->index(list->count(),2,QModelIndex())).toTime());
-        if(sum > 0)
-        {
-            for(int i = 0; i < list->count(); ++i)
-            {
-                model->setData(model->index(i,3,QModelIndex()),
-                               set_doubleValue(static_cast<double>(get_timeMin(model->data(model->index(i,2,QModelIndex())).toTime())) / static_cast<double>(sum)*100.0,false));
-            }
-        }
-    }
-
-    int sum_int(QAbstractItemModel *model,QStringList *list, int col) const
-    {
-        int sum = 0;
-        for(int i = 0; i < list->count(); ++i)
-        {
-           sum = sum + model->data(model->index(i,col,QModelIndex())).toInt();
-        }
-        return sum;
-    }
-
-    double sum_double(QAbstractItemModel *model,QStringList *list, int col) const
-    {
-        double sum = 0;
-        for(int i = 0; i < list->count(); ++i)
-        {
-           sum = sum + model->data(model->index(i,col,QModelIndex())).toDouble();
-        }
-        return sum;
-    }
-
-    QTime sum_time(QAbstractItemModel *model,QStringList *list, int col) const
-    {
-        QTime sum(0,0,0);
-        for(int i = 0; i < list->count(); ++i)
-        {
-           sum = sum.addSecs(get_timesec(model->data(model->index(i,col,QModelIndex())).toTime().toString("hh:mm:ss")));
-        }
-        return sum;
-    }
 };
 
 namespace Ui {
@@ -263,7 +157,6 @@ private:
     Ui::Dialog_addweek *ui;
     schedule *workSched;
     del_addweek week_del;
-    QStandardItemModel *weekModel;
     QMap<QString, QVector<double>> compValues;
     QString editWeekID,timeFormat,empty;
     QStringList sportuseList,weekMeta;
@@ -273,8 +166,6 @@ private:
     QHash<QString,QString> *generalValues;
     void fill_values(QString);
     void update_values();
-    void fill_weekSumRow(QAbstractItemModel*);
-    QStringList create_values();
 };
 
 #endif // DIALOG_ADDWEEK_H

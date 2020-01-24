@@ -25,6 +25,7 @@ Dialog_stresscalc::Dialog_stresscalc(QWidget *parent) :
     ui(new Ui::Dialog_stresscalc)
 {
     ui->setupUi(this);
+
     combo_sport << "--" << settings::SwimLabel << settings::BikeLabel << settings::RunLabel;
     ui->comboBox_sport->addItems(combo_sport);
     lab_power = "Threshold ----:";

@@ -13,12 +13,13 @@ public:
     int calc_lapPace(int,double) const;
     double calc_totalWork(double,double,int) const;
     double get_speed(QTime,double,bool) const;
-    QString currentSport;
+    QString get_currentSport() {return currentSport;}
+    //QString currentSport;
 
 private:
 
 protected:
-    QString sportMark;
+    QString sportMark,currentSport;
     int thresPower,thresPace,thresSpeed,hfThreshold;
     double workFactor,stressFactor;
     void set_currentSport(QString);
@@ -40,7 +41,7 @@ protected:
     QTime calc_duration(double,int) const;
     QTime set_sectoTime(int);
     QString set_time(int) const;
-    QString get_workout_pace(double, double, QString,bool) const;
+    QString get_workout_pace(double, double,bool) const;
 
     double wattToSpeed(double,double) const;
     int get_timesec(QString time) const;
@@ -53,6 +54,17 @@ protected:
     double current_dayCalories(QDateTime) const;
     QString calc_weekID(QDate);
     QHash<QString,double> *thresValues, *athleteValues;
+
+
+    //QCP Objects
+    QCPGraph *create_QCPLine(QCustomPlot*, QString,QColor,QVector<double> &xdata,QVector<double> &ydata,bool);
+    QCPBars *create_QCPBar(QColor,int,int,bool);
+    void create_itemTracer(QCustomPlot *,QString,QCPGraph*,QVector<double> &xdata,QColor,int);
+    void create_itemLineText(QCustomPlot *,QString,QFont,QVector<double> &xdata,QVector<double> &ydata,int,bool);
+    void set_itemText(QString,QFont,QVector<double> &ydata,int,bool);
+    void create_itemBarText(QFont,QColor,QVector<double> &xdata,QVector<double> &ydata,int,bool);
+
+
 };
 
 #endif // CALCULATION_H

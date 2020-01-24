@@ -25,6 +25,7 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    this->setFixedSize(settings::screenSize.first*0.35,settings::screenSize.second*0.45);
     generalValues = settings::getStringMapPointer(settings::stingMap::General);
     workSched = p_sched;
     ui->comboBox_phase->addItems(settings::get_listValues("Phase"));
@@ -36,10 +37,9 @@ Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sc
     sportuseList.removeLast();
     week_del.sportUse = &sportuseList;
     sportlistCount = sportuseList.count();
-    weekModel = new QStandardItemModel(this);
     ui->toolButton_paste->setEnabled(false);
-    this->setFixedHeight(100+(35*(sportuseList.count()+1)));
-    this->setFixedWidth(650);
+    ui->tableWidget_sportValues->setColumnCount(1);
+    ui->tableWidget_sportValues->setRowCount(sportlistCount);
     this->fill_values(sel_week);
 }
 
@@ -61,20 +61,11 @@ void Dialog_addweek::fill_values(QString selWeekID)
     ui->label_header->clear();
     ui->label_header->setText("Saison: "+ generalValues->value("saison")  +" - Week: "+ weekMeta.at(1)+" ("+selWeekID +") - Phase: "+weekMeta.at(2));
 
-    weekModel->clear();
-    weekModel->setRowCount(sportuseList.count()+1);
-    weekModel->setColumnCount(weekHeader->count());
-    ui->tableView_sportValues->setModel(weekModel);
-    ui->tableView_sportValues->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_sportValues->horizontalHeader()->setSectionsClickable(false);
-    ui->tableView_sportValues->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView_sportValues->verticalHeader()->hide();
-    ui->tableView_sportValues->setItemDelegate(&week_del);
-
-    for(int vheader = 0; vheader < weekHeader->count(); ++vheader)
-    {
-        weekModel->setHorizontalHeaderItem(vheader,new QStandardItem(weekHeader->at(vheader)));
-    }
+    ui->tableWidget_sportValues->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_sportValues->horizontalHeader()->hide();
+    ui->tableWidget_sportValues->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_sportValues->verticalHeader()->hide();
+    ui->tableWidget_sportValues->setItemDelegate(&week_del);
 
     if(compValues.count() > 0)
     {
@@ -89,24 +80,30 @@ void Dialog_addweek::fill_values(QString selWeekID)
         update = true;
 
         QVector<double> weekComp(5,0);
+        QString delimiter = "#";
+        QString itemString;
 
         for(int sport = 0; sport < sportlistCount; ++sport)
         {
             weekComp = compValues.value(sportuseList.at(sport));
-            weekModel->setData(weekModel->index(sport,0,QModelIndex()),sportuseList.at(sport));
-            weekModel->setData(weekModel->index(sport,1,QModelIndex()),weekComp.at(0));
-            weekModel->setData(weekModel->index(sport,2,QModelIndex()),set_time(static_cast<int>((weekComp.at(1)))));
-            weekModel->setData(weekModel->index(sport,3,QModelIndex()),weekComp.at(2));
-            weekModel->setData(weekModel->index(sport,4,QModelIndex()),this->set_doubleValue(weekComp.at(3),false));
-            weekModel->setData(weekModel->index(sport,5,QModelIndex()),this->get_workout_pace(weekComp.at(3),weekComp.at(1),sportuseList.at(sport),false));
-            weekModel->setData(weekModel->index(sport,6,QModelIndex()),weekComp.at(4));
+            this->set_currentSport(sportuseList.at(sport));
+
+            QTableWidgetItem *item = new QTableWidgetItem();
+            itemString = sportuseList.at(sport)+delimiter+
+                         "Workouts: " +QString::number(weekComp.at(0))+delimiter+
+                         set_sectoTime(weekComp.at(1)).toString()+delimiter+
+                         QString::number(weekComp.at(2))+delimiter+
+                         QString::number(this->set_doubleValue(weekComp.at(3),false))+delimiter+
+                         QString::number(weekComp.at(4));
+            item->setData(Qt::DisplayRole,itemString);
+            item->setData(Qt::AccessibleTextRole,sportuseList.at(sport));
+            ui->tableWidget_sportValues->setItem(sport,0,item);
+
         }
-        this->fill_weekSumRow(ui->tableView_sportValues->model());
+        //this->fill_weekSumRow(ui->tableWidget_sportValues->model());
 
      }
      ui->dateEdit_selectDate->blockSignals(false);
-     week_del.calc_percent(&sportuseList,ui->tableView_sportValues->model());
-
 }
 
 void Dialog_addweek::update_values()
@@ -117,11 +114,13 @@ void Dialog_addweek::update_values()
     QString sport;
     for(int sport = 0; sport < sportlistCount; ++sport)
     {
+        /*
         weekData[0] = weekModel->data(weekModel->index(sport,1)).toDouble();
         weekData[1] = get_timesec(weekModel->data(weekModel->index(sport,2)).toString());
         weekData[2] = weekModel->data(weekModel->index(sport,3)).toDouble();
         weekData[3] = weekModel->data(weekModel->index(sport,4)).toDouble();
         weekData[4] = weekModel->data(weekModel->index(sport,6)).toDouble();
+        */
         compValues.insert(sportuseList.at(sport),weekData);
     }
 
@@ -134,33 +133,6 @@ void Dialog_addweek::update_values()
     workSched->set_weekCompValues(weekMeta,compValues);
 
     ui->toolButton_paste->setEnabled(true);
-}
-
-void Dialog_addweek::fill_weekSumRow(QAbstractItemModel *ab_model)
-{
-    weekModel->setData(weekModel->index(sportlistCount,0,QModelIndex()),generalValues->value("sum"));
-    weekModel->setData(weekModel->index(sportlistCount,1,QModelIndex()),week_del.sum_int(ab_model,&sportuseList,1));
-    weekModel->setData(weekModel->index(sportlistCount,2,QModelIndex()),week_del.sum_time(ab_model,&sportuseList,2).toString(timeFormat));
-    weekModel->setData(weekModel->index(sportlistCount,3,QModelIndex()),100);
-    weekModel->setData(weekModel->index(sportlistCount,4,QModelIndex()),this->set_doubleValue(week_del.sum_double(ab_model,&sportuseList,4),false));
-    weekModel->setData(weekModel->index(sportlistCount,5,QModelIndex()),"--");
-    weekModel->setData(weekModel->index(sportlistCount,6,QModelIndex()),week_del.sum_int(ab_model,&sportuseList,6));
-}
-
-QStringList Dialog_addweek::create_values()
-{
-    QString splitter = "-",vString;
-    QStringList list;
-
-    for(int i = 0; i < sportuseList.count()+1; ++i)
-    {
-        vString = weekModel->data(weekModel->index(i,1,QModelIndex())).toString()+splitter;
-        vString = vString+weekModel->data(weekModel->index(i,4,QModelIndex())).toString()+splitter;
-        vString = vString+weekModel->data(weekModel->index(i,2,QModelIndex())).toTime().toString("hh:mm")+splitter;
-        vString = vString+weekModel->data(weekModel->index(i,6,QModelIndex())).toString();
-        list << vString;
-    }
-    return list;
 }
 
 void Dialog_addweek::on_dateEdit_selectDate_dateChanged(const QDate &date)
@@ -183,17 +155,10 @@ void Dialog_addweek::on_toolButton_paste_clicked()
     QString vPhase = weekMeta.at(1),contentSport,dist;
     QStringList content;
 
-    QAbstractItemModel *ab_model = ui->tableView_sportValues->model();
-
     ui->comboBox_phase->setCurrentText(vPhase.split("_").first());
     ui->comboBox_cycle->setCurrentText(vPhase.split("_").last());
     ui->lineEdit_weekContent->setText(weekMeta.at(3));
     ui->lineEdit_weekGoals->setText(weekMeta.at(4));
-
-
-    week_del.calc_percent(&sportuseList,ab_model);
-
-    this->fill_weekSumRow(ab_model);
 
     ui->dateEdit_selectDate->setFocus();
 }

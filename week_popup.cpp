@@ -25,6 +25,8 @@ week_popup::week_popup(QWidget *parent,QString weekid,schedule *p_sched,standard
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    this->setFixedSize(settings::screenSize.first/2,settings::screenSize.second/2.25);
+
     isLoad = false;
     dayCount = 7;
     workSched = p_sched;
@@ -306,10 +308,12 @@ void week_popup::set_weekPlot(int yValue)
     {
         QCPRange xRange(QCPAxisTickerDateTime::dateTimeToKey(firstDay.addDays(-1)),QCPAxisTickerDateTime::dateTimeToKey(firstDay.addDays(dayCount)));
 
-        QCPGraph *stressLine = this->get_QCPLine("StessScore",QColor(255,0,0),xDateTick,yStress,false);
+        //QCPGraph *stressLine = this->get_QCPLine("StessScore",QColor(255,0,0),xDateTick,yStress,false);
+        QCPGraph *stressLine = this->create_QCPLine(ui->widget_plot,"StessScore",QColor(255,0,0),xDateTick,yStress,false);
         stressLine->setBrush(QBrush(QColor(255,0,0,50)));
 
-        QCPGraph *ltsLine = this->get_QCPLine("LTS",QColor(0,255,0),xDateTick,yLTS,false);
+        //QCPGraph *ltsLine = this->get_QCPLine("LTS",QColor(0,255,0),xDateTick,yLTS,false);
+        QCPGraph *ltsLine = this->create_QCPLine(ui->widget_plot,"LTS",QColor(0,255,0),xDateTick,yLTS,false);
 
         QCPBars *workBars = this->get_QCPBar(QColor(225,225,100),3000,dayCount,false);
         workBars->setName("Workouts");

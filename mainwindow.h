@@ -74,8 +74,7 @@ public:
         QString delimiter = "#";
         QColor rectColor,gradColor;
         gradColor.setHsv(0,0,180,200);
-        int textMargin = 2;
-        int celloffset = 21;
+        int textMargin = option.rect.width()/50;
         phase_font.setBold(true);
         phase_font.setPixelSize(settings::get_fontValue("fontBig"));
         content_font.setBold(false);
@@ -94,11 +93,10 @@ public:
         rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
         rectGradient.setSpread(QGradient::RepeatSpread);
 
-        QPainterPath rectHead;
-
-        QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),20);
-        rectHead.addRoundedRect(rect_head,3,3);
-        QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,20);
+        QPainterPath headPath;
+        QRect rectHead(option.rect.x(),option.rect.y(), option.rect.width(),option.rect.height()*0.175);
+        headPath.addRoundedRect(rectHead,3,3);
+        QRect rectHeadText(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,rectHead.height());
 
 
         if(option.state & QStyle::State_Selected)
@@ -124,10 +122,10 @@ public:
         painter->setFont(date_font);
         painter->setBrush(rectGradient);
         painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-        painter->drawPath(rectHead);
+        painter->drawPath(headPath);
 
         painter->setPen(Qt::white);
-        painter->drawText(rect_head_text,Qt::AlignLeft | Qt::AlignVCenter, dayDate);
+        painter->drawText(rectHeadText,Qt::AlignLeft | Qt::AlignVCenter, dayDate);
 
         temp_value = index.data(Qt::DisplayRole).toString();
         workoutValues = temp_value.split(delimiter,QString::SkipEmptyParts);
@@ -142,8 +140,8 @@ public:
 
             if(!workoutValues.isEmpty())
             {
-                int height = static_cast<int>(floor((option.rect.height()- celloffset) / workoutValues.count()));
-                int yPos = (option.rect.y() + celloffset);
+                int height = static_cast<int>(floor((option.rect.height()*0.825) / workoutValues.count()));
+                int yPos = rectHead.bottom();
 
                 for(int i = 0; i < workoutValues.count(); ++i)
                 {
@@ -179,7 +177,7 @@ public:
             else
             {
                 QPainterPath rectDay;
-                QRect rectEmpty(option.rect.x(),option.rect.y()+celloffset,option.rect.width(),option.rect.height()-celloffset-1);
+                QRect rectEmpty(option.rect.x(),rectHead.bottom(),option.rect.width(),option.rect.height()*0.825);
                 rectDay.addRoundedRect(rectEmpty,4,4);
 
                 painter->setPen(rectPen);
@@ -190,14 +188,13 @@ public:
         }
         else
         {
-            QPainterPath rectPhase;
+            QPainterPath phasePath;
             temp_value = index.data(Qt::DisplayRole).toString();
             workoutValues = index.data(Qt::DisplayRole).toString().split(delimiter,QString::SkipEmptyParts);
             int valueCount = workoutValues.count();
 
             if(!temp_value.isEmpty())
             {
-                int height = static_cast<int>(floor((option.rect.height()- celloffset) / 3));
                 for(int pos = 0; pos < phaseList.count();++pos)
                 {
                     if(temp_value.contains(phaseList.at(pos)))
@@ -211,11 +208,11 @@ public:
                     }
                 }
 
-                QRect rect_phase(option.rect.x(),option.rect.y()+celloffset, option.rect.width(),option.rect.height()-celloffset-1);
-                rectPhase.addRoundedRect(rect_phase,4,4);
-                QRect rect_phase_name(option.rect.x()+textMargin,option.rect.y()+celloffset, option.rect.width()-textMargin,height-1);
-                QRect rect_phase_content(option.rect.x()+textMargin,option.rect.y()+height+celloffset, option.rect.width()-textMargin,height-1);
-                QRect rect_phase_goal(option.rect.x()+textMargin,option.rect.y()+(height*2)+celloffset, option.rect.width()-textMargin,height-1);
+                QRect rectPhase(option.rect.x(),rectHead.bottom(),option.rect.width(),option.rect.height()*0.825);
+                phasePath.addRoundedRect(rectPhase,4,4);
+                QRect phaseName(option.rect.x()+textMargin,rectHead.bottom(), option.rect.width()-textMargin,rectPhase.height()*0.4);
+                QRect phaseContent(option.rect.x()+textMargin,phaseName.bottom(), option.rect.width()-textMargin,rectPhase.height()*0.3);
+                QRect phaseGoal(option.rect.x()+textMargin,phaseContent.bottom(), option.rect.width()-textMargin,rectPhase.height()*0.3);
 
                 rectColor.setAlpha(225);
                 rectGradient.setColorAt(0,rectColor);
@@ -225,26 +222,26 @@ public:
                 painter->setFont(phase_font);
                 painter->setBrush(rectGradient);
                 painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-                painter->drawPath(rectPhase);
-                painter->drawText(rect_phase_name,Qt::AlignVCenter,workoutValues.at(1));
+                painter->drawPath(phasePath);
+                painter->drawText(phaseName,Qt::AlignVCenter,workoutValues.at(1));
 
                 if(valueCount == 2)
                 {
                     painter->setFont(content_font);
-                    painter->drawText(rect_phase_content,Qt::AlignVCenter,"");
-                    painter->drawText(rect_phase_goal,Qt::AlignVCenter,"");
+                    painter->drawText(phaseContent,Qt::AlignVCenter,"");
+                    painter->drawText(phaseGoal,Qt::AlignVCenter,"");
                 }
                 else if(valueCount == 3)
                 {
                     painter->setFont(content_font);
-                    painter->drawText(rect_phase_content,Qt::AlignVCenter,workoutValues.at(2));
-                    painter->drawText(rect_phase_goal,Qt::AlignVCenter,"");
+                    painter->drawText(phaseContent,Qt::AlignVCenter,workoutValues.at(2));
+                    painter->drawText(phaseGoal,Qt::AlignVCenter,"");
                 }
                 else if(valueCount == 4)
                 {
                     painter->setFont(content_font);
-                    painter->drawText(rect_phase_content,Qt::AlignVCenter,workoutValues.at(2));
-                    painter->drawText(rect_phase_goal,Qt::AlignVCenter | Qt::TextWordWrap,workoutValues.at(3));
+                    painter->drawText(phaseContent,Qt::AlignVCenter,workoutValues.at(2));
+                    painter->drawText(phaseGoal,Qt::AlignVCenter | Qt::TextWordWrap,workoutValues.at(3));
                 }
              }
         }
@@ -1005,8 +1002,13 @@ private:
 
     QDate selectedDate;
     QString weeknumber,buttonStyle,dateformat,timeshort,timelong;
+    QIcon stressPanelUp,stressPanelDown;
     int userSetup,saisonWeek,saisonWeeks,weekDays,weekCounter,weekRange,sportUse,selectedInt;
     bool isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
+
+    double stressMax;
+    QVector<double> xDate,yLTS,ySTS,yTSB,yStress,yDura;
+    QVector<double> tsbMinMax;
 
     void set_tableWidgetItems(QTableWidget*,int,int,QAbstractItemDelegate*);
     void set_tableHeader(QTableWidget*,QStringList*,bool);
@@ -1017,6 +1019,8 @@ private:
     QString set_summeryString(int,QMap<QString,QVector<double>>*,QString);
     void set_saisonValues(QStringList*,QString,int);
     void workoutSchedule(QDate);
+    void set_pmcData(QDate);
+    void set_pmcPlot();
     void saisonSchedule(QString);
     bool check_Date(QDate);
     QString get_weekRange();
@@ -1088,6 +1092,7 @@ private slots:
     void set_phaseFilter(int);
     void refresh_schedule();
     void refresh_saison();
+    void selectionChanged_stressPlot();
 
     //Editor
     void on_horizontalSlider_factor_valueChanged(int value);
@@ -1146,6 +1151,7 @@ private slots:
     void on_toolButton_split_clicked();
     void on_toolButton_merge_clicked();
     void on_actionExpand_Activity_Tree_triggered();
+    void on_pushButton_stressPlot_clicked(bool checked);
 };
 
 #endif // MAINWINDOW_H

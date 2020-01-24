@@ -58,6 +58,12 @@
         <file>icons/Strength.png</file>
         <file>icons/Triathlon.png</file>
         <file>icons/SportIcon.png</file>
+        <file>icons/Timewatch.png</file>
+        <file>icons/Battery.png</file>
+        <file>icons/Arrow_down.png</file>
+        <file>icons/Arrow_up.png</file>
+        <file>icons/Kilometer.png</file>
+        <file>icons/Percent.png</file>
     </qresource>
     <qresource prefix="/style">
         <file>qss/style.qss</file>

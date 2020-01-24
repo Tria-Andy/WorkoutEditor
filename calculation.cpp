@@ -133,7 +133,7 @@ int calculation::get_timesec(QString time) const
     return sec;
 }
 
-QString calculation::get_workout_pace(double dist, double duration,QString sport,bool full_label) const
+QString calculation::get_workout_pace(double dist, double duration,bool full_label) const
 {
     QStringList speedLabel;
     speedLabel << " min/km - " << " km/h" << " min/km" << "no Speed";
@@ -483,6 +483,50 @@ QString calculation::calc_weekID(QDate workoutDate)
 
     return weeknumber;
 }
+
+QCPGraph *calculation::create_QCPLine(QCustomPlot *plot,QString name,QColor gColor,QVector<double> &xdata, QVector<double> &ydata, bool secondAxis)
+{
+    QCPGraph *graph = plot->addGraph();
+    if(secondAxis)
+    {
+        graph->setValueAxis(plot->yAxis2);
+    }
+    graph->setName(name);
+    graph->setLineStyle(QCPGraph::lsLine);
+    graph->setData(xdata,ydata);
+    graph->setAntialiased(true);
+    graph->setPen(QPen(gColor,1));
+
+    return graph;
+}
+
+void calculation::create_itemTracer(QCustomPlot *plot,QString layer,QCPGraph *graphline, QVector<double> &xdata,QColor tColor,int pos)
+{
+    QCPItemTracer *tracer = new QCPItemTracer(plot);
+    tracer->setGraph(graphline);
+    tracer->setGraphKey(xdata[pos]);
+    tracer->setStyle(QCPItemTracer::tsCircle);
+    tracer->setBrush(QBrush(tColor));
+    tracer->setLayer(layer);
+}
+
+void calculation::create_itemLineText(QCustomPlot *plot,QString layer,QFont lineFont, QVector<double> &xdata,QVector<double> &ydata,int pos,bool secondAxis)
+{
+    QCPItemText *itemText = new QCPItemText(plot);
+    if(secondAxis)
+    {
+        itemText->position->setAxes(plot->xAxis,plot->yAxis2);
+    }
+    itemText->position->setType(QCPItemPosition::ptPlotCoords);
+    itemText->setPositionAlignment(Qt::AlignHCenter|Qt::AlignBottom);
+    itemText->position->setCoords(xdata[pos],ydata[pos]+1);
+    itemText->setText(QString::number(ydata[pos]));
+    itemText->setTextAlignment(Qt::AlignCenter);
+    itemText->setFont(lineFont);
+    itemText->setPadding(QMargins(1, 1, 1, 1));
+    itemText->setLayer(layer);
+}
+
 
 double calculation::calc_swim_xpower(double distance,double pace,double time,double athleteWeight) const
 {

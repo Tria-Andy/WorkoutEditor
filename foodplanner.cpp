@@ -93,6 +93,43 @@ void foodplanner::set_headerLabel(QStandardItemModel *model, QStringList *list, 
     }
 }
 
+void foodplanner::set_foodHistoryValues()
+{
+    QStandardItem *rootItem = historyModel->invisibleRootItem();
+    QStandardItem *weekItem;
+    QPair<int,int> foodKey;
+    QMap<QDate,QList<QVariant>> foodHistMap;
+    QList<QVariant> foodValues;
+    QDate histDate;
+    int baseCal = 0,sportCal = 0,foodCal = 0;
+
+    for(int week = 0; week < historyModel->rowCount(); ++week)
+    {
+        weekItem = rootItem->child(week,0);
+
+        foodKey.first = rootItem->child(week,0)->data(Qt::DisplayRole).toInt();
+        foodKey.second = rootItem->child(week,1)->data(Qt::DisplayRole).toInt();
+        histDate = QDate::fromString(rootItem->child(week,2)->data(Qt::DisplayRole).toString(),dateFormat);
+        baseCal = rootItem->child(week,4)->data(Qt::DisplayRole).toInt();
+
+        for(int day = 0; day < weekItem->rowCount(); ++day)
+        {
+            sportCal = weekItem->child(day,1)->data(Qt::DisplayRole).toInt();
+            foodCal = weekItem->child(day,2)->data(Qt::DisplayRole).toInt();
+            foodValues.append(rootItem->child(week,3)->data(Qt::DisplayRole));
+            foodValues.append(rootItem->child(week,5)->data(Qt::DisplayRole));
+            foodValues.append(foodCal);
+            foodValues.append(sportCal);
+            foodValues.append(baseCal + sportCal);
+            foodValues.append(foodCal - (baseCal + sportCal));
+            foodHistMap.insert(histDate.addDays(day),foodValues);
+            foodValues.clear();
+        }
+        foodHistoryMap.insert(foodKey,foodHistMap);
+        foodHistMap.clear();
+    }
+}
+
 void foodplanner::set_mealsMap()
 {
     QStandardItem *rootitem = mealModel->invisibleRootItem();
@@ -242,11 +279,17 @@ void foodplanner::set_foodPlanData(QStandardItem *weekItem)
 
 void foodplanner::update_foodHistory(QDate day)
 {    
-    QStandardItem *weekItem = historyModel->item(historyModel->rowCount()-1,0);
-    int row = day.dayOfWeek()-1;
-    weekItem->child(row,0)->setData(foodHistTags->at(1),Qt::AccessibleTextRole);
-    weekItem->child(row,1)->setData(QString::number(daySumMap.value(day).at(2)),Qt::DisplayRole);
-    weekItem->child(row,2)->setData(QString::number(daySumMap.value(day).at(0)),Qt::DisplayRole);
+    QPair<int,int> foodHistKey(day.weekNumber(),day.year());
+    QMap<QDate,QList<QVariant>> foodHistMap = foodHistoryMap.value(foodHistKey);
+    QList<QVariant> foodValues = foodHistMap.value(day);
+
+    foodValues[2] = daySumMap.value(day).at(0);
+    foodValues[3] = daySumMap.value(day).at(2);
+    foodValues[4] = daySumMap.value(day).at(3);
+    foodValues[5] = daySumMap.value(day).at(4);
+
+    foodHistMap.insert(day,foodValues);
+    foodHistoryMap.insert(foodHistKey,foodHistMap);
 }
 
 void foodplanner::set_foodPlanMap(int update)
@@ -526,6 +569,7 @@ void foodplanner::check_foodPlan()
         }
     }
 
+    this->set_foodHistoryValues();
     this->set_foodPlanMap(INIT);
 }
 

@@ -45,76 +45,79 @@ public:
 
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
-         painter->save();
-         int textMargin = 2;
-         QFont headFont,workFont;
-         QPainterPath rectRow;
-         int celloffset = 27;
-         QString sport = index.data(Qt::AccessibleTextRole).toString();
-         QStringList workValues = index.data(Qt::DisplayRole).toString().split("#");
-         QString sportIcon = settings::sportIcon.value(sport);
+        painter->save();
+        int textMargin = option.rect.width()/50;
+        QFont headFont,workFont;
+        QString sport = index.data(Qt::AccessibleTextRole).toString();
+        QStringList workValues = index.data(Qt::DisplayRole).toString().split("#");
+        QString sportIcon = settings::sportIcon.value(sport);
+        QString timeIcon = ":/images/icons/Timewatch.png";
+        QString energyIcon = ":/images/icons/Battery.png";
 
-         headFont.setBold(true);
-         headFont.setPixelSize(settings::get_fontValue("fontBig"));
-         workFont.setBold(false);
-         workFont.setPixelSize(settings::get_fontValue("fontMedium"));
+        headFont.setBold(true);
+        headFont.setPixelSize(settings::get_fontValue("fontBig"));
+        workFont.setBold(false);
+        workFont.setPixelSize(settings::get_fontValue("fontMedium"));
 
-         QRect rectEntry(option.rect.x(),option.rect.y(), option.rect.width(),option.rect.height());
-         rectRow.addRoundedRect(rectEntry,2,2);
-         QRect rectText(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,option.rect.height());
+        QLinearGradient rectGradient;
+        rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
+        rectGradient.setSpread(QGradient::RepeatSpread);
+        QColor gradColor;
+        gradColor.setHsv(0,0,180,200);
+        QColor rectColor = settings::get_itemColor(sport).toHsv();
 
-         QLinearGradient rectGradient;
-         rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
-         rectGradient.setSpread(QGradient::RepeatSpread);
-         QColor gradColor;
-         gradColor.setHsv(0,0,180,200);
-         QColor rectColor = settings::get_itemColor(sport).toHsv();
+        rectColor.setAlpha(225);
+        rectGradient.setColorAt(0,rectColor);
+        rectGradient.setColorAt(1,gradColor);
 
-         rectColor.setAlpha(225);
-         rectGradient.setColorAt(0,rectColor);
-         rectGradient.setColorAt(1,gradColor);
+        QPainterPath workPath;
+        QRect workHead(option.rect.x(),option.rect.y(), option.rect.width(),option.rect.height()*0.25);
+        workPath.addRoundedRect(workHead,5,5);
 
-         QPainterPath rectHead;
-         QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),26);
-         rectHead.addRoundedRect(rect_head,4,4);
-         QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,26);
-         QRect rectIcon(option.rect.x()+(option.rect.width()-30),option.rect.y(), 25,25);
+        QRect workIcon(option.rect.x(),option.rect.y(), workHead.height(),workHead.height());
+        QRect workTitle(workIcon.right()+textMargin,option.rect.y(),(option.rect.width()-workIcon.width()-textMargin)*0.75,workHead.height());
+        QRect workTime(workTitle.right(),option.rect.y(),(option.rect.width()-workIcon.width()-textMargin)*0.25,workHead.height());
 
-         painter->setPen(Qt::black);
+        painter->setBrush(rectGradient);
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+        painter->setPen(Qt::black);
+        painter->setFont(headFont);
+        painter->drawPath(workPath);
+        painter->drawPixmap(workIcon,sportIcon);
+        painter->drawText(workTitle,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(0));
+        painter->drawText(workTime,Qt::AlignRight | Qt::AlignVCenter,workValues.at(1));
+
+        QPainterPath bodyPath;
+        QRect workInfo(option.rect.x(),workHead.bottom(),option.rect.width(),option.rect.height()*0.725);
+        bodyPath.addRoundedRect(workInfo,5,5);
+
+        rectGradient.setColorAt(0,rectColor);
+        rectGradient.setColorAt(1,gradColor);
+
+        if(!workValues.isEmpty())
+        {
+         QString workMeta;
+         int rectHeight = workInfo.height()*0.25;
+         workMeta = workValues.at(2)+ "\n"+workValues.at(3);
+
+         QRect rectMeta(option.rect.x()+textMargin,workHead.bottom(),option.rect.width(),workInfo.height()*0.5);
+         QRect rectTime(option.rect.x(),rectMeta.bottom(),rectHeight,rectHeight);
+         QRect rectContent(rectTime.right(),rectMeta.bottom(),option.rect.width()-rectTime.width(),rectHeight);
+         QRect rectEnergy(option.rect.x(),rectContent.bottom(),rectHeight,rectHeight);
+         QRect rectWork(rectEnergy.right(),rectContent.bottom(),option.rect.width()-rectEnergy.width(),rectHeight);
+
          painter->setBrush(rectGradient);
          painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-         painter->drawPath(rectHead);
-         painter->setFont(headFont);
-         painter->drawText(rect_head_text,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(0));
-         painter->drawPixmap(rectIcon,sportIcon);
-
-         QPainterPath rectWork;
-         QRect rectWorkout(option.rect.x(),option.rect.y()+celloffset,option.rect.width(),option.rect.height()-celloffset-1);
-         rectWork.addRoundedRect(rectWorkout,5,5);
-         QRect rectLabel(option.rect.x()+textMargin,option.rect.y()+celloffset+textMargin,(option.rect.width()/2)-textMargin,option.rect.height()-celloffset-textMargin-1);
-
-         rectGradient.setColorAt(0,rectColor);
-         rectGradient.setColorAt(1,gradColor);
-
-         if(!workValues.isEmpty())
-         {
-             QString partValue;
-
-             for(int i = 1; i < workValues.count(); ++i)
-             {
-                partValue = partValue + workValues.at(i) + "\n";
-             }
-             partValue.chop(1);
-
-             QRect rectValues(option.rect.x()+textMargin,option.rect.y()+celloffset+textMargin,option.rect.width()-textMargin,option.rect.height()-celloffset-textMargin-2);
-             painter->setBrush(rectGradient);
-             painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-             painter->setPen(Qt::black);
-             painter->drawPath(rectWork);
-             painter->setFont(workFont);
-             painter->drawText(rectValues,Qt::AlignLeft,partValue);
-         }
-         painter->restore();
+         painter->setPen(Qt::black);
+         painter->setFont(workFont);
+         painter->drawPath(bodyPath);
+         painter->drawText(rectMeta,Qt::AlignLeft | Qt::AlignVCenter,workMeta);
+         painter->drawPixmap(rectTime,timeIcon);
+         painter->drawText(rectContent,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(4));
+         painter->drawPixmap(rectEnergy,energyIcon);
+         painter->drawText(rectWork,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(5));
+        }
+        painter->restore();
     }
 };
 
@@ -144,10 +147,10 @@ private slots:
     void on_toolButton_title_clicked();
     void on_toolButton_comment_clicked();
     void on_toolButton_addWorkout_clicked();
-
     void on_toolButton_clearMask_clicked();
-
     void on_comboBox_workSport_currentIndexChanged(const QString &arg1);
+    void on_timeEdit_workDuration_userTimeChanged(const QTime &time);
+    void on_doubleSpinBox_workDistance_valueChanged(double arg1);
 
 private:
     Ui::day_popup *ui;
@@ -171,8 +174,6 @@ private:
     void set_exportContent();
     void set_result(int);
     void reset_controls();
-
-
 };
 
 #endif // DAY_POPUP_H

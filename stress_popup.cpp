@@ -8,6 +8,8 @@ stress_popup::stress_popup(QWidget *parent,schedule *p_sched,const QDate startDa
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    this->setFixedSize(settings::screenSize.first/2,settings::screenSize.second/2.25);
+
     isLoad = false;
     workSched = p_sched;
 
@@ -86,6 +88,8 @@ void stress_popup::set_graph()
     ui->widget_stressPlot->addLayer("StressScore",ui->widget_stressPlot->layer(4),QCustomPlot::limAbove);
     ui->widget_stressPlot->xAxis->grid()->setLayer("GRID");
     ui->widget_stressPlot->yAxis->grid()->setLayer("GRID");
+
+
     this->set_stressValues(ui->dateEdit_start->date(),ui->dateEdit_end->date());
 }
 

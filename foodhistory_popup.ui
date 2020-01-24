@@ -102,17 +102,19 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="treeView_foodhistory">
+    <widget class="QTreeWidget" name="treeWidget_foodhistory">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>3</verstretch>
       </sizepolicy>
      </property>
+     <column>
+      <property name="text">
+       <string notr="true">1</string>
+      </property>
+     </column>
     </widget>
-   </item>
-   <item>
-    <widget class="QColumnView" name="columnView_foodHistory"/>
    </item>
    <item>
     <widget class="QFrame" name="frame_control">

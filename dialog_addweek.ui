@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>730</width>
-    <height>330</height>
+    <width>734</width>
+    <height>415</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -431,7 +431,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QTableView" name="tableView_sportValues">
+       <widget class="QTableWidget" name="tableWidget_sportValues">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -444,6 +444,88 @@
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QFrame" name="frame">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QFormLayout" name="formLayout">
+         <item row="1" column="1">
+          <widget class="QSpinBox" name="spinBox_workouts"/>
+         </item>
+         <item row="6" column="1">
+          <widget class="QLineEdit" name="lineEdit_pace"/>
+         </item>
+         <item row="2" column="1">
+          <widget class="QTimeEdit" name="timeEdit_duration"/>
+         </item>
+         <item row="3" column="1">
+          <widget class="QDoubleSpinBox" name="doubleSpinBox_percent"/>
+         </item>
+         <item row="4" column="1">
+          <widget class="QDoubleSpinBox" name="doubleSpinBox_distance"/>
+         </item>
+         <item row="5" column="1">
+          <widget class="QSpinBox" name="spinBox_stressScore"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Workouts:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Duration:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Percent (%):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Distance:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>StressScore:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Pace:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="lineEdit_sportName"/>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_9">
+           <property name="text">
+            <string>Sport:</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>

@@ -26,6 +26,8 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched,stan
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    this->setFixedSize(settings::screenSize.first*0.35,settings::screenSize.second*0.425);
+
     popupDate = w_date;
     stdWorkouts = p_stdWorkout;
     workSchedule = p_sched;
@@ -83,11 +85,12 @@ void day_popup::init_dayWorkouts(QDate workDate)
         this->set_currentSport(it.value().at(1));
 
         QTableWidgetItem *item = new QTableWidgetItem();
-        itemValue = set_sectoTime(it.value().at(0).toInt()).toString()+conString+it.value().at(1)+conString+it.value().at(2)+delimiter+
+        itemValue = it.value().at(1)+conString+it.value().at(2)+delimiter+
+                    set_sectoTime(it.value().at(0).toInt()).toString()+delimiter+
                     it.value().at(3)+delimiter+
                     it.value().at(4)+delimiter+
-                    set_time(it.value().at(5).toInt())+delimiter+
-                    it.value().at(6)+" Km"+conString+it.value().at(7)+" TSS"+conString+it.value().at(8)+" KJ";
+                    set_time(it.value().at(5).toInt())+conString+it.value().at(6)+" Km"+delimiter+
+                    it.value().at(7)+" TSS"+conString+it.value().at(8)+" KJ";
         item->setData(Qt::DisplayRole,itemValue);
         item->setData(Qt::AccessibleTextRole,it.value().at(1));
         ui->tableWidget_day->setItem(it.key(),0,item);
@@ -287,6 +290,16 @@ void day_popup::on_tableWidget_day_itemClicked(QTableWidgetItem *item)
     this->set_controls(true);
 }
 
+void day_popup::on_timeEdit_workDuration_userTimeChanged(const QTime &time)
+{
+    ui->lineEdit_workPace->setText(this->get_workout_pace(ui->doubleSpinBox_workDistance->value(),get_secFromTime(time),true));
+}
+
+void day_popup::on_doubleSpinBox_workDistance_valueChanged(double dist)
+{
+    ui->lineEdit_workPace->setText(this->get_workout_pace(dist,get_secFromTime(ui->timeEdit_workDuration->time()),true));
+}
+
 void day_popup::copy_workoutValue(QString value)
 {
     QClipboard *clipboard = QApplication::clipboard();
@@ -322,6 +335,7 @@ void day_popup::set_result(int result)
             {
                 valueList.insert(valueList.count(), workoutMap.value(ui->spinBox_selWorkout->value()));
                 workoutMap.remove(ui->spinBox_selWorkout->value());
+                workSchedule->workoutUpdates.insert(popupDate,this->reorder_workouts(&workoutMap));
                 this->reset_controls();
             }
             else
@@ -366,7 +380,6 @@ void day_popup::set_result(int result)
     ui->lineEdit_selected->setText("-");
     this->init_dayWorkouts(popupDate);
     ui->toolButton_dayEdit->setChecked(false);
-
 }
 
 void day_popup::reset_controls()
@@ -471,7 +484,7 @@ void day_popup::on_comboBox_stdworkout_currentIndexChanged(int index)
         ui->doubleSpinBox_workDistance->setValue(stdWorkoutData.at(3).toDouble());
         ui->spinBox_workStress->setValue(stdWorkoutData.at(4).toInt());
         ui->spinBox_workKJoule->setValue(stdWorkoutData.at(5).toInt());
-        ui->lineEdit_workPace->setText(this->get_workout_pace(stdWorkoutData.at(3).toDouble(),stdWorkoutData.at(2).toInt(),currentSport,true));
+        ui->lineEdit_workPace->setText(this->get_workout_pace(stdWorkoutData.at(3).toDouble(),stdWorkoutData.at(2).toInt(),true));
         ui->toolButton_map->setProperty("Image",stdWorkoutData.at(7));
         ui->lineEdit_stdWorkID->setText(workoutID);
     }

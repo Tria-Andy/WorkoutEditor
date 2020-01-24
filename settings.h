@@ -70,7 +70,7 @@ public:
     static QHash<QString,QString> sportIcon;
     static int loadSettings();
     static QString AltLabel,SwimLabel,BikeLabel,RunLabel,TriaLabel,StrengthLabel,OtherLabel;
-
+    static QPair<int,int> screenSize;
     //QMap/QHash Getter
     static QHash<QString,QColor> get_colorMap() {return colorMap;}
     static QHash<QString,QVector<double>> doubleVector;

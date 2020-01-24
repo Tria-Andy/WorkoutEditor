@@ -10,8 +10,7 @@ foodhistory_popup::foodhistory_popup(QWidget *parent,foodplanner *pFood) :
 
     foodplan = pFood;
     weekCount = foodplan->historyModel->rowCount();
-    ui->treeView_foodhistory->setModel(foodplan->historyModel);
-    ui->columnView_foodHistory->setModel(foodplan->historyModel);
+
     dialogResult = QDialog::Rejected;
     athleteWeight = this->athleteValues->value("weight");
 
@@ -28,6 +27,8 @@ foodhistory_popup::foodhistory_popup(QWidget *parent,foodplanner *pFood) :
     subLayout->setMargins(QMargins(10,1,10,1));
     subLayout->addElement(0,0,ui->widget_plot->legend);
 
+    foodHistory = foodplan->get_foodHistoryMap();
+
     if(weekCount > 5)
     {
         ui->comboBox_weekCount->setCurrentIndex(4);
@@ -36,6 +37,7 @@ foodhistory_popup::foodhistory_popup(QWidget *parent,foodplanner *pFood) :
     {
         ui->comboBox_weekCount->setCurrentIndex(ui->comboBox_weekCount->count()-1);
     }
+    this->set_foodHistoryTree();
 }
 
 foodhistory_popup::~foodhistory_popup()
@@ -47,6 +49,33 @@ void foodhistory_popup::on_toolButton_close_clicked()
 {
     done(dialogResult);
 }
+
+void foodhistory_popup::set_foodHistoryTree()
+{
+    QTreeWidgetItem *rootItem = ui->treeWidget_foodhistory->invisibleRootItem();
+    QTreeWidgetItem *weekItem, *dayItem;
+    ui->treeWidget_foodhistory->setColumnCount(6);
+
+    for(QMap<QPair<int,int>,QMap<QDate,QList<QVariant>>>::const_iterator it = foodHistory->cbegin(); it != foodHistory->cend(); ++it)
+    {
+        weekItem = new QTreeWidgetItem(rootItem);
+        weekItem->setData(0,Qt::DisplayRole,it.key().first);
+        weekItem->setData(1,Qt::DisplayRole,it.key().second);
+
+        for(QMap<QDate,QList<QVariant>>::const_iterator day = it.value().cbegin(); day != it.value().cend(); ++day)
+        {
+            dayItem = new QTreeWidgetItem();
+            dayItem->setData(0,Qt::DisplayRole,day.key());
+            dayItem->setData(1,Qt::DisplayRole,day.value().at(0));
+            dayItem->setData(2,Qt::DisplayRole,day.value().at(1));
+            dayItem->setData(3,Qt::DisplayRole,day.value().at(2));
+            dayItem->setData(4,Qt::DisplayRole,day.value().at(3));
+            dayItem->setData(5,Qt::DisplayRole,day.value().at(4));
+            weekItem->addChild(dayItem);
+        }
+    }
+}
+
 
 void foodhistory_popup::set_plotValues(int currWeek,int count,bool week)
 {
@@ -204,28 +233,8 @@ void foodhistory_popup::on_comboBox_weekCount_currentIndexChanged(int index)
     this->set_plotValues(weekCount,index+1,false);
 }
 
-void foodhistory_popup::on_treeView_foodhistory_clicked(const QModelIndex &index)
-{
-    if(index.column() == 0)
-    {
-        ui->treeView_foodhistory->collapseAll();
-
-        if(foodplan->historyModel->item(index.row(),0)->hasChildren())
-        {
-            this->set_plotValues(index.row(),foodplan->historyModel->item(index.row(),0)->rowCount(),true);
-            ui->comboBox_weekCount->setEnabled(false);
-            ui->treeView_foodhistory->expand(index);
-        }
-    }
-    else
-    {
-        dialogResult = QDialog::Accepted;
-    }
-}
-
 void foodhistory_popup::on_toolButton_reset_clicked()
 {
     this->set_plotValues(weekCount,ui->comboBox_weekCount->currentIndex()+1,false);
-    ui->treeView_foodhistory->collapseAll();
     ui->comboBox_weekCount->setEnabled(true);
 }
