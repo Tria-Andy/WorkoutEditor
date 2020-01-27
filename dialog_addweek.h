@@ -47,11 +47,6 @@ public:
         QFont headFont,workFont;
         QString sport = index.data(Qt::AccessibleTextRole).toString();
         QStringList sportValues = index.data(Qt::DisplayRole).toString().split("#");
-        QString sportIcon = settings::sportIcon.value(sport);
-        QString timeIcon = ":/images/icons/Timewatch.png";
-        QString energyIcon = ":/images/icons/Battery.png";
-        QString distIcon = ":/images/icons/Kilometer.png";
-        QString percentIcon = ":/images/icons/Percent.png";
 
         headFont.setBold(true);
         headFont.setPixelSize(settings::get_fontValue("fontBig"));
@@ -74,8 +69,8 @@ public:
         sportPath.addRoundedRect(workHead,5,5);
         int headerHeight = workHead.height();
 
-        QRect sportImage(option.rect.x(),option.rect.y(), headerHeight-iconMargin,headerHeight-iconMargin);
-        QRect sportTitle(sportImage.right()+textMargin,option.rect.y(),(option.rect.width()-headerHeight-textMargin)*0.5,workHead.height());
+        QRect sportIcon(option.rect.x(),option.rect.y(), headerHeight-iconMargin,headerHeight-iconMargin);
+        QRect sportTitle(sportIcon.right()+textMargin,option.rect.y(),(option.rect.width()-headerHeight-textMargin)*0.5,workHead.height());
         QRect sportCount(sportTitle.right(),option.rect.y(),(option.rect.width()-headerHeight-textMargin)*0.5,workHead.height());
 
         painter->setBrush(rectGradient);
@@ -83,7 +78,7 @@ public:
         painter->setPen(Qt::black);
         painter->setFont(headFont);
         painter->drawPath(sportPath);
-        painter->drawPixmap(sportImage,sportIcon);
+        painter->drawPixmap(sportIcon,settings::sportIcon.value(sport));
         painter->drawText(sportTitle,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(0));
         painter->drawText(sportCount,Qt::AlignRight | Qt::AlignVCenter,sportValues.at(1));
 
@@ -99,17 +94,17 @@ public:
          int rectHeight = sportMeta.height()*0.5;
          int rectwidth = (sportMeta.width()-rectHeight)*0.5;
 
-         QRect rectTime(option.rect.x(),workHead.bottom(),rectHeight-iconMargin,rectHeight-iconMargin);
-         QRect rectAmount(rectTime.right()+textMargin,workHead.bottom(),rectwidth,rectHeight);
+         QRect duraIcon(option.rect.x(),workHead.bottom()+iconMargin,rectHeight-iconMargin,rectHeight-iconMargin);
+         QRect duraValue(duraIcon.right()+textMargin,workHead.bottom()+iconMargin,rectwidth,rectHeight);
 
-         QRect rectPercentIcon(rectAmount.right(),workHead.bottom(),rectHeight-iconMargin,rectHeight-iconMargin);
-         QRect rectPercent(rectPercentIcon.right()+textMargin,workHead.bottom(),rectwidth,rectHeight);
+         QRect precentIcon(duraValue.right(),workHead.bottom()+iconMargin,rectHeight-iconMargin,rectHeight-iconMargin);
+         QRect percentValue(precentIcon.right()+textMargin,workHead.bottom()+iconMargin,rectwidth,rectHeight);
 
-         QRect rectDistIcon(option.rect.x(),rectAmount.bottom(),rectHeight-iconMargin,rectHeight-iconMargin);
-         QRect rectDist(rectDistIcon.right()+textMargin,rectAmount.bottom(),rectwidth,rectHeight);
+         QRect distIcon(option.rect.x(),duraValue.bottom(),rectHeight-iconMargin,rectHeight-iconMargin);
+         QRect distValue(distIcon.right()+textMargin,duraValue.bottom(),rectwidth,rectHeight);
 
-         QRect rectEngeryIcon(rectDist.right(),rectAmount.bottom(),rectHeight-iconMargin,rectHeight-iconMargin);
-         QRect rectEnergy(rectEngeryIcon.right()+textMargin,rectAmount.bottom(),rectwidth,rectHeight);
+         QRect stressIcon(distValue.right(),duraValue.bottom(),rectHeight-iconMargin,rectHeight-iconMargin);
+         QRect stressValue(stressIcon.right()+textMargin,duraValue.bottom(),rectwidth,rectHeight);
 
          painter->setBrush(rectGradient);
          painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
@@ -117,17 +112,17 @@ public:
          painter->setFont(workFont);
          painter->drawPath(bodyPath);
 
-         painter->drawPixmap(rectTime,timeIcon);
-         painter->drawText(rectAmount,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(2));
+         painter->drawPixmap(duraIcon,settings::sportIcon.value("Duration"));
+         painter->drawText(duraValue,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(2));
 
-         painter->drawPixmap(rectDistIcon,distIcon);
-         painter->drawText(rectDist,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(3));
+         painter->drawPixmap(precentIcon,settings::sportIcon.value("Percent"));
+         painter->drawText(percentValue,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(3));
 
-         painter->drawPixmap(rectPercentIcon,percentIcon);
-         painter->drawText(rectPercent,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(4));
+         painter->drawPixmap(distIcon,settings::sportIcon.value("Distance"));
+         painter->drawText(distValue,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(4));
 
-         painter->drawPixmap(rectEngeryIcon,energyIcon);
-         painter->drawText(rectEnergy,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(5));
+         painter->drawPixmap(stressIcon,settings::sportIcon.value("TSS"));
+         painter->drawText(stressValue,Qt::AlignLeft | Qt::AlignVCenter,sportValues.at(5));
         }
         painter->restore();
     }
@@ -152,6 +147,10 @@ private slots:
     void on_toolButton_close_clicked();
     void on_toolButton_copy_clicked();
     void on_toolButton_paste_clicked();
+
+    void on_tableWidget_sportValues_itemClicked(QTableWidgetItem *item);
+
+    void on_toolButton_editSport_clicked();
 
 private:
     Ui::Dialog_addweek *ui;

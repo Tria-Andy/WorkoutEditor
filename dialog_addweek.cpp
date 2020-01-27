@@ -97,6 +97,11 @@ void Dialog_addweek::fill_values(QString selWeekID)
                          QString::number(weekComp.at(4));
             item->setData(Qt::DisplayRole,itemString);
             item->setData(Qt::AccessibleTextRole,sportuseList.at(sport));
+            item->setData(Qt::UserRole,weekComp.at(0));
+            item->setData(Qt::UserRole+1,weekComp.at(1));
+            item->setData(Qt::UserRole+2,weekComp.at(2));
+            item->setData(Qt::UserRole+3,weekComp.at(3));
+            item->setData(Qt::UserRole+4,weekComp.at(4));
             ui->tableWidget_sportValues->setItem(sport,0,item);
 
         }
@@ -106,12 +111,45 @@ void Dialog_addweek::fill_values(QString selWeekID)
      ui->dateEdit_selectDate->blockSignals(false);
 }
 
+void Dialog_addweek::on_tableWidget_sportValues_itemClicked(QTableWidgetItem *item)
+{
+    ui->lineEdit_sportName->setText(item->data(Qt::AccessibleTextRole).toString());
+    ui->spinBox_workouts->setValue(item->data(Qt::UserRole).toInt());
+    ui->timeEdit_duration->setTime(set_sectoTime(item->data(Qt::UserRole+1).toInt()));
+    ui->doubleSpinBox_percent->setValue(item->data(Qt::UserRole+2).toDouble());
+    ui->doubleSpinBox_distance->setValue(item->data(Qt::UserRole+3).toDouble());
+    ui->spinBox_stressScore->setValue(item->data(Qt::UserRole+4).toInt());
+}
+
+void Dialog_addweek::on_toolButton_editSport_clicked()
+{
+    QTableWidgetItem *item = ui->tableWidget_sportValues->currentItem();
+    QString delimiter = "#";
+
+    QString itemString = ui->lineEdit_sportName->text()+delimiter+
+                 "Workouts: " +QString::number(ui->spinBox_workouts->value())+delimiter+
+                 ui->timeEdit_duration->time().toString()+delimiter+
+                 QString::number(ui->doubleSpinBox_percent->value())+delimiter+
+                 QString::number(this->set_doubleValue(ui->doubleSpinBox_distance->value(),false))+delimiter+
+                 QString::number(ui->spinBox_stressScore->value());
+
+    item->setData(Qt::DisplayRole,itemString);
+    item->setData(Qt::AccessibleTextRole,ui->lineEdit_sportName->text());
+    item->setData(Qt::UserRole,ui->spinBox_workouts->value());
+    item->setData(Qt::UserRole+1,get_secFromTime(ui->timeEdit_duration->time()));
+    item->setData(Qt::UserRole+2,ui->doubleSpinBox_percent->value());
+    item->setData(Qt::UserRole+3,ui->doubleSpinBox_distance->value());
+    item->setData(Qt::UserRole+4,ui->spinBox_stressScore->value());
+}
+
+
 void Dialog_addweek::update_values()
 {
     ui->dateEdit_selectDate->setFocus();
 
     QVector<double> weekData(5,0);
     QString sport;
+
     for(int sport = 0; sport < sportlistCount; ++sport)
     {
         /*

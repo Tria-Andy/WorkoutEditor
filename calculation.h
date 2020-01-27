@@ -58,12 +58,10 @@ protected:
 
     //QCP Objects
     QCPGraph *create_QCPLine(QCustomPlot*, QString,QColor,QVector<double> &xdata,QVector<double> &ydata,bool);
-    QCPBars *create_QCPBar(QColor,int,int,bool);
+    QCPBars *create_QCPBar(QCustomPlot*,QColor,QVector<double> &xdata,QVector<double> &ydata,bool);
     void create_itemTracer(QCustomPlot *,QString,QCPGraph*,QVector<double> &xdata,QColor,int);
     void create_itemLineText(QCustomPlot *,QString,QFont,QVector<double> &xdata,QVector<double> &ydata,int,bool);
-    void set_itemText(QString,QFont,QVector<double> &ydata,int,bool);
-    void create_itemBarText(QFont,QColor,QVector<double> &xdata,QVector<double> &ydata,int,bool);
-
+    void create_itemBarText(QCustomPlot *plot,QString,QFont,QColor,QVector<double> &xdata,QVector<double> &ydata,int,int,bool);
 
 };
 

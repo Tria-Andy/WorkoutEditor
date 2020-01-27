@@ -373,7 +373,7 @@ void schedule::set_workoutData()
             dayItem->appendRow(itemList);
         }
     }
-
+    workoutUpdates.clear();
     isUpdated = true;
 }
 
@@ -437,7 +437,7 @@ void schedule::set_compValues(bool update,QDate workDate,QMap<int,QStringList> v
 {
     QMap<QString,QVector<double>> compSum;
     QMap<int,QStringList> compValues;
-    QVector<double> stressValue(4);
+    QVector<double> stressValue(5);
     stressValue.fill(0);
 
     if(update)
@@ -454,6 +454,7 @@ void schedule::set_compValues(bool update,QDate workDate,QMap<int,QStringList> v
         {
             stressValue[0] = stressValue.at(0) + it.value().at(4);
             stressValue[3] = stressValue.at(3) + it.value().at(1);
+            stressValue[4] = stressValue.at(4) + it.value().at(3);
         }
         stressMap.insert(workDate,stressValue);
     }
@@ -480,6 +481,7 @@ void schedule::set_compValues(bool update,QDate workDate,QMap<int,QStringList> v
                 {
                     stressValue[0] = stressValue.at(0) + it.value().at(4);
                     stressValue[3] = stressValue.at(3) + it.value().at(1);
+                    stressValue[4] = stressValue.at(4) + it.value().at(3);
                 }
                 compSum.clear();
                 stressMap.insert(compDate,stressValue);
@@ -531,7 +533,7 @@ void schedule::recalc_stressValues()
     double lte = static_cast<double>(exp(-1.0/ltsDays));
     double ste = static_cast<double>(exp(-1.0/stsDays));
     double ltsStress = 0,stsStress = 0;
-    QVector<double> stressValue(4);
+    QVector<double> stressValue(5);
 
     stsStress = stressMap.value(firstdayofweek.addDays(-stsDays-1)).at(1);
     ltsStress = stressMap.value(firstdayofweek.addDays(-ltsDays-1)).at(2);
@@ -545,6 +547,7 @@ void schedule::recalc_stressValues()
             stressValue[1] = (it.value().at(0) * (1.0 - ste)) + (stsStress * ste);
             stressValue[2] = (it.value().at(0) * (1.0 - lte)) + (ltsStress * lte);
             stressValue[3] = it.value().at(3);
+            stressValue[4] = it.value().at(4);
             stsStress = stressValue[1];
             ltsStress = stressValue[2];
             stressMap.insert(it.key(),stressValue);
@@ -554,7 +557,7 @@ void schedule::recalc_stressValues()
 
 void schedule::set_stressMap()
 {
-    QVector<double> stressValue(4,0);
+    QVector<double> stressValue(5,0);
 
     for(QMap<int,QStringList>::const_iterator it = mapList.cbegin(), end = mapList.cend(); it != end; ++it)
     {
@@ -562,6 +565,7 @@ void schedule::set_stressMap()
         stressValue[1] = it.value().at(2).toDouble();
         stressValue[2] = it.value().at(3).toDouble();
         stressValue[3] = it.value().at(4).toDouble();
+        stressValue[4] = 0;
         stressMap.insert(QDate::fromString(it.value().at(0),dateFormat),stressValue);
         stressValue.fill(0);
     }

@@ -89,8 +89,10 @@ void day_popup::init_dayWorkouts(QDate workDate)
                     set_sectoTime(it.value().at(0).toInt()).toString()+delimiter+
                     it.value().at(3)+delimiter+
                     it.value().at(4)+delimiter+
-                    set_time(it.value().at(5).toInt())+conString+it.value().at(6)+" Km"+delimiter+
-                    it.value().at(7)+" TSS"+conString+it.value().at(8)+" KJ";
+                    set_time(it.value().at(5).toInt())+delimiter+
+                    it.value().at(6)+delimiter+
+                    it.value().at(7)+delimiter+
+                    it.value().at(8);
         item->setData(Qt::DisplayRole,itemValue);
         item->setData(Qt::AccessibleTextRole,it.value().at(1));
         ui->tableWidget_day->setItem(it.key(),0,item);

@@ -496,8 +496,30 @@ QCPGraph *calculation::create_QCPLine(QCustomPlot *plot,QString name,QColor gCol
     graph->setData(xdata,ydata);
     graph->setAntialiased(true);
     graph->setPen(QPen(gColor,1));
+    graph->setLayer(name);
 
     return graph;
+}
+
+QCPBars *calculation::create_QCPBar(QCustomPlot *plot,QColor gColor, QVector<double> &xdata,QVector<double> &ydata,bool secondAxis)
+{
+    QCPBars *bars;
+    if(secondAxis)
+    {
+        bars = new QCPBars(plot->xAxis,plot->yAxis2);
+    }
+    else
+    {
+        bars = new QCPBars(plot->xAxis,plot->yAxis);
+    }
+
+    bars->setAntialiased(true);
+    bars->setPen(QPen(gColor));
+    gColor.setAlpha(80);
+    bars->setBrush(QBrush(gColor));
+    bars->setData(xdata,ydata);
+
+    return bars;
 }
 
 void calculation::create_itemTracer(QCustomPlot *plot,QString layer,QCPGraph *graphline, QVector<double> &xdata,QColor tColor,int pos)
@@ -525,6 +547,34 @@ void calculation::create_itemLineText(QCustomPlot *plot,QString layer,QFont line
     itemText->setFont(lineFont);
     itemText->setPadding(QMargins(1, 1, 1, 1));
     itemText->setLayer(layer);
+}
+
+void calculation::create_itemBarText(QCustomPlot *plot,QString layer,QFont barFont, QColor gColor, QVector<double> &xdata, QVector<double> &ydata, int pos, int xOffset,bool secondAxis)
+{
+    double yCords = 0;
+
+    QCPItemText *barText = new QCPItemText(plot);
+    if(secondAxis)
+    {
+        barText->position->setAxes(plot->xAxis,plot->yAxis2);
+    }
+
+    if(ydata[pos] < plot->yAxis->range().maxRange / 10.0 && !secondAxis)
+    {
+        yCords = ydata[pos] + 10.0;
+    }
+    else
+    {
+        yCords = ydata[pos]/2;
+    }
+
+    barText->position->setType(QCPItemPosition::ptPlotCoords);
+    barText->position->setCoords(xdata[pos]+xOffset,yCords);
+
+    barText->setText(QString::number(ydata[pos]));
+    barText->setFont(barFont);
+    barText->setColor(gColor);
+    barText->setLayer(layer);
 }
 
 

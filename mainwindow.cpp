@@ -60,14 +60,18 @@ MainWindow::MainWindow(QWidget *parent) :
         buttonStyle = "QToolButton:hover {color: white; border: 1px solid white; border-radius: 4px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #00b8ff, stop: 0.5 #0086ff,stop: 1 #0064ff)}";
 
         ui->label_month->setText("Week " + weeknumber + " - " + QString::number(selectedDate.addDays(weekRange*weekDays).weekNumber()-1));
-        planerIcon.addFile(":/images/icons/DateTime.png");
-        editorIcon.addFile(":/images/icons/Editor.png");
-        foodIcon.addFile(":/images/icons/Food.png");
+        iconMap.insert("Planner",QIcon(":/images/icons/DateTime.png"));
+        iconMap.insert("Editor",QIcon(":/images/icons/Editor.png"));
+        iconMap.insert("Food",QIcon(":/images/icons/Food.png"));
+        iconMap.insert("PaneUp",QIcon(":/images/icons/Arrow_up.png"));
+        iconMap.insert("PaneDown",QIcon(":/images/icons/Arrow_down.png"));
+        iconMap.insert("AddAvg",QIcon(":/images/icons/AddAvg.png"));
+        iconMap.insert("MinAvg",QIcon(":/images/icons/MinAvg.png"));
 
         modules = new QComboBox(this);
-        modules->addItem(planerIcon,"Planner");
-        modules->addItem(editorIcon,"Editor");
-        modules->addItem(foodIcon,"Nutrition");
+        modules->addItem(iconMap.value("Planner"),"Planner");
+        modules->addItem(iconMap.value("Editor"),"Editor");
+        modules->addItem(iconMap.value("Food"),"Nutrition");
         modules->setToolTip("Modules");
 
         planerMode = new QLabel(this);
@@ -133,15 +137,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->toolButton_split->setVisible(false);
         ui->toolButton_merge->setVisible(false);
 
-        connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
-        connect(planMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_planMode(bool)));
-        connect(phaseGroup,SIGNAL(buttonClicked(int)),this,SLOT(set_phaseFilter(int)));
-        connect(modules,SIGNAL(currentIndexChanged(int)),this,SLOT(set_module(int)));
-        connect(workSchedule->scheduleModel,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_schedule()));
-        connect(workSchedule->scheduleModel,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SLOT(refresh_schedule()));
-        connect(workSchedule->phaseModel,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_saison()));
-        connect(workSchedule->phaseModel,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SLOT(refresh_saison()));
-        connect(ui->widget_stressPlot,SIGNAL(selectionChangedByUser()),this,SLOT(selectionChanged_stressPlot()));
+        this->set_pmcPlot();
 
         //Planer
         ui->stackedWidget->setGeometry(5,5,0,0);
@@ -150,9 +146,8 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tableWidget_schedule->verticalHeader()->hide();
         ui->frame_PMC->setVisible(false);
         ui->pushButton_stressPlot->setChecked(false);
-        stressPanelUp  =  QIcon(":/images/icons/Arrow_up.png");
-        stressPanelDown  =  QIcon(":/images/icons/Arrow_down.png");
-        ui->pushButton_stressPlot->setIcon(stressPanelUp);
+        ui->pushButton_stressPlot->setIcon(iconMap.value("PaneUp"));
+        ui->spinBox_extWeeks->setRange(3,12);
 
         //ui->tableWidget_schedule->setMouseTracking(true);
         ui->tableWidget_saison->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -205,6 +200,15 @@ MainWindow::MainWindow(QWidget *parent) :
         //ui->treeView_meals->setItemDelegate(&mousehover_del);
         //ui->treeView_meals->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
+        connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
+        connect(planMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_planMode(bool)));
+        connect(phaseGroup,SIGNAL(buttonClicked(int)),this,SLOT(set_phaseFilter(int)));
+        connect(modules,SIGNAL(currentIndexChanged(int)),this,SLOT(set_module(int)));
+        connect(workSchedule->scheduleModel,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_schedule()));
+        connect(workSchedule->scheduleModel,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SLOT(refresh_schedule()));
+        connect(workSchedule->phaseModel,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_saison()));
+        connect(workSchedule->phaseModel,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SLOT(refresh_saison()));
+        connect(ui->widget_stressPlot,SIGNAL(selectionChangedByUser()),this,SLOT(selectionChanged_stressPlot()));
         connect(foodPlan->mealModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(mealSave(QStandardItem*)));
         connect(ui->tableWidget_foodPlan->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodDay(int)));
         connect(ui->tableWidget_foodPlan->verticalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodSection(int)));
@@ -236,8 +240,9 @@ MainWindow::MainWindow(QWidget *parent) :
         foodcopyMode = lineSelected = dayLineSelected = false;
 
         this->reset_menuEdit();
+        this->set_distributionPlot();
         this->init_polishgraph();
-        this->set_pmcPlot();
+
         this->resetPlot();
         this->loadUISettings();
         this->activityList(ui->treeWidget_activityfiles->columnCount()-1);
@@ -535,7 +540,6 @@ void MainWindow::set_menuItems(int module)
     if(module == PLANER)
     {
         ui->menuWorkout->setEnabled(true);
-        ui->actionPMC->setVisible(true);
         ui->actionIntervall_Editor->setVisible(true);
         ui->actionPace_Calculator->setVisible(true);
         ui->actionStress_Calculator->setVisible(true);
@@ -543,8 +547,6 @@ void MainWindow::set_menuItems(int module)
         planerMode->setEnabled(true);
         planMode->setEnabled(true);
         planerMode->setVisible(true);
-
-        if(workSchedule->get_stressMap()->count() == 0) ui->actionPMC->setEnabled(false);
 
         ui->actionfood_History->setVisible(false);
         ui->actionFood_Macros->setVisible(false);
@@ -562,7 +564,6 @@ void MainWindow::set_menuItems(int module)
         ui->actionReset->setVisible(true);
         ui->actionSelect_File->setVisible(true);
         ui->actionReset->setEnabled(actLoaded);
-        ui->actionPMC->setVisible(true);
         ui->actionPace_Calculator->setVisible(true);
         ui->actionStress_Calculator->setVisible(true);
 
@@ -579,7 +580,6 @@ void MainWindow::set_menuItems(int module)
         ui->actionNew->setVisible(true);
         ui->actionNew->setEnabled(false);
 
-        ui->actionPMC->setVisible(false);
         ui->actionReset->setVisible(false);
         ui->actionPace_Calculator->setVisible(false);
         ui->actionStress_Calculator->setVisible(false);
@@ -617,6 +617,7 @@ void MainWindow::summery_Set(QDate date,QStandardItem *phaseItem)
         }
         headerInfo = workSchedule->get_weekMeta(this->calc_weekID(date));
         headerString = "Week: " + headerInfo.at(0) + " - " + "Phase: " + headerInfo.at(2);
+        ui->lineEdit_currentWeek->setText(headerInfo.at(0));
     }
     else
     {
@@ -783,26 +784,20 @@ void MainWindow::workoutSchedule(QDate date)
     this->summery_Set(date,nullptr);
 }
 
-void MainWindow::set_pmcData(QDate rangeStart)
+void MainWindow::set_pmcData(QDate rangeStart,bool currWeek,int extWeek)
 {
     ui->widget_stressPlot->clearPlottables();
     ui->widget_stressPlot->clearItems();
     ui->widget_stressPlot->legend->setFillOrder(QCPLegend::foColumnsFirst);
     ui->widget_stressPlot->plotLayout()->setRowStretchFactor(1,0.0001);
 
-
     QMap<QDate,QVector<double>> *stressMap =  workSchedule->get_stressMap();
-    int dayCount = rangeStart.addDays(-1).daysTo(rangeStart.addDays(21));
-    xDate.resize(dayCount);
-    yLTS.resize(dayCount);
-    ySTS.resize(dayCount);
-    yTSB.resize(dayCount);
-    yStress.resize(dayCount);
-    yDura.resize(dayCount);
-
-    stressMax = 0;
-    tsbMinMax.resize(2);
-    tsbMinMax.fill(0);
+    int plotRange = currWeek ? weekDays : weekDays*extWeek;
+    int dayCount = rangeStart.addDays(-1).daysTo(rangeStart.addDays(plotRange));
+    int xTickCount = dayCount;
+    double stressMax = 0;
+    QVector<double> xDate(dayCount,0),yLTS(dayCount,0),ySTS(dayCount,0),yTSB(dayCount,0),yStress(dayCount,0),yDura(dayCount,0),yDist(dayCount,0);
+    QVector<double> tsbMinMax(2,0);
 
     QDateTime startDate;
     QTime wTime;
@@ -812,7 +807,7 @@ void MainWindow::set_pmcData(QDate rangeStart)
     startDate.setTimeSpec(Qt::LocalTime);
     int day = 0;
 
-    for(QMap<QDate,QVector<double>>::const_iterator stressStart = stressMap->find(rangeStart.addDays(-1)), end = stressMap->find(rangeStart.addDays(21)); stressStart != end; ++stressStart)
+    for(QMap<QDate,QVector<double>>::const_iterator stressStart = stressMap->find(rangeStart.addDays(-1)), end = stressMap->find(rangeStart.addDays(plotRange)); stressStart != end; ++stressStart)
     {
         startDate.setDate(stressStart.key());
         xDate[day] = startDate.toTime_t() + 3600;
@@ -820,7 +815,7 @@ void MainWindow::set_pmcData(QDate rangeStart)
         ySTS[day] = round(stressStart.value().at(1));
         yLTS[day] = round(stressStart.value().at(2));
         yDura[day] = round(stressStart.value().at(3)/60.0);
-
+        yDist[day] = round(stressStart.value().at(4));
         if(stressMax < yStress[day]) stressMax = yStress[day];
         if(day > 0) yTSB[day] = yLTS[day-1] - ySTS[day-1];
         ++day;
@@ -833,8 +828,8 @@ void MainWindow::set_pmcData(QDate rangeStart)
     QDateTime rStop(rangeStart.addDays(21));
     rStop.setTime(time);
     rStop.setTimeSpec(Qt::LocalTime);
-    QColor duraColor(0,85,255);
-    QCPRange xRange(QCPAxisTickerDateTime::dateTimeToKey(rangeStart.addDays(-1)),QCPAxisTickerDateTime::dateTimeToKey(rangeStart.addDays(21)));
+
+    QCPRange xRange(QCPAxisTickerDateTime::dateTimeToKey(rangeStart.addDays(-1)),QCPAxisTickerDateTime::dateTimeToKey(rangeStart.addDays(plotRange)));
 
     QFont lineFont;
     lineFont.setPointSize(8);
@@ -844,15 +839,19 @@ void MainWindow::set_pmcData(QDate rangeStart)
     QCPGraph *stressLine = this->create_QCPLine(ui->widget_stressPlot,"StressScore",QColor(225,150,0),xDate,yStress,false);
     QCPGraph *tsbLine = this->create_QCPLine(ui->widget_stressPlot,"TSB",QColor(255,170,0),xDate,yTSB,true);
     tsbLine->setBrush(QBrush(QColor(255,170,0,50)));
-    QCPBars *duraBars = new QCPBars(ui->widget_stressPlot->xAxis,ui->widget_stressPlot->yAxis);
+
+    QCPBarsGroup *barGroup = new QCPBarsGroup(ui->widget_stressPlot);
+    QCPBars *duraBars = this->create_QCPBar(ui->widget_stressPlot,QColor(0,85,255),xDate,yDura,false);
     duraBars->setName("Duration");
-    duraBars->setWidth(250000.0/dayCount);
-    duraBars->setAntialiased(true);
-    duraBars->setPen(QPen(duraColor));
-    duraColor.setAlpha(80);
-    duraBars->setBrush(QBrush(duraColor));
-    duraBars->setLayer("StressScore");
-    duraBars->setData(xDate,yDura);
+    duraBars->setLayer("CompBars");
+    duraBars->setWidth(25000/extWeek);
+    duraBars->setBarsGroup(barGroup);
+
+    QCPBars *distBars = this->create_QCPBar(ui->widget_stressPlot,QColor(0,200,255),xDate,yDist,false);
+    distBars->setName("Distance");
+    distBars->setLayer("CompBars");
+    distBars->setWidth(25000/extWeek);
+    distBars->setBarsGroup(barGroup);
 
     for(int i = 0; i < xDate.count(); ++i)
     {
@@ -861,19 +860,13 @@ void MainWindow::set_pmcData(QDate rangeStart)
         this->create_itemTracer(ui->widget_stressPlot,"StressScore",stressLine,xDate,QColor(225,150,0),i);
         this->create_itemTracer(ui->widget_stressPlot,"TSB",tsbLine,xDate,QColor(255,170,0),i);
 
-
         this->create_itemLineText(ui->widget_stressPlot,"LTS",lineFont,xDate,yLTS,i,false);
         this->create_itemLineText(ui->widget_stressPlot,"STS",lineFont,xDate,ySTS,i,false);
         this->create_itemLineText(ui->widget_stressPlot,"StressScore",lineFont,xDate,yStress,i,false);
         this->create_itemLineText(ui->widget_stressPlot,"TSB",lineFont,xDate,yTSB,i,true);
 
-        QCPItemText *barText = new QCPItemText(ui->widget_stressPlot);
-        barText->position->setType(QCPItemPosition::ptPlotCoords);
-        barText->position->setCoords(xDate[i],20.0);
-        barText->setText(QString::number(yDura[i]));
-        barText->setFont(lineFont);
-        barText->setLayer("StressScore");
-
+        this->create_itemBarText(ui->widget_stressPlot,"CompBars",lineFont,Qt::black,xDate,yDura,i,-distBars->width()*1.75,false);
+        this->create_itemBarText(ui->widget_stressPlot,"CompBars",lineFont,Qt::black,xDate,yDist,i,distBars->width()*1.75,false);
 
         if(tsbMinMax[0] > yTSB[i]) tsbMinMax[0] = yTSB[i];
         if(tsbMinMax[1] < yTSB[i]) tsbMinMax[1] = yTSB[i];
@@ -888,8 +881,20 @@ void MainWindow::set_pmcData(QDate rangeStart)
     dayTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
     dayTicker->setTickStep(1.0);
 
+    if(plotRange > 21 && plotRange < 42)
+    {
+        xTickCount = (plotRange+1)/3;
+    }
+    else if(plotRange >= 42)
+    {
+        xTickCount = (plotRange+1)/5;
+    }
+    if(dayCount >= 22)
+    {
+        dayCount = dayCount / 7;
+    }
 
-    dateTicker->setTickCount(dayCount);
+    dateTicker->setTickCount(xTickCount);
     dayTicker->setTickCount(dayCount);
 
     ui->widget_stressPlot->yAxis->setRange(0,stressMax+stressMax*0.15);
@@ -942,10 +947,110 @@ void MainWindow::set_pmcPlot()
     ui->widget_stressPlot->addLayer("STS",ui->widget_stressPlot->layer(2),QCustomPlot::limAbove);
     ui->widget_stressPlot->addLayer("LTS",ui->widget_stressPlot->layer(3),QCustomPlot::limAbove);
     ui->widget_stressPlot->addLayer("StressScore",ui->widget_stressPlot->layer(4),QCustomPlot::limAbove);
+    ui->widget_stressPlot->addLayer("CompBars",ui->widget_stressPlot->layer(5),QCustomPlot::limAbove);
     ui->widget_stressPlot->xAxis->grid()->setLayer("GRID");
     ui->widget_stressPlot->yAxis->grid()->setLayer("GRID");
 
-    this->set_pmcData(firstdayofweek);
+    this->set_pmcData(firstdayofweek,false,3);
+}
+
+void MainWindow::set_distributionPlot()
+{
+    QFont plotFont;
+    plotFont.setBold(true);
+    plotFont.setPointSize(8);
+
+    ui->widget_distributionPlot->xAxis->setLabel("Level");
+    ui->widget_distributionPlot->xAxis->setLabelFont(plotFont);
+    ui->widget_distributionPlot->xAxis2->setVisible(true);
+    ui->widget_distributionPlot->xAxis2->setLabelFont(plotFont);
+    ui->widget_distributionPlot->xAxis2->setTickLabels(false);
+    ui->widget_distributionPlot->yAxis->setLabel("Percent");
+    ui->widget_distributionPlot->yAxis->setLabelFont(plotFont);
+    ui->widget_distributionPlot->yAxis2->setVisible(true);
+    ui->widget_distributionPlot->yAxis2->setLabelFont(plotFont);
+
+    this->set_distributionData(firstdayofweek);
+}
+
+void MainWindow::set_distributionData(QDate startDate)
+{
+    QMap<int, QStringList> dayWorkouts;
+    QMap<int,QString> weekWorkouts;
+    QMap<int,double> zoneTime;
+    QStringList levelList = settings::get_listValues("Level");
+    int workoutCount = 0;
+    QFont barFont;
+    barFont.setPointSize(10);
+
+
+    for(int day = 0; day < weekDays; ++day)
+    {
+        dayWorkouts = workSchedule->get_workouts(true,startDate.addDays(day).toString(workSchedule->dateFormat));
+        for(QMap<int, QStringList>::const_iterator it = dayWorkouts.cbegin(), end = dayWorkouts.cend(); it != end; ++it)
+        {
+            weekWorkouts.insert(workoutCount++,it.value().last());
+        }
+
+        QVector<double> workLoad(levelList.count(),0);
+        double zoneValue = 0;
+        double weekSum = 0;
+
+        for( QMap<int,QString>::const_iterator it = weekWorkouts.cbegin(), end = weekWorkouts.cend(); it != end; ++it)
+        {
+            workLoad = stdWorkouts->get_workLevelLoad(it.value());
+            if(workLoad.count() > 0)
+            {
+                for(int level = 0; level < levelList.count(); ++level)
+                {
+                    weekSum = weekSum + workLoad.at(level);
+                    zoneValue = zoneTime.value(level) + workLoad.at(level);
+                    zoneTime.insert(level,zoneValue);
+                }
+            }
+        }
+        for( QMap<int,double>::const_iterator it = zoneTime.cbegin(), end = zoneTime.cend(); it != end; ++it)
+        {
+            if(it.value() > 0)
+            {
+                zoneTime.insert(it.key(),round((it.value()/weekSum)*100.0));
+            }
+        }
+    }
+
+    QVector<double> tickCount,zoneValues;
+    QVector<QString> zoneLabel;
+
+    for(int i = 0; i < levelList.count(); ++i)
+    {
+     tickCount << i;
+     zoneLabel << levelList.at(i);
+     zoneValues << zoneTime.value(i);
+    }
+
+    ui->widget_distributionPlot->clearPlottables();
+    ui->widget_distributionPlot->clearItems();
+
+    QSharedPointer<QCPAxisTickerText> zoneTicker(new QCPAxisTickerText);
+    zoneTicker->addTicks(tickCount, zoneLabel);
+    ui->widget_distributionPlot->xAxis->setTicker(zoneTicker);
+
+    QCPBars *distbars = this->create_QCPBar(ui->widget_distributionPlot,QColor(0,85,255),tickCount,zoneValues,false);
+    distbars->setWidth(50);
+    distbars->setWidthType(QCPBars::wtAbsolute);
+    distbars->setName("Distribution");
+
+    for(int i = 0; i < zoneValues.count(); ++i)
+    {
+        this->create_itemBarText(ui->widget_distributionPlot,"main",barFont,Qt::black,tickCount,zoneValues,i,0,false);
+    }
+
+    ui->widget_distributionPlot->xAxis->setRange(-1,7);
+    ui->widget_distributionPlot->yAxis->setRange(0,100);
+    ui->widget_distributionPlot->xAxis->setLabel("Level");
+    ui->widget_distributionPlot->yAxis->setLabel("Percent");
+
+    ui->widget_distributionPlot->replot();
 }
 
 void MainWindow::set_saisonValues(QStringList *sportList,QString weekID, int week)
@@ -1047,7 +1152,8 @@ void MainWindow::refresh_schedule()
 {
     this->workoutSchedule(firstdayofweek.addDays(weekCounter*weekDays));
     ui->label_month->setText("Week " + this->get_weekRange());
-    this->set_pmcData(firstdayofweek.addDays(weekCounter*weekDays));
+    this->set_pmcData(firstdayofweek.addDays(weekCounter*weekDays),ui->pushButton_currentWeek->isChecked(),ui->spinBox_extWeeks->value());
+    this->set_distributionData(firstdayofweek.addDays(weekCounter*weekDays));
 }
 
 void MainWindow::refresh_saison()
@@ -1181,7 +1287,6 @@ void MainWindow::on_actionNew_triggered()
             if(dialog_code == QDialog::Rejected)
             {
                 ui->actionSave->setEnabled(workSchedule->get_isUpdated());
-                ui->actionPMC->setEnabled(true);
             }
         }
     }
@@ -1325,7 +1430,6 @@ void MainWindow::on_toolButton_weekCurrent_clicked()
     {
         weekCounter = 0;
         this->set_buttons(firstdayofweek.addDays(weekCounter*weekDays),false);
-        this->set_pmcData(firstdayofweek.addDays(weekCounter*weekDays));
     }
     else
     {
@@ -1340,7 +1444,6 @@ void MainWindow::on_toolButton_weekMinus_clicked()
     {
         --weekCounter;
         this->set_buttons(firstdayofweek.addDays(weekCounter*weekDays),false);
-        this->set_pmcData(firstdayofweek.addDays(weekCounter*weekDays));
     }
     else
     {
@@ -1355,7 +1458,6 @@ void MainWindow::on_toolButton_weekPlus_clicked()
     {
         ++weekCounter;
         this->set_buttons(firstdayofweek.addDays(weekCounter*weekDays),false);
-        this->set_pmcData(firstdayofweek.addDays(weekCounter*weekDays));
     }
     else
     {
@@ -1370,7 +1472,6 @@ void MainWindow::on_toolButton_weekFour_clicked()
     {
         weekCounter = weekCounter+4;
         this->set_buttons(firstdayofweek.addDays(weekCounter*weekDays),false);
-        this->set_pmcData(firstdayofweek.addDays(weekCounter*weekDays));
     }
     else
     {
@@ -2666,13 +2767,6 @@ void MainWindow::on_toolButton_clearContent_clicked()
     ui->toolButton_sync->setEnabled(false);
 }
 
-void MainWindow::on_actionPMC_triggered()
-{
-    stress_popup stressPop(this,workSchedule,ui->calendarWidget->selectedDate());
-    stressPop.setModal(true);
-    stressPop.exec();
-}
-
 void MainWindow::set_module(int modID)
 {
     ui->stackedWidget->setCurrentIndex(modID);
@@ -3287,23 +3381,15 @@ void MainWindow::on_tableWidget_schedule_itemClicked(QTableWidgetItem *item)
 
     if(item->column() == 0)
     {
-       QString selected_week =  item->data(Qt::UserRole).toString();
-       week_popup week_pop(this,selected_week,workSchedule,stdWorkouts);
-       week_pop.setModal(true);
-       dialog_code = week_pop.exec();
+        Dialog_week_copy week_copy(this,item->data(Qt::UserRole).toString(),workSchedule,true);
+        week_copy.setModal(true);
+        dialog_code = week_copy.exec();
 
-       if(dialog_code == QDialog::Accepted)
-       {
-           Dialog_week_copy week_copy(this,selected_week,workSchedule,true);
-           week_copy.setModal(true);
-           dialog_code = week_copy.exec();
-
-           if(dialog_code == QDialog::Accepted)
-           {
-               this->refresh_schedule();
-               ui->actionSave->setEnabled(workSchedule->get_isUpdated());
-           }
-       }
+        if(dialog_code == QDialog::Accepted)
+        {
+           this->refresh_schedule();
+           ui->actionSave->setEnabled(workSchedule->get_isUpdated());
+        }
     }
     else
     {
@@ -3369,13 +3455,28 @@ void MainWindow::on_pushButton_stressPlot_clicked(bool checked)
     if(checked)
     {
         weekRange = weekRange / 2;
-        ui->pushButton_stressPlot->setIcon(stressPanelDown);
+        ui->pushButton_stressPlot->setIcon(iconMap.value("PaneDown"));
     }
     else
     {
         weekRange = settings::get_intValue("weekrange");
-        ui->pushButton_stressPlot->setIcon(stressPanelUp);
+        ui->pushButton_stressPlot->setIcon(iconMap.value("PaneUp"));
     }
+    this->refresh_schedule();
+}
 
-    this->workoutSchedule(firstdayofweek.addDays(weekCounter*weekDays));
+void MainWindow::on_pushButton_currentWeek_clicked(bool checked)
+{
+    this->set_pmcData(firstdayofweek.addDays(weekCounter*weekDays),checked,ui->spinBox_extWeeks->value());
+    ui->spinBox_extWeeks->setEnabled(!checked);
+}
+
+void MainWindow::on_spinBox_extWeeks_valueChanged(int value)
+{
+    this->set_pmcData(firstdayofweek.addDays(weekCounter*weekDays),ui->pushButton_currentWeek->isChecked(),value);
+}
+
+void MainWindow::on_toolButton_extReset_clicked()
+{
+    ui->spinBox_extWeeks->setValue(ui->spinBox_extWeeks->minimum());
 }

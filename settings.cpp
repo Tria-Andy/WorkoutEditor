@@ -565,12 +565,19 @@ int settings::loadSettings()
                 else if(settingList.at(i) == "Other") OtherLabel = settingList.at(i);
             }
 
+            sportIcon.insert(generalMap.value("sum"),":/images/icons/Summery.png");
             sportIcon.insert(SwimLabel,":/images/icons/Swimming.png");
             sportIcon.insert(BikeLabel,":/images/icons/Biking.png");
             sportIcon.insert(RunLabel,":/images/icons/Running.png");
             sportIcon.insert(StrengthLabel,":/images/icons/Strength.png");
             sportIcon.insert(AltLabel,":/images/icons/SportIcon.png");
             sportIcon.insert(TriaLabel,":/images/icons/Triathlon.png");
+
+            sportIcon.insert("Percent",":/images/icons/Percent.png");
+            sportIcon.insert("TSS",":/images/icons/Lightning.png");
+            sportIcon.insert("Duration",":/images/icons/Timewatch.png");
+            sportIcon.insert("KJ",":/images/icons/Battery.png");
+            sportIcon.insert("Distance",":/images/icons/Kilometer.png");
 
             delete myvalues;
         }

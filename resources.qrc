@@ -64,6 +64,8 @@
         <file>icons/Arrow_up.png</file>
         <file>icons/Kilometer.png</file>
         <file>icons/Percent.png</file>
+        <file>icons/Summery.png</file>
+        <file>icons/Lightning.png</file>
     </qresource>
     <qresource prefix="/style">
         <file>qss/style.qss</file>

@@ -50,9 +50,6 @@ public:
         QFont headFont,workFont;
         QString sport = index.data(Qt::AccessibleTextRole).toString();
         QStringList workValues = index.data(Qt::DisplayRole).toString().split("#");
-        QString sportIcon = settings::sportIcon.value(sport);
-        QString timeIcon = ":/images/icons/Timewatch.png";
-        QString energyIcon = ":/images/icons/Battery.png";
 
         headFont.setBold(true);
         headFont.setPixelSize(settings::get_fontValue("fontBig"));
@@ -83,7 +80,7 @@ public:
         painter->setPen(Qt::black);
         painter->setFont(headFont);
         painter->drawPath(workPath);
-        painter->drawPixmap(workIcon,sportIcon);
+        painter->drawPixmap(workIcon,settings::sportIcon.value(sport));
         painter->drawText(workTitle,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(0));
         painter->drawText(workTime,Qt::AlignRight | Qt::AlignVCenter,workValues.at(1));
 
@@ -98,13 +95,21 @@ public:
         {
          QString workMeta;
          int rectHeight = workInfo.height()*0.25;
+         int rectWidth = (option.rect.width()-rectHeight)/2;
+
          workMeta = workValues.at(2)+ "\n"+workValues.at(3);
 
          QRect rectMeta(option.rect.x()+textMargin,workHead.bottom(),option.rect.width(),workInfo.height()*0.5);
-         QRect rectTime(option.rect.x(),rectMeta.bottom(),rectHeight,rectHeight);
-         QRect rectContent(rectTime.right(),rectMeta.bottom(),option.rect.width()-rectTime.width(),rectHeight);
-         QRect rectEnergy(option.rect.x(),rectContent.bottom(),rectHeight,rectHeight);
-         QRect rectWork(rectEnergy.right(),rectContent.bottom(),option.rect.width()-rectEnergy.width(),rectHeight);
+
+         QRect duraIcon(option.rect.x(),rectMeta.bottom(),rectHeight,rectHeight);
+         QRect duraValue(duraIcon.right()+textMargin,rectMeta.bottom(),rectWidth,rectHeight);
+         QRect distIcon(duraValue.right(),rectMeta.bottom(),rectHeight,rectHeight);
+         QRect distValue(distIcon.right()+textMargin,rectMeta.bottom(),rectWidth,rectHeight);
+
+         QRect stressIcon(option.rect.x(),duraIcon.bottom(),rectHeight,rectHeight);
+         QRect stressValue(stressIcon.right()+textMargin,duraIcon.bottom(),rectWidth,rectHeight);
+         QRect workIcon(stressValue.right(),duraIcon.bottom(),rectHeight,rectHeight);
+         QRect workValue(workIcon.right()+textMargin,duraIcon.bottom(),rectWidth,rectHeight);
 
          painter->setBrush(rectGradient);
          painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
@@ -112,10 +117,14 @@ public:
          painter->setFont(workFont);
          painter->drawPath(bodyPath);
          painter->drawText(rectMeta,Qt::AlignLeft | Qt::AlignVCenter,workMeta);
-         painter->drawPixmap(rectTime,timeIcon);
-         painter->drawText(rectContent,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(4));
-         painter->drawPixmap(rectEnergy,energyIcon);
-         painter->drawText(rectWork,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(5));
+         painter->drawPixmap(duraIcon,settings::sportIcon.value("Duration"));
+         painter->drawText(duraValue,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(4));
+         painter->drawPixmap(distIcon,settings::sportIcon.value("Distance"));
+         painter->drawText(distValue,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(5));
+         painter->drawPixmap(stressIcon,settings::sportIcon.value("TSS"));
+         painter->drawText(stressValue,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(6));
+         painter->drawPixmap(workIcon,settings::sportIcon.value("KJ"));
+         painter->drawText(workValue,Qt::AlignLeft | Qt::AlignVCenter,workValues.at(7));
         }
         painter->restore();
     }

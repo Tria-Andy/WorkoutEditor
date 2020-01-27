@@ -181,9 +181,11 @@ public:
                 rectDay.addRoundedRect(rectEmpty,4,4);
 
                 painter->setPen(rectPen);
+                painter->setFont(date_font);
                 painter->setBrush(QBrush(gradColor));
                 painter->setRenderHint(QPainter::Antialiasing);
                 painter->drawPath(rectDay);
+                painter->drawText(rectEmpty,Qt::AlignCenter | Qt::AlignVCenter,settings::getStringMapPointer(settings::stingMap::General)->value("breakname"));
             }
         }
         else
@@ -410,6 +412,9 @@ public:
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
+
+
+
         QFont phase_font,date_font, work_font;
         QStringList sum_values;
         QStringList sportList = settings::get_listValues("Sport");
@@ -983,7 +988,7 @@ private:
     QStringList *schedMode, *avgHeader;
     QLabel *planerMode;
     QToolButton *planMode;
-    QIcon editorIcon,planerIcon,foodIcon;
+    QMap<QString,QIcon> iconMap;
     QWidget *menuSpacer;
     QButtonGroup *phaseGroup;
     QComboBox *modules;
@@ -1002,13 +1007,8 @@ private:
 
     QDate selectedDate;
     QString weeknumber,buttonStyle,dateformat,timeshort,timelong;
-    QIcon stressPanelUp,stressPanelDown;
     int userSetup,saisonWeek,saisonWeeks,weekDays,weekCounter,weekRange,sportUse,selectedInt;
     bool isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
-
-    double stressMax;
-    QVector<double> xDate,yLTS,ySTS,yTSB,yStress,yDura;
-    QVector<double> tsbMinMax;
 
     void set_tableWidgetItems(QTableWidget*,int,int,QAbstractItemDelegate*);
     void set_tableHeader(QTableWidget*,QStringList*,bool);
@@ -1019,8 +1019,10 @@ private:
     QString set_summeryString(int,QMap<QString,QVector<double>>*,QString);
     void set_saisonValues(QStringList*,QString,int);
     void workoutSchedule(QDate);
-    void set_pmcData(QDate);
+    void set_pmcData(QDate,bool,int);
     void set_pmcPlot();
+    void set_distributionPlot();
+    void set_distributionData(QDate);
     void saisonSchedule(QString);
     bool check_Date(QDate);
     QString get_weekRange();
@@ -1077,7 +1079,6 @@ private slots:
     void on_actionPreferences_triggered();
     void on_actionPace_Calculator_triggered();
     void on_actionVersion_triggered();
-    void on_actionPMC_triggered();
     void set_module(int);
 
     //Planner
@@ -1152,6 +1153,9 @@ private slots:
     void on_toolButton_merge_clicked();
     void on_actionExpand_Activity_Tree_triggered();
     void on_pushButton_stressPlot_clicked(bool checked);
+    void on_pushButton_currentWeek_clicked(bool checked);
+    void on_spinBox_extWeeks_valueChanged(int arg1);
+    void on_toolButton_extReset_clicked();
 };
 
 #endif // MAINWINDOW_H

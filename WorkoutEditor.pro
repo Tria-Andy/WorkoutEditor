@@ -32,7 +32,6 @@ SOURCES += main.cpp\
     activity.cpp \
     dialog_stresscalc.cpp \
     qcustomplot.cpp \
-    week_popup.cpp \
     day_popup.cpp \
     dialog_settings.cpp \
     dialog_pacecalc.cpp \
@@ -44,7 +43,6 @@ SOURCES += main.cpp\
     dialog_version.cpp \
     jsonhandler.cpp \
     logger.cpp \
-    stress_popup.cpp \
     calculation.cpp \
     xmlhandler.cpp \
     dialog_workcreator.cpp \
@@ -58,7 +56,6 @@ HEADERS  += mainwindow.h \
     activity.h \
     dialog_stresscalc.h \
     qcustomplot.h \
-    week_popup.h \
     day_popup.h \
     dialog_settings.h \
     dialog_pacecalc.h \
@@ -71,7 +68,6 @@ HEADERS  += mainwindow.h \
     jsonhandler.h \
     logger.h \
     del_level.h \
-    stress_popup.h \
     calculation.h \
     xmlhandler.h \
     dialog_workcreator.h \
@@ -82,16 +78,13 @@ HEADERS  += mainwindow.h \
     foodhistory_popup.h
 
 FORMS    += mainwindow.ui \
-    dialog_export.ui \
     dialog_stresscalc.ui \
-    week_popup.ui \
     day_popup.ui \
     dialog_settings.ui \
     dialog_pacecalc.ui \
     year_popup.ui \
     dialog_week_copy.ui \
     dialog_version.ui \
-    stress_popup.ui \
     dialog_workcreator.ui \
     dialog_addweek.ui \
     dialog_map.ui \
