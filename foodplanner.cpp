@@ -148,36 +148,6 @@ void foodplanner::set_mealsMap()
     }
 }
 
-void foodplanner::update_foodPlanModel()
-{
-    QStandardItem *dayItem,*mealItem;    
-    for(QMap<QPair<bool,QDate>,QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>>>::const_iterator daystart = updateMap.cbegin(), dayend = updateMap.cend(); daystart != dayend; ++daystart)
-    {
-        if(daystart.key().first)
-        {
-            dayItem = this->get_modelItem(foodPlanModel,daystart.key().second.toString(dateSaveFormat),0);
-            for(QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>>::const_iterator mealstart = daystart.value().cbegin(), mealend = daystart.value().cend(); mealstart != mealend; ++mealstart)
-            {
-                mealItem = dayItem->child(mealsHeader.indexOf(mealstart.key()));
-                foodPlanModel->removeRows(0,mealItem->rowCount(),mealItem->index());
-
-                for(QHash<QString,QPair<QString,QPair<int,double>>>::const_iterator foodstart = mealstart.value().cbegin(), foodend = mealstart.value().cend(); foodstart != foodend; ++foodstart)
-                {
-                    QList<QStandardItem*> foodList;
-                    foodList << new QStandardItem(foodstart.key());
-                    foodList << new QStandardItem(foodstart.value().first);
-                    foodList << new QStandardItem(QString::number(foodstart.value().second.second));
-                    foodList << new QStandardItem(QString::number(foodstart.value().second.first));
-                    foodList.at(0)->setData(foodPlanTags->at(3),Qt::AccessibleTextRole);
-
-                    mealItem->appendRow(foodList);
-                }
-            }
-            this->set_dayFoodValues(dayItem);
-        }
-    }
-}
-
 QVector<double> foodplanner::get_mealValues(QString mealId,double factor)
 {
     QVector<double> mealValues(7,0);
@@ -290,6 +260,11 @@ void foodplanner::update_foodHistory(QDate day)
 
     foodHistMap.insert(day,foodValues);
     foodHistoryMap.insert(foodHistKey,foodHistMap);
+
+    QModelIndex weekIndex = historyModel->indexFromItem(historyModel->findItems(firstdayofweek.toString(dateFormat),Qt::MatchExactly | Qt::MatchRecursive,2).at(0));
+    QStandardItem *weekItem = historyModel->itemFromIndex(weekIndex.siblingAtColumn(0));
+    weekItem->child(day.dayOfWeek()-1,1)->setData(daySumMap.value(day).at(2),Qt::DisplayRole);
+    weekItem->child(day.dayOfWeek()-1,2)->setData(daySumMap.value(day).at(0),Qt::DisplayRole);
 }
 
 void foodplanner::set_foodPlanMap(int update)
@@ -309,10 +284,43 @@ void foodplanner::set_foodPlanMap(int update)
     }
 }
 
+
+void foodplanner::update_foodPlanModel()
+{
+    QStandardItem *dayItem,*mealItem;
+    for(QMap<QPair<bool,QDate>,QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>>>::const_iterator daystart = updateMap.cbegin(), dayend = updateMap.cend(); daystart != dayend; ++daystart)
+    {
+        if(daystart.key().first)
+        {
+            dayItem = this->get_modelItem(foodPlanModel,daystart.key().second.toString(dateSaveFormat),0);
+            for(QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>>::const_iterator mealstart = daystart.value().cbegin(), mealend = daystart.value().cend(); mealstart != mealend; ++mealstart)
+            {
+                mealItem = dayItem->child(mealsHeader.indexOf(mealstart.key()));
+                foodPlanModel->removeRows(0,mealItem->rowCount(),mealItem->index());
+
+                for(QHash<QString,QPair<QString,QPair<int,double>>>::const_iterator foodstart = mealstart.value().cbegin(), foodend = mealstart.value().cend(); foodstart != foodend; ++foodstart)
+                {
+                    QList<QStandardItem*> foodList;
+                    foodList << new QStandardItem(foodstart.key());
+                    foodList << new QStandardItem(foodstart.value().first);
+                    foodList << new QStandardItem(QString::number(foodstart.value().second.second));
+                    foodList << new QStandardItem(QString::number(foodstart.value().second.first));
+                    foodList.at(0)->setData(foodPlanTags->at(3),Qt::AccessibleTextRole);
+
+                    mealItem->appendRow(foodList);
+                }
+            }
+            this->set_dayFoodValues(dayItem);
+        }
+    }
+    updateMap.clear();
+}
+
+
 void foodplanner::update_foodPlanData(bool singleItem,QDate copyFromDate,QDate copyToDate)
 {
     QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>> updateMealSection;
-    QPair<bool,QDate> copyKey(false,copyFromDate);
+    QPair<bool,QDate> copyKey(singleItem,copyFromDate);
 
     if(singleItem && copyToDate.isValid())
     {
@@ -350,21 +358,28 @@ void foodplanner::fill_updateMap(bool singleItem,bool dragDrop,QDate updateDate,
     QHash<QString,QPair<QString,QPair<int,double>>> updateMeal;
 
     QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>> updateMealSection = updateMap.value(copyKey);
-
     QHash<QString,QVector<double>> currentMeal = foodPlanMap.value(updateDate).value(updateSection);
 
     if(singleItem & !dragDrop) updateMap.clear();
 
-    for(QHash<QString,QVector<double>>::const_iterator it = currentMeal.cbegin(), end = currentMeal.cend(); it != end; ++it)
+    if(dragDrop)
     {
-        updateFood.first = mealsMap.value(it.key());
-        posPort.first = static_cast<int>(it.value().at(0));
-        posPort.second = it.value().at(1);
-        updateFood.second = posPort;
-        updateMeal.insert(it.key(),updateFood);
+        updateMealSection = updateMap.first();
+        updateMealSection.insert(updateSection,updateMealSection.value(updateMealSection.keys().first()));
+    }
+    else
+    {
+        for(QHash<QString,QVector<double>>::const_iterator it = currentMeal.cbegin(), end = currentMeal.cend(); it != end; ++it)
+        {
+            updateFood.first = mealsMap.value(it.key());
+            posPort.first = static_cast<int>(it.value().at(0));
+            posPort.second = it.value().at(1);
+            updateFood.second = posPort;
+            updateMeal.insert(it.key(),updateFood);
+        }
+        updateMealSection.insert(updateSection,updateMeal);
     }
 
-    updateMealSection.insert(updateSection,updateMeal);
     updateMap.insert(copyKey,updateMealSection);
 }
 

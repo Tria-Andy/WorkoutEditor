@@ -145,6 +145,7 @@ MainWindow::MainWindow(QWidget *parent) :
         this->set_tableHeader(ui->tableWidget_schedule,&cal_header,false);
         ui->tableWidget_schedule->verticalHeader()->hide();
         ui->frame_PMC->setVisible(false);
+        ui->frame_saisonEstimate->setVisible(false);
         ui->pushButton_stressPlot->setChecked(false);
         ui->pushButton_stressPlot->setIcon(iconMap.value("PaneUp"));
         ui->spinBox_extWeeks->setRange(3,12);
@@ -792,8 +793,21 @@ void MainWindow::set_pmcData(QDate rangeStart,bool currWeek,int extWeek)
     ui->widget_stressPlot->plotLayout()->setRowStretchFactor(1,0.0001);
 
     QMap<QDate,QVector<double>> *stressMap =  workSchedule->get_stressMap();
+    double offSet = 0;
     int plotRange = currWeek ? weekDays : weekDays*extWeek;
+
     int dayCount = rangeStart.addDays(-1).daysTo(rangeStart.addDays(plotRange));
+    double barWidth = ui->widget_stressPlot->width()/ pow(dayCount,1.5);
+
+    if(currWeek)
+    {
+        offSet = pow(barWidth,1.5);
+    }
+    else
+    {
+        offSet = pow(barWidth,extWeek);
+    }
+
     int xTickCount = dayCount;
     double stressMax = 0;
     QVector<double> xDate(dayCount,0),yLTS(dayCount,0),ySTS(dayCount,0),yTSB(dayCount,0),yStress(dayCount,0),yDura(dayCount,0),yDist(dayCount,0);
@@ -817,7 +831,14 @@ void MainWindow::set_pmcData(QDate rangeStart,bool currWeek,int extWeek)
         yDura[day] = round(stressStart.value().at(3)/60.0);
         yDist[day] = round(stressStart.value().at(4));
         if(stressMax < yStress[day]) stressMax = yStress[day];
-        if(day > 0) yTSB[day] = yLTS[day-1] - ySTS[day-1];
+        if(day > 0)
+        {
+            yTSB[day] = yLTS[day-1] - ySTS[day-1];
+        }
+        else
+        {
+            yTSB[day] = round(stressMap->value(rangeStart.addDays(-2)).at(2) - stressMap->value(rangeStart.addDays(-2)).at(1));
+        }
         ++day;
     }
 
@@ -841,16 +862,19 @@ void MainWindow::set_pmcData(QDate rangeStart,bool currWeek,int extWeek)
     tsbLine->setBrush(QBrush(QColor(255,170,0,50)));
 
     QCPBarsGroup *barGroup = new QCPBarsGroup(ui->widget_stressPlot);
+
     QCPBars *duraBars = this->create_QCPBar(ui->widget_stressPlot,QColor(0,85,255),xDate,yDura,false);
     duraBars->setName("Duration");
     duraBars->setLayer("CompBars");
-    duraBars->setWidth(25000/extWeek);
+    duraBars->setWidthType(QCPBars::wtAbsolute);
+    duraBars->setWidth(barWidth);
     duraBars->setBarsGroup(barGroup);
 
     QCPBars *distBars = this->create_QCPBar(ui->widget_stressPlot,QColor(0,200,255),xDate,yDist,false);
     distBars->setName("Distance");
     distBars->setLayer("CompBars");
-    distBars->setWidth(25000/extWeek);
+    distBars->setWidthType(QCPBars::wtAbsolute);
+    distBars->setWidth(barWidth);
     distBars->setBarsGroup(barGroup);
 
     for(int i = 0; i < xDate.count(); ++i)
@@ -865,8 +889,8 @@ void MainWindow::set_pmcData(QDate rangeStart,bool currWeek,int extWeek)
         this->create_itemLineText(ui->widget_stressPlot,"StressScore",lineFont,xDate,yStress,i,false);
         this->create_itemLineText(ui->widget_stressPlot,"TSB",lineFont,xDate,yTSB,i,true);
 
-        this->create_itemBarText(ui->widget_stressPlot,"CompBars",lineFont,Qt::black,xDate,yDura,i,-distBars->width()*1.75,false);
-        this->create_itemBarText(ui->widget_stressPlot,"CompBars",lineFont,Qt::black,xDate,yDist,i,distBars->width()*1.75,false);
+        this->create_itemBarText(ui->widget_stressPlot,"CompBars",lineFont,Qt::black,xDate,yDura,i,-duraBars->width()*offSet,false);
+        this->create_itemBarText(ui->widget_stressPlot,"CompBars",lineFont,Qt::black,xDate,yDist,i,distBars->width()*offSet,false);
 
         if(tsbMinMax[0] > yTSB[i]) tsbMinMax[0] = yTSB[i];
         if(tsbMinMax[1] < yTSB[i]) tsbMinMax[1] = yTSB[i];
@@ -983,7 +1007,6 @@ void MainWindow::set_distributionData(QDate startDate)
     QFont barFont;
     barFont.setPointSize(10);
 
-
     for(int day = 0; day < weekDays; ++day)
     {
         dayWorkouts = workSchedule->get_workouts(true,startDate.addDays(day).toString(workSchedule->dateFormat));
@@ -1036,8 +1059,7 @@ void MainWindow::set_distributionData(QDate startDate)
     ui->widget_distributionPlot->xAxis->setTicker(zoneTicker);
 
     QCPBars *distbars = this->create_QCPBar(ui->widget_distributionPlot,QColor(0,85,255),tickCount,zoneValues,false);
-    distbars->setWidth(50);
-    distbars->setWidthType(QCPBars::wtAbsolute);
+    distbars->setWidthType(QCPBars::wtPlotCoords);
     distbars->setName("Distribution");
 
     for(int i = 0; i < zoneValues.count(); ++i)
@@ -3127,10 +3149,9 @@ void MainWindow::on_treeView_meals_collapsed(const QModelIndex &index)
 
 void MainWindow::on_tableWidget_foodPlan_itemClicked(QTableWidgetItem *item)
 {
-    foodPlan->clear_updateMap();
     foodPlan->dayMealCopy.first = false;
     foodPlan->dayMealCopy.second = false;
-    foodPlan->fill_updateMap(true,false,item->data(Qt::UserRole).toDate(),foodPlan->mealsHeader.at(item->row()));
+    foodPlan->fill_updateMap(true,ui->toolButton_menuCopy->isChecked(),item->data(Qt::UserRole).toDate(),foodPlan->mealsHeader.at(item->row()));
 
     ui->frame_dayShow->setVisible(false);
     ui->toolButton_linePaste->setEnabled(false);
@@ -3153,7 +3174,7 @@ void MainWindow::on_tableWidget_foodPlan_itemChanged(QTableWidgetItem *item)
 {
     if(item->data(Qt::UserRole).toDate().isValid())
     {
-        foodPlan->fill_updateMap(false,true,item->data(Qt::UserRole).toDate(),item->data(Qt::UserRole+1).toString());
+        foodPlan->fill_updateMap(true,false,item->data(Qt::UserRole).toDate(),item->data(Qt::UserRole+1).toString());
         foodPlan->fill_updateMap(true,true,ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().addDays(item->column()),ui->tableWidget_foodPlan->verticalHeaderItem(item->row())->data(Qt::DisplayRole).toString());
         foodPlan->update_foodPlanData(true,item->data(Qt::UserRole).toDate(),ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().addDays(item->column()));
         this->fill_foodPlanTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
@@ -3210,14 +3231,20 @@ void MainWindow::on_toolButton_menuCopy_clicked()
         menuCopy << ui->listWidget_menuEdit->item(i)->text();
     }
 
+    ui->dateEdit_copyDay->setDate(ui->dateEdit_selectDay->date());
     ui->toolButton_menuPaste->setEnabled(true);
 }
 
 void MainWindow::on_toolButton_menuPaste_clicked()
 {
     ui->listWidget_menuEdit->clear();
+    foodPlan->update_foodPlanData(true,ui->dateEdit_copyDay->date(),ui->dateEdit_selectDay->date());
+
     ui->listWidget_menuEdit->addItems(menuCopy);
     ui->toolButton_menuCopy->setEnabled(false);
+    ui->toolButton_menuCopy->setChecked(false);
+    this->fill_foodPlanTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
+    foodPlan->clear_updateMap();
 }
 
 void MainWindow::on_comboBox_weightmode_currentIndexChanged(const QString &value)
@@ -3412,11 +3439,20 @@ void MainWindow::on_tableWidget_schedule_itemClicked(QTableWidgetItem *item)
 
 void MainWindow::on_tableWidget_saison_itemClicked(QTableWidgetItem *item)
 {
+    int dialog_code;
+
     if(item->column() == 0)
     {
        Dialog_addweek addweek(this,item->data(Qt::UserRole).toString(),workSchedule);
        addweek.setModal(true);
-       addweek.exec();
+       dialog_code = addweek.exec();
+
+       if(dialog_code == QDialog::Accepted)
+       {
+          this->refresh_saison();
+          ui->actionSave->setEnabled(workSchedule->get_isUpdated());
+       }
+
     }
 }
 

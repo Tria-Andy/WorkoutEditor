@@ -428,6 +428,7 @@ void schedule::set_weekCompValues(QStringList weekMeta,QMap<QString, QVector<dou
         {
             itemList << new QStandardItem(QString::number(it.value().at(itemValue)));
         }
+        itemList.at(0)->setData(saisonTags->at(3),Qt::AccessibleTextRole);
         weekItem->appendRow(itemList);
     }
     isUpdated = true;
@@ -452,9 +453,9 @@ void schedule::set_compValues(bool update,QDate workDate,QMap<int,QStringList> v
 
         for(QMap<QString,QVector<double>>::const_iterator it = compSum.cbegin(), end = compSum.cend(); it != end; ++it)
         {
-            stressValue[0] = stressValue.at(0) + it.value().at(4);
-            stressValue[3] = stressValue.at(3) + it.value().at(1);
-            stressValue[4] = stressValue.at(4) + it.value().at(3);
+            stressValue[0] += it.value().at(4);
+            stressValue[3] += it.value().at(1);
+            stressValue[4] += it.value().at(3);
         }
         stressMap.insert(workDate,stressValue);
     }
@@ -479,9 +480,9 @@ void schedule::set_compValues(bool update,QDate workDate,QMap<int,QStringList> v
                 compSum = compMap.value(compDate);
                 for(QMap<QString,QVector<double>>::const_iterator it = compSum.cbegin(), end = compSum.cend(); it != end; ++it)
                 {
-                    stressValue[0] = stressValue.at(0) + it.value().at(4);
-                    stressValue[3] = stressValue.at(3) + it.value().at(1);
-                    stressValue[4] = stressValue.at(4) + it.value().at(3);
+                    stressValue[0] += it.value().at(4);
+                    stressValue[3] += it.value().at(1);
+                    stressValue[4] += it.value().at(3);
                 }
                 compSum.clear();
                 stressMap.insert(compDate,stressValue);
@@ -565,7 +566,7 @@ void schedule::set_stressMap()
         stressValue[1] = it.value().at(2).toDouble();
         stressValue[2] = it.value().at(3).toDouble();
         stressValue[3] = it.value().at(4).toDouble();
-        stressValue[4] = 0;
+        stressValue[4] = it.value().at(5).toDouble();
         stressMap.insert(QDate::fromString(it.value().at(0),dateFormat),stressValue);
         stressValue.fill(0);
     }

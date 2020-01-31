@@ -898,13 +898,12 @@ void Dialog_settings::on_dateEdit_stress_dateChanged(const QDate &date)
 
 void Dialog_settings::on_pushButton_stressEdit_clicked()
 {
-    QTime tempTime(0,0,0);
-
-    QVector<double> stressValues;
+    QVector<double> stressValues(5,0);
     stressValues[0] = ui->doubleSpinBox_stress->value();
     stressValues[1] = ui->doubleSpinBox_sts->value();
     stressValues[2] = ui->doubleSpinBox_lts->value();
     stressValues[3] = get_secFromTime(ui->timeEdit_duration->time());
+    stressValues[4] = 0;
     schedule_ptr->update_stressMap(ui->dateEdit_stress->date(),stressValues);
 
     stressEdit = true;

@@ -36,9 +36,6 @@ class del_addweek : public QStyledItemDelegate, public calculation
 public:
     explicit del_addweek(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
-    QStringList *sportUse;
-    QHash<QString,QString>* generalValues = settings::getStringMapPointer(settings::stingMap::General);
-
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
@@ -152,18 +149,23 @@ private slots:
 
     void on_toolButton_editSport_clicked();
 
+    void on_timeEdit_duration_userTimeChanged(const QTime &time);
+
+    void on_doubleSpinBox_distance_valueChanged(double arg1);
+
 private:
     Ui::Dialog_addweek *ui;
     schedule *workSched;
     del_addweek week_del;
     QMap<QString, QVector<double>> compValues;
-    QString editWeekID,timeFormat,empty;
+    QVector<double> weekSummery;
     QStringList sportuseList,weekMeta;
-    QStringList *weekHeader;
-    int sportlistCount;
+    int sportlistCount,weekDuration,sportDuration;
     bool update;
     QHash<QString,QString> *generalValues;
-    void fill_values(QString);
+    void set_sportData(QString,QVector<double>,QTableWidgetItem*);
+    void fill_weekValues(QString);
+    void calc_weekSummery();
     void update_values();
 };
 

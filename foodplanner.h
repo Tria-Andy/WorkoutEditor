@@ -72,6 +72,7 @@ private:
     void set_foodHistoryValues();
     void set_mealsMap();
     void update_foodPlanModel();
+    void update_foodHistoryModel(QDate);
     void set_foodPlanMap(int);
     void set_dayFoodValues(QStandardItem*);
     void set_foodPlanData(QStandardItem*);

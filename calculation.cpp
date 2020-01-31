@@ -198,8 +198,8 @@ QString calculation::get_workout_pace(double dist, double duration,bool full_lab
 
 double calculation::get_speed(QTime pace,double dist,bool fixdist) const
 {
-    int sec = pace.minute()*60;
-    sec = sec + pace.second();
+    int sec = get_secFromTime(pace);
+
     double speed;
 
     if(sec > 0)
@@ -430,7 +430,7 @@ QTime calculation::calc_duration(double dist, int pace) const
     return duration;
 }
 
-QTime calculation::set_sectoTime(int timeSec)
+QTime calculation::set_sectoTime(int timeSec) const
 {    
     return QTime(0,0,0).addSecs(timeSec);
 }
@@ -549,29 +549,38 @@ void calculation::create_itemLineText(QCustomPlot *plot,QString layer,QFont line
     itemText->setLayer(layer);
 }
 
-void calculation::create_itemBarText(QCustomPlot *plot,QString layer,QFont barFont, QColor gColor, QVector<double> &xdata, QVector<double> &ydata, int pos, int xOffset,bool secondAxis)
+void calculation::create_itemBarText(QCustomPlot *plot,QString layer,QFont barFont, QColor gColor, QVector<double> &xdata, QVector<double> &ydata, int pos, double offSet,bool secondAxis)
 {
     double yCords = 0;
-
+    double spacing = 10.0;
     QCPItemText *barText = new QCPItemText(plot);
+
+    barText->setClipToAxisRect(false);
+
     if(secondAxis)
     {
         barText->position->setAxes(plot->xAxis,plot->yAxis2);
     }
+    else
+    {
+        barText->position->setAxes(plot->xAxis,plot->yAxis);
+    }
 
     if(ydata[pos] < plot->yAxis->range().maxRange / 10.0 && !secondAxis)
     {
-        yCords = ydata[pos] + 10.0;
+        yCords = ydata.at(pos) + spacing;
     }
     else
     {
-        yCords = ydata[pos]/2;
+        yCords = ydata.at(pos)/2;
     }
 
-    barText->position->setType(QCPItemPosition::ptPlotCoords);
-    barText->position->setCoords(xdata[pos]+xOffset,yCords);
 
-    barText->setText(QString::number(ydata[pos]));
+
+    barText->position->setType(QCPItemPosition::ptPlotCoords);
+    barText->position->setCoords(xdata.at(pos)+offSet,yCords);
+
+    barText->setText(QString::number(ydata.at(pos)));
     barText->setFont(barFont);
     barText->setColor(gColor);
     barText->setLayer(layer);
@@ -681,89 +690,32 @@ double calculation::calc_stressScore(double baseValue, int duration) const
 }
 
 
-double calculation::estimate_stress(QString sport, int p_goal, int duration,bool usePM) const
+double calculation::estimate_stressScore(double duration, double distance) const
 {
-    sport = "";
-    double goal = 0;
-    double est_stress = 0;
-    double est_power = 0;
-    double raw_effort = 0;
-    double cv_effort = 0;
-    double thresPower = 0;
-    double athleteWeight = athleteValues->value("weight");
-    double athleteHeight = athleteValues->value("height");
-
     if(isSwim)
     {
-        goal = p_goal;
-    }
-    if(isBike)
-    {
-        if(usePM)
+        if(calc_lapPace(duration,distance*1000.0) > 0)
         {
-            goal = p_goal;
-        }
-        else
-        {
-            goal = get_speed(QTime::fromString(set_time(p_goal),"mm:ss"),0,true)/3.6;
+            return (duration / 3600.0) * (sqrt(pow(static_cast<double>(thresPace) / calc_lapPace(duration,distance*1000.0),3.0))*100.0);
         }
     }
-    if(isRun)
+    else if (isBike || isRun)
     {
-        if(usePM)
+        if(calc_lapPace(duration,distance) > 0)
         {
-            goal = p_goal;
-        }
-        else
-        {
-            goal = get_speed(QTime::fromString(set_time(p_goal),"mm:ss"),0,true)/3.6;
+            return (duration / 3600.0) * (sqrt(pow(static_cast<double>(thresPace) / calc_lapPace(duration,distance),3.0))*100.0);
         }
     }
-    if(isStrength)
+    else if(isStrength)
     {
-        goal = p_goal;
+        return (duration / 3600.0) * (athleteValues->value("weight")*0.5);
     }
-    if(isAlt)
+    else if(isAlt)
     {
-        goal = p_goal;
+       return (duration / 3600.0) * athleteValues->value("weight");
     }
 
-    if(goal > 0)
-    {
-        if(isSwim)
-        {
-            thresPower = thresValues->value("swimpower");
-            est_power = calc_swim_xpower(100,goal,duration,athleteWeight);
-            raw_effort = (duration * est_power) * (est_power / thresPower);         
-        }
-        if(isBike)
-        {
-            thresPower = thresValues->value("bikepower");
-            raw_effort = (duration * goal) * (goal / thresPower);
-        }
-        if(isRun)
-        {
-            thresPower = thresValues->value("runpower");
-            est_power = calc_lnp(goal,athleteHeight,athleteWeight);
-            raw_effort = est_power * duration * (est_power / thresPower);
-        }
-        if(isStrength)
-        {
-            thresPower = thresValues->value("stgpower");
-            raw_effort = (duration * goal) * (goal / thresPower);
-        }
-        if(isAlt)
-        {
-            thresPower = thresValues->value("runpower");
-            raw_effort = (duration * goal) * (goal / thresPower);
-        }
-
-        cv_effort = thresPower * 3600;
-        est_stress = (raw_effort / cv_effort) * 100;
-
-        return set_doubleValue(est_stress,false);
-    }
-    return 0;
+    return duration / distance;
 }
 
 double calculation::set_doubleValue(double value, bool setthree) const

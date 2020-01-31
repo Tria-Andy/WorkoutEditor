@@ -39,7 +39,7 @@ protected:
     double calc_distance(int, double) const;
 
     QTime calc_duration(double,int) const;
-    QTime set_sectoTime(int);
+    QTime set_sectoTime(int) const;
     QString set_time(int) const;
     QString get_workout_pace(double, double,bool) const;
 
@@ -48,7 +48,7 @@ protected:
     double set_doubleValue(double,bool) const;
     int get_thresPercent(QString,bool) const;
 
-    double estimate_stress(QString,int,int,bool) const;
+    double estimate_stressScore(double,double) const;
 
     double calc_lnp(double,double,double) const;
     double current_dayCalories(QDateTime) const;
@@ -61,7 +61,7 @@ protected:
     QCPBars *create_QCPBar(QCustomPlot*,QColor,QVector<double> &xdata,QVector<double> &ydata,bool);
     void create_itemTracer(QCustomPlot *,QString,QCPGraph*,QVector<double> &xdata,QColor,int);
     void create_itemLineText(QCustomPlot *,QString,QFont,QVector<double> &xdata,QVector<double> &ydata,int,bool);
-    void create_itemBarText(QCustomPlot *plot,QString,QFont,QColor,QVector<double> &xdata,QVector<double> &ydata,int,int,bool);
+    void create_itemBarText(QCustomPlot *plot,QString,QFont,QColor,QVector<double> &xdata,QVector<double> &ydata,int,double,bool);
 
 };
 
