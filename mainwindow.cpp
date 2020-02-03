@@ -3249,7 +3249,7 @@ void MainWindow::on_toolButton_menuPaste_clicked()
 
 void MainWindow::on_comboBox_weightmode_currentIndexChanged(const QString &value)
 {
-    if(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate() == ui->dateEdit_selectDay->date())
+    if(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate() == ui->dateEdit_selectWeek->date())
     {
         foodPlan->update_foodMode(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate(),value);
         ui->comboBox_weightmode->setEnabled(false);

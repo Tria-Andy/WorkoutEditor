@@ -213,10 +213,12 @@ Dialog_workCreator::~Dialog_workCreator()
 void Dialog_workCreator::set_controlButtons(bool setButton)
 {
     ui->pushButton_clear->setEnabled(setButton);
+    ui->pushButton_combiMode->setEnabled(setButton);
     ui->toolButton_save->setEnabled(setButton);
     ui->toolButton_delete->setEnabled(setButton);
     ui->pushButton_sync->setEnabled(setButton);
     ui->comboBox_code->setEnabled(setButton);
+
 }
 
 void Dialog_workCreator::get_workouts(QString sport)
@@ -282,7 +284,8 @@ void Dialog_workCreator::on_listWidget_workouts_itemClicked(QListWidgetItem *ite
 void Dialog_workCreator::load_selectedWorkout(QString workID)
 {
     ui->treeWidget_workoutTree->blockSignals(true);
-    ui->treeWidget_workoutTree->clear();
+    if(!ui->pushButton_combiMode->isChecked()) ui->treeWidget_workoutTree->clear();
+
     currentWorkID = workID;
     QStandardItem* workoutItem = stdWorkouts->get_selectedWorkout(workID);
     QTreeWidgetItem *rootItem = ui->treeWidget_workoutTree->invisibleRootItem();
@@ -873,6 +876,7 @@ void Dialog_workCreator::on_comboBox_sport_currentTextChanged(const QString &spo
 void Dialog_workCreator::on_pushButton_clear_clicked()
 {
     this->clearIntTree();
+    ui->pushButton_combiMode->setChecked(false);
     this->set_controlButtons(false);
 }
 
