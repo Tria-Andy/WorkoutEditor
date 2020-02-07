@@ -20,20 +20,26 @@ private slots:
     void on_toolButton_close_clicked();
     void on_comboBox_weekCount_currentIndexChanged(int index);
     void on_toolButton_reset_clicked();
+    void on_toolButton_edit_clicked();
+    void on_treeWidget_foodhistory_itemClicked(QTreeWidgetItem *item, int column);
+    void on_spinBox_sport_valueChanged(int arg1);
+    void on_spinBox_food_valueChanged(int arg1);
 
 private:
     Ui::foodhistory_popup *ui;
     foodplanner *foodplan;
-    QMap<QPair<int,int>,QMap<QDate,QList<QVariant>>> *foodHistory;
+    QMap<QPair<QDate,int>,QMap<QDate,QList<QVariant>>> *foodHistory;
 
     QVector<double> weekList,metaRate,calConversion,calSport,calFood,calDiff,weight;
-    int weekCount,dialogResult;
+    int weekCount;
+    bool updateHistory;
     double athleteWeight;
     QStringList weekLabels;
+    QStringList *historyHeader;
 
     void set_foodHistoryTree();
-
-    void set_plotValues(int,int,bool);
+    void reset_editValues();
+    void set_plotValues(int,bool);
     void set_graph(int,double);
 };
 #endif // FOODHISTORY_POPUP_H

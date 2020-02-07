@@ -10,11 +10,12 @@ foodhistory_popup::foodhistory_popup(QWidget *parent,foodplanner *pFood) :
 
     foodplan = pFood;
     weekCount = foodplan->historyModel->rowCount();
-
-    dialogResult = QDialog::Rejected;
+    historyHeader = settings::getHeaderMap("foodhistheader");
     athleteWeight = this->athleteValues->value("weight");
+    updateHistory = false;
 
     ui->comboBox_weekCount->blockSignals(true);
+
     for(int i = 0; i < 15 && i < weekCount; ++i)
     {
         ui->comboBox_weekCount->addItem(QString::number(i+1));
@@ -28,6 +29,7 @@ foodhistory_popup::foodhistory_popup(QWidget *parent,foodplanner *pFood) :
     subLayout->addElement(0,0,ui->widget_plot->legend);
 
     foodHistory = foodplan->get_foodHistoryMap();
+    this->set_foodHistoryTree();
 
     if(weekCount > 5)
     {
@@ -37,7 +39,7 @@ foodhistory_popup::foodhistory_popup(QWidget *parent,foodplanner *pFood) :
     {
         ui->comboBox_weekCount->setCurrentIndex(ui->comboBox_weekCount->count()-1);
     }
-    this->set_foodHistoryTree();
+
 }
 
 foodhistory_popup::~foodhistory_popup()
@@ -47,82 +49,130 @@ foodhistory_popup::~foodhistory_popup()
 
 void foodhistory_popup::on_toolButton_close_clicked()
 {
-    done(dialogResult);
+    if(updateHistory)
+    {
+        done(QDialog::Accepted);
+    }
+    else
+    {
+        done(QDialog::Rejected);
+    }
 }
 
 void foodhistory_popup::set_foodHistoryTree()
 {
     QTreeWidgetItem *rootItem = ui->treeWidget_foodhistory->invisibleRootItem();
     QTreeWidgetItem *weekItem, *dayItem;
-    ui->treeWidget_foodhistory->setColumnCount(6);
+    ui->treeWidget_foodhistory->blockSignals(true);
+    ui->treeWidget_foodhistory->setEditTriggers(QAbstractItemView::AllEditTriggers);
+    ui->treeWidget_foodhistory->setColumnCount(historyHeader->count());
+    QModelIndex weekIndex;
+    QString weekID;
 
-    for(QMap<QPair<int,int>,QMap<QDate,QList<QVariant>>>::const_iterator it = foodHistory->cbegin(); it != foodHistory->cend(); ++it)
+    QStringList headerLabel;
+    for(int col = 0; col < historyHeader->count(); ++col)
     {
+        headerLabel << historyHeader->at(col);
+    }
+    ui->treeWidget_foodhistory->setHeaderLabels(headerLabel);
+
+    for(QMap<QPair<QDate,int>,QMap<QDate,QList<QVariant>>>::const_iterator it = foodHistory->cbegin(); it != foodHistory->cend(); ++it)
+    {
+        weekIndex = foodplan->get_modelIndex(foodplan->historyModel,it.key().first.toString("dd.MM.yyyy"),2);
+
         weekItem = new QTreeWidgetItem(rootItem);
         weekItem->setData(0,Qt::DisplayRole,it.key().first);
         weekItem->setData(1,Qt::DisplayRole,it.key().second);
+        weekItem->setData(2,Qt::DisplayRole,weekIndex.siblingAtColumn(3).data());
+        weekItem->setData(3,Qt::DisplayRole,weekIndex.siblingAtColumn(4).data());
+        weekItem->setData(7,Qt::DisplayRole,weekIndex.siblingAtColumn(5).data());
 
         for(QMap<QDate,QList<QVariant>>::const_iterator day = it.value().cbegin(); day != it.value().cend(); ++day)
         {
             dayItem = new QTreeWidgetItem();
             dayItem->setData(0,Qt::DisplayRole,day.key());
-            dayItem->setData(1,Qt::DisplayRole,day.value().at(0));
-            dayItem->setData(2,Qt::DisplayRole,day.value().at(1));
-            dayItem->setData(3,Qt::DisplayRole,day.value().at(2));
-            dayItem->setData(4,Qt::DisplayRole,day.value().at(3));
-            dayItem->setData(5,Qt::DisplayRole,day.value().at(4));
+            dayItem->setData(3,Qt::DisplayRole,weekIndex.siblingAtColumn(4).data());
+            dayItem->setData(4,Qt::DisplayRole,day.value().at(2));
+            dayItem->setData(5,Qt::DisplayRole,day.value().at(1));
+            dayItem->setData(6,Qt::DisplayRole,day.value().at(4));
+            dayItem->setData(7,Qt::UserRole,day.value().at(3));
             weekItem->addChild(dayItem);
         }
     }
+    ui->treeWidget_foodhistory->blockSignals(false);
 }
 
-
-void foodhistory_popup::set_plotValues(int currWeek,int count,bool week)
+void foodhistory_popup::reset_editValues()
 {
-    int valueStart = 0;
-    int labelCol = 0;
-    QModelIndex sectionIndex;
+    ui->spinBox_base->setValue(0);
+    ui->dateEdit_day->setDate(QDate::currentDate());
+    ui->spinBox_sport->setValue(0);
+    ui->spinBox_food->setValue(0);
+    ui->spinBox_diff->setValue(0);
+    ui->spinBox_summery->setValue(0);
+}
 
-    if(week)
+void foodhistory_popup::set_plotValues(int weekCount,bool singleWeek)
+{
+    int xCount = singleWeek ? 7 : weekCount;
+
+    weekLabels.clear();
+    weekList.resize(xCount);
+    metaRate.resize(xCount);
+    calConversion.resize(xCount);
+    calSport.resize(xCount);
+    calFood.resize(xCount);
+    calDiff.resize(xCount);
+    weight.resize(xCount);
+    double maxConvers = 0;
+
+    QTreeWidgetItem *weekItem;
+
+    if(singleWeek)
     {
-        sectionIndex = foodplan->historyModel->indexFromItem(foodplan->historyModel->item(currWeek,0));
-        labelCol = 1;
+        weekItem = ui->treeWidget_foodhistory->topLevelItem(weekCount);
+
+        for(int day = 0; day < weekItem->childCount();++day)
+        {
+            weekLabels << weekItem->child(day)->data(0,Qt::DisplayRole).toString();
+            weekList[day] = day+1;
+            weight[day] = 0;
+            metaRate[day] = weekItem->child(day)->data(3,Qt::DisplayRole).toDouble();
+            calSport[day] = weekItem->child(day)->data(4,Qt::DisplayRole).toDouble();
+            calFood[day] = weekItem->child(day)->data(5,Qt::DisplayRole).toDouble();
+            calDiff[day] = weekItem->child(day)->data(6,Qt::DisplayRole).toDouble()*-1;
+
+            calConversion[day] = metaRate[day] + calSport[day];
+            if(calConversion[day] > maxConvers) maxConvers = calConversion[day];
+        }
     }
     else
     {
-        valueStart = currWeek - count;
+        int startWeek = ui->treeWidget_foodhistory->topLevelItemCount()-weekCount;
+        int weekCounter = 0;
+
+        for( ;startWeek < ui->treeWidget_foodhistory->topLevelItemCount(); ++startWeek,++weekCounter)
+        {
+            weekItem = ui->treeWidget_foodhistory->topLevelItem(startWeek);
+            weekLabels << weekItem->data(1,Qt::DisplayRole).toString();
+            weekList[weekCounter] = weekCounter+1;
+            weight[weekCounter] = weekItem->data(2,Qt::DisplayRole).toDouble();
+
+            for(int day = 0; day < weekItem->childCount();++day)
+            {
+                metaRate[weekCounter] += weekItem->child(day)->data(3,Qt::DisplayRole).toDouble();
+                calSport[weekCounter] += weekItem->child(day)->data(4,Qt::DisplayRole).toDouble();
+                calFood[weekCounter] += weekItem->child(day)->data(5,Qt::DisplayRole).toDouble();
+                calDiff[weekCounter] += weekItem->child(day)->data(6,Qt::DisplayRole).toDouble()*-1;
+
+                calConversion[weekCounter] = metaRate[weekCounter] + calSport[weekCounter];
+                if(calConversion[weekCounter] > maxConvers) maxConvers = calConversion[weekCounter];
+            }
+        }
     }
 
-    weekLabels.clear();
-    weekList.resize(count);
-    metaRate.resize(count);
-    calConversion.resize(count);
-    calSport.resize(count);
-    calFood.resize(count);
-    calDiff.resize(count);
-    weight.resize(count);
-    double maxConvers = 0;
+    this->set_graph(xCount,maxConvers);
 
-    for(int i = 0; i < count; ++i,++valueStart)
-    {
-       weekLabels << foodplan->historyModel->data(foodplan->historyModel->index(valueStart,labelCol,sectionIndex)).toString();
-       weight[i] = foodplan->historyModel->data(foodplan->historyModel->index(valueStart,2,sectionIndex)).toDouble();
-       metaRate[i] = foodplan->historyModel->data(foodplan->historyModel->index(valueStart,3,sectionIndex)).toDouble();
-       calSport[i] = foodplan->historyModel->data(foodplan->historyModel->index(valueStart,4,sectionIndex)).toDouble();
-       calFood[i] = foodplan->historyModel->data(foodplan->historyModel->index(valueStart,5,sectionIndex)).toDouble();
-       calDiff[i] = foodplan->historyModel->data(foodplan->historyModel->index(valueStart,6,sectionIndex)).toDouble();
-
-       calConversion[i] = metaRate[i] + calSport[i];
-       if(calConversion[i] > maxConvers) maxConvers = calConversion[i];
-
-    }
-
-    for(int i = 1; i <= count; ++i)
-    {
-        weekList[i-1] = i;
-    }
-
-    this->set_graph(count,maxConvers);
 }
 
 void foodhistory_popup::set_graph(int weekcount,double maxCon)
@@ -230,11 +280,73 @@ void foodhistory_popup::set_graph(int weekcount,double maxCon)
 
 void foodhistory_popup::on_comboBox_weekCount_currentIndexChanged(int index)
 {
-    this->set_plotValues(weekCount,index+1,false);
+    this->set_plotValues(index+1,false);
 }
 
 void foodhistory_popup::on_toolButton_reset_clicked()
 {
-    this->set_plotValues(weekCount,ui->comboBox_weekCount->currentIndex()+1,false);
+    this->set_plotValues(ui->comboBox_weekCount->currentIndex()+1,false);
     ui->comboBox_weekCount->setEnabled(true);
+}
+
+void foodhistory_popup::on_toolButton_edit_clicked()
+{
+    QVector<double> dayValues(5,0);
+
+    QTreeWidgetItem *item = ui->treeWidget_foodhistory->currentItem();
+
+    dayValues[0] = ui->spinBox_base->value();
+    dayValues[1] = ui->spinBox_food->value();
+    dayValues[2] = ui->spinBox_sport->value();
+    dayValues[3] = ui->spinBox_summery->value();
+    dayValues[4] = ui->spinBox_diff->value();
+
+    item->setData(4,Qt::DisplayRole,dayValues.at(2));
+    item->setData(5,Qt::DisplayRole,dayValues.at(1));
+    item->setData(6,Qt::DisplayRole,dayValues.at(4));
+    item->setData(7,Qt::UserRole,dayValues.at(3));
+
+    foodplan->update_foodHistory(ui->dateEdit_day->date(),dayValues);
+    updateHistory = true;
+
+    this->reset_editValues();
+}
+
+void foodhistory_popup::on_treeWidget_foodhistory_itemClicked(QTreeWidgetItem *item, int column)
+{
+    Q_UNUSED(column);
+    if(item->childCount() == 0)
+    {
+        ui->spinBox_base->setValue(item->data(3,Qt::DisplayRole).toInt());
+        ui->dateEdit_day->setDate(item->data(0,Qt::DisplayRole).toDate());
+        ui->spinBox_sport->setValue(item->data(4,Qt::DisplayRole).toInt());
+        ui->spinBox_food->setValue(item->data(5,Qt::DisplayRole).toInt());
+        ui->spinBox_diff->setValue(item->data(6,Qt::DisplayRole).toInt());
+        ui->spinBox_summery->setValue(item->data(7,Qt::UserRole).toInt());
+    }
+    else
+    {
+        if(item->isExpanded())
+        {
+            ui->treeWidget_foodhistory->collapseItem(item);
+            this->reset_editValues();
+        }
+        else
+        {
+            ui->treeWidget_foodhistory->expandItem(item);
+        }
+        ui->comboBox_weekCount->setEnabled(false);
+        this->set_plotValues(ui->treeWidget_foodhistory->indexOfTopLevelItem(item),true);
+    }
+}
+
+void foodhistory_popup::on_spinBox_sport_valueChanged(int sportValue)
+{
+    ui->spinBox_summery->setValue(ui->spinBox_base->value()+sportValue);
+    ui->spinBox_diff->setValue(ui->spinBox_food->value()-ui->spinBox_summery->value());
+}
+
+void foodhistory_popup::on_spinBox_food_valueChanged(int foodValue)
+{
+    ui->spinBox_diff->setValue(foodValue-ui->spinBox_summery->value());
 }

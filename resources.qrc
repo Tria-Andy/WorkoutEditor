@@ -66,6 +66,7 @@
         <file>icons/Percent.png</file>
         <file>icons/Summery.png</file>
         <file>icons/Lightning.png</file>
+        <file>icons/Count.png</file>
     </qresource>
     <qresource prefix="/style">
         <file>qss/style.qss</file>

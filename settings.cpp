@@ -578,6 +578,7 @@ int settings::loadSettings()
             sportIcon.insert("Duration",":/images/icons/Timewatch.png");
             sportIcon.insert("KJ",":/images/icons/Battery.png");
             sportIcon.insert("Distance",":/images/icons/Kilometer.png");
+            sportIcon.insert("Workouts",":/images/icons/Count.png");
 
             delete myvalues;
         }

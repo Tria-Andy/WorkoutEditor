@@ -163,12 +163,12 @@ void day_popup::set_comboWorkouts(QString stdworkID)
 
     if(!workoutMap.value(stdworkID).isEmpty())
     {
-        ui->toolButton_map->setProperty("Image",workoutMap.value(stdworkID).at(7));
+        ui->toolButton_map->setAccessibleName(workoutMap.value(stdworkID).at(7));
         ui->comboBox_stdworkout->setCurrentIndex(ui->comboBox_stdworkout->findData(stdworkID,Qt::UserRole));
     }
     else
     {
-        ui->toolButton_map->setProperty("Image","none.png");
+        ui->toolButton_map->setAccessibleName("none.png");
     }
 
     ui->comboBox_stdworkout->blockSignals(false);
@@ -487,14 +487,14 @@ void day_popup::on_comboBox_stdworkout_currentIndexChanged(int index)
         ui->spinBox_workStress->setValue(stdWorkoutData.at(4).toInt());
         ui->spinBox_workKJoule->setValue(stdWorkoutData.at(5).toInt());
         ui->lineEdit_workPace->setText(this->get_workout_pace(stdWorkoutData.at(3).toDouble(),stdWorkoutData.at(2).toInt(),true));
-        ui->toolButton_map->setProperty("Image",stdWorkoutData.at(7));
+        ui->toolButton_map->setAccessibleName(stdWorkoutData.at(7));
         ui->lineEdit_stdWorkID->setText(workoutID);
     }
 }
 
 void day_popup::on_toolButton_map_clicked()
 {
-    Dialog_map dialogMap(this,stdWorkouts,ui->toolButton_map->property("Image").toString());
+    Dialog_map dialogMap(this,stdWorkouts,ui->toolButton_map->accessibleName());
     dialogMap.setModal(true);
     dialogMap.exec();
 }

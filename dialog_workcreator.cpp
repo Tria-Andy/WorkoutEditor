@@ -276,6 +276,7 @@ void Dialog_workCreator::on_listWidget_workouts_itemClicked(QListWidgetItem *ite
     ui->checkBox_timebased->setChecked(item->data(Qt::UserRole+1).toBool());
     ui->timeEdit_lapTime->setEnabled(item->data(Qt::UserRole+1).toBool());
     ui->doubleSpinBox_distance->setEnabled(!item->data(Qt::UserRole+1).toBool());
+    ui->toolButton_map->setAccessibleName(item->data(Qt::UserRole+2).toString());
     ui->toolButton_map->setProperty("Image",item->data(Qt::UserRole+2).toString());
     ui->pushButton_clear->setEnabled(isWorkLoaded);
     this->control_editPanel(false);
@@ -284,9 +285,13 @@ void Dialog_workCreator::on_listWidget_workouts_itemClicked(QListWidgetItem *ite
 void Dialog_workCreator::load_selectedWorkout(QString workID)
 {
     ui->treeWidget_workoutTree->blockSignals(true);
-    if(!ui->pushButton_combiMode->isChecked()) ui->treeWidget_workoutTree->clear();
 
-    currentWorkID = workID;
+    if(!ui->pushButton_combiMode->isChecked())
+    {
+        ui->treeWidget_workoutTree->clear();
+        currentWorkID = workID;
+    }
+
     QStandardItem* workoutItem = stdWorkouts->get_selectedWorkout(workID);
     QTreeWidgetItem *rootItem = ui->treeWidget_workoutTree->invisibleRootItem();
 
@@ -677,7 +682,7 @@ void Dialog_workCreator::save_selectedWorkout(bool copyWorkout)
     metaList.insert(6, new QStandardItem(QString::number(round(plotMap.last().second.at(3)))));
     metaList.insert(7, new QStandardItem(QString::number(round_workValue(static_cast<int>(plotMap.last().second.at(4))))));
     metaList.insert(8, new QStandardItem(QString::number(ui->checkBox_timebased->isChecked())));
-    metaList.insert(9, new QStandardItem(ui->toolButton_map->property("Image").toString()));
+    metaList.insert(9, new QStandardItem(ui->toolButton_map->accessibleName()));
     metaList.at(0)->setData(stdWorkTags->at(1),Qt::AccessibleTextRole);
 
     stdWorkouts->update_selectedWorkout(currentWorkID,metaList);
@@ -1141,13 +1146,13 @@ void Dialog_workCreator::on_checkBox_timebased_clicked(bool checked)
 void Dialog_workCreator::on_toolButton_map_clicked()
 {
     int dialog_code;
-    Dialog_map dialogMap(this,stdWorkouts,ui->toolButton_map->property("Image").toString());
+    Dialog_map dialogMap(this,stdWorkouts,ui->toolButton_map->accessibleName());
     dialogMap.setModal(true);
     dialog_code = dialogMap.exec();
 
     if(dialog_code == QDialog::Accepted)
     {
-        ui->toolButton_map->setProperty("Image",stdWorkouts->get_workoutImage());
+        ui->toolButton_map->setAccessibleName(stdWorkouts->get_workoutImage());
     }
 
 }

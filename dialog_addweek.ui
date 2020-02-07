@@ -409,7 +409,7 @@
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/images/icons/Summery.png</pixmap>
+               <pixmap resource="resources.qrc">:/images/icons/Count.png</pixmap>
               </property>
              </widget>
             </item>

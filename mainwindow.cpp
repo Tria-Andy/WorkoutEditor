@@ -89,7 +89,6 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->mainToolBar->addWidget(planerMode);
         ui->mainToolBar->addWidget(planMode);
         ui->calendarWidget->setVisible(true);
-        ui->frame_YearAvg->setVisible(false);
         ui->toolButton_weekCurrent->setEnabled(false);
         ui->toolButton_weekMinus->setEnabled(false);
         this->set_phaseButtons();
@@ -162,12 +161,14 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tableWidget_summery->verticalHeader()->hide();
         ui->tableWidget_summery->setItemDelegate(&sum_del); 
 
-        ui->tableView_yearAvg->setEditTriggers(QAbstractItemView::NoEditTriggers);
-        ui->tableView_yearAvg->setItemDelegate(&avgweek_del);
-        ui->tableView_yearAvg->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-        ui->tableView_yearAvg->horizontalHeader()->setSectionsClickable(false);
-        ui->tableView_yearAvg->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-        ui->tableView_yearAvg->verticalHeader()->hide();
+        ui->tableWidget_weekAvg->setColumnCount(1);
+        ui->tableWidget_weekAvg->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableWidget_weekAvg->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableWidget_weekAvg->horizontalHeader()->hide();
+        ui->tableWidget_weekAvg->verticalHeader()->hide();
+        ui->tableWidget_weekAvg->setItemDelegate(&avgweek_del);
+        ui->tableWidget_weekAvg->setVisible(false);
+        ui->widget_planning->setVisible(false);
 
         ui->toolButton_addSelect->setEnabled(false);
         ui->toolButton_clearSelect->setEnabled(false);
@@ -439,7 +440,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
             if(row == it.value().count()-1)
             {
                 item->setData(Qt::ToolTipRole,"Range: "+QString::number(round(it.value().at(3) * minMax.first))+"-"+QString::number(round(it.value().at(3) * minMax.second)));
-                item->setData(Qt::DisplayRole,QString::number(it.value().at(4)) +" - "+QString::number(slidingSum));
+                item->setData(Qt::DisplayRole,QString::number(slidingSum)+" - "+QString::number(it.value().at(4)));
             }
             ui->tableWidget_daySum->closePersistentEditor(item);
 
@@ -602,6 +603,8 @@ void MainWindow::summery_Set(QDate date,QStandardItem *phaseItem)
     sportUseList << sportUse;
     sportUseList << settings::get_listValues("Sportuse");
     int sumCounter = 0;
+    int phaseWeeks = 0;
+
     QMap<QString,QVector<double>> sportSummery;
     QMap<QString,QVector<double>> calcSummery;
 
@@ -609,6 +612,7 @@ void MainWindow::summery_Set(QDate date,QStandardItem *phaseItem)
     {
         sumCounter = settings::getHeaderMap("summery")->count();
         sportSummery.insert(sportUse,QVector<double>(sumCounter,0));
+        ui->label_selection->setText("Week:");
 
         QHash<QDate,QMap<QString,QVector<double> >> *comp = workSchedule->get_compValues();
         for(int day = 0; day < weekDays; ++day)
@@ -618,13 +622,14 @@ void MainWindow::summery_Set(QDate date,QStandardItem *phaseItem)
         }
         headerInfo = workSchedule->get_weekMeta(this->calc_weekID(date));
         headerString = "Week: " + headerInfo.at(0) + " - " + "Phase: " + headerInfo.at(2);
-        ui->lineEdit_currentWeek->setText(headerInfo.at(0));
+        ui->lineEdit_currentSelect->setText(headerInfo.at(0));
     }
     else
     {
         sportUseList.removeLast();
         sumCounter = settings::getHeaderMap("summery")->count()-1;
         sportSummery.insert(sportUse,QVector<double>(sumCounter,0));
+        ui->label_selection->setText("Phase:");
 
         QHash<QString,QMap<QString,QVector<double> >> *compWeek = workSchedule->get_compWeekValues();
         QString weekID;
@@ -641,7 +646,9 @@ void MainWindow::summery_Set(QDate date,QStandardItem *phaseItem)
                 calcSummery = compWeek->value(weekID);
                 this->summery_calc(&calcSummery,&sportSummery,&sportUseList,sumCounter);
             }
+            phaseWeeks = saisonValues->value(saison).at(2).toInt();
             headerString = "All Phases - Weeks: " + saisonValues->value(saison).at(2);
+            ui->lineEdit_currentSelect->setText("All Phases");
         }
         else
         {
@@ -650,7 +657,31 @@ void MainWindow::summery_Set(QDate date,QStandardItem *phaseItem)
                 calcSummery = compWeek->value(phaseItem->child(week,0)->data(Qt::DisplayRole).toString());
                 this->summery_calc(&calcSummery,&sportSummery,&sportUseList,sumCounter);
             }
+            phaseWeeks = phaseItem->rowCount();
             headerString = "Phase: " + phaseItem->data(Qt::DisplayRole).toString() + " - Weeks: " + QString::number(phaseItem->rowCount());
+            ui->lineEdit_currentSelect->setText(phaseItem->data(Qt::DisplayRole).toString());
+        }
+
+        ui->tableWidget_weekAvg->clear();
+        ui->tableWidget_weekAvg->setRowCount(sportUseList.count());
+
+        QString avgValue;
+
+        for(int sports = 0; sports < sportUseList.count(); ++sports)
+        {
+            sportUse = sportUseList.at(sports);
+
+            if(sportSummery.contains(sportUse))
+            {
+                QTableWidgetItem *item = new QTableWidgetItem();
+                avgValue = QString::number(set_doubleValue(sportSummery.value(sportUse).at(0)/phaseWeeks,false))+"-"+
+                           set_sectoTime(round(sportSummery.value(sportUse).at(1)/phaseWeeks)).toString()+"-"+
+                           QString::number(set_doubleValue(sportSummery.value(sportUse).at(3)/phaseWeeks,false))+"-"+
+                           QString::number(set_doubleValue(sportSummery.value(sportUse).at(4)/phaseWeeks,false));
+                item->setData(Qt::DisplayRole,avgValue);
+                item->setData(Qt::AccessibleTextRole,sportUse);
+                ui->tableWidget_weekAvg->setItem(sports,0,item);
+            }
         }
     }
 
@@ -658,7 +689,7 @@ void MainWindow::summery_Set(QDate date,QStandardItem *phaseItem)
     ui->tableWidget_summery->clear();
     ui->tableWidget_summery->setRowCount(sportSummery.count());
     ui->tableWidget_summery->setHorizontalHeaderItem(0,new QTableWidgetItem());
-    ui->tableWidget_summery->horizontalHeaderItem(0)->setData(Qt::EditRole,headerString);
+    ui->tableWidget_summery->horizontalHeaderItem(0)->setData(Qt::DisplayRole,headerString);
     ui->tableWidget_summery->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignLeft);
 
     for(int sports = 0; sports < sportUseList.count(); ++sports)
@@ -674,7 +705,7 @@ void MainWindow::summery_Set(QDate date,QStandardItem *phaseItem)
     for(QMap<int,QString>::const_iterator it = sumValues.cbegin(), end = sumValues.cend(); it != end; ++it)
     {
         QTableWidgetItem *item = new QTableWidgetItem();
-        item->setData(Qt::EditRole,it.value());
+        item->setData(Qt::DisplayRole,it.value());
         ui->tableWidget_summery->setItem(it.key(),0,item);
     }
 }
@@ -2818,7 +2849,14 @@ void MainWindow::toolButton_planMode(bool checked)
     isWeekMode = !checked;
 
     ui->tableWidget_schedule->setVisible(!checked);
+    ui->widget_distributionPlot->setVisible(!checked);
+    ui->frame__pmcControl->setVisible(!checked);
+    ui->widget_stressPlot->setVisible(!checked);
+
+    ui->frame_saisonEstimate->setVisible(checked);
     ui->tableWidget_saison->setVisible(checked);
+    ui->tableWidget_weekAvg->setVisible(checked);
+    ui->widget_planning->setVisible(checked);
 
     if(!checked)
     {
@@ -2834,7 +2872,6 @@ void MainWindow::toolButton_planMode(bool checked)
     }
     ui->comboBox_saisonName->setEnabled(checked);
     ui->calendarWidget->setVisible(!checked);
-    ui->frame_YearAvg->setVisible(checked);
     ui->frame_phases->setVisible(checked);
 }
 
@@ -2936,6 +2973,7 @@ void MainWindow::on_listWidget_weekPlans_itemClicked(QListWidgetItem *item)
 
 void MainWindow::on_toolButton_addMenu_clicked()
 {
+    foodPlan->insert_newMeal(ui->treeView_meals->currentIndex().data(Qt::DisplayRole).toString());
     ui->toolButton_saveMeals->setEnabled(true);
 }
 
@@ -3399,6 +3437,7 @@ void MainWindow::on_actionfood_History_triggered()
     if(dialog_code == QDialog::Accepted)
     {
         ui->actionSave->setEnabled(true);
+        this->fill_foodSumTable(firstdayofweek);
     }
 }
 
@@ -3488,17 +3527,20 @@ void MainWindow::on_pushButton_stressPlot_clicked(bool checked)
 {
     ui->frame_PMC->setVisible(checked);
 
-    if(checked)
+    if(isWeekMode)
     {
-        weekRange = weekRange / 2;
-        ui->pushButton_stressPlot->setIcon(iconMap.value("PaneDown"));
+        if(checked)
+        {
+            weekRange = weekRange / 2;
+            ui->pushButton_stressPlot->setIcon(iconMap.value("PaneDown"));
+        }
+        else
+        {
+            weekRange = settings::get_intValue("weekrange");
+            ui->pushButton_stressPlot->setIcon(iconMap.value("PaneUp"));
+        }
+        this->refresh_schedule();
     }
-    else
-    {
-        weekRange = settings::get_intValue("weekrange");
-        ui->pushButton_stressPlot->setIcon(iconMap.value("PaneUp"));
-    }
-    this->refresh_schedule();
 }
 
 void MainWindow::on_pushButton_currentWeek_clicked(bool checked)

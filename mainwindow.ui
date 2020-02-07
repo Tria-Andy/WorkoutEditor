@@ -284,68 +284,6 @@
              </layout>
             </widget>
            </item>
-           <item>
-            <widget class="QFrame" name="frame_YearAvg">
-             <property name="minimumSize">
-              <size>
-               <width>250</width>
-               <height>200</height>
-              </size>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::Panel</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_2">
-              <property name="spacing">
-               <number>4</number>
-              </property>
-              <property name="leftMargin">
-               <number>2</number>
-              </property>
-              <property name="topMargin">
-               <number>2</number>
-              </property>
-              <property name="rightMargin">
-               <number>2</number>
-              </property>
-              <property name="bottomMargin">
-               <number>2</number>
-              </property>
-              <item>
-               <widget class="QLabel" name="label_4">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="frameShape">
-                 <enum>QFrame::Panel</enum>
-                </property>
-                <property name="frameShadow">
-                 <enum>QFrame::Raised</enum>
-                </property>
-                <property name="text">
-                 <string>Averages per Week:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QTableView" name="tableView_yearAvg"/>
-              </item>
-             </layout>
-            </widget>
-           </item>
           </layout>
          </widget>
         </item>
@@ -763,6 +701,12 @@
                  </property>
                  <item>
                   <widget class="QFrame" name="frame_saisonEstimate">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                     <horstretch>2</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
                    <property name="frameShape">
                     <enum>QFrame::StyledPanel</enum>
                    </property>
@@ -919,14 +863,14 @@
                      <number>2</number>
                     </property>
                     <item>
-                     <widget class="QLabel" name="label_13">
+                     <widget class="QLabel" name="label_selection">
                       <property name="text">
-                       <string>Week:</string>
+                       <string>-</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLineEdit" name="lineEdit_currentWeek">
+                     <widget class="QLineEdit" name="lineEdit_currentSelect">
                       <property name="enabled">
                        <bool>false</bool>
                       </property>
@@ -950,16 +894,6 @@
                        </size>
                       </property>
                      </spacer>
-                    </item>
-                    <item>
-                     <widget class="QLabel" name="label_12">
-                      <property name="text">
-                       <string>Selection:</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QComboBox" name="comboBox_weekSelection"/>
                     </item>
                    </layout>
                   </widget>
@@ -1008,7 +942,27 @@
                   </widget>
                  </item>
                  <item>
+                  <widget class="QCustomPlot" name="widget_planning" native="true">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                     <horstretch>2</horstretch>
+                     <verstretch>2</verstretch>
+                    </sizepolicy>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QCustomPlot" name="widget_distributionPlot" native="true">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                     <horstretch>1</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QTableWidget" name="tableWidget_weekAvg">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>1</horstretch>

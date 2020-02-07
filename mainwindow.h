@@ -413,8 +413,6 @@ public:
     {
         painter->save();
 
-
-
         QFont phase_font,date_font, work_font;
         QStringList sum_values;
         QStringList sportList = settings::get_listValues("Sport");
@@ -665,32 +663,96 @@ public:
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
-        QFont cFont;
-        QString sportname,indexData;
+        QFont headFont,bodyFont;
+        int textMargin = option.rect.width()/50;
+        int iconMargin = 2;
         QStringList sportuse = settings::get_listValues("Sportuse");
-        const QAbstractItemModel *model = index.model();
-        cFont.setPixelSize(12);
 
-        QColor rectColor;
-        QRect rect_text(option.rect.x()+2,option.rect.y(), option.rect.width()-2,option.rect.height());
-        sportname = model->data(model->index(index.row(),0,QModelIndex())).toString().trimmed();
-        indexData = index.data().toString();
+        QString sport = index.data(Qt::AccessibleTextRole).toString();
+        QStringList avgValues = index.data(Qt::DisplayRole).toString().split("-");
+
+        headFont.setBold(true);
+        headFont.setPixelSize(settings::get_fontValue("fontBig"));
+        bodyFont.setBold(false);
+        bodyFont.setPixelSize(settings::get_fontValue("fontMedium"));
+
+        QLinearGradient rectGradient;
+        rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
+        rectGradient.setSpread(QGradient::RepeatSpread);
+        QColor gradColor;
+        gradColor.setHsv(0,0,180,200);
+        QColor rectColor = settings::get_itemColor(sport).toHsv();
+
+        rectColor.setAlpha(225);
+        rectGradient.setColorAt(0,rectColor);
+        rectGradient.setColorAt(1,gradColor);
+
+        QPainterPath sportPath;
+        QRect sportHead(option.rect.x(),option.rect.y(), option.rect.width(),option.rect.height()*0.45);
+        sportPath.addRoundedRect(sportHead,5,5);
+
+        QRect sportIcon(option.rect.x(),option.rect.y(), sportHead.height(),sportHead.height());
+        QRect sportTitle(sportIcon.right()+textMargin,option.rect.y(),(option.rect.width()-sportIcon.width()-textMargin)*0.75,sportHead.height());
+
+        painter->setBrush(rectGradient);
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
         painter->setPen(Qt::black);
+        painter->setFont(headFont);
+        painter->drawPath(sportPath);
+        painter->drawPixmap(sportIcon,settings::sportIcon.value(sport));
+        painter->drawText(sportTitle,Qt::AlignLeft | Qt::AlignVCenter,sport);
 
-        if(index.row() == sportuse.count())
+
+        QPainterPath avgPath;
+        QRect avgInfo(option.rect.x(),sportHead.bottom(),option.rect.width(),option.rect.height()*0.55);
+        avgPath.addRoundedRect(avgInfo,5,5);
+
+        rectGradient.setColorAt(0,rectColor);
+        rectGradient.setColorAt(1,gradColor);
+
+        if(index.row() == 0)
         {
             rectColor = settings::get_itemColor(generalValues->value("sum")).toHsv();
-            cFont.setBold(true);
+            headFont.setBold(true);
         }
         else
         {
-            rectColor = settings::get_itemColor(sportname).toHsv();
-            cFont.setBold(false);
+            rectColor = settings::get_itemColor(sport).toHsv();
         }
-        rectColor.setAlpha(175);
-        painter->fillRect(option.rect,rectColor);
-        painter->setFont(cFont);
-        painter->drawText(rect_text,indexData,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+
+        if(!avgValues.isEmpty())
+        {
+
+         int rectHeight = avgInfo.height();
+         int rectWidth = (option.rect.width()-(rectHeight*avgValues.count()))/avgValues.count();
+
+         QRect workIcon(option.rect.x(),sportHead.bottom()+iconMargin,rectHeight-iconMargin,rectHeight-iconMargin);
+         QRect workValue(workIcon.right()+textMargin,sportHead.bottom(),rectWidth,rectHeight);
+
+         QRect duraIcon(workValue.right(),sportHead.bottom()+iconMargin,rectHeight-iconMargin,rectHeight-iconMargin);
+         QRect duraValue(duraIcon.right()+textMargin,sportHead.bottom(),rectWidth,rectHeight);
+
+         QRect distIcon(duraValue.right(),sportHead.bottom()+iconMargin,rectHeight-iconMargin,rectHeight-iconMargin);
+         QRect distValue(distIcon.right()+textMargin,sportHead.bottom(),rectWidth,rectHeight);
+
+         QRect stressIcon(distValue.right(),sportHead.bottom()+iconMargin,rectHeight-iconMargin,rectHeight-iconMargin);
+         QRect stressValue(stressIcon.right()+textMargin,sportHead.bottom(),rectWidth,rectHeight);
+
+         painter->setBrush(rectGradient);
+         painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+         painter->setPen(Qt::black);
+         painter->setFont(bodyFont);
+         painter->drawPath(avgPath);
+
+         painter->drawPixmap(workIcon,settings::sportIcon.value("Workouts"));
+         painter->drawText(workValue,Qt::AlignLeft | Qt::AlignVCenter,avgValues.at(0));
+         painter->drawPixmap(duraIcon,settings::sportIcon.value("Duration"));
+         painter->drawText(duraValue,Qt::AlignLeft | Qt::AlignVCenter,avgValues.at(1));
+         painter->drawPixmap(distIcon,settings::sportIcon.value("Distance"));
+         painter->drawText(distValue,Qt::AlignLeft | Qt::AlignVCenter,avgValues.at(2));
+         painter->drawPixmap(stressIcon,settings::sportIcon.value("TSS"));
+         painter->drawText(stressValue,Qt::AlignLeft | Qt::AlignVCenter,avgValues.at(3));
+        }
         painter->restore();
     }
 };
