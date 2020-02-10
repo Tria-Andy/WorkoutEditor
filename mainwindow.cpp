@@ -100,6 +100,17 @@ MainWindow::MainWindow(QWidget *parent) :
         }
         avgHeader = settings::getHeaderMap("average");
 
+        statusLabel = new QLabel(this);
+        statusLabel->setText("Status");
+        ui->statusBar->addWidget(statusLabel);
+        statusProgress = new QProgressBar(this);
+        statusProgress->setRange(0,100);
+        statusProgress->setTextVisible(false);
+        statusProgress->setMaximumSize(10000,10);
+
+        ui->statusBar->addPermanentWidget(statusProgress,1);
+
+
         //Editor Mode
         actLoaded = false;
 
@@ -284,6 +295,17 @@ void MainWindow::loadUISettings()
 {
     this->refresh_saisonInfo();
     settings::settingsUpdated = false;
+}
+
+void MainWindow::set_progress(int value)
+{
+    statusProgress->setValue(value);
+
+    if(value == 100)
+    {
+        QTimer::singleShot(2000,statusProgress,SLOT(reset()));
+        statusLabel->setText("Status");
+    }
 }
 
 void MainWindow::freeMem()
@@ -1322,7 +1344,6 @@ void MainWindow::refresh_saisonInfo()
         ui->comboBox_saisonName->addItem(saisonValues->keys().at(i));
     }
     ui->comboBox_saisonName->setEnabled(false);
-    saisonWeeks = saisonValues->value(ui->comboBox_saisonName->currentText()).at(2).toInt();
 }
 
 //ACTIONS**********************************************************************
@@ -1359,51 +1380,30 @@ void MainWindow::on_actionStress_Calculator_triggered()
 
 void MainWindow::on_actionSave_triggered()
 {
+    set_progress(10);
     if(ui->stackedWidget->currentIndex() == PLANER)
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this,
-                                      tr("Save Workouts"),
-                                      "Save Workout Schedule?",
-                                      QMessageBox::Yes|QMessageBox::No
-                                      );
-        if (reply == QMessageBox::Yes)
-        {
-            workSchedule->save_workouts(isWeekMode);
-            ui->actionSave->setEnabled(workSchedule->get_isUpdated());
-        }
+        statusLabel->setText("Save Schedule");
+        set_progress(50);
+        workSchedule->save_workouts(isWeekMode);
+        ui->actionSave->setEnabled(workSchedule->get_isUpdated());
+        set_progress(100);
     }
     else if(ui->stackedWidget->currentIndex() == EDITOR)
     {
-        ui->progressBar_fileState->setValue(10);
-        QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(this,
-                                          tr("Save File"),
-                                          "Save Changes to Golden Cheetah?",
-                                          QMessageBox::Yes|QMessageBox::No
-                                          );
-        if (reply == QMessageBox::Yes)
-        {
-            currActivity->prepare_save();
-            this->save_activity();
-        }
-        ui->progressBar_fileState->setValue(100);
-        QTimer::singleShot(2000,ui->progressBar_fileState,SLOT(reset()));
+        statusLabel->setText("Save GC File");
+        set_progress(50);
+        currActivity->prepare_save();
+        this->save_activity();
+        set_progress(100);
     }
     else if(ui->stackedWidget->currentIndex() == FOOD)
     {
-        QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(this,
-                                          tr("Save Food Plan"),
-                                          "Save Food Plan?",
-                                          QMessageBox::Yes|QMessageBox::No
-                                          );
-        if (reply == QMessageBox::Yes)
-        {
-            foodPlan->save_foolPlan();
-            //foodPlan->write_foodHistory();
-            ui->actionSave->setEnabled(false);
-        }
+        statusLabel->setText("Save Food Plan");
+        set_progress(50);
+        foodPlan->save_foolPlan();
+        ui->actionSave->setEnabled(false);
+        set_progress(100);
     }
 }
 
@@ -2350,7 +2350,7 @@ void MainWindow::save_activity()
 
            currActivity->update_activityMap(intKey,intValues);
        }
-       ui->progressBar_fileState->setValue(row*intCount);
+       set_progress(row*intCount);
     }
     currActivity->prepare_mapToJson();
 }
@@ -2877,13 +2877,13 @@ void MainWindow::toolButton_planMode(bool checked)
 
 void MainWindow::on_actionRefresh_Filelist_triggered()
 {
+    statusLabel->setText("Refresh Filelist");
     ui->treeWidget_activityfiles->clear();
     ui->treeWidget_activityfiles->setColumnCount(currActivity->gcActivtiesMap.last().count());
-    ui->progressBar_fileState->setValue(10);
+    set_progress(10);
     currActivity->check_activityFiles();
     this->activityList(ui->treeWidget_activityfiles->columnCount()-1);
-    ui->progressBar_fileState->setValue(100);
-    QTimer::singleShot(2000,ui->progressBar_fileState,SLOT(reset()));
+    set_progress(100);
 }
 
 void MainWindow::on_comboBox_saisonName_currentIndexChanged(const QString &value)
@@ -3540,6 +3540,20 @@ void MainWindow::on_pushButton_stressPlot_clicked(bool checked)
             ui->pushButton_stressPlot->setIcon(iconMap.value("PaneUp"));
         }
         this->refresh_schedule();
+    }
+    else
+    {
+        if(checked)
+        {
+            weekRange = weekRange / 2;
+            ui->pushButton_stressPlot->setIcon(iconMap.value("PaneDown"));
+        }
+        else
+        {
+            weekRange = settings::get_intValue("weekrange");
+            ui->pushButton_stressPlot->setIcon(iconMap.value("PaneUp"));
+        }
+        this->refresh_saison();
     }
 }
 

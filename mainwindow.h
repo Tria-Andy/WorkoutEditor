@@ -1057,6 +1057,9 @@ private:
     QDate firstdayofweek;
     QString dateFormat,longTime,shortTime;
     QHash<QString,QString> *gcValues,*generalValues;
+    QLabel *statusLabel;
+    QProgressBar *statusProgress;
+
 
     //Intervall Chart
     void set_polishPlot(int);
@@ -1093,6 +1096,7 @@ private:
     void set_phaseButtons();
     void refresh_saisonInfo();
     void loadUISettings();
+    void set_progress(int);
 
     //Editor
     bool clearActivtiy();

@@ -215,7 +215,7 @@ void day_popup::set_exportContent()
     {
         sampleMap.insert(i,sampleValues);
     }
-
+    set_progress(25);
     QDateTime workoutDateTime(popupDate,set_sectoTime(selectedWorkout.at(0).toInt()));
     QString sport,stressType,commonRI;
     QString totalWork = selectedWorkout.at(8);
@@ -235,7 +235,7 @@ void day_popup::set_exportContent()
         if(sport == settings::StrengthLabel) commonRI = "4.0";
         stressType = "triscore";
     }
-
+    set_progress(50);
     this->rideData.insert("STARTTIME",workoutDateTime.toString("yyyy/MM/dd hh:mm:ss UTC"));
     this->rideData.insert("DEVICETYPE","Manual Import");
     this->rideData.insert("IDENTIFIER","");
@@ -262,9 +262,9 @@ void day_popup::set_exportContent()
     overrideData.insert("total_work",totalWork);
     overrideData.insert(stressType,selectedWorkout.at(7));
 
+    set_progress(75);
     this->prepareWrite_JsonFile();
-
-    QMessageBox::information(this,"Export Workout","Workout Informations Exported!",QMessageBox::Ok);
+    set_progress(100);
 }
 
 
@@ -314,6 +314,7 @@ void day_popup::set_result(int result)
 
     if(ui->toolButton_dayEdit->isChecked())
     {
+        set_progress(25);
         if(result == MOVE || result == COPY)
         {
             workSchedule->workoutUpdates.insert(ui->dateEdit_workDate->date(),workoutMap);
@@ -326,9 +327,11 @@ void day_popup::set_result(int result)
         {
             workSchedule->workoutUpdates.insert(popupDate,valueList);
         }
+        set_progress(50);
     }
     else
     {
+        set_progress(25);
         if(result == MOVE || result == COPY)
         {
             valueList = workSchedule->get_workouts(SCHEDULE,ui->dateEdit_workDate->date().toString(workSchedule->dateFormat));
@@ -346,6 +349,7 @@ void day_popup::set_result(int result)
             }
 
             workSchedule->workoutUpdates.insert(ui->dateEdit_workDate->date(),this->reorder_workouts(&valueList));
+
         }
         if(result == EDIT)
         {
@@ -373,8 +377,10 @@ void day_popup::set_result(int result)
             workSchedule->workoutUpdates.insert(popupDate,this->reorder_workouts(&workoutMap));
             this->reset_controls();
         }
+        set_progress(50);
     }
 
+    set_progress(75);
     workSchedule->set_workoutData();
 
     ui->dateEdit_workDate->setEnabled(false);
@@ -382,6 +388,7 @@ void day_popup::set_result(int result)
     ui->lineEdit_selected->setText("-");
     this->init_dayWorkouts(popupDate);
     ui->toolButton_dayEdit->setChecked(false);
+    set_progress(100);
 }
 
 void day_popup::reset_controls()
@@ -404,6 +411,16 @@ void day_popup::reset_controls()
     this->set_controls(false);
 }
 
+void day_popup::set_progress(int value)
+{
+    ui->progressBar_save->setValue(value);
+
+    if(value == 100)
+    {
+        QTimer::singleShot(2000,ui->progressBar_save,SLOT(reset()));
+    }
+}
+
 void day_popup::on_toolButton_close_clicked()
 {
     reject();
@@ -411,6 +428,8 @@ void day_popup::on_toolButton_close_clicked()
 
 void day_popup::on_toolButton_editMove_clicked()
 {
+    set_progress(10);
+
     if(moveWorkout)
     {
         moveWorkout = false;
@@ -424,11 +443,13 @@ void day_popup::on_toolButton_editMove_clicked()
 
 void day_popup::on_toolButton_copy_clicked()
 {
+    set_progress(10);
     this->set_result(COPY);
 }
 
 void day_popup::on_toolButton_delete_clicked()
 {
+    set_progress(10);
     this->set_result(DEL);
 }
 
@@ -461,14 +482,8 @@ void day_popup::on_toolButton_dayEdit_clicked(bool checked)
 
 void day_popup::on_toolButton_upload_clicked()
 {
-    QMessageBox::StandardButton reply;
-
-    reply = QMessageBox::question(this,"Export Workout","Export Workout Informations to GC?",QMessageBox::Yes|QMessageBox::No);
-
-    if (reply == QMessageBox::Yes)
-    {
-        this->set_exportContent();
-    }
+    set_progress(10);
+    this->set_exportContent();
 }
 
 void day_popup::on_comboBox_stdworkout_currentIndexChanged(int index)

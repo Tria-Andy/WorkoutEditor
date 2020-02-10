@@ -183,6 +183,7 @@ private:
     void set_exportContent();
     void set_result(int);
     void reset_controls();
+    void set_progress(int);
 };
 
 #endif // DAY_POPUP_H

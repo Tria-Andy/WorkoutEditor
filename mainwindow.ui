@@ -1265,31 +1265,6 @@
              </column>
             </widget>
            </item>
-           <item>
-            <widget class="QProgressBar" name="progressBar_fileState">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>5</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>6</height>
-              </size>
-             </property>
-             <property name="toolTipDuration">
-              <number>7</number>
-             </property>
-             <property name="value">
-              <number>0</number>
-             </property>
-             <property name="textVisible">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
           </layout>
          </widget>
         </item>
@@ -3683,7 +3658,7 @@
      <x>0</x>
      <y>0</y>
      <width>1234</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
