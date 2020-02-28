@@ -144,20 +144,16 @@ private slots:
     void on_toolButton_close_clicked();
     void on_toolButton_copy_clicked();
     void on_toolButton_paste_clicked();
-
     void on_tableWidget_sportValues_itemClicked(QTableWidgetItem *item);
-
     void on_toolButton_editSport_clicked();
-
     void on_timeEdit_duration_userTimeChanged(const QTime &time);
-
     void on_doubleSpinBox_distance_valueChanged(double arg1);
 
 private:
     Ui::Dialog_addweek *ui;
     schedule *workSched;
     del_addweek week_del;
-    QMap<QString, QVector<double>> compValues;
+    QMap<QString,QVector<double>> compValues;
     QVector<double> weekSummery;
     QStringList sportuseList,weekMeta;
     int sportlistCount,weekDuration,sportDuration;

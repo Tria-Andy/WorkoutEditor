@@ -198,6 +198,9 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, standardWorkouts *pworko
     hButton->addWidget(updateClose);
     diaLayout->addWidget(buttonFrame);
 
+    ui->spinBox_level->setValue(0);
+    ui->comboBox_levelName->setCurrentIndex(-1);
+
     connect(updateClose,SIGNAL(clicked(bool)),updateDialog,SLOT(reject()));
     connect(updateAll,SIGNAL(toggled(bool)),this,SLOT(set_updateDates(bool)));
     connect(updateOk,SIGNAL(clicked(bool)),this,SLOT(update_workouts()));
@@ -436,7 +439,7 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasChilds)
         if(item->data(0,Qt::DisplayRole).toString() == isBreak)
         {
             defaultDist = percent = 0.0;
-            defaultTime.setHMS(0,0,30);
+            defaultTime.setHMS(0,0,25);
             level = 0;
             tempID = 0;
             pValue = 0;

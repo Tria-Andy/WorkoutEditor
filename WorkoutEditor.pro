@@ -37,7 +37,6 @@ SOURCES += main.cpp\
     dialog_pacecalc.cpp \
     standardworkouts.cpp \
     dialog_addweek.cpp \
-    year_popup.cpp \
     schedule.cpp \
     dialog_week_copy.cpp \
     dialog_version.cpp \
@@ -61,7 +60,6 @@ HEADERS  += mainwindow.h \
     dialog_pacecalc.h \
     standardworkouts.h \
     dialog_addweek.h \
-    year_popup.h \
     schedule.h \
     dialog_week_copy.h \
     dialog_version.h \
@@ -82,7 +80,6 @@ FORMS    += mainwindow.ui \
     day_popup.ui \
     dialog_settings.ui \
     dialog_pacecalc.ui \
-    year_popup.ui \
     dialog_week_copy.ui \
     dialog_version.ui \
     dialog_workcreator.ui \

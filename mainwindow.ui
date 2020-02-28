@@ -737,7 +737,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QComboBox" name="comboBox"/>
+                     <widget class="QComboBox" name="comboBox_saisonSport"/>
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_8">
@@ -752,11 +752,39 @@
                       </property>
                      </spacer>
                     </item>
+                    <item>
+                     <widget class="QLabel" name="label_4">
+                      <property name="text">
+                       <string>Phasestart:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDateEdit" name="dateEdit_phaseStart">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_12">
+                      <property name="text">
+                       <string>Weekcount:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSpinBox" name="spinBox_phaseWeeks">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QFrame" name="frame__pmcControl">
+                  <widget class="QFrame" name="frame_pmcControl">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>2</horstretch>
@@ -932,33 +960,57 @@
                   <number>2</number>
                  </property>
                  <item>
-                  <widget class="QCustomPlot" name="widget_stressPlot" native="true">
+                  <widget class="QWidget" name="widget_stressPlot" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>2</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <layout class="QHBoxLayout" name="stressPlot_Layout">
+                    <property name="spacing">
+                     <number>1</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>1</number>
+                    </property>
+                   </layout>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCustomPlot" name="widget_planning" native="true">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                     <horstretch>2</horstretch>
-                     <verstretch>2</verstretch>
-                    </sizepolicy>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QCustomPlot" name="widget_distributionPlot" native="true">
+                  <widget class="QWidget" name="widget_distribution" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>1</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <layout class="QHBoxLayout" name="distribution_Layout">
+                    <property name="spacing">
+                     <number>1</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>1</number>
+                    </property>
+                   </layout>
                   </widget>
                  </item>
                  <item>

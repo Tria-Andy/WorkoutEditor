@@ -14,7 +14,6 @@ public:
     double calc_totalWork(double,double,int) const;
     double get_speed(QTime,double,bool) const;
     QString get_currentSport() {return currentSport;}
-    //QString currentSport;
 
 private:
 
@@ -55,14 +54,11 @@ protected:
     QString calc_weekID(QDate);
     QHash<QString,double> *thresValues, *athleteValues;
 
-
     //QCP Objects
-    QCPGraph *create_QCPLine(QCustomPlot*, QString,QColor,QVector<double> &xdata,QVector<double> &ydata,bool);
-    QCPBars *create_QCPBar(QCustomPlot*,QColor,QVector<double> &xdata,QVector<double> &ydata,bool);
-    void create_itemTracer(QCustomPlot *,QString,QCPGraph*,QVector<double> &xdata,QColor,int);
-    void create_itemLineText(QCustomPlot *,QString,QFont,QVector<double> &xdata,QVector<double> &ydata,int,bool);
-    void create_itemBarText(QCustomPlot *plot,QString,QFont,QColor,QVector<double> &xdata,QVector<double> &ydata,int,double,bool);
-
+    QCPGraph *create_QCPLine(QCustomPlot*, QString,QColor,bool);
+    QCPBars *create_QCPBar(QCustomPlot*,QString,QColor,bool);
+    void create_itemTracer(QCustomPlot *,QString,QCPGraph*,double,double,QColor,bool);
+    void create_itemBarText(QCustomPlot *plot,QString,QFont,QColor,double,double,double,double,QCPAxis*);
 };
 
 #endif // CALCULATION_H

@@ -25,16 +25,19 @@
 #include "settings.h"
 #include "calculation.h"
 #include "xmlhandler.h"
+#include "standardworkouts.h"
 
 class schedule : public xmlHandler, public calculation
 {
 
 public:
-    schedule();
+    schedule(standardWorkouts *pworkouts = nullptr);
     bool newSaison;
     QStandardItemModel *scheduleModel,*phaseModel;
     QString dateFormat,longTime,shortTime;
     QHash<QDate,QMap<int,QStringList>> workoutUpdates;
+
+    QCustomPlot *stressPlot,*levelPlot,*compPlot;
 
     QString get_weekPhase(QDate);
     QString get_selSaison() {return selSaison;}
@@ -49,7 +52,8 @@ public:
     QMap<QDate,QPair<double,double> > stressValues;
     QMap<QDate,int> get_linkStdWorkouts(QString key) {return linkedWorkouts.value(key);}
     QHash<QDate,QMap<QString,QVector<double> >> *get_compValues() {return &compMap;}
-    QHash<QString,QMap<QString,QVector<double> >> *get_compWeekValues() {return &compWeekMap;}
+    QMap<QString,QMap<QString,QVector<double>>> *get_compWeekValues() {return &compWeekMap;}
+    QMap<QDate,QPair<QString,QString>> *get_weekPhaseMap() {return &weekPhaseMap;}
 
     void init_scheduleData();
     void save_workouts(bool);
@@ -61,6 +65,9 @@ public:
     bool get_isUpdated() {return isUpdated;}
     void set_selSaison(QString value) {selSaison = value;}
     void update_stressMap(QDate,QVector<double>);
+    void calc_levelPlot(QDate);
+    void calc_pmcPlot(QDate,bool,int);
+    void calc_compPlot(int,QDate,QString);
 
     //Workout
     //Setter
@@ -68,6 +75,7 @@ public:
 
     //edit Workouts
     void set_workoutData();
+    void get_summery(int,QString);
     void update_linkedWorkouts(QDate,QString,int,bool);
     void set_weekCompValues(QStringList,QMap<QString,QVector<double>>);
     void add_contest(QString,QDate,QStringList);
@@ -78,21 +86,31 @@ protected:
 
 private:
     bool isUpdated;
+    int weekDays;
+    standardWorkouts *stdWorkouts;
     QDate firstdayofweek;
     QHash<QString,double> *doubleValues;
     QHash<QString,QString> *gcValues,*fileMap;
 
-    QStringList sportTags; 
+    QStringList sportTags,levelList;
     QStringList *macroTags,*scheduleTags,*saisonTags;
     QString selSaison;
 
     QMap<QString,QStringList> saisonValues;
     QHash<QString,QMap<QDate,QStringList>> contestMap;
+    QMap<QDate,QPair<QString,QString>> weekPhaseMap;
     QHash<QDate,QMap<QString,QVector<double>>> compMap;
-    QHash<QString,QMap<QString,QVector<double>>> compWeekMap;
+    QMap<QString,QMap<QString,QVector<double>>> compWeekMap;
     QMap<QDate,QVector<double>> stressMap;
     QHash<QString,QMap<QDate,int>> linkedWorkouts;
     QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
+    void set_plotObj();
+
+
+    QCPBars *duraBars,*distBars,*levelBar,*workCompBar,*distCompBar,*duraCompBar,*stressCompBar;
+    QCPBarsGroup *stressBars,*compBars;
+    QCPGraph *ltsLine,*stsLine,*stressLine,*tsbLine;
+    QCPRange xRange;
 
     void reset_workTime();
     void set_compValues(bool,QDate,QMap<int,QStringList>);

@@ -484,24 +484,23 @@ QString calculation::calc_weekID(QDate workoutDate)
     return weeknumber;
 }
 
-QCPGraph *calculation::create_QCPLine(QCustomPlot *plot,QString name,QColor gColor,QVector<double> &xdata, QVector<double> &ydata, bool secondAxis)
+QCPGraph *calculation::create_QCPLine(QCustomPlot *plot,QString label,QColor gColor, bool secondAxis)
 {
     QCPGraph *graph = plot->addGraph();
     if(secondAxis)
     {
         graph->setValueAxis(plot->yAxis2);
     }
-    graph->setName(name);
+    graph->setName(label);
     graph->setLineStyle(QCPGraph::lsLine);
-    graph->setData(xdata,ydata);
     graph->setAntialiased(true);
     graph->setPen(QPen(gColor,1));
-    graph->setLayer(name);
+    graph->setLayer(label);
 
     return graph;
 }
 
-QCPBars *calculation::create_QCPBar(QCustomPlot *plot,QColor gColor, QVector<double> &xdata,QVector<double> &ydata,bool secondAxis)
+QCPBars *calculation::create_QCPBar(QCustomPlot *plot,QString label,QColor gColor,bool secondAxis)
 {
     QCPBars *bars;
     if(secondAxis)
@@ -514,78 +513,51 @@ QCPBars *calculation::create_QCPBar(QCustomPlot *plot,QColor gColor, QVector<dou
     }
 
     bars->setAntialiased(true);
+    bars->setName(label);
     bars->setPen(QPen(gColor));
     gColor.setAlpha(80);
     bars->setBrush(QBrush(gColor));
-    bars->setData(xdata,ydata);
 
     return bars;
 }
 
-void calculation::create_itemTracer(QCustomPlot *plot,QString layer,QCPGraph *graphline, QVector<double> &xdata,QColor tColor,int pos)
+void calculation::create_itemTracer(QCustomPlot *plot,QString layer,QCPGraph *graphline,double xdata,double ydata,QColor tColor,bool showText)
 {
-    QCPItemTracer *tracer = new QCPItemTracer(plot);
-    tracer->setGraph(graphline);
-    tracer->setGraphKey(xdata[pos]);
-    tracer->setStyle(QCPItemTracer::tsCircle);
-    tracer->setBrush(QBrush(tColor));
-    tracer->setLayer(layer);
-}
+    QCPItemTracer *itemTracer = new QCPItemTracer(plot);
+    itemTracer->setGraph(graphline);
+    itemTracer->setGraphKey(xdata);
+    itemTracer->setStyle(QCPItemTracer::tsCircle);
+    itemTracer->setBrush(QBrush(tColor));
+    itemTracer->setLayer(layer);
 
-void calculation::create_itemLineText(QCustomPlot *plot,QString layer,QFont lineFont, QVector<double> &xdata,QVector<double> &ydata,int pos,bool secondAxis)
-{
-    QCPItemText *itemText = new QCPItemText(plot);
-    if(secondAxis)
+    if(showText)
     {
-        itemText->position->setAxes(plot->xAxis,plot->yAxis2);
+        QCPItemText *itemText = new QCPItemText(plot);
+        itemText->setText(QString::number(ydata));
+        itemText->setTextAlignment(Qt::AlignCenter);
+        itemText->setClipToAxisRect(false);
+        itemText->setPositionAlignment(Qt::AlignHCenter|Qt::AlignBottom);
+        itemText->position->setParentAnchor(itemTracer->position);
+        itemText->setColor(tColor);
+        itemText->setPadding(QMargins(1, 1, 1, 1));
+        itemText->setLayer(layer);
     }
-    itemText->position->setType(QCPItemPosition::ptPlotCoords);
-    itemText->setPositionAlignment(Qt::AlignHCenter|Qt::AlignBottom);
-    itemText->position->setCoords(xdata[pos],ydata[pos]+1);
-    itemText->setText(QString::number(ydata[pos]));
-    itemText->setTextAlignment(Qt::AlignCenter);
-    itemText->setFont(lineFont);
-    itemText->setPadding(QMargins(1, 1, 1, 1));
-    itemText->setLayer(layer);
 }
 
-void calculation::create_itemBarText(QCustomPlot *plot,QString layer,QFont barFont, QColor gColor, QVector<double> &xdata, QVector<double> &ydata, int pos, double offSet,bool secondAxis)
+void calculation::create_itemBarText(QCustomPlot *plot,QString layer,QFont barFont, QColor gColor, double xdata, double ydata,double xoffSet,double yoffSet,QCPAxis *yAxis)
 {
-    double yCords = 0;
-    double spacing = 10.0;
     QCPItemText *barText = new QCPItemText(plot);
-
+    barText->position->setAxes(plot->xAxis,yAxis);
     barText->setClipToAxisRect(false);
 
-    if(secondAxis)
-    {
-        barText->position->setAxes(plot->xAxis,plot->yAxis2);
-    }
-    else
-    {
-        barText->position->setAxes(plot->xAxis,plot->yAxis);
-    }
-
-    if(ydata[pos] < plot->yAxis->range().maxRange / 10.0 && !secondAxis)
-    {
-        yCords = ydata.at(pos) + spacing;
-    }
-    else
-    {
-        yCords = ydata.at(pos)/2;
-    }
-
-
-
     barText->position->setType(QCPItemPosition::ptPlotCoords);
-    barText->position->setCoords(xdata.at(pos)+offSet,yCords);
-
-    barText->setText(QString::number(ydata.at(pos)));
+    barText->position->setCoords(xdata+xoffSet,ydata+yoffSet);
+    barText->setPositionAlignment(Qt::AlignCenter | Qt::AlignVCenter);
+    barText->setText(QString::number(ydata));
     barText->setFont(barFont);
     barText->setColor(gColor);
     barText->setLayer(layer);
 }
-
 
 double calculation::calc_swim_xpower(double distance,double pace,double time,double athleteWeight) const
 {

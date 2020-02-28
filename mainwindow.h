@@ -33,7 +33,6 @@
 #include "dialog_version.h"
 #include "day_popup.h"
 #include "week_popup.h"
-#include "year_popup.h"
 #include "standardworkouts.h"
 #include "stress_popup.h"
 #include "foodmacro_popup.h"
@@ -250,7 +249,6 @@ public:
         painter->restore();
     }
 };
-
 class saison_delegate : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
@@ -651,7 +649,6 @@ public:
         painter->restore();
     }
 };
-
 class del_avgweek : public QStyledItemDelegate, public calculation
 {
     Q_OBJECT
@@ -1060,7 +1057,6 @@ private:
     QLabel *statusLabel;
     QProgressBar *statusProgress;
 
-
     //Intervall Chart
     void set_polishPlot(int);
     void init_polishgraph();
@@ -1084,10 +1080,6 @@ private:
     QString set_summeryString(int,QMap<QString,QVector<double>>*,QString);
     void set_saisonValues(QStringList*,QString,int);
     void workoutSchedule(QDate);
-    void set_pmcData(QDate,bool,int);
-    void set_pmcPlot();
-    void set_distributionPlot();
-    void set_distributionData(QDate);
     void saisonSchedule(QString);
     bool check_Date(QDate);
     QString get_weekRange();
@@ -1149,7 +1141,6 @@ private slots:
 
     //Planner
     void on_calendarWidget_clicked(const QDate &date);
-    void on_tableWidget_summery_clicked(const QModelIndex &index);
     void on_actionEdit_Week_triggered();
     void on_toolButton_weekCurrent_clicked();
     void on_toolButton_weekMinus_clicked();
@@ -1177,7 +1168,6 @@ private slots:
     void on_comboBox_saisonName_currentIndexChanged(const QString &arg1);
     void on_actionSave_triggered();
     void on_actionDelete_triggered();
-    void activityTreeSection(int);
 
     //Food
     void on_toolButton_addMenu_clicked();
@@ -1222,6 +1212,7 @@ private slots:
     void on_pushButton_currentWeek_clicked(bool checked);
     void on_spinBox_extWeeks_valueChanged(int arg1);
     void on_toolButton_extReset_clicked();
+    void on_comboBox_saisonSport_currentIndexChanged(const QString &arg1);
 };
 
 #endif // MAINWINDOW_H

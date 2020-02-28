@@ -19,7 +19,7 @@
 #include "dialog_addweek.h"
 #include "ui_dialog_addweek.h"
 
-Dialog_addweek::Dialog_addweek(QWidget *parent, QString sel_week, schedule *p_sched) :
+Dialog_addweek::Dialog_addweek(QWidget *parent,QString sel_week, schedule *p_sched) :
     QDialog(parent),
     ui(new Ui::Dialog_addweek)
 {
@@ -58,7 +58,9 @@ void Dialog_addweek::fill_weekValues(QString selWeekID)
     ui->dateEdit_selectDate->blockSignals(true);
 
     weekMeta = workSched->get_weekMeta(selWeekID);
+
     compValues = workSched->get_compWeekValues()->value(selWeekID);
+
     ui->label_header->clear();
     ui->label_header->setText("Saison: "+ generalValues->value("saison")  +" - Week: "+ weekMeta.at(1)+" ("+selWeekID +") - Phase: "+weekMeta.at(2));
 
