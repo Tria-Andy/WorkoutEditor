@@ -156,6 +156,7 @@ private:
     QMap<QString,QVector<double>> compValues;
     QVector<double> weekSummery;
     QStringList sportuseList,weekMeta;
+    int sportRow;
     int sportlistCount,weekDuration,sportDuration;
     bool update;
     QHash<QString,QString> *generalValues;
