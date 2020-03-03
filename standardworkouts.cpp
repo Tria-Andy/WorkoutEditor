@@ -216,10 +216,19 @@ QStandardItem *standardWorkouts::get_modelItem(QString searchString, int col)
     return list.at(0);
 }
 
-void standardWorkouts::delete_stdWorkout(QString workID,bool isdelete)
+void standardWorkouts::delete_stdWorkout(QString sport,QString workID)
 {
-    get_modelIndex(workID,0);
+    QModelIndex index = get_modelIndex(workID,1);
+    QStandardItem *item = get_modelItem(workID,1);
 
+    stdWorkoutsModel->removeRows(0,item->rowCount(),index);
+    stdWorkoutsModel->removeRow(item->row(),index.parent());
+
+    QHash<QString,QVector<QString>> workoutInfo = workoutMap.value(sport);
+    workoutInfo.remove(workID);
+    workoutMap.insert(sport,workoutInfo);
+    workoutUpdate = true;
+    this->save_workouts();
 }
 
 void standardWorkouts::save_workouts()

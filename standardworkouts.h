@@ -39,7 +39,7 @@ public:
     void set_image(QString imageName) {workoutImage = imageName;}
     void update_selectedWorkout(QString,QList<QStandardItem*>);
     void save_selectedWorkout(QString,QString);
-    void delete_stdWorkout(QString,bool);
+    void delete_stdWorkout(QString,QString);
     void save_workouts();
 
 protected:

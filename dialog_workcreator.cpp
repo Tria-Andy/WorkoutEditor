@@ -1054,7 +1054,7 @@ void Dialog_workCreator::on_toolButton_delete_clicked()
 
     if (reply == QMessageBox::Yes)
     {
-        stdWorkouts->delete_stdWorkout(currentWorkID,true);
+        stdWorkouts->delete_stdWorkout(currentSport,currentWorkID);
         this->clearIntTree();
         this->get_workouts(currentSport);
     }
