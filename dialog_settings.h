@@ -111,7 +111,6 @@ private slots:
     void enableSavebutton();
     void on_comboBox_contestsport_currentIndexChanged(const QString &arg1);
     void on_comboBox_contestdist_currentIndexChanged(const QString &arg1);
-
     void on_treeWidget_stressValue_itemClicked(QTreeWidgetItem *item, int column);
 
 private:
@@ -122,6 +121,7 @@ private:
     foodplanner *food_ptr;
     QHash<QString,QColor> colorMapCache;
     QCheckBox *tempCheck;
+    QDoubleSpinBox *palValueDay;
     QStringList *stressHeader;
     QStringList sportList,model_header,contestTags;
     del_level level_del;
@@ -144,7 +144,7 @@ private:
     void updateListMap(int,bool);
     void writeChangedValues();
     void writeRangeValues(QString);
-    void refresh_saisonCombo();
+    void refresh_saisonCombo(bool);
     void set_saisonInfo(QString);
     void refresh_contestTable(QString);
     void refresh_macros();

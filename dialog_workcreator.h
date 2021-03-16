@@ -117,6 +117,7 @@ private:
     schedule *worksched;
     standardWorkouts *stdWorkouts;
     QString isSeries,isGroup,currentWorkID,isBreak,viewBackground;
+    QPair<int,int> setRepCount;
     int thresValue;
     QHash<QString,QMap<int,QString>> *xmlTagMap;
     QMap<int,QPair<QString,QVector<double>>> plotMap;

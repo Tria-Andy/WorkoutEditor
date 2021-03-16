@@ -55,6 +55,7 @@ private:
     QString set_intervalInfo(QTreeWidgetItem *,bool);
     QVector<double> calc_avgValues(QTreeWidgetItem*);
     double interpolate_speed(int,int,double);
+
     void set_activityHeader(QString,QStringList*);
     void set_polishData();
     void extend_activityHeader();
@@ -78,6 +79,7 @@ public:
     QString checkRangeLevel(double);
     QString set_intervalName(QTreeWidgetItem*,bool);
     double polish_SpeedValues(double,double,bool);
+    double polish_powerValues(double,double,int);
 
     bool clear_loadedActivity();
     bool read_jsonFile(QString,bool);

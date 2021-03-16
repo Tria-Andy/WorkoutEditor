@@ -30,7 +30,7 @@ class settings
 private:
     static void saveSettings();
     static QString setSettingString(QStringList);
-    static QStringList setRangeString(QHash<QString,QString>*);
+    static QStringList setRangeString(QHash<QString,QString>);
     static QString set_colorString(QColor);
 
     static QString settingFile,valueFile,valueFilePath,splitter;
@@ -39,7 +39,8 @@ private:
     static QMap<int,QString> sampList,intList;
 
     static QMap<int,double> weightMap;
-    static QHash<QString,QString> swimRange,bikeRange,runRange,triRange,stgRange,altRange,hfRange;
+    static QHash<QString,QHash<QString,QString>> rangeMap;
+    static QHash<QString,QMap<QString,int>> macroMap;
 
     //Getter
     static QColor get_colorRGB(QString,bool);
@@ -48,14 +49,15 @@ private:
     //Setter
     static void fill_mapList(QMap<int,QString>*,QString*);
     static void fill_mapColor(QStringList*,QString*,bool);
-    static void fill_mapRange(QHash<QString,QString>*,QString*);
+    static void fill_mapRange(QHash<QString,QString>*,QString);
+    static QHash<QString,QString> set_rangeLevel(QString);
     static void readMappingFile(QDomDocument*,QHash<QString,QStringList*>*);
     static void fill_sportDistance(QStringList*,QSettings*);
     static QVector<double> set_doubleValues(QStringList*);
 
 protected:
     static QHash<QString,double> thresholdMap,athleteMap,modeMap,doubleMap;
-    static QHash<QString,QString> generalMap,gcInfo,triaMap,formatMap,fileMap;
+    static QHash<QString,QString> generalMap,gcInfo,sportMap,triaMap,formatMap,fileMap;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,QStringList> listMap,jsonTags;
     static QHash<QString,QMap<QString,QString>> sportDistance;
@@ -69,13 +71,13 @@ public:
     static bool settingsUpdated;
     static QHash<QString,QString> sportIcon;
     static int loadSettings();
-    static QString AltLabel,SwimLabel,BikeLabel,RunLabel,TriaLabel,StrengthLabel,OtherLabel;
+    static QString AltLabel,SwimLabel,BikeLabel,RunLabel,JumpLabel,TriaLabel,StrengthLabel,AthLabel,OtherLabel;
     static QPair<int,int> screenSize;
     //QMap/QHash Getter
     static QHash<QString,QColor> get_colorMap() {return colorMap;}
     static QHash<QString,QVector<double>> doubleVector;
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
-    static QString get_rangeValue(QString,QString);
+    static QString get_rangeValues(QString key,QString value) {return rangeMap.value(key).value(value);}
     static QString get_format(QString key) {return formatMap.value(key);}
     static QStringList get_listValues(QString key) {return listMap.value(key);}
     static QMap<QString,QString> get_sportDistance(QString key) {return sportDistance.value(key);}
@@ -143,7 +145,7 @@ public:
     }
 
     //QMap/QHash Setter
-    static void set_rangeValue(QString,QString,QString);
+    static void set_rangeValue(QString key,QHash<QString,QString> values) {rangeMap.insert(key,values);}
 
     //common functions
     static double get_weightforDate(QDateTime);

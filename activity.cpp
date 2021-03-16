@@ -90,6 +90,7 @@ bool Activity::clear_loadedActivity()
     activityData.clear();
     activityMap.clear();
     activityInfo.clear();
+    overrideData.clear();
 
     return true;
 }
@@ -122,6 +123,7 @@ void Activity::prepare_mapToJson()
 {
     QVector<double> xValues(4,0);
     double distStep = 0.0;
+    double secStep = 0;
     QVector<double> sampleValues(sampleMap.first().count(),0);
 
     for(QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>>::const_iterator interval = activityMap.cbegin(), end = activityMap.cend(); interval != end; ++interval)
@@ -136,13 +138,15 @@ void Activity::prepare_mapToJson()
                 xValues[3] = lapStart.value().at(4);
                 xDataValues.insert(lapStart.value().at(0),xValues);
 
+                secStep = lapStart.value().at(6);
+
                 if(interval.key().second != breakName)
                 {
                     for(int intSec = lapStart.value().at(0); intSec <  lapStart.value().at(0)+lapStart.value().at(3); ++intSec)
                     {
                         if(intSec == lapStart.value().at(0))
                         {
-                            sampleValues[0] = distStep + (lapStart.value().at(6)/2);
+                            sampleValues[0] = distStep + (secStep/2);
                         }
                         else
                         {
@@ -150,7 +154,7 @@ void Activity::prepare_mapToJson()
                         }
                         sampleValues[1] = lapStart.value().at(5);
                         sampleValues[2] = lapStart.value().at(4);
-                        distStep = distStep + lapStart.value().at(6);
+                        distStep = distStep + secStep;
                         sampleMap.insert(intSec,sampleValues);
                     }
                 }
@@ -176,20 +180,28 @@ void Activity::prepare_mapToJson()
         }
         else
         {
+            intervallMap.insert(intervallMap.lastKey(),qMakePair(intervallMap.last().first,sampleMap.lastKey()));
             for(QMap<QPair<int,QString>,QVector<double>>::const_iterator lapStart = interval.value().cbegin(), lapEnd = interval.value().cend(); lapStart != lapEnd; ++lapStart)
             {
-                for(int intSec = intervallMap.value(interval.key().first).first; intSec <= intervallMap.value(interval.key().first).second; ++intSec)
+                secStep = lapStart.value().at(1);
+
+                for(int intSec = intervallMap.value(interval.key().first).first; intSec < intervallMap.value(interval.key().first).second; ++intSec)
                 {
                     sampleValues = sampleMap.value(intSec);
                     sampleValues[0] = distStep;
                     sampleValues[1] = this->polish_SpeedValues(sampleValues.at(1),lapStart.value().at(2),true);
-                    distStep = distStep + lapStart.value().at(1);
+                    sampleValues[3] = this->polish_powerValues(sampleValues.at(1),sampleValues.at(3),lapStart.value().at(3));
+                    distStep = distStep + secStep;
                     sampleMap.insert(intSec,sampleValues);
                 }
             }
+
+            sampleValues = sampleMap.last();
+            sampleValues[0] = distStep + secStep;
+            sampleMap.insert(sampleMap.lastKey(),sampleValues);
         }
     }
-    this->prepareWrite_JsonFile();
+    this->prepareWrite_JsonFile(false);
 }
 
 bool Activity::check_activityFiles()
@@ -337,18 +349,8 @@ QMap<QPair<int, QString>, QVector<double> > Activity::get_intervalData(int intCo
 
     if(intKey.first < 0) intKey.first = 0;
 
-    int lapOffSet;
-    if((sampleMap.lastKey() < intKey.second+1) || isUpdated)
-    {
-        lapOffSet = intKey.second;
-    }
-    else
-    {
-        lapOffSet = intKey.second+1;
-    }
-
     intervalSum[0] = intKey.second - intKey.first;
-    intervalSum[1] = sampleMap.value(lapOffSet).at(0) - sampleMap.value(intKey.first).at(0);
+    intervalSum[1] = sampleMap.value(intKey.second).at(0) - sampleMap.value(intKey.first).at(0);
 
     for(QMap<int,QVector<double>>::const_iterator sampleData = sampleMap.lowerBound(intKey.first), end = sampleMap.lowerBound(intKey.second); sampleData != end; ++sampleData)
     {
@@ -555,7 +557,7 @@ void Activity::prepare_baseData()
             paceTimeInZone.insert(levels.at(i),0);
             hfTimeInZone.insert(levels.at(i),0);
 
-            temp = settings::get_rangeValue("HF",levels.at(i));
+            temp = settings::get_rangeValues("hf",levels.at(i));
             zoneLow = temp.split("-").first().toDouble();
             zoneHigh = temp.split("-").last().toDouble();
 
@@ -614,10 +616,6 @@ void Activity::prepare_baseData()
         else if(isTria)
         {
             this->set_activityHeader("triaheader",&activityHeader);
-        }
-        else
-        {
-
         }
 
         activityHeader.move(4,activityHeader.count()-1);
@@ -682,7 +680,7 @@ void Activity::fill_rangeLevel(bool isPower)
 
     for(int i = 0; i < levels.count(); ++i)
     {
-        currentValues = settings::get_rangeValue(currentSport,levels.at(i));
+        currentValues = settings::get_rangeValues(currentSport.toLower(),levels.at(i));
         zoneLow = currentValues.split("-").first().toDouble();
         zoneHigh = currentValues.split("-").last().toDouble();
 
@@ -980,4 +978,22 @@ double Activity::interpolate_speed(int row,int sec,double limit)
             return curr_speed;
         }
     }
+}
+
+double Activity::polish_powerValues(double speed,double power, int avgPower)
+{
+    double corrPower = power;
+    double lowLimit = avgPower*thresValues->value("runlimit");
+
+    if(power < lowLimit)
+    {
+        corrPower = ceil(thresPower*(pow(speed/thresSpeed,1.4)));
+        //qDebug() << "Corr" << speed << power << lowLimit << corrPower << avgPower;
+    }
+    else
+    {
+        //qDebug() << "Set" << speed << corrPower << avgPower;
+    }
+
+    return corrPower;
 }

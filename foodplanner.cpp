@@ -464,9 +464,13 @@ void foodplanner::edit_updateMap(int foodEdit,QPair<QDate,QString> dateSection,Q
 
 void foodplanner::set_daySumMap(QDate day)
 {
-    QVector<double> values(5,0); 
 
-    values[1] = round(this->current_dayCalories(QDateTime(day)) * athleteValues->value("currpal"));
+    QVector<double> values(5,0); 
+    double calMinute = 0;
+    double sportMinutes = 0;
+    const int minutes = 1440;
+
+    calMinute = round(this->current_dayCalories(QDateTime(day)) * settings::doubleVector.value("palday").at(day.dayOfWeek()-1)) / minutes;
 
     QMap<QString,QVector<double>> sportValues = schedulePtr->get_compValues()->value(day);
     QHash<QString,QHash<QString,QVector<double>>> foodValues = foodPlanMap.value(day);
@@ -482,8 +486,10 @@ void foodplanner::set_daySumMap(QDate day)
     for(QMap<QString,QVector<double>>::const_iterator it = sportValues.cbegin(), end = sportValues.cend(); it != end; ++it)
     {
         values[2] = values.at(2) + it.value().at(5);
+        sportMinutes = sportMinutes + (it.value().at(1)/60.0);
     }
 
+    values[1] = ceil((minutes - sportMinutes) * calMinute);
     values[3] = values.at(1) + values.at(2);
     values[4] = values.at(3) - values.at(0);
 
@@ -499,7 +505,7 @@ void foodplanner::set_daySumMap(QDate day)
     macroValues[1] = round(values.at(3) * (settings::doubleVector.value("Macros").at(1) / 100.0) / 4.1);
     macroValues[2] = round(values.at(3) * (settings::doubleVector.value("Macros").at(2) / 100.0) / 9.3);
     macroValues[3] = ceil(athleteValues->value("weight") * (doubleValues->value("DayFiber") /100.0));
-    macroValues[4] = round(values.at(3) * (doubleValues->value("DaySugar") / 100.0) / 4.1);
+    macroValues[4] = ceil(athleteValues->value("weight") * (doubleValues->value("DaySugar")));
 
     foodMacros.insert("Target",macroValues);
     dayMacroMap.insert(day,foodMacros);

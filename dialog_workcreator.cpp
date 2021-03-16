@@ -221,7 +221,6 @@ void Dialog_workCreator::set_controlButtons(bool setButton)
     ui->toolButton_delete->setEnabled(setButton);
     ui->pushButton_sync->setEnabled(setButton);
     ui->comboBox_code->setEnabled(setButton);
-
 }
 
 void Dialog_workCreator::get_workouts(QString sport)
@@ -462,6 +461,10 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasChilds)
         defaultDist = this->calc_distance(get_secFromTime(defaultTime),this->calc_thresPace(percent));
         pValue = get_speed(defaultTime,defaultDist,false);
     }
+    else if(isRopejump)
+    {
+        pValue = percent / 10.0;
+    }
     else if(isStrength || isAlt)
     {
         pValue = percent / 10.0;
@@ -662,6 +665,18 @@ void Dialog_workCreator::save_selectedWorkout(bool copyWorkout)
     QString currentSport = ui->comboBox_sport->currentText();
     QTreeWidgetItem *rootItem = ui->treeWidget_workoutTree->invisibleRootItem();
     QString workCount;
+    int sumTime = 0;
+    setRepCount.first = 0;
+    setRepCount.second = 0;
+
+    if(isRopejump || isStrength || isAlt || isAth)
+    {
+        sumTime = plotMap.last().second.at(1);
+    }
+    else
+    {
+        sumTime = ceil(plotMap.last().second.at(1)/10.0)*10.0;
+    }
 
     if(currentWorkID.isEmpty() || copyWorkout)
     {
@@ -680,7 +695,7 @@ void Dialog_workCreator::save_selectedWorkout(bool copyWorkout)
     metaList.insert(1, new QStandardItem(currentWorkID));
     metaList.insert(2, new QStandardItem(ui->comboBox_code->currentText()));
     metaList.insert(3, new QStandardItem(ui->lineEdit_workoutname->text()));
-    metaList.insert(4, new QStandardItem(QString::number(ceil(plotMap.last().second.at(1)/10.0)*10.0)));
+    metaList.insert(4, new QStandardItem(QString::number(sumTime)));
     metaList.insert(5, new QStandardItem(QString::number(round(plotMap.last().second.at(2)*10.0)/10.0)));
     metaList.insert(6, new QStandardItem(QString::number(round(plotMap.last().second.at(3)))));
     metaList.insert(7, new QStandardItem(QString::number(round_workValue(static_cast<int>(plotMap.last().second.at(4))))));
@@ -734,6 +749,15 @@ QStandardItem* Dialog_workCreator::add_itemToWorkout(QTreeWidgetItem *item,QStan
         itemList << new QStandardItem(QString::number(pos));
         itemList << new QStandardItem(item->data(0,Qt::DisplayRole).toString());
         itemList << new QStandardItem(item->data(9,Qt::DisplayRole).toString());
+
+        if(item->data(0,Qt::DisplayRole).toString() == isGroup)
+        {
+            itemList << new QStandardItem(QString::number(++setRepCount.second));
+        }
+        if(item->data(0,Qt::DisplayRole).toString() == isSeries)
+        {
+            itemList << new QStandardItem(QString::number(++setRepCount.first));
+        }
         itemList.at(0)->setData(stdWorkTags->at(2),Qt::AccessibleTextRole);
     }
     else
@@ -814,7 +838,17 @@ void Dialog_workCreator::set_sumLabel(bool reset)
     }
     else
     {
-        ui->label_duration->setText("Time: " + this->set_time(static_cast<int>(ceil(plotMap.last().second.at(1)/10.0)*10.0)) + " - " + "Distance: " + QString::number(set_doubleValue(round(plotMap.last().second.at(2)*10.0)/10.0,false)) + " - " + "Stress: " + QString::number(round(plotMap.last().second.at(3)))+ " - " + "Work: "+QString::number(round_workValue(static_cast<int>(plotMap.last().second.at(4)))));
+        int sumTime = 0;
+        if(isRopejump || isStrength || isAlt || isAth)
+        {
+            sumTime = plotMap.last().second.at(1);
+        }
+        else
+        {
+            sumTime = ceil(plotMap.last().second.at(1)/10.0)*10.0;
+        }
+
+        ui->label_duration->setText("Time: " + this->set_time(sumTime) + " - " + "Distance: " + QString::number(set_doubleValue(round(plotMap.last().second.at(2)*10.0)/10.0,false)) + " - " + "Stress: " + QString::number(round(plotMap.last().second.at(3)))+ " - " + "Work: "+QString::number(round_workValue(static_cast<int>(plotMap.last().second.at(4)))));
     }
 
 }
@@ -1131,6 +1165,7 @@ void Dialog_workCreator::update_workouts()
     }
     worksched->set_workoutData();
     worksched->set_isUpdated(true);
+    updateProgess->setValue(100);
     QTimer::singleShot(2000,updateProgess,SLOT(reset()));
 }
 

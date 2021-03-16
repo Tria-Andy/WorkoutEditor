@@ -101,6 +101,7 @@ void xmlHandler::xml_toTreeModel(QString xmlFile, QStandardItemModel *model)
         {
             pItem.insert(nodeAtt,new QStandardItem(element.attribute(tagList->at(nodeAtt))));
         }
+
         pItem.at(0)->setData(element.tagName(),Qt::AccessibleTextRole);
         rootItem->appendRow(pItem);
 

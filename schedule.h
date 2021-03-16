@@ -39,10 +39,12 @@ public:
 
     QCustomPlot *stressPlot,*levelPlot,*compPlot;
 
-    QString get_weekPhase(QDate);
-    QString get_selSaison() {return selSaison;}
+    QString get_weekPhase(QDate,bool);
+    QString get_saisonDate(QDate);
     QStringList get_weekList();
     QStringList get_weekMeta(QString);
+    QStringList get_weekScheduleMeta(QString);
+    QStringList get_remainWeeks();
     QStandardItem *get_phaseItem(QString);
 
     QHash<QString,QMap<QDate,QStringList>> get_contestMap() {return contestMap;}
@@ -53,6 +55,8 @@ public:
     QMap<QDate,int> get_linkStdWorkouts(QString key) {return linkedWorkouts.value(key);}
     QHash<QDate,QMap<QString,QVector<double> >> *get_compValues() {return &compMap;}
     QMap<QString,QMap<QString,QVector<double>>> *get_compWeekValues() {return &compWeekMap;}
+    QHash<QString,QMap<QDate,QPair<QString,QString>>> saisonWeekMap;
+    QHash<QString,QMap<QDate,QPair<QString,QString>>> *get_saisonWeekMap() {return &saisonWeekMap;}
     QMap<QDate,QPair<QString,QString>> *get_weekPhaseMap() {return &weekPhaseMap;}
 
     void init_scheduleData();
@@ -61,13 +65,15 @@ public:
     void copyWeek(QString,QString);
     void clearWeek(QString);
     void add_newSaison(QStringList);
-    void delete_Saison(QString);
+    bool delete_Saison(QString);
     bool get_isUpdated() {return isUpdated;}
     void set_selSaison(QString value) {selSaison = value;}
     void update_stressMap(QDate,QVector<double>);
     void calc_levelPlot(QDate);
     void calc_pmcPlot(QDate,bool,int);
     void calc_compPlot(int,QDate,QString);
+    void set_weekMeta(QStringList);
+    void set_weekScheduleMeta(QStringList);
 
     //Workout
     //Setter

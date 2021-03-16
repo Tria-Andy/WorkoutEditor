@@ -32,9 +32,14 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched,stan
     stdWorkouts = p_stdWorkout;
     workSchedule = p_sched;
     moveWorkout = false;
+    weekMeta = workSchedule->get_weekScheduleMeta(calc_weekID(w_date));
     editIcon = QIcon(":/images/icons/Modify.png");
     addIcon = QIcon(":/images/icons/Create.png");
     maxWorkouts = settings::get_intValue("maxworkouts");
+    partTags = settings::get_xmlMapping("part");
+    stepTags = settings::get_xmlMapping("step");
+    isSeries = "Series";
+    isGroup = "Group";
     ui->toolButton_editMove->setIcon(editIcon);
     ui->toolButton_editMove->setToolTip("Edit/Move");
     ui->lineEdit_selected->setReadOnly(true);
@@ -50,10 +55,10 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched,stan
     ui->tableWidget_day->verticalHeader()->setDefaultSectionSize(ui->tableWidget_day->height() / maxWorkouts);
 
     ui->comboBox_workCode->addItems(settings::get_listValues("WorkoutCode"));
-    ui->comboBox_workSport->addItems(settings::get_listValues("Sportuse"));
+    ui->comboBox_workSport->addItems(settings::get_listValues("Sport"));
     this->reset_controls();
     this->init_dayWorkouts(popupDate);
-    ui->lineEdit_workoutInfo->setText(workSchedule->get_weekPhase(w_date)+" - Week: "+ QString::number(w_date.weekNumber()));
+    ui->lineEdit_workoutInfo->setText(weekMeta.at(1)+" - Week: "+ weekMeta.at(0));
 }
 
 enum {EDIT,MOVE,COPY,DEL};
@@ -74,7 +79,7 @@ void day_popup::init_dayWorkouts(QDate workDate)
     int workCount = workoutMap.count();
     ui->tableWidget_day->setRowCount(workCount);
 
-    ui->label_weekinfo->setText(workoutDate + " - Phase: " + workSchedule->get_weekPhase(workDate));
+    ui->label_weekinfo->setText(workoutDate + " - Phase: " + weekMeta.at(1));
 
     QString conString = " - ";
     QString itemValue = QString();
@@ -201,20 +206,84 @@ void day_popup::set_controls(bool active)
     ui->lineEdit_stdWorkID->setVisible(false);
 }
 
+void day_popup::read_stdWorkout(QString workID)
+{
+    QStandardItem* workoutItem = stdWorkouts->get_selectedWorkout(workID);
+
+    for(int row = 0; row < workoutItem->rowCount(); ++row)
+    {
+        if(workoutItem->child(row,0)->hasChildren())
+        {
+            this->read_childValues(workoutItem->child(row,0));
+        }
+        else
+        {
+            this->fill_exportValues(workoutItem->child(row,0));
+        }
+    }
+    this->set_exportContent();
+}
+
+void day_popup::read_childValues(QStandardItem *parent)
+{
+    QStandardItem *childItem;
+
+    if(parent->hasChildren())
+    {
+        int repeats = parent->index().siblingAtColumn(2).data(Qt::DisplayRole).toInt();
+
+        for(int reps = 0; reps < repeats; ++reps)
+        {
+            for(int row = 0; row < parent->rowCount(); ++row)
+            {
+                childItem = parent->child(row,0);
+
+                if(childItem->hasChildren())
+                {
+                    this->read_childValues(childItem);
+                }
+                else
+                {
+                    this->fill_exportValues(childItem);
+                }
+            }
+        }
+    }
+}
+
+void day_popup::fill_exportValues(QStandardItem *item)
+{
+    int intStart = sampleMap.lastKey();
+    int intCount = intervallMap.count();
+    int time = intStart + this->get_itemValue(item,stepTags,stepTags->at(3)).toInt();
+
+    intervallMap.insert(intCount,qMakePair<int>(intStart,time));
+    intNameMap.insert(intCount,item->index().siblingAtColumn(1).data().toString());
+
+    QVector<double> sampleValues(2,0);
+
+    for(int sec = intStart; sec <= time; ++sec)
+    {
+        sampleValues[0] = this->calc_thresPower(this->get_itemValue(item,stepTags,stepTags->at(2)).toDouble());
+        sampleValues[1] = 0;
+        sampleMap.insert(sec,sampleValues);
+    }
+}
+
+QVariant day_popup::get_itemValue(QStandardItem *item,QStringList *list,QString tagName)
+{
+    return item->index().siblingAtColumn(list->indexOf(tagName)).data(Qt::DisplayRole);
+}
+
 void day_popup::set_exportContent()
 {
     QStringList selectedWorkout = workoutMap.value(ui->spinBox_selWorkout->value());
-    int sampCount = selectedWorkout.at(5).toInt();
-    QVector<double> sampleValues(2,0);
-
-    intervallMap.insert(0,qMakePair(0,sampCount));
-    intNameMap.insert(0,"Workout");
+    int sampCount = sampleMap.count();
 
     sampleUseKeys.insert(0,"SECS");
-    for(int i = 0; i < sampCount; ++i)
-    {
-        sampleMap.insert(i,sampleValues);
-    }
+    sampleUseKeys.insert(1,"WATTS");
+    sampleUseKeys.insert(2,"KM");
+
     set_progress(25);
     QDateTime workoutDateTime(popupDate,set_sectoTime(selectedWorkout.at(0).toInt()));
     QString sport,stressType,commonRI;
@@ -229,7 +298,7 @@ void day_popup::set_exportContent()
     if(sport == settings::SwimLabel) stressType = "swimscore";
     if(sport == settings::BikeLabel) stressType = "skiba_bike_score";
     if(sport == settings::RunLabel) stressType = "govss";
-    if(sport == settings::AltLabel || sport == settings::StrengthLabel)
+    if(sport == settings::JumpLabel || sport == settings::StrengthLabel || sport == settings::AthLabel || sport == settings::AltLabel)
     {
         commonRI = QString::number(set_doubleValue(totalWork.toDouble() / this->calc_totalWork(10.0,sampCount,0)*10.0,false));
         if(sport == settings::StrengthLabel) commonRI = "4.0";
@@ -239,6 +308,7 @@ void day_popup::set_exportContent()
     this->rideData.insert("STARTTIME",workoutDateTime.toString("yyyy/MM/dd hh:mm:ss UTC"));
     this->rideData.insert("DEVICETYPE","Manual Import");
     this->rideData.insert("IDENTIFIER","");
+    this->rideData.insert("RECINTSECS","1");
     this->rideData.insert("OVERRIDES","");
 
     this->tagData.insert("Sport",sport);
@@ -263,13 +333,19 @@ void day_popup::set_exportContent()
     overrideData.insert(stressType,selectedWorkout.at(7));
 
     set_progress(75);
-    this->prepareWrite_JsonFile();
+    this->prepareWrite_JsonFile(true);
     set_progress(100);
 }
 
-
 void day_popup::on_tableWidget_day_itemClicked(QTableWidgetItem *item)
 {
+    intervallMap.clear();
+    sampleMap.clear();
+    sampleUseKeys.clear();
+    rideData.clear();
+    tagData.clear();
+    overrideData.clear();
+
     QStringList workValues = workoutMap.value(item->row());
     this->set_currentSport(workValues.at(1));
 
@@ -365,6 +441,8 @@ void day_popup::set_result(int result)
             updateValues.append(QString::number(ui->spinBox_workKJoule->value()));
             updateValues.append(ui->lineEdit_workPace->text());
             updateValues.append(ui->lineEdit_stdWorkID->text());
+
+            workSchedule->update_linkedWorkouts(popupDate,ui->lineEdit_stdWorkID->text(),ui->spinBox_selWorkout->value(),false);
 
             workoutMap.insert(ui->spinBox_selWorkout->value(),updateValues);
             workSchedule->workoutUpdates.insert(popupDate,this->reorder_workouts(&workoutMap));
@@ -483,7 +561,9 @@ void day_popup::on_toolButton_dayEdit_clicked(bool checked)
 void day_popup::on_toolButton_upload_clicked()
 {
     set_progress(10);
-    this->set_exportContent();
+    sampleMap.insert(0,QVector<double>(2,0));
+    this->read_stdWorkout(ui->lineEdit_stdWorkID->text());
+    set_progress(100);
 }
 
 void day_popup::on_comboBox_stdworkout_currentIndexChanged(int index)
@@ -516,9 +596,7 @@ void day_popup::on_toolButton_map_clicked()
 
 void day_popup::on_dateEdit_workDate_dateChanged(const QDate &date)
 {
-    ui->lineEdit_workoutInfo->setText(workSchedule->get_weekPhase(date)+" - Week: "+ QString::number(date.weekNumber()));
-
-    QString weekNumber = this->calc_weekID(date);
+    ui->lineEdit_workoutInfo->setText(workSchedule->get_weekPhase(date,true)+" - Week: "+ QString::number(date.weekNumber()));
 
     if(date != popupDate)
     {

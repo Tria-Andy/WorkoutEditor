@@ -109,7 +109,6 @@ void standardWorkouts::update_selectedWorkout(QString workoutID,QList<QStandardI
     workoutUpdate = true;
 }
 
-
 void standardWorkouts::read_childFromModel(QStandardItem *item,QString workID,int reps)
 {
     if(item->hasChildren())
@@ -226,6 +225,7 @@ void standardWorkouts::delete_stdWorkout(QString sport,QString workID)
 
     QHash<QString,QVector<QString>> workoutInfo = workoutMap.value(sport);
     workoutInfo.remove(workID);
+    workoutIndex.remove(workID);
     workoutMap.insert(sport,workoutInfo);
     workoutUpdate = true;
     this->save_workouts();

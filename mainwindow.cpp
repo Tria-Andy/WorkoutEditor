@@ -428,6 +428,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     minMax.second = settings::doubleVector.value(mode).at(1)/100.0;
     QVector<double> weekValues(5,0);
 
+    qDebug() << minMax;
 
     if(startDate == firstdayofweek)
     {
@@ -472,6 +473,10 @@ void MainWindow::fill_foodSumTable(QDate startDate)
             ui->tableWidget_weekSum->openPersistentEditor(item);
             item->setData(Qt::DisplayRole,weekValues.at(row));
             item->setData(Qt::UserRole,mode);
+            if(row == it.value().count()-1)
+            {
+                item->setData(Qt::ToolTipRole,"Range: "+QString::number(round(weekValues.at(3) * minMax.first))+"-"+QString::number(round(weekValues.at(3) * minMax.second)));
+            }
             ui->tableWidget_weekSum->closePersistentEditor(item);
         }
     }
@@ -613,20 +618,21 @@ void MainWindow::set_menuItems(int module)
         ui->actionExpand_Activity_Tree->setVisible(false);
         planerMode->setVisible(false);
         planMode->setEnabled(false);
+
+        this->fill_foodSumTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
     }
 }
 
 //Planner Functions ***********************************************************************************
 
-void MainWindow::summery_Set(QDate date,QStandardItem *phaseItem)
+void MainWindow::summery_Set(QDate date, int weekCount)
 {
     QStringList sportUseList,headerInfo;
     QString sportUse,headerString;
     sportUse = generalValues->value("sum");
     sportUseList << sportUse;
-    sportUseList << settings::get_listValues("Sportuse");
+
     int sumCounter = 0;
-    int phaseWeeks = 0;
 
     QMap<QString,QVector<double>> sportSummery;
     QMap<QString,QVector<double>> calcSummery;
@@ -638,54 +644,59 @@ void MainWindow::summery_Set(QDate date,QStandardItem *phaseItem)
         ui->label_selection->setText("Week:");
 
         QHash<QDate,QMap<QString,QVector<double> >> *comp = workSchedule->get_compValues();
+
         for(int day = 0; day < weekDays; ++day)
         {
             calcSummery = comp->value(date.addDays(day));
+
+            for(QMap<QString,QVector<double>>::const_iterator workout = calcSummery.cbegin(); workout != calcSummery.cend(); ++workout)
+            {
+                    if(workout.key() != settings::OtherLabel)
+                    {
+                        if(!sportUseList.contains(workout.key())) sportUseList << workout.key();
+                    }
+            }
             this->summery_calc(&calcSummery,&sportSummery,&sportUseList,sumCounter);
         }
-        headerInfo = workSchedule->get_weekMeta(this->calc_weekID(date));
-        headerString = "Week: " + headerInfo.at(0) + " - " + "Phase: " + headerInfo.at(2);
+
+        headerInfo = workSchedule->get_weekScheduleMeta(this->calc_weekID(date));
+        headerString = "Week: " + headerInfo.at(0) + " - " + "Phase: " + headerInfo.at(1);
         ui->lineEdit_currentSelect->setText(headerInfo.at(0));
     }
     else
     {
-        sportUseList.removeLast();
+        sportUseList << settings::get_listValues("Sportuse");
         sumCounter = settings::getHeaderMap("summery")->count()-1;
         sportSummery.insert(sportUse,QVector<double>(sumCounter,0));
         ui->label_selection->setText("Phase:");
-
         QString saison = ui->comboBox_saisonName->currentText();
+
+        QMap<QString,QMap<QString,QVector<double>>> *compWeek = workSchedule->get_compWeekValues();
+        QMap<QDate,QPair<QString,QString>> saisonWeekMap = workSchedule->get_saisonWeekMap()->value(saison);
 
         if(phaseGroup->checkedId() == 1)
         {
-            QMap<QString,QMap<QString,QVector<double>>> *compWeek = workSchedule->get_compWeekValues();
-
-            for(QMap<QString,QMap<QString,QVector<double>>>::const_iterator week = compWeek->cbegin(); week != compWeek->cend(); ++week)
+            for(QMap<QDate,QPair<QString,QString>>::const_iterator week = saisonWeekMap.cbegin(); week != saisonWeekMap.cend(); ++week)
             {
-                    calcSummery = week.value();
+                    calcSummery = compWeek->value(week.value().first);
                     this->summery_calc(&calcSummery,&sportSummery,&sportUseList,sumCounter);
             }
 
-            phaseWeeks = saisonValues->value(saison).at(2).toInt();
-            headerString = "All Phases - Weeks: " + saisonValues->value(saison).at(2);
+            headerString = "All Phases - Weeks: " + QString::number(weekCount);
             ui->lineEdit_currentSelect->setText("All Phases");
         }
         else
         {
-            QString phaseName = phaseItem->data(Qt::DisplayRole).toString();
-            phaseWeeks = phaseItem->rowCount();
+            QString phaseName = phaseGroup->checkedButton()->text();
 
-            QMap<QDate,QPair<QString,QString>> *weekPhaseMap = workSchedule->get_weekPhaseMap();
-            QMap<QString,QMap<QString,QVector<double>>> *compWeek = workSchedule->get_compWeekValues();
-
-            for(QMap<QDate,QPair<QString,QString>>::const_iterator week = weekPhaseMap->find(date); week != weekPhaseMap->find(date.addDays(phaseWeeks*weekDays)); ++week)
+            for(QMap<QDate,QPair<QString,QString>>::const_iterator week = saisonWeekMap.find(date); week != saisonWeekMap.find(date.addDays(weekCount*weekDays)); ++week)
             {
                 calcSummery = compWeek->value(week.value().first);
                 this->summery_calc(&calcSummery,&sportSummery,&sportUseList,sumCounter);
             }
 
-            headerString = "Phase: " + phaseItem->data(Qt::DisplayRole).toString() + " - Weeks: " + QString::number(phaseItem->rowCount());
-            ui->lineEdit_currentSelect->setText(phaseItem->data(Qt::DisplayRole).toString());
+            headerString = "Phase: " + phaseName + " - Weeks: " + QString::number(weekCount);
+            ui->lineEdit_currentSelect->setText(phaseName);
         }
 
         ui->tableWidget_weekAvg->clear();
@@ -700,10 +711,10 @@ void MainWindow::summery_Set(QDate date,QStandardItem *phaseItem)
             if(sportSummery.contains(sportUse))
             {
                 QTableWidgetItem *item = new QTableWidgetItem();
-                avgValue = QString::number(set_doubleValue(sportSummery.value(sportUse).at(0)/phaseWeeks,false))+"-"+
-                           set_sectoTime(round(sportSummery.value(sportUse).at(1)/phaseWeeks)).toString()+"-"+
-                           QString::number(set_doubleValue(sportSummery.value(sportUse).at(3)/phaseWeeks,false))+"-"+
-                           QString::number(set_doubleValue(sportSummery.value(sportUse).at(4)/phaseWeeks,false));
+                avgValue = QString::number(set_doubleValue(sportSummery.value(sportUse).at(0)/weekCount,false))+"-"+
+                           set_sectoTime(round(sportSummery.value(sportUse).at(1)/weekCount)).toString()+"-"+
+                           QString::number(set_doubleValue(sportSummery.value(sportUse).at(3)/weekCount,false))+"-"+
+                           QString::number(set_doubleValue(sportSummery.value(sportUse).at(4)/weekCount,false));
                 item->setData(Qt::DisplayRole,avgValue);
                 item->setData(Qt::AccessibleTextRole,sportUse);
                 ui->tableWidget_weekAvg->setItem(sports,0,item);
@@ -814,8 +825,8 @@ void MainWindow::workoutSchedule(QDate date)
             ui->tableWidget_schedule->openPersistentEditor(item);
             if(col == 0)
             {
-                weekInfo = workSchedule->get_weekMeta(calc_weekID(date.addDays(dayCounter)));
-                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(2) + delimiter + weekInfo.at(4) + delimiter + weekInfo.at(5);
+                weekInfo = workSchedule->get_weekScheduleMeta(calc_weekID(date.addDays(dayCounter)));
+                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(1) + delimiter + weekInfo.at(2) + delimiter + weekInfo.at(3);
                 item->setData(Qt::UserRole,weekInfo.at(0));
             }
             else
@@ -826,6 +837,7 @@ void MainWindow::workoutSchedule(QDate date)
                 {
                     stdConnect = it.value().count() == 9 ? "\n" : "*\n";
                     itemValue = itemValue + it.value().at(1) + conString + it.value().at(2) + stdConnect;
+                    itemValue = itemValue + it.value().at(4) +"\n";
                     itemValue = itemValue + set_time(it.value().at(5).toInt()) + conString + it.value().at(6) + " km" + delimiter;
                 }
                 item->setData(Qt::UserRole,date.addDays(dayCounter));
@@ -839,7 +851,8 @@ void MainWindow::workoutSchedule(QDate date)
             ui->tableWidget_schedule->closePersistentEditor(item);
         }
     }
-    this->summery_Set(date,nullptr);
+    this->summery_Set(date,0);
+    ui->comboBox_saisonName->setCurrentText(workSchedule->get_saisonDate(date));
 }
 
 void MainWindow::set_saisonValues(QStringList *sportList,QString weekID, int week)
@@ -861,6 +874,7 @@ void MainWindow::set_saisonValues(QStringList *sportList,QString weekID, int wee
     weekitem->setData(Qt::UserRole,weekID);
     weekitem->setTextAlignment(0);
     itemValue.clear();
+    ui->tableWidget_saison->insertRow(week);
     ui->tableWidget_saison->setItem(week,col++,weekitem);
 
     compValues = compWeekMap->value(weekID);
@@ -898,55 +912,52 @@ void MainWindow::saisonSchedule(QString phase)
     QStringList sportUseList;
     sportUseList << "Week";
     sportUseList << settings::get_listValues("Sportuse");
-    sportUseList.removeLast();
     sportUseList << generalValues->value("sum");
     QString weekID;
-    QDate startDate;
+    QDate startDate,endDate;
 
+    int weekCount = 0;
     int phaseWeeks = 0;
 
     ui->tableWidget_saison->setColumnCount(sportUseList.count());
+    ui->tableWidget_saison->setRowCount(0);
     ui->tableWidget_saison->setHorizontalHeaderLabels(sportUseList);
 
-    if(phase == phaseGroup->button(1)->text())
+    QString saison = ui->comboBox_saisonName->currentText();
+    QMap<QDate,QPair<QString,QString>> saisonWeekMap = workSchedule->get_saisonWeekMap()->value(saison);
+
+    if(phaseGroup->button(1)->isChecked())
     {
-        QString saison = ui->comboBox_saisonName->currentText();
-        startDate = QDate::fromString(saisonValues->value(saison).at(0),dateFormat).addDays(weekDays*saisonWeek);
+        startDate = saisonWeekMap.firstKey().addDays(saisonWeek*weekDays);
+        endDate = startDate.addDays(weekDays*weekRange);
 
-        ui->tableWidget_saison->setRowCount(static_cast<int>(weekRange));
-        ui->tableWidget_saison->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-        for(int week = 0; week < static_cast<int>(weekRange); ++week)
+        for(QMap<QDate,QPair<QString,QString>>::const_iterator week = saisonWeekMap.find(startDate); week != saisonWeekMap.find(endDate); ++week)
         {
-            weekID = calc_weekID(startDate.addDays((week*static_cast<int>(weekDays))));
-            this->set_saisonValues(&sportUseList,weekID,week);
+            this->set_saisonValues(&sportUseList,calc_weekID(week.key()),weekCount++);
+            phaseWeeks = saisonWeekMap.count();
         }
-        this->summery_Set(startDate,nullptr);
-        phaseWeeks = weekRange;
+        ui->tableWidget_saison->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     }
     else
     {
-        QStandardItem *phaseItem = workSchedule->get_phaseItem(phase);
-
-        if(phaseItem->hasChildren())
+        for(QMap<QDate,QPair<QString,QString>>::const_iterator week = saisonWeekMap.cbegin(); week != saisonWeekMap.cend(); ++week)
         {
-            ui->tableWidget_saison->setRowCount(phaseItem->rowCount());
-            ui->tableWidget_saison->verticalHeader()->setDefaultSectionSize(ui->tableWidget_saison->height() / static_cast<int>(weekRange));
-            ui->tableWidget_saison->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-            startDate = QDate::fromString(phaseItem->child(0,3)->data(Qt::DisplayRole).toString(),dateFormat);
-
-            for(int week = 0; week < phaseItem->rowCount(); ++week)
+            if(phase == week.value().second)
             {
-                weekID = phaseItem->child(week,0)->data(Qt::DisplayRole).toString();
-                this->set_saisonValues(&sportUseList,weekID,week);
+                this->set_saisonValues(&sportUseList,calc_weekID(week.key()),weekCount++);
+                if(weekCount == 1) startDate = week.key();
+                ++phaseWeeks;
             }
-            this->summery_Set(startDate,phaseItem);
         }
-        phaseWeeks = phaseItem->rowCount();
+        ui->tableWidget_saison->verticalHeader()->setDefaultSectionSize(ui->tableWidget_saison->height() / static_cast<int>(weekRange));
+        ui->tableWidget_saison->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     }
+
+    this->summery_Set(startDate,phaseWeeks);
+
     ui->spinBox_phaseWeeks->setValue(phaseWeeks);
     ui->dateEdit_phaseStart->setDate(startDate);
-    workSchedule->calc_compPlot(phaseWeeks,startDate,ui->comboBox_saisonSport->currentText());
+    workSchedule->calc_compPlot(weekCount,startDate,ui->comboBox_saisonSport->currentText());
 }
 
 void MainWindow::refresh_schedule()
@@ -1139,7 +1150,7 @@ void MainWindow::on_actionSave_triggered()
 void MainWindow::on_calendarWidget_clicked(const QDate &date)
 {
    weeknumber = this->calc_weekID(date);
-   this->summery_Set(date,nullptr);
+   this->summery_Set(date,0);
 }
 
 bool MainWindow::check_Date(QDate currentDate)
@@ -1659,6 +1670,7 @@ void MainWindow::set_selecteditem(QTreeWidgetItem *selItem, int column)
             ui->doubleSpinBox_intDistance->blockSignals(true);
             ui->timeEdit_intDuration->blockSignals(true);
             ui->doubleSpinBox_intDistance->setValue(selItem->data(4,Qt::DisplayRole).toDouble());
+            ui->spinBox_intWatts->setValue(selItem->data(7,Qt::DisplayRole).toInt());
             ui->timeEdit_intDuration->setTime(QTime::fromString(selItem->data(1,Qt::DisplayRole).toString(),shortTime));
             ui->spinBox_intCAD->setValue(selItem->data(8,Qt::DisplayRole).toUInt());
             ui->doubleSpinBox_intDistance->setFocus();
@@ -1719,13 +1731,14 @@ void MainWindow::set_polishPlot(int lapIndex)
 {
     QPair<int,int> intStartStop = currActivity->get_intervalData(lapIndex);
     QMap<int,QVector<double>> *polishData = currActivity->get_polishData();
-    QVector<double> secTicker,speedValues,powerValues,hfValues,polishValues;
+    QVector<double> secTicker,speedValues,powerValues,hfValues,polishSpeed,polishPower;
     QPair<double,double> speedMinMax,powerMinMax,hfMinMax,rangeMinMax;
     QStringList label;
 
     int pos = 0;
     double intDist = 0;
     double avgSpeed = 0;
+    double avgPower = 0;
 
     speedMinMax.first = 50.0;
     speedMinMax.second = 0.0;
@@ -1740,7 +1753,8 @@ void MainWindow::set_polishPlot(int lapIndex)
     speedValues.resize(vSize);
     powerValues.resize(vSize);
     hfValues.resize(vSize);
-    polishValues.resize(vSize);
+    polishSpeed.resize(vSize);
+    polishPower.resize(vSize);
 
     for(QMap<int,QVector<double>>::const_iterator intStart = polishData->lowerBound(intStartStop.first), intEnd = polishData->lowerBound(intStartStop.second); intStart != intEnd; ++intStart)
     {
@@ -1760,6 +1774,7 @@ void MainWindow::set_polishPlot(int lapIndex)
     {
         label << "Speed" << "Watts" << "HF";
         avgSpeed = ui->doubleSpinBox_intSpeed->value();
+        avgPower = ui->spinBox_intWatts->value();
         intDist = ui->doubleSpinBox_intDistance->value();
 
         if(currActivity->isRun)
@@ -1769,11 +1784,12 @@ void MainWindow::set_polishPlot(int lapIndex)
             {
                 if(lapIndex == 0 && i < 5)
                 {
-                    polishValues[i] = speedValues[i];
+                    polishSpeed[i] = speedValues[i];
                 }
                 else
                 {
-                    polishValues[i] = currActivity->polish_SpeedValues(speedValues[i],avgSpeed,true);
+                    polishSpeed[i] = currActivity->polish_SpeedValues(speedValues[i],avgSpeed,true);
+                    polishPower[i] = currActivity->polish_powerValues(polishSpeed.at(i),powerValues.at(i),avgPower);
                 }
             }
         }
@@ -1830,11 +1846,17 @@ void MainWindow::set_polishPlot(int lapIndex)
 
     if(currActivity->get_currentSport() != settings::SwimLabel)
     {
-        QCPGraph *polishLine = ui->widget_plot->addGraph();
-        polishLine->setName("Polished Speed");
-        polishLine->setLineStyle(QCPGraph::lsLine);
-        polishLine->setData(secTicker,polishValues);
-        polishLine->setPen(QPen(QColor(255,200,0),2));
+        QCPGraph *corrSpeed = ui->widget_plot->addGraph();
+        corrSpeed->setName("Polished Speed");
+        corrSpeed->setLineStyle(QCPGraph::lsLine);
+        corrSpeed->setData(secTicker,polishSpeed);
+        corrSpeed->setPen(QPen(QColor(255,200,0),2));
+
+        QCPGraph *corrPower = ui->widget_plot->addGraph(ui->widget_plot->xAxis,ui->widget_plot->yAxis2);
+        corrPower->setName("Corrected Watts");
+        corrPower->setLineStyle(QCPGraph::lsLine);
+        corrPower->setData(secTicker,polishPower);
+        corrPower->setPen(QPen(QColor(255,125,0),2));
 
         QCPGraph *polishRangeP = ui->widget_plot->addGraph();
         polishRangeP->setName("Polish Range");
@@ -2074,6 +2096,7 @@ void MainWindow::save_activity()
            lapValues[0] = intItem->data(4,Qt::DisplayRole).toDouble();
            lapValues[1] = (intItem->data(4,Qt::UserRole).toDouble() / intItem->data(1,Qt::UserRole).toInt()) / 1000.0;
            lapValues[2] = intItem->data(6,Qt::DisplayRole).toDouble();
+           lapValues[3] = intItem->data(7,Qt::DisplayRole).toDouble();
 
            intValues.insert(lapKey,lapValues);
 
@@ -2203,9 +2226,9 @@ void MainWindow::refresh_activityTree()
     QPair<int,int> lapStartStop;
     QString swimType;
 
-    double poolLength = currActivity->poolLength / 1000.0;
+    double poolLength = currActivity->isSwim ? (currActivity->poolLength / 1000.0) : 0;
     double completeDist = 0,totalWork = 0,intWork = 0;
-    int completeTime = -1,breakTime = 0,intTime = 0,lapTime = 0,intStrokes = 0;
+    int completeTime = 0,breakTime = 0,intTime = 0,lapTime = 0,intStrokes = 0;
 
     for(int row = 0; row < rootItem->childCount(); ++row)
     {
@@ -2214,7 +2237,7 @@ void MainWindow::refresh_activityTree()
 
         if(currActivity->isSwim)
         {
-            lapItem->setData(5,Qt::DisplayRole,set_time(++completeTime));
+            lapItem->setData(5,Qt::DisplayRole,set_time(completeTime));
             lapItem->setData(5,Qt::UserRole,completeTime);
             intTime = intWork = intStrokes = 0;
 
@@ -2237,12 +2260,12 @@ void MainWindow::refresh_activityTree()
 
                     lapItem->child(child)->setData(5,Qt::UserRole,completeTime);
                     lapTime = lapItem->child(child)->data(4,Qt::UserRole).toInt();
-                    completeTime = completeTime + lapTime;
+                    completeTime += lapTime;
                     totalWork = totalWork + lapItem->child(child)->data(9,Qt::DisplayRole).toDouble();
-                    intTime = intTime + lapTime;
+                    intTime += lapTime;
 
-                    intWork = intWork + lapItem->child(child)->data(9,Qt::DisplayRole).toDouble();
-                    intStrokes = intStrokes + lapItem->child(child)->data(8,Qt::DisplayRole).toInt();
+                    intWork += lapItem->child(child)->data(9,Qt::DisplayRole).toDouble();
+                    intStrokes += lapItem->child(child)->data(8,Qt::DisplayRole).toInt();
 
                     lapItem->child(child)->setData(0,Qt::UserRole,completeDist);
                     lapItem->child(child)->setData(5,Qt::DisplayRole,set_time(intTime));
@@ -2271,10 +2294,11 @@ void MainWindow::refresh_activityTree()
                 lapItem->setData(4,Qt::UserRole,completeTime);
                 breakTime = breakTime + get_timesec(lapItem->data(4,Qt::DisplayRole).toString())+1;
             }
+            ++completeTime;
         }
         else
         {
-            lapItem->setData(2,Qt::DisplayRole,set_time(++completeTime));
+            lapItem->setData(2,Qt::DisplayRole,set_time(completeTime));
             lapItem->setData(2,Qt::UserRole,completeTime);
             intTime = get_timesec(lapItem->data(1,Qt::DisplayRole).toString());
             completeTime = completeTime + intTime;
@@ -2287,12 +2311,14 @@ void MainWindow::refresh_activityTree()
             lapItem->setData(4,Qt::UserRole,set_doubleValue(lapItem->data(4,Qt::DisplayRole).toDouble()*1000.0,true));
         }
     }
+
     if(currActivity->isSwim)
     {
         currActivity->update_moveTime(completeTime-breakTime);
         currActivity->set_overrideData("total_work",QString::number(ceil(totalWork)));
         currActivity->set_swimTimeInZone(true);
     }
+
     currActivity->activityInfo.insert("Distance",QString::number(set_doubleValue(completeDist+poolLength,true)));
     currActivity->activityInfo.insert("Total Work",QString::number(ceil(totalWork)));
 
@@ -3059,6 +3085,7 @@ void MainWindow::selectFoodDay(int selectedDay)
     QHash<QString,QHash<QString,QVector<double>>> dayFoodValues = foodPlan->get_foodPlanMap()->value(ui->tableWidget_foodPlan->horizontalHeaderItem(selectedDay)->data(Qt::UserRole).toDate());
     QHash<QString,QVector<double>> dayFoodMap,dayMacroSum;
     QVector<double> dayValues(4,0);
+    int fiberSum = 0;
 
     for(int mealSection = 0; mealSection < foodPlan->mealsHeader.count(); ++mealSection)
     {
@@ -3066,21 +3093,24 @@ void MainWindow::selectFoodDay(int selectedDay)
 
         for(QHash<QString,QVector<double>>::const_iterator it = dayFoodMap.cbegin(), end = dayFoodMap.cend(); it != end; ++it)
         {
-            dayValues[0] = round(dayValues[0] + it.value().at(2));
-            dayValues[1] = round(dayValues[1] + (it.value().at(3)*4.1));
-            dayValues[2] = round(dayValues[2] + (it.value().at(4)*4.1));
-            dayValues[3] = round(dayValues[3] + (it.value().at(5)*9.3));
+            dayValues[0] = round(dayValues.at(0) + it.value().at(2));
+            dayValues[1] = round(dayValues.at(1) + (it.value().at(3)*4.1));
+            dayValues[2] = round(dayValues.at(2) + (it.value().at(4)*4.1));
+            dayValues[3] = round(dayValues.at(3) + (it.value().at(5)*9.3));
+            fiberSum =  fiberSum + it.value().at(6);
         }
+        dayValues[1] = dayValues.at(1) - fiberSum;
         dayMacroSum.insert(foodPlan->mealsHeader.at(mealSection),dayValues);
         dayValues.fill(0);
+        fiberSum = 0;
     }
 
     for(QHash<QString,QVector<double>>::const_iterator it = dayMacroSum.cbegin(), end = dayMacroSum.cend(); it != end; ++it)
     {
-        dayValues[0] = dayValues[0] + it.value().at(0);
-        dayValues[1] = dayValues[1] + it.value().at(1);
-        dayValues[2] = dayValues[2] + it.value().at(2);
-        dayValues[3] = dayValues[3] + it.value().at(3);
+        dayValues[0] += it.value().at(0);
+        dayValues[1] += it.value().at(1);
+        dayValues[2] += it.value().at(2);
+        dayValues[3] += it.value().at(3);
     }
     dayMacroSum.insert(generalValues->value("sum"),dayValues);
 
@@ -3284,5 +3314,14 @@ void MainWindow::on_toolButton_extReset_clicked()
 
 void MainWindow::on_comboBox_saisonSport_currentIndexChanged(const QString &sport)
 {
+    Q_UNUSED(sport)
+
     //this->set_compData(ui->spinBox_phaseWeeks->value(),ui->dateEdit_phaseStart->date(),sport);
+}
+
+void MainWindow::on_actionNutritionEditor_triggered()
+{
+    Dialog_nutrition nutritionEditor(this,foodPlan);
+    nutritionEditor.setModal(true);
+    nutritionEditor.exec();
 }

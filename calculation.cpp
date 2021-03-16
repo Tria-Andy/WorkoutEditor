@@ -9,7 +9,7 @@ calculation::calculation()
 void calculation::set_currentSport(QString sport)
 {
     currentSport = sport;
-    isSwim = isBike = isRun = isStrength = isAlt = isOther = isTria = false;
+    isSwim = isBike = isRun = isRopejump = isStrength = isAth = isAlt = isOther = isTria = false;
     hfThreshold = thresValues->value("hfthres");
     stressFactor = 1.0;
 
@@ -36,11 +36,11 @@ void calculation::set_currentSport(QString sport)
     {
         isRun = true;
         usePMData = static_cast<bool>(thresValues->value("runpm"));
-        thresPower = static_cast<int>(thresValues->value("runcp"));
+        thresPower = static_cast<int>(thresValues->value("runpower"));
         thresPace = static_cast<int>(thresValues->value("runpace"));
+        thresSpeed = thresValues->value("runspeed");
         workFactor = thresValues->value("runfactor");
         stressFactor = thresValues->value("runstress");
-
         if(usePMData)
         {
             sportMark = " Watt";
@@ -50,11 +50,32 @@ void calculation::set_currentSport(QString sport)
             sportMark = "/km";
         }
     }
+    else if(currentSport == settings::JumpLabel)
+    {
+        isRopejump = true;
+        usePMData = true;
+        thresPower = static_cast<int>(thresValues->value("jumppower")+(round(thresValues->value("jumppower")*thresValues->value("ropefactor"))));
+        workFactor = 1;
+        thresPace = 0;
+        sportMark = " Watt";
+
+    }
     else if(currentSport == settings::StrengthLabel)
     {
         isStrength = true;
         usePMData = true;
         thresPower = static_cast<int>(thresValues->value("stgpower"));
+        stressFactor = thresValues->value("stgstress");
+        workFactor = 1;
+        thresPace = 0;
+        sportMark = " Watt";
+    }
+    else if(currentSport == settings::AthLabel)
+    {
+        isAth = true;
+        usePMData = true;
+        thresPower = static_cast<int>(thresValues->value("stgpower"));
+        stressFactor = thresValues->value("athstress");
         workFactor = 1;
         thresPace = 0;
         sportMark = " Watt";
@@ -63,7 +84,7 @@ void calculation::set_currentSport(QString sport)
     {
         isAlt = true;
         usePMData = true;
-        thresPower = static_cast<int>(thresValues->value("runcp"));
+        thresPower = static_cast<int>(thresValues->value("runpower"));
         thresPace = 0;
         workFactor = 1;
         sportMark = " Watt";
@@ -169,7 +190,7 @@ QString calculation::get_workout_pace(double dist, double duration,bool full_lab
             speed = sec/dist;
             nr=2;
         }
-        if(isAlt || isStrength) static_cast<void>(speed = 0.0), nr=3;
+        if(isAlt || isStrength || isAth) static_cast<void>(speed = 0.0), nr=3;
 
         speed = set_doubleValue(speed,false);
 
@@ -320,6 +341,7 @@ double calculation::calc_totalWork(double pValue, double dura,int tempID) const
     }
     else if(isRun)
     {
+
         if(usePMData)
         {
             totalWork = (dura * pValue) / factor;
@@ -331,7 +353,11 @@ double calculation::calc_totalWork(double pValue, double dura,int tempID) const
             totalWork = (weight * grav * mSec * bodyHub) * dura / factor;
         }
     }
-    else if(isStrength)
+    else if (isRopejump)
+    {
+        totalWork = (dura * pValue) / factor;
+    }
+    else if(isStrength || isAth)
     {
         //double mSec = pValue/3600.0;
         //totalWork = (weight * grav * mSec * 0.145) * dura / factor;
@@ -649,14 +675,20 @@ double calculation::calc_stressScore(double baseValue, int duration) const
             raw_effort = est_power * duration * (est_power / thresPower);
         }
     }
-    else if(isStrength || isAlt)
+    else if(isRopejump)
+    {
+        baseCalc = calc_thresPower(baseValue);
+        est_stress = 0.03 * duration * pow((baseCalc/thresPower),3.5);
+        return set_doubleValue(est_stress*stressFactor,false);
+    }
+    else if(isStrength || isAlt || isAth)
     {
         baseCalc = calc_thresPower(baseValue);
         raw_effort = (duration * baseCalc) * (baseCalc / thresPower);
     }
 
     cv_effort = thresPower * 3600;
-    est_stress = (raw_effort / cv_effort) * 100;
+    est_stress = ((raw_effort / cv_effort) * 100)*stressFactor;
 
     return set_doubleValue(est_stress,false);
 }
@@ -678,7 +710,7 @@ double calculation::estimate_stressScore(double duration, double distance) const
             return (duration / 3600.0) * (sqrt(pow(static_cast<double>(thresPace) / calc_lapPace(duration,distance),3.0))*100.0);
         }
     }
-    else if(isStrength)
+    else if(isStrength || isAth)
     {
         return (duration / 3600.0) * (athleteValues->value("weight")*0.5);
     }
@@ -704,7 +736,7 @@ double calculation::set_doubleValue(double value, bool setthree) const
 
 int calculation::get_thresPercent(QString level, bool max) const
 {
-    QString range = settings::get_rangeValue(currentSport,level);
+    QString range = settings::get_rangeValues(currentSport.toLower(),level);
 
     if(max)
     {

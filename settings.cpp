@@ -37,6 +37,7 @@ QPair<int,int> settings::screenSize;
 QHash<QString,QString> settings::gcInfo;
 QHash<QString,QString> settings::generalMap;
 QHash<QString,QString> settings::formatMap;
+QHash<QString,QString> settings::sportMap;
 QHash<QString,QString> settings::fileMap;
 QHash<QString,QColor> settings::colorMap;
 QHash<QString,int> settings::intMap;
@@ -47,9 +48,11 @@ QString settings::valueFilePath;
 QString settings::SwimLabel;
 QString settings::BikeLabel;
 QString settings::RunLabel;
+QString settings::JumpLabel;
 QString settings::StrengthLabel;
 QString settings::AltLabel;
 QString settings::TriaLabel;
+QString settings::AthLabel;
 QString settings::OtherLabel;
 
 QHash<QString,QStringList*> settings::headerMap;
@@ -64,15 +67,8 @@ QMap<int,double> settings::weightMap;
 QHash<QString,double> settings::thresholdMap;
 QHash<QString,double> settings::athleteMap;
 QHash<QString,double> settings::doubleMap;
-QHash<QString,QString> settings::swimRange;
-QHash<QString,QString> settings::bikeRange;
-QHash<QString,QString> settings::runRange;
-QHash<QString,QString> settings::triRange;
-QHash<QString,QString> settings::stgRange;
-QHash<QString,QString> settings::altRange;
-QHash<QString,QString> settings::hfRange;
 QHash<QString,QString> settings::triaMap;
-
+QHash<QString,QHash<QString,QString>> settings::rangeMap;
 QStringList settings::keyList;
 QStringList settings::extkeyList;
 
@@ -98,9 +94,21 @@ void settings::fill_mapColor(QStringList *stringList, QString *colorString,bool 
     }
 }
 
-void settings::fill_mapRange(QHash<QString, QString> *map, QString *values)
+QHash<QString, QString> settings::set_rangeLevel(QString values)
 {
-    QStringList list = values->split(splitter);
+    QHash<QString,QString> levelValues;
+
+    QStringList list = values.split(splitter);
+    for(int i = 0; i < listMap.value("Level").count(); ++i)
+    {
+        levelValues.insert(listMap.value("Level").at(i),list.at(i));
+    }
+    return levelValues;
+}
+
+void settings::fill_mapRange(QHash<QString, QString> *map, QString values)
+{
+    QStringList list = values.split(splitter);
     for(int i = 0; i < listMap.value("Level").count(); ++i)
     {
         map->insert(listMap.value("Level").at(i),list.at(i));
@@ -238,9 +246,11 @@ int settings::loadSettings()
             gcInfo.insert("athlete",mysettings->value("athlete").toString());
             gcInfo.insert("athletepref",mysettings->value("athletepref").toString());
             gcInfo.insert("folder",mysettings->value("folder").toString());
+            gcInfo.insert("uploads",mysettings->value("manual").toString());
             gcInfo.insert("conf",mysettings->value("conf").toString());
             gcInfo.insert("gcpath",mysettings->value("gcpath").toString());
             gcInfo.insert("bodyfile",mysettings->value("bodyfile").toString());
+            gcInfo.insert("nutritionfile",mysettings->value("nutritionfile").toString());
         mysettings->endGroup();
 
         if(gcInfo.value("gcpath").isEmpty())
@@ -255,6 +265,7 @@ int settings::loadSettings()
         {
             gcInfo.insert("actpath",gcInfo.value("gcpath") + QDir::separator() + gcInfo.value("athlete")+ QDir::separator() + gcInfo.value("folder"));
             gcInfo.insert("confpath",gcInfo.value("gcpath") + QDir::separator() + gcInfo.value("athlete")+ QDir::separator() + gcInfo.value("conf"));
+            gcInfo.insert("uploadpath",gcInfo.value("gcpath") + QDir::separator() + gcInfo.value("athlete")+ QDir::separator() + gcInfo.value("uploads"));
         }
 
         mysettings->beginGroup("Filepath");
@@ -394,16 +405,20 @@ int settings::loadSettings()
                 thresholdMap.insert("swimpower",myvalues->value("swimpower").toDouble());
                 thresholdMap.insert("bikepower",myvalues->value("bikepower").toDouble());
                 thresholdMap.insert("runpower",myvalues->value("runpower").toDouble());
-                thresholdMap.insert("runcp",myvalues->value("runcp").toDouble());
                 thresholdMap.insert("stgpower",myvalues->value("stgpower").toDouble());
+                thresholdMap.insert("jumppower",(((athleteMap.value("weight") * 9.81)*myvalues->value("jumphigh").toDouble()) / myvalues->value("jumpsecond").toDouble()));
+                thresholdMap.insert("ropefactor",myvalues->value("ropefactor").toDouble());
                 thresholdMap.insert("swimfactor",myvalues->value("swimfactor").toDouble());
                 thresholdMap.insert("bikefactor",myvalues->value("bikefactor").toDouble());
                 thresholdMap.insert("wattfactor",myvalues->value("wattfactor").toDouble());
                 thresholdMap.insert("runfactor",myvalues->value("runfactor").toDouble());
+                thresholdMap.insert("stgstress",myvalues->value("stgstress").toDouble());
+                thresholdMap.insert("athstress",myvalues->value("athstress").toDouble());
                 thresholdMap.insert("runstress",myvalues->value("runstress").toDouble());
                 thresholdMap.insert("swimpace",myvalues->value("swimpace").toDouble());
                 thresholdMap.insert("bikepace",myvalues->value("bikepace").toDouble());
                 thresholdMap.insert("bikespeed",myvalues->value("bikespeed").toDouble());
+                thresholdMap.insert("runspeed",myvalues->value("runspeed").toDouble());
                 thresholdMap.insert("swimlimit",myvalues->value("swimlimit").toDouble());
                 thresholdMap.insert("bikelimit",myvalues->value("bikelimit").toDouble());
                 thresholdMap.insert("runlimit",myvalues->value("runlimit").toDouble());
@@ -424,24 +439,16 @@ int settings::loadSettings()
             myvalues->endGroup();
 
             myvalues->beginGroup("Range");
-                settingString = myvalues->value("swim").toString();
-                settings::fill_mapRange(&swimRange,&settingString);
-                settingString = myvalues->value("bike").toString();
-                settings::fill_mapRange(&bikeRange,&settingString);
-                settingString = myvalues->value("run").toString();
-                settings::fill_mapRange(&runRange,&settingString);
-                settingString = myvalues->value("triathlon").toString();
-                settings::fill_mapRange(&triRange,&settingString);
-                settingString = myvalues->value("strength").toString();
-                settings::fill_mapRange(&stgRange,&settingString);
-                settingString = myvalues->value("alternative").toString();
-                settings::fill_mapRange(&altRange,&settingString);
-                settingString = myvalues->value("hf").toString();
-                settings::fill_mapRange(&hfRange,&settingString);
+                settingList = myvalues->allKeys();
+
+                for(int i = 0; i < settingList.count(); ++i)
+                {
+                    rangeMap.insert(settingList.at(i),settings::set_rangeLevel(myvalues->value(settingList.at(i)).toString()));
+                }
             myvalues->endGroup();
 
             myvalues->beginGroup("Phase");
-                generalMap.insert("saison", myvalues->value("saison").toString());
+                intMap.insert("usesaisons", myvalues->value("usesaisons").toInt());
                 settingList = myvalues->value("phases").toString().split(splitter);
                 listMap.insert("Phase",settingList);
                 settingString = myvalues->value("color").toString();
@@ -485,6 +492,16 @@ int settings::loadSettings()
                     tempList = settingString.split("|");
                     doubleVector.insert(listMap.value("Mode").at(i),set_doubleValues(&tempList));
                 }
+                settingList = myvalues->value("modemacros").toString().split(splitter);
+
+                QMap<QString,int> macroValues;
+                for(int x = 0; x < settingList.count(); ++x)
+                {
+                    settingString = settingList.at(x);
+                    tempList = settingString.split("|");
+
+                }
+
                 settingList = myvalues->value("modeborder").toString().split(splitter);
                 settingString = myvalues->value("color").toString();
                 settings::fill_mapColor(&settingList,&settingString,false);
@@ -512,8 +529,8 @@ int settings::loadSettings()
                 doubleMap.insert("DaySugar",myvalues->value("sugar").toDouble());
                 doubleMap.insert("Macrorange",myvalues->value("macrorange").toDouble());
                 athleteMap.insert("BodyFatCal",myvalues->value("fatcal").toDouble());
-                settingList = myvalues->value("moveday").toString().split(splitter);
-                doubleVector.insert("Moveday",set_doubleValues(&settingList));
+                settingList = myvalues->value("palday").toString().split(splitter);
+                doubleVector.insert("palday",set_doubleValues(&settingList));
             myvalues->endGroup();
 
             myvalues->beginGroup("Misc");
@@ -550,6 +567,10 @@ int settings::loadSettings()
                 settingList <<  myvalues->value("sports").toString().split(splitter);
                 listMap.insert("Sport",myvalues->value("sports").toString().split(splitter));
                 listMap.insert("Sportuse",myvalues->value("sportuse").toString().split(splitter));
+                listMap.insert("Cardio",myvalues->value("Cardio").toString().split(splitter));
+                listMap.insert("Muscular",myvalues->value("muscluar").toString().split(splitter));
+                listMap.insert("Program",myvalues->value("powerprogram").toString().split(splitter));
+                listMap.insert("Equipment",myvalues->value("equipment").toString().split(splitter));
                 settingString = myvalues->value("color").toString();
                 settings::fill_mapColor(&settingList,&settingString,false);
             myvalues->endGroup();
@@ -559,9 +580,11 @@ int settings::loadSettings()
                 if(settingList.at(i) == "Swim") SwimLabel = settingList.at(i);
                 else if(settingList.at(i) == "Bike") BikeLabel = settingList.at(i);
                 else if(settingList.at(i) == "Run") RunLabel = settingList.at(i);
+                else if(settingList.at(i) == "Ropejump") JumpLabel = settingList.at(i);
                 else if(settingList.at(i) == "Strength" || settingList.at(i) == "Power") StrengthLabel = settingList.at(i);
                 else if(settingList.at(i) == "Alt" || settingList.at(i) == "Alternative") AltLabel = settingList.at(i);
                 else if(settingList.at(i) == "Tria" || settingList.at(i) == "Triathlon") TriaLabel = settingList.at(i);
+                else if(settingList.at(i) == "Ath" || settingList.at(i) == "Athletic") AthLabel = settingList.at(i);
                 else if(settingList.at(i) == "Other") OtherLabel = settingList.at(i);
             }
 
@@ -569,7 +592,9 @@ int settings::loadSettings()
             sportIcon.insert(SwimLabel,":/images/icons/Swimming.png");
             sportIcon.insert(BikeLabel,":/images/icons/Biking.png");
             sportIcon.insert(RunLabel,":/images/icons/Running.png");
+            sportIcon.insert(JumpLabel,":/images/icons/Ropejump.png");
             sportIcon.insert(StrengthLabel,":/images/icons/Strength.png");
+            sportIcon.insert(AthLabel,":/images/icons/Athletic.png");
             sportIcon.insert(AltLabel,":/images/icons/SportIcon.png");
             sportIcon.insert(TriaLabel,":/images/icons/Triathlon.png");
 
@@ -639,28 +664,6 @@ double settings::get_weightforDate(QDateTime actDate)
     return weight;
 }
 
-QString settings::get_rangeValue(QString map, QString key)
-{
-    if(map == SwimLabel) return swimRange.value(key);
-    if(map == BikeLabel) return bikeRange.value(key);
-    if(map == RunLabel) return runRange.value(key);
-    if(map == StrengthLabel) return stgRange.value(key);
-    if(map == AltLabel) return altRange.value(key);
-    if(map == TriaLabel) return triRange.value(key);
-    if(map == "HF") return hfRange.value(key);
-
-    return nullptr;
-}
-
-void settings::set_rangeValue(QString map, QString key,QString value)
-{
-    if(map == SwimLabel) swimRange.insert(key,value);
-    if(map == BikeLabel) bikeRange.insert(key,value);
-    if(map == RunLabel)  runRange.insert(key,value);
-    if(map == StrengthLabel) stgRange.insert(key,value);
-    if(map == "HF") hfRange.insert(key,value);
-}
-
 void settings::writeListValues(QHash<QString,QStringList> *plist)
 {
     for(QHash<QString,QStringList>::const_iterator it =  plist->cbegin(), end = plist->cend(); it != end; ++it)
@@ -682,13 +685,13 @@ QString settings::setSettingString(QStringList list)
     return setValue;
 }
 
-QStringList settings::setRangeString(QHash<QString, QString> *hash)
+QStringList settings::setRangeString(QHash<QString, QString> hash)
 {
     QStringList rangeList;
 
     for(int i = 0; i < listMap.value("Level").count(); ++i)
     {
-        rangeList.insert(i,hash->value(listMap.value("Level").at(i)));
+        rangeList.insert(i,hash.value(listMap.value("Level").at(i)));
     }
     return rangeList;
 }
@@ -769,12 +772,12 @@ void settings::saveSettings()
     myvalues->endGroup();
 
     myvalues->beginGroup("Range");
-        myvalues->setValue("swim",settings::setSettingString(settings::setRangeString(&swimRange)));
-        myvalues->setValue("bike",settings::setSettingString(settings::setRangeString(&bikeRange)));
-        myvalues->setValue("run",settings::setSettingString(settings::setRangeString(&runRange)));
-        myvalues->setValue("strength",settings::setSettingString(settings::setRangeString(&stgRange)));
-        myvalues->setValue("triathlon",settings::setSettingString(settings::setRangeString(&triRange)));
-        myvalues->setValue("hf",settings::setSettingString(settings::setRangeString(&hfRange)));
+
+    for(QHash<QString,QHash<QString,QString>>::const_iterator it = rangeMap.cbegin(); it != rangeMap.cend(); ++it)
+    {
+        myvalues->setValue(it.key(),settings::setSettingString(settings::setRangeString(it.value())));
+    }
+
     myvalues->endGroup();
 
     myvalues->beginGroup("Cycle");
@@ -816,11 +819,11 @@ void settings::saveSettings()
         }
         settingList.clear();
 
-        for(int i = 0; i < doubleVector.value("Moveday").count(); ++i)
+        for(int i = 0; i < doubleVector.value("palday").count(); ++i)
         {
-            settingList << QString::number(doubleVector.value("Moveday").at(i));
+            settingList << QString::number(doubleVector.value("palday").at(i));
         }
-        myvalues->setValue("moveday",settings::setSettingString(settingList));
+        myvalues->setValue("palday",settings::setSettingString(settingList));
         settingList.clear();
 
         for(int i = 0; i < doubleVector.value("Macros").count(); ++i)

@@ -169,18 +169,24 @@ private:
 
     QDate popupDate;
     QMap<int,QStringList> workoutMap;
-    QStringList *workListHeader;
+    QString isSeries,isGroup;
+    QStringList *workListHeader,*partTags,*stepTags;
+    QStringList weekMeta;
     QIcon editIcon,addIcon;
     bool moveWorkout;
     int maxWorkouts;
 
     QMap<int,QStringList> reorder_workouts(QMap<int,QStringList>*);
+    QVariant get_itemValue(QStandardItem*,QStringList*,QString);
 
     void init_dayWorkouts(QDate);
     void copy_workoutValue(QString);
     void set_comboWorkouts(QString);
     void set_controls(bool);
     void set_exportContent();
+    void fill_exportValues(QStandardItem*);
+    void read_stdWorkout(QString);
+    void read_childValues(QStandardItem*);
     void set_result(int);
     void reset_controls();
     void set_progress(int);

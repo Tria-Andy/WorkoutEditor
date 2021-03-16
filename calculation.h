@@ -8,7 +8,7 @@ class calculation
 {
 public:
     calculation();
-    bool usePMData,isSwim,isBike,isRun,isStrength,isAlt,isOther,isTria;
+    bool usePMData,isSwim,isBike,isRun,isRopejump,isStrength,isAlt,isAth,isOther,isTria;
     QString calc_lapSpeed(double) const;
     int calc_lapPace(int,double) const;
     double calc_totalWork(double,double,int) const;
@@ -19,7 +19,7 @@ private:
 
 protected:
     QString sportMark,currentSport;
-    int thresPower,thresPace,thresSpeed,hfThreshold;
+    double thresPower,thresPace,thresSpeed,hfThreshold;
     double workFactor,stressFactor;
     void set_currentSport(QString);
 

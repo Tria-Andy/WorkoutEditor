@@ -1484,6 +1484,7 @@
               <widget class="QTableWidget" name="tableWidget_contest">
                <property name="font">
                 <font>
+                 <family>Segoe UI</family>
                  <pointsize>8</pointsize>
                 </font>
                </property>
@@ -2578,69 +2579,147 @@
                    </size>
                   </property>
                   <property name="text">
-                   <string> Add Calories:</string>
+                   <string>Adjust Day PAL:</string>
                   </property>
                  </widget>
                 </item>
-                <item row="0" column="1">
-                 <widget class="QSpinBox" name="spinBox_addWork">
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>20</height>
-                   </size>
+                <item row="1" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox_PAL_0">
+                  <property name="enabled">
+                   <bool>true</bool>
                   </property>
                   <property name="maximum">
-                   <number>999</number>
+                   <double>5.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.050000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox_PAL_1">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="maximum">
+                   <double>5.500000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.050000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox_PAL_2">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="maximum">
+                   <double>5.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.050000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox_PAL_3">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="maximum">
+                   <double>5.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.050000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox_PAL_4">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="maximum">
+                   <double>5.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.050000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox_PAL_5">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="maximum">
+                   <double>5.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.050000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="7" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox_PAL_6">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="maximum">
+                   <double>5.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.050000000000000</double>
                   </property>
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="QCheckBox" name="checkBox_Work_0">
+                 <widget class="QLabel" name="label_67">
                   <property name="text">
-                   <string>Monday</string>
+                   <string>Monday:</string>
                   </property>
                  </widget>
                 </item>
                 <item row="2" column="0">
-                 <widget class="QCheckBox" name="checkBox_Work_1">
+                 <widget class="QLabel" name="label_68">
                   <property name="text">
-                   <string>Tuesday</string>
+                   <string>Tuesday:</string>
                   </property>
                  </widget>
                 </item>
                 <item row="3" column="0">
-                 <widget class="QCheckBox" name="checkBox_Work_2">
+                 <widget class="QLabel" name="label_69">
                   <property name="text">
-                   <string>Wednesday</string>
+                   <string>Wednesday:</string>
                   </property>
                  </widget>
                 </item>
                 <item row="4" column="0">
-                 <widget class="QCheckBox" name="checkBox_Work_3">
+                 <widget class="QLabel" name="label_70">
                   <property name="text">
-                   <string>Thursday</string>
+                   <string>Thursday:</string>
                   </property>
                  </widget>
                 </item>
                 <item row="5" column="0">
-                 <widget class="QCheckBox" name="checkBox_Work_4">
+                 <widget class="QLabel" name="label_71">
                   <property name="text">
-                   <string>Friday</string>
+                   <string>Friday:</string>
                   </property>
                  </widget>
                 </item>
                 <item row="6" column="0">
-                 <widget class="QCheckBox" name="checkBox_Work_5">
+                 <widget class="QLabel" name="label_72">
                   <property name="text">
-                   <string>Saturday</string>
+                   <string>Saturday:</string>
                   </property>
                  </widget>
                 </item>
                 <item row="7" column="0">
-                 <widget class="QCheckBox" name="checkBox_Work_6">
+                 <widget class="QLabel" name="label_73">
                   <property name="text">
-                   <string>Sunday</string>
+                   <string>Sunday:</string>
                   </property>
                  </widget>
                 </item>
@@ -2808,14 +2887,6 @@
   <tabstop>toolButton_colormin</tabstop>
   <tabstop>listWidget_food</tabstop>
   <tabstop>listWidget_addwork</tabstop>
-  <tabstop>spinBox_addWork</tabstop>
-  <tabstop>checkBox_Work_0</tabstop>
-  <tabstop>checkBox_Work_1</tabstop>
-  <tabstop>checkBox_Work_2</tabstop>
-  <tabstop>checkBox_Work_3</tabstop>
-  <tabstop>checkBox_Work_4</tabstop>
-  <tabstop>checkBox_Work_5</tabstop>
-  <tabstop>checkBox_Work_6</tabstop>
   <tabstop>pushButton_save</tabstop>
   <tabstop>pushButton_cancel</tabstop>
   <tabstop>lineEdit_foodFile</tabstop>

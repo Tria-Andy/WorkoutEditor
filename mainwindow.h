@@ -38,6 +38,7 @@
 #include "foodmacro_popup.h"
 #include "foodhistory_popup.h"
 #include "dialog_export.h"
+#include "dialog_nutrition.h"
 #include "dialog_stresscalc.h"
 #include "dialog_workcreator.h"
 #include "dialog_settings.h"
@@ -342,21 +343,8 @@ public:
         }
         else
         {
-            for(int pos = 0; pos < sportList.count();++pos)
-            {
-                if(index.column() == pos+1)
-                {
-                    if(index.column() != sportList.count())
-                    {
-                        rectColor = settings::get_itemColor(sportList.at(pos)).toHsv();
-                    }
-                    else
-                    {
-                        rectColor = settings::get_itemColor(generalValues->value("sum")).toHsv();
-                    }
-                    break;
-                }
-            }
+            if(index.column() > 0 && index.column() <= sportList.count())rectColor = settings::get_itemColor(sportList.at(index.column()-1)).toHsv();
+            if(index.column() == sportList.count()+1) rectColor = settings::get_itemColor(generalValues->value("sum")).toHsv();
 
             QString labels;
             labels = "Workouts:\n";
@@ -374,6 +362,7 @@ public:
             rectGradient.setColorAt(0,rectColor);
             rectGradient.setColorAt(1,gradColor);
 
+            qDebug() << saison_values;
 
             if(!saison_values.isEmpty())
             {
@@ -1068,14 +1057,14 @@ private:
 
     QDate selectedDate;
     QString weeknumber,buttonStyle,dateformat,timeshort,timelong;
-    int userSetup,saisonWeek,saisonWeeks,weekDays,weekCounter,weekRange,sportUse,selectedInt;
+    int userSetup,saisonWeek,weekDays,weekCounter,weekRange,sportUse,selectedInt;
     bool isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
 
     void set_tableWidgetItems(QTableWidget*,int,int,QAbstractItemDelegate*);
     void set_tableHeader(QTableWidget*,QStringList*,bool);
 
     void openPreferences();
-    void summery_Set(QDate,QStandardItem*);
+    void summery_Set(QDate,int);
     void summery_calc(QMap<QString,QVector<double>>*,QMap<QString,QVector<double>>*,QStringList*,int);
     QString set_summeryString(int,QMap<QString,QVector<double>>*,QString);
     void set_saisonValues(QStringList*,QString,int);
@@ -1213,6 +1202,7 @@ private slots:
     void on_spinBox_extWeeks_valueChanged(int arg1);
     void on_toolButton_extReset_clicked();
     void on_comboBox_saisonSport_currentIndexChanged(const QString &arg1);
+    void on_actionNutritionEditor_triggered();
 };
 
 #endif // MAINWINDOW_H

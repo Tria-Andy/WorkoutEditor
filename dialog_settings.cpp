@@ -91,11 +91,10 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->spinBox_protein->setValue(settings::doubleVector.value("Macros").at(1));
     ui->spinBox_fat->setValue(settings::doubleVector.value("Macros").at(2));
 
-    ui->spinBox_addWork->setValue(settings::doubleMap.value("AddMoving"));
     for(int i = 0; i < 7; ++i)
     {
-       tempCheck = this->findChild<QCheckBox *>("checkBox_Work_"+QString::number(i));
-       tempCheck->setChecked(doubleVector.value("Moveday").at(i));
+       palValueDay = this->findChild<QDoubleSpinBox *>("doubleSpinBox_PAL_"+QString::number(i));
+       palValueDay->setValue(settings::doubleVector.value("palday").at(i));
     }
 
     stressHeader = settings::getHeaderMap("stresslist");
@@ -120,7 +119,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
 
     connect(ui->tableWidget_contest->verticalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectContest(int)));
 
-    this->refresh_saisonCombo();
+    this->refresh_saisonCombo(true);
     this->checkSetup();
 }
 
@@ -368,16 +367,16 @@ void Dialog_settings::writeChangedValues()
     saveVector.resize(7);
     for(int i = 0; i < 7; ++i)
     {
-       tempCheck = this->findChild<QCheckBox *>("checkBox_Work_"+QString::number(i));
-       saveVector[i] = tempCheck->isChecked();
+        palValueDay = this->findChild<QDoubleSpinBox *>("doubleSpinBox_PAL_"+QString::number(i));
+        saveVector[i] = palValueDay->value();
     }
-    doubleVector.insert("Moveday",saveVector);
+    settings::doubleVector.insert("palday",saveVector);
 
     saveVector.resize(3);
     saveVector[0] = ui->spinBox_carbs->value();
     saveVector[1] = ui->spinBox_protein->value();
     saveVector[2] = ui->spinBox_fat->value();
-    doubleVector.insert("Macros",saveVector);
+    settings::doubleVector.insert("Macros",saveVector);
 
     settings::writeListValues(&listMap);
 
@@ -395,8 +394,9 @@ void Dialog_settings::writeRangeValues(QString sport)
 {
     QStringList levels = listMap.value("Level");
     QString min,max;
+    QHash<QString,QString> rangeValues;
     QStandardItemModel *model;
-    if(sport == "HF")
+    if(sport.toLower() == "hf")
     {
         model = hf_model;
     }
@@ -409,15 +409,21 @@ void Dialog_settings::writeRangeValues(QString sport)
     {
         min = model->data(model->index(i,1,QModelIndex())).toString();
         max = model->data(model->index(i,3,QModelIndex())).toString();
-        settings::set_rangeValue(sport,levels.at(i),min+"-"+max);
+        rangeValues.insert(levels.at(i),min+"-"+max);
     }
+    settings::set_rangeValue(sport.toLower(),rangeValues);
 }
 
-void Dialog_settings::refresh_saisonCombo()
+void Dialog_settings::refresh_saisonCombo(bool updated)
 {
-    ui->comboBox_saisons->clear();
-    ui->comboBox_saisons->addItems(schedule_ptr->get_saisonValues()->keys());
-    ui->comboBox_saisons->setCurrentIndex(0);
+    if(updated)
+    {
+        ui->comboBox_saisons->blockSignals(true);
+        ui->comboBox_saisons->clear();
+        ui->comboBox_saisons->addItems(schedule_ptr->get_saisonValues()->keys());
+        ui->comboBox_saisons->setCurrentIndex(0);
+        ui->comboBox_saisons->blockSignals(false);
+    }
 }
 
 void Dialog_settings::on_comboBox_selInfo_currentTextChanged(const QString &value)
@@ -476,7 +482,7 @@ void Dialog_settings::set_hfmodel(double hfThres)
 
     for(int i = 0; i < levels.count(); ++i)
     {
-        range = settings::get_rangeValue("HF",levels.at(i));
+        range = settings::get_rangeValues("hf",levels.at(i));
         zone_low = range.split("-").first();
         zone_high = range.split("-").last();
         hf_model->insertRows(i,1,QModelIndex());
@@ -540,7 +546,7 @@ void Dialog_settings::set_thresholdModel(QString sport,int thresBase)
 
     for(int i = 0; i < levels.count(); ++i)
     {
-        range = settings::get_rangeValue(sport,levels.at(i));
+        range = settings::get_rangeValues(sport.toLower(),levels.at(i));
         level_model->insertRows(i,1,QModelIndex());
         level_model->setData(level_model->index(i,0,QModelIndex()),levels.at(i));
         level_model->setData(level_model->index(i,1,QModelIndex()),range.split("-").first());
@@ -1082,6 +1088,7 @@ void Dialog_settings::on_pushButton_delContest_clicked()
 
 void Dialog_settings::on_toolButton_addSaison_clicked()
 {
+    schedule_ptr->newSaison = true;
     ui->comboBox_saisons->insertItem(ui->comboBox_saisons->count(),"New-Saison");
     ui->comboBox_saisons->setCurrentIndex(ui->comboBox_saisons->count()-1);
     ui->dateEdit_saisonStart->setDate(QDate(QDate().currentDate().year(),1,1));
@@ -1091,8 +1098,7 @@ void Dialog_settings::on_toolButton_addSaison_clicked()
 
 void Dialog_settings::on_comboBox_saisons_currentIndexChanged(const QString &value)
 {
-    this->set_saisonInfo(value);
-    schedule_ptr->newSaison = true;
+    if(!schedule_ptr->newSaison) this->set_saisonInfo(value);
 }
 
 void Dialog_settings::on_comboBox_saisons_editTextChanged(const QString &value)
@@ -1102,6 +1108,7 @@ void Dialog_settings::on_comboBox_saisons_editTextChanged(const QString &value)
 
 void Dialog_settings::on_toolButton_updateSaison_clicked()
 {
+    QString saisonName;
     if(schedule_ptr->newSaison)
     {
         QMessageBox::StandardButton reply;
@@ -1112,8 +1119,9 @@ void Dialog_settings::on_toolButton_updateSaison_clicked()
                                       );
         if (reply == QMessageBox::Yes)
         {
+            saisonName = QString::number(ui->dateEdit_saisonStart->date().year())+"-"+QString::number(ui->dateEdit_saisonEnd->date().year());
             QStringList saisonInfo;
-            saisonInfo << ui->comboBox_saisons->currentText()
+            saisonInfo << saisonName
                        << ui->dateEdit_saisonStart->date().toString(formatMap.value("dateformat"))
                        << ui->dateEdit_saisonEnd->date().toString(formatMap.value("dateformat"))
                        << ui->lineEdit_saisonWeeks->text();
@@ -1123,7 +1131,7 @@ void Dialog_settings::on_toolButton_updateSaison_clicked()
     }
 
     ui->toolButton_addSaison->setEnabled(true);
-    this->set_saisonInfo(ui->comboBox_saisons->currentText());
+    this->set_saisonInfo(saisonName);
 }
 
 void Dialog_settings::on_toolButton_deleteSaison_clicked()
@@ -1135,10 +1143,8 @@ void Dialog_settings::on_toolButton_deleteSaison_clicked()
                                   QMessageBox::Yes|QMessageBox::No
                                   );
     if (reply == QMessageBox::Yes)
-    {
-        schedule_ptr->delete_Saison(ui->comboBox_saisons->currentText());
-        schedule_ptr->save_workouts(false);
-        this->refresh_saisonCombo();
+    {    
+        this->refresh_saisonCombo(schedule_ptr->delete_Saison(ui->comboBox_saisons->currentText()));
         this->set_saisonInfo(ui->comboBox_saisons->currentText());
     }
 }
@@ -1237,15 +1243,7 @@ void Dialog_settings::on_comboBox_thresBase_currentIndexChanged(int index)
 {
     if(isRun)
     {
-        if(index == 0)
-        {
-            thresPower = thresValues->value("runpower");
-        }
-        else
-        {
-            thresPower = thresValues->value("runcp");
-        }
-
+        thresPower = thresValues->value("runpower");
         ui->spinBox_thresPower->setValue(thresPower);
     }
 

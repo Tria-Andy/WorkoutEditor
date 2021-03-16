@@ -35,7 +35,6 @@ Dialog_addweek::Dialog_addweek(QWidget *parent,QString sel_week, schedule *p_sch
     weekSummery.resize(4);
     weekSummery.fill(0);
     sportuseList = settings::get_listValues("Sportuse");
-    sportuseList.removeLast();
     sportlistCount = sportuseList.count();
     ui->toolButton_paste->setEnabled(false);
     ui->tableWidget_sportValues->setColumnCount(1);

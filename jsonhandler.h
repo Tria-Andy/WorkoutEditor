@@ -47,7 +47,7 @@ protected:
 
     QString read_jsonContent(QString,bool);
     QVector<QString> read_activityMeta(QString,int);
-    void prepareWrite_JsonFile();
+    void prepareWrite_JsonFile(bool manual);
 
 
 private:

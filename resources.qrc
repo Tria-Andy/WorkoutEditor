@@ -67,6 +67,8 @@
         <file>icons/Summery.png</file>
         <file>icons/Lightning.png</file>
         <file>icons/Count.png</file>
+        <file>icons/Athletic.png</file>
+        <file>icons/Ropejump.png</file>
     </qresource>
     <qresource prefix="/style">
         <file>qss/style.qss</file>

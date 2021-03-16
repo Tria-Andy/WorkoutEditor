@@ -27,6 +27,7 @@ VERSION = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
 VERSION_PE_HEADER = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
 
 SOURCES += main.cpp\
+    dialog_nutrition.cpp \
         mainwindow.cpp \
     settings.cpp \
     activity.cpp \
@@ -51,6 +52,7 @@ SOURCES += main.cpp\
     foodhistory_popup.cpp
 
 HEADERS  += mainwindow.h \
+    dialog_nutrition.h \
     settings.h \
     activity.h \
     dialog_stresscalc.h \
@@ -76,6 +78,7 @@ HEADERS  += mainwindow.h \
     foodhistory_popup.h
 
 FORMS    += mainwindow.ui \
+    dialog_nutrition.ui \
     dialog_stresscalc.ui \
     day_popup.ui \
     dialog_settings.ui \

@@ -149,6 +149,7 @@
                <widget class="QLabel" name="label_5">
                 <property name="font">
                  <font>
+                  <family>Segoe UI</family>
                   <pointsize>10</pointsize>
                   <weight>75</weight>
                   <bold>true</bold>
@@ -175,6 +176,7 @@
                 </property>
                 <property name="font">
                  <font>
+                  <family>Segoe UI</family>
                   <pointsize>10</pointsize>
                   <weight>75</weight>
                   <bold>true</bold>
@@ -186,6 +188,7 @@
                <widget class="QLabel" name="label_6">
                 <property name="font">
                  <font>
+                  <family>Segoe UI</family>
                   <pointsize>10</pointsize>
                   <weight>75</weight>
                   <bold>true</bold>
@@ -215,6 +218,7 @@
                 </property>
                 <property name="font">
                  <font>
+                  <family>Segoe UI</family>
                   <pointsize>10</pointsize>
                   <weight>75</weight>
                   <bold>true</bold>
@@ -473,6 +477,7 @@
                    </property>
                    <property name="font">
                     <font>
+                     <family>Segoe UI</family>
                      <pointsize>11</pointsize>
                      <weight>75</weight>
                      <bold>true</bold>
@@ -1350,6 +1355,7 @@
             </property>
             <property name="font">
              <font>
+              <family>Segoe UI</family>
               <pointsize>10</pointsize>
              </font>
             </property>
@@ -1471,6 +1477,7 @@
                   <widget class="QLabel" name="label_lapType">
                    <property name="font">
                     <font>
+                     <family>Segoe UI</family>
                      <pointsize>10</pointsize>
                      <weight>75</weight>
                      <bold>true</bold>
@@ -1621,10 +1628,10 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="5" column="1">
+                 <item row="6" column="1">
                   <widget class="QSpinBox" name="spinBox_intCAD"/>
                  </item>
-                 <item row="5" column="0">
+                 <item row="6" column="0">
                   <widget class="QLabel" name="label_cad">
                    <property name="text">
                     <string>Strokes/CAD:</string>
@@ -1648,6 +1655,23 @@
                    </property>
                    <property name="decimals">
                     <number>3</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="0">
+                  <widget class="QLabel" name="label_13">
+                   <property name="text">
+                    <string>Watts:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="1">
+                  <widget class="QSpinBox" name="spinBox_intWatts">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="maximum">
+                    <number>999</number>
                    </property>
                   </widget>
                  </item>
@@ -1953,6 +1977,7 @@
                 </property>
                 <property name="font">
                  <font>
+                  <family>Segoe UI</family>
                   <pointsize>10</pointsize>
                   <weight>75</weight>
                   <bold>true</bold>
@@ -2456,6 +2481,7 @@
              </property>
              <property name="font">
               <font>
+               <family>Segoe UI</family>
                <pointsize>12</pointsize>
                <weight>75</weight>
                <bold>true</bold>
@@ -2633,6 +2659,7 @@
                     </property>
                     <property name="font">
                      <font>
+                      <family>Segoe UI</family>
                       <pointsize>11</pointsize>
                       <weight>75</weight>
                       <bold>true</bold>
@@ -2676,6 +2703,7 @@
                  </property>
                  <property name="font">
                   <font>
+                   <family>Segoe UI</family>
                    <pointsize>8</pointsize>
                   </font>
                  </property>
@@ -2828,6 +2856,7 @@
                        </property>
                        <property name="font">
                         <font>
+                         <family>Segoe UI</family>
                          <pointsize>10</pointsize>
                          <weight>75</weight>
                          <bold>true</bold>
@@ -2976,6 +3005,7 @@
                     </property>
                     <property name="font">
                      <font>
+                      <family>Segoe UI</family>
                       <pointsize>10</pointsize>
                      </font>
                     </property>
@@ -3024,6 +3054,7 @@
                    <widget class="QFrame" name="frame_dayEdit">
                     <property name="font">
                      <font>
+                      <family>Segoe UI</family>
                       <pointsize>9</pointsize>
                      </font>
                     </property>
@@ -3194,6 +3225,7 @@
                        </property>
                        <property name="font">
                         <font>
+                         <family>Segoe UI</family>
                          <pointsize>9</pointsize>
                         </font>
                        </property>
@@ -3661,6 +3693,7 @@
                     </property>
                     <property name="font">
                      <font>
+                      <family>Segoe UI</family>
                       <pointsize>11</pointsize>
                      </font>
                     </property>
@@ -3806,6 +3839,7 @@
    <addaction name="actionIntervall_Editor"/>
    <addaction name="actionPace_Calculator"/>
    <addaction name="actionStress_Calculator"/>
+   <addaction name="actionNutritionEditor"/>
    <addaction name="actionFood_Macros"/>
    <addaction name="actionfood_History"/>
    <addaction name="separator"/>
@@ -4022,6 +4056,15 @@
    </property>
    <property name="toolTip">
     <string>Expand</string>
+   </property>
+  </action>
+  <action name="actionNutritionEditor">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/images/icons/Editor.png</normaloff>:/images/icons/Editor.png</iconset>
+   </property>
+   <property name="text">
+    <string>NutritionEditor</string>
    </property>
   </action>
  </widget>

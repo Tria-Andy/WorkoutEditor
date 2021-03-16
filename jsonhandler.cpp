@@ -26,7 +26,6 @@ jsonHandler::jsonHandler()
     hasOverride = hasXdata = false;
 }
 
-
 QVector<QString> jsonHandler::read_activityMeta(QString filePath, int counter)
 {
     QFile file(filePath);
@@ -100,8 +99,8 @@ QString jsonHandler::read_jsonContent(QString jsonfile,bool fullPath)
         //Check if File contains OVERRIDES
         if(activityObject.keys().contains(mapList->at(2)))
         {
-            hasOverride = true;
             itemArray = activityObject[mapList->at(2)].toArray();
+            if(itemArray.count() > 0) hasOverride = true;
 
             for(int i = 0; i < itemArray.count(); ++i)
             {
@@ -114,21 +113,11 @@ QString jsonHandler::read_jsonContent(QString jsonfile,bool fullPath)
         //Fill IntervallMap
         itemArray = activityObject.value(mapList->at(3)).toArray();
         keyList = settings::get_xmlMapping("intervals");
-        int intStop = -2;
 
         for(int i = 0; i < itemArray.count(); ++i)
         {
             itemObject = itemArray.at(i).toObject();
-
-            if(intStop == itemObject[keyList->at(1)].toInt())
-            {
-                intervallMap.insert(i,qMakePair(itemObject[keyList->at(1)].toInt()+1,itemObject[keyList->at(2)].toInt()));
-            }
-            else
-            {
-                intervallMap.insert(i,qMakePair(itemObject[keyList->at(1)].toInt(),itemObject[keyList->at(2)].toInt()));
-            }
-            intStop = itemObject[keyList->at(2)].toInt();
+            intervallMap.insert(i,qMakePair(itemObject[keyList->at(1)].toInt(),itemObject[keyList->at(2)].toInt()));
         }
 
         //Fill SampleMap
@@ -252,7 +241,7 @@ void jsonHandler::check_keyList(QStringList *targetList,QStringList *map, QStrin
     }
 }
 
-void jsonHandler::prepareWrite_JsonFile()
+void jsonHandler::prepareWrite_JsonFile(bool manual)
 {
     QString jsonFile = tagData.value("Filename");
     tagData.insert("Updated","1");
@@ -349,11 +338,22 @@ void jsonHandler::prepareWrite_JsonFile()
 
     QJsonDocument jsonDoc;
     QJsonObject activityFile;
+    QString importPath;
 
     activityFile[mapList->at(0)] = activityItem;
     jsonDoc.setObject(activityFile);
 
-    QFile file(gcValues->value("actpath") + QDir::separator() + jsonFile);
+    if(manual)
+    {
+        importPath = gcValues->value("uploadpath");
+    }
+    else
+    {
+        importPath = gcValues->value("actpath");
+    }
+
+
+    QFile file(importPath + QDir::separator() + jsonFile);
     //QFile file(QCoreApplication::applicationDirPath() + QDir::separator() + jsonFile); //Test
 
     if(!file.open(QFile::WriteOnly))

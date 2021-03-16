@@ -77,7 +77,6 @@ private:
     void set_dayFoodValues(QStandardItem*);
     void set_foodPlanData(QStandardItem*);
     void update_foodHistory(QDate);
-
     void check_foodPlan();
 };
 
