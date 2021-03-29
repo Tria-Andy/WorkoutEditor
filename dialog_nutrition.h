@@ -18,9 +18,22 @@ public:
 
 private slots:
     void on_toolButton_close_clicked();
+    void on_comboBox_recipe_currentIndexChanged(const QString &arg1);
+    void on_comboBox_ingredients_currentIndexChanged(const QString &arg1);
+    void on_listWidget_recipes_itemClicked(QListWidgetItem *item);
+
+    void on_listWidget_ingredients_itemClicked(QListWidgetItem *item);
+
+    void on_toolButton_add_clicked();
 
 private:
     Ui::Dialog_nutrition *ui;
+    foodplanner *foodPlan;
+    QSortFilterProxyModel *foodProxy;
+    QStringList *recipeHeader;
+
+
+    void set_listItems(QStandardItemModel*,QListWidget*,QString);
 };
 
 #endif // DIALOG_NUTRITION_H

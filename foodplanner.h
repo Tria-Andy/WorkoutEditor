@@ -13,7 +13,7 @@ class foodplanner : public xmlHandler, public calculation
 public:
     explicit foodplanner(schedule *ptrSchedule = nullptr);
 
-    QStandardItemModel *foodPlanModel,*mealModel,*historyModel;
+    QStandardItemModel *foodPlanModel,*mealModel,*recipeModel,*ingredModel,*historyModel;
     QStringList *menuHeader,*foodPlanTags,*foodHistTags,*mealsTags,*foodsumHeader,*foodestHeader,*foodhistHeader;
     QStringList planList,mealsHeader,dayHeader,dayListHeader;
     QPair<bool,bool> dayMealCopy;
@@ -32,6 +32,10 @@ public:
     QMap<QDate,double> get_lastFoodWeek(QDate);
     QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
     QStandardItem *get_modelItem(QStandardItemModel*,QString,int);
+    QVector<double> get_foodMacros(QString);
+
+    QStringList get_modelSections(QStandardItemModel*);
+    QList<QStandardItem*> get_sectionItems(QStandardItemModel*,QString);
 
     void update_foodPlanData(bool,QDate,QDate);
     void update_foodHistory(QDate,QVector<double>);

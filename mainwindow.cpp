@@ -428,15 +428,13 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     minMax.second = settings::doubleVector.value(mode).at(1)/100.0;
     QVector<double> weekValues(5,0);
 
-    qDebug() << minMax;
-
     if(startDate == firstdayofweek)
     {
         slidingValues = foodPlan->get_lastFoodWeek(startDate.addDays(-7));
     }
     else
     {
-        for(QMap<QDate,QVector<double>>::const_iterator it = daySumMap->find(startDate.addDays(-3)), end = daySumMap->find(startDate); it != end; ++it)
+        for(QMap<QDate,QVector<double>>::Iterator it = daySumMap->find(startDate.addDays(-3)), end = daySumMap->find(startDate); it != end; ++it)
         {
             slidingValues.insert(it.key(),it.value().at(4));
         }
@@ -444,11 +442,11 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     int slidingSum = 0;
 
 
-    for(QMap<QDate,QVector<double>>::const_iterator it = daySumMap->find(startDate), end = daySumMap->find(startDate.addDays(7)); it != end; ++it,++day)
+    for(QMap<QDate,QVector<double>>::Iterator it = daySumMap->find(startDate), end = daySumMap->find(startDate.addDays(7)); it != end; ++it,++day)
     {
         slidingValues.insert(it.key(),it.value().at(4));
         slidingSum = 0;
-        for(QMap<QDate,double>::const_iterator lastDay = slidingValues.find(it.key().addDays(-2)); lastDay != slidingValues.find(it.key());++lastDay)
+        for(QMap<QDate,double>::Iterator lastDay = slidingValues.find(it.key().addDays(-2)); lastDay != slidingValues.find(it.key());++lastDay)
         {
             slidingSum = slidingSum + lastDay.value();
         }

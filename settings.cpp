@@ -289,6 +289,8 @@ int settings::loadSettings()
             fileMap.insert("foodfile",mysettings->value("foodfile").toString());
             fileMap.insert("mealsfile",mysettings->value("mealsfile").toString());
             fileMap.insert("foodhistory",mysettings->value("foodhistory").toString());
+            fileMap.insert("ingredfile",mysettings->value("ingredfile").toString());
+            fileMap.insert("recipefile",mysettings->value("recipefile").toString());
         mysettings->endGroup();
 
 
@@ -494,7 +496,6 @@ int settings::loadSettings()
                 }
                 settingList = myvalues->value("modemacros").toString().split(splitter);
 
-                QMap<QString,int> macroValues;
                 for(int x = 0; x < settingList.count(); ++x)
                 {
                     settingString = settingList.at(x);

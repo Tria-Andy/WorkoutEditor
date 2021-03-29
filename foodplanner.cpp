@@ -34,11 +34,15 @@ foodplanner::foodplanner(schedule *p_Schedule)
 
     foodPlanModel = new QStandardItemModel();
     historyModel = new QStandardItemModel();
+    ingredModel = new QStandardItemModel();
+    recipeModel = new QStandardItemModel();
     historyModel->setColumnCount(foodhistHeader->count());
     this->set_headerLabel(historyModel,foodhistHeader,false);
 
     if(!settings::getStringMapPointer(settings::stingMap::GC)->value("foodplanner").isEmpty())
     {
+        this->xml_toTreeModel(fileMap->value("recipefile"),recipeModel);
+        this->xml_toTreeModel(fileMap->value("ingredfile"),ingredModel);
         this->xml_toTreeModel(fileMap->value("mealsfile"),mealModel);
         this->set_mealsMap();
         this->xml_toTreeModel(fileMap->value("foodfile"),foodPlanModel);
@@ -175,6 +179,8 @@ QModelIndex foodplanner::get_modelIndex(QStandardItemModel *model, QString searc
 {
     QList<QStandardItem*> list = model->findItems(searchString,Qt::MatchExactly | Qt::MatchRecursive,col);
 
+    qDebug() << list.count();
+
     if(list.count() > 0)
     {
         return model->indexFromItem(list.at(0));
@@ -197,6 +203,52 @@ QStandardItem *foodplanner::get_modelItem(QStandardItemModel *model, QString sea
     {
         return nullptr;
     }
+}
+
+QVector<double> foodplanner::get_foodMacros(QString ingredID)
+{
+    QVector<double> macros(7,0);
+
+    QModelIndex index = this->get_modelIndex(ingredModel,ingredID,0);
+
+    macros[0] = index.siblingAtColumn(2).data(Qt::DisplayRole).toDouble();
+    macros[1] = index.siblingAtColumn(3).data(Qt::DisplayRole).toDouble();
+    macros[2] = index.siblingAtColumn(4).data(Qt::DisplayRole).toDouble();
+    macros[3] = index.siblingAtColumn(5).data(Qt::DisplayRole).toDouble();
+    macros[4] = index.siblingAtColumn(6).data(Qt::DisplayRole).toDouble();
+    macros[5] = index.siblingAtColumn(7).data(Qt::DisplayRole).toDouble();
+    macros[6] = index.siblingAtColumn(8).data(Qt::DisplayRole).toDouble();
+
+    return macros;
+}
+
+QStringList foodplanner::get_modelSections(QStandardItemModel *model)
+{
+    QStringList sectionList;
+
+    for(int i = 0; i < model->rowCount(); i++)
+    {
+        sectionList << model->item(i,0)->data(Qt::DisplayRole).toString();
+    }
+
+    return sectionList;
+}
+
+QList<QStandardItem*> foodplanner::get_sectionItems(QStandardItemModel *model, QString section)
+{
+    QStandardItem *item = model->findItems(section,Qt::MatchExactly,0).at(0);
+    QList<QStandardItem*> sectionItems;
+    QStandardItem *sectionItem;
+
+    for(int i = 0; i < item->rowCount(); i++)
+    {
+        sectionItem = new QStandardItem();
+        sectionItem->setData(item->child(i,1)->data(Qt::DisplayRole).toString(),Qt::DisplayRole);
+        sectionItem->setData(item->child(i,0)->data(Qt::DisplayRole).toString(),Qt::AccessibleTextRole);
+        sectionItems.append(sectionItem);
+    }
+
+    return sectionItems;
 }
 
 void foodplanner::set_dayFoodValues(QStandardItem *dayItem)
