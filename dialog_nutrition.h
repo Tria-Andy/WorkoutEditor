@@ -21,18 +21,19 @@ private slots:
     void on_comboBox_recipe_currentIndexChanged(const QString &arg1);
     void on_comboBox_ingredients_currentIndexChanged(const QString &arg1);
     void on_listWidget_recipes_itemClicked(QListWidgetItem *item);
-
     void on_listWidget_ingredients_itemClicked(QListWidgetItem *item);
-
     void on_toolButton_add_clicked();
-
     void on_doubleSpinBox_portion_valueChanged(double arg1);
-
     void on_treeWidget_recipe_itemClicked(QTreeWidgetItem *item, int column);
-
     void on_toolButton_update_clicked();
-
     void on_toolButton_edit_clicked();
+    void on_toolButton_addIngred_clicked();
+
+    void on_toolButton_clear_clicked();
+
+    void on_toolButton_save_clicked();
+
+    void on_toolButton_createRecipe_clicked();
 
 private:
     Ui::Dialog_nutrition *ui;
@@ -42,6 +43,9 @@ private:
     QVector<double> loadedMacros;
 
     void set_listItems(QStandardItemModel*,QListWidget*,QString);
+    void update_ingredientModel(bool);
+    void calc_recipeValues();
+    void clear_recipeInfo();
 };
 
 #endif // DIALOG_NUTRITION_H

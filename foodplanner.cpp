@@ -84,6 +84,14 @@ QString foodplanner::get_mode(QDate startDate)
     }
 }
 
+QString foodplanner::get_newRecipeID(QString section)
+{
+    QStandardItem *item = recipeModel->findItems(section,Qt::MatchExactly,0).at(0);
+
+    return section+"-"+QString::number(item->rowCount());
+
+}
+
 void foodplanner::set_headerLabel(QStandardItemModel *model, QStringList *list, bool vert)
 {
     for(int i = 0; i < list->count(); ++i)
@@ -178,8 +186,6 @@ QVector<double> foodplanner::get_mealValues(QString mealId,double factor)
 QModelIndex foodplanner::get_modelIndex(QStandardItemModel *model, QString searchString,int col)
 {
     QList<QStandardItem*> list = model->findItems(searchString,Qt::MatchExactly | Qt::MatchRecursive,col);
-
-    qDebug() << list.count();
 
     if(list.count() > 0)
     {
@@ -485,6 +491,25 @@ void foodplanner::change_updateMapOrder(QPair<QDate,QString> dateSection, QMap<Q
     updateMap.insert(updateKey,editMealSection);
 }
 
+void foodplanner::add_ingredient(QString section, QString foodName,QVector<double> values)
+{
+    QStandardItem *sectionItem = this->get_modelItem(ingredModel,section,0);
+    QList<QStandardItem*> itemList;
+    QStandardItem *item;
+    QString sectionID = ingredModel->indexFromItem(sectionItem).siblingAtColumn(1).data().toString();
+
+    itemList.append(new QStandardItem(sectionID+"-"+QString::number(sectionItem->rowCount())));
+    itemList.append(new QStandardItem(foodName));
+
+    for(int i = 0; i < values.count(); ++i)
+    {
+        item = new QStandardItem(QString::number(values.at(i)));
+        itemList.append(item);
+    }
+
+    sectionItem->appendRow(itemList);
+}
+
 void foodplanner::edit_updateMap(int foodEdit,QPair<QDate,QString> dateSection,QString mealID, double factor)
 {
     QPair<bool,QDate> updateKey(true,dateSection.first);
@@ -712,8 +737,6 @@ void foodplanner::update_foodMode(QDate weekStart,QString newMode)
 void foodplanner::update_ingredient(QString ingredID,QVector<double> values)
 {
     QModelIndex index = this->get_modelIndex(ingredModel,ingredID,0);
-
-    qDebug() << index.data() << ingredID << values;
 }
 
 void foodplanner::edit_mealSection(QString sectionName,int mode)

@@ -128,14 +128,14 @@ public:
         painter->drawText(rectHeadText,Qt::AlignLeft | Qt::AlignVCenter, dayDate);
 
         temp_value = index.data(Qt::DisplayRole).toString();
-        workoutValues = temp_value.split(delimiter,QString::SkipEmptyParts);
+        workoutValues = temp_value.split(delimiter,Qt::SkipEmptyParts);
         workoutValues.removeFirst();
 
         if(index.column() != 0)
         {
             QString workout;
             temp_value = index.data(Qt::DisplayRole).toString();
-            workoutValues = temp_value.split(delimiter,QString::SkipEmptyParts);
+            workoutValues = temp_value.split(delimiter,Qt::SkipEmptyParts);
             workoutValues.removeFirst();
 
             if(!workoutValues.isEmpty())
@@ -192,7 +192,7 @@ public:
         {
             QPainterPath phasePath;
             temp_value = index.data(Qt::DisplayRole).toString();
-            workoutValues = index.data(Qt::DisplayRole).toString().split(delimiter,QString::SkipEmptyParts);
+            workoutValues = index.data(Qt::DisplayRole).toString().split(delimiter,Qt::SkipEmptyParts);
             int valueCount = workoutValues.count();
 
             if(!temp_value.isEmpty())

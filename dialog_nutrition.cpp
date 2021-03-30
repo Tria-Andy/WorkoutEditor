@@ -16,6 +16,10 @@ Dialog_nutrition::Dialog_nutrition(QWidget *parent, foodplanner *p_food) :
     ui->comboBox_recipe->addItems(foodPlan->get_modelSections(foodPlan->recipeModel));
     ui->comboBox_ingredients->addItems(foodPlan->get_modelSections(foodPlan->ingredModel));
 
+    ui->toolButton_save->setEnabled(false);
+    ui->lineEdit_recipeName->setEnabled(false);
+    ui->toolButton_clear->setEnabled(false);
+
     recipeHeader = settings::getHeaderMap("recipeheader");
     QTreeWidgetItem *headerItem = new QTreeWidgetItem();
     for(int i = 0; i < recipeHeader->count(); ++i)
@@ -74,13 +78,20 @@ void Dialog_nutrition::on_listWidget_recipes_itemClicked(QListWidgetItem *selIte
         treeItem->setData(6,Qt::DisplayRole,recipeItem->child(row,7)->data(Qt::DisplayRole).toDouble());
         treeItem->setData(7,Qt::DisplayRole,recipeItem->child(row,8)->data(Qt::DisplayRole).toDouble());
     }
+
+    ui->lineEdit_recipeName->setText(selItem->data(Qt::DisplayRole).toString());
+    ui->lineEdit_recipeName->setAccessibleName(selItem->data(Qt::AccessibleTextRole).toString());
+    this->calc_recipeValues();
+
+    ui->toolButton_save->setEnabled(true);
+    ui->toolButton_clear->setEnabled(true);
 }
 
 void Dialog_nutrition::set_listItems(QStandardItemModel *model,QListWidget *selList,QString value)
 {
     selList->clear();
-    QList<QStandardItem*> items = foodPlan->get_sectionItems(model,value);
 
+    QList<QStandardItem*> items = foodPlan->get_sectionItems(model,value);
     QListWidgetItem *listItem;
 
     for(int count = 0; count < items.count(); ++count)
@@ -90,6 +101,8 @@ void Dialog_nutrition::set_listItems(QStandardItemModel *model,QListWidget *selL
         listItem->setData(Qt::AccessibleTextRole,items.at(count)->data(Qt::AccessibleTextRole).toString());
         selList->addItem(listItem);
     }
+
+    selList->sortItems();
 }
 
 void Dialog_nutrition::on_listWidget_ingredients_itemClicked(QListWidgetItem *item)
@@ -119,6 +132,7 @@ void Dialog_nutrition::on_toolButton_add_clicked()
     newItem->setData(5,Qt::DisplayRole,ui->doubleSpinBox_fat->value());
     newItem->setData(6,Qt::DisplayRole,ui->doubleSpinBox_fiber->value());
     newItem->setData(7,Qt::DisplayRole,ui->doubleSpinBox_sugar->value());
+    this->calc_recipeValues();
 }
 
 void Dialog_nutrition::on_doubleSpinBox_portion_valueChanged(double value)
@@ -160,18 +174,118 @@ void Dialog_nutrition::on_toolButton_update_clicked()
     currItem->setData(5,Qt::DisplayRole,ui->doubleSpinBox_fat->value());
     currItem->setData(6,Qt::DisplayRole,ui->doubleSpinBox_fiber->value());
     currItem->setData(7,Qt::DisplayRole,ui->doubleSpinBox_sugar->value());
+    this->calc_recipeValues();
 }
+
+void Dialog_nutrition::update_ingredientModel(bool addNew)
+{
+    QVector<double> foodValues(7,0);
+
+    foodValues[0] = ui->doubleSpinBox_portion->value();
+    foodValues[1] = ui->doubleSpinBox_calories->value();
+    foodValues[2] = ui->doubleSpinBox_carbs->value();
+    foodValues[3] = ui->doubleSpinBox_protein->value();
+    foodValues[4] = ui->doubleSpinBox_fat->value();
+    foodValues[5] = ui->doubleSpinBox_fiber->value();
+    foodValues[6] = ui->doubleSpinBox_sugar->value();
+
+    if(addNew)
+    {
+        foodPlan->add_ingredient(ui->comboBox_ingredients->currentText(),ui->lineEdit_foodName->text(),foodValues);
+        this->set_listItems(foodPlan->ingredModel,ui->listWidget_ingredients,ui->comboBox_ingredients->currentText());
+    }
+    else
+    {
+        foodPlan->update_ingredient(ui->lineEdit_foodName->accessibleName(),foodValues);
+    }
+}
+
+void Dialog_nutrition::calc_recipeValues()
+{
+    QTreeWidgetItem *rootItem = ui->treeWidget_recipe->invisibleRootItem();
+    QVector<double> foodValues(7,0);
+    QTreeWidgetItem *currItem;
+
+    for(int row = 0; row < rootItem->childCount(); ++row)
+    {
+        currItem = rootItem->child(row);
+
+        for(int col = 1, i= 0; col < recipeHeader->count(); ++col,++i)
+        {
+            foodValues[i] = currItem->data(col,Qt::DisplayRole).toDouble() + foodValues.at(i);
+        }
+    }
+
+    ui->label_gramms->setText(QString::number(foodValues.at(0)));
+    ui->label_calories->setText(QString::number(round(foodValues.at(1))));
+
+    ui->label_carbs->setText(QString::number(round(foodValues.at(2))));
+    ui->label_protein->setText(QString::number(round(foodValues.at(3))));
+    ui->label_fat->setText(QString::number(round(foodValues.at(4))));
+    ui->label_fiber->setText(QString::number(round(foodValues.at(5))));
+    ui->label_sugar->setText(QString::number(round(foodValues.at(6))));
+}
+
+void Dialog_nutrition::clear_recipeInfo()
+{
+    ui->treeWidget_recipe->clear();
+    ui->lineEdit_recipeName->clear();
+    ui->label_gramms->setText("-");
+    ui->label_calories->setText("-");
+    ui->label_carbs->setText("-");
+    ui->label_protein->setText("-");
+    ui->label_fat->setText("-");
+    ui->label_fiber->setText("-");
+    ui->label_sugar->setText("-");
+}
+
 
 void Dialog_nutrition::on_toolButton_edit_clicked()
 {
-    QVector<double> foodValues(6,0);
+    this->update_ingredientModel(false);
+}
 
-    foodValues[0] = ui->doubleSpinBox_calories->value();
-    foodValues[1] = ui->doubleSpinBox_carbs->value();
-    foodValues[2] = ui->doubleSpinBox_protein->value();
-    foodValues[3] = ui->doubleSpinBox_fat->value();
-    foodValues[4] = ui->doubleSpinBox_fiber->value();
-    foodValues[5] = ui->doubleSpinBox_sugar->value();
+void Dialog_nutrition::on_toolButton_addIngred_clicked()
+{
+    this->update_ingredientModel(true);
+}
 
-    foodPlan->update_ingredient(ui->lineEdit_foodName->accessibleName(),foodValues);
+void Dialog_nutrition::on_toolButton_clear_clicked()
+{
+    this->clear_recipeInfo();
+}
+
+void Dialog_nutrition::on_toolButton_save_clicked()
+{
+    QTreeWidgetItem *rootItem = ui->treeWidget_recipe->invisibleRootItem();
+    QTreeWidgetItem *currItem;
+    QList<QStandardItem*> ingredList;
+    QStandardItem *recipeItem,*ingredItem;
+
+    recipeItem = new QStandardItem();
+    recipeItem->setData("ID");
+
+
+    for(int row = 0; row < rootItem->childCount(); ++row)
+    {
+        currItem = rootItem->child(row);
+        ingredList.clear();
+
+        for(int col = 0; col < recipeHeader->count(); ++col)
+        {
+            ingredItem = new QStandardItem();
+            ingredItem->setData(currItem->data(col,Qt::DisplayRole));
+            ingredList.append(ingredItem);
+        }
+        recipeItem->appendRow(ingredList);
+    }
+
+}
+
+void Dialog_nutrition::on_toolButton_createRecipe_clicked()
+{
+    ui->lineEdit_recipeName->setEnabled(true);
+    ui->toolButton_save->setEnabled(true);
+    ui->lineEdit_recipeName->setAccessibleName(foodPlan->get_newRecipeID(ui->comboBox_recipe->currentText()));
+    ui->toolButton_createRecipe->setEnabled(false);
 }

@@ -28,6 +28,8 @@ public:
     bool updateMap_hasData();
     QString get_mealName(QString key) {return mealsMap.value(key);}
     QString get_mode(QDate);
+    QString get_newRecipeID(QString);
+
     QPair<QString,QVector<int>> get_mealData(QString);
     QMap<QDate,double> get_lastFoodWeek(QDate);
     QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
@@ -55,6 +57,8 @@ public:
     void insert_newMeal(QString);
     void remove_week(QString);
     void change_updateMapOrder(QPair<QDate,QString>,QMap<QString,int>);
+    void add_ingredient(QString, QString,QVector<double>);
+    void submit_recipes(QStandardItem*);
 
 
 private:
