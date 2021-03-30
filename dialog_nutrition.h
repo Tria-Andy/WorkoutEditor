@@ -26,12 +26,20 @@ private slots:
 
     void on_toolButton_add_clicked();
 
+    void on_doubleSpinBox_portion_valueChanged(double arg1);
+
+    void on_treeWidget_recipe_itemClicked(QTreeWidgetItem *item, int column);
+
+    void on_toolButton_update_clicked();
+
+    void on_toolButton_edit_clicked();
+
 private:
     Ui::Dialog_nutrition *ui;
     foodplanner *foodPlan;
     QSortFilterProxyModel *foodProxy;
     QStringList *recipeHeader;
-
+    QVector<double> loadedMacros;
 
     void set_listItems(QStandardItemModel*,QListWidget*,QString);
 };

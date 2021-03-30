@@ -709,6 +709,13 @@ void foodplanner::update_foodMode(QDate weekStart,QString newMode)
     }
 }
 
+void foodplanner::update_ingredient(QString ingredID,QVector<double> values)
+{
+    QModelIndex index = this->get_modelIndex(ingredModel,ingredID,0);
+
+    qDebug() << index.data() << ingredID << values;
+}
+
 void foodplanner::edit_mealSection(QString sectionName,int mode)
 {
     if(mode == ADD)

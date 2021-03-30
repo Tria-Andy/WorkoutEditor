@@ -438,6 +438,40 @@
               </widget>
              </item>
              <item>
+              <widget class="Line" name="line">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="toolButton_update">
+               <property name="text">
+                <string>...</string>
+               </property>
+               <property name="icon">
+                <iconset resource="resources.qrc">
+                 <normaloff>:/images/icons/Refresh.png</normaloff>:/images/icons/Refresh.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>18</width>
+                 <height>18</height>
+                </size>
+               </property>
+               <property name="autoRaise">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="Line" name="line_2">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QToolButton" name="toolButton_edit">
                <property name="text">
                 <string>...</string>
@@ -454,6 +488,13 @@
                </property>
                <property name="autoRaise">
                 <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="Line" name="line_3">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
                </property>
               </widget>
              </item>
@@ -481,6 +522,10 @@
             <zorder>toolButton_edit</zorder>
             <zorder>toolButton_delete</zorder>
             <zorder>toolButton_add</zorder>
+            <zorder>toolButton_update</zorder>
+            <zorder>line</zorder>
+            <zorder>line_2</zorder>
+            <zorder>line_3</zorder>
            </widget>
           </item>
           <item>

@@ -30,6 +30,8 @@ Dialog_nutrition::Dialog_nutrition(QWidget *parent, foodplanner *p_food) :
     ui->treeWidget_recipe->setDragDropMode(QAbstractItemView::DragDrop);
     ui->treeWidget_recipe->setEnabled(true);
 
+    loadedMacros.resize(7);
+
 }
 
 Dialog_nutrition::~Dialog_nutrition()
@@ -57,15 +59,11 @@ void Dialog_nutrition::on_listWidget_recipes_itemClicked(QListWidgetItem *selIte
     ui->treeWidget_recipe->clear();
 
     QStandardItem *recipeItem = foodPlan->get_modelItem(foodPlan->recipeModel,selItem->data(Qt::AccessibleTextRole).toString(),0);
-
-    QTreeWidgetItem *rootItem = ui->treeWidget_recipe->invisibleRootItem();
     QTreeWidgetItem *treeItem;
-
-    qDebug() << recipeItem->rowCount();
 
     for(int row = 0; row < recipeItem->rowCount();++row)
     {
-        treeItem = new QTreeWidgetItem(rootItem);
+        treeItem = new QTreeWidgetItem(ui->treeWidget_recipe->invisibleRootItem());
         treeItem->setData(0,Qt::AccessibleTextRole,recipeItem->child(row,0)->data(Qt::DisplayRole).toString());
         treeItem->setData(0,Qt::DisplayRole,recipeItem->child(row,1)->data(Qt::DisplayRole).toString());
         treeItem->setData(1,Qt::DisplayRole,recipeItem->child(row,2)->data(Qt::DisplayRole).toDouble());
@@ -96,22 +94,84 @@ void Dialog_nutrition::set_listItems(QStandardItemModel *model,QListWidget *selL
 
 void Dialog_nutrition::on_listWidget_ingredients_itemClicked(QListWidgetItem *item)
 {
-    QVector<double> foodMacros = foodPlan->get_foodMacros(item->data(Qt::AccessibleTextRole).toString());
+    loadedMacros = foodPlan->get_foodMacros(item->data(Qt::AccessibleTextRole).toString());
 
     ui->lineEdit_foodName->setText(item->data(Qt::DisplayRole).toString());
-    ui->doubleSpinBox_portion->setValue(foodMacros.at(0));
-    ui->doubleSpinBox_calories->setValue(foodMacros.at(1));
-    ui->doubleSpinBox_carbs->setValue(foodMacros.at(2));
-    ui->doubleSpinBox_protein->setValue(foodMacros.at(3));
-    ui->doubleSpinBox_fat->setValue(foodMacros.at(4));
-    ui->doubleSpinBox_fiber->setValue(foodMacros.at(5));
-    ui->doubleSpinBox_sugar->setValue(foodMacros.at(6));
+    ui->lineEdit_foodName->setAccessibleName(item->data(Qt::AccessibleTextRole).toString());
+    ui->doubleSpinBox_portion->setValue(loadedMacros.at(0));
+    ui->doubleSpinBox_calories->setValue(loadedMacros.at(1));
+    ui->doubleSpinBox_carbs->setValue(loadedMacros.at(2));
+    ui->doubleSpinBox_protein->setValue(loadedMacros.at(3));
+    ui->doubleSpinBox_fat->setValue(loadedMacros.at(4));
+    ui->doubleSpinBox_fiber->setValue(loadedMacros.at(5));
+    ui->doubleSpinBox_sugar->setValue(loadedMacros.at(6));
 }
 
 void Dialog_nutrition::on_toolButton_add_clicked()
 {
-    //QTreeWidgetItem *newItem;
+    QTreeWidgetItem *newItem = new QTreeWidgetItem(ui->treeWidget_recipe->invisibleRootItem());
+    newItem->setData(0,Qt::AccessibleTextRole,ui->lineEdit_foodName->accessibleName());
+    newItem->setData(0,Qt::DisplayRole,ui->lineEdit_foodName->text());
+    newItem->setData(1,Qt::DisplayRole,ui->doubleSpinBox_portion->value());
+    newItem->setData(2,Qt::DisplayRole,ui->doubleSpinBox_calories->value());
+    newItem->setData(3,Qt::DisplayRole,ui->doubleSpinBox_carbs->value());
+    newItem->setData(4,Qt::DisplayRole,ui->doubleSpinBox_protein->value());
+    newItem->setData(5,Qt::DisplayRole,ui->doubleSpinBox_fat->value());
+    newItem->setData(6,Qt::DisplayRole,ui->doubleSpinBox_fiber->value());
+    newItem->setData(7,Qt::DisplayRole,ui->doubleSpinBox_sugar->value());
+}
 
+void Dialog_nutrition::on_doubleSpinBox_portion_valueChanged(double value)
+{
+    double factor = value / 100.0;
 
+    ui->doubleSpinBox_calories->setValue(loadedMacros.at(1)*factor);
+    ui->doubleSpinBox_carbs->setValue(loadedMacros.at(2)*factor);
+    ui->doubleSpinBox_protein->setValue(loadedMacros.at(3)*factor);
+    ui->doubleSpinBox_fat->setValue(loadedMacros.at(4)*factor);
+    ui->doubleSpinBox_fiber->setValue(loadedMacros.at(5)*factor);
+    ui->doubleSpinBox_sugar->setValue(loadedMacros.at(6)*factor);
+}
 
+void Dialog_nutrition::on_treeWidget_recipe_itemClicked(QTreeWidgetItem *item, int column)
+{
+    Q_UNUSED(column)
+
+    loadedMacros = foodPlan->get_foodMacros(item->data(0,Qt::AccessibleTextRole).toString());
+
+    ui->lineEdit_foodName->setText(item->data(0,Qt::DisplayRole).toString());
+    ui->lineEdit_foodName->setAccessibleName(item->data(0,Qt::AccessibleTextRole).toString());
+    ui->doubleSpinBox_portion->setValue(item->data(1,Qt::DisplayRole).toDouble());
+    ui->doubleSpinBox_calories->setValue(item->data(2,Qt::DisplayRole).toDouble());
+    ui->doubleSpinBox_carbs->setValue(item->data(3,Qt::DisplayRole).toDouble());
+    ui->doubleSpinBox_protein->setValue(item->data(4,Qt::DisplayRole).toDouble());
+    ui->doubleSpinBox_fat->setValue(item->data(5,Qt::DisplayRole).toDouble());
+    ui->doubleSpinBox_fiber->setValue(item->data(6,Qt::DisplayRole).toDouble());
+    ui->doubleSpinBox_sugar->setValue(item->data(7,Qt::DisplayRole).toDouble());
+}
+
+void Dialog_nutrition::on_toolButton_update_clicked()
+{
+    QTreeWidgetItem *currItem = ui->treeWidget_recipe->currentItem();
+    currItem->setData(1,Qt::DisplayRole,ui->doubleSpinBox_portion->value());
+    currItem->setData(2,Qt::DisplayRole,ui->doubleSpinBox_calories->value());
+    currItem->setData(3,Qt::DisplayRole,ui->doubleSpinBox_carbs->value());
+    currItem->setData(4,Qt::DisplayRole,ui->doubleSpinBox_protein->value());
+    currItem->setData(5,Qt::DisplayRole,ui->doubleSpinBox_fat->value());
+    currItem->setData(6,Qt::DisplayRole,ui->doubleSpinBox_fiber->value());
+    currItem->setData(7,Qt::DisplayRole,ui->doubleSpinBox_sugar->value());
+}
+
+void Dialog_nutrition::on_toolButton_edit_clicked()
+{
+    QVector<double> foodValues(6,0);
+
+    foodValues[0] = ui->doubleSpinBox_calories->value();
+    foodValues[1] = ui->doubleSpinBox_carbs->value();
+    foodValues[2] = ui->doubleSpinBox_protein->value();
+    foodValues[3] = ui->doubleSpinBox_fat->value();
+    foodValues[4] = ui->doubleSpinBox_fiber->value();
+    foodValues[5] = ui->doubleSpinBox_sugar->value();
+
+    foodPlan->update_ingredient(ui->lineEdit_foodName->accessibleName(),foodValues);
 }

@@ -48,6 +48,7 @@ public:
     void save_foolPlan();
     void save_mealList();
     void update_foodMode(QDate,QString);
+    void update_ingredient(QString,QVector<double>);
     void edit_mealSection(QString,int);
     void remove_meal(QItemSelectionModel*);
     void insert_newWeek(QDate);
