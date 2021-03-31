@@ -510,17 +510,30 @@ void foodplanner::add_ingredient(QString section, QString foodName,QVector<doubl
     sectionItem->appendRow(itemList);
 }
 
-void foodplanner::submit_recipes(QList<QStandardItem *> recipeValues, QString section)
+QStandardItem* foodplanner::submit_recipes(QList<QStandardItem *> recipeMeta, QString section,bool newRecipe)
 {
     QStandardItem *sectionItem = this->get_modelItem(recipeModel,section,0);
+    QStandardItem *recipeItem;
+    QString recipeID = recipeMeta.at(0)->data(Qt::DisplayRole).toString();
 
+    if(newRecipe)
+    {
+        sectionItem->appendRow(recipeMeta);
+        recipeItem = sectionItem->child(sectionItem->rowCount()-1,0);
+    }
+    else
+    {
+        QModelIndex recipeIndex = this->get_modelIndex(recipeModel,recipeID,0);
 
+        for(int i = 0; i < recipeMeta.count(); ++i)
+        {
+            recipeItem = recipeModel->itemFromIndex(recipeIndex.siblingAtColumn(i));
+            recipeItem->setData(recipeMeta.at(i)->data(Qt::DisplayRole),Qt::DisplayRole);
+        }
+        recipeItem = this->get_modelItem(recipeModel,recipeID,0);
+    }
 
-    qDebug() << sectionItem->data(Qt::DisplayRole);
-
-
-
-
+    return recipeItem;
 }
 
 void foodplanner::edit_updateMap(int foodEdit,QPair<QDate,QString> dateSection,QString mealID, double factor)
@@ -560,7 +573,7 @@ void foodplanner::set_daySumMap(QDate day)
     double sportMinutes = 0;
     const int minutes = 1440;
 
-    calMinute = round(this->current_dayCalories(QDateTime(day)) * settings::doubleVector.value("palday").at(day.dayOfWeek()-1)) / minutes;
+    calMinute = round(this->current_dayCalories(day.startOfDay()) * settings::doubleVector.value("palday").at(day.dayOfWeek()-1)) / minutes;
 
     QMap<QString,QVector<double>> sportValues = schedulePtr->get_compValues()->value(day);
     QHash<QString,QHash<QString,QVector<double>>> foodValues = foodPlanMap.value(day);
@@ -608,7 +621,7 @@ void foodplanner::set_weekSumMap()
     QModelIndex weekIndex;
     QStandardItem *weekItem = nullptr;
 
-    double currentWeight = settings::get_weightforDate(QDateTime(firstdayofweek));
+    double currentWeight = settings::get_weightforDate(firstdayofweek.startOfDay());
 
     for(QMap<QDate,QVector<QString>>::const_iterator week = foodPlanList.cbegin(); week != foodPlanList.cend(); ++week)
     {
@@ -694,8 +707,8 @@ void foodplanner::check_foodPlan()
         weekList << new QStandardItem(QString::number(firstdayofweek.weekNumber()));
         weekList << new QStandardItem(QString::number(firstdayofweek.year()));
         weekList << new QStandardItem(firstdayofweek.toString(dateFormat));
-        weekList << new QStandardItem(QString::number(settings::get_weightforDate(QDateTime(firstdayofweek))));
-        weekList << new QStandardItem(QString::number(round(this->current_dayCalories(QDateTime(firstdayofweek)) * athleteValues->value("currpal"))));
+        weekList << new QStandardItem(QString::number(settings::get_weightforDate(firstdayofweek.startOfDay())));
+        weekList << new QStandardItem(QString::number(round(this->current_dayCalories(firstdayofweek.startOfDay()) * athleteValues->value("currpal"))));
         weekList << new QStandardItem(foodPlanModel->data(foodPlanModel->index(0,2)).toString());
         weekList.at(0)->setData(foodHistTags->at(0),Qt::AccessibleTextRole);
         rootItem->appendRow(weekList);

@@ -38,6 +38,7 @@ public:
 
     QStringList get_modelSections(QStandardItemModel*);
     QList<QStandardItem*> get_sectionItems(QStandardItemModel*,QString);
+    QStandardItem* submit_recipes(QList<QStandardItem*>,QString,bool);
 
     void update_foodPlanData(bool,QDate,QDate);
     void update_foodHistory(QDate,QVector<double>);
@@ -58,8 +59,6 @@ public:
     void remove_week(QString);
     void change_updateMapOrder(QPair<QDate,QString>,QMap<QString,int>);
     void add_ingredient(QString, QString,QVector<double>);
-    void submit_recipes(QList<QStandardItem*>,QString);
-
 
 private:
     schedule *schedulePtr;

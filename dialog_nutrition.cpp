@@ -71,7 +71,7 @@ void Dialog_nutrition::on_listWidget_recipes_itemClicked(QListWidgetItem *selIte
         treeItem->setData(0,Qt::AccessibleTextRole,recipeItem->child(row,0)->data(Qt::DisplayRole).toString());
         treeItem->setData(0,Qt::DisplayRole,recipeItem->child(row,1)->data(Qt::DisplayRole).toString());
         treeItem->setData(1,Qt::DisplayRole,recipeItem->child(row,2)->data(Qt::DisplayRole).toDouble());
-        treeItem->setData(2,Qt::DisplayRole,recipeItem->child(row,3)->data(Qt::DisplayRole).toInt());
+        treeItem->setData(2,Qt::DisplayRole,recipeItem->child(row,3)->data(Qt::DisplayRole).toDouble());
         treeItem->setData(3,Qt::DisplayRole,recipeItem->child(row,4)->data(Qt::DisplayRole).toDouble());
         treeItem->setData(4,Qt::DisplayRole,recipeItem->child(row,5)->data(Qt::DisplayRole).toDouble());
         treeItem->setData(5,Qt::DisplayRole,recipeItem->child(row,6)->data(Qt::DisplayRole).toDouble());
@@ -81,10 +81,13 @@ void Dialog_nutrition::on_listWidget_recipes_itemClicked(QListWidgetItem *selIte
 
     ui->lineEdit_recipeName->setText(selItem->data(Qt::DisplayRole).toString());
     ui->lineEdit_recipeName->setAccessibleName(selItem->data(Qt::AccessibleTextRole).toString());
+    ui->lineEdit_recipeName->setEnabled(true);
     this->calc_recipeValues();
 
     ui->toolButton_save->setEnabled(true);
     ui->toolButton_clear->setEnabled(true);
+    ui->toolButton_createRecipe->setEnabled(false);
+
 }
 
 void Dialog_nutrition::set_listItems(QStandardItemModel *model,QListWidget *selList,QString value)
@@ -126,7 +129,7 @@ void Dialog_nutrition::on_toolButton_add_clicked()
     newItem->setData(0,Qt::AccessibleTextRole,ui->lineEdit_foodName->accessibleName());
     newItem->setData(0,Qt::DisplayRole,ui->lineEdit_foodName->text());
     newItem->setData(1,Qt::DisplayRole,ui->doubleSpinBox_portion->value());
-    newItem->setData(2,Qt::DisplayRole,ui->doubleSpinBox_calories->value());
+    newItem->setData(2,Qt::DisplayRole,round(ui->doubleSpinBox_calories->value()));
     newItem->setData(3,Qt::DisplayRole,ui->doubleSpinBox_carbs->value());
     newItem->setData(4,Qt::DisplayRole,ui->doubleSpinBox_protein->value());
     newItem->setData(5,Qt::DisplayRole,ui->doubleSpinBox_fat->value());
@@ -237,6 +240,10 @@ void Dialog_nutrition::clear_recipeInfo()
     ui->label_fat->setText("-");
     ui->label_fiber->setText("-");
     ui->label_sugar->setText("-");
+
+    ui->toolButton_createRecipe->setEnabled(true);
+    ui->toolButton_save->setEnabled(false);
+    ui->toolButton_clear->setEnabled(false);
 }
 
 
@@ -260,37 +267,38 @@ void Dialog_nutrition::on_toolButton_save_clicked()
     QTreeWidgetItem *rootItem = ui->treeWidget_recipe->invisibleRootItem();
     QTreeWidgetItem *currItem;
     QList<QStandardItem*> ingredList,macroList;
-    QStandardItem *ingredItem;
+    QStandardItem *recipeItem;
 
-    macroList.append(new QStandardItem(ui->lineEdit_recipeName->accessibleName()));
-    macroList.append(new QStandardItem(ui->lineEdit_recipeName->text()));
-    macroList.append(new QStandardItem(ui->label_gramms->text()));
-    macroList.append(new QStandardItem(ui->label_calories->text()));
-    macroList.append(new QStandardItem(ui->label_carbs->text()));
-    macroList.append(new QStandardItem(ui->label_protein->text()));
-    macroList.append(new QStandardItem(ui->label_fat->text()));
-    macroList.append(new QStandardItem(ui->label_fiber->text()));
-    macroList.append(new QStandardItem(ui->label_sugar->text()));
+    macroList.insert(0,new QStandardItem(ui->lineEdit_recipeName->accessibleName()));
+    macroList.insert(1,new QStandardItem(ui->lineEdit_recipeName->text()));
+    macroList.insert(2,new QStandardItem(ui->label_gramms->text()));
+    macroList.insert(3,new QStandardItem(ui->label_calories->text()));
+    macroList.insert(4,new QStandardItem(ui->label_carbs->text()));
+    macroList.insert(5,new QStandardItem(ui->label_protein->text()));
+    macroList.insert(6,new QStandardItem(ui->label_fat->text()));
+    macroList.insert(7,new QStandardItem(ui->label_fiber->text()));
+    macroList.insert(8,new QStandardItem(ui->label_sugar->text()));
+
+    recipeItem = foodPlan->submit_recipes(macroList,ui->comboBox_recipe->currentText(),ui->toolButton_createRecipe->isChecked());
 
     for(int row = 0; row < rootItem->childCount(); ++row)
     {
         currItem = rootItem->child(row);
         ingredList.clear();
 
-        ingredItem = new QStandardItem();
-        ingredItem->setData(currItem->data(0,Qt::AccessibleTextRole));
+        ingredList.insert(0,new QStandardItem(currItem->data(0,Qt::AccessibleTextRole).toString()));
 
-        for(int col = 0; col < recipeHeader->count(); ++col)
+        for(int col = 0,i = 1; col < recipeHeader->count(); ++col,++i)
         {
-            ingredItem = new QStandardItem();
-            ingredItem->setData(currItem->data(col,Qt::DisplayRole));
-            ingredList.append(ingredItem);
+            ingredList.insert(i,new QStandardItem(currItem->data(col,Qt::DisplayRole).toString()));
         }
 
-        macroList.at(0)->appendRow(ingredList);
+        recipeItem->appendRow(ingredList);
     }
 
-    foodPlan->submit_recipes(macroList,ui->comboBox_recipe->currentText());
+    this->set_listItems(foodPlan->recipeModel,ui->listWidget_recipes,ui->comboBox_recipe->currentText());
+
+    if(ui->toolButton_createRecipe->isChecked()) this->clear_recipeInfo();
 }
 
 void Dialog_nutrition::on_toolButton_createRecipe_clicked()

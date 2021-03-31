@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>917</width>
+    <width>930</width>
     <height>500</height>
    </rect>
   </property>
@@ -173,26 +173,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton_createRecipe">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/images/icons/Create.png</normaloff>:/images/icons/Create.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>18</width>
-          <height>18</height>
-         </size>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QToolButton" name="toolButton_save">
         <property name="text">
          <string>...</string>
@@ -236,6 +216,29 @@
        <widget class="Line" name="line_6">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toolButton_createRecipe">
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/images/icons/Create.png</normaloff>:/images/icons/Create.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>18</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -1012,6 +1015,9 @@
                </property>
                <property name="maximum">
                 <double>500.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>5.000000000000000</double>
                </property>
               </widget>
              </item>

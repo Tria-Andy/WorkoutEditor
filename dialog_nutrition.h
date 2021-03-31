@@ -28,12 +28,10 @@ private slots:
     void on_toolButton_update_clicked();
     void on_toolButton_edit_clicked();
     void on_toolButton_addIngred_clicked();
-
     void on_toolButton_clear_clicked();
-
     void on_toolButton_save_clicked();
-
     void on_toolButton_createRecipe_clicked();
+
 
 private:
     Ui::Dialog_nutrition *ui;
