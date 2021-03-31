@@ -510,6 +510,19 @@ void foodplanner::add_ingredient(QString section, QString foodName,QVector<doubl
     sectionItem->appendRow(itemList);
 }
 
+void foodplanner::submit_recipes(QList<QStandardItem *> recipeValues, QString section)
+{
+    QStandardItem *sectionItem = this->get_modelItem(recipeModel,section,0);
+
+
+
+    qDebug() << sectionItem->data(Qt::DisplayRole);
+
+
+
+
+}
+
 void foodplanner::edit_updateMap(int foodEdit,QPair<QDate,QString> dateSection,QString mealID, double factor)
 {
     QPair<bool,QDate> updateKey(true,dateSection.first);
@@ -603,7 +616,7 @@ void foodplanner::set_weekSumMap()
         weekItem = foodPlanModel->itemFromIndex(weekIndex.siblingAtColumn(3));
         weekItem->setData(currentWeight,Qt::DisplayRole);
 
-        for(QMap<QDate,QVector<double>>::const_iterator day = daySumMap.find(week.key()); day != daySumMap.find(week.key().addDays(7)); ++day)
+        for(QMap<QDate,QVector<double>>::iterator day = daySumMap.find(week.key()); day != daySumMap.find(week.key().addDays(7)); ++day)
         {
             weekValues[1] = weekValues.at(1) + day.value().at(0);
             weekValues[2] = weekValues.at(2) + day.value().at(3);

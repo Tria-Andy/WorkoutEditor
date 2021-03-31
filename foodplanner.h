@@ -58,7 +58,7 @@ public:
     void remove_week(QString);
     void change_updateMapOrder(QPair<QDate,QString>,QMap<QString,int>);
     void add_ingredient(QString, QString,QVector<double>);
-    void submit_recipes(QStandardItem*);
+    void submit_recipes(QList<QStandardItem*>,QString);
 
 
 private:

@@ -259,17 +259,26 @@ void Dialog_nutrition::on_toolButton_save_clicked()
 {
     QTreeWidgetItem *rootItem = ui->treeWidget_recipe->invisibleRootItem();
     QTreeWidgetItem *currItem;
-    QList<QStandardItem*> ingredList;
-    QStandardItem *recipeItem,*ingredItem;
+    QList<QStandardItem*> ingredList,macroList;
+    QStandardItem *ingredItem;
 
-    recipeItem = new QStandardItem();
-    recipeItem->setData("ID");
-
+    macroList.append(new QStandardItem(ui->lineEdit_recipeName->accessibleName()));
+    macroList.append(new QStandardItem(ui->lineEdit_recipeName->text()));
+    macroList.append(new QStandardItem(ui->label_gramms->text()));
+    macroList.append(new QStandardItem(ui->label_calories->text()));
+    macroList.append(new QStandardItem(ui->label_carbs->text()));
+    macroList.append(new QStandardItem(ui->label_protein->text()));
+    macroList.append(new QStandardItem(ui->label_fat->text()));
+    macroList.append(new QStandardItem(ui->label_fiber->text()));
+    macroList.append(new QStandardItem(ui->label_sugar->text()));
 
     for(int row = 0; row < rootItem->childCount(); ++row)
     {
         currItem = rootItem->child(row);
         ingredList.clear();
+
+        ingredItem = new QStandardItem();
+        ingredItem->setData(currItem->data(0,Qt::AccessibleTextRole));
 
         for(int col = 0; col < recipeHeader->count(); ++col)
         {
@@ -277,9 +286,11 @@ void Dialog_nutrition::on_toolButton_save_clicked()
             ingredItem->setData(currItem->data(col,Qt::DisplayRole));
             ingredList.append(ingredItem);
         }
-        recipeItem->appendRow(ingredList);
+
+        macroList.at(0)->appendRow(ingredList);
     }
 
+    foodPlan->submit_recipes(macroList,ui->comboBox_recipe->currentText());
 }
 
 void Dialog_nutrition::on_toolButton_createRecipe_clicked()
