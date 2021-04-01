@@ -1143,7 +1143,7 @@ void Dialog_workCreator::update_workouts()
     int progress = 100/stdWorkoutMapping.count();
     int updateStep = 1;
 
-    for(QMap<QDate,int>::const_iterator it = stdWorkoutMapping.lowerBound(updateFrom->date()), end = stdWorkoutMapping.upperBound(updateTo->date()); it != end; ++it)
+    for(QMap<QDate,int>::iterator it = stdWorkoutMapping.lowerBound(updateFrom->date()), end = stdWorkoutMapping.upperBound(updateTo->date()); it != end; ++it)
     {
         if(it.key() > QDate::currentDate())
         {

@@ -20,6 +20,8 @@ Dialog_nutrition::Dialog_nutrition(QWidget *parent, foodplanner *p_food) :
     ui->lineEdit_recipeName->setEnabled(false);
     ui->toolButton_clear->setEnabled(false);
 
+    recipeTags = settings::get_xmlMapping("recipes");
+
     recipeHeader = settings::getHeaderMap("recipeheader");
     QTreeWidgetItem *headerItem = new QTreeWidgetItem();
     for(int i = 0; i < recipeHeader->count(); ++i)
@@ -199,8 +201,10 @@ void Dialog_nutrition::update_ingredientModel(bool addNew)
     }
     else
     {
-        foodPlan->update_ingredient(ui->lineEdit_foodName->accessibleName(),foodValues);
+        foodPlan->update_ingredient(ui->lineEdit_foodName->accessibleName(),ui->lineEdit_foodName->text(),foodValues);
     }
+
+    foodPlan->save_ingredList();
 }
 
 void Dialog_nutrition::calc_recipeValues()
@@ -278,6 +282,7 @@ void Dialog_nutrition::on_toolButton_save_clicked()
     macroList.insert(6,new QStandardItem(ui->label_fat->text()));
     macroList.insert(7,new QStandardItem(ui->label_fiber->text()));
     macroList.insert(8,new QStandardItem(ui->label_sugar->text()));
+    macroList.at(0)->setData(recipeTags->at(1),Qt::AccessibleTextRole);
 
     recipeItem = foodPlan->submit_recipes(macroList,ui->comboBox_recipe->currentText(),ui->toolButton_createRecipe->isChecked());
 
@@ -292,13 +297,14 @@ void Dialog_nutrition::on_toolButton_save_clicked()
         {
             ingredList.insert(i,new QStandardItem(currItem->data(col,Qt::DisplayRole).toString()));
         }
-
+        ingredList.at(0)->setData(recipeTags->at(2),Qt::AccessibleTextRole);
         recipeItem->appendRow(ingredList);
     }
 
     this->set_listItems(foodPlan->recipeModel,ui->listWidget_recipes,ui->comboBox_recipe->currentText());
 
     if(ui->toolButton_createRecipe->isChecked()) this->clear_recipeInfo();
+    foodPlan->save_recipeList();
 }
 
 void Dialog_nutrition::on_toolButton_createRecipe_clicked()

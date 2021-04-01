@@ -37,7 +37,8 @@ private:
     Ui::Dialog_nutrition *ui;
     foodplanner *foodPlan;
     QSortFilterProxyModel *foodProxy;
-    QStringList *recipeHeader;
+    QStringList *recipeHeader,*recipeTags;
+
     QVector<double> loadedMacros;
 
     void set_listItems(QStandardItemModel*,QListWidget*,QString);

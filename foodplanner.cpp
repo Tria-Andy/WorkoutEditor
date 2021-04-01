@@ -10,6 +10,7 @@ foodplanner::foodplanner(schedule *p_Schedule)
     foodPlanTags = settings::get_xmlMapping("foodplan");
     foodHistTags = settings::get_xmlMapping("histweeks");
     mealsTags = settings::get_xmlMapping("meals");
+    ingredTags = settings::get_xmlMapping("ingredients");
 
     menuHeader = settings::getHeaderMap("menuheader");
     foodsumHeader = settings::getHeaderMap("foodsumheader");
@@ -506,7 +507,7 @@ void foodplanner::add_ingredient(QString section, QString foodName,QVector<doubl
         item = new QStandardItem(QString::number(values.at(i)));
         itemList.append(item);
     }
-
+    itemList.at(0)->setData(ingredTags->at(1),Qt::AccessibleTextRole);
     sectionItem->appendRow(itemList);
 }
 
@@ -741,6 +742,16 @@ void foodplanner::save_mealList()
     this->treeModel_toXml(mealModel,fileMap->value("mealsfile"));
 }
 
+void foodplanner::save_recipeList()
+{
+    this->treeModel_toXml(recipeModel,fileMap->value("recipefile"));
+}
+
+void foodplanner::save_ingredList()
+{
+    this->treeModel_toXml(ingredModel,fileMap->value("ingredfile"));
+}
+
 void foodplanner::update_foodMode(QDate weekStart,QString newMode)
 {
     QStandardItem *weekItem;
@@ -760,9 +771,17 @@ void foodplanner::update_foodMode(QDate weekStart,QString newMode)
     }
 }
 
-void foodplanner::update_ingredient(QString ingredID,QVector<double> values)
+void foodplanner::update_ingredient(QString ingredID,QString name,QVector<double> values)
 {
     QModelIndex index = this->get_modelIndex(ingredModel,ingredID,0);
+    QStandardItem *sectionItem = ingredModel->itemFromIndex(index)->parent();
+
+    sectionItem->child(index.row(),1)->setData(name,Qt::DisplayRole);
+
+    for(int i = 0,item=2; i < values.count(); ++i,++item)
+    {
+        sectionItem->child(index.row(),item)->setData(values.at(i),Qt::DisplayRole);
+    }
 }
 
 void foodplanner::edit_mealSection(QString sectionName,int mode)

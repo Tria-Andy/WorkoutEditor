@@ -14,7 +14,7 @@ public:
     explicit foodplanner(schedule *ptrSchedule = nullptr);
 
     QStandardItemModel *foodPlanModel,*mealModel,*recipeModel,*ingredModel,*historyModel;
-    QStringList *menuHeader,*foodPlanTags,*foodHistTags,*mealsTags,*foodsumHeader,*foodestHeader,*foodhistHeader;
+    QStringList *menuHeader,*foodPlanTags,*foodHistTags,*mealsTags,*foodsumHeader,*foodestHeader,*foodhistHeader,*ingredTags;
     QStringList planList,mealsHeader,dayHeader,dayListHeader;
     QPair<bool,bool> dayMealCopy;
     QHash<QString,QPair<QString,QPair<int,double>>> get_mealtoUpdate(bool,QDate,QString);
@@ -50,8 +50,10 @@ public:
     void clear_updateMap() {updateMap.clear();}
     void save_foolPlan();
     void save_mealList();
+    void save_recipeList();
+    void save_ingredList();
     void update_foodMode(QDate,QString);
-    void update_ingredient(QString,QVector<double>);
+    void update_ingredient(QString,QString,QVector<double>);
     void edit_mealSection(QString,int);
     void remove_meal(QItemSelectionModel*);
     void insert_newWeek(QDate);
