@@ -45,6 +45,7 @@ private:
     void update_ingredientModel(bool);
     void calc_recipeValues();
     void clear_recipeInfo();
+    void clear_ingredValues();
 };
 
 #endif // DIALOG_NUTRITION_H

@@ -761,6 +761,26 @@
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QToolButton" name="toolButton_edit">
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resources.qrc">
+                    <normaloff>:/images/icons/Update.png</normaloff>:/images/icons/Update.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>18</width>
+                    <height>18</height>
+                   </size>
+                  </property>
+                  <property name="autoRaise">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </widget>
              </item>
@@ -815,13 +835,6 @@
               </widget>
              </item>
              <item>
-              <widget class="Line" name="line">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QToolButton" name="toolButton_update">
                <property name="text">
                 <string>...</string>
@@ -842,34 +855,7 @@
               </widget>
              </item>
              <item>
-              <widget class="Line" name="line_2">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QToolButton" name="toolButton_edit">
-               <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="resources.qrc">
-                 <normaloff>:/images/icons/Update.png</normaloff>:/images/icons/Update.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>18</width>
-                 <height>18</height>
-                </size>
-               </property>
-               <property name="autoRaise">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="Line" name="line_3">
+              <widget class="Line" name="line">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>
@@ -896,19 +882,16 @@
               </widget>
              </item>
             </layout>
-            <zorder>toolButton_edit</zorder>
             <zorder>toolButton_delete</zorder>
             <zorder>toolButton_add</zorder>
-            <zorder>toolButton_update</zorder>
             <zorder>line</zorder>
-            <zorder>line_2</zorder>
-            <zorder>line_3</zorder>
+            <zorder>toolButton_update</zorder>
            </widget>
           </item>
           <item>
            <widget class="QFrame" name="frame_editItem">
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::Panel</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
@@ -1043,6 +1026,29 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>comboBox_recipe</tabstop>
+  <tabstop>lineEdit_recipeName</tabstop>
+  <tabstop>listWidget_recipes</tabstop>
+  <tabstop>treeWidget_recipe</tabstop>
+  <tabstop>comboBox_ingredients</tabstop>
+  <tabstop>listWidget_ingredients</tabstop>
+  <tabstop>lineEdit_foodName</tabstop>
+  <tabstop>doubleSpinBox_portion</tabstop>
+  <tabstop>doubleSpinBox_calories</tabstop>
+  <tabstop>doubleSpinBox_carbs</tabstop>
+  <tabstop>doubleSpinBox_protein</tabstop>
+  <tabstop>doubleSpinBox_fat</tabstop>
+  <tabstop>doubleSpinBox_fiber</tabstop>
+  <tabstop>doubleSpinBox_sugar</tabstop>
+  <tabstop>toolButton_add</tabstop>
+  <tabstop>toolButton_delete</tabstop>
+  <tabstop>toolButton_addIngred</tabstop>
+  <tabstop>toolButton_save</tabstop>
+  <tabstop>toolButton_clear</tabstop>
+  <tabstop>toolButton_createRecipe</tabstop>
+  <tabstop>toolButton_close</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

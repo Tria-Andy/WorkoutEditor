@@ -203,13 +203,18 @@ MainWindow::MainWindow(QWidget *parent) :
         this->set_tableHeader(ui->tableWidget_weekSum,foodPlan->foodsumHeader,true);
         ui->tableWidget_weekSum->horizontalHeader()->hide();
 
-        ui->treeView_meals->setModel(foodPlan->mealModel);
-        ui->treeView_meals->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-        ui->treeView_meals->setSortingEnabled(true);
-        ui->treeView_meals->sortByColumn(0,Qt::AscendingOrder);
-        ui->treeView_meals->hideColumn(1);
-        //ui->treeView_meals->setItemDelegate(&mousehover_del);
-        //ui->treeView_meals->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+        ui->comboBox_foodSelect->addItem("Recipes");
+        ui->comboBox_foodSelect->addItem("Ingredients");
+
+        QStringList headerItems;
+        for(int i = 0; i < settings::getHeaderMap("recipeheader")->count(); ++i)
+        {
+            headerItems << settings::getHeaderMap("recipeheader")->at(i);
+        }
+        ui->treeWidget_meals->setHeaderLabels(headerItems);
+        ui->treeWidget_meals->header()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->treeWidget_meals->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
 
         connect(ui->actionExit_and_Save, SIGNAL(triggered()), this, SLOT(close()));
         connect(planMode,SIGNAL(clicked(bool)),this,SLOT(toolButton_planMode(bool)));
@@ -235,8 +240,6 @@ MainWindow::MainWindow(QWidget *parent) :
         this->set_tableHeader(ui->tableWidget_forecast,foodPlan->foodestHeader,true);
         ui->tableWidget_forecast->horizontalHeader()->hide();
 
-        ui->toolButton_saveMeals->setEnabled(false);
-        ui->toolButton_deleteMenu->setEnabled(false);
         ui->toolButton_menuCopy->setEnabled(false);
         ui->toolButton_menuPaste->setEnabled(false);
         ui->toolButton_addMeal->setProperty("Editmode",1);
@@ -2710,11 +2713,6 @@ void MainWindow::on_listWidget_weekPlans_itemClicked(QListWidgetItem *item)
     this->fill_foodPlanTable(item->data(Qt::UserRole).toDate());
 }
 
-void MainWindow::on_toolButton_addMenu_clicked()
-{
-    foodPlan->insert_newMeal(ui->treeView_meals->currentIndex().data(Qt::DisplayRole).toString());
-    ui->toolButton_saveMeals->setEnabled(true);
-}
 
 void MainWindow::on_listWidget_menuEdit_itemDoubleClicked(QListWidgetItem *item)
 {
@@ -2733,16 +2731,6 @@ void MainWindow::on_toolButton_menuEdit_clicked()
     ui->label_menuEdit->setText("Edit: -");
     ui->actionSave->setEnabled(true);
     this->reset_menuEdit();
-}
-
-void MainWindow::on_toolButton_saveMeals_clicked()
-{
-    ui->progressBar_saveMeals->setValue(0);
-    foodPlan->save_mealList();
-    ui->progressBar_saveMeals->setValue(100);
-    ui->actionSave->setEnabled(true);
-    QTimer::singleShot(2000,ui->progressBar_saveMeals,SLOT(reset()));
-    ui->toolButton_saveMeals->setEnabled(false);
 }
 
 void MainWindow::on_calendarWidget_Food_clicked(const QDate &date)
@@ -2767,11 +2755,6 @@ void MainWindow::on_calendarWidget_Food_clicked(const QDate &date)
     }
 }
 
-void MainWindow::on_toolButton_deleteMenu_clicked()
-{
-    ui->toolButton_saveMeals->setEnabled(true);
-}
-
 void MainWindow::on_doubleSpinBox_portion_valueChanged(double value)
 {
     ui->lineEdit_calories->setText(QString::number(round(value *ui->spinBox_calories->value()/ui->spinBox_portFactor->value())));
@@ -2785,7 +2768,7 @@ void MainWindow::on_toolButton_addMeal_clicked()
     }
     else if(ui->toolButton_addMeal->property("Editmode") == ADD)
     {
-        foodPlan->edit_updateMap(ADD,qMakePair(ui->dateEdit_selectDay->date(),ui->lineEdit_editSection->text()),ui->treeView_meals->currentIndex().siblingAtColumn(1).data(Qt::DisplayRole).toString(),ui->doubleSpinBox_portion->value());
+        foodPlan->edit_updateMap(ADD,qMakePair(ui->dateEdit_selectDay->date(),ui->lineEdit_editSection->text()),ui->treeWidget_meals->currentIndex().siblingAtColumn(1).data(Qt::DisplayRole).toString(),ui->doubleSpinBox_portion->value());
     }
     this->set_menuList(ui->dateEdit_selectDay->date(),ui->lineEdit_editSection->text());
 }
@@ -2844,47 +2827,12 @@ void MainWindow::on_actionDelete_triggered()
 
 void MainWindow::on_listWidget_menuEdit_itemClicked(QListWidgetItem *item)
 {
-    QPair<QString,QVector<int>> mealData = foodPlan->get_mealData(item->data(Qt::UserRole).toString());
-    this->set_selectedMeal(mealData,item->data(Qt::UserRole+1).toDouble());
-    ui->toolButton_addMeal->setProperty("Editmode",EDIT);
+    //QPair<QString,QVector<int>> mealData = foodPlan->get_mealData(item->data(Qt::UserRole).toString());
+    //this->set_selectedMeal(mealData,item->data(Qt::UserRole+1).toDouble());
+    //ui->toolButton_addMeal->setProperty("Editmode",EDIT);
 }
 
-void MainWindow::on_treeView_meals_clicked(const QModelIndex &index)
-{
-    ui->listWidget_menuEdit->clearSelection();
-    bool addnew = true;
-
-    if(index.parent() == foodPlan->mealModel->invisibleRootItem()->index())
-    {
-        ui->treeView_meals->expand(index);
-    }
-    else
-    {
-        QPair<QString,QVector<int>> mealData = foodPlan->get_mealData(index.siblingAtColumn(1).data(Qt::DisplayRole).toString());
-
-        for(int row = 0; row < ui->listWidget_menuEdit->count(); ++row)
-        {
-            if(ui->listWidget_menuEdit->item(row)->data(Qt::UserRole).toString() == index.siblingAtColumn(1).data(Qt::DisplayRole).toString())
-            {
-                ui->listWidget_menuEdit->setCurrentItem(ui->listWidget_menuEdit->item(row));
-                ui->listWidget_menuEdit->itemClicked(ui->listWidget_menuEdit->currentItem());
-                ui->listWidget_menuEdit->item(row)->setSelected(true);
-                ui->toolButton_addMeal->setProperty("Editmode",EDIT);
-                addnew = false;
-                break;
-            }
-        }
-
-        if(addnew)
-        {
-            ui->toolButton_addMeal->setProperty("Editmode",ADD);
-            this->set_selectedMeal(mealData,index.siblingAtColumn(2).data(Qt::DisplayRole).toDouble());
-            ui->listWidget_menuEdit->clearSelection();
-        }
-    }
-}
-
-void MainWindow::set_selectedMeal(QPair<QString,QVector<int>> mealData,double portion)
+void MainWindow::set_selectedMeal(QPair<QString,QVector<double>> mealData,double portion)
 {
     ui->doubleSpinBox_portion->setEnabled(true);
     ui->lineEdit_Mealname->setText(mealData.first);
@@ -2910,13 +2858,6 @@ void MainWindow::set_selectedMeal(QPair<QString,QVector<int>> mealData,double po
     ui->spinBox_calories->setValue(mealData.second.at(1));
     ui->lineEdit_calories->setText(QString::number(mealData.second.at(1)));
     ui->doubleSpinBox_portion->setValue(portion);
-}
-
-void MainWindow::on_treeView_meals_collapsed(const QModelIndex &index)
-{
-    Q_UNUSED(index)
-    ui->toolButton_addMenu->setEnabled(false);
-    ui->toolButton_deleteMenu->setEnabled(false);
 }
 
 void MainWindow::on_tableWidget_foodPlan_itemClicked(QTableWidgetItem *item)
@@ -2954,13 +2895,6 @@ void MainWindow::on_tableWidget_foodPlan_itemChanged(QTableWidgetItem *item)
     ui->actionSave->setEnabled(true);
 }
 
-void MainWindow::on_treeView_meals_expanded(const QModelIndex &index)
-{
-    Q_UNUSED(index)
-    ui->toolButton_addMenu->setEnabled(true);
-    ui->toolButton_deleteMenu->setEnabled(false);
-}
-
 void MainWindow::mealSave(QStandardItem *item)
 {
     int calories = 0;
@@ -2975,13 +2909,11 @@ void MainWindow::mealSave(QStandardItem *item)
 
     calories = mealMacros.at(0) + mealMacros.at(1) + mealMacros.at(2) - mealMacros.at(3);
     calItem->setData(calories,Qt::DisplayRole);
-
-    ui->toolButton_saveMeals->setEnabled(true);
 }
 
 void MainWindow::on_toolButton_mealreset_clicked()
 {
-    ui->treeView_meals->collapseAll();
+    ui->treeWidget_meals->collapseAll();
 }
 
 void MainWindow::on_toolButton_menuClear_clicked()
@@ -3317,9 +3249,101 @@ void MainWindow::on_comboBox_saisonSport_currentIndexChanged(const QString &spor
     //this->set_compData(ui->spinBox_phaseWeeks->value(),ui->dateEdit_phaseStart->date(),sport);
 }
 
-void MainWindow::on_actionNutritionEditor_triggered()
+void MainWindow::on_toolButton_recipeEditor_clicked()
 {
     Dialog_nutrition nutritionEditor(this,foodPlan);
     nutritionEditor.setModal(true);
     nutritionEditor.exec();
+}
+
+void MainWindow::on_comboBox_foodSelect_currentIndexChanged(const QString &value)
+{
+    ui->treeWidget_meals->clear();
+
+    QStandardItemModel *model;
+    QStandardItem *item;
+
+    QTreeWidgetItem *rootItem,*sectionItem,*treeItem;
+
+    rootItem = ui->treeWidget_meals->invisibleRootItem();
+
+    if(value == "Recipes")
+    {
+        model = foodPlan->recipeModel;
+    }
+    if(value == "Ingredients")
+    {
+        model = foodPlan->ingredModel;
+    }
+
+    for(int row = 0; row < model->rowCount(); ++row)
+    {
+        item = model->item(row,0);
+
+        sectionItem = new QTreeWidgetItem();
+        sectionItem->setData(0,Qt::DisplayRole,item->data(Qt::DisplayRole).toString());
+
+        if(item->hasChildren())
+        {
+            for(int child = 0; child < item->rowCount(); ++child)
+            {
+                treeItem = new QTreeWidgetItem();
+                treeItem->setData(0,Qt::AccessibleTextRole,item->child(child,0)->data(Qt::DisplayRole).toString());
+                treeItem->setData(0,Qt::DisplayRole,item->child(child,1)->data(Qt::DisplayRole).toString());
+                treeItem->setData(1,Qt::DisplayRole,item->child(child,2)->data(Qt::DisplayRole).toDouble());
+                treeItem->setData(2,Qt::DisplayRole,item->child(child,3)->data(Qt::DisplayRole).toDouble());
+                treeItem->setData(3,Qt::DisplayRole,item->child(child,4)->data(Qt::DisplayRole).toDouble());
+                treeItem->setData(4,Qt::DisplayRole,item->child(child,5)->data(Qt::DisplayRole).toDouble());
+                treeItem->setData(5,Qt::DisplayRole,item->child(child,6)->data(Qt::DisplayRole).toDouble());
+                treeItem->setData(6,Qt::DisplayRole,item->child(child,7)->data(Qt::DisplayRole).toDouble());
+                treeItem->setData(7,Qt::DisplayRole,item->child(child,8)->data(Qt::DisplayRole).toDouble());
+                sectionItem->addChild(treeItem);
+            }
+        }
+        rootItem->addChild(sectionItem);
+    }
+
+}
+
+void MainWindow::on_treeWidget_meals_itemClicked(QTreeWidgetItem *item, int column)
+{
+    bool addnew = true;
+
+
+    if(item->parent() == ui->treeWidget_meals->invisibleRootItem() && column == 0)
+    {
+        ui->treeWidget_meals->expand(ui->treeWidget_meals->currentIndex());
+    }
+    else
+    {
+        for(int i = 0; i < ui->listWidget_menuEdit->count(); ++i)
+        {
+            if(item->data(0,Qt::AccessibleTextRole) == ui->listWidget_menuEdit->item(i)->data(Qt::AccessibleTextRole))
+            {
+                ui->listWidget_menuEdit->setCurrentItem(ui->listWidget_menuEdit->item(i));
+                ui->toolButton_addMeal->setProperty("Editmode",EDIT);
+                addnew = false;
+                break;
+            }
+        }
+
+        if(addnew)
+        {
+            QPair<QString,QVector<double>> mealData;
+            mealData.first = item->data(0,Qt::DisplayRole).toString();
+            QVector<double> mealValues(item->columnCount()-1,0);
+
+            for(int i = 0, col = 1; col < item->columnCount(); ++i,++col)
+            {
+                mealValues[i] = item->data(col,Qt::DisplayRole).toDouble();
+            }
+            mealData.second = mealValues;
+
+            ui->toolButton_addMeal->setProperty("Editmode",ADD);
+            this->set_selectedMeal(mealData,item->data(2,Qt::DisplayRole).toDouble());
+            ui->listWidget_menuEdit->clearSelection();
+        }
+    }
+
+
 }

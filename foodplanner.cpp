@@ -525,6 +525,12 @@ QStandardItem* foodplanner::submit_recipes(QList<QStandardItem *> recipeMeta, QS
     else
     {
         QModelIndex recipeIndex = this->get_modelIndex(recipeModel,recipeID,0);
+        recipeItem = recipeModel->itemFromIndex(recipeIndex);
+
+        if(recipeItem->hasChildren())
+        {
+            recipeModel->removeRows(0,recipeItem->rowCount(),recipeIndex);
+        }
 
         for(int i = 0; i < recipeMeta.count(); ++i)
         {

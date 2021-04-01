@@ -58,7 +58,7 @@
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="schedule">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -2847,10 +2847,13 @@
                       <number>2</number>
                      </property>
                      <item>
+                      <widget class="QComboBox" name="comboBox_foodSelect"/>
+                     </item>
+                     <item>
                       <widget class="QToolButton" name="toolButton_mealreset">
                        <property name="minimumSize">
                         <size>
-                         <width>125</width>
+                         <width>24</width>
                          <height>24</height>
                         </size>
                        </property>
@@ -2863,7 +2866,17 @@
                         </font>
                        </property>
                        <property name="text">
-                        <string>Meals</string>
+                        <string/>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="resources.qrc">
+                         <normaloff>:/images/icons/tree.png</normaloff>:/images/icons/tree.png</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>18</width>
+                         <height>18</height>
+                        </size>
                        </property>
                        <property name="checkable">
                         <bool>false</bool>
@@ -2881,7 +2894,7 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QToolButton" name="toolButton_addMenu">
+                      <widget class="QToolButton" name="toolButton_recipeEditor">
                        <property name="minimumSize">
                         <size>
                          <width>24</width>
@@ -2899,71 +2912,7 @@
                        </property>
                        <property name="icon">
                         <iconset resource="resources.qrc">
-                         <normaloff>:/images/icons/Create.png</normaloff>:/images/icons/Create.png</iconset>
-                       </property>
-                       <property name="iconSize">
-                        <size>
-                         <width>18</width>
-                         <height>18</height>
-                        </size>
-                       </property>
-                       <property name="autoRaise">
-                        <bool>true</bool>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QToolButton" name="toolButton_deleteMenu">
-                       <property name="minimumSize">
-                        <size>
-                         <width>24</width>
-                         <height>24</height>
-                        </size>
-                       </property>
-                       <property name="maximumSize">
-                        <size>
-                         <width>24</width>
-                         <height>24</height>
-                        </size>
-                       </property>
-                       <property name="text">
-                        <string>...</string>
-                       </property>
-                       <property name="icon">
-                        <iconset resource="resources.qrc">
-                         <normaloff>:/images/icons/Delete.png</normaloff>:/images/icons/Delete.png</iconset>
-                       </property>
-                       <property name="iconSize">
-                        <size>
-                         <width>18</width>
-                         <height>18</height>
-                        </size>
-                       </property>
-                       <property name="autoRaise">
-                        <bool>true</bool>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QToolButton" name="toolButton_saveMeals">
-                       <property name="minimumSize">
-                        <size>
-                         <width>24</width>
-                         <height>24</height>
-                        </size>
-                       </property>
-                       <property name="maximumSize">
-                        <size>
-                         <width>24</width>
-                         <height>24</height>
-                        </size>
-                       </property>
-                       <property name="text">
-                        <string>...</string>
-                       </property>
-                       <property name="icon">
-                        <iconset resource="resources.qrc">
-                         <normaloff>:/images/icons/Save.png</normaloff>:/images/icons/Save.png</iconset>
+                         <normaloff>:/images/icons/Editor.png</normaloff>:/images/icons/Editor.png</iconset>
                        </property>
                        <property name="iconSize">
                         <size>
@@ -2996,7 +2945,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QTreeView" name="treeView_meals">
+                   <widget class="QTreeWidget" name="treeWidget_meals">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                       <horstretch>0</horstretch>
@@ -3015,6 +2964,11 @@
                     <property name="defaultDropAction">
                      <enum>Qt::MoveAction</enum>
                     </property>
+                    <column>
+                     <property name="text">
+                      <string notr="true">1</string>
+                     </property>
+                    </column>
                    </widget>
                   </item>
                  </layout>
@@ -3839,7 +3793,6 @@
    <addaction name="actionIntervall_Editor"/>
    <addaction name="actionPace_Calculator"/>
    <addaction name="actionStress_Calculator"/>
-   <addaction name="actionNutritionEditor"/>
    <addaction name="actionFood_Macros"/>
    <addaction name="actionfood_History"/>
    <addaction name="separator"/>
@@ -4056,15 +4009,6 @@
    </property>
    <property name="toolTip">
     <string>Expand</string>
-   </property>
-  </action>
-  <action name="actionNutritionEditor">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/Editor.png</normaloff>:/images/icons/Editor.png</iconset>
-   </property>
-   <property name="text">
-    <string>NutritionEditor</string>
    </property>
   </action>
  </widget>

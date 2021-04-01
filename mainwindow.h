@@ -1102,7 +1102,7 @@ private:
     void fill_foodPlanTable(QDate);
     void fill_foodSumTable(QDate);
     void fill_foodPlanList(bool,int);
-    void set_selectedMeal(QPair<QString,QVector<int>>,double);
+    void set_selectedMeal(QPair<QString,QVector<double>>,double);
     void set_menuList(QDate,QString);
     void reset_menuEdit();
     void change_foodOrder(int);
@@ -1159,19 +1159,13 @@ private slots:
     void on_actionDelete_triggered();
 
     //Food
-    void on_toolButton_addMenu_clicked();
     void on_toolButton_menuEdit_clicked();
-    void on_toolButton_saveMeals_clicked();
     void on_calendarWidget_Food_clicked(const QDate &date);
-    void on_toolButton_deleteMenu_clicked();
     void on_doubleSpinBox_portion_valueChanged(double arg1);
     void on_toolButton_addMeal_clicked();
     void on_toolButton_foodUp_clicked();
     void on_toolButton_foodDown_clicked();
-    void on_treeView_meals_clicked(const QModelIndex &index);
-    void on_treeView_meals_collapsed(const QModelIndex &index);
     void on_listWidget_menuEdit_itemClicked(QListWidgetItem *item);
-    void on_treeView_meals_expanded(const QModelIndex &index);
     void mealSave(QStandardItem*);
     void on_toolButton_mealreset_clicked();
     void on_toolButton_menuCopy_clicked();
@@ -1202,7 +1196,9 @@ private slots:
     void on_spinBox_extWeeks_valueChanged(int arg1);
     void on_toolButton_extReset_clicked();
     void on_comboBox_saisonSport_currentIndexChanged(const QString &arg1);
-    void on_actionNutritionEditor_triggered();
+    void on_toolButton_recipeEditor_clicked();
+    void on_comboBox_foodSelect_currentIndexChanged(const QString &arg1);
+    void on_treeWidget_meals_itemClicked(QTreeWidgetItem *item, int column);
 };
 
 #endif // MAINWINDOW_H

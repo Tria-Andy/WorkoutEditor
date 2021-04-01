@@ -20,6 +20,9 @@ Dialog_nutrition::Dialog_nutrition(QWidget *parent, foodplanner *p_food) :
     ui->lineEdit_recipeName->setEnabled(false);
     ui->toolButton_clear->setEnabled(false);
 
+    ui->toolButton_edit->setVisible(false);
+    ui->toolButton_update->setVisible(false);
+
     recipeTags = settings::get_xmlMapping("recipes");
 
     recipeHeader = settings::getHeaderMap("recipeheader");
@@ -123,6 +126,9 @@ void Dialog_nutrition::on_listWidget_ingredients_itemClicked(QListWidgetItem *it
     ui->doubleSpinBox_fat->setValue(loadedMacros.at(4));
     ui->doubleSpinBox_fiber->setValue(loadedMacros.at(5));
     ui->doubleSpinBox_sugar->setValue(loadedMacros.at(6));
+
+    ui->toolButton_addIngred->setVisible(false);
+    ui->toolButton_edit->setVisible(true);
 }
 
 void Dialog_nutrition::on_toolButton_add_clicked()
@@ -138,6 +144,8 @@ void Dialog_nutrition::on_toolButton_add_clicked()
     newItem->setData(6,Qt::DisplayRole,ui->doubleSpinBox_fiber->value());
     newItem->setData(7,Qt::DisplayRole,ui->doubleSpinBox_sugar->value());
     this->calc_recipeValues();
+
+    this->clear_ingredValues();
 }
 
 void Dialog_nutrition::on_doubleSpinBox_portion_valueChanged(double value)
@@ -167,6 +175,9 @@ void Dialog_nutrition::on_treeWidget_recipe_itemClicked(QTreeWidgetItem *item, i
     ui->doubleSpinBox_fat->setValue(item->data(5,Qt::DisplayRole).toDouble());
     ui->doubleSpinBox_fiber->setValue(item->data(6,Qt::DisplayRole).toDouble());
     ui->doubleSpinBox_sugar->setValue(item->data(7,Qt::DisplayRole).toDouble());
+
+    ui->toolButton_add->setVisible(false);
+    ui->toolButton_update->setVisible(true);
 }
 
 void Dialog_nutrition::on_toolButton_update_clicked()
@@ -180,6 +191,11 @@ void Dialog_nutrition::on_toolButton_update_clicked()
     currItem->setData(6,Qt::DisplayRole,ui->doubleSpinBox_fiber->value());
     currItem->setData(7,Qt::DisplayRole,ui->doubleSpinBox_sugar->value());
     this->calc_recipeValues();
+
+    ui->toolButton_update->setVisible(false);
+    ui->toolButton_add->setVisible(true);
+
+    this->clear_ingredValues();
 }
 
 void Dialog_nutrition::update_ingredientModel(bool addNew)
@@ -205,6 +221,8 @@ void Dialog_nutrition::update_ingredientModel(bool addNew)
     }
 
     foodPlan->save_ingredList();
+
+    this->clear_ingredValues();
 }
 
 void Dialog_nutrition::calc_recipeValues()
@@ -245,9 +263,22 @@ void Dialog_nutrition::clear_recipeInfo()
     ui->label_fiber->setText("-");
     ui->label_sugar->setText("-");
 
+    ui->toolButton_createRecipe->setChecked(false);
     ui->toolButton_createRecipe->setEnabled(true);
     ui->toolButton_save->setEnabled(false);
     ui->toolButton_clear->setEnabled(false);
+}
+
+void Dialog_nutrition::clear_ingredValues()
+{
+    ui->lineEdit_foodName->clear();
+    ui->doubleSpinBox_portion->clear();
+    ui->doubleSpinBox_calories->clear();
+    ui->doubleSpinBox_carbs->clear();
+    ui->doubleSpinBox_protein->clear();
+    ui->doubleSpinBox_fat->clear();
+    ui->doubleSpinBox_fiber->clear();
+    ui->doubleSpinBox_sugar->clear();
 }
 
 
@@ -304,6 +335,7 @@ void Dialog_nutrition::on_toolButton_save_clicked()
     this->set_listItems(foodPlan->recipeModel,ui->listWidget_recipes,ui->comboBox_recipe->currentText());
 
     if(ui->toolButton_createRecipe->isChecked()) this->clear_recipeInfo();
+
     foodPlan->save_recipeList();
 }
 
