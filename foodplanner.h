@@ -42,6 +42,8 @@ public:
 
     void update_foodPlanData(bool,QDate,QDate);
     void update_foodHistory(QDate,QVector<double>);
+    void set_mealUpdates(QDate,QString,QMap<int,QList<QStandardItem*>>);
+
     void set_daySumMap(QDate);
     void set_weekSumMap();
     void set_dragandDrop() {update_foodPlanModel();}
@@ -77,6 +79,8 @@ private:
     QDate firstdayofweek;
     QString dateFormat;
     QString dateSaveFormat;
+    QMap<int,QList<QStandardItem*>> mealUpdateMap;
+
 
     void set_headerLabel(QStandardItemModel*, QStringList*,bool);
     void set_foodHistoryValues();

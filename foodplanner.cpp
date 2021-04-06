@@ -354,6 +354,23 @@ void foodplanner::update_foodHistory(QDate day, QVector<double> dayValues)
     weekItem->child(day.dayOfWeek()-1,2)->setData(dayValues.at(1),Qt::DisplayRole);
 }
 
+void foodplanner::set_mealUpdates(QDate mealDate, QString mealSection, QMap<int,QList<QStandardItem *>> mealMap)
+{
+    QStandardItem *dayItem,*mealItem;
+    dayItem = this->get_modelItem(foodPlanModel,mealDate.toString(dateSaveFormat),0);
+    mealItem = dayItem->child(mealsHeader.indexOf(mealSection),0);
+
+    foodPlanModel->removeRows(0,mealItem->rowCount(),mealItem->index());
+
+    for(QMap<int,QList<QStandardItem *>>::const_iterator mealStart = mealMap.cbegin(); mealStart != mealMap.cend(); ++mealStart)
+    {
+        mealStart.value().first()->setData(foodPlanTags->at(3),Qt::AccessibleTextRole);
+        mealItem->appendRow(mealStart.value());
+    }
+
+    this->set_dayFoodValues(dayItem);
+}
+
 void foodplanner::set_foodPlanMap(int update)
 {
     QStandardItem *rootItem = foodPlanModel->invisibleRootItem();
@@ -371,7 +388,7 @@ void foodplanner::set_foodPlanMap(int update)
     }
 }
 
-
+/*
 void foodplanner::update_foodPlanModel()
 {
     QStandardItem *dayItem,*mealItem;
@@ -402,7 +419,7 @@ void foodplanner::update_foodPlanModel()
     }
     updateMap.clear();
 }
-
+*/
 
 void foodplanner::update_foodPlanData(bool singleItem,QDate copyFromDate,QDate copyToDate)
 {

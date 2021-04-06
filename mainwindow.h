@@ -1102,8 +1102,8 @@ private:
     void fill_foodPlanTable(QDate);
     void fill_foodSumTable(QDate);
     void fill_foodPlanList(bool,int);
-    void set_selectedMeal(QPair<QString,QVector<double>>,double);
     void set_menuList(QDate,QString);
+    void set_selectedMeals(QTreeWidgetItem*,bool);
     void reset_menuEdit();
     void change_foodOrder(int);
     void set_foodOrder();
@@ -1197,8 +1197,8 @@ private slots:
     void on_toolButton_extReset_clicked();
     void on_comboBox_saisonSport_currentIndexChanged(const QString &arg1);
     void on_toolButton_recipeEditor_clicked();
-    void on_comboBox_foodSelect_currentIndexChanged(const QString &arg1);
     void on_treeWidget_meals_itemClicked(QTreeWidgetItem *item, int column);
+    void on_comboBox_foodSelect_currentIndexChanged(int index);
 };
 
 #endif // MAINWINDOW_H
