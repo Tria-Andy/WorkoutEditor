@@ -42,11 +42,11 @@ public:
 
     void update_foodPlanData(bool,QDate,QDate);
     void update_foodHistory(QDate,QVector<double>);
-    void set_mealUpdates(QDate,QString,QMap<int,QList<QStandardItem*>>);
+    void update_foodPlanModel(QDate,QString,QMap<int,QList<QStandardItem*>>);
 
     void set_daySumMap(QDate);
     void set_weekSumMap();
-    void set_dragandDrop() {update_foodPlanModel();}
+    //void set_dragandDrop() {update_foodPlanModel();}
     void fill_updateMap(bool,bool,QDate,QString);
     void edit_updateMap(int,QPair<QDate,QString>,QString,double);
     void clear_updateMap() {updateMap.clear();}
@@ -66,26 +66,27 @@ public:
 
 private:
     schedule *schedulePtr;
+    QMap<QDate,QList<QTableWidgetItem*>> daySummeryMap;
+    QDate firstdayofweek;
+    QString dateFormat;
+    QString dateSaveFormat;
+
     QMap<QDate,QHash<QString,QHash<QString,QVector<double>> > > foodPlanMap;
     QMap<QPair<QDate,int>,QMap<QDate,QList<QVariant>>> foodHistoryMap;
     QMap<QPair<bool,QDate>,QHash<QString,QHash<QString,QPair<QString,QPair<int,double>>>>> updateMap;
-    QMap<QDate,QVector<double>> daySumMap;
+    QMap<QDate,QVector<double>> daySumMap;   
     QMap<QDate,QVector<double>> weekSumMap;
     QMap<QDate,QHash<QString,QVector<double>>> dayMacroMap;
     QHash<QString,QString> mealsMap;
     QHash<QString,QString> *fileMap;
     QHash<QString,double> *doubleValues;
     QMap<QDate,QVector<QString>> foodPlanList;
-    QDate firstdayofweek;
-    QString dateFormat;
-    QString dateSaveFormat;
-    QMap<int,QList<QStandardItem*>> mealUpdateMap;
+
+
 
 
     void set_headerLabel(QStandardItemModel*, QStringList*,bool);
     void set_foodHistoryValues();
-    void set_mealsMap();
-    void update_foodPlanModel();
     void update_foodHistoryModel(QDate);
     void set_foodPlanMap(int);
     void set_dayFoodValues(QStandardItem*);

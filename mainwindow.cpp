@@ -332,7 +332,7 @@ void MainWindow::set_tableWidgetItems(QTableWidget *widget, int rows, int cols,Q
     widget->blockSignals(true);
     widget->setRowCount(rows);
     widget->setColumnCount(cols);
-    if(delegate != nullptr) widget->setItemDelegate(delegate);
+    //if(delegate != nullptr) widget->setItemDelegate(delegate);
 
     for(int row = 0; row < rows; ++row)
     {
@@ -365,6 +365,50 @@ void MainWindow::set_tableHeader(QTableWidget *widget, QStringList *header, bool
 
 void MainWindow::fill_foodPlanTable(QDate startDate)
 {
+
+    QStandardItem *weekItem = foodPlan->get_modelItem(foodPlan->foodPlanModel,calc_weekID(startDate),0);
+    QStandardItem *dayItem,*sectionItem;
+
+    QTableWidgetItem *planItem;
+    QString foodName,foodString;
+    double portFactor = 0;
+    double calories = 0;
+    double mealCalories = 0;
+
+    for(int day = 0; day < weekItem->rowCount(); ++day)
+    {
+        dayItem = weekItem->child(day);
+        if(dayItem->hasChildren())
+        {
+            for(int section = 0; section < dayItem->rowCount(); ++section)
+            {
+                sectionItem = dayItem->child(section);
+                if(sectionItem->hasChildren())
+                {
+                    foodString.clear();
+                    for(int meal = 0; meal < sectionItem->rowCount(); ++meal)
+                    {
+                        foodName = sectionItem->child(meal,1)->data(Qt::DisplayRole).toString();
+                        portFactor = sectionItem->child(meal,9)->data(Qt::DisplayRole).toDouble();
+                        calories = sectionItem->child(meal,3)->data(Qt::DisplayRole).toDouble();
+                        mealCalories = mealCalories + calories;
+                        foodString = foodString + foodName +" ("+QString::number(portFactor)+"-"+QString::number(calories)+")"+"\n";
+                    }
+                    planItem = new QTableWidgetItem();
+                    planItem->setData(Qt::DisplayRole,foodString);
+                }
+
+                planItem->setData(Qt::AccessibleTextRole,dayItem->data(Qt::DisplayRole));
+                planItem->setData(Qt::AccessibleDescriptionRole,sectionItem->data(Qt::DisplayRole));
+                planItem->setData(Qt::ToolTipRole,"Meal Cal: " + QString::number(mealCalories));
+
+                ui->tableWidget_foodPlan->takeItem(section,day);
+                ui->tableWidget_foodPlan->setItem(section,day,planItem);
+            }
+        }
+    }
+
+    /*
     QMap<QDate,QHash<QString,QHash<QString,QVector<double>>>> *foodPlanMap = foodPlan->get_foodPlanMap();
     int day = 0;
     QString foodItem;
@@ -406,17 +450,18 @@ void MainWindow::fill_foodPlanTable(QDate startDate)
     }
     ui->tableWidget_foodPlan->blockSignals(false);
 
-    QListWidgetItem *weekItem = ui->listWidget_weekPlans->currentItem();
-    ui->lineEdit_selectWeek->setText(weekItem->data(Qt::AccessibleTextRole).toString());
-    ui->dateEdit_selectWeek->setDate(weekItem->data(Qt::UserRole).toDate());
+    QListWidgetItem *selWeekItem = ui->listWidget_weekPlans->currentItem();
+    ui->lineEdit_selectWeek->setText(selWeekItem->data(Qt::AccessibleTextRole).toString());
+    ui->dateEdit_selectWeek->setDate(selWeekItem->data(Qt::UserRole).toDate());
     ui->label_foodWeek->setText("Kw "+ ui->listWidget_weekPlans->currentIndex().data(Qt::DisplayRole).toString());
-    ui->comboBox_weightmode->setCurrentText(weekItem->data(Qt::AccessibleDescriptionRole).toString());
+    ui->comboBox_weightmode->setCurrentText(selWeekItem->data(Qt::AccessibleDescriptionRole).toString());
     ui->comboBox_weightmode->setEnabled(true);
     ui->actionDelete->setEnabled(true);
     ui->calendarWidget_Food->setSelectedDate(ui->listWidget_weekPlans->currentIndex().data(Qt::UserRole).toDate());
     this->reset_menuEdit();
 
     this->fill_foodSumTable(startDate);
+    */
 }
 
 void MainWindow::fill_foodSumTable(QDate startDate)
@@ -498,6 +543,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     item->setData(Qt::DisplayRole,QString::number(weekSumValues.at(4))+" kg");
     item = ui->tableWidget_forecast->item(5,0);
     item->setData(Qt::DisplayRole,QString::number(weekSumValues.at(5))+" kg");
+
 }
 
 void MainWindow::fill_foodPlanList(bool newWeek,int currentIndex)
@@ -622,7 +668,7 @@ void MainWindow::set_menuItems(int module)
         planerMode->setVisible(false);
         planMode->setEnabled(false);
 
-        this->fill_foodSumTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
+        //this->fill_foodSumTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
     }
 }
 
@@ -2815,7 +2861,7 @@ void MainWindow::on_toolButton_menuEdit_clicked()
         itemMap.insert(row,itemList);
     }
 
-    foodPlan->set_mealUpdates(ui->dateEdit_selectDay->date(),ui->lineEdit_editSection->text(),itemMap);
+    foodPlan->update_foodPlanModel(ui->dateEdit_selectDay->date(),ui->lineEdit_editSection->text(),itemMap);
 
 
     /*
@@ -3087,7 +3133,7 @@ void MainWindow::on_comboBox_weightmode_currentIndexChanged(const QString &value
         ui->comboBox_weightmode->setEnabled(false);
         ui->actionSave->setEnabled(true);
         this->fill_foodPlanList(false,ui->listWidget_weekPlans->currentRow());
-        this->fill_foodSumTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
+        //this->fill_foodSumTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
     }
 }
 
@@ -3235,7 +3281,7 @@ void MainWindow::on_actionfood_History_triggered()
     if(dialog_code == QDialog::Accepted)
     {
         ui->actionSave->setEnabled(true);
-        this->fill_foodSumTable(firstdayofweek);
+        //this->fill_foodSumTable(firstdayofweek);
     }
 }
 
@@ -3268,7 +3314,7 @@ void MainWindow::on_tableWidget_schedule_itemClicked(QTableWidgetItem *item)
             if(foodPlan->get_daySumMap()->contains(selectedDate))
             {
                 foodPlan->set_daySumMap(selectedDate);
-                this->fill_foodSumTable(selectedDate.addDays(1 - selectedDate.dayOfWeek()));
+                //this->fill_foodSumTable(selectedDate.addDays(1 - selectedDate.dayOfWeek()));
             }
         }
     }
