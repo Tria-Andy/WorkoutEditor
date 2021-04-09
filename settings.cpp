@@ -291,6 +291,7 @@ int settings::loadSettings()
             fileMap.insert("foodhistory",mysettings->value("foodhistory").toString());
             fileMap.insert("ingredfile",mysettings->value("ingredfile").toString());
             fileMap.insert("recipefile",mysettings->value("recipefile").toString());
+            fileMap.insert("drinkfile",mysettings->value("drinkfile").toString());
         mysettings->endGroup();
 
 

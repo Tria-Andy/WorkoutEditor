@@ -37,6 +37,7 @@ foodplanner::foodplanner(schedule *p_Schedule)
     historyModel = new QStandardItemModel();
     ingredModel = new QStandardItemModel();
     recipeModel = new QStandardItemModel();
+    drinkModel = new QStandardItemModel();
     historyModel->setColumnCount(foodhistHeader->count());
     this->set_headerLabel(historyModel,foodhistHeader,false);
 
@@ -44,12 +45,16 @@ foodplanner::foodplanner(schedule *p_Schedule)
     {
         this->xml_toTreeModel(fileMap->value("recipefile"),recipeModel);
         this->xml_toTreeModel(fileMap->value("ingredfile"),ingredModel);
+        this->xml_toTreeModel(fileMap->value("drinkfile"),drinkModel);
         this->xml_toTreeModel(fileMap->value("mealsfile"),mealModel);
         this->xml_toTreeModel(fileMap->value("foodfile"),foodPlanModel);
         this->xml_toTreeModel(fileMap->value("foodhistory"),historyModel);
         this->check_foodPlan();
     }
 }
+
+enum {INIT,WEEK,DAY};
+enum {ADD,DEL,EDIT};
 
 QHash<QString, QPair<QString, QPair<int, double>>>  foodplanner::get_mealtoUpdate(bool toUpdate,QDate updateDate, QString updateSection)
 {
@@ -58,8 +63,7 @@ QHash<QString, QPair<QString, QPair<int, double>>>  foodplanner::get_mealtoUpdat
     return dayToUpdate.value(updateSection);
 }
 
-enum {INIT,WEEK,DAY};
-enum {ADD,DEL,EDIT};
+
 
 bool foodplanner::updateMap_hasData()
 {
@@ -89,7 +93,6 @@ QString foodplanner::get_newRecipeID(QString section)
     QStandardItem *item = recipeModel->findItems(section,Qt::MatchExactly,0).at(0);
 
     return section+"-"+QString::number(item->rowCount());
-
 }
 
 void foodplanner::set_headerLabel(QStandardItemModel *model, QStringList *list, bool vert)
@@ -285,7 +288,7 @@ void foodplanner::set_foodPlanData(QStandardItem *weekItem)
 
     for(int day = 0; day < weekItem->rowCount(); ++day)
     {
-        this->set_dayFoodValues(weekItem->child(day,0));
+        //this->set_dayFoodValues(weekItem->child(day,0));
     }
 }
 

@@ -13,8 +13,8 @@ class foodplanner : public xmlHandler, public calculation
 public:
     explicit foodplanner(schedule *ptrSchedule = nullptr);
 
-    QStandardItemModel *foodPlanModel,*mealModel,*recipeModel,*ingredModel,*historyModel;
-    QStringList *menuHeader,*foodPlanTags,*foodHistTags,*mealsTags,*foodsumHeader,*foodestHeader,*foodhistHeader,*ingredTags;
+    QStandardItemModel *foodPlanModel,*mealModel,*recipeModel,*ingredModel,*drinkModel,*historyModel;
+    QStringList *menuHeader,*foodPlanTags,*foodHistTags,*mealsTags,*foodsumHeader,*foodestHeader,*foodhistHeader,*ingredTags,*drinkTags;
     QStringList planList,mealsHeader,dayHeader,dayListHeader;
     QPair<bool,bool> dayMealCopy;
     QHash<QString,QPair<QString,QPair<int,double>>> get_mealtoUpdate(bool,QDate,QString);
@@ -81,8 +81,6 @@ private:
     QHash<QString,QString> *fileMap;
     QHash<QString,double> *doubleValues;
     QMap<QDate,QVector<QString>> foodPlanList;
-
-
 
 
     void set_headerLabel(QStandardItemModel*, QStringList*,bool);

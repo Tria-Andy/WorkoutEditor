@@ -30,7 +30,7 @@
      <family>Segoe UI</family>
     </font>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_19">
+   <layout class="QVBoxLayout" name="verticalLayout_19">
     <property name="spacing">
      <number>4</number>
     </property>
@@ -2847,9 +2847,6 @@
                       <number>2</number>
                      </property>
                      <item>
-                      <widget class="QComboBox" name="comboBox_foodSelect"/>
-                     </item>
-                     <item>
                       <widget class="QToolButton" name="toolButton_mealreset">
                        <property name="minimumSize">
                         <size>
@@ -2929,46 +2926,146 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QProgressBar" name="progressBar_saveMeals">
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>5</height>
-                     </size>
+                   <widget class="QToolBox" name="toolBox_foodSelect">
+                    <property name="frameShape">
+                     <enum>QFrame::StyledPanel</enum>
                     </property>
-                    <property name="value">
-                     <number>0</number>
+                    <property name="frameShadow">
+                     <enum>QFrame::Sunken</enum>
                     </property>
-                    <property name="textVisible">
-                     <bool>false</bool>
+                    <property name="currentIndex">
+                     <number>2</number>
                     </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QTreeWidget" name="treeWidget_meals">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                      <horstretch>0</horstretch>
-                      <verstretch>2</verstretch>
-                     </sizepolicy>
+                    <property name="tabSpacing">
+                     <number>2</number>
                     </property>
-                    <property name="font">
-                     <font>
-                      <family>Segoe UI</family>
-                      <pointsize>10</pointsize>
-                     </font>
-                    </property>
-                    <property name="dragDropMode">
-                     <enum>QAbstractItemView::DragDrop</enum>
-                    </property>
-                    <property name="defaultDropAction">
-                     <enum>Qt::MoveAction</enum>
-                    </property>
-                    <column>
-                     <property name="text">
-                      <string notr="true">1</string>
+                    <widget class="QWidget" name="foodPage1">
+                     <property name="geometry">
+                      <rect>
+                       <x>0</x>
+                       <y>0</y>
+                       <width>284</width>
+                       <height>197</height>
+                      </rect>
                      </property>
-                    </column>
+                     <attribute name="label">
+                      <string>Recipes</string>
+                     </attribute>
+                     <layout class="QVBoxLayout" name="verticalLayout_2">
+                      <property name="spacing">
+                       <number>0</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>1</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>1</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>0</number>
+                      </property>
+                      <item>
+                       <widget class="QTreeWidget" name="treeWidget_recipe">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>2</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="font">
+                         <font>
+                          <family>Segoe UI</family>
+                          <pointsize>10</pointsize>
+                         </font>
+                        </property>
+                        <property name="dragDropMode">
+                         <enum>QAbstractItemView::DragDrop</enum>
+                        </property>
+                        <property name="defaultDropAction">
+                         <enum>Qt::MoveAction</enum>
+                        </property>
+                        <column>
+                         <property name="text">
+                          <string notr="true">1</string>
+                         </property>
+                        </column>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                    <widget class="QWidget" name="foodPage2">
+                     <property name="geometry">
+                      <rect>
+                       <x>0</x>
+                       <y>0</y>
+                       <width>284</width>
+                       <height>197</height>
+                      </rect>
+                     </property>
+                     <attribute name="label">
+                      <string>Ingedients</string>
+                     </attribute>
+                     <layout class="QVBoxLayout" name="verticalLayout_20">
+                      <property name="spacing">
+                       <number>0</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>1</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>1</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>0</number>
+                      </property>
+                      <item>
+                       <widget class="QTreeWidget" name="treeWidget_ingred">
+                        <column>
+                         <property name="text">
+                          <string notr="true">1</string>
+                         </property>
+                        </column>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                    <widget class="QWidget" name="foodPage3">
+                     <attribute name="label">
+                      <string>Drinks</string>
+                     </attribute>
+                     <layout class="QVBoxLayout" name="verticalLayout_21">
+                      <property name="spacing">
+                       <number>0</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>1</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>1</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>0</number>
+                      </property>
+                      <item>
+                       <widget class="QTreeWidget" name="treeWidget_drink">
+                        <column>
+                         <property name="text">
+                          <string notr="true">1</string>
+                         </property>
+                        </column>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
                    </widget>
                   </item>
                  </layout>

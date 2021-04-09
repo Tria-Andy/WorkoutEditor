@@ -1045,6 +1045,7 @@ private:
     QHash<QString,QString> *gcValues,*generalValues;
     QLabel *statusLabel;
     QProgressBar *statusProgress;
+    QTreeWidget *foodTree;
 
     //Intervall Chart
     void set_polishPlot(int);
@@ -1099,14 +1100,16 @@ private:
 
     //Food
     QMap<int,QStringList> selectedLine;
+    QMap<QString,QTreeWidgetItem*> foodTreeMap;
     void fill_foodPlanTable(QDate);
     void fill_foodSumTable(QDate);
     void fill_foodPlanList(bool,int);
     void set_menuList(QDate,QString);
-    void set_selectedMeals(QTreeWidgetItem*,bool);
+    void set_selectedMeals(QTreeWidgetItem*,double);
     void reset_menuEdit();
     void change_foodOrder(int);
     void set_foodOrder();
+    void fill_foodTrees();
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -1197,8 +1200,10 @@ private slots:
     void on_toolButton_extReset_clicked();
     void on_comboBox_saisonSport_currentIndexChanged(const QString &arg1);
     void on_toolButton_recipeEditor_clicked();
-    void on_treeWidget_meals_itemClicked(QTreeWidgetItem *item, int column);
-    void on_comboBox_foodSelect_currentIndexChanged(int index);
+    void on_toolBox_foodSelect_currentChanged(int index);
+    void on_treeWidget_recipe_itemClicked(QTreeWidgetItem *item, int column);
+    void on_treeWidget_ingred_itemClicked(QTreeWidgetItem *item, int column);
+    void on_treeWidget_drink_itemClicked(QTreeWidgetItem *item, int column);
 };
 
 #endif // MAINWINDOW_H
