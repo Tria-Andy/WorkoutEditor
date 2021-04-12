@@ -1100,7 +1100,7 @@ private:
 
     //Food
     QMap<int,QStringList> selectedLine;
-    QMap<QString,QTreeWidgetItem*> foodTreeMap;
+    QHash<QString,QTreeWidgetItem*> foodTreeMap;
     void fill_foodPlanTable(QDate);
     void fill_foodSumTable(QDate);
     void fill_foodPlanList(bool,int);
@@ -1108,8 +1108,8 @@ private:
     void set_selectedMeals(QTreeWidgetItem*,double);
     void reset_menuEdit();
     void change_foodOrder(int);
-    void set_foodOrder();
     void fill_foodTrees();
+    void set_foodEditOptions(double);
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);

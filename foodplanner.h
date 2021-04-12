@@ -21,7 +21,6 @@ public:
     QMap<QDate,QVector<double>> *get_daySumMap() {return &daySumMap;}
     QMap<QDate,QVector<double>> *get_weekSumMap() {return &weekSumMap;}
     QMap<QDate,QHash<QString,QVector<double>>> *get_dayMacroMap() {return &dayMacroMap;}
-    QVector<double> get_mealValues(QString,double);
     QMap<QDate,QHash<QString,QHash<QString,QVector<double>>>> *get_foodPlanMap() {return &foodPlanMap;}
     QMap<QPair<QDate,int>,QMap<QDate,QList<QVariant>>> *get_foodHistoryMap() {return &foodHistoryMap;}
     QMap<QDate,QVector<QString>> *get_foodPlanList() {return &foodPlanList;}
@@ -61,7 +60,6 @@ public:
     void insert_newWeek(QDate);
     void insert_newMeal(QString);
     void remove_week(QString);
-    void change_updateMapOrder(QPair<QDate,QString>,QMap<QString,int>);
     void add_ingredient(QString, QString,QVector<double>);
 
 private:
