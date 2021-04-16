@@ -1202,7 +1202,7 @@ void Dialog_settings::on_toolButton_mealAdd_clicked()
     QStringList tempList = listMap.value(ui->comboBox_food->currentText());
     tempList.append(ui->lineEdit_mealEdit->text());
     listMap.insert(ui->comboBox_food->currentText(),tempList);
-    food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),ADD);
+    //food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),ADD);
     ui->lineEdit_mealEdit->clear();
     this->enableSavebutton();
 }
@@ -1210,7 +1210,7 @@ void Dialog_settings::on_toolButton_mealAdd_clicked()
 void Dialog_settings::on_toolButton_mealDelete_clicked()
 {
     QListWidgetItem *item = ui->listWidget_food->takeItem(ui->listWidget_food->currentRow());
-    food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),DEL);
+    //food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),DEL);
     ui->lineEdit_mealEdit->clear();
     delete item;
 

@@ -1032,7 +1032,7 @@ private:
     del_foodWeekSum foodSumWeek_del;
     del_foodDaySum foodSumSelect_del;
     del_mousehover mousehover_del;
-    QStringList modus_list,cal_header,menuCopy;
+    QStringList modus_list,cal_header;
     QStringList *schedMode, *avgHeader;
     QLabel *planerMode;
     QToolButton *planMode;
@@ -1104,7 +1104,8 @@ private:
     void fill_foodPlanTable(QDate);
     void fill_foodSumTable(QDate);
     void fill_foodPlanList(bool,int);
-    void set_menuList(QDate,QString);
+    void set_menuItemValues(QDate,QString);
+    void set_mealItems(QMap<int,QListWidgetItem *>);
     void set_selectedMeals(QTreeWidgetItem*,double);
     void reset_menuEdit();
     void change_foodOrder(int);
@@ -1169,7 +1170,6 @@ private slots:
     void on_toolButton_foodUp_clicked();
     void on_toolButton_foodDown_clicked();
     void on_listWidget_menuEdit_itemClicked(QListWidgetItem *item);
-    void mealSave(QStandardItem*);
     void on_toolButton_mealreset_clicked();
     void on_toolButton_menuCopy_clicked();
     void on_toolButton_menuPaste_clicked();

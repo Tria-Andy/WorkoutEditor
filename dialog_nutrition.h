@@ -31,18 +31,27 @@ private slots:
     void on_toolButton_clear_clicked();
     void on_toolButton_save_clicked();
     void on_toolButton_createRecipe_clicked();
+    void on_toolButton_delete_clicked();
+    void on_comboBox_drinks_currentIndexChanged(const QString &arg1);
+    void on_listWidget_drinks_itemClicked(QListWidgetItem *item);
 
+    void on_toolButton_up_clicked();
+
+    void on_toolButton_down_clicked();
 
 private:
     Ui::Dialog_nutrition *ui;
     foodplanner *foodPlan;
-    QSortFilterProxyModel *foodProxy;
+    QStandardItemModel *foodModel;
     QStringList *recipeHeader,*recipeTags;
-
+    bool foodUpdated;
     QVector<double> loadedMacros;
+    QMap<int,QStandardItemModel*> modelMap;
 
+    QTreeWidgetItem* move_item(int);
     void set_listItems(QStandardItemModel*,QListWidget*,QString);
-    void update_ingredientModel(bool);
+    void set_foodMacros(QListWidgetItem *,QVector<double>);
+    void update_ingredientModel(bool,int);
     void calc_recipeValues();
     void clear_recipeInfo();
     void clear_ingredValues();

@@ -58,7 +58,7 @@
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="schedule">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -2934,10 +2934,10 @@
                      <enum>QFrame::Sunken</enum>
                     </property>
                     <property name="currentIndex">
-                     <number>2</number>
+                     <number>0</number>
                     </property>
                     <property name="tabSpacing">
-                     <number>2</number>
+                     <number>1</number>
                     </property>
                     <widget class="QWidget" name="foodPage1">
                      <property name="geometry">
@@ -2945,7 +2945,7 @@
                        <x>0</x>
                        <y>0</y>
                        <width>284</width>
-                       <height>197</height>
+                       <height>200</height>
                       </rect>
                      </property>
                      <attribute name="label">
@@ -3002,7 +3002,7 @@
                        <x>0</x>
                        <y>0</y>
                        <width>284</width>
-                       <height>197</height>
+                       <height>200</height>
                       </rect>
                      </property>
                      <attribute name="label">
@@ -3036,6 +3036,14 @@
                      </layout>
                     </widget>
                     <widget class="QWidget" name="foodPage3">
+                     <property name="geometry">
+                      <rect>
+                       <x>0</x>
+                       <y>0</y>
+                       <width>284</width>
+                       <height>200</height>
+                      </rect>
+                     </property>
                      <attribute name="label">
                       <string>Drinks</string>
                      </attribute>
