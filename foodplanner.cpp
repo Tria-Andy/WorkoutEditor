@@ -62,6 +62,15 @@ bool foodplanner::copyMap_hasData()
     return false;
 }
 
+bool foodplanner::dragDrop_hasData()
+{
+    if(dragDrop.first.isValid())
+    {
+        return true;
+    }
+    return false;
+}
+
 QString foodplanner::get_mode(QDate startDate)
 {
     if(foodPlanModel->findItems(calc_weekID(startDate),Qt::MatchExactly,0).isEmpty())
@@ -80,14 +89,6 @@ QString foodplanner::get_newRecipeID(QString section)
     QStandardItem *item = recipeModel->findItems(section,Qt::MatchExactly,0).at(0);
 
     return section+"-"+QString::number(item->rowCount());
-}
-
-QPair<QDate, QString> foodplanner::get_mealToCopy()
-{
-    QPair<QDate,QString> mealCopy;
-    mealCopy.first = copyMap.firstKey();
-    mealCopy.second = copyMap.value(copyMap.firstKey()).at(0);
-    return mealCopy;
 }
 
 void foodplanner::set_headerLabel(QStandardItemModel *model, QStringList *list, bool vert)
@@ -185,6 +186,15 @@ QVector<double> foodplanner::get_foodMacros(QStandardItemModel *model,QString fo
     macros[6] = index.siblingAtColumn(8).data(Qt::DisplayRole).toDouble();
 
     return macros;
+}
+
+QPair<QDate, QString> foodplanner::get_copyMeal()
+{
+    QPair<QDate, QString> meal;
+    meal.first = copyMap.firstKey();
+    meal.second = copyMap.value(copyMap.firstKey()).at(0);
+
+    return meal;
 }
 
 QStringList foodplanner::get_modelSections(QStandardItemModel *model)
@@ -312,6 +322,8 @@ void foodplanner::update_foodHistory(QDate day, QVector<double> dayValues)
 
 void foodplanner::update_foodPlanModel(QDate mealDate, QString mealSection, QMap<int,QList<QStandardItem *>> mealMap)
 {
+    qDebug() << mealDate << mealSection;
+
     QStandardItem *dayItem,*mealItem;
     dayItem = this->get_modelItem(foodPlanModel,mealDate.toString(dateSaveFormat),0);
     mealItem = dayItem->child(mealsHeader.indexOf(mealSection),0);
@@ -492,35 +504,75 @@ void foodplanner::fill_copyMap(QDate copyDate, QString copySection)
 
     sectionList.append(copySection);
     copyMap.insert(copyDate,sectionList);
+    copyQueue.enqueue(copyMap);
+
+    qDebug() << "Queue:" << copyQueue;
 }
 
-void foodplanner::execute_copy(QDate copyDate)
+QMap<int, QList<QStandardItem *> > foodplanner::get_copyItem(QDate copyDate, QString copySection)
 {
     QStandardItem *dayItem,*sectionItem;
     QMap<int,QList<QStandardItem *>> mealMap;
     QList<QStandardItem *> itemList;
+
+    dayItem = this->get_modelItem(foodPlanModel,copyDate.toString(dateSaveFormat),0);
+    sectionItem = dayItem->child(mealsHeader.indexOf(copySection));
+
+    for(int meal = 0; meal < sectionItem->rowCount(); ++meal)
+    {
+        for(int value = 0; value < sectionItem->columnCount(); ++value)
+        {
+            itemList.insert(value,new QStandardItem(sectionItem->child(meal,value)->data(Qt::DisplayRole).toString()));
+        }
+        mealMap.insert(meal,itemList);
+        itemList.clear();
+    }
+
+    return mealMap;
+}
+
+void foodplanner::execute_copy(QDate copyDate)
+{
     int dayCount = 0;
+
+    copyQueue.dequeue();
 
     for(QMap<QDate,QStringList>::const_iterator it = copyMap.cbegin(); it != copyMap.cend(); ++it)
     {
-        dayItem = this->get_modelItem(foodPlanModel,it.key().toString(dateSaveFormat),0);
-
         for(int section = 0; section < it.value().count(); ++section)
         {
-            sectionItem = dayItem->child(section,0);
-
-            for(int meal = 0; meal < sectionItem->rowCount(); ++meal)
-            {
-                for(int value = 0; value < sectionItem->columnCount(); ++value)
-                {
-                    itemList.insert(value,new QStandardItem(sectionItem->child(meal,value)->data(Qt::DisplayRole).toString()));
-                }
-                mealMap.insert(meal,itemList);
-                itemList.clear();
-            }
-            this->update_foodPlanModel(copyDate.addDays(dayCount),it.value().at(section),mealMap);
+            this->update_foodPlanModel(copyDate.addDays(dayCount),it.value().at(section),this->get_copyItem(it.key(),it.value().at(section)));
         }
+
         ++dayCount;
+    }
+    this->clear_copyMap();
+    qDebug() << "Queue" << copyQueue;
+}
+
+void foodplanner::clear_dragDrop()
+{
+    dragDrop.first = QDate();
+    dragDrop.second.clear();
+}
+
+void foodplanner::set_dragDrop(QDate copyDate, QString copySection)
+{
+    qDebug() << "Drag"<< copyDate << copySection;
+    dragDrop.first = copyDate;
+    dragDrop.second = copySection;
+}
+
+void foodplanner::set_dropMeal(QDate toDate, QString toSection)
+{
+    if(dragDrop.first.isValid())
+    {
+        if(toDate.isValid())
+        {
+            qDebug() << "Drop"<< toDate << toSection;
+            this->update_foodPlanModel(toDate,toSection,this->get_copyItem(dragDrop.first,dragDrop.second));
+        }
+        this->clear_dragDrop();
     }
 }
 

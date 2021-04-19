@@ -229,6 +229,7 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(workSchedule->stressPlot,SIGNAL(selectionChangedByUser()),this,SLOT(selectionChanged_stressPlot()));
         connect(ui->tableWidget_foodPlan->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodDay(int)));
         connect(ui->tableWidget_foodPlan->verticalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodSection(int)));
+        connect(foodPlan->foodPlanModel,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_foodTables()));
 
         ui->comboBox_weightmode->blockSignals(true);
         ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
@@ -3076,27 +3077,28 @@ void MainWindow::on_tableWidget_foodPlan_itemClicked(QTableWidgetItem *item)
     ui->toolButton_menuCopy->setEnabled(true);
 
     this->set_menuItemValues(item->data(Qt::UserRole).toDate(),foodPlan->mealsHeader.at(item->row()));
+    foodPlan->clear_dragDrop();
+}
+
+void MainWindow::on_tableWidget_foodPlan_itemPressed(QTableWidgetItem *item)
+{
+    foodPlan->set_dragDrop(item->data(Qt::UserRole).toDate(),foodPlan->mealsHeader.at(item->row()));
+}
+
+void MainWindow::refresh_foodTables()
+{
+    qDebug() << "Reload" << ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate();
 }
 
 void MainWindow::on_tableWidget_foodPlan_itemChanged(QTableWidgetItem *item)
 {
-    //qDebug() << "From:" << item->row() << item->column() << item->data(Qt::UserRole);
-    //qDebug() << item->data(Qt::DisplayRole);
-    //qDebug() << "To:" << ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().addDays(item->column());
-    item->setData(Qt::UserRole,ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().addDays(item->column()));
-    ui->actionSave->setEnabled(true);
-    //qDebug() << "Copy:" << item->row() << item->column() << item->data(Qt::UserRole);
-
-    /*
-    if(item->data(Qt::UserRole).toDate().isValid())
-    {
-        foodPlan->fill_updateMap(true,false,item->data(Qt::UserRole).toDate(),item->data(Qt::UserRole+1).toString());
-        foodPlan->fill_updateMap(true,true,ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().addDays(item->column()),ui->tableWidget_foodPlan->verticalHeaderItem(item->row())->data(Qt::DisplayRole).toString());
-        foodPlan->update_foodPlanData(true,item->data(Qt::UserRole).toDate(),ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().addDays(item->column()));
-        this->fill_foodPlanTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
+    if(foodPlan->dragDrop_hasData())
+    { 
+       foodPlan->set_dropMeal(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().addDays(item->column()),foodPlan->mealsHeader.at(item->row()));
+       this->fill_foodPlanTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
+       this->fill_foodSumTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
     }
-
-    */
+    ui->actionSave->setEnabled(true);
 }
 
 void MainWindow::on_toolButton_mealreset_clicked()
@@ -3112,6 +3114,7 @@ void MainWindow::on_toolButton_menuClear_clicked()
 void MainWindow::on_toolButton_menuCopy_clicked()
 {
     foodPlan->fill_copyMap(ui->tableWidget_foodPlan->currentItem()->data(Qt::UserRole).toDate(),foodPlan->mealsHeader.at(ui->tableWidget_foodPlan->currentItem()->row()));
+
     ui->dateEdit_copyDay->setDate(ui->dateEdit_selectDay->date());
     ui->toolButton_menuPaste->setEnabled(true);
 }
@@ -3119,11 +3122,10 @@ void MainWindow::on_toolButton_menuCopy_clicked()
 void MainWindow::on_toolButton_menuPaste_clicked()
 {
     ui->listWidget_menuEdit->clear();
-    QPair<QDate,QString> mealCopy = foodPlan->get_mealToCopy();
+    QPair<QDate,QString> mealCopy = foodPlan->get_copyMeal();
     this->set_menuItemValues(mealCopy.first,mealCopy.second);
     ui->toolButton_menuCopy->setEnabled(false);
     ui->toolButton_menuCopy->setChecked(false);
-
 }
 
 void MainWindow::on_comboBox_weightmode_currentIndexChanged(const QString &value)
@@ -3485,5 +3487,3 @@ void MainWindow::on_toolBox_foodSelect_currentChanged(int index)
         ui->label_portInfo->setText("ml");
     }
 }
-
-

@@ -1101,9 +1101,9 @@ private:
     //Food
     QMap<int,QStringList> selectedLine;
     QHash<QString,QTreeWidgetItem*> foodTreeMap;
-    void fill_foodPlanTable(QDate);
     void fill_foodSumTable(QDate);
     void fill_foodPlanList(bool,int);
+    void fill_foodPlanTable(QDate);
     void set_menuItemValues(QDate,QString);
     void set_mealItems(QMap<int,QListWidgetItem *>);
     void set_selectedMeals(QTreeWidgetItem*,double);
@@ -1204,6 +1204,8 @@ private slots:
     void on_treeWidget_recipe_itemClicked(QTreeWidgetItem *item, int column);
     void on_treeWidget_ingred_itemClicked(QTreeWidgetItem *item, int column);
     void on_treeWidget_drink_itemClicked(QTreeWidgetItem *item, int column);
+    void on_tableWidget_foodPlan_itemPressed(QTableWidgetItem *item);
+    void refresh_foodTables();
 };
 
 #endif // MAINWINDOW_H

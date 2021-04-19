@@ -23,14 +23,14 @@ public:
     QMap<QPair<QDate,int>,QMap<QDate,QList<QVariant>>> *get_foodHistoryMap() {return &foodHistoryMap;}
     QMap<QDate,QVector<QString>> *get_foodPlanList() {return &foodPlanList;}
     bool copyMap_hasData();
+    bool dragDrop_hasData();
     QString get_mode(QDate);
     QString get_newRecipeID(QString);
-    QPair<QDate,QString> get_mealToCopy();
     QMap<QDate,double> get_lastFoodWeek(QDate);
     QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
     QStandardItem *get_modelItem(QStandardItemModel*,QString,int);
     QVector<double> get_foodMacros(QStandardItemModel*,QString);
-
+    QPair<QDate,QString> get_copyMeal();
     QStringList get_modelSections(QStandardItemModel*);
     QList<QStandardItem*> get_sectionItems(QStandardItemModel*,QString);
     QStandardItem* submit_recipes(QList<QStandardItem*>,QString,bool);
@@ -43,6 +43,9 @@ public:
     void fill_copyMap(QDate,QString);
     void execute_copy(QDate);
     void clear_copyMap() {copyMap.clear();}
+    void clear_dragDrop();
+    void set_dragDrop(QDate,QString);
+    void set_dropMeal(QDate,QString);
     void save_foolPlan();
     void save_drinkList();
     void save_recipeList();
@@ -59,7 +62,9 @@ private:
     QDate firstdayofweek;
     QString dateFormat;
     QString dateSaveFormat;
+    QQueue<QMap<QDate,QStringList>> copyQueue;
     QMap<QDate,QStringList> copyMap;
+    QPair<QDate,QString> dragDrop;
     QMap<QPair<QDate,int>,QMap<QDate,QList<QVariant>>> foodHistoryMap;
     QMap<QDate,QVector<double>> daySumMap;   
     QMap<QDate,QVector<double>> weekSumMap;
@@ -67,6 +72,8 @@ private:
     QHash<QString,QString> *fileMap;
     QHash<QString,double> *doubleValues;
     QMap<QDate,QVector<QString>> foodPlanList;
+
+    QMap<int,QList<QStandardItem *>> get_copyItem(QDate,QString);
 
     void set_headerLabel(QStandardItemModel*, QStringList*,bool);
     void set_foodHistoryValues();
