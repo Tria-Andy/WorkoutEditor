@@ -230,6 +230,8 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(ui->tableWidget_foodPlan->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodDay(int)));
         connect(ui->tableWidget_foodPlan->verticalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodSection(int)));
         connect(foodPlan->foodPlanModel,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_foodTables()));
+        connect(foodPlan->summeryModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(refresh_summeryTables()));
+
 
         ui->comboBox_weightmode->blockSignals(true);
         ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
@@ -328,6 +330,16 @@ void MainWindow::freeMem()
     }
 }
 
+bool MainWindow::eventFilter(QObject *object, QEvent *event)
+{
+    if( object == ui->tableWidget_foodPlan->viewport() && event->type() == QEvent::Drop )
+    {
+        //ui->tableWidget_foodPlan->blockSignals(true);
+    }
+
+    return false;
+}
+
 void MainWindow::set_tableWidgetItems(QTableWidget *widget, int rows, int cols,QAbstractItemDelegate *delegate)
 {
     widget->blockSignals(true);
@@ -424,10 +436,13 @@ void MainWindow::fill_foodPlanTable(QDate startDate)
             }
         }
     }
+    this->fill_foodSumTable(startDate);
 }
 
 void MainWindow::fill_foodSumTable(QDate startDate)
 {
+    qDebug() << "Sum Table" << startDate;
+
     QMap<QDate,QVector<double>> *daySumMap = foodPlan->get_daySumMap();
     QTableWidgetItem *item;
 
@@ -2839,8 +2854,8 @@ void MainWindow::on_toolButton_menuEdit_clicked()
     }
 
     foodPlan->update_foodPlanModel(ui->dateEdit_selectDay->date(),ui->lineEdit_editSection->text(),itemMap);
-    this->fill_foodPlanTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
-    this->fill_foodSumTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
+    //this->fill_foodPlanTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
+    //this->fill_foodSumTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
     this->reset_menuEdit();
 }
 
@@ -3087,7 +3102,14 @@ void MainWindow::on_tableWidget_foodPlan_itemPressed(QTableWidgetItem *item)
 
 void MainWindow::refresh_foodTables()
 {
-    qDebug() << "Reload" << ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate();
+    ui->tableWidget_foodPlan->blockSignals(true);
+    this->fill_foodPlanTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
+    ui->tableWidget_foodPlan->blockSignals(false);
+}
+
+void MainWindow::refresh_summeryTables()
+{
+    qDebug() << "Reload Summery" << ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate();
 }
 
 void MainWindow::on_tableWidget_foodPlan_itemChanged(QTableWidgetItem *item)
@@ -3095,8 +3117,6 @@ void MainWindow::on_tableWidget_foodPlan_itemChanged(QTableWidgetItem *item)
     if(foodPlan->dragDrop_hasData())
     { 
        foodPlan->set_dropMeal(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().addDays(item->column()),foodPlan->mealsHeader.at(item->row()));
-       this->fill_foodPlanTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
-       this->fill_foodSumTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
     }
     ui->actionSave->setEnabled(true);
 }
@@ -3146,6 +3166,7 @@ void MainWindow::selectFoodSection(int selectedSection)
     ui->label_CopyInfo->setText("Selected Meal:");
     ui->dateEdit_copyDay->setVisible(false);
     ui->dateEdit_copyDay->setDate(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
+    ui->dateEdit_copyDay->setProperty("Section",true);
     ui->lineEdit_copySection->setVisible(true);
     ui->lineEdit_copySection->setText(foodPlan->mealsHeader.at(selectedSection));
 
@@ -3171,6 +3192,7 @@ void MainWindow::selectFoodDay(int selectedDay)
     ui->lineEdit_copySection->setVisible(false);
     ui->dateEdit_copyDay->setVisible(true);
     ui->dateEdit_copyDay->setDate(ui->tableWidget_foodPlan->horizontalHeaderItem(selectedDay)->data(Qt::UserRole).toDate());
+    ui->dateEdit_copyDay->setProperty("Section",false);
 
     foodPlan->clear_copyMap();
     QTableWidgetItem *item;
@@ -3268,9 +3290,19 @@ void MainWindow::on_actionFood_Macros_triggered()
 
 void MainWindow::on_toolButton_linePaste_clicked()
 {
-    foodPlan->execute_copy(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
+    QDate copyDate;
+    if(ui->dateEdit_copyDay->property("Section").toBool())
+    {
+        copyDate = ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate();
+    }
+    else
+    {
+        copyDate = ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().addDays(ui->tableWidget_foodPlan->currentColumn());
+    }
 
-    this->fill_foodPlanTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
+    foodPlan->execute_copy(copyDate,ui->dateEdit_copyDay->property("Section").toBool());
+
+    //this->fill_foodPlanTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
 }
 
 void MainWindow::on_actionfood_History_triggered()

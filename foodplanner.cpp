@@ -31,6 +31,7 @@ foodplanner::foodplanner(schedule *p_Schedule)
     }
 
     foodPlanModel = new QStandardItemModel();
+    summeryModel = new QStandardItemModel();
     ingredModel = new QStandardItemModel();
     recipeModel = new QStandardItemModel();
     drinkModel = new QStandardItemModel();
@@ -47,6 +48,8 @@ foodplanner::foodplanner(schedule *p_Schedule)
         this->xml_toTreeModel(fileMap->value("foodhistory"),historyModel);
         this->check_foodPlan();
     }
+    foodProxy = new QSortFilterProxyModel();
+    foodProxy->setSourceModel(foodPlanModel);
 }
 
 enum {INIT,WEEK,DAY};
@@ -231,18 +234,47 @@ void foodplanner::set_foodPlanData(QStandardItem *weekItem)
     //Fill FoodPlans List
     QModelIndex weekIndex = foodPlanModel->indexFromItem(weekItem);
     QVector<QString> weekInfo(4);
+    QDate firstDay = weekIndex.siblingAtColumn(1).data(Qt::DisplayRole).toDate();
     weekInfo[0] = weekIndex.siblingAtColumn(0).data(Qt::DisplayRole).toString();
-    weekInfo[1] = weekIndex.siblingAtColumn(1).data(Qt::DisplayRole).toDate().toString(dateFormat);
+    weekInfo[1] = firstDay.toString(dateFormat);
     weekInfo[2] = weekIndex.siblingAtColumn(2).data(Qt::DisplayRole).toString();
     weekInfo[3] = weekIndex.siblingAtColumn(3).data(Qt::DisplayRole).toString();
 
-    foodPlanList.insert(weekIndex.siblingAtColumn(1).data(Qt::DisplayRole).toDate(),weekInfo);
+    foodPlanList.insert(firstDay,weekInfo);
 
+    //Set SummeryModel
+    QStandardItem *sumRootItem = summeryModel->invisibleRootItem();
+    QList<QStandardItem*> sumList,weekList;
+    weekList.insert(0,new QStandardItem(weekInfo.at(0)));
+    weekList.insert(1,new QStandardItem(firstDay.toString(dateFormat)));
     QStandardItem *dayItem,*sectionItem;
-    QHash<QString,QVector<double>> foodMacros;
-    QVector<int> mealValues(7,0);
-    QVector<double> macroValues(5,0);
+    QVector<int> sumValues(6,0);
 
+    for(int day = 0; day < weekItem->rowCount(); ++day)
+    {
+        sumList.insert(0,new QStandardItem());
+        sumList.at(0)->setData(day,Qt::DisplayRole);
+        sumList.insert(1,new QStandardItem());
+        sumList.at(1)->setData(firstDay.addDays(day),Qt::DisplayRole);
+
+        weekList.at(0)->appendRow(sumList);
+        sumList.clear();
+    }
+    sumRootItem->appendRow(weekList);
+
+    for(int day = 0; day < weekItem->rowCount(); ++day)
+    {
+        dayItem = weekItem->child(day,0);
+        update_summeryModel(firstDay.addDays(day),weekItem->child(day,0),false);
+    }
+
+
+
+    //Depricated
+    QHash<QString,QVector<double>> foodMacros;
+
+    QVector<double> macroValues(5,0);
+    QVector<int> mealValues(7,0);
     for(int day = 0; day < weekItem->rowCount(); ++day)
     {
         dayItem = weekItem->child(day,0);
@@ -266,10 +298,9 @@ void foodplanner::set_foodPlanData(QStandardItem *weekItem)
                 }
             }
         }
+
         foodMacros.insert("Day",macroValues);
         dayMacroMap.insert(dayItem->data(Qt::DisplayRole).toDate(),foodMacros);
-        //foodPlanMap.insert(dayItem->data(Qt::DisplayRole).toDate(),mealCal);
-
         this->set_daySumMap(dayItem->data(Qt::DisplayRole).toDate());
     }
 }
@@ -322,23 +353,20 @@ void foodplanner::update_foodHistory(QDate day, QVector<double> dayValues)
 
 void foodplanner::update_foodPlanModel(QDate mealDate, QString mealSection, QMap<int,QList<QStandardItem *>> mealMap)
 {
-    qDebug() << mealDate << mealSection;
-
     QStandardItem *dayItem,*mealItem;
     dayItem = this->get_modelItem(foodPlanModel,mealDate.toString(dateSaveFormat),0);
     mealItem = dayItem->child(mealsHeader.indexOf(mealSection),0);
+    int calories = 0;
 
     foodPlanModel->removeRows(0,mealItem->rowCount(),mealItem->index());
 
     for(QMap<int,QList<QStandardItem *>>::const_iterator mealStart = mealMap.cbegin(); mealStart != mealMap.cend(); ++mealStart)
     {
+        calories = calories + mealStart.value().at(3)->data(Qt::DisplayRole).toInt();
         mealStart.value().first()->setData(foodPlanTags->at(3),Qt::AccessibleTextRole);
         mealItem->appendRow(mealStart.value());
     }
-
-    this->set_daySumMap(mealDate);
-
-    //this->set_dayFoodValues(dayItem);
+    this->update_summeryModel(mealDate,mealItem,true);
 }
 
 void foodplanner::set_foodPlanMap(int update)
@@ -406,6 +434,57 @@ QStandardItem* foodplanner::submit_recipes(QList<QStandardItem *> recipeMeta, QS
     }
 
     return recipeItem;
+}
+
+void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isMeal)
+{
+    const int minutes = 1440;
+    double calMinute = round(this->current_dayCalories(day.startOfDay()) * settings::doubleVector.value("palday").at(day.dayOfWeek()-1)) / minutes;
+    double sportMinutes = 0;
+    QMap<QString,QVector<double>> sportValues = schedulePtr->get_compValues()->value(day);
+
+    QVector<int> sumValues(8,0);
+    QStandardItem *dayItem,*sectionItem;
+
+    if (isMeal)
+    {
+        dayItem = calcItem->parent();
+    }
+    else
+    {
+        dayItem = calcItem;
+    }
+
+    for(int section = 0; section < dayItem->rowCount(); ++section)
+    {
+        sectionItem = dayItem->child(section);
+
+        for(int meal = 0; meal < sectionItem->rowCount(); ++meal)
+        {
+            sumValues[0] = sumValues.at(0) + sectionItem->child(meal,3)->data(Qt::DisplayRole).toInt();
+            sumValues[3] = sumValues.at(3) + sectionItem->child(meal,4)->data(Qt::DisplayRole).toInt();
+            sumValues[4] = sumValues.at(4) + sectionItem->child(meal,5)->data(Qt::DisplayRole).toInt();
+            sumValues[5] = sumValues.at(5) + sectionItem->child(meal,6)->data(Qt::DisplayRole).toInt();
+            sumValues[6] = sumValues.at(6) + sectionItem->child(meal,7)->data(Qt::DisplayRole).toInt();
+            sumValues[7] = sumValues.at(7) + sectionItem->child(meal,8)->data(Qt::DisplayRole).toInt();
+        }
+    }
+
+    for(QMap<QString,QVector<double>>::const_iterator it = sportValues.cbegin(), end = sportValues.cend(); it != end; ++it)
+    {
+        sumValues[2] = sumValues.at(2) + it.value().at(5);
+        sportMinutes = sportMinutes + (it.value().at(1)/60.0);
+    }
+
+    sumValues[1] = ceil((minutes - sportMinutes) * calMinute);
+
+    QStandardItem *weekItem = this->get_modelItem(summeryModel,calc_weekID(day),0);
+    dayItem = weekItem->child(day.dayOfWeek()-1,0);
+
+    for(int value = 0; value < sumValues.count(); ++value)
+    {
+        dayItem->setData(sumValues.at(value),Qt::UserRole+value);
+    }
 }
 
 void foodplanner::set_daySumMap(QDate day)
@@ -496,6 +575,9 @@ void foodplanner::set_weekSumMap()
 void foodplanner::fill_copyMap(QDate copyDate, QString copySection)
 {
     QStringList sectionList;
+    QPair<QDate,QString> queueItem;
+    queueItem.first = copyDate;
+    queueItem.second = copySection;
 
     if(copyMap.contains(copyDate))
     {
@@ -504,9 +586,7 @@ void foodplanner::fill_copyMap(QDate copyDate, QString copySection)
 
     sectionList.append(copySection);
     copyMap.insert(copyDate,sectionList);
-    copyQueue.enqueue(copyMap);
-
-    qDebug() << "Queue:" << copyQueue;
+    copyQueue.enqueue(queueItem);
 }
 
 QMap<int, QList<QStandardItem *> > foodplanner::get_copyItem(QDate copyDate, QString copySection)
@@ -531,23 +611,21 @@ QMap<int, QList<QStandardItem *> > foodplanner::get_copyItem(QDate copyDate, QSt
     return mealMap;
 }
 
-void foodplanner::execute_copy(QDate copyDate)
+void foodplanner::execute_copy(QDate copyDate,bool section)
 {
     int dayCount = 0;
 
-    copyQueue.dequeue();
+    QPair<QDate,QString> queueItem;
 
-    for(QMap<QDate,QStringList>::const_iterator it = copyMap.cbegin(); it != copyMap.cend(); ++it)
+    while(!copyQueue.isEmpty())
     {
-        for(int section = 0; section < it.value().count(); ++section)
-        {
-            this->update_foodPlanModel(copyDate.addDays(dayCount),it.value().at(section),this->get_copyItem(it.key(),it.value().at(section)));
-        }
-
-        ++dayCount;
+        queueItem = copyQueue.dequeue();
+        this->update_foodPlanModel(copyDate.addDays(dayCount),queueItem.second,this->get_copyItem(queueItem.first,queueItem.second));
+        if(section) ++dayCount;
     }
+
     this->clear_copyMap();
-    qDebug() << "Queue" << copyQueue;
+
 }
 
 void foodplanner::clear_dragDrop()
@@ -558,7 +636,6 @@ void foodplanner::clear_dragDrop()
 
 void foodplanner::set_dragDrop(QDate copyDate, QString copySection)
 {
-    qDebug() << "Drag"<< copyDate << copySection;
     dragDrop.first = copyDate;
     dragDrop.second = copySection;
 }
@@ -569,7 +646,6 @@ void foodplanner::set_dropMeal(QDate toDate, QString toSection)
     {
         if(toDate.isValid())
         {
-            qDebug() << "Drop"<< toDate << toSection;
             this->update_foodPlanModel(toDate,toSection,this->get_copyItem(dragDrop.first,dragDrop.second));
         }
         this->clear_dragDrop();

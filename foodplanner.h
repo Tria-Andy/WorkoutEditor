@@ -13,10 +13,10 @@ class foodplanner : public xmlHandler, public calculation
 public:
     explicit foodplanner(schedule *ptrSchedule = nullptr);
 
-    QStandardItemModel *foodPlanModel,*historyModel,*recipeModel,*ingredModel,*drinkModel;
+    QStandardItemModel *foodPlanModel,*summeryModel,*historyModel,*recipeModel,*ingredModel,*drinkModel;
+    QSortFilterProxyModel *foodProxy;
     QStringList *menuHeader,*foodPlanTags,*foodHistTags,*foodsumHeader,*foodestHeader,*foodhistHeader,*ingredTags,*drinkTags;
     QStringList planList,mealsHeader,dayHeader,dayListHeader;
-
     QMap<QDate,QVector<double>> *get_daySumMap() {return &daySumMap;}
     QMap<QDate,QVector<double>> *get_weekSumMap() {return &weekSumMap;}
     QMap<QDate,QHash<QString,QVector<double>>> *get_dayMacroMap() {return &dayMacroMap;}
@@ -38,10 +38,9 @@ public:
     void update_foodHistory(QDate,QVector<double>);
     void update_foodPlanModel(QDate,QString,QMap<int,QList<QStandardItem*>>);
 
-    void set_daySumMap(QDate);
     void set_weekSumMap();
     void fill_copyMap(QDate,QString);
-    void execute_copy(QDate);
+    void execute_copy(QDate,bool);
     void clear_copyMap() {copyMap.clear();}
     void clear_dragDrop();
     void set_dragDrop(QDate,QString);
@@ -57,12 +56,16 @@ public:
     void remove_week(QString);
     void add_ingredient(QString, QString,QVector<double>);
 
+public slots:
+    void set_daySumMap(QDate);
+    void sumMapChanged();
+
 private:
     schedule *schedulePtr;
     QDate firstdayofweek;
     QString dateFormat;
     QString dateSaveFormat;
-    QQueue<QMap<QDate,QStringList>> copyQueue;
+    QQueue<QPair<QDate,QString>> copyQueue;
     QMap<QDate,QStringList> copyMap;
     QPair<QDate,QString> dragDrop;
     QMap<QPair<QDate,int>,QMap<QDate,QList<QVariant>>> foodHistoryMap;
@@ -78,10 +81,12 @@ private:
     void set_headerLabel(QStandardItemModel*, QStringList*,bool);
     void set_foodHistoryValues();
     void update_foodHistoryModel(QDate);
+    void update_summeryModel(QDate,QStandardItem*,bool);
     void set_foodPlanMap(int);
     void set_foodPlanData(QStandardItem*);
     void update_foodHistory(QDate);
     void check_foodPlan();
+
 };
 
 #endif // FOODPLANNER_H
