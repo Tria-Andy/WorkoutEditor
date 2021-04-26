@@ -815,8 +815,8 @@ public:
         else if(index.row() == 4)
         {            
             QMap<int,QPair<int,QColor>> colorMap;
-            colorMap.insert(0,get_color(index.data().toString().split(" - ").first().toInt(),dayCal,index.data(Qt::UserRole).toString()));
-            colorMap.insert(1,get_color(index.data().toString().split(" - ").last().toInt(),dayCal,index.data(Qt::UserRole).toString()));
+            colorMap.insert(0,get_color(index.data(Qt::UserRole+1).toInt(),dayCal,index.data(Qt::UserRole).toString()));
+            colorMap.insert(1,get_color(index.data(Qt::UserRole+2).toInt(),dayCal,index.data(Qt::UserRole).toString()));
 
             if(colorMap.value(0).first == colorMap.value(1).first)
             {
@@ -828,7 +828,6 @@ public:
                 gradColor = colorMap.value(0).second;
             }
         }
-
         itemGradient.setColorAt(0,gradColor);
         itemGradient.setColorAt(1,itemColor);
         painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
@@ -886,7 +885,6 @@ public:
         painter->setFont(foodFont);
 
         QVector<double> percent = settings::doubleVector.value(index.data(Qt::UserRole).toString());
-
         int weekCal = index.model()->data(index.model()->index(3,index.column())).toInt();
 
         gradColor.setHsv(0,0,200,150);
@@ -924,7 +922,6 @@ public:
                 painter->setPen(Qt::black);
             }
         }
-
         itemGradient.setColorAt(0,gradColor);
         itemGradient.setColorAt(1,itemColor);
         painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
@@ -1057,7 +1054,7 @@ private:
     QMap<QString,QStringList> *saisonValues;
 
     QDate selectedDate;
-    QString weeknumber,buttonStyle,dateformat,timeshort,timelong;
+    QString weeknumber,buttonStyle;
     int userSetup,saisonWeek,weekDays,weekCounter,weekRange,sportUse,selectedInt;
     bool isWeekMode,graphLoaded,actLoaded,foodcopyMode,lineSelected,dayLineSelected;
 
