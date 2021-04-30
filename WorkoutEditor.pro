@@ -48,8 +48,7 @@ SOURCES += main.cpp\
     dialog_workcreator.cpp \
     foodplanner.cpp \
     dialog_map.cpp \
-    foodmacro_popup.cpp \
-    foodhistory_popup.cpp
+    foodmacro_popup.cpp
 
 HEADERS  += mainwindow.h \
     dialog_nutrition.h \
@@ -74,8 +73,7 @@ HEADERS  += mainwindow.h \
     del_mousehover.h \
     foodplanner.h \
     dialog_map.h \
-    foodmacro_popup.h \
-    foodhistory_popup.h
+    foodmacro_popup.h
 
 FORMS    += mainwindow.ui \
     dialog_nutrition.ui \
@@ -88,8 +86,7 @@ FORMS    += mainwindow.ui \
     dialog_workcreator.ui \
     dialog_addweek.ui \
     dialog_map.ui \
-    foodmacro_popup.ui \
-    foodhistory_popup.ui
+    foodmacro_popup.ui
 
 RESOURCES += \
     resources.qrc
