@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>985</width>
-    <height>515</height>
+    <height>549</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -846,7 +846,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>165</width>
+                  <width>108</width>
                   <height>94</height>
                  </rect>
                 </property>
@@ -882,7 +882,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>165</width>
+                  <width>108</width>
                   <height>94</height>
                  </rect>
                 </property>
@@ -1042,7 +1042,7 @@
              <item row="4" column="1">
               <widget class="QDoubleSpinBox" name="doubleSpinBox_carbs">
                <property name="maximum">
-                <double>200.000000000000000</double>
+                <double>1000.000000000000000</double>
                </property>
               </widget>
              </item>
@@ -1056,7 +1056,7 @@
              <item row="5" column="1">
               <widget class="QDoubleSpinBox" name="doubleSpinBox_protein">
                <property name="maximum">
-                <double>200.000000000000000</double>
+                <double>1000.000000000000000</double>
                </property>
               </widget>
              </item>
@@ -1070,7 +1070,7 @@
              <item row="6" column="1">
               <widget class="QDoubleSpinBox" name="doubleSpinBox_fat">
                <property name="maximum">
-                <double>100.000000000000000</double>
+                <double>500.000000000000000</double>
                </property>
               </widget>
              </item>
@@ -1084,7 +1084,7 @@
              <item row="7" column="1">
               <widget class="QDoubleSpinBox" name="doubleSpinBox_fiber">
                <property name="maximum">
-                <double>100.000000000000000</double>
+                <double>500.000000000000000</double>
                </property>
               </widget>
              </item>
@@ -1098,7 +1098,7 @@
              <item row="8" column="1">
               <widget class="QDoubleSpinBox" name="doubleSpinBox_sugar">
                <property name="maximum">
-                <double>100.000000000000000</double>
+                <double>500.000000000000000</double>
                </property>
               </widget>
              </item>
@@ -1125,7 +1125,7 @@
                 <number>1</number>
                </property>
                <property name="maximum">
-                <double>500.000000000000000</double>
+                <double>1000.000000000000000</double>
                </property>
                <property name="singleStep">
                 <double>5.000000000000000</double>
@@ -1138,7 +1138,7 @@
                 <number>1</number>
                </property>
                <property name="maximum">
-                <double>500.000000000000000</double>
+                <double>2000.000000000000000</double>
                </property>
               </widget>
              </item>

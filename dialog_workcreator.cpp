@@ -657,7 +657,7 @@ void Dialog_workCreator::read_currentData(QTreeWidgetItem *item)
     lastPlotValues[3] = stressSum + item->data(6,Qt::DisplayRole).toDouble();
     lastPlotValues[4] = workSum + item->data(7,Qt::DisplayRole).toDouble();
     plotMap.insert(row+1,qMakePair(item->data(0,Qt::UserRole).toString(),lastPlotValues));
-    plotRange.insertMulti(item->data(0,Qt::UserRole).toString(),qMakePair(row,row+1));
+    plotRange.insert(item->data(0,Qt::UserRole).toString(),qMakePair(row,row+1));
 }
 
 void Dialog_workCreator::save_selectedWorkout(bool copyWorkout)

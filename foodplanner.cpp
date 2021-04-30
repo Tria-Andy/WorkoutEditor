@@ -130,31 +130,30 @@ void foodplanner::read_nutritionHistory()
     QString jsonFile = file.readAll();
     QJsonDocument d = QJsonDocument::fromJson(jsonFile.toUtf8());
     QJsonObject jsonobj = d.object();
-    QJsonArray nutrition = jsonobj["measures"].toArray();
+    QStringList *mapList,*valueList;
+    QJsonArray nutrition = jsonobj[settings::get_xmlMapping("nutrition")->at(0)].toArray();
     file.close();
 
     QDate day;
     QJsonObject nutritionInfo;
-    QVector<int> histValues(9,0);
+    QVector<int> histValues(10,0);
     QPair<QString,QVector<int>> histInfo;
+
+    mapList = settings::get_xmlMapping("nutritinfo");
+    valueList = settings::get_xmlMapping("nutrivalues");
 
     for(int i = 0; i < nutrition.count(); ++i)
     {
         nutritionInfo = nutrition.at(i).toObject();
 
-        day = QDateTime().fromSecsSinceEpoch(nutritionInfo.value("when").toInt()).date();
+        day = QDateTime().fromSecsSinceEpoch(nutritionInfo.value(mapList->at(0)).toInt()).date();
 
-        histValues[0] = nutritionInfo.value("mbr").toInt();
-        histValues[1] = nutritionInfo.value("sport").toInt();
-        histValues[2] = nutritionInfo.value("energy").toInt();
-        histValues[3] = nutritionInfo.value("bal").toInt();
-        histValues[4] = nutritionInfo.value("cho").toInt();
-        histValues[5] = nutritionInfo.value("pro").toInt();
-        histValues[6] = nutritionInfo.value("fat").toInt();
-        histValues[7] = nutritionInfo.value("fib").toInt();
-        histValues[8] = nutritionInfo.value("sug").toInt();
+        for(int value = 0; value < valueList->count(); ++value)
+        {
+            histValues[value] = nutritionInfo.value(valueList->at(value)).toInt();
+        }
 
-        histInfo.first = nutritionInfo.value("comment").toString();
+        histInfo.first = nutritionInfo.value(mapList->at(1)).toString();
         histInfo.second = histValues;
 
         historyMap.insert(day,histInfo);
@@ -311,13 +310,26 @@ void foodplanner::update_fromSchedule(QDate editDay)
     this->update_summeryModel(editDay,weekItem->child(editDay.dayOfWeek()-1),false);
 }
 
-void foodplanner::add_ingredient(QString section, QString foodName,QVector<double> values)
+void foodplanner::add_ingredient(QString section, QString foodName,QVector<double> values,int modelID)
 {
-    QStandardItem *sectionItem = this->get_modelItem(ingredModel,section,0);
+    QStandardItem *sectionItem = nullptr;
+    QStringList *tagList = nullptr;
+
+    if(modelID == 0)
+    {
+        sectionItem = this->get_modelItem(ingredModel,section,0);
+        tagList = ingredTags;
+    }
+    if(modelID == 1)
+    {
+        sectionItem = this->get_modelItem(drinkModel,section,0);
+        tagList = drinkTags;
+    }
+
     QList<QStandardItem*> itemList;
     QStandardItem *item;
 
-    itemList.append(new QStandardItem(section+"-"+QString::number(sectionItem->rowCount())));
+    itemList.append(new QStandardItem(section+"-"+QString::number(sectionItem->rowCount()+1)));
     itemList.append(new QStandardItem(foodName));
 
     for(int i = 0; i < values.count(); ++i)
@@ -325,7 +337,7 @@ void foodplanner::add_ingredient(QString section, QString foodName,QVector<doubl
         item = new QStandardItem(QString::number(values.at(i)));
         itemList.append(item);
     }
-    itemList.at(0)->setData(ingredTags->at(1),Qt::AccessibleTextRole);
+    itemList.at(0)->setData(tagList->at(1),Qt::AccessibleTextRole);
     sectionItem->appendRow(itemList);
 }
 
@@ -585,7 +597,7 @@ void foodplanner::check_foodPlan()
     this->read_nutritionHistory();
 
     //add days to history
-    QVector<int> histValues(9,0);
+    QVector<int> histValues(10,0);
     QPair<QString,QVector<int>> histInfo;
     bool newDay = false;
 
@@ -605,6 +617,7 @@ void foodplanner::check_foodPlan()
                 histValues[6] = weekItem->child(day,0)->data(Qt::UserRole+7).toInt();
                 histValues[7] = weekItem->child(day,0)->data(Qt::UserRole+8).toInt();
                 histValues[8] = weekItem->child(day,0)->data(Qt::UserRole+9).toInt();
+                histValues[9] = 0;
 
                 histInfo.first = weekItem->child(day,0)->data(Qt::AccessibleTextRole).toString();
                 histInfo.second = histValues;
@@ -629,29 +642,29 @@ void foodplanner::save_historyFile()
     QJsonObject histItem = QJsonObject();
     QJsonObject objValue;
     int counter = 0;
+    QStringList *mapList,*valueList;
+
+    mapList = settings::get_xmlMapping("nutritinfo");
+    valueList = settings::get_xmlMapping("nutrivalues");
 
     for(QMap<QDate,QPair<QString,QVector<int>>>::const_iterator it = historyMap.cbegin(); it != historyMap.cend(); ++it)
     {
-        objValue.insert("when",it.key().startOfDay().toSecsSinceEpoch());
-        objValue.insert("comment",it.value().first);
-        objValue.insert("mbr",it.value().second.at(0));
-        objValue.insert("sport",it.value().second.at(1));
-        objValue.insert("energy",it.value().second.at(2));
-        objValue.insert("bal",it.value().second.at(3));
-        objValue.insert("cho",it.value().second.at(4));
-        objValue.insert("pro",it.value().second.at(5));
-        objValue.insert("fat",it.value().second.at(6));
-        objValue.insert("fib",it.value().second.at(7));
-        objValue.insert("sug",it.value().second.at(8));
-        objValue.insert("source",0);
-        objValue.insert("originalsource","");
+        objValue.insert(mapList->at(0),it.key().startOfDay().toSecsSinceEpoch());
+        objValue.insert(mapList->at(1),it.value().first);
+        objValue.insert(mapList->at(2),"");
+
+        for(int value = 0; value < valueList->count(); ++value)
+        {
+            objValue.insert(valueList->at(value),it.value().second.at(value));
+        }
+
         jsonArray.insert(counter++,objValue);
     }
 
     QJsonDocument jsonDoc;
     QJsonObject nutritionFile;
 
-    nutritionFile["measures"] = jsonArray;
+    nutritionFile[settings::get_xmlMapping("nutrition")->at(0)] = jsonArray;
     jsonDoc.setObject(nutritionFile);
 
     QFile file(gcValues->value("confpath") + QDir::separator() + gcValues->value("nutritionfile"));

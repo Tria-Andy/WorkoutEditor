@@ -235,8 +235,8 @@ void Dialog_nutrition::on_toolButton_update_clicked()
 
 void Dialog_nutrition::update_ingredientModel(bool addNew,int listID)
 {
-    QComboBox *sourceBox;
-    QListWidget *foodList;
+    QComboBox *sourceBox = nullptr;
+    QListWidget *foodList = nullptr;
 
     if(listID == INGED)
     {
@@ -248,7 +248,6 @@ void Dialog_nutrition::update_ingredientModel(bool addNew,int listID)
        sourceBox = ui->comboBox_drinks;
        foodList = ui->listWidget_drinks;
     }
-
 
     QVector<double> foodValues(7,0);
 
@@ -262,7 +261,7 @@ void Dialog_nutrition::update_ingredientModel(bool addNew,int listID)
 
     if(addNew)
     {
-        foodPlan->add_ingredient(sourceBox->currentText(),ui->lineEdit_foodName->text(),foodValues);
+        foodPlan->add_ingredient(sourceBox->currentText(),ui->lineEdit_foodName->text(),foodValues,listID);
         this->set_listItems(modelMap.value(listID),foodList,sourceBox->currentText());
     }
     else

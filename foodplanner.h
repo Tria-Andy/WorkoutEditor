@@ -54,7 +54,7 @@ public:
     void edit_mealSection(QString,int);
     void insert_newWeek(QDate);
     void remove_week(QString);
-    void add_ingredient(QString, QString,QVector<double>);
+    void add_ingredient(QString, QString,QVector<double>,int);
 
 public slots:
     void scheduleChanged(QStandardItem*);

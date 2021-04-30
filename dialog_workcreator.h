@@ -121,7 +121,7 @@ private:
     int thresValue;
     QHash<QString,QMap<int,QString>> *xmlTagMap;
     QMap<int,QPair<QString,QVector<double>>> plotMap;
-    QMap<QString,QPair<int,int>> plotRange;
+    QMultiMap<QString,QPair<int,int>> plotRange;
     QMap<QDate,int> stdWorkoutMapping;
     QVector<double> lastPlotValues;
     QSet<QString> workoutTitle;

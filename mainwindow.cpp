@@ -2719,6 +2719,8 @@ void MainWindow::set_selectedMeals(QTreeWidgetItem *listItem, double portion)
 {
     bool addnew = true;
 
+    qDebug() << portion;
+
     this->set_foodEditOptions(portion);
 
     for(int i = 0; i < ui->listWidget_menuEdit->count(); ++i)
@@ -3088,6 +3090,7 @@ void MainWindow::refresh_foodTables()
     ui->tableWidget_foodPlan->blockSignals(true);
     this->fill_foodPlanTable(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
     ui->tableWidget_foodPlan->blockSignals(false);
+    ui->actionSave->setEnabled(true);
 }
 
 void MainWindow::refresh_summeryTables()
@@ -3101,7 +3104,6 @@ void MainWindow::on_tableWidget_foodPlan_itemChanged(QTableWidgetItem *item)
     { 
        foodPlan->set_dropMeal(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().addDays(item->column()),foodPlan->mealsHeader.at(item->row()));
     }
-    ui->actionSave->setEnabled(true);
 }
 
 void MainWindow::on_toolButton_mealreset_clicked()
