@@ -296,7 +296,6 @@ int settings::loadSettings()
 
 
         QFile file(gcInfo.value("confpath") + QDir::separator() + gcInfo.value("bodyfile"));
-
         if (!file.open(QFile::ReadOnly | QFile::Text))
         {
             athleteMap.insert("weight",80.0);

@@ -3899,7 +3899,6 @@
    <addaction name="actionPace_Calculator"/>
    <addaction name="actionStress_Calculator"/>
    <addaction name="actionFood_Macros"/>
-   <addaction name="actionfood_History"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -4092,18 +4091,6 @@
     <string>Food Macros</string>
    </property>
   </action>
-  <action name="actionfood_History">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/images/icons/List.png</normaloff>:/images/icons/List.png</iconset>
-   </property>
-   <property name="text">
-    <string>food_History</string>
-   </property>
-   <property name="toolTip">
-    <string>Food History</string>
-   </property>
-  </action>
   <action name="actionExpand_Activity_Tree">
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -4122,7 +4109,7 @@
   <customwidget>
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
+   <header location="global">qcustomplot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

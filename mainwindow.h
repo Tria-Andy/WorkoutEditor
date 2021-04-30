@@ -36,7 +36,6 @@
 #include "standardworkouts.h"
 #include "stress_popup.h"
 #include "foodmacro_popup.h"
-#include "foodhistory_popup.h"
 #include "dialog_export.h"
 #include "dialog_nutrition.h"
 #include "dialog_stresscalc.h"
@@ -1176,7 +1175,6 @@ private slots:
     void selectFoodDay(int);
     void on_actionFood_Macros_triggered();
     void on_toolButton_linePaste_clicked();
-    void on_actionfood_History_triggered();
     void on_actionFood_triggered();
     void on_tableWidget_schedule_itemClicked(QTableWidgetItem *item);
     void on_tableWidget_saison_itemClicked(QTableWidgetItem *item);

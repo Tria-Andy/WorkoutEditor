@@ -78,47 +78,43 @@ void foodmacro_popup::set_plotValues(QDate startDate)
     weekStart.setDate(startDate);
     weekStart.setTime(wTime);
     weekStart.setTimeSpec(Qt::LocalTime);
+    QStandardItem *weekitem = foodplan->get_proxyItem(1);
+    QVector<double> macros(5,0);
+    QVector<double> target(5,0);
 
-
-    QMap<QDate,QHash<QString,QVector<double>>> *dayMacroMap = foodplan->get_dayMacroMap();
-    int day = 0;
-
-    for(QMap<QDate,QHash<QString,QVector<double>>>::const_iterator daystart = dayMacroMap->find(startDay) , dayend = dayMacroMap->find(startDay.addDays(7)); daystart != dayend; ++daystart )
+    for(int day = 0; day < weekitem->rowCount(); ++day)
     {
-        dateHeader << QLocale().dayName(day+1,QLocale::ShortFormat) + " " + daystart.key().toString("dd.MM");
+        dateHeader << QLocale().dayName(day+1,QLocale::ShortFormat) + " " + weekitem->child(day,1)->data(Qt::DisplayRole).toDate().toString("dd.MM");
 
-        for(QHash<QString,QVector<double>>::const_iterator macrostart = daystart->cbegin() , macroend = daystart->cend(); macrostart != macroend; ++macrostart )
+
+        for(int macro = 5,pos = 0; macro < 10; ++macro,++pos)
         {
-            if(macrostart.key() == "Target")
-            {
-                carbValues[day] = macrostart.value().at(0);
-                proteinValues[day] = macrostart.value().at(1);
-                fatValues[day] = macrostart.value().at(2);
-                fiberValues[day] = macrostart.value().at(3);
-                sugarValues[day] = macrostart.value().at(4);
-                this->set_tableItem(macrostart.value(),0,day);
-            }
+            macros[pos] = weekitem->child(day,0)->data(Qt::UserRole+macro).toInt();
+            target[pos] = weekitem->child(day,1)->data(Qt::UserRole+pos).toInt();
+        }
 
-            if(macrostart.key() == "Day")
-            {
-                carbMarco[day] = macrostart.value().at(0);
-                proteinMacro[day] = macrostart.value().at(1);
-                fatMacro[day] = macrostart.value().at(2);
-                fiberMacro[day] = macrostart.value().at(3);
-                sugarMacro[day] = macrostart.value().at(4);
-                this->set_tableItem(macrostart.value(),1,day);
-            }
+        carbValues[day] = target.at(0);
+        proteinValues[day] = target.at(1);
+        fatValues[day] = target.at(2);
+        fiberValues[day] = target.at(3);
+        sugarValues[day] = target.at(4);
+        this->set_tableItem(target,0,day);
 
-            for(int i = 0; i < macrostart.value().count(); ++i)
+        carbMarco[day] = macros.at(0);
+        proteinMacro[day] = macros.at(1);
+        fatMacro[day] = macros.at(2);
+        fiberMacro[day] = macros.at(3);
+        sugarMacro[day] = macros.at(4);
+        this->set_tableItem(macros,1,day);
+
+        for(int i = 0; i < macros.count(); ++i)
+        {
+            if(macros.at(i) > yMax)
             {
-                if(macrostart.value().at(i) > yMax)
-                {
-                    yMax = macrostart.value().at(i);
-                }
+                yMax = macros.at(i);
             }
         }
         xValues[day] = weekStart.addDays(day).toTime_t() + 3600;
-        ++day;
     }
 
     dateHeader << "Summery";
