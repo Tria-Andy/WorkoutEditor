@@ -58,11 +58,20 @@ enum {ADD,DEL,EDIT};
 
 bool foodplanner::copyMap_hasData()
 {
-    if(copyMap.count() > 0)
+    if(copyMap.first.isValid())
     {
         return true;
     }
 
+    return false;
+}
+
+bool foodplanner::copyQueue_hasData()
+{
+    if(!copyQueue.isEmpty())
+    {
+        return true;
+    }
     return false;
 }
 
@@ -205,15 +214,6 @@ QVector<double> foodplanner::get_foodMacros(QStandardItemModel *model,QString fo
     return macros;
 }
 
-QPair<QDate, QString> foodplanner::get_copyMeal()
-{
-    QPair<QDate, QString> meal;
-    meal.first = copyMap.firstKey();
-    meal.second = copyMap.value(copyMap.firstKey()).at(0);
-
-    return meal;
-}
-
 QStringList foodplanner::get_modelSections(QStandardItemModel *model)
 {
     QStringList sectionList;
@@ -315,12 +315,12 @@ void foodplanner::add_ingredient(QString section, QString foodName,QVector<doubl
     QStandardItem *sectionItem = nullptr;
     QStringList *tagList = nullptr;
 
-    if(modelID == 0)
+    if(modelID == 1)
     {
         sectionItem = this->get_modelItem(ingredModel,section,0);
         tagList = ingredTags;
     }
-    if(modelID == 1)
+    else if(modelID == 2)
     {
         sectionItem = this->get_modelItem(drinkModel,section,0);
         tagList = drinkTags;
@@ -481,21 +481,21 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
     }
 }
 
-void foodplanner::fill_copyMap(QDate copyDate, QString copySection)
+void foodplanner::fill_copyMap(QDate copyDate, QString copySection,bool day)
 {
     QStringList sectionList;
     QPair<QDate,QString> queueItem;
     queueItem.first = copyDate;
     queueItem.second = copySection;
 
-    if(copyMap.contains(copyDate))
+    if(day)
     {
-        sectionList = copyMap.value(copyDate);
+        copyMap = queueItem;
     }
-
-    sectionList.append(copySection);
-    copyMap.insert(copyDate,sectionList);
-    copyQueue.enqueue(queueItem);
+    else
+    {
+        copyQueue.enqueue(queueItem);
+    }
 }
 
 QMap<int, QList<QStandardItem *> > foodplanner::get_copyItem(QDate copyDate, QString copySection)
@@ -532,9 +532,6 @@ void foodplanner::execute_copy(QDate copyDate,bool section)
         this->update_foodPlanModel(copyDate.addDays(dayCount),queueItem.second,this->get_copyItem(queueItem.first,queueItem.second));
         if(section) ++dayCount;
     }
-
-    this->clear_copyMap();
-
 }
 
 void foodplanner::clear_dragDrop()

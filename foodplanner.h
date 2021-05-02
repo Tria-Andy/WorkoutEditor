@@ -21,6 +21,7 @@ public:
     QStringList planList,mealsHeader,dayHeader,dayListHeader;
 
     bool copyMap_hasData();
+    bool copyQueue_hasData();
     bool dragDrop_hasData();
     bool check_foodDay(QDate);
     QString get_mode(QDate);
@@ -28,7 +29,7 @@ public:
     QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
     QStandardItem *get_modelItem(QStandardItemModel*,QString,int);
     QVector<double> get_foodMacros(QStandardItemModel*,QString);
-    QPair<QDate,QString> get_copyMeal();
+    QPair<QDate,QString> get_copyMeal() {return copyMap;};
     QStringList get_modelSections(QStandardItemModel*);
     QList<QStandardItem*> get_sectionItems(QStandardItemModel*,QString);
     QStandardItem* submit_recipes(QList<QStandardItem*>,QString,bool);
@@ -38,9 +39,8 @@ public:
 
     void set_currentWeek(QDate);
     void update_fromSchedule(QDate);
-    void fill_copyMap(QDate,QString);
+    void fill_copyMap(QDate,QString,bool);
     void execute_copy(QDate,bool);
-    void clear_copyMap() {copyMap.clear();}
     void clear_dragDrop();
     void set_dragDrop(QDate,QString);
     void set_dropMeal(QDate,QString);
@@ -66,7 +66,7 @@ private:
     QString dateSaveFormat;
     QHash<QString,QString> *gcValues;
     QQueue<QPair<QDate,QString>> copyQueue;
-    QMap<QDate,QStringList> copyMap;
+    QPair<QDate,QString> copyMap;
     QMap<QDate,int> slideMap;
     QPair<QDate,QString> dragDrop;
     QMap<QDate,QPair<QString,QVector<int>>> historyMap;

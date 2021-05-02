@@ -264,10 +264,10 @@
          <number>0</number>
         </property>
         <property name="maximum">
-         <number>5</number>
+         <number>50</number>
         </property>
         <property name="value">
-         <number>0</number>
+         <number>1</number>
         </property>
        </widget>
       </item>
@@ -836,7 +836,7 @@
                 <enum>QFrame::Sunken</enum>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>1</number>
                </property>
                <property name="tabSpacing">
                 <number>1</number>

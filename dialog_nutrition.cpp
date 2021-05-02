@@ -137,7 +137,6 @@ void Dialog_nutrition::set_foodMacros(QListWidgetItem *item,QVector<double> food
 {
     loadedMacros = foodMacros;
 
-
     ui->lineEdit_foodName->setText(item->data(Qt::DisplayRole).toString());
     ui->lineEdit_foodName->setAccessibleName(item->data(Qt::AccessibleTextRole).toString());
 
@@ -261,7 +260,7 @@ void Dialog_nutrition::update_ingredientModel(bool addNew,int listID)
 
     if(addNew)
     {
-        foodPlan->add_ingredient(sourceBox->currentText(),ui->lineEdit_foodName->text(),foodValues,listID);
+        foodPlan->add_ingredient(sourceBox->currentText(),ui->lineEdit_foodName->text(),foodValues,listID+1);
         this->set_listItems(modelMap.value(listID),foodList,sourceBox->currentText());
     }
     else
