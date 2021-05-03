@@ -570,7 +570,7 @@ void foodplanner::check_foodPlan()
     {
         weekItem = rootItem->child(week,0);
 
-        if(weekItem->index().siblingAtColumn(1).data().toDate().daysTo(firstdayofweek) > 14)
+        if(weekItem->index().siblingAtColumn(1).data().toDate().daysTo(firstdayofweek) > 7)
         {
             weekList << weekItem;
         }

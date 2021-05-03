@@ -48,7 +48,7 @@ schedule::schedule(standardWorkouts *pworkouts)
        this->xml_toListMap(fileMap->value("stressfile"));
        this->set_stressMap();
 
-       this->remove_WeekofPast(firstdayofweek.addDays(-7));
+       this->remove_WeekofPast(firstdayofweek.addDays(-14));
        this->set_saisonValues();
 
 
@@ -967,7 +967,7 @@ void schedule::set_compValues(bool update,QDate workDate,QMap<int,QStringList> v
         for(int saison = 0; saison < saisons.count(); ++saison)
         {
             daysLeft = firstdayofweek.daysTo(QDate().fromString(saisonValues.value(saisons.at(saison)).at(1),dateFormat));
-            for(int day = 0; day <= daysLeft; ++day)
+            for(int day = -7; day <= daysLeft; ++day)
             {
                 compDate = firstdayofweek.addDays(day);
 
