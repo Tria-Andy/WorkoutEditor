@@ -1103,7 +1103,8 @@ private:
     void fill_foodPlanTable(QDate);
     void set_menuItemValues(QDate,QString);
     void set_mealItems(QMap<int,QListWidgetItem *>);
-    void set_selectedMeals(QTreeWidgetItem*,double);
+    //void set_selectedMeals(QTreeWidgetItem*,double);
+    void set_selectedMeals(QTreeWidgetItem*);
     void reset_menuEdit();
     void change_foodOrder(int);
     void fill_foodTrees();
