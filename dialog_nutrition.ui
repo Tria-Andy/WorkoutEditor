@@ -836,7 +836,7 @@
                 <enum>QFrame::Sunken</enum>
                </property>
                <property name="currentIndex">
-                <number>1</number>
+                <number>0</number>
                </property>
                <property name="tabSpacing">
                 <number>1</number>
@@ -851,7 +851,7 @@
                  </rect>
                 </property>
                 <attribute name="label">
-                 <string>Ingredients</string>
+                 <string>Food</string>
                 </attribute>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
                  <property name="spacing">

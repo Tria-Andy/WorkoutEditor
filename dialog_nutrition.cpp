@@ -168,7 +168,7 @@ void Dialog_nutrition::on_toolButton_add_clicked()
     QTreeWidgetItem *newItem = new QTreeWidgetItem(ui->treeWidget_recipe->invisibleRootItem());
     newItem->setData(0,Qt::AccessibleTextRole,ui->lineEdit_foodName->accessibleName());
     newItem->setData(0,Qt::DisplayRole,ui->lineEdit_foodName->text());
-    newItem->setData(0,Qt::UserRole+1,ui->toolBox_food->currentIndex()+1);
+    newItem->setData(0,Qt::UserRole+1,ui->toolBox_food->currentIndex());
     newItem->setData(1,Qt::DisplayRole,ui->doubleSpinBox_portion->value());
     newItem->setData(2,Qt::DisplayRole,round(ui->doubleSpinBox_calories->value()));
     newItem->setData(3,Qt::DisplayRole,ui->doubleSpinBox_carbs->value());
@@ -265,7 +265,7 @@ void Dialog_nutrition::update_ingredientModel(bool addNew,int listID)
     }
     else
     {
-        foodPlan->update_ingredient(ui->lineEdit_foodName->accessibleName(),ui->lineEdit_foodName->text(),foodValues);
+        foodPlan->update_ingredient(ui->lineEdit_foodName->accessibleName(),ui->lineEdit_foodName->text(),foodValues,listID+1);
     }
 
     foodPlan->save_ingredList(listID);

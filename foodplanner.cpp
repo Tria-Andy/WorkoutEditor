@@ -157,15 +157,18 @@ void foodplanner::read_nutritionHistory()
 
         day = QDateTime().fromSecsSinceEpoch(nutritionInfo.value(mapList->at(0)).toInt()).date();
 
-        for(int value = 0; value < valueList->count(); ++value)
+        if(day.daysTo(QDate().currentDate()) <= doubleValues->value("keephistory"))
         {
-            histValues[value] = nutritionInfo.value(valueList->at(value)).toInt();
+            for(int value = 0; value < valueList->count(); ++value)
+            {
+                histValues[value] = nutritionInfo.value(valueList->at(value)).toInt();
+            }
+
+            histInfo.first = nutritionInfo.value(mapList->at(1)).toString();
+            histInfo.second = histValues;
+
+            historyMap.insert(day,histInfo);
         }
-
-        histInfo.first = nutritionInfo.value(mapList->at(1)).toString();
-        histInfo.second = histValues;
-
-        historyMap.insert(day,histInfo);
     }
 }
 
@@ -341,9 +344,29 @@ void foodplanner::add_ingredient(QString section, QString foodName,QVector<doubl
     sectionItem->appendRow(itemList);
 }
 
-void foodplanner::scheduleChanged(QStandardItem *item)
+void foodplanner::update_ingredient(QString ingredID,QString name,QVector<double> values,int modelID)
 {
-    qDebug() << item->data(Qt::UserRole);
+    QModelIndex index;
+
+    QStandardItem *sectionItem = nullptr;
+
+    if(modelID == 1)
+    {
+        index = this->get_modelIndex(ingredModel,ingredID,0);
+        sectionItem = ingredModel->itemFromIndex(index)->parent();
+    }
+    else if(modelID == 2)
+    {
+        index = this->get_modelIndex(drinkModel,ingredID,0);
+        sectionItem = drinkModel->itemFromIndex(index)->parent();
+    }
+
+    sectionItem->child(index.row(),1)->setData(name,Qt::DisplayRole);
+
+    for(int i = 0,item=2; i < values.count(); ++i,++item)
+    {
+        sectionItem->child(index.row(),item)->setData(values.at(i),Qt::DisplayRole);
+    }
 }
 
 QStandardItem* foodplanner::submit_recipes(QList<QStandardItem *> recipeMeta, QString section,bool newRecipe)
@@ -601,6 +624,7 @@ void foodplanner::check_foodPlan()
     for(int week = 0; week < summeryModel->rowCount();++week)
     {
         weekItem = summeryModel->item(week,0);
+
         for(int day = 0; day < weekItem->rowCount(); ++day)
         {
             if(weekItem->child(day,1)->data(Qt::DisplayRole).toDate().daysTo(QDate().currentDate()) > 0)
@@ -690,29 +714,16 @@ void foodplanner::update_foodMode(QDate weekStart,QString newMode)
     weekItem->setData(newMode,Qt::DisplayRole);
 }
 
-void foodplanner::update_ingredient(QString ingredID,QString name,QVector<double> values)
-{
-    QModelIndex index = this->get_modelIndex(ingredModel,ingredID,0);
-    QStandardItem *sectionItem = ingredModel->itemFromIndex(index)->parent();
-
-    sectionItem->child(index.row(),1)->setData(name,Qt::DisplayRole);
-
-    for(int i = 0,item=2; i < values.count(); ++i,++item)
-    {
-        sectionItem->child(index.row(),item)->setData(values.at(i),Qt::DisplayRole);
-    }
-}
-
 void foodplanner::edit_mealSection(QString sectionName,int mode)
 {
     qDebug() << sectionName << mode;
-
 }
 
 void foodplanner::insert_newWeek(QDate firstday)
 {
     QStandardItem *rootItem = foodPlanModel->invisibleRootItem();
-    QString mealDefault;
+
+    QVector<double> mealDefault = settings::doubleVector.value("Mealdefault");
 
     QList<QStandardItem*> weekList;
     weekList << new QStandardItem(this->calc_weekID(firstday));
@@ -735,11 +746,17 @@ void foodplanner::insert_newWeek(QDate firstday)
             mealsItem << new QStandardItem(mealsHeader.at(meals));
             mealsItem << new QStandardItem(QString::number(meals));
             mealsItem.at(0)->setData(foodPlanTags->at(2),Qt::AccessibleTextRole);
-            mealDefault = "100-"+QString::number(meals);
 
             QList<QStandardItem*> foodItem;
-            foodItem << new QStandardItem(mealDefault);
-            foodItem << new QStandardItem("-");
+            foodItem << new QStandardItem(mealsHeader.at(meals)+"-0");
+            foodItem << new QStandardItem("Default");
+            foodItem << new QStandardItem("1");
+            foodItem << new QStandardItem(QString::number(mealDefault.at(meals)));
+            foodItem << new QStandardItem("0");
+            foodItem << new QStandardItem("0");
+            foodItem << new QStandardItem("0");
+            foodItem << new QStandardItem("0");
+            foodItem << new QStandardItem("0");
             foodItem << new QStandardItem("0");
             foodItem << new QStandardItem("0");
             foodItem.at(0)->setData(foodPlanTags->at(3),Qt::AccessibleTextRole);

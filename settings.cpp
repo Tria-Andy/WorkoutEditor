@@ -523,15 +523,14 @@ int settings::loadSettings()
                 settingList = myvalues->value("dish").toString().split(splitter);
                 listMap.insert("Dish",settingList);
                 settingList.clear();
-                doubleMap.insert("AddMoving",myvalues->value("addmoving").toDouble());
-                doubleMap.insert("DayRoutine",myvalues->value("dayroutine").toDouble());
-                doubleMap.insert("DayRoutineCal",myvalues->value("dayroutinecal").toDouble());
                 doubleMap.insert("DayFiber",myvalues->value("fiber").toDouble());
                 doubleMap.insert("DaySugar",myvalues->value("sugar").toDouble());
                 doubleMap.insert("Macrorange",myvalues->value("macrorange").toDouble());
+                doubleMap.insert("keephistory",myvalues->value("keephistory").toDouble());
                 athleteMap.insert("BodyFatCal",myvalues->value("fatcal").toDouble());
                 settingList = myvalues->value("palday").toString().split(splitter);
                 doubleVector.insert("palday",set_doubleValues(&settingList));
+
             myvalues->endGroup();
 
             myvalues->beginGroup("Misc");
@@ -568,6 +567,7 @@ int settings::loadSettings()
                 settingList <<  myvalues->value("sports").toString().split(splitter);
                 listMap.insert("Sport",myvalues->value("sports").toString().split(splitter));
                 listMap.insert("Sportuse",myvalues->value("sportuse").toString().split(splitter));
+                listMap.insert("Training",myvalues->value("training").toString().split(splitter));
                 listMap.insert("Cardio",myvalues->value("Cardio").toString().split(splitter));
                 listMap.insert("Muscular",myvalues->value("muscluar").toString().split(splitter));
                 listMap.insert("Program",myvalues->value("powerprogram").toString().split(splitter));
