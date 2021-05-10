@@ -36,7 +36,10 @@ public:
     QMap<QString,QList<QDate>> get_recipeMap(QString recipeID) {return recipeMap.value(recipeID);}
     QStandardItem *get_proxyItem(int);
     int get_slideValue(QDate day) {return slideMap.value(day);}
+
     void update_foodPlanModel(QDate,QString,QMap<int,QList<QStandardItem*>>);
+    void update_ingredient(QString,QString,QVector<double>,int);
+    void add_ingredient(QString, QString,QVector<double>,int);
 
     void set_currentWeek(QDate);
     void update_fromSchedule(QDate);
@@ -51,14 +54,10 @@ public:
     void save_recipeList();
     void save_ingredList(int);
     void update_foodMode(QDate,QString);
-    void update_ingredient(QString,QString,QVector<double>);
     void edit_mealSection(QString,int);
     void insert_newWeek(QDate);
     void remove_week(QString);
-    void add_ingredient(QString, QString,QVector<double>,int);
 
-public slots:
-    void scheduleChanged(QStandardItem*);
 
 private:
     schedule *schedulePtr;

@@ -3006,7 +3006,7 @@
                       </rect>
                      </property>
                      <attribute name="label">
-                      <string>Ingedients</string>
+                      <string>Food</string>
                      </attribute>
                      <layout class="QVBoxLayout" name="verticalLayout_20">
                       <property name="spacing">

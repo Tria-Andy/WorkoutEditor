@@ -86,7 +86,6 @@ void foodmacro_popup::set_plotValues(QDate startDate)
     {
         dateHeader << QLocale().dayName(day+1,QLocale::ShortFormat) + " " + weekitem->child(day,1)->data(Qt::DisplayRole).toDate().toString("dd.MM");
 
-
         for(int macro = 5,pos = 0; macro < 10; ++macro,++pos)
         {
             macros[pos] = weekitem->child(day,0)->data(Qt::UserRole+macro).toInt();
@@ -107,14 +106,22 @@ void foodmacro_popup::set_plotValues(QDate startDate)
         sugarMacro[day] = macros.at(4);
         this->set_tableItem(macros,1,day);
 
-        for(int i = 0; i < macros.count(); ++i)
+        xValues[day] = weekStart.addDays(day).toTime_t() + 3600;
+    }
+
+    for(int i = 0; i < macros.count(); ++i)
+    {
+        if(macros.at(i) > yMax)
         {
-            if(macros.at(i) > yMax)
+            if(target.at(i) > macros.at(i))
+            {
+                yMax = target.at(i);
+            }
+            else
             {
                 yMax = macros.at(i);
             }
         }
-        xValues[day] = weekStart.addDays(day).toTime_t() + 3600;
     }
 
     dateHeader << "Summery";
