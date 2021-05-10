@@ -169,6 +169,15 @@ void foodplanner::read_nutritionHistory()
     }
 }
 
+void foodplanner::set_recipeList(QDate day, QString recipeID, QString section)
+{
+    QMap<QString,QList<QDate>> recipeAt = recipeMap.value(recipeID);
+    QList<QDate> atSection = recipeAt.value(section);
+    atSection.append(day);
+    recipeAt.insert(section,atSection);
+    recipeMap.insert(recipeID,recipeAt);
+}
+
 QModelIndex foodplanner::get_modelIndex(QStandardItemModel *model, QString searchString,int col)
 {
     QList<QStandardItem*> list = model->findItems(searchString,Qt::MatchExactly | Qt::MatchRecursive,col);
@@ -561,7 +570,7 @@ void foodplanner::set_dropMeal(QDate toDate, QString toSection)
 void foodplanner::check_foodPlan()
 {
     QStandardItem *rootItem = foodPlanModel->invisibleRootItem();
-    QStandardItem *weekItem;
+    QStandardItem *weekItem,*dayItem,*sectionItem;
     QList<QStandardItem*> weekList;
     QList<QStandardItem*> sumList;
 
@@ -578,6 +587,22 @@ void foodplanner::check_foodPlan()
         {
             sumList.append(weekItem);
         }
+
+        for(int day = 0; day < weekItem->rowCount(); ++day)
+        {
+            dayItem = weekItem->child(day,0);
+            for(int section = 0; section < dayItem->rowCount(); ++section)
+            {
+                sectionItem = dayItem->child(section,0);
+                for(int meal = 0; meal < sectionItem->rowCount(); ++meal)
+                {
+                    if(sectionItem->child(meal,11)->data(Qt::DisplayRole).toInt() == 0)
+                    {
+                        this->set_recipeList(dayItem->data(Qt::DisplayRole).toDate(), sectionItem->child(meal,0)->data(Qt::DisplayRole).toString(),sectionItem->data(Qt::DisplayRole).toString());
+                    }
+                }
+            }
+        }
     }
 
     for(int i = 0; i < weekList.count(); ++i)
@@ -591,9 +616,10 @@ void foodplanner::check_foodPlan()
         this->set_summeryData(sumList.at(i));
     }
 
+    //add days to history
+
     this->read_nutritionHistory();
 
-    //add days to history
     QVector<int> histValues(10,0);
     QPair<QString,QVector<int>> histInfo;
     bool newDay = false;

@@ -33,6 +33,7 @@ public:
     QStringList get_modelSections(QStandardItemModel*);
     QList<QStandardItem*> get_sectionItems(QStandardItemModel*,QString);
     QStandardItem* submit_recipes(QList<QStandardItem*>,QString,bool);
+    QMap<QString,QList<QDate>> get_recipeMap(QString recipeID) {return recipeMap.value(recipeID);}
     QStandardItem *get_proxyItem(int);
     int get_slideValue(QDate day) {return slideMap.value(day);}
     void update_foodPlanModel(QDate,QString,QMap<int,QList<QStandardItem*>>);
@@ -68,6 +69,7 @@ private:
     QQueue<QPair<QDate,QString>> copyQueue;
     QPair<QDate,QString> copyMap;
     QMap<QDate,int> slideMap;
+    QMap<QString,QMap<QString,QList<QDate>>> recipeMap;
     QPair<QDate,QString> dragDrop;
     QMap<QDate,QPair<QString,QVector<int>>> historyMap;
     QHash<QString,QString> *fileMap;
@@ -77,6 +79,7 @@ private:
 
     void set_headerLabel(QStandardItemModel*, QStringList*,bool);
     void read_nutritionHistory();
+    void set_recipeList(QDate,QString,QString);
     void update_summeryModel(QDate,QStandardItem*,bool);
     void set_summeryData(QStandardItem*);
     void update_foodHistory(QDate);

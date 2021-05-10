@@ -113,6 +113,18 @@ void Dialog_nutrition::on_listWidget_recipes_itemClicked(QListWidgetItem *selIte
     ui->toolButton_clear->setEnabled(true);
     ui->toolButton_createRecipe->setEnabled(false);
 
+    QMap<QString,QList<QDate>> recipeList = foodPlan->get_recipeMap(recipeItem->data(Qt::DisplayRole).toString());
+    ui->treeWidget_recipeDays->clear();
+    ui->treeWidget_recipeDays->setColumnCount(2);
+    for(QMap<QString,QList<QDate>>::const_iterator it = recipeList.cbegin(); it != recipeList.cend(); ++it)
+    {
+        for(int day = 0; day < it.value().count(); ++day)
+        {
+            QTreeWidgetItem *dayItem = new QTreeWidgetItem(ui->treeWidget_recipeDays->invisibleRootItem());
+            dayItem->setData(0,Qt::DisplayRole,it.value().at(day).toString("dd.MM.yyyy"));
+            dayItem->setData(1,Qt::DisplayRole,it.key());
+        }
+    }
 }
 
 void Dialog_nutrition::set_listItems(QStandardItemModel *model,QListWidget *selList,QString value)
