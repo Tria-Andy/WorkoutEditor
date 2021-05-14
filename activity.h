@@ -66,6 +66,7 @@ public:
     explicit Activity();
 
     QMap<QString,QVector<QString>> gcActivtiesMap;
+    QMap<QDateTime,QVector<QString>> gcActivityMap;
     QMap<QString,QString> activityInfo;
     QStringList averageHeader,activityHeader,swimType;
     QVector<double> sampSpeed,sampSecond;
