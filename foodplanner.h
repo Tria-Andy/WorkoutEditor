@@ -35,7 +35,7 @@ public:
     QStandardItem* submit_recipes(QList<QStandardItem*>,QString,bool);
     QMap<QString,QList<QDate>> get_recipeMap(QString recipeID) {return recipeMap.value(recipeID);}
     QStandardItem *get_proxyItem(int);
-    int get_slideValue(QDate day) {return slideMap.value(day);}
+    int get_slideValue(QDate day) {return slideMap.value(day).second;}
 
     void update_foodPlanModel(QDate,QString,QMap<int,QList<QStandardItem*>>);
     void update_ingredient(QString,QString,QVector<double>,int);
@@ -67,7 +67,7 @@ private:
     QHash<QString,QString> *gcValues;
     QQueue<QPair<QDate,QString>> copyQueue;
     QPair<QDate,QString> copyMap;
-    QMap<QDate,int> slideMap;
+    QMap<QDate,QPair<int,int>> slideMap;
     QMap<QString,QMap<QString,QList<QDate>>> recipeMap;
     QPair<QDate,QString> dragDrop;
     QMap<QDate,QPair<QString,QVector<int>>> historyMap;

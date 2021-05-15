@@ -223,16 +223,13 @@ bool Activity::check_activityFiles()
         jsonFile = fileList.at(fileCount).fileName();
         currentFiles.insert(jsonFile);
 
+
+
         if(!gcActivtiesMap.contains(jsonFile))
         {
             gcActivtiesMap.insert(jsonFile,this->read_activityMeta(filePath,gcActivtiesMap.count()));
             newActivity = true;
         }
-    }
-
-    for(QMap<QString,QVector<QString>>::const_iterator  it = gcActivtiesMap.cbegin(); it != gcActivtiesMap.cend(); ++it)
-    {
-        //if(!currentFiles.contains(it.key())) gcActivtiesMap.remove(it.key());
     }
 
     return newActivity;

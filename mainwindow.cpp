@@ -2996,8 +2996,6 @@ void MainWindow::fill_foodTrees()
 
 void MainWindow::set_foodEditOptions(double portion)
 {
-    qDebug() << "Set SpinBox" << portion;
-
     if(portion == 0)
     {
         ui->doubleSpinBox_portion->setRange(0.0,0.0);
@@ -3050,12 +3048,9 @@ void MainWindow::on_listWidget_menuEdit_itemClicked(QListWidgetItem *item)
 {
     int dataCount = item->data(Qt::UserRole).toInt();
 
-    qDebug() << item->data(Qt::AccessibleTextRole).toString() << item->data(Qt::UserRole+1).toDouble() << item->data(Qt::UserRole+dataCount).toDouble();
-
     ui->toolBox_foodSelect->setCurrentIndex(item->data(Qt::UserRole+(dataCount+1)).toInt());
     foodTree->setCurrentItem(foodTreeMap.value(item->data(Qt::AccessibleTextRole).toString()));
 
-    //this->set_selectedMeals(foodTree->currentItem(),item->data(Qt::UserRole+dataCount).toDouble());
     this->set_selectedMeals(foodTree->currentItem());
 }
 

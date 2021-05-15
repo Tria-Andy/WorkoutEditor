@@ -480,28 +480,27 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
     QStandardItem *weekItem = this->get_modelItem(summeryModel,calc_weekID(day),0);
     dayItem = weekItem->child(day.dayOfWeek()-1,0);
 
-    qDebug() << day << sumValues.at(3) - sumValues.at(0);
 
-    slideMap.insert(day,sumValues.at(4));
+    QPair<int,int> slideValue;
+    slideValue.first = sumValues.at(4);
+    slideValue.second = 0;
+
+    slideMap.insert(day,slideValue);
 
     int slideSum = 0;
 
     if(slideMap.firstKey().daysTo(day) >= 2)
     {
-        for(QMap<QDate,int>::Iterator it = slideMap.begin(); it != slideMap.end() ;++it)
+        for(QMap<QDate,QPair<int,int>>::Iterator it = slideMap.find(day); it != slideMap.end() ;++it)
         {
-            qDebug() << "Slide" << it.key() << it.value();
-
             if(it.key() >= day.addDays(-2))
             {
-                for(QMap<QDate,int>::Iterator slide = slideMap.find(day.addDays(-2)); slide != slideMap.find(day) ;++slide)
+                for(QMap<QDate,QPair<int,int>>::Iterator slide = slideMap.find(day.addDays(-2)); slide != slideMap.find(day) ;++slide)
                 {
-                    qDebug() << "Calc" << slide.key() << slide.value();
-                    slideSum = slideSum + slide.value();
-                    qDebug() << "SlideSum" << slideSum;
+                    slideSum = slideSum + slide.value().first;
                 }
-
-                slideMap.insert(it.key(),(round((it.value()+slideSum)/3)));
+                slideValue.second = round((it.value().first+slideSum)/3);
+                slideMap.insert(it.key(),slideValue);
                 slideSum = 0;
             }
         }
