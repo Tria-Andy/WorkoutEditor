@@ -378,6 +378,8 @@ void Dialog_settings::writeChangedValues()
     saveVector[2] = ui->spinBox_fat->value();
     settings::doubleVector.insert("Macros",saveVector);
 
+    food_ptr->update_byPalChange();
+
     settings::writeListValues(&listMap);
 
     if(stressEdit) schedule_ptr->save_ltsFile();

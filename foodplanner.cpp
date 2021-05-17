@@ -322,6 +322,21 @@ void foodplanner::update_fromSchedule(QDate editDay)
     this->update_summeryModel(editDay,weekItem->child(editDay.dayOfWeek()-1),false);
 }
 
+void foodplanner::update_byPalChange()
+{
+    QStandardItem *weekItem;
+
+    for(int week = 0; week < foodPlanModel->rowCount(); ++week)
+    {
+        weekItem = foodPlanModel->item(week,0);
+
+        for(int day = 0; day < weekItem->rowCount(); ++day)
+        {
+            this->update_summeryModel(weekItem->child(day,0)->data(Qt::DisplayRole).toDate(),weekItem->child(day,0),false);
+        }
+    }
+}
+
 void foodplanner::add_ingredient(QString section, QString foodName,QVector<double> values,int modelID)
 {
     QStandardItem *sectionItem = nullptr;
@@ -493,16 +508,16 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
     {
         for(QMap<QDate,QPair<int,int>>::Iterator it = slideMap.find(day); it != slideMap.end() ;++it)
         {
-            if(it.key() >= day.addDays(-2))
+            slideValue = it.value();
+
+            for(QMap<QDate,QPair<int,int>>::Iterator slide = slideMap.find(it.key().addDays(-2)); slide != slideMap.find(it.key()) ;++slide)
             {
-                for(QMap<QDate,QPair<int,int>>::Iterator slide = slideMap.find(day.addDays(-2)); slide != slideMap.find(day) ;++slide)
-                {
-                    slideSum = slideSum + slide.value().first;
-                }
-                slideValue.second = round((it.value().first+slideSum)/3);
-                slideMap.insert(it.key(),slideValue);
-                slideSum = 0;
+                slideSum = slideSum + slide.value().first;
             }
+
+            slideValue.second = round((it.value().first+slideSum)/3);
+            slideMap.insert(it.key(),slideValue);
+            slideSum = 0;
         }
     }
 

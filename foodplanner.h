@@ -43,6 +43,7 @@ public:
 
     void set_currentWeek(QDate);
     void update_fromSchedule(QDate);
+    void update_byPalChange();
     void fill_copyMap(QDate,QString,bool);
     void execute_copy(QDate,bool);
     void clear_dragDrop();
