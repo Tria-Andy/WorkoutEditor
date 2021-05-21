@@ -1085,7 +1085,7 @@ private:
     void set_selecteditem(QTreeWidgetItem*,int);
     void refresh_activityTree();
     void reset_avgSelection();
-    void activityList(int);
+    void activityList();
     void load_activity(const QString &filename,bool);
     void recalc_selectedInt(QTime,double);
     void init_controlStyleSheets();
@@ -1103,12 +1103,11 @@ private:
     void fill_foodPlanTable(QDate);
     void set_menuItemValues(QDate,QString);
     void set_mealItems(QMap<int,QListWidgetItem *>);
-    //void set_selectedMeals(QTreeWidgetItem*,double);
+    void calc_mealItems();
     void set_selectedMeals(QTreeWidgetItem*);
     void reset_menuEdit();
     void change_foodOrder(int);
     void fill_foodTrees();
-    void set_foodEditOptions(double);
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);

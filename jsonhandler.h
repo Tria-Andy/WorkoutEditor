@@ -46,7 +46,7 @@ protected:
     QHash<QString,QString> *gcValues,*generalValues;
 
     QString read_jsonContent(QString,bool);
-    QVector<QString> read_activityMeta(QString,int);
+    QPair<QDateTime,QVector<QString>> read_activityMeta(QString);
     void prepareWrite_JsonFile(bool manual);
 
 

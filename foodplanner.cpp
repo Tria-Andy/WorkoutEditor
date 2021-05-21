@@ -49,6 +49,7 @@ foodplanner::foodplanner(schedule *p_Schedule)
     foodProxy->setSourceModel(foodPlanModel);
     sumProxy = new QSortFilterProxyModel();
     sumProxy->setSourceModel(summeryModel);
+
     this->set_currentWeek(firstdayofweek);
     this->check_foodPlan();
 }
@@ -640,7 +641,7 @@ void foodplanner::check_foodPlan()
                 sectionItem = dayItem->child(section,0);
                 for(int meal = 0; meal < sectionItem->rowCount(); ++meal)
                 {
-                    if(sectionItem->child(meal,11)->data(Qt::DisplayRole).toInt() == 0)
+                    if(sectionItem->child(meal,10)->data(Qt::DisplayRole).toInt() == 0)
                     {
                         this->set_recipeList(dayItem->data(Qt::DisplayRole).toDate(), sectionItem->child(meal,0)->data(Qt::DisplayRole).toString(),sectionItem->data(Qt::DisplayRole).toString());
                     }

@@ -31,8 +31,6 @@ class Activity : public jsonHandler, public xmlHandler, public calculation
 {
 
 private:
-    void fill_actMap();
-
     QMap<QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>> activityMap;
     QHash<QString,QString> *fileMap;
     QMap<QString,QVector<double>> averageMap;
@@ -59,14 +57,12 @@ private:
     void set_activityHeader(QString,QStringList*);
     void set_polishData();
     void extend_activityHeader();
-    void save_actvitiyFile();
     void fill_rangeLevel(bool);
 
 public:
     explicit Activity();
 
-    QMap<QString,QVector<QString>> gcActivtiesMap;
-    QMap<QDateTime,QVector<QString>> gcActivityMap;
+    QMap<QDateTime,QVector<QString>> gcActivtiesMap;
     QMap<QString,QString> activityInfo;
     QStringList averageHeader,activityHeader,swimType;
     QVector<double> sampSpeed,sampSecond;
@@ -84,7 +80,7 @@ public:
 
     bool clear_loadedActivity();
     bool read_jsonFile(QString,bool);
-    bool check_activityFiles();
+    void check_activityFiles();
 
     void update_activityMap(QPair<int,QString>,QMap<QPair<int,QString>,QVector<double>>);
     void update_intervalMap(int,QString,QPair<int,int>);

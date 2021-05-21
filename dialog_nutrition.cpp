@@ -12,8 +12,11 @@ Dialog_nutrition::Dialog_nutrition(QWidget *parent, foodplanner *p_food) :
     foodPlan = p_food;
 
     ui->comboBox_recipe->addItems(foodPlan->get_modelSections(foodPlan->recipeModel));
+    ui->comboBox_recipe->model()->sort(0);
     ui->comboBox_ingredients->addItems(foodPlan->get_modelSections(foodPlan->ingredModel));
+    ui->comboBox_ingredients->model()->sort(0);
     ui->comboBox_drinks->addItems(foodPlan->get_modelSections(foodPlan->drinkModel));
+    ui->comboBox_drinks->model()->sort(0);
 
     modelMap.insert(0,foodPlan->ingredModel);
     modelMap.insert(1,foodPlan->drinkModel);

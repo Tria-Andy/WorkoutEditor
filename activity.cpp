@@ -36,8 +36,7 @@ Activity::Activity()
     fileMap = settings::getStringMapPointer(settings::stingMap::File);
     infoHeader = settings::getHeaderMap("activityinfo");
     levels = settings::get_listValues("Level");
-    this->xml_toListMap(fileMap->value("activityfile"));
-    this->fill_actMap();
+    this->check_activityFiles();
 }
 
 void Activity::update_activityMap(QPair<int, QString> intKey, QMap<QPair<int, QString>, QVector<double> > intValues)
@@ -93,30 +92,6 @@ bool Activity::clear_loadedActivity()
     overrideData.clear();
 
     return true;
-}
-
-void Activity::save_actvitiyFile()
-{
-    QStringList listValues;
-    int counter = 0;
-    int maxFileCount = generalValues->value("filecount").toInt();
-    int writeEntry = gcActivtiesMap.last().at(4).toInt() - maxFileCount;
-    mapList.clear();
-
-    for(QMap<QString,QVector<QString>>::const_iterator it = gcActivtiesMap.cbegin(), end = gcActivtiesMap.cend(); it != end; ++it)
-    {
-        if(it.value().at(4).toInt() >= writeEntry)
-        {
-            listValues << it.key();
-            for(int value = 0; value < it.value().count(); ++value)
-            {
-                listValues << it.value().at(value);
-            }
-            mapList.insert(counter++,listValues);
-            listValues.clear();
-        }
-    }
-    this->listMap_toXml(fileMap->value("activityfile"));
 }
 
 void Activity::prepare_mapToJson()
@@ -204,11 +179,10 @@ void Activity::prepare_mapToJson()
     this->prepareWrite_JsonFile(false);
 }
 
-bool Activity::check_activityFiles()
+void Activity::check_activityFiles()
 {
     QString filePath;
     QString jsonFile;
-    bool newActivity = false;
     int maxFileCount = generalValues->value("filecount").toInt();
     QDir directory(gcValues->value("actpath"));
     directory.setSorting(QDir::Name | QDir::Reversed);
@@ -216,6 +190,7 @@ bool Activity::check_activityFiles()
     QFileInfoList fileList = directory.entryInfoList();
     maxFileCount = fileList.count() > maxFileCount ? maxFileCount : fileList.count();
     QSet<QString> currentFiles;
+    QPair<QDateTime,QVector<QString>> actData;
 
     for(int fileCount = 0; fileCount < maxFileCount; ++fileCount)
     {
@@ -223,47 +198,11 @@ bool Activity::check_activityFiles()
         jsonFile = fileList.at(fileCount).fileName();
         currentFiles.insert(jsonFile);
 
-
-
-        if(!gcActivtiesMap.contains(jsonFile))
-        {
-            gcActivtiesMap.insert(jsonFile,this->read_activityMeta(filePath,gcActivtiesMap.count()));
-            newActivity = true;
-        }
+        actData = this->read_activityMeta(filePath);
+        gcActivtiesMap.insert(actData.first,actData.second);
     }
 
-    return newActivity;
 }
-
-
-void Activity::fill_actMap()
-{
-    QVector<QString> actValues;
-    QDir directory(gcValues->value("actpath"));
-
-    bool refresh = false;
-
-    for(QMap<int,QStringList>::const_iterator it = mapList.cbegin(), end = mapList.cend(); it != end; ++it)
-    {
-        actValues.insert(0,it.value().at(1));
-        actValues.insert(1,it.value().at(2));
-        actValues.insert(2,it.value().at(3));
-        actValues.insert(3,it.value().at(4));
-        actValues.insert(4,QString::number(it.key()));
-
-        for(int i = 0; i < it.value().count(); ++i)
-        {
-            if(it.value().at(i).isEmpty()) refresh = true;
-        }
-
-        if(refresh) actValues = read_activityMeta(directory.path()+QDir::separator()+it.value().at(0),it.key());
-
-        gcActivtiesMap.insert(it.value().at(0),actValues);
-        actValues.clear();
-    }
-    if(this->check_activityFiles() || refresh) save_actvitiyFile();
-}
-
 
 bool Activity::read_jsonFile(QString jsonfile,bool fullPath)
 {
@@ -281,6 +220,7 @@ bool Activity::read_jsonFile(QString jsonfile,bool fullPath)
         for(int i = 0; i < valueList.count();++i)
         {
             stgValue = valueList.at(i);
+            qDebug() << stgValue << tagData.value(stgValue);
             activityInfo.insert(stgValue,tagData.value(stgValue));
         }
         activityInfo.insert("Date",rideData.value("STARTTIME"));

@@ -26,12 +26,14 @@ jsonHandler::jsonHandler()
     hasOverride = hasXdata = false;
 }
 
-QVector<QString> jsonHandler::read_activityMeta(QString filePath, int counter)
+QPair<QDateTime,QVector<QString>> jsonHandler::read_activityMeta(QString filePath)
 {
     QFile file(filePath);
     file.open(QFile::ReadOnly | QFile::Text);
     QString jsonfile = file.readAll();
     file.close();
+
+    QPair<QDateTime,QVector<QString>> actData;
 
     QDateTime workDateTime;
     workDateTime.setTimeSpec(Qt::UTC);
@@ -48,14 +50,16 @@ QVector<QString> jsonHandler::read_activityMeta(QString filePath, int counter)
 
     workDateTime = QDateTime::fromString(actObject.value("STARTTIME").toString().trimmed(),"yyyy/MM/dd hh:mm:ss UTC").addSecs(localTime.offsetFromUtc());
 
+    actData.first = workDateTime;
+
     QVector<QString> actValues;
     actValues.insert(0,QLocale().dayName(workDateTime.date().dayOfWeek(),QLocale::ShortFormat));
-    actValues.insert(1,workDateTime.toString("dd.MM.yyyy hh:mm"));
-    actValues.insert(2,tagObject.value("Sport").toString().trimmed());
-    actValues.insert(3,tagObject.value("Workout Code").toString().trimmed());
-    actValues.insert(4,QString::number(counter));
+    actValues.insert(1,tagObject.value("Sport").toString().trimmed());
+    actValues.insert(2,tagObject.value("Workout Code").toString().trimmed());
+    actValues.insert(3,tagObject.value("Filename").toString().trimmed());
+    actData.second = actValues;
 
-    return actValues;
+    return actData;
 }
 
 QString jsonHandler::read_jsonContent(QString jsonfile,bool fullPath)
@@ -113,7 +117,6 @@ QString jsonHandler::read_jsonContent(QString jsonfile,bool fullPath)
         //Fill IntervallMap
         itemArray = activityObject.value(mapList->at(3)).toArray();
         keyList = settings::get_xmlMapping("intervals");
-
         for(int i = 0; i < itemArray.count(); ++i)
         {
             itemObject = itemArray.at(i).toObject();
@@ -124,7 +127,6 @@ QString jsonHandler::read_jsonContent(QString jsonfile,bool fullPath)
         itemArray = activityObject.value(mapList->at(4)).toArray();
         keyList = settings::get_xmlMapping("samples");
         QStringList sampleKeys = itemArray.first().toObject().keys();
-
         if(sampleKeys.count() <= 1)
         {
             sampleKeys << keyList->at(1);
