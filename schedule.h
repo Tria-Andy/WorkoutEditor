@@ -58,6 +58,8 @@ public:
     QHash<QString,QMap<QDate,QPair<QString,QString>>> saisonWeekMap;
     QHash<QString,QMap<QDate,QPair<QString,QString>>> *get_saisonWeekMap() {return &saisonWeekMap;}
     QMap<QDate,QPair<QString,QString>> *get_weekPhaseMap() {return &weekPhaseMap;}
+    QQueue<QDate> changedDays;
+
 
     void init_scheduleData();
     void save_workouts(bool);

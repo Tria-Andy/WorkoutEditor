@@ -34,10 +34,9 @@ private slots:
     void on_toolButton_delete_clicked();
     void on_comboBox_drinks_currentIndexChanged(const QString &arg1);
     void on_listWidget_drinks_itemClicked(QListWidgetItem *item);
-
     void on_toolButton_up_clicked();
-
     void on_toolButton_down_clicked();
+    void on_toolButton_reset_clicked();
 
 private:
     Ui::Dialog_nutrition *ui;

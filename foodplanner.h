@@ -17,7 +17,7 @@ public:
     QStandardItemModel *foodPlanModel,*summeryModel,*recipeModel,*ingredModel,*drinkModel;
     QSortFilterProxyModel *foodProxy,*sumProxy;
 
-    QStringList *menuHeader,*foodPlanTags,*foodHistTags,*foodsumHeader,*foodestHeader,*foodhistHeader,*ingredTags,*drinkTags;
+    QStringList *menuHeader,*foodPlanTags,*foodHistTags,*foodsumHeader,*foodweekHeader,*ingredTags,*drinkTags;
     QStringList planList,mealsHeader,dayHeader,dayListHeader;
 
     bool copyMap_hasData();
@@ -28,6 +28,7 @@ public:
     QString get_newRecipeID(QString);
     QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
     QStandardItem *get_modelItem(QStandardItemModel*,QString,int);
+    QStandardItemModel *get_foodModel(int modelID) {return modelMap.value(modelID);}
     QVector<double> get_foodMacros(QStandardItemModel*,QString);
     QPair<QDate,QString> get_copyMeal() {return copyMap;};
     QStringList get_modelSections(QStandardItemModel*);
@@ -36,13 +37,14 @@ public:
     QMap<QString,QList<QDate>> get_recipeMap(QString recipeID) {return recipeMap.value(recipeID);}
     QStandardItem *get_proxyItem(int);
     int get_slideValue(QDate day) {return slideMap.value(day).second;}
+    QPair<double,double> get_estimateWeight(QDate date){return estWeightMap.value(date);}
 
     void update_foodPlanModel(QDate,QString,QMap<int,QList<QStandardItem*>>);
     void update_ingredient(QString,QString,QVector<double>,int);
     void add_ingredient(QString, QString,QVector<double>,int);
 
     void set_currentWeek(QDate);
-    void update_fromSchedule(QDate);
+    void update_fromSchedule();
     void update_byPalChange();
     void fill_copyMap(QDate,QString,bool);
     void execute_copy(QDate,bool);
@@ -55,7 +57,7 @@ public:
     void save_recipeList();
     void save_ingredList(int);
     void update_foodMode(QDate,QString);
-    void edit_mealSection(QString,int);
+    void add_foodSection(QString,int);
     void insert_newWeek(QDate);
     void remove_week(QString);
 
@@ -69,6 +71,8 @@ private:
     QQueue<QPair<QDate,QString>> copyQueue;
     QPair<QDate,QString> copyMap;
     QMap<QDate,QPair<int,int>> slideMap;
+    QMap<QDate,QPair<double,double>> estWeightMap;
+    QMap<int,QStandardItemModel*> modelMap;
     QMap<QString,QMap<QString,QList<QDate>>> recipeMap;
     QPair<QDate,QString> dragDrop;
     QMap<QDate,QPair<QString,QVector<int>>> historyMap;

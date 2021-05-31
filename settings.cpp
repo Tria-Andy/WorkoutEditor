@@ -520,13 +520,14 @@ int settings::loadSettings()
                 settings::fill_mapColor(&settingList,&settingString,true);
                 settingList.clear();
 
-                settingList = myvalues->value("dish").toString().split(splitter);
-                listMap.insert("Dish",settingList);
+                settingList = myvalues->value("foodtags").toString().split(splitter);
+                listMap.insert("foodtags",settingList);
                 settingList.clear();
                 doubleMap.insert("DayFiber",myvalues->value("fiber").toDouble());
                 doubleMap.insert("DaySugar",myvalues->value("sugar").toDouble());
                 doubleMap.insert("Macrorange",myvalues->value("macrorange").toDouble());
                 doubleMap.insert("keephistory",myvalues->value("keephistory").toDouble());
+                intMap.insert("savehistory",myvalues->value("savehistory").toInt());
                 athleteMap.insert("BodyFatCal",myvalues->value("fatcal").toDouble());
                 settingList = myvalues->value("palday").toString().split(splitter);
                 doubleVector.insert("palday",set_doubleValues(&settingList));

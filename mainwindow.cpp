@@ -194,13 +194,13 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tableWidget_foodPlan->installEventFilter(this);
         ui->tableWidget_foodPlan->viewport()->installEventFilter(this);
 
-        this->set_tableWidgetItems(ui->tableWidget_daySum,5,foodPlan->dayHeader.count(),&foodSumDay_del);
+        this->set_tableWidgetItems(ui->tableWidget_daySum,6,foodPlan->dayHeader.count(),&foodSumDay_del);
         this->set_tableHeader(ui->tableWidget_daySum,foodPlan->foodsumHeader,true);
         ui->tableWidget_daySum->verticalHeader()->setFixedWidth(110);
         ui->tableWidget_daySum->horizontalHeader()->hide();
 
-        this->set_tableWidgetItems(ui->tableWidget_weekSum,5,1,&foodSumWeek_del);
-        this->set_tableHeader(ui->tableWidget_weekSum,foodPlan->foodsumHeader,true);
+        this->set_tableWidgetItems(ui->tableWidget_weekSum,foodPlan->foodweekHeader->count(),1,&foodSumWeek_del);
+        this->set_tableHeader(ui->tableWidget_weekSum,foodPlan->foodweekHeader,true);
         ui->tableWidget_weekSum->horizontalHeader()->hide();
 
         QStringList headerItems;
@@ -238,10 +238,6 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->comboBox_weightmode->blockSignals(false);
         //ui->spinBox_calories->setVisible(false);
         //ui->spinBox_portFactor->setVisible(false);
-
-        this->set_tableWidgetItems(ui->tableWidget_forecast,foodPlan->foodestHeader->count(),1,nullptr);
-        this->set_tableHeader(ui->tableWidget_forecast,foodPlan->foodestHeader,true);
-        ui->tableWidget_forecast->horizontalHeader()->hide();
 
         ui->toolButton_menuCopy->setEnabled(false);
         ui->toolButton_menuPaste->setEnabled(false);
@@ -440,25 +436,26 @@ void MainWindow::fill_foodPlanTable(QDate startDate)
 void MainWindow::fill_foodSumTable(QDate startDate)
 {
     QStandardItem *weekItem;
-    QPair<double,double> minMax;
+    QPair<double,double> minMax,calcWeight;
 
     QString mode = foodPlan->get_mode(startDate);
     minMax.first = settings::doubleVector.value(mode).at(2)/100.0;
     minMax.second = settings::doubleVector.value(mode).at(1)/100.0;
     QVector<double> weekValues(5,0);
-    double currentWeight = settings::get_weightforDate(firstdayofweek.startOfDay());
     double weightLoss = 0;
-    double avgCal = 0;
-    double avgConvers = 0;
     int sumCal = 0;
     double slideSum = 0;
+    double dayDiff = 0;
 
     weekItem = foodPlan->get_proxyItem(1);
 
     for(int day = 0; day < weekItem->rowCount(); ++day)
     {
         sumCal = weekItem->child(day,0)->data(Qt::UserRole+3).toInt();
+        dayDiff = weekItem->child(day,0)->data(Qt::UserRole+4).toInt();
         slideSum = foodPlan->get_slideValue(startDate.addDays(day));
+        calcWeight = foodPlan->get_estimateWeight(startDate.addDays(day));
+
         for(int cal = 0; cal < weekValues.count(); ++cal)
         {
             weekValues[cal] = weekValues.at(cal) + weekItem->child(day,0)->data(Qt::UserRole+cal).toDouble();
@@ -467,34 +464,45 @@ void MainWindow::fill_foodSumTable(QDate startDate)
             {
                 ui->tableWidget_daySum->item(cal,day)->setData(Qt::DisplayRole,weekItem->child(day,0)->data(Qt::UserRole+cal).toInt());
                 ui->tableWidget_daySum->item(cal,day)->setData(Qt::UserRole,mode);
-
-                ui->tableWidget_weekSum->item(cal,0)->setData(Qt::DisplayRole,weekValues.at(cal));
-                ui->tableWidget_weekSum->item(cal,0)->setData(Qt::UserRole,mode);
             }
             else
             {
-                ui->tableWidget_daySum->item(cal,day)->setData(Qt::DisplayRole,QString::number(slideSum)+" - " +QString::number(weekItem->child(day,0)->data(Qt::UserRole+4).toInt()));
+                ui->tableWidget_daySum->item(cal,day)->setData(Qt::DisplayRole,QString::number(slideSum)+" - " +QString::number(round(dayDiff)));
                 ui->tableWidget_daySum->item(cal,day)->setData(Qt::UserRole,mode);
                 ui->tableWidget_daySum->item(cal,day)->setData(Qt::UserRole+1,slideSum);
                 ui->tableWidget_daySum->item(cal,day)->setData(Qt::UserRole+2,weekItem->child(day,0)->data(Qt::UserRole+4).toInt());
-                ui->tableWidget_daySum->item(cal,day)->setData(Qt::ToolTipRole,"Range: "+QString::number(round(sumCal * minMax.first))+"-"+QString::number(round(sumCal * minMax.second)));
-
-                ui->tableWidget_weekSum->item(cal,0)->setData(Qt::DisplayRole,weekValues.at(cal));
-                ui->tableWidget_weekSum->item(cal,0)->setData(Qt::UserRole,mode);
-                ui->tableWidget_weekSum->item(cal,0)->setData(Qt::ToolTipRole,"Range: "+QString::number(round(weekValues.at(3) * minMax.first))+"-"+QString::number(round(weekValues.at(3) * minMax.second)));
+                ui->tableWidget_daySum->item(cal,day)->setData(Qt::ToolTipRole,"Range: "+QString::number(round(sumCal * minMax.first))+" - "+QString::number(round(sumCal * minMax.second)));
             }
         }
+        ui->tableWidget_daySum->item(5,day)->setData(Qt::DisplayRole,QString::number(set_doubleValue(calcWeight.first,false))+" -> "+QString::number(set_doubleValue(calcWeight.second,false)));
     }
-    weightLoss = set_doubleValue(weekValues.at(4) / athleteValues->value("BodyFatCal") / 1000.0,true)*-1;
-    avgCal = round(weekValues.at(0)/7);
-    avgConvers = round(weekValues.at(3)/7);
 
-    ui->tableWidget_forecast->item(0,0)->setData(Qt::DisplayRole,QString::number(currentWeight)+" kg");
-    ui->tableWidget_forecast->item(1,0)->setData(Qt::DisplayRole,QString::number(avgCal)+" Cal");
-    ui->tableWidget_forecast->item(2,0)->setData(Qt::DisplayRole,QString::number(avgConvers)+" Cal");
-    ui->tableWidget_forecast->item(3,0)->setData(Qt::DisplayRole,QString::number(avgConvers-avgCal)+" Cal");
-    ui->tableWidget_forecast->item(4,0)->setData(Qt::DisplayRole,QString::number(weightLoss)+" kg");
-    ui->tableWidget_forecast->item(5,0)->setData(Qt::DisplayRole,QString::number(set_doubleValue(currentWeight+weightLoss,false))+" kg");
+    weightLoss = set_doubleValue(weekValues.at(4) / athleteValues->value("BodyFatCal") / 1000.0,true)*-1;
+    double weekAvg = round(weekValues.at(3) / weekDays);
+
+    ui->tableWidget_weekSum->item(0,0)->setData(Qt::DisplayRole,QString::number(set_doubleValue(foodPlan->get_estimateWeight(startDate.addDays(-1)).second,false)));
+    ui->tableWidget_weekSum->item(0,0)->setData(Qt::UserRole,mode);
+    ui->tableWidget_weekSum->item(1,0)->setData(Qt::DisplayRole,QString::number(weekValues.at(0)));
+    ui->tableWidget_weekSum->item(1,0)->setData(Qt::UserRole,mode);
+    ui->tableWidget_weekSum->item(2,0)->setData(Qt::DisplayRole,QString::number(round(weekValues.at(0) / weekDays)));
+    ui->tableWidget_weekSum->item(2,0)->setData(Qt::UserRole,mode);
+    ui->tableWidget_weekSum->item(3,0)->setData(Qt::DisplayRole,QString::number(weekValues.at(1)));
+    ui->tableWidget_weekSum->item(3,0)->setData(Qt::UserRole,mode);
+    ui->tableWidget_weekSum->item(4,0)->setData(Qt::DisplayRole,QString::number(weekValues.at(2)));
+    ui->tableWidget_weekSum->item(4,0)->setData(Qt::UserRole,mode);
+    ui->tableWidget_weekSum->item(5,0)->setData(Qt::DisplayRole,QString::number(weekAvg));
+    ui->tableWidget_weekSum->item(5,0)->setData(Qt::UserRole,mode);
+    ui->tableWidget_weekSum->item(6,0)->setData(Qt::DisplayRole,QString::number(weekValues.at(3)));
+    ui->tableWidget_weekSum->item(6,0)->setData(Qt::UserRole,mode);
+    ui->tableWidget_weekSum->item(7,0)->setData(Qt::DisplayRole,QString::number(weekValues.at(4)));
+    ui->tableWidget_weekSum->item(7,0)->setData(Qt::UserRole,mode);
+    ui->tableWidget_weekSum->item(7,0)->setData(Qt::ToolTipRole,"Range: "+QString::number(round(weekValues.at(3) * minMax.first))+" - "+QString::number(round(weekValues.at(3) * minMax.second)));
+    ui->tableWidget_weekSum->item(8,0)->setData(Qt::DisplayRole,QString::number(round((weekValues.at(4) / weekDays)*-1)));
+    ui->tableWidget_weekSum->item(8,0)->setData(Qt::UserRole,mode);
+    ui->tableWidget_weekSum->item(8,0)->setData(Qt::ToolTipRole,"Range: "+QString::number(round(weekAvg * minMax.first))+" - "+QString::number(round(weekAvg * minMax.second)));
+    ui->tableWidget_weekSum->item(9,0)->setData(Qt::DisplayRole,QString::number(weightLoss));
+    ui->tableWidget_weekSum->item(9,0)->setData(Qt::UserRole,mode);
+    ui->tableWidget_weekSum->item(10,0)->setData(Qt::DisplayRole,QString::number(set_doubleValue(foodPlan->get_estimateWeight(startDate.addDays(6)).second,false)));
 }
 
 void MainWindow::fill_foodPlanList(bool newWeek,int setIndex)
@@ -518,14 +526,6 @@ void MainWindow::fill_foodPlanList(bool newWeek,int setIndex)
         item->setData(Qt::AccessibleDescriptionRole,foodPlan->foodPlanModel->item(week,2)->data(Qt::DisplayRole).toString());
         item->setData(Qt::UserRole,firstDay);
 
-        if(foodPlan->foodPlanModel->item(week,1)->data(Qt::DisplayRole).toDate() == firstdayofweek)
-        {
-            item->setData(Qt::UserRole+1,athleteValues->value("weight"));
-        }
-        else
-        {
-            item->setData(Qt::UserRole+1,foodPlan->foodPlanModel->item(week,3)->data(Qt::DisplayRole).toString().toDouble());
-        }
         ui->listWidget_weekPlans->addItem(item);
     }
 
@@ -785,9 +785,7 @@ QString MainWindow::set_summeryString(int counter, QMap<QString,QVector<double>>
     QString valueString = sport;
     uint weekComp = static_cast<uint>(summery->value(generalValues->value("sum")).at(1));
     double sportComp = summery->value(sport).at(1);
-    double avgValue = weekComp/weekComp;
-
-    avgValue = sportComp / weekComp;
+    double avgValue = sportComp/weekComp;
 
     for(int i = 0; i < counter; ++i)
     {
@@ -828,7 +826,7 @@ void MainWindow::workoutSchedule(QDate date)
             if(col == 0)
             {
                 weekInfo = workSchedule->get_weekScheduleMeta(calc_weekID(date.addDays(dayCounter)));
-                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(1) + delimiter + weekInfo.at(2) + delimiter + weekInfo.at(3);
+                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(1) + delimiter + weekInfo.at(2) + delimiter + weekInfo.at(3)+" - ("+QString::number(set_doubleValue(foodPlan->get_estimateWeight(date.addDays(dayCounter)).second,false))+")";
                 item->setData(Qt::UserRole,weekInfo.at(0));
             }
             else
@@ -897,10 +895,12 @@ void MainWindow::set_saisonValues(QStringList *sportList,QString weekID, int wee
     }
 
     QTableWidgetItem *sumItem = new QTableWidgetItem();
+
     for(int sum = 0; sum < sumValues.count(); ++sum)
     {
         itemValue = itemValue + QString::number(sumValues.at(sum)) + delimiter;
     }
+
     itemValue.chop(1);
     sumItem->setData(Qt::EditRole,itemValue);
     itemValue.clear();
@@ -1079,11 +1079,7 @@ void MainWindow::set_phaseButtons()
 void MainWindow::refresh_saisonInfo()
 {
     ui->comboBox_saisonName->clear();
-
-    for(int i = 0; i < saisonValues->keys().count(); ++i)
-    {
-        ui->comboBox_saisonName->addItem(saisonValues->keys().at(i));
-    }
+    ui->comboBox_saisonName->addItems(saisonValues->keys());
     ui->comboBox_saisonName->setEnabled(false);
 }
 
@@ -2735,12 +2731,12 @@ void MainWindow::set_selectedMeals(QTreeWidgetItem *listItem)
     bool addnew = true;
     double portion = listItem->data(1,Qt::DisplayRole).toInt();
 
-    if(portion == 0)
+    if(portion <= 0)
     {
         ui->doubleSpinBox_portion->setRange(0.0,0.0);
         ui->doubleSpinBox_portion->setSingleStep(0.00);
     }
-    if(portion == 1.0 && portion < 10.0)
+    if(portion >= 0.0 && portion < 10.0)
     {
         ui->doubleSpinBox_portion->setRange(0.0,50.0);
         ui->doubleSpinBox_portion->setSingleStep(0.05);
@@ -3294,6 +3290,7 @@ void MainWindow::on_tableWidget_schedule_itemClicked(QTableWidgetItem *item)
         {
            this->refresh_schedule();
            ui->actionSave->setEnabled(workSchedule->get_isUpdated());
+           foodPlan->update_fromSchedule();
         }
     }
     else
@@ -3308,7 +3305,7 @@ void MainWindow::on_tableWidget_schedule_itemClicked(QTableWidgetItem *item)
             ui->actionSave->setEnabled(workSchedule->get_isUpdated());
             if(foodPlan->check_foodDay(selectedDate))
             {
-                foodPlan->update_fromSchedule(selectedDate);
+                foodPlan->update_fromSchedule();
             }
         }
     }

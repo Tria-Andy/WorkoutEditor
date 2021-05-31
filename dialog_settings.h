@@ -94,7 +94,6 @@ private slots:
     void on_toolButton_colorhigh_clicked();
     void on_toolButton_colorlow_clicked();
     void on_toolButton_colormin_clicked();
-    void on_comboBox_food_currentIndexChanged(const QString &arg1);
     void on_listWidget_food_itemClicked(QListWidgetItem *item);
     void on_toolButton_mealAdd_clicked();
     void on_toolButton_mealDelete_clicked();
@@ -112,6 +111,7 @@ private slots:
     void on_comboBox_contestsport_currentIndexChanged(const QString &arg1);
     void on_comboBox_contestdist_currentIndexChanged(const QString &arg1);
     void on_treeWidget_stressValue_itemClicked(QTreeWidgetItem *item, int column);
+    void on_comboBox_food_currentIndexChanged(int index);
 
 private:
     Ui::Dialog_settings *ui;

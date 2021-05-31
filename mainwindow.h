@@ -77,7 +77,7 @@ public:
         phase_font.setBold(true);
         phase_font.setPixelSize(settings::get_fontValue("fontBig"));
         content_font.setBold(false);
-        content_font.setPixelSize(settings::get_fontValue("fontSmall"));
+        content_font.setPixelSize(settings::get_fontValue("fontMedium")-1);
         date_font.setBold(true);
         date_font.setPixelSize(settings::get_fontValue("fontMedium"));
         work_font.setBold(false);
@@ -827,6 +827,13 @@ public:
                 gradColor = colorMap.value(0).second;
             }
         }
+        else if(index.row() == 5)
+        {
+            itemColor.setHsv(215,200,200,255);
+            painter->setPen(Qt::black);
+        }
+
+
         itemGradient.setColorAt(0,gradColor);
         itemGradient.setColorAt(1,itemColor);
         painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
@@ -884,21 +891,27 @@ public:
         painter->setFont(foodFont);
 
         QVector<double> percent = settings::doubleVector.value(index.data(Qt::UserRole).toString());
-        int weekCal = index.model()->data(index.model()->index(3,index.column())).toInt();
+        int weekCal = index.model()->data(index.model()->index(6,index.column())).toInt();
+        int avgDiff = index.model()->data(index.model()->index(5,index.column())).toInt();
 
         gradColor.setHsv(0,0,200,150);
 
         if(index.row() == 0)
         {
+            itemColor.setHsv(215,200,200,255);
+            painter->setPen(Qt::black);
+        }
+        else if(index.row() == 1 || index.row() == 2)
+        {
             itemColor.setHsv(200,150,255,255);
             painter->setPen(Qt::black);
         }
-        else if(index.row() > 0 && index.row() < 4)
+        else if((index.row() > 2 && index.row() < 7))
         {
             itemColor.setHsv(240,255,255,255);
             painter->setPen(Qt::white);
         }
-        else if(index.row() == 4)
+        else if(index.row() == 7)
         {
             if(index.data().toInt() >= (weekCal*(percent.at(0)/100.0)))
             {
@@ -921,6 +934,35 @@ public:
                 painter->setPen(Qt::black);
             }
         }
+        else if(index.row() == 8)
+        {
+            if((index.data().toInt()*-1) >= (avgDiff*(percent.at(0)/100.0)))
+            {
+                itemColor = settings::get_itemColor("max").toHsv();
+                painter->setPen(Qt::black);
+            }
+            if((index.data().toInt()*-1) < (avgDiff*(percent.at(0)/100.0)) && (index.data().toInt()*-1) > (avgDiff*(percent.at(1)/100.0)))
+            {
+                itemColor = settings::get_itemColor("high").toHsv();
+                painter->setPen(Qt::black);
+            }
+            if((index.data().toInt()*-1) <= (avgDiff*(percent.at(1)/100.0)) && (index.data().toInt()*-1) > (avgDiff*(percent.at(2)/100.0)))
+            {
+                itemColor = settings::get_itemColor("low").toHsv();
+                painter->setPen(Qt::black);
+            }
+            if((index.data().toInt()*-1) <= (avgDiff*(percent.at(2)/100.0)))
+            {
+                itemColor = settings::get_itemColor("min").toHsv();
+                painter->setPen(Qt::black);
+            }
+        }
+        else if((index.row() > 8 || index.row() == 10))
+        {
+            itemColor.setHsv(215,200,200,255);
+            painter->setPen(Qt::black);
+        }
+
         itemGradient.setColorAt(0,gradColor);
         itemGradient.setColorAt(1,itemColor);
         painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);

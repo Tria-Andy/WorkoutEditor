@@ -282,7 +282,7 @@ void schedule::calc_pmcPlot(QDate rangeStart,bool currWeek, int extWeek)
 
     int day = 0;
 
-    for(QMap<QDate,QVector<double>>::const_iterator stressStart = stressMap.find(rangeStart.addDays(-1)), end = stressMap.find(rangeStart.addDays(plotRange)); stressStart != end; ++stressStart)
+    for(QMap<QDate,QVector<double>>::iterator stressStart = stressMap.find(rangeStart.addDays(-1)), end = stressMap.find(rangeStart.addDays(plotRange)); stressStart != end; ++stressStart)
     {
         startDate.setDate(stressStart.key());
         xDate[day] = startDate.toTime_t() + 3600;
@@ -388,7 +388,6 @@ void schedule::calc_compPlot(int plotCount, QDate startDate, QString sport)
     QVector<double> yDura(plotCount,0);
     QVector<double> yDist(plotCount,0);
     QVector<double> yWorks(plotCount,0);
-    QVector<double> yValues(plotCount,0);
 
     QString weekID;
     QMap<QString,QVector<double>> compValues;
@@ -714,7 +713,7 @@ void schedule::save_ltsFile()
     int ltsDays = settings::get_intValue("ltsdays")+1;
     mapList.clear();
 
-    for(QMap<QDate,QVector<double>>::const_iterator it = stressMap.find(firstdayofweek.addDays(-ltsDays)), end = stressMap.find(firstdayofweek.addDays(7)); it != end; ++it)
+    for(QMap<QDate,QVector<double>>::iterator it = stressMap.find(firstdayofweek.addDays(-ltsDays)), end = stressMap.find(firstdayofweek.addDays(7)); it != end; ++it)
     {
         listValues << it.key().toString(dateFormat);
         for(int value = 0; value < it.value().count(); ++value)
@@ -772,7 +771,6 @@ void schedule::check_workouts(QDate date)
     //Read Contest/Races
     index = this->get_modelIndex(scheduleModel,dateString,0);
     QStandardItem *dayItem = scheduleModel->itemFromIndex(index);
-    QString workTime;
 
     if(dayItem->hasChildren())
     {
@@ -848,7 +846,6 @@ void schedule::remove_WeekofPast(QDate dayOfWeek)
 
 void schedule::set_workoutData()
 {
-    QString workoutStress;
     QModelIndex dayIndex;
     QStandardItem *dayItem = nullptr;
 
@@ -857,7 +854,6 @@ void schedule::set_workoutData()
         dayIndex = this->get_modelIndex(scheduleModel,it.key().toString(dateFormat),0);
         dayItem = scheduleModel->itemFromIndex(dayIndex);
         scheduleModel->removeRows(0,dayItem->rowCount(),dayIndex);
-        this->set_compValues(true,it.key(),it.value());
 
         for(QMap<int,QStringList>::const_iterator vit = it.value().cbegin(), vend = it.value().cend(); vit != vend; ++vit)
         { 
@@ -871,6 +867,8 @@ void schedule::set_workoutData()
             this->update_linkedWorkouts(it.key(),vit.value().last(),vit.key(),true);
             dayItem->appendRow(itemList);
         }
+        changedDays.enqueue(it.key());
+        this->set_compValues(true,it.key(),it.value());
     }
     workoutUpdates.clear();
     isUpdated = true;

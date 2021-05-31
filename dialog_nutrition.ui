@@ -805,7 +805,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>200</width>
            <height>0</height>
           </size>
          </property>
@@ -887,6 +887,12 @@
                 </property>
                 <item>
                  <widget class="QToolButton" name="toolButton_addIngred">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>...</string>
                   </property>
@@ -907,6 +913,12 @@
                 </item>
                 <item>
                  <widget class="QToolButton" name="toolButton_edit">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>...</string>
                   </property>
@@ -919,6 +931,42 @@
                     <width>18</width>
                     <height>18</height>
                    </size>
+                  </property>
+                  <property name="autoRaise">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="Line" name="line_3">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="toolButton_reset">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resources.qrc">
+                    <normaloff>:/images/icons/Cancel.png</normaloff>:/images/icons/Cancel.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>18</width>
+                    <height>18</height>
+                   </size>
+                  </property>
+                  <property name="shortcut">
+                   <string>Ctrl+S</string>
                   </property>
                   <property name="autoRaise">
                    <bool>true</bool>
@@ -947,7 +995,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>119</width>
+                  <width>169</width>
                   <height>94</height>
                  </rect>
                 </property>
@@ -983,7 +1031,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>119</width>
+                  <width>169</width>
                   <height>94</height>
                  </rect>
                 </property>

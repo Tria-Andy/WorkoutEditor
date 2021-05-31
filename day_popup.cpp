@@ -72,7 +72,6 @@ day_popup::~day_popup()
 void day_popup::init_dayWorkouts(QDate workDate)
 {
     ui->tableWidget_day->clear();
-    QString viewBackground = "background-color: #e6e6e6";
     QString workoutDate = workDate.toString(workSchedule->dateFormat);
 
     workoutMap = workSchedule->get_workouts(true,workoutDate);

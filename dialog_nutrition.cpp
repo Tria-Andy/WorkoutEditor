@@ -195,6 +195,8 @@ void Dialog_nutrition::on_toolButton_add_clicked()
     this->clear_ingredValues();
     ui->toolButton_addIngred->setVisible(true);
     ui->toolButton_edit->setVisible(false);
+
+    if(ui->treeWidget_recipe->invisibleRootItem()->childCount() > 0) ui->toolButton_clear->setEnabled(true);
 }
 
 void Dialog_nutrition::on_doubleSpinBox_portion_valueChanged(double value)
@@ -257,7 +259,7 @@ void Dialog_nutrition::update_ingredientModel(bool addNew,int listID)
         sourceBox = ui->comboBox_ingredients;
         foodList = ui->listWidget_ingredients;
     }
-    if(listID == DRINK)
+    else if(listID == DRINK)
     {
        sourceBox = ui->comboBox_drinks;
        foodList = ui->listWidget_drinks;
@@ -276,7 +278,6 @@ void Dialog_nutrition::update_ingredientModel(bool addNew,int listID)
     if(addNew)
     {
         foodPlan->add_ingredient(sourceBox->currentText(),ui->lineEdit_foodName->text(),foodValues,listID+1);
-        this->set_listItems(modelMap.value(listID),foodList,sourceBox->currentText());
     }
     else
     {
@@ -286,6 +287,7 @@ void Dialog_nutrition::update_ingredientModel(bool addNew,int listID)
     foodPlan->save_ingredList(listID);
 
     this->clear_ingredValues();
+    this->set_listItems(modelMap.value(listID),foodList,sourceBox->currentText());
     foodUpdated = true;
 }
 
@@ -420,8 +422,10 @@ void Dialog_nutrition::on_toolButton_delete_clicked()
     ui->treeWidget_recipe->invisibleRootItem()->removeChild(ui->treeWidget_recipe->currentItem());
     ui->treeWidget_recipe->clearSelection();
     ui->toolButton_add->setVisible(true);
-     ui->toolButton_update->setVisible(false);
+    ui->toolButton_update->setVisible(false);
     this->clear_ingredValues();
+
+    if(ui->treeWidget_recipe->invisibleRootItem()->childCount() == 0) ui->toolButton_clear->setEnabled(false);
 }
 
 QTreeWidgetItem* Dialog_nutrition::move_item(int movement)
@@ -444,3 +448,11 @@ void Dialog_nutrition::on_toolButton_down_clicked()
 {
     ui->treeWidget_recipe->setCurrentItem(this->move_item(1));
 }
+
+void Dialog_nutrition::on_toolButton_reset_clicked()
+{
+    this->clear_ingredValues();
+    ui->toolButton_add->setVisible(true);
+    ui->toolButton_update->setVisible(false);
+}
+

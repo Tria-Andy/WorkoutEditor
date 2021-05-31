@@ -61,8 +61,7 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->pushButton_clearContest->setEnabled(false);
     ui->pushButton_delContest->setEnabled(false);
     ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
-    ui->comboBox_food->addItem("Dish");
-    ui->comboBox_food->addItem("Meals");
+    ui->comboBox_food->addItems(listMap.value("foodtags"));
     ui->pushButton_save->setEnabled(false);
     ui->dateEdit_stress->setDate(QDate::currentDate().addDays(1-QDate::currentDate().dayOfWeek()));
     ui->label_watttospeed->setVisible(false);
@@ -1184,12 +1183,11 @@ void Dialog_settings::on_toolButton_colormin_clicked()
     this->set_bottonColor(ui->toolButton_colormin,true);
 }
 
-void Dialog_settings::on_comboBox_food_currentIndexChanged(const QString &value)
+void Dialog_settings::on_comboBox_food_currentIndexChanged(int index)
 {
     ui->listWidget_food->clear();
-    ui->listWidget_food->addItems(listMap.value(value));
+    ui->listWidget_food->addItems(food_ptr->get_modelSections(food_ptr->get_foodModel(index)));
 }
-
 
 void Dialog_settings::on_listWidget_food_itemClicked(QListWidgetItem *item)
 {
@@ -1201,10 +1199,7 @@ void Dialog_settings::on_listWidget_food_itemClicked(QListWidgetItem *item)
 void Dialog_settings::on_toolButton_mealAdd_clicked()
 {
     ui->listWidget_food->addItem(ui->lineEdit_mealEdit->text());
-    QStringList tempList = listMap.value(ui->comboBox_food->currentText());
-    tempList.append(ui->lineEdit_mealEdit->text());
-    listMap.insert(ui->comboBox_food->currentText(),tempList);
-    //food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),ADD);
+    food_ptr->add_foodSection(ui->lineEdit_mealEdit->text(),ui->comboBox_food->currentIndex());
     ui->lineEdit_mealEdit->clear();
     this->enableSavebutton();
 }
@@ -1212,7 +1207,6 @@ void Dialog_settings::on_toolButton_mealAdd_clicked()
 void Dialog_settings::on_toolButton_mealDelete_clicked()
 {
     QListWidgetItem *item = ui->listWidget_food->takeItem(ui->listWidget_food->currentRow());
-    //food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),DEL);
     ui->lineEdit_mealEdit->clear();
     delete item;
 
@@ -1223,21 +1217,13 @@ void Dialog_settings::on_toolButton_mealDelete_clicked()
     }
     listMap.insert(ui->comboBox_food->currentText(),tempList);
     this->enableSavebutton();
-
 }
 
 void Dialog_settings::on_toolButton_mealEdit_clicked()
 {
     QListWidgetItem *item = ui->listWidget_food->currentItem();
     item->setData(Qt::EditRole,ui->lineEdit_mealEdit->text());
-    food_ptr->edit_mealSection(ui->lineEdit_mealEdit->text(),EDIT);
     ui->lineEdit_mealEdit->clear();
-    QStringList tempList;
-    for(int i = 0; i < ui->listWidget_food->count(); ++i)
-    {
-        tempList.append(ui->listWidget_food->item(i)->data(Qt::DisplayRole).toString());
-    }
-    listMap.insert(ui->comboBox_food->currentText(),tempList);
     this->enableSavebutton();
 }
 
