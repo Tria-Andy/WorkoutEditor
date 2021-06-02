@@ -47,7 +47,6 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
     ui->comboBox_cycle->addItems(settings::get_listValues("Cycle"));
     ui->comboBox_program->addItems(settings::get_listValues("Program"));
     ui->comboBox_cardio->addItems(settings::get_listValues("Cardio"));
-    ui->comboBox_goal->addItems(settings::get_listValues("Mode"));
     weekMeta = workSched->get_weekMeta(selected_week);
     weekMeta = workSched->get_weekScheduleMeta(selected_week);
 
@@ -55,8 +54,7 @@ Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedul
     ui->comboBox_cycle->setCurrentText(weekMeta.at(1).split("_").last());
     ui->comboBox_program->setCurrentText(weekMeta.at(2).split(" - ").first());
     ui->comboBox_cardio->setCurrentText(weekMeta.at(2).split(" - ").last());
-    ui->comboBox_goal->setCurrentText(weekMeta.at(3).split(" ").first());
-    ui->doubleSpinBox_weight->setValue(weekMeta.at(3).split(" ").last().split("kg").first().toDouble());
+    ui->doubleSpinBox_weight->setValue(weekMeta.at(3).toDouble());
     ui->comboBox_copyto->setEnabled(false);
 
     editMode = 0;
@@ -81,7 +79,7 @@ void Dialog_week_copy::on_pushButton_ok_clicked()
     {
         weekMeta[1] = ui->comboBox_phase->currentText() +"_"+ ui->comboBox_cycle->currentText();
         weekMeta[2] = ui->comboBox_program->currentText()+" - "+ui->comboBox_cardio->currentText();
-        weekMeta[3] = ui->comboBox_goal->currentText()+ " "+QString::number(ui->doubleSpinBox_weight->value())+"kg";
+        weekMeta[3] = QString::number(ui->doubleSpinBox_weight->value());
 
         workSched->set_weekScheduleMeta(weekMeta);
         accept();

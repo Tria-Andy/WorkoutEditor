@@ -193,8 +193,6 @@ void Dialog_nutrition::on_toolButton_add_clicked()
     newItem->setData(7,Qt::DisplayRole,ui->doubleSpinBox_sugar->value());
     this->calc_recipeValues();
     this->clear_ingredValues();
-    ui->toolButton_addIngred->setVisible(true);
-    ui->toolButton_edit->setVisible(false);
 
     if(ui->treeWidget_recipe->invisibleRootItem()->childCount() > 0) ui->toolButton_clear->setEnabled(true);
 }
@@ -241,11 +239,10 @@ void Dialog_nutrition::on_toolButton_update_clicked()
     currItem->setData(5,Qt::DisplayRole,ui->doubleSpinBox_fat->value());
     currItem->setData(6,Qt::DisplayRole,ui->doubleSpinBox_fiber->value());
     currItem->setData(7,Qt::DisplayRole,ui->doubleSpinBox_sugar->value());
-    this->calc_recipeValues();
 
     ui->toolButton_update->setVisible(false);
     ui->toolButton_add->setVisible(true);
-
+    this->calc_recipeValues();
     this->clear_ingredValues();
 }
 
@@ -345,6 +342,9 @@ void Dialog_nutrition::clear_ingredValues()
     ui->doubleSpinBox_fat->clear();
     ui->doubleSpinBox_fiber->clear();
     ui->doubleSpinBox_sugar->clear();
+
+    ui->toolButton_addIngred->setVisible(true);
+    ui->toolButton_edit->setVisible(false);
 }
 
 
@@ -424,6 +424,7 @@ void Dialog_nutrition::on_toolButton_delete_clicked()
     ui->toolButton_add->setVisible(true);
     ui->toolButton_update->setVisible(false);
     this->clear_ingredValues();
+    this->calc_recipeValues();
 
     if(ui->treeWidget_recipe->invisibleRootItem()->childCount() == 0) ui->toolButton_clear->setEnabled(false);
 }
@@ -455,4 +456,3 @@ void Dialog_nutrition::on_toolButton_reset_clicked()
     ui->toolButton_add->setVisible(true);
     ui->toolButton_update->setVisible(false);
 }
-

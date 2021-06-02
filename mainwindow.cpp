@@ -826,7 +826,7 @@ void MainWindow::workoutSchedule(QDate date)
             if(col == 0)
             {
                 weekInfo = workSchedule->get_weekScheduleMeta(calc_weekID(date.addDays(dayCounter)));
-                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(1) + delimiter + weekInfo.at(2) + delimiter + weekInfo.at(3)+" - ("+QString::number(set_doubleValue(foodPlan->get_estimateWeight(date.addDays(dayCounter)).second,false))+")";
+                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(1) + delimiter + weekInfo.at(2) + delimiter + foodPlan->get_mode(date.addDays(dayCounter)) +" "+weekInfo.at(3)+"kg - ("+QString::number(set_doubleValue(foodPlan->get_estimateWeight(date.addDays(dayCounter)).second,false))+")";
                 item->setData(Qt::UserRole,weekInfo.at(0));
             }
             else
@@ -2474,7 +2474,11 @@ void MainWindow::on_actionIntervall_Editor_triggered()
 
     if(dialog_code == QDialog::Accepted)
     {
-        ui->actionSave->setEnabled(workSchedule->get_isUpdated());
+        if(workSchedule->get_isUpdated())
+        {
+            ui->actionSave->setEnabled(true);
+            foodPlan->update_fromSchedule();
+        }
     }
 }
 
@@ -3045,7 +3049,7 @@ void MainWindow::on_listWidget_menuEdit_itemClicked(QListWidgetItem *item)
 {
     int dataCount = item->data(Qt::UserRole).toInt();
 
-    ui->toolBox_foodSelect->setCurrentIndex(item->data(Qt::UserRole+(dataCount+1)).toInt());
+    ui->toolBox_foodSelect->setCurrentIndex(item->data(Qt::UserRole+dataCount).toInt());
     foodTree->setCurrentItem(foodTreeMap.value(item->data(Qt::AccessibleTextRole).toString()));
 
     this->set_selectedMeals(foodTree->currentItem());

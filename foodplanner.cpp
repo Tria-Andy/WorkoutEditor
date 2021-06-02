@@ -330,7 +330,10 @@ void foodplanner::update_fromSchedule()
         editDay = schedulePtr->changedDays.dequeue();
         weekID = calc_weekID(editDay);
         weekItem = this->get_modelItem(foodPlanModel,weekID,0);
-        this->update_summeryModel(editDay,weekItem->child(editDay.dayOfWeek()-1),false);
+        if(weekItem != nullptr)
+        {
+            this->update_summeryModel(editDay,weekItem->child(editDay.dayOfWeek()-1),false);
+        }
     }
 }
 

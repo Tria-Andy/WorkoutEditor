@@ -74,7 +74,7 @@ void calculation::set_currentSport(QString sport)
     {
         isAth = true;
         usePMData = true;
-        thresPower = static_cast<int>(thresValues->value("stgpower"));
+        thresPower = round((athleteValues->value("weight") * 9.81) * (thresValues->value("athfactor")));
         stressFactor = thresValues->value("athstress");
         workFactor = 1;
         thresPace = 0;

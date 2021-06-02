@@ -413,6 +413,7 @@ int settings::loadSettings()
                 thresholdMap.insert("swimfactor",myvalues->value("swimfactor").toDouble());
                 thresholdMap.insert("bikefactor",myvalues->value("bikefactor").toDouble());
                 thresholdMap.insert("wattfactor",myvalues->value("wattfactor").toDouble());
+                thresholdMap.insert("athfactor",myvalues->value("athfactor").toDouble());
                 thresholdMap.insert("runfactor",myvalues->value("runfactor").toDouble());
                 thresholdMap.insert("stgstress",myvalues->value("stgstress").toDouble());
                 thresholdMap.insert("athstress",myvalues->value("athstress").toDouble());
