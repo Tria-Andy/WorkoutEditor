@@ -68,8 +68,8 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->doubleSpinBox_watttospeed->setVisible(false);
 
     ui->lineEdit_age->setText(QString::number(QDate::currentDate().year() - athleteValues->value("yob")));
-    ui->lineEdit_weight->setText(QString::number(settings::get_weightforDate(QDateTime::currentDateTime())));
-    ui->lineEdit_currDayCal->setText(QString::number(current_dayCalories(QDateTime::currentDateTime())));
+    ui->lineEdit_weight->setText(QString::number(settings::get_weightforDate(QDate::currentDate())));
+    ui->lineEdit_currDayCal->setText(QString::number(current_dayCalories(QDate::currentDate())));
     ui->doubleSpinBox_bone->setValue(athleteValues->value("boneskg"));
     ui->doubleSpinBox_muscle->setValue(athleteValues->value("musclekg"));
     ui->doubleSpinBox_PALvalue->setValue(athleteValues->value("currpal"));
@@ -1025,7 +1025,7 @@ void Dialog_settings::on_pushButton_calcFat_clicked()
     ui->lineEdit_fatpercent->setText(QString::number(set_doubleValue(fatPercent,false)));
     ui->lineEdit_ffmi->setText(QString::number(set_doubleValue(ffmi,false)));
     athleteValues->insert("bodyfat",fatPercent);
-    ui->lineEdit_currDayCal->setText(QString::number(round(current_dayCalories(QDateTime::currentDateTime()) * ui->doubleSpinBox_PALvalue->value())));
+    ui->lineEdit_currDayCal->setText(QString::number(round(current_dayCalories(QDate::currentDate()) * ui->doubleSpinBox_PALvalue->value())));
 
     fatComment = QString::number(ui->spinBox_breast->value())+"-"+
                  QString::number(ui->spinBox_stomach->value())+"-"+
@@ -1152,7 +1152,7 @@ void Dialog_settings::on_toolButton_deleteSaison_clicked()
 
 void Dialog_settings::on_doubleSpinBox_PALvalue_valueChanged(double value)
 {
-    ui->lineEdit_currDayCal->setText(QString::number(round(current_dayCalories(QDateTime::currentDateTime()) * value)));
+    ui->lineEdit_currDayCal->setText(QString::number(round(current_dayCalories(QDate::currentDate()) * value)));
 }
 
 void Dialog_settings::on_comboBox_weightmode_currentIndexChanged(const QString &mode)

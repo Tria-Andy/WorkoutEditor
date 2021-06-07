@@ -71,7 +71,6 @@ void foodmacro_popup::set_plotValues(QDate startDate)
     subLayout->setMargins(QMargins(10,1,10,1));
     subLayout->addElement(0,0,ui->widget_plot->legend);
 
-    QString itemValue;
     QDateTime weekStart;
     QTime wTime;
     wTime.fromString("00:00:00","hh:mm:ss");

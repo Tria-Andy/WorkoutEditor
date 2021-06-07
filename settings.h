@@ -38,7 +38,7 @@ private:
 
     static QMap<int,QString> sampList,intList;
 
-    static QMap<int,double> weightMap;
+    static QMap<QDate,double> weightMap;
     static QHash<QString,QHash<QString,QString>> rangeMap;
     static QHash<QString,QMap<QString,int>> macroMap;
 
@@ -148,7 +148,7 @@ public:
     static void set_rangeValue(QString key,QHash<QString,QString> values) {rangeMap.insert(key,values);}
 
     //common functions
-    static double get_weightforDate(QDateTime);
+    static double get_weightforDate(QDate);
     static void writeListValues(QHash<QString,QStringList> *plist);
     static void autoSave() {settings::saveSettings();}
 };

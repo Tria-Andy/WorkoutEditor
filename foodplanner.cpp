@@ -180,7 +180,7 @@ void foodplanner::set_recipeList(QDate day, QString recipeID, QString section)
 {
     QMap<QString,QList<QDate>> recipeAt = recipeMap.value(recipeID);
     QList<QDate> atSection = recipeAt.value(section);
-    atSection.append(day);
+    atSection.append(day);    
     recipeAt.insert(section,atSection);
     recipeMap.insert(recipeID,recipeAt);
 }
@@ -457,7 +457,7 @@ QStandardItem *foodplanner::get_proxyItem(int id)
 void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isMeal)
 {
     const int minutes = 1440;
-    double calMinute = round(this->current_dayCalories(day.startOfDay()) * settings::doubleVector.value("palday").at(day.dayOfWeek()-1)) / minutes;
+    double calMinute = round(this->current_dayCalories(day) * settings::doubleVector.value("palday").at(day.dayOfWeek()-1)) / minutes;
     double sportMinutes = 0;
     QMap<QString,QVector<double>> sportValues = schedulePtr->get_compValues()->value(day);
 
@@ -500,26 +500,31 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
     sumValues[3] = sumValues.at(1) + sumValues.at(2);
     sumValues[4] = sumValues.at(3) - sumValues.at(0);
 
+    double currentWeight = settings::get_weightforDate(day);
+
     macroValues[0] = round(sumValues.at(3) * (settings::doubleVector.value("Macros").at(0) / 100.0) / 4.1);
     macroValues[1] = round(sumValues.at(3) * (settings::doubleVector.value("Macros").at(1) / 100.0) / 4.1);
     macroValues[2] = round(sumValues.at(3) * (settings::doubleVector.value("Macros").at(2) / 100.0) / 9.3);
-    macroValues[3] = ceil(athleteValues->value("weight") * (doubleValues->value("DayFiber") /100.0));
-    macroValues[4] = ceil(athleteValues->value("weight") * (doubleValues->value("DaySugar")));
+    macroValues[3] = ceil(currentWeight * (doubleValues->value("DayFiber") /100.0));
+    macroValues[4] = ceil(currentWeight * (doubleValues->value("DaySugar")));
 
-    QPair<double,double> weightChange;
-
-    weightChange.first = set_doubleValue(sumValues.at(4) / athleteValues->value("BodyFatCal") / 1000.0,true)*-1;
-    weightChange.second = settings::get_weightforDate(day.startOfDay());
-
-    estWeightMap.insert(day,weightChange);
-
-    if(estWeightMap.firstKey().daysTo(day) >= 1)
+    if(day.daysTo(firstdayofweek) <= 1)
     {
-        for(QMap<QDate,QPair<double,double>>::iterator it = estWeightMap.find(day); it != estWeightMap.end(); ++it)
+        QPair<double,double> weightChange;
+
+        weightChange.first = set_doubleValue(sumValues.at(4) / athleteValues->value("BodyFatCal") / 1000.0,true)*-1;
+        weightChange.second = currentWeight;
+
+        estWeightMap.insert(day,weightChange);
+
+        if(estWeightMap.firstKey().daysTo(day) >= 1)
         {
-            weightChange.second = estWeightMap.value(it.key().addDays(-1)).second + weightChange.first;
-            weightChange.first = it.value().first;
-            estWeightMap.insert(it.key(),weightChange);
+            for(QMap<QDate,QPair<double,double>>::iterator it = estWeightMap.find(day); it != estWeightMap.end(); ++it)
+            {
+                weightChange.second = estWeightMap.value(it.key().addDays(-1)).second + weightChange.first;
+                weightChange.first = it.value().first;
+                estWeightMap.insert(it.key(),weightChange);
+            }
         }
     }
 

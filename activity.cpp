@@ -469,7 +469,7 @@ void Activity::prepare_baseData()
     isIndoor = false;
     averageHeader.clear();
     activityHeader.clear();
-    actWeight = settings::get_weightforDate(QDateTime::fromString(activityInfo.value("Date"),"yyyy/MM/dd hh:mm:ss UTC").addSecs(QDateTime::currentDateTime().offsetFromUtc()));
+    actWeight = settings::get_weightforDate(QDate::fromString(activityInfo.value("Date"),"yyyy/MM/dd hh:mm:ss UTC"));
 
     this->set_activityHeader("averagepace",&averageHeader);
 

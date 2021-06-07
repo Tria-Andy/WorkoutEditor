@@ -316,7 +316,7 @@ double calculation::calc_totalWork(double pValue, double dura,int tempID) const
 {
     double factor = 1000.0;
     double grav = 9.81;
-    double weight = settings::get_weightforDate(QDateTime::currentDateTime());
+    double weight = settings::get_weightforDate(QDate::currentDate());
     double totalWork = 0;
 
     if(isSwim)
@@ -471,7 +471,7 @@ double calculation::calc_lnp(double speed,double athleteHeight,double athleteWei
     return (cAero+3.6*athleteEff)*speed*athleteWeight;
 }
 
-double calculation::current_dayCalories(QDateTime calcDate) const
+double calculation::current_dayCalories(QDate calcDate) const
 {
     int calMethode = static_cast<int>(athleteValues->value("methode"));
     double weight = settings::get_weightforDate(calcDate);
@@ -613,7 +613,7 @@ double calculation::get_corrected_MET(double weight, int style) const
 {
     QString factor = settings::get_listValues("SwimMET").at(style);
     double swimMET = factor.toDouble();
-    double mlkgmin = (((current_dayCalories(QDateTime::currentDateTime())/1440)/5)/weight)*1000.0;
+    double mlkgmin = (((current_dayCalories(QDate::currentDate())/1440)/5)/weight)*1000.0;
 
     if(style == 0)
     {

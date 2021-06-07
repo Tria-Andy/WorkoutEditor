@@ -260,10 +260,12 @@ void Dialog_workCreator::on_listWidget_workouts_itemClicked(QListWidgetItem *ite
     stdWorkoutMapping = worksched->get_linkStdWorkouts(workoutId);
     workoutUpdateWidget->clear();
 
+    QDate startDate = stdWorkoutMapping.lowerBound(settings::firstDayofWeek).key();
+
     if(stdWorkoutMapping.count() > 0)
     {
         int counter = 1;
-        for(QMap<QDate,int>::const_iterator it = stdWorkoutMapping.cbegin(), end = stdWorkoutMapping.cend(); it != end; ++it)
+        for(QMap<QDate,int>::iterator it = stdWorkoutMapping.find(startDate); it != stdWorkoutMapping.end(); ++it)
         {
             QListWidgetItem *item = new QListWidgetItem(workoutUpdateWidget);
             item->setData(Qt::DisplayRole,QString::number(counter++)+" - "+it.key().toString(dateFormat)+" - Workout: "+QString::number(it.value()+1));
@@ -499,8 +501,6 @@ void Dialog_workCreator::set_defaultData(QTreeWidgetItem *item, bool hasChilds)
 
 void Dialog_workCreator::edit_selectedStep(QTreeWidgetItem *item)
 {
-    QList<QListWidgetItem*> itemList;
-
     if(item->data(0,Qt::DisplayRole).toString() == isSeries || item->data(0,Qt::DisplayRole).toString() == isGroup)
     {
         ui->frame_partEdit->setVisible(true);
@@ -1128,10 +1128,11 @@ void Dialog_workCreator::on_pushButton_sync_clicked()
 {
     metaValues.resize(9);
     metaValues = stdWorkouts->get_workoutMap()->value(currentSport).value(ui->pushButton_sync->accessibleName());
-    updateFrom->setDate(stdWorkoutMapping.firstKey());
-    updateFrom->setDateRange(stdWorkoutMapping.firstKey(),stdWorkoutMapping.lastKey());
+    updateFrom->setDate(settings::firstDayofWeek);
+    updateFrom->setDateRange(settings::firstDayofWeek,stdWorkoutMapping.lastKey());
     updateTo->setDate(stdWorkoutMapping.lastKey());
-    updateTo->setDateRange(stdWorkoutMapping.firstKey(),stdWorkoutMapping.lastKey());
+    updateTo->setDateRange(settings::firstDayofWeek,stdWorkoutMapping.lastKey());
+
     updateProgess->setValue(0);
     updateDialog->exec();
 }

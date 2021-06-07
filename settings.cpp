@@ -63,7 +63,7 @@ QHash<QString,QMap<QString,QString>> settings::sportDistance;
 QHash<QString,QVector<double>> settings::doubleVector;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
-QMap<int,double> settings::weightMap;
+QMap<QDate,double> settings::weightMap;
 QHash<QString,double> settings::thresholdMap;
 QHash<QString,double> settings::athleteMap;
 QHash<QString,double> settings::doubleMap;
@@ -317,7 +317,7 @@ int settings::loadSettings()
             double currBone = 0.0;
             double currMuscle = 0.0;
             double currBodyfat = 0.0;
-            int weightDate = 0;
+            QDate weightDate;
 
             for(int i = 0; i < bodyWeight.count(); ++i)
             {
@@ -326,18 +326,20 @@ int settings::loadSettings()
                 currBone = weightInfo.value("boneskg").toDouble();
                 currMuscle = weightInfo.value("musclekg").toDouble();
                 currBodyfat = weightInfo.value("fatpercent").toDouble();
-                weightMap.insert(weightInfo.value("when").toInt(),currWeight);
+                weightDate = QDateTime().fromSecsSinceEpoch(weightInfo.value("when").toInt()).date();
 
-                if(weightMap.lastKey() > weightDate)
+                if(weightDate.daysTo(firstDayofWeek) < 14)
                 {
+                    weightMap.insert(weightDate,currWeight);
                     athleteMap.insert("weight",currWeight);
                     athleteMap.insert("boneskg",currBone);
                     athleteMap.insert("musclekg",currMuscle);
                     athleteMap.insert("bodyfat",currBodyfat);
                 }
-                weightDate = weightMap.lastKey();
             }
         }
+
+        qDebug() << weightMap;
 
         //Read Header values
         QDomDocument xmlDoc;
@@ -643,28 +645,23 @@ int settings::loadSettings()
     return LOADED;
 }
 
-double settings::get_weightforDate(QDateTime actDate)
+double settings::get_weightforDate(QDate actDate)
 {
-    QDateTime weightDate,firstDate;
-    double weight = 0.0;
-    firstDate.setTime_t(weightMap.firstKey());
-
-    for(QMap<int,double>::const_iterator it = weightMap.cbegin(), end = weightMap.cend(); it != end; ++it)
+    if(actDate.daysTo(firstDayofWeek) <= 0)
     {
-        weightDate.setTime_t(it.key());
-
-        if(actDate >= firstDate && actDate < weightDate)
+        if(actDate.daysTo(weightMap.lastKey()) < 0)
         {
-            weight = it.value();
-            break;
+            return weightMap.last();
         }
-        else if(actDate >= weightDate)
+        else
         {
-            weight = it.value();
+            return weightMap.first();
         }
     }
-
-    return weight;
+    else
+    {
+        return athleteMap.value("weight");
+    }
 }
 
 void settings::writeListValues(QHash<QString,QStringList> *plist)

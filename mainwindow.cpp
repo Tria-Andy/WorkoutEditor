@@ -236,8 +236,8 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
         ui->comboBox_weightmode->setEnabled(false);
         ui->comboBox_weightmode->blockSignals(false);
-        //ui->spinBox_calories->setVisible(false);
-        //ui->spinBox_portFactor->setVisible(false);
+        ui->spinBox_calories->setVisible(false);
+        ui->spinBox_portFactor->setVisible(false);
 
         ui->toolButton_menuCopy->setEnabled(false);
         ui->toolButton_menuPaste->setEnabled(false);

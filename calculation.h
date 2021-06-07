@@ -50,7 +50,7 @@ protected:
     double estimate_stressScore(double,double) const;
 
     double calc_lnp(double,double,double) const;
-    double current_dayCalories(QDateTime) const;
+    double current_dayCalories(QDate) const;
     QString calc_weekID(QDate);
     QHash<QString,double> *thresValues, *athleteValues;
 
