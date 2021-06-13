@@ -61,6 +61,7 @@ QHash<QString,QStringList> settings::listMap;
 QHash<QString,QStringList> settings::jsonTags;
 QHash<QString,QMap<QString,QString>> settings::sportDistance;
 QHash<QString,QVector<double>> settings::doubleVector;
+QHash<QString,QHash<QString,QHash<QString,double>>> settings::modeMap;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
 QMap<QDate,double> settings::weightMap;
@@ -339,8 +340,6 @@ int settings::loadSettings()
             }
         }
 
-        qDebug() << weightMap;
-
         //Read Header values
         QDomDocument xmlDoc;
         QFile headerFile(gcInfo.value("schedule") + QDir::separator() + fileMap.value("headerfile"));
@@ -487,10 +486,50 @@ int settings::loadSettings()
             myvalues->endGroup();
 
             myvalues->beginGroup("Foodplanner");
+            QHash<QString,double> tempMap;
+            QHash<QString,QHash<QString,double>> modeTempMap;
+
                 settingList = myvalues->value("mode").toString().split(splitter);
                 listMap.insert("Mode",settingList);
                 settingList.clear();
+
+                settingList = myvalues->value("lossborder").toString().split(splitter);
+                listMap.insert("lossborder",settingList);
+                settingList.clear();
+
+                settingList = myvalues->value("modeborder").toString().split(splitter);
+                listMap.insert("modeborder",settingList);
+                settingList.clear();
+
+                settingList = myvalues->value("losspercent").toString().split(splitter);
+                for(int i = 0; i < listMap.value("Mode").count(); i++)
+                {
+                    settingString = settingList.at(i);
+                    tempList = settingString.split("|");
+                    for(int x = 0; x < listMap.value("lossborder").count(); ++x)
+                    {
+                        tempMap.insert(listMap.value("lossborder").at(x),tempList.at(x).toDouble());
+                    }
+                    modeTempMap.insert("losspercent",tempMap);
+                    modeMap.insert(listMap.value("Mode").at(i),modeTempMap);
+                }
+                tempMap.clear();
+                modeTempMap.clear();
+
                 settingList = myvalues->value("modepercent").toString().split(splitter);
+                for(int i = 0; i < listMap.value("Mode").count(); i++)
+                {
+                    settingString = settingList.at(i);
+                    tempList = settingString.split("|");
+                    modeTempMap = modeMap.value(listMap.value("Mode").at(i));
+                    for(int x = 0; x < listMap.value("modeborder").count(); ++x)
+                    {
+                        tempMap.insert(listMap.value("modeborder").at(x),tempList.at(x).toDouble());
+                    }
+                    modeTempMap.insert("modepercent",tempMap);
+                    modeMap.insert(listMap.value("Mode").at(i),modeTempMap);
+                }
+
                 for(int i = 0; i < listMap.value("Mode").count(); i++)
                 {
                     settingString = settingList.at(i);
@@ -649,7 +688,7 @@ double settings::get_weightforDate(QDate actDate)
 {
     if(actDate.daysTo(firstDayofWeek) <= 0)
     {
-        if(actDate.daysTo(weightMap.lastKey()) < 0)
+        if(actDate.daysTo(weightMap.lastKey()) <= 0)
         {
             return weightMap.last();
         }

@@ -56,7 +56,7 @@ private:
     static QVector<double> set_doubleValues(QStringList*);
 
 protected:
-    static QHash<QString,double> thresholdMap,athleteMap,modeMap,doubleMap;
+    static QHash<QString,double> thresholdMap,athleteMap,doubleMap;
     static QHash<QString,QString> generalMap,gcInfo,sportMap,triaMap,formatMap,fileMap;
     static QHash<QString,QColor> colorMap;
     static QHash<QString,QStringList> listMap,jsonTags;
@@ -76,6 +76,7 @@ public:
     //QMap/QHash Getter
     static QHash<QString,QColor> get_colorMap() {return colorMap;}
     static QHash<QString,QVector<double>> doubleVector;
+    static QHash<QString,QHash<QString,QHash<QString,double>>> modeMap;
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
     static QString get_rangeValues(QString key,QString value) {return rangeMap.value(key).value(value);}
     static QString get_format(QString key) {return formatMap.value(key);}

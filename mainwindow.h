@@ -890,9 +890,14 @@ public:
         foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
 
-        QVector<double> percent = settings::doubleVector.value(index.data(Qt::UserRole).toString());
+        QString foodMode = index.data(Qt::UserRole).toString();
+
+        QVector<double> percent = settings::doubleVector.value(foodMode);
+        QHash<QString,double> lossMap = settings::modeMap.value(foodMode).value("losspercent");
+
         int weekCal = index.model()->data(index.model()->index(6,index.column())).toInt();
         int avgDiff = index.model()->data(index.model()->index(5,index.column())).toInt();
+        double startWeight = index.model()->data(index.model()->index(0,index.column())).toDouble();
 
         gradColor.setHsv(0,0,200,150);
 
@@ -957,7 +962,33 @@ public:
                 painter->setPen(Qt::black);
             }
         }
-        else if((index.row() > 8 || index.row() == 10))
+        else if (index.row() == 9)
+        {
+            double lossPercent = ((index.data().toDouble()*-1) / startWeight)*100;
+
+            if(lossPercent >= lossMap.value("high"))
+            {
+                itemColor = settings::get_itemColor("max").toHsv();
+                painter->setPen(Qt::black);
+            }
+            if(lossPercent < lossMap.value("high") && lossPercent >= lossMap.value("goal"))
+            {
+                itemColor = settings::get_itemColor("low").toHsv();
+                painter->setPen(Qt::black);
+            }
+            if(lossPercent > lossMap.value("low") && lossPercent <= lossMap.value("goal"))
+            {
+                itemColor = settings::get_itemColor("low").toHsv();
+                painter->setPen(Qt::black);
+            }
+            if(lossPercent < lossMap.value("low"))
+            {
+                itemColor = settings::get_itemColor("min").toHsv();
+                painter->setPen(Qt::black);
+            }
+
+        }
+        else if(index.row() == 10)
         {
             itemColor.setHsv(215,200,200,255);
             painter->setPen(Qt::black);

@@ -437,8 +437,8 @@ void MainWindow::fill_foodSumTable(QDate startDate)
 {
     QStandardItem *weekItem;
     QPair<double,double> minMax,calcWeight;
-
     QString mode = foodPlan->get_mode(startDate);
+    QHash<QString,double> lossMap = settings::modeMap.value(mode).value("losspercent");
     minMax.first = settings::doubleVector.value(mode).at(2)/100.0;
     minMax.second = settings::doubleVector.value(mode).at(1)/100.0;
     QVector<double> weekValues(5,0);
@@ -477,10 +477,11 @@ void MainWindow::fill_foodSumTable(QDate startDate)
         ui->tableWidget_daySum->item(5,day)->setData(Qt::DisplayRole,QString::number(set_doubleValue(calcWeight.first,false))+" -> "+QString::number(set_doubleValue(calcWeight.second,false)));
     }
 
+    double startWeight = set_doubleValue(foodPlan->get_estimateWeight(startDate.addDays(-1)).second,false);
     weightLoss = set_doubleValue(weekValues.at(4) / athleteValues->value("BodyFatCal") / 1000.0,true)*-1;
     double weekAvg = round(weekValues.at(3) / weekDays);
 
-    ui->tableWidget_weekSum->item(0,0)->setData(Qt::DisplayRole,QString::number(set_doubleValue(foodPlan->get_estimateWeight(startDate.addDays(-1)).second,false)));
+    ui->tableWidget_weekSum->item(0,0)->setData(Qt::DisplayRole,QString::number(startWeight));
     ui->tableWidget_weekSum->item(0,0)->setData(Qt::UserRole,mode);
     ui->tableWidget_weekSum->item(1,0)->setData(Qt::DisplayRole,QString::number(weekValues.at(0)));
     ui->tableWidget_weekSum->item(1,0)->setData(Qt::UserRole,mode);
@@ -501,6 +502,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     ui->tableWidget_weekSum->item(8,0)->setData(Qt::UserRole,mode);
     ui->tableWidget_weekSum->item(8,0)->setData(Qt::ToolTipRole,"Range: "+QString::number(round(weekAvg * minMax.first))+" - "+QString::number(round(weekAvg * minMax.second)));
     ui->tableWidget_weekSum->item(9,0)->setData(Qt::DisplayRole,QString::number(weightLoss));
+    ui->tableWidget_weekSum->item(9,0)->setData(Qt::ToolTipRole,"Range: "+QString::number(set_doubleValue((startWeight * lossMap.value("low"))/100.0,true))+" - "+QString::number(set_doubleValue((startWeight * lossMap.value("high"))/100.0,true)));
     ui->tableWidget_weekSum->item(9,0)->setData(Qt::UserRole,mode);
     ui->tableWidget_weekSum->item(10,0)->setData(Qt::DisplayRole,QString::number(set_doubleValue(foodPlan->get_estimateWeight(startDate.addDays(6)).second,false)));
 }
