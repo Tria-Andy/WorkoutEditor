@@ -476,8 +476,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
         }
         ui->tableWidget_daySum->item(5,day)->setData(Qt::DisplayRole,QString::number(set_doubleValue(calcWeight.first,false))+" -> "+QString::number(set_doubleValue(calcWeight.second,false)));
     }
-
-    double startWeight = set_doubleValue(foodPlan->get_estimateWeight(startDate.addDays(-1)).second,false);
+    double startWeight = set_doubleValue(foodPlan->get_estimateWeight(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate()).second,false);
     weightLoss = set_doubleValue(weekValues.at(4) / athleteValues->value("BodyFatCal") / 1000.0,true)*-1;
     double weekAvg = round(weekValues.at(3) / weekDays);
 

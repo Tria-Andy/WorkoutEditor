@@ -71,7 +71,7 @@ private:
     QQueue<QPair<QDate,QString>> copyQueue;
     QPair<QDate,QString> copyMap;
     QMap<QDate,QPair<int,int>> slideMap;
-    QMap<QDate,QPair<double,double>> estWeightMap;
+    QMap<QDateTime,QPair<double,double>> estWeightMap;
     QMap<int,QStandardItemModel*> modelMap;
     QMap<QString,QMap<QString,QList<QDate>>> recipeMap;
     QPair<QDate,QString> dragDrop;

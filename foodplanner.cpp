@@ -508,18 +508,19 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
     macroValues[3] = ceil(currentWeight * (doubleValues->value("DayFiber") /100.0));
     macroValues[4] = ceil(currentWeight * (doubleValues->value("DaySugar")));
 
-    if(day.daysTo(firstdayofweek) <= 1)
-    {
-        QPair<double,double> weightChange;
+    QPair<double,double> weightChange;
+    QDateTime weightDay = day.startOfDay();
 
+    if(day.daysTo(firstdayofweek) <= 0)
+    {
         weightChange.first = set_doubleValue(sumValues.at(4) / athleteValues->value("BodyFatCal") / 1000.0,true)*-1;
         weightChange.second = currentWeight;
 
-        estWeightMap.insert(day,weightChange);
+        estWeightMap.insert(weightDay,weightChange);
 
-        if(estWeightMap.firstKey().daysTo(day) >= 1)
+        if(estWeightMap.firstKey().daysTo(weightDay) >= 1)
         {
-            for(QMap<QDate,QPair<double,double>>::iterator it = estWeightMap.find(day); it != estWeightMap.end(); ++it)
+            for(QMap<QDateTime,QPair<double,double>>::iterator it = estWeightMap.find(weightDay); it != estWeightMap.end(); ++it)
             {
                 weightChange.second = estWeightMap.value(it.key().addDays(-1)).second + weightChange.first;
                 weightChange.first = it.value().first;

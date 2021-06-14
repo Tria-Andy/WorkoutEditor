@@ -686,21 +686,22 @@ int settings::loadSettings()
 
 double settings::get_weightforDate(QDate actDate)
 {
-    if(actDate.daysTo(firstDayofWeek) <= 0)
+    QDate lastDate = weightMap.firstKey();
+    double weightDate = 0;
+
+    for(QMap<QDate,double>::const_iterator it = weightMap.cbegin(); it != weightMap.cend(); ++it)
     {
-        if(actDate.daysTo(weightMap.lastKey()) <= 0)
+        if(lastDate.daysTo(actDate) > 0 && (actDate.daysTo(it.key()) >= 0 && actDate.daysTo(it.key()) <= 6))
         {
-            return weightMap.last();
+            weightDate = weightMap.value(lastDate);
         }
-        else
+        if(actDate.daysTo(weightMap.lastKey()) < 0)
         {
-            return weightMap.first();
+            weightDate = weightMap.last();
         }
+        lastDate = it.key();
     }
-    else
-    {
-        return athleteMap.value("weight");
-    }
+    return weightDate;
 }
 
 void settings::writeListValues(QHash<QString,QStringList> *plist)
