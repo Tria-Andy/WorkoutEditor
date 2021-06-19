@@ -33,7 +33,7 @@ class schedule : public xmlHandler, public calculation
 public:
     schedule(standardWorkouts *pworkouts = nullptr);
     bool newSaison;
-    QStandardItemModel *scheduleModel,*phaseModel;
+    QStandardItemModel *scheduleModel,*phaseModel,*sumModel;
     QString dateFormat,longTime,shortTime;
     QHash<QDate,QMap<int,QStringList>> workoutUpdates;
 
@@ -62,6 +62,7 @@ public:
 
 
     void init_scheduleData();
+    void update_sumModel(QString);
     void save_workouts(bool);
     void save_ltsFile();
     void copyWeek(QString,QString);
@@ -88,6 +89,10 @@ public:
     void set_weekCompValues(QStringList,QMap<QString,QVector<double>>);
     void add_contest(QString,QDate,QStringList);
     void remove_contest(QString,QDate);
+
+
+signals:
+    void scheduleChanged();
 
 protected:
 

@@ -442,6 +442,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     minMax.first = settings::doubleVector.value(mode).at(2)/100.0;
     minMax.second = settings::doubleVector.value(mode).at(1)/100.0;
     QVector<double> weekValues(5,0);
+    const int timeOffset = 72000;
     double weightLoss = 0;
     int sumCal = 0;
     double slideSum = 0;
@@ -454,7 +455,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
         sumCal = weekItem->child(day,0)->data(Qt::UserRole+3).toInt();
         dayDiff = weekItem->child(day,0)->data(Qt::UserRole+4).toInt();
         slideSum = foodPlan->get_slideValue(startDate.addDays(day));
-        calcWeight = foodPlan->get_estimateWeight(startDate.addDays(day));
+        calcWeight = foodPlan->get_estimateWeight(startDate.addDays(day).startOfDay().addSecs(timeOffset));
 
         for(int cal = 0; cal < weekValues.count(); ++cal)
         {
@@ -476,7 +477,18 @@ void MainWindow::fill_foodSumTable(QDate startDate)
         }
         ui->tableWidget_daySum->item(5,day)->setData(Qt::DisplayRole,QString::number(set_doubleValue(calcWeight.first,false))+" -> "+QString::number(set_doubleValue(calcWeight.second,false)));
     }
-    double startWeight = set_doubleValue(foodPlan->get_estimateWeight(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate()).second,false);
+
+    double startWeight = 0;
+
+    if(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().daysTo(firstdayofweek) == 0)
+    {
+        startWeight = set_doubleValue(foodPlan->get_estimateWeight(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().startOfDay()).second,false);
+    }
+    else
+    {
+        startWeight = set_doubleValue(foodPlan->get_estimateWeight(ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate().startOfDay().addSecs(timeOffset)).second,false);
+    }
+
     weightLoss = set_doubleValue(weekValues.at(4) / athleteValues->value("BodyFatCal") / 1000.0,true)*-1;
     double weekAvg = round(weekValues.at(3) / weekDays);
 
@@ -503,7 +515,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     ui->tableWidget_weekSum->item(9,0)->setData(Qt::DisplayRole,QString::number(weightLoss));
     ui->tableWidget_weekSum->item(9,0)->setData(Qt::ToolTipRole,"Range: "+QString::number(set_doubleValue((startWeight * lossMap.value("low"))/100.0,true))+" - "+QString::number(set_doubleValue((startWeight * lossMap.value("high"))/100.0,true)));
     ui->tableWidget_weekSum->item(9,0)->setData(Qt::UserRole,mode);
-    ui->tableWidget_weekSum->item(10,0)->setData(Qt::DisplayRole,QString::number(set_doubleValue(foodPlan->get_estimateWeight(startDate.addDays(6)).second,false)));
+    ui->tableWidget_weekSum->item(10,0)->setData(Qt::DisplayRole,QString::number(set_doubleValue(foodPlan->get_estimateWeight(startDate.addDays(6).startOfDay().addSecs(timeOffset)).second,false)));
 }
 
 void MainWindow::fill_foodPlanList(bool newWeek,int setIndex)
@@ -827,7 +839,7 @@ void MainWindow::workoutSchedule(QDate date)
             if(col == 0)
             {
                 weekInfo = workSchedule->get_weekScheduleMeta(calc_weekID(date.addDays(dayCounter)));
-                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(1) + delimiter + weekInfo.at(2) + delimiter + foodPlan->get_mode(date.addDays(dayCounter)) +" "+weekInfo.at(3)+"kg - ("+QString::number(set_doubleValue(foodPlan->get_estimateWeight(date.addDays(dayCounter)).second,false))+")";
+                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(1) + delimiter + weekInfo.at(2) + delimiter + foodPlan->get_mode(date.addDays(dayCounter)) +" "+weekInfo.at(3)+"kg - ("+QString::number(set_doubleValue(foodPlan->get_estimateWeight(date.addDays(dayCounter).startOfDay().addSecs(72000)).second,false))+")";
                 item->setData(Qt::UserRole,weekInfo.at(0));
             }
             else

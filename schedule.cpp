@@ -37,6 +37,7 @@ schedule::schedule(standardWorkouts *pworkouts)
 
     scheduleModel = new QStandardItemModel();
     phaseModel = new QStandardItemModel();
+    sumModel = new QStandardItemModel();
 
    if(!gcValues->value("schedule").isEmpty())
    {
@@ -649,6 +650,41 @@ QMap<int, QStringList> schedule::get_workouts(int dataSource,QString indexString
     return workouts;
 }
 
+void schedule::init_scheduleData()
+{
+    QStandardItem *weekItem;
+    QStandardItem *sumWeekItem;
+    QStandardItem *rootItem = sumModel->invisibleRootItem();
+
+    for(int week = 0; week < scheduleModel->rowCount(); ++week)
+    {
+        weekItem = scheduleModel->item(week,0);
+        sumWeekItem = new QStandardItem();
+        sumWeekItem->setData(weekItem->data(Qt::DisplayRole),Qt::DisplayRole);
+
+        for(int sport = 0; sport < sportTags.count(); ++sport)
+        {
+            sumWeekItem->appendRow(new QStandardItem(sportTags.at(sport)));
+        }
+
+        rootItem->appendRow(sumWeekItem);
+    }
+
+
+
+}
+
+void schedule::update_sumModel(QString weekID)
+{
+    QMap<int,QStringList> works = this->get_workouts(1,weekID);
+
+
+
+
+
+
+}
+
 QStringList schedule::get_weekMeta(QString weekID)
 {
     QStringList weekMeta;
@@ -1153,4 +1189,5 @@ void schedule::set_saisonValues()
         }
     }
     this->set_compValues(false,QDate(),QMap<int,QStringList>());
+    this->init_scheduleData();
 }

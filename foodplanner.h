@@ -37,7 +37,7 @@ public:
     QMap<QString,QList<QDate>> get_recipeMap(QString recipeID) {return recipeMap.value(recipeID);}
     QStandardItem *get_proxyItem(int);
     int get_slideValue(QDate day) {return slideMap.value(day).second;}
-    QPair<double,double> get_estimateWeight(QDate date){return estWeightMap.value(date);}
+    QPair<double,double> get_estimateWeight(QDateTime date) {return estWeightMap.value(date);}
 
     void update_foodPlanModel(QDate,QString,QMap<int,QList<QStandardItem*>>);
     void update_ingredient(QString,QString,QVector<double>,int);
