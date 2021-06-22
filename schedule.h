@@ -20,6 +20,7 @@
 #define SCHEDULE_H
 
 #include <QStandardItemModel>
+#include <QObject>
 #include <QtXml>
 #include <QMessageBox>
 #include "settings.h"
@@ -27,16 +28,16 @@
 #include "xmlhandler.h"
 #include "standardworkouts.h"
 
-class schedule : public xmlHandler, public calculation
+class schedule : public QObject, public xmlHandler, public calculation
 {
+    Q_OBJECT
 
 public:
     schedule(standardWorkouts *pworkouts = nullptr);
     bool newSaison;
-    QStandardItemModel *scheduleModel,*phaseModel,*sumModel;
+    QStandardItemModel *scheduleModel,*phaseModel;
     QString dateFormat,longTime,shortTime;
     QHash<QDate,QMap<int,QStringList>> workoutUpdates;
-
     QCustomPlot *stressPlot,*levelPlot,*compPlot;
 
     QString get_weekPhase(QDate,bool);
@@ -60,9 +61,6 @@ public:
     QMap<QDate,QPair<QString,QString>> *get_weekPhaseMap() {return &weekPhaseMap;}
     QQueue<QDate> changedDays;
 
-
-    void init_scheduleData();
-    void update_sumModel(QString);
     void save_workouts(bool);
     void save_ltsFile();
     void copyWeek(QString,QString);
@@ -90,9 +88,12 @@ public:
     void add_contest(QString,QDate,QStringList);
     void remove_contest(QString,QDate);
 
+public slots:
+    void compValuesUpdate();
+
 
 signals:
-    void scheduleChanged();
+    void compValueChanged();
 
 protected:
 

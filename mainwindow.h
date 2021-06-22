@@ -1214,6 +1214,7 @@ private slots:
     void refresh_schedule();
     void refresh_saison();
     void selectionChanged_stressPlot();
+    void refresh_summery();
 
     //Editor
     void on_horizontalSlider_factor_valueChanged(int value);

@@ -227,6 +227,7 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(workSchedule->phaseModel,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_saison()));
         connect(workSchedule->phaseModel,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SLOT(refresh_saison()));
         connect(workSchedule->stressPlot,SIGNAL(selectionChangedByUser()),this,SLOT(selectionChanged_stressPlot()));
+        connect(workSchedule,&schedule::compValueChanged,this,SLOT(refresh_summery()));
         connect(ui->tableWidget_foodPlan->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodDay(int)));
         connect(ui->tableWidget_foodPlan->verticalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodSection(int)));
         connect(foodPlan->foodPlanModel,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_foodTables()));
@@ -1011,6 +1012,11 @@ void MainWindow::selectionChanged_stressPlot()
             graph->layer()->setVisible(true);
         }
     }
+}
+
+void MainWindow::refresh_summery()
+{
+    qDebug() << "Refresh CompMap";
 }
 
 QString MainWindow::get_weekRange()
@@ -3177,6 +3183,8 @@ void MainWindow::selectFoodSection(int selectedSection)
     ui->lineEdit_copySection->setVisible(true);
     ui->lineEdit_copySection->setText(foodPlan->mealsHeader.at(selectedSection));
 
+    foodPlan->check_copyQueue();
+
     QTableWidgetItem *item;
 
     for(int day = 0; day < weekDays; ++day)
@@ -3198,6 +3206,8 @@ void MainWindow::selectFoodDay(int selectedDay)
     ui->dateEdit_copyDay->setVisible(true);
     ui->dateEdit_copyDay->setDate(ui->tableWidget_foodPlan->horizontalHeaderItem(selectedDay)->data(Qt::UserRole).toDate());
     ui->dateEdit_copyDay->setProperty("Section",false);
+
+    foodPlan->check_copyQueue();
 
     QTableWidgetItem *item;
 

@@ -37,10 +37,9 @@ schedule::schedule(standardWorkouts *pworkouts)
 
     scheduleModel = new QStandardItemModel();
     phaseModel = new QStandardItemModel();
-    sumModel = new QStandardItemModel();
 
-   if(!gcValues->value("schedule").isEmpty())
-   {
+    if(!gcValues->value("schedule").isEmpty())
+    {
        //Schedule
        this->xml_toTreeModel(fileMap->value("schedulefile"),scheduleModel);
        //Saison - Phase
@@ -51,16 +50,14 @@ schedule::schedule(standardWorkouts *pworkouts)
 
        this->remove_WeekofPast(firstdayofweek.addDays(-14));
        this->set_saisonValues();
+    }
+    isUpdated = false;
 
+    stressPlot = new QCustomPlot();
+    levelPlot = new QCustomPlot();
+    compPlot = new QCustomPlot();
 
-   }
-   isUpdated = false;
-
-   stressPlot = new QCustomPlot();
-   levelPlot = new QCustomPlot();
-   compPlot = new QCustomPlot();
-
-   this->set_plotObj();
+    this->set_plotObj();
 }
 
 enum {ADD,EDIT,COPY,DEL};
@@ -650,41 +647,6 @@ QMap<int, QStringList> schedule::get_workouts(int dataSource,QString indexString
     return workouts;
 }
 
-void schedule::init_scheduleData()
-{
-    QStandardItem *weekItem;
-    QStandardItem *sumWeekItem;
-    QStandardItem *rootItem = sumModel->invisibleRootItem();
-
-    for(int week = 0; week < scheduleModel->rowCount(); ++week)
-    {
-        weekItem = scheduleModel->item(week,0);
-        sumWeekItem = new QStandardItem();
-        sumWeekItem->setData(weekItem->data(Qt::DisplayRole),Qt::DisplayRole);
-
-        for(int sport = 0; sport < sportTags.count(); ++sport)
-        {
-            sumWeekItem->appendRow(new QStandardItem(sportTags.at(sport)));
-        }
-
-        rootItem->appendRow(sumWeekItem);
-    }
-
-
-
-}
-
-void schedule::update_sumModel(QString weekID)
-{
-    QMap<int,QStringList> works = this->get_workouts(1,weekID);
-
-
-
-
-
-
-}
-
 QStringList schedule::get_weekMeta(QString weekID)
 {
     QStringList weekMeta;
@@ -777,6 +739,11 @@ void schedule::remove_contest(QString saison, QDate contestDate)
 
     QStandardItem *dayItem = scheduleModel->itemFromIndex(get_modelIndex(scheduleModel,contestDate.toString(dateFormat),0));
     scheduleModel->removeRows(0,dayItem->rowCount(),dayItem->index());
+}
+
+void schedule::compValuesUpdate()
+{
+    qDebug() << "Refresh CompValues";
 }
 
 
@@ -1024,7 +991,7 @@ void schedule::set_compValues(bool update,QDate workDate,QMap<int,QStringList> v
             }
         }
     }
-
+    emit compValueChanged();
     this->recalc_stressValues();
 }
 
@@ -1189,5 +1156,4 @@ void schedule::set_saisonValues()
         }
     }
     this->set_compValues(false,QDate(),QMap<int,QStringList>());
-    this->init_scheduleData();
 }

@@ -49,6 +49,7 @@ public:
     void fill_copyMap(QDate,QString,bool);
     void execute_copy(QDate,bool);
     void clear_dragDrop();
+    void check_copyQueue() {if(!copyQueue.isEmpty()) copyQueue.clear();}
     void set_dragDrop(QDate,QString);
     void set_dropMeal(QDate,QString);
     void save_foolPlan();

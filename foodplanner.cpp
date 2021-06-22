@@ -115,9 +115,19 @@ QString foodplanner::get_mode(QDate startDate)
 
 QString foodplanner::get_newRecipeID(QString section)
 {
-    QStandardItem *item = recipeModel->findItems(section,Qt::MatchExactly,0).at(0);
+    QStandardItem *foodItem = recipeModel->findItems(section,Qt::MatchExactly,0).at(0);
+    int count = foodItem->rowCount();
+    QString recipeID = foodItem->data(Qt::DisplayRole).toString()+"-"+QString::number(count);
 
-    return section+"-"+QString::number(item->rowCount());
+    for(int i = 0; i < foodItem->rowCount(); ++i)
+    {
+        if(recipeID == foodItem->child(i,0)->data(Qt::DisplayRole).toString())
+        {
+            recipeID = foodItem->data(Qt::DisplayRole).toString()+"-"+QString::number(++count);
+        }
+    }
+
+    return recipeID;
 }
 
 void foodplanner::set_headerLabel(QStandardItemModel *model, QStringList *list, bool vert)
