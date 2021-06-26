@@ -227,7 +227,7 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(workSchedule->phaseModel,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_saison()));
         connect(workSchedule->phaseModel,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SLOT(refresh_saison()));
         connect(workSchedule->stressPlot,SIGNAL(selectionChangedByUser()),this,SLOT(selectionChanged_stressPlot()));
-        connect(workSchedule,&schedule::compValueChanged,this,SLOT(refresh_summery()));
+        connect(workSchedule->compChanged,SIGNAL(triggered()),this,SLOT(refresh_summery()));
         connect(ui->tableWidget_foodPlan->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodDay(int)));
         connect(ui->tableWidget_foodPlan->verticalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(selectFoodSection(int)));
         connect(foodPlan->foodPlanModel,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SLOT(refresh_foodTables()));
@@ -865,8 +865,8 @@ void MainWindow::workoutSchedule(QDate date)
             ui->tableWidget_schedule->closePersistentEditor(item);
         }
     }
-    this->summery_Set(date,0);
     ui->comboBox_saisonName->setCurrentText(workSchedule->get_saisonDate(date));
+    this->summery_Set(date,0);
 }
 
 void MainWindow::set_saisonValues(QStringList *sportList,QString weekID, int week)
@@ -986,6 +986,16 @@ void MainWindow::refresh_schedule()
     workSchedule->calc_pmcPlot(firstdayofweek.addDays(addDays),ui->pushButton_currentWeek->isChecked(),ui->spinBox_extWeeks->value());
 }
 
+void MainWindow::refresh_summery()
+{
+    int addDays = weekCounter*weekDays;
+
+    if(workSchedule->compChanged->data().toDate().daysTo(firstdayofweek.addDays(addDays)) == 0)
+    {
+        this->summery_Set(workSchedule->compChanged->data().toDate(),0);
+    }
+}
+
 void MainWindow::refresh_saison()
 {
     QString weekLabel = "Week ";
@@ -1012,11 +1022,6 @@ void MainWindow::selectionChanged_stressPlot()
             graph->layer()->setVisible(true);
         }
     }
-}
-
-void MainWindow::refresh_summery()
-{
-    qDebug() << "Refresh CompMap";
 }
 
 QString MainWindow::get_weekRange()
@@ -3283,7 +3288,7 @@ void MainWindow::selectFoodDay(int selectedDay)
 
 void MainWindow::on_actionFood_Macros_triggered()
 {
-    foodmacro_popup foodPop(this,foodPlan,ui->calendarWidget_Food->selectedDate());
+    foodmacro_popup foodPop(this,foodPlan,ui->listWidget_weekPlans->currentItem()->data(Qt::UserRole).toDate());
     foodPop.setModal(true);
     foodPop.exec();
 }

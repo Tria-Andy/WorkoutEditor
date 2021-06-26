@@ -34,6 +34,7 @@ schedule::schedule(standardWorkouts *pworkouts)
     fileMap = settings::getStringMapPointer(settings::stingMap::File);
     weekDays = settings::get_intValue("weekdays");
     levelList = settings::get_listValues("Level");
+    compChanged = new QAction();
 
     scheduleModel = new QStandardItemModel();
     phaseModel = new QStandardItemModel();
@@ -991,7 +992,8 @@ void schedule::set_compValues(bool update,QDate workDate,QMap<int,QStringList> v
             }
         }
     }
-    emit compValueChanged();
+    compChanged->setData(workDate.addDays(1 - workDate.dayOfWeek()));
+    compChanged->triggered();
     this->recalc_stressValues();
 }
 

@@ -20,7 +20,6 @@
 #define SCHEDULE_H
 
 #include <QStandardItemModel>
-#include <QObject>
 #include <QtXml>
 #include <QMessageBox>
 #include "settings.h"
@@ -28,13 +27,13 @@
 #include "xmlhandler.h"
 #include "standardworkouts.h"
 
-class schedule : public QObject, public xmlHandler, public calculation
+class schedule : public xmlHandler, public calculation
 {
-    Q_OBJECT
 
 public:
     schedule(standardWorkouts *pworkouts = nullptr);
     bool newSaison;
+    QAction *compChanged;
     QStandardItemModel *scheduleModel,*phaseModel;
     QString dateFormat,longTime,shortTime;
     QHash<QDate,QMap<int,QStringList>> workoutUpdates;
