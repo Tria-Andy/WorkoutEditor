@@ -511,33 +511,6 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
     sumValues[4] = sumValues.at(3) - sumValues.at(0);
 
     double currentWeight = settings::get_weightforDate(day);
-
-    QStandardItem *weekItem = this->get_modelItem(summeryModel,calc_weekID(day),0);
-    dayItem = weekItem->child(day.dayOfWeek()-1,0);
-
-    QVector<double> percent = settings::doubleVector.value(dayItem->data(Qt::AccessibleTextRole).toString());
-    double factor = ((percent.at(1) + percent.at(2)) / 2) / 100.0;
-    double maxCalories = round(sumValues.at(3) - (sumValues.at(3) * factor));
-    double carbTarget = round(maxCalories * (settings::doubleVector.value("Macros").at(0) / 100.0) / 4.1);
-
-    macroValues[0] = carbTarget;
-    macroValues[1] = round(maxCalories * (settings::doubleVector.value("Macros").at(1) / 100.0) / 4.1);
-    macroValues[2] = round(maxCalories * (settings::doubleVector.value("Macros").at(2) / 100.0) / 9.3);
-    macroValues[3] = round(carbTarget * (doubleValues->value("DayFiber")));
-    macroValues[4] = round(carbTarget * (doubleValues->value("DaySugar")));
-
-    for(int value = 0; value < sumValues.count(); ++value)
-    {
-        dayItem->setData(sumValues.at(value),Qt::UserRole+value);
-    }
-
-    dayItem = weekItem->child(day.dayOfWeek()-1,1);
-
-    for(int macro = 0; macro < macroValues.count(); ++macro)
-    {
-        dayItem->setData(macroValues.at(macro),Qt::UserRole+macro);
-    }
-
     QPair<double,double> weightChange;
     QDateTime weightDay = day.startOfDay().addSecs(72000);
 
@@ -582,6 +555,32 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
             slideMap.insert(it.key(),slideValue);
             slideSum = 0;
         }
+    }
+
+    QStandardItem *weekItem = this->get_modelItem(summeryModel,calc_weekID(day),0);
+    dayItem = weekItem->child(day.dayOfWeek()-1,0);
+
+    QVector<double> percent = settings::doubleVector.value(dayItem->data(Qt::AccessibleTextRole).toString());
+    double factor = ((percent.at(1) + percent.at(2)) / 2) / 100.0;
+    double maxCalories = round(sumValues.at(3) - (sumValues.at(3) * factor));
+    double carbTarget = round(maxCalories * (settings::doubleVector.value("Macros").at(0) / 100.0) / 4.1);
+
+    macroValues[0] = carbTarget;
+    macroValues[1] = round(maxCalories * (settings::doubleVector.value("Macros").at(1) / 100.0) / 4.1);
+    macroValues[2] = round(maxCalories * (settings::doubleVector.value("Macros").at(2) / 100.0) / 9.3);
+    macroValues[3] = round(carbTarget * (doubleValues->value("DayFiber")));
+    macroValues[4] = round(carbTarget * (doubleValues->value("DaySugar")));
+
+    for(int value = 0; value < sumValues.count(); ++value)
+    {
+        dayItem->setData(sumValues.at(value),Qt::UserRole+value);
+    }
+
+    dayItem = weekItem->child(day.dayOfWeek()-1,1);
+
+    for(int macro = 0; macro < macroValues.count(); ++macro)
+    {
+        dayItem->setData(macroValues.at(macro),Qt::UserRole+macro);
     }
 }
 
