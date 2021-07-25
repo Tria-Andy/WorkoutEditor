@@ -328,10 +328,10 @@ int settings::loadSettings()
                 currMuscle = weightInfo.value("musclekg").toDouble();
                 currBodyfat = weightInfo.value("fatpercent").toDouble();
                 weightDate = QDateTime().fromSecsSinceEpoch(weightInfo.value("when").toInt()).date();
+                weightMap.insert(weightDate,currWeight);
 
                 if(weightDate.daysTo(firstDayofWeek) < 14)
                 {
-                    weightMap.insert(weightDate,currWeight);
                     athleteMap.insert("weight",currWeight);
                     athleteMap.insert("boneskg",currBone);
                     athleteMap.insert("musclekg",currMuscle);
@@ -499,6 +499,10 @@ int settings::loadSettings()
 
                 settingList = myvalues->value("modeborder").toString().split(splitter);
                 listMap.insert("modeborder",settingList);
+                settingList.clear();
+
+                settingList = myvalues->value("modemacros").toString().split(splitter);
+                listMap.insert("modemacros",settingList);
                 settingList.clear();
 
                 settingList = myvalues->value("losspercent").toString().split(splitter);
@@ -690,7 +694,7 @@ double settings::get_weightforDate(QDate actDate)
     double weightDate = 0;
 
     for(QMap<QDate,double>::const_iterator it = weightMap.cbegin(); it != weightMap.cend(); ++it)
-    {
+    {        
         if(lastDate.daysTo(actDate) > 0 && (actDate.daysTo(it.key()) >= 0 && actDate.daysTo(it.key()) <= 6))
         {
             weightDate = weightMap.value(lastDate);
