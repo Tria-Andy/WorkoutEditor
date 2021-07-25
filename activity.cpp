@@ -920,8 +920,17 @@ double Activity::interpolate_speed(int row,int sec,double limit)
 double Activity::polish_powerValues(double speed,double power, int avgPower)
 {
     double corrPower = power;
-    double lowLimit = avgPower*thresValues->value("runlimit");
+    //double lowLimit = avgPower*thresValues->value("runlimit");
 
+    double powerLimit = thresValues->value("runlimit");
+    double speedPower = thresPower * (speed / thresSpeed);
+
+    if((power / speedPower) < powerLimit)
+    {
+        corrPower = round(speedPower);
+    }
+
+    /*
     if(power < lowLimit)
     {
         corrPower = ceil(thresPower*(pow(speed/thresSpeed,1.4)));
@@ -931,6 +940,6 @@ double Activity::polish_powerValues(double speed,double power, int avgPower)
     {
         //qDebug() << "Set" << speed << corrPower << avgPower;
     }
-
+    */
     return corrPower;
 }

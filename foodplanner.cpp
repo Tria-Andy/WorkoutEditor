@@ -814,9 +814,23 @@ void foodplanner::save_ingredList(int list)
 void foodplanner::update_foodMode(QDate weekStart,QString newMode)
 {
     QStandardItem *weekItem;
+
+    weekItem = this->get_modelItem(summeryModel,calc_weekID(weekStart),0);
+
+    for(int day = 0; day < weekItem->rowCount(); day++)
+    {
+        weekItem->child(day,0)->setData(newMode,Qt::AccessibleTextRole);
+    }
+
     QModelIndex weekIndex = this->get_modelIndex(foodPlanModel,calc_weekID(weekStart),0);
     weekItem = foodPlanModel->itemFromIndex(weekIndex.siblingAtColumn(2));
     weekItem->setData(newMode,Qt::DisplayRole);
+    weekItem = foodPlanModel->itemFromIndex(weekIndex);
+
+    for(int day = 0; day < weekItem->rowCount(); ++day)
+    {
+        update_summeryModel(weekStart.addDays(day),weekItem->child(day,0),false);
+    }
 }
 
 void foodplanner::add_foodSection(QString sectionName,int modelID)
