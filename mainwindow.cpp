@@ -443,7 +443,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     minMax.first = settings::doubleVector.value(mode).at(2)/100.0;
     minMax.second = settings::doubleVector.value(mode).at(1)/100.0;
     QVector<double> weekValues(5,0);
-    const int timeOffset = 72000;
+    const int timeOffset = startDate.startOfDay().offsetFromUtc();
     double weightLoss = 0;
     int sumCal = 0;
     double slideSum = 0;
@@ -529,12 +529,12 @@ void MainWindow::fill_foodPlanList(bool newWeek,int setIndex)
 
     for(int week = 1; week < foodPlan->foodPlanModel->rowCount(); ++week)
     {
-        firstDay = QDate().fromString(foodPlan->foodPlanModel->item(week,1)->data(Qt::DisplayRole).toString(),"yyyy-MM-dd");
-
+        firstDay = QDate().fromString(foodPlan->foodPlanModel->item(week,1)->data(Qt::DisplayRole).toString(),"yyyy-MM-dd");        
         item = new QListWidgetItem();
         weekString = foodPlan->foodPlanModel->item(week,0)->data(Qt::DisplayRole).toString()+ " - "+
                      firstDay.toString(dateFormat)+ " - "+
-                     foodPlan->foodPlanModel->item(week,2)->data(Qt::DisplayRole).toString();
+                     foodPlan->foodPlanModel->item(week,2)->data(Qt::DisplayRole).toString()+ " - "+
+                     workSchedule->get_weekPhase(firstDay,true);
         item->setData(Qt::DisplayRole,weekString);
         item->setData(Qt::AccessibleTextRole,foodPlan->foodPlanModel->item(week,0)->data(Qt::DisplayRole).toString());
         item->setData(Qt::AccessibleDescriptionRole,foodPlan->foodPlanModel->item(week,2)->data(Qt::DisplayRole).toString());
@@ -840,7 +840,7 @@ void MainWindow::workoutSchedule(QDate date)
             if(col == 0)
             {
                 weekInfo = workSchedule->get_weekScheduleMeta(calc_weekID(date.addDays(dayCounter)));
-                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(1) + delimiter + weekInfo.at(2) + delimiter + foodPlan->get_mode(date.addDays(dayCounter)) +" "+weekInfo.at(3)+"kg - ("+QString::number(set_doubleValue(foodPlan->get_estimateWeight(date.addDays(dayCounter).startOfDay().addSecs(72000)).second,false))+")";
+                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(1) + delimiter + weekInfo.at(2) + delimiter + foodPlan->get_mode(date.addDays(dayCounter)) +" "+weekInfo.at(3)+"kg - ("+QString::number(set_doubleValue(foodPlan->get_estimateWeight(date.addDays(dayCounter).startOfDay().addSecs(date.startOfDay().offsetFromUtc())).second,false))+")";
                 item->setData(Qt::UserRole,weekInfo.at(0));
             }
             else

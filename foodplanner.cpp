@@ -469,6 +469,7 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
     const int minutes = 1440;
     double calMinute = round(this->current_dayCalories(day) * settings::doubleVector.value("palday").at(day.dayOfWeek()-1)) / minutes;
     double sportMinutes = 0;
+    double epoc = 0;
     QMap<QString,QVector<double>> sportValues = schedulePtr->get_compValues()->value(day);
 
     QVector<int> sumValues(10,0);
@@ -503,16 +504,19 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
     for(QMap<QString,QVector<double>>::const_iterator it = sportValues.cbegin(), end = sportValues.cend(); it != end; ++it)
     {
         sumValues[2] = sumValues.at(2) + it.value().at(5);
+        epoc = epoc + ceil(it.value().at(5)*(it.value().at(4)/1000));
         sportMinutes = sportMinutes + (it.value().at(1)/60.0);
     }
 
-    sumValues[1] = ceil((minutes - sportMinutes) * calMinute);
+    sumValues[1] = ceil(((minutes - sportMinutes) * calMinute)+epoc);
     sumValues[3] = sumValues.at(1) + sumValues.at(2);
     sumValues[4] = sumValues.at(3) - sumValues.at(0);
 
     double currentWeight = settings::get_weightforDate(day);
     QPair<double,double> weightChange;
-    QDateTime weightDay = day.startOfDay().addSecs(72000);
+    int offSet = day.startOfDay().offsetFromUtc();
+
+    QDateTime weightDay = day.startOfDay().addSecs(offSet);
 
     if(day.daysTo(firstdayofweek) <= 0)
     {
@@ -525,7 +529,8 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
         {
             for(QMap<QDateTime,QPair<double,double>>::iterator it = estWeightMap.find(weightDay); it != estWeightMap.end(); ++it)
             {
-                weightChange.second = estWeightMap.value(it.key().addDays(-1)).second + weightChange.first;
+                weightChange.second = it.operator-(1).value().second + weightChange.first;
+                ///weightChange.second = estWeightMap.value(it.key().addDays(-1)).second + weightChange.first;
                 weightChange.first = it.value().first;
                 estWeightMap.insert(it.key(),weightChange);
             }

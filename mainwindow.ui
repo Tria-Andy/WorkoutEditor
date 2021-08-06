@@ -2516,7 +2516,7 @@
                  <property name="font">
                   <font>
                    <family>Segoe UI</family>
-                   <pointsize>12</pointsize>
+                   <pointsize>10</pointsize>
                    <weight>75</weight>
                    <bold>true</bold>
                   </font>
@@ -2940,8 +2940,8 @@
                       <rect>
                        <x>0</x>
                        <y>0</y>
-                       <width>98</width>
-                       <height>71</height>
+                       <width>303</width>
+                       <height>200</height>
                       </rect>
                      </property>
                      <attribute name="label">
@@ -2979,8 +2979,8 @@
                       <rect>
                        <x>0</x>
                        <y>0</y>
-                       <width>98</width>
-                       <height>71</height>
+                       <width>303</width>
+                       <height>200</height>
                       </rect>
                      </property>
                      <attribute name="label">

@@ -329,14 +329,11 @@ int settings::loadSettings()
                 currBodyfat = weightInfo.value("fatpercent").toDouble();
                 weightDate = QDateTime().fromSecsSinceEpoch(weightInfo.value("when").toInt()).date();
 
-                if(weightDate.daysTo(firstDayofWeek) < 14)
-                {
-                    weightMap.insert(weightDate,currWeight);
-                    athleteMap.insert("weight",currWeight);
-                    athleteMap.insert("boneskg",currBone);
-                    athleteMap.insert("musclekg",currMuscle);
-                    athleteMap.insert("bodyfat",currBodyfat);
-                }
+                weightMap.insert(weightDate,currWeight);
+                athleteMap.insert("weight",currWeight);
+                athleteMap.insert("boneskg",currBone);
+                athleteMap.insert("musclekg",currMuscle);
+                athleteMap.insert("bodyfat",currBodyfat);
             }
         }
 
