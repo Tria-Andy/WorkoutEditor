@@ -928,6 +928,11 @@ double Activity::polish_powerValues(double speed,double power, int avgPower)
     if((power / speedPower) < powerLimit)
     {
         corrPower = round(speedPower);
+
+        if(corrPower < avgPower)
+        {
+            corrPower = avgPower;
+        }
     }
 
     /*

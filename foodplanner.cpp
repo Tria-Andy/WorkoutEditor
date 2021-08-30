@@ -530,7 +530,7 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
             for(QMap<QDateTime,QPair<double,double>>::iterator it = estWeightMap.find(weightDay); it != estWeightMap.end(); ++it)
             {
                 weightChange.second = it.operator-(1).value().second + weightChange.first;
-                ///weightChange.second = estWeightMap.value(it.key().addDays(-1)).second + weightChange.first;
+                //weightChange.second = estWeightMap.value(it.key().addDays(-1)).second + weightChange.first;
                 weightChange.first = it.value().first;
                 estWeightMap.insert(it.key(),weightChange);
             }
