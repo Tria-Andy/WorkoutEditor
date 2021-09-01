@@ -828,6 +828,7 @@ void MainWindow::workoutSchedule(QDate date)
     QString itemValue = QString();
     QString delimiter = "#";
     QString stdConnect;
+    QDate calcDate;
 
     this->set_tableWidgetItems(ui->tableWidget_schedule,weekRange,cal_header.count(),&schedule_del);
 
@@ -835,18 +836,20 @@ void MainWindow::workoutSchedule(QDate date)
     {
         for(int col = 0; col < weekDays+1; ++col)
         {
+            calcDate = date.addDays(dayCounter);
             QTableWidgetItem *item = ui->tableWidget_schedule->item(row,col);
             ui->tableWidget_schedule->openPersistentEditor(item);
+
             if(col == 0)
             {
-                weekInfo = workSchedule->get_weekScheduleMeta(calc_weekID(date.addDays(dayCounter)));
-                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(1) + delimiter + weekInfo.at(2) + delimiter + foodPlan->get_mode(date.addDays(dayCounter)) +" "+weekInfo.at(3)+"kg - ("+QString::number(set_doubleValue(foodPlan->get_estimateWeight(date.addDays(dayCounter).startOfDay().addSecs(date.startOfDay().offsetFromUtc())).second,false))+")";
+                weekInfo = workSchedule->get_weekScheduleMeta(calc_weekID(calcDate));
+                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(1) + delimiter + weekInfo.at(2) + delimiter + foodPlan->get_mode(calcDate) +" "+weekInfo.at(3)+"kg - ("+QString::number(set_doubleValue(foodPlan->get_estimateWeight(calcDate.startOfDay().addSecs(calcDate.startOfDay().offsetFromUtc())).second,false))+")";
                 item->setData(Qt::UserRole,weekInfo.at(0));
             }
             else
             {
-                dayWorkouts = workSchedule->get_workouts(true,date.addDays(dayCounter).toString(dateFormat));
-                itemValue = date.addDays(dayCounter).toString("dd MMM yy") +delimiter;
+                dayWorkouts = workSchedule->get_workouts(true,calcDate.toString(dateFormat));
+                itemValue = calcDate.toString("dd MMM yy") +delimiter;
                 for(QMap<int,QStringList>::const_iterator it = dayWorkouts.cbegin(), end = dayWorkouts.cend(); it != end; ++it)
                 {
                     stdConnect = it.value().count() == 9 ? "\n" : "*\n";
@@ -854,10 +857,11 @@ void MainWindow::workoutSchedule(QDate date)
                     itemValue = itemValue + it.value().at(4) +"\n";
                     itemValue = itemValue + set_time(it.value().at(5).toInt()) + conString + it.value().at(6) + " km" + delimiter;
                 }
-                item->setData(Qt::UserRole,date.addDays(dayCounter));
+                item->setData(Qt::UserRole,calcDate);
                 ++dayCounter;
                 itemValue.chop(1);
             }
+
             item->setData(Qt::EditRole,itemValue);
             item->setTextAlignment(0);
             itemValue.clear();
