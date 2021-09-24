@@ -22,13 +22,11 @@ Dialog_workCreator::Dialog_workCreator(QWidget *parent, standardWorkouts *pworko
     ui->comboBox_partName->addItem(isSeries);
     ui->comboBox_partName->addItem(isGroup);
     ui->comboBox_stepName->addItems(settings::get_listValues("IntEditor"));
-    ui->comboBox_levelName->addItems(settings::get_listValues("Level"));
     isBreak = generalValues->value("breakname");
     dateFormat = settings::get_format("dateformat");
     longTime = settings::get_format("longtime");
     shortTime = settings::get_format("shorttime");
     groupList << isGroup << isSeries;
-    levelList = settings::get_listValues("Level");
     ui->listWidget_group->addItems(groupList);
     ui->listWidget_group->setItemDelegate(&mousehover_del);
     ui->listWidget_phases->addItems(settings::get_listValues("IntEditor"));
@@ -249,6 +247,10 @@ void Dialog_workCreator::get_workouts(QString sport)
     QString actBackground = "background: "+sportBack;
     ui->listWidget_workouts->setStyleSheet(actBackground);
     this->set_sportData(sport);
+
+    QStringList levelNames = settings::get_sportLevel(sport);
+    ui->comboBox_levelName->clear();
+    ui->comboBox_levelName->addItems(levelNames);
 }
 
 void Dialog_workCreator::on_listWidget_workouts_itemClicked(QListWidgetItem *item)
@@ -352,6 +354,7 @@ QTreeWidgetItem* Dialog_workCreator::set_itemToWidget(QStandardItem *item,QTreeW
         stepitem->setData(0,Qt::AccessibleTextRole,stdWorkTags->at(3));
         stepitem->setData(0,Qt::DisplayRole,this->get_itemValue(item,stepTags,stepTags->at(1)));
         stepitem->setData(1,Qt::DisplayRole,this->get_itemValue(item,stepTags,stepTags->at(4)));
+        stepitem->setData(1,Qt::AccessibleTextRole,settings::get_levelMap(this->get_itemValue(item,stepTags,stepTags->at(4)).toString()));
         stepitem->setData(2,Qt::DisplayRole,this->get_itemValue(item,stepTags,stepTags->at(2)).toInt());
         stepitem->setData(3,Qt::DisplayRole,set_time(this->calc_thresPace(this->get_itemValue(item,stepTags,stepTags->at(2)).toDouble())));
         stepitem->setData(4,Qt::DisplayRole,this->calc_thresPower(this->get_itemValue(item,stepTags,stepTags->at(2)).toDouble()));
@@ -546,6 +549,7 @@ void Dialog_workCreator::update_selectedStep()
     {
         currentItem->setData(0,Qt::DisplayRole,ui->comboBox_stepName->currentText());
         currentItem->setData(1,Qt::DisplayRole,ui->comboBox_levelName->currentText());
+        currentItem->setData(1,Qt::AccessibleTextRole,settings::get_levelMap(ui->comboBox_levelName->currentText()));
         currentItem->setData(2,Qt::DisplayRole,ui->spinBox_level->value());
         currentItem->setData(3,Qt::DisplayRole,ui->timeEdit_pace->time().toString(shortTime));
         currentItem->setData(4,Qt::DisplayRole,ui->lineEdit_power->text());
@@ -1205,8 +1209,10 @@ void Dialog_workCreator::on_spinBox_level_valueChanged(int value)
 
 void Dialog_workCreator::on_comboBox_levelName_currentTextChanged(const QString &level)
 {
-    ui->spinBox_level->setMinimum(this->get_thresPercent(level,false));
-    ui->spinBox_level->setMaximum(this->get_thresPercent(level,true));
+    QPair<int,int> levelMinMax = settings::get_levelRange(currentSport,level);
+
+    ui->spinBox_level->setMinimum(levelMinMax.first);
+    ui->spinBox_level->setMaximum(levelMinMax.second);
     this->refresh_editStep();
 }
 

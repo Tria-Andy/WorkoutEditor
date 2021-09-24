@@ -35,7 +35,6 @@ Activity::Activity()
 {
     fileMap = settings::getStringMapPointer(settings::stingMap::File);
     infoHeader = settings::getHeaderMap("activityinfo");
-    levels = settings::get_listValues("Level");
     this->check_activityFiles();
 }
 
@@ -220,11 +219,10 @@ bool Activity::read_jsonFile(QString jsonfile,bool fullPath)
         for(int i = 0; i < valueList.count();++i)
         {
             stgValue = valueList.at(i);
-            qDebug() << stgValue << tagData.value(stgValue);
             activityInfo.insert(stgValue,tagData.value(stgValue));
         }
         activityInfo.insert("Date",rideData.value("STARTTIME"));
-
+        levels = settings::get_sportLevel(this->get_currentSport());
         return true;
     }
     return false;
@@ -234,7 +232,7 @@ QMap<int,QVector<double>> Activity::get_xData(QPair<int,int> intKey)
 {
     QMap<int,QVector<double>> xDataValues;
 
-    for(QMap<int,QVector<double>>::const_iterator xdata = xDataValues.lowerBound(intKey.first), end = xDataValues.lowerBound(intKey.second); xdata != end; ++xdata)
+    for(QMap<int,QVector<double>>::iterator xdata = xDataValues.lowerBound(intKey.first), end = xDataValues.lowerBound(intKey.second); xdata != end; ++xdata)
     {
         xDataValues.insert(xdata.key(),xdata.value());
     }
@@ -251,7 +249,7 @@ QMap<QPair<int,QString>,QVector<double>> Activity::get_swimLapData(int intCount,
     int timezone = 0;
     int lapTime = 0;
 
-    for(QMap<int,QVector<double>>::const_iterator xdata = xDataValues.lowerBound(intKey.first), end = xDataValues.lowerBound(intKey.second); xdata != end; ++xdata)
+    for(QMap<int,QVector<double>>::iterator xdata = xDataValues.lowerBound(intKey.first), end = xDataValues.lowerBound(intKey.second); xdata != end; ++xdata)
     {
         lapTime = round(xdata.value().at(2));
 
@@ -289,7 +287,7 @@ QMap<QPair<int, QString>, QVector<double> > Activity::get_intervalData(int intCo
     intervalSum[0] = intKey.second - intKey.first;
     intervalSum[1] = sampleMap.value(intKey.second).at(0) - sampleMap.value(intKey.first).at(0);
 
-    for(QMap<int,QVector<double>>::const_iterator sampleData = sampleMap.lowerBound(intKey.first), end = sampleMap.lowerBound(intKey.second); sampleData != end; ++sampleData)
+    for(QMap<int,QVector<double>>::iterator sampleData = sampleMap.lowerBound(intKey.first), end = sampleMap.lowerBound(intKey.second); sampleData != end; ++sampleData)
     {
         intervalSum[2] = intervalSum.at(2) + sampleData.value().at(1);
         intervalSum[3] = intervalSum.at(3) + sampleData.value().at(3);
@@ -611,15 +609,15 @@ void Activity::set_swimTimeInZone(bool recalc)
 void Activity::fill_rangeLevel(bool isPower)
 {
     QPair<double,double> zoneValues;
-    QString currentValues;
+    QPair<int,int> rangeValues;
     double zoneLow = 0;
     double zoneHigh = 0;
 
     for(int i = 0; i < levels.count(); ++i)
     {
-        currentValues = settings::get_rangeValues(currentSport.toLower(),levels.at(i));
-        zoneLow = currentValues.split("-").first().toDouble();
-        zoneHigh = currentValues.split("-").last().toDouble();
+        rangeValues = settings::get_levelRange(currentSport,levels.at(i));
+        zoneLow = rangeValues.first;
+        zoneHigh = rangeValues.second;
 
         if(isPower)
         {
@@ -637,7 +635,7 @@ void Activity::fill_rangeLevel(bool isPower)
 
 QString Activity::checkRangeLevel(double lapValue)
 {
-    for(QHash<QString,QPair<double,double>>::const_iterator it = rangeLevels.cbegin(), end = rangeLevels.cend(); it != end; ++it)
+    for(QMap<QString,QPair<double,double>>::const_iterator it = rangeLevels.cbegin(), end = rangeLevels.cend(); it != end; ++it)
     {
         if(lapValue <= it.value().first && lapValue > it.value().second) return it.key();
     }
@@ -920,31 +918,20 @@ double Activity::interpolate_speed(int row,int sec,double limit)
 double Activity::polish_powerValues(double speed,double power, int avgPower)
 {
     double corrPower = power;
-    //double lowLimit = avgPower*thresValues->value("runlimit");
 
     double powerLimit = thresValues->value("runlimit");
     double speedPower = thresPower * (speed / thresSpeed);
+    double lowLimit = avgPower * powerLimit;
 
     if((power / speedPower) < powerLimit)
     {
         corrPower = round(speedPower);
 
-        if(corrPower < avgPower)
+        if(corrPower < lowLimit)
         {
-            corrPower = avgPower;
+            corrPower = lowLimit;
         }
     }
 
-    /*
-    if(power < lowLimit)
-    {
-        corrPower = ceil(thresPower*(pow(speed/thresSpeed,1.4)));
-        //qDebug() << "Corr" << speed << power << lowLimit << corrPower << avgPower;
-    }
-    else
-    {
-        //qDebug() << "Set" << speed << corrPower << avgPower;
-    }
-    */
     return corrPower;
 }

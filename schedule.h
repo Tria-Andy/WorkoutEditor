@@ -105,7 +105,7 @@ private:
     QHash<QString,double> *doubleValues;
     QHash<QString,QString> *gcValues,*fileMap;
 
-    QStringList sportTags,levelList;
+    QStringList sportTags;
     QStringList *macroTags,*scheduleTags,*saisonTags;
     QString selSaison;
 

@@ -33,7 +33,6 @@ schedule::schedule(standardWorkouts *pworkouts)
     gcValues = settings::getStringMapPointer(settings::stingMap::GC);
     fileMap = settings::getStringMapPointer(settings::stingMap::File);
     weekDays = settings::get_intValue("weekdays");
-    levelList = settings::get_listValues("Level");
     compChanged = new QAction();
 
     scheduleModel = new QStandardItemModel();
@@ -190,7 +189,7 @@ void schedule::calc_levelPlot(QDate startDate)
     QMap<int, QStringList> dayWorkouts;
     QMap<int,QString> weekWorkouts;
     QMap<int,double> zoneTime;
-    QStringList levelList = settings::get_listValues("Level");
+    QStringList levelList = settings::get_listValues("Sportlevel");
     int workoutCount = 0;
     QFont barFont;
     barFont.setPointSize(10);

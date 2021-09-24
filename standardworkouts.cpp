@@ -36,7 +36,7 @@ void standardWorkouts::fill_workoutMap()
     workoutUpdate = false;
     QStandardItem *sportItem;
     QString sportName;
-    QVector<double> loadValues(settings::get_listValues("Level").count(),0);
+    QVector<double> loadValues(settings::get_listValues("Sportlevel").count(),0);
 
     for(int sport = 0; sport < stdWorkoutsModel->rowCount(); ++sport)
     {        
@@ -131,10 +131,10 @@ void standardWorkouts::set_levelLoadValues(QStandardItem *item,QString workID,in
 {
     QVector<double> levelValues = levelLoadMap.value(workID);
 
-    int pos = settings::get_listValues("Level").indexOf(item->index().siblingAtColumn(4).data(Qt::DisplayRole).toString());
-    double levelValue = levelValues.at(pos) + (item->index().siblingAtColumn(3).data(Qt::DisplayRole).toDouble() * reps);
+    int setPos = settings::get_listValues("Sportlevel").indexOf(settings::get_levelMap(item->index().siblingAtColumn(4).data(Qt::DisplayRole).toString()));
+    double levelValue = levelValues.at(setPos) + (item->index().siblingAtColumn(3).data(Qt::DisplayRole).toDouble() * reps);
 
-    levelValues[pos] = levelValue;
+    levelValues[setPos] = levelValue;
     levelLoadMap.insert(workID,levelValues);
 }
 

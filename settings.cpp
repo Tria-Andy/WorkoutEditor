@@ -39,6 +39,7 @@ QHash<QString,QString> settings::generalMap;
 QHash<QString,QString> settings::formatMap;
 QHash<QString,QString> settings::sportMap;
 QHash<QString,QString> settings::fileMap;
+QHash<QString,QString> settings::levelMapping;
 QHash<QString,QColor> settings::colorMap;
 QHash<QString,int> settings::intMap;
 QHash<QString,QString> settings::sportIcon;
@@ -58,10 +59,12 @@ QString settings::OtherLabel;
 QHash<QString,QStringList*> settings::headerMap;
 QHash<QString,QStringList*> settings::xmlmapping;
 QHash<QString,QStringList> settings::listMap;
+QHash<QString,QStringList> settings::sportLevels;
 QHash<QString,QStringList> settings::jsonTags;
+
 QHash<QString,QMap<QString,QString>> settings::sportDistance;
 QHash<QString,QVector<double>> settings::doubleVector;
-QHash<QString,QHash<QString,QHash<QString,double>>> settings::modeMap;
+QHash<QString,QHash<QString,QHash<QString,double>>> settings::foodmodeMap;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
 QMap<QDate,double> settings::weightMap;
@@ -70,6 +73,7 @@ QHash<QString,double> settings::athleteMap;
 QHash<QString,double> settings::doubleMap;
 QHash<QString,QString> settings::triaMap;
 QHash<QString,QHash<QString,QString>> settings::rangeMap;
+QMap<QString,QMap<QString,QPair<int,int>>> settings::sportRangeMap;
 QStringList settings::keyList;
 QStringList settings::extkeyList;
 
@@ -433,20 +437,83 @@ int settings::loadSettings()
                 thresholdMap.insert("hfmax",myvalues->value("hfmax").toDouble());
             myvalues->endGroup();
 
-            myvalues->beginGroup("Level");
-                settingList = myvalues->value("levels").toString().split(splitter);
-                listMap.insert("Level",settingList);
+
+            myvalues->beginGroup("Sport");
+                settingList << myvalues->value("racesport").toString().split(splitter);
+                fill_sportDistance(&settingList,myvalues);
+                settingList.clear();
+                settingList <<  myvalues->value("sports").toString().split(splitter);
+                for(int i = 0; i < settingList.count(); ++i)
+                {
+                    sportMap.insert(settingList.at(i),settingList.at(i).toLower());
+                }
+
+                listMap.insert("Sport",myvalues->value("sports").toString().split(splitter));
+                listMap.insert("Sportuse",myvalues->value("sportuse").toString().split(splitter));
+                listMap.insert("Training",myvalues->value("training").toString().split(splitter));
+                listMap.insert("Cardio",myvalues->value("Cardio").toString().split(splitter));
+                listMap.insert("Muscular",myvalues->value("muscluar").toString().split(splitter));
+                listMap.insert("Program",myvalues->value("powerprogram").toString().split(splitter));
+                listMap.insert("Equipment",myvalues->value("equipment").toString().split(splitter));
                 settingString = myvalues->value("color").toString();
+                settings::fill_mapColor(&settingList,&settingString,false);
+            myvalues->endGroup();
+
+            for(int i = 0; i < settingList.count(); ++i)
+            {
+                if(settingList.at(i) == "Swim") SwimLabel = settingList.at(i);
+                else if(settingList.at(i) == "Bike") BikeLabel = settingList.at(i);
+                else if(settingList.at(i) == "Run") RunLabel = settingList.at(i);
+                else if(settingList.at(i) == "Ropejump") JumpLabel = settingList.at(i);
+                else if(settingList.at(i) == "Strength" || settingList.at(i) == "Power") StrengthLabel = settingList.at(i);
+                else if(settingList.at(i) == "Alt" || settingList.at(i) == "Alternative") AltLabel = settingList.at(i);
+                else if(settingList.at(i) == "Tria" || settingList.at(i) == "Triathlon") TriaLabel = settingList.at(i);
+                else if(settingList.at(i) == "Ath" || settingList.at(i) == "Athletic") AthLabel = settingList.at(i);
+                else if(settingList.at(i) == "Other") OtherLabel = settingList.at(i);
+            }
+
+
+            myvalues->beginGroup("Level");
+                settingList = myvalues->value("sportlevel").toString().split(splitter);
+                listMap.insert("Sportlevel",settingList);
+                settingString = myvalues->value("levelcolor").toString();
                 settings::fill_mapColor(&settingList,&settingString,true);
+
+                for(int i = 0; i < settingList.count(); ++i)
+                {
+                    tempList = myvalues->value(settingList.at(i)).toString().split(splitter);
+                    for(int x = 0; x < tempList.count(); ++x)
+                    {
+                        levelMapping.insert(tempList.at(x),settingList.at(i));
+                    }
+                }
+
+                for(QHash<QString,QString>::const_iterator it = sportMap.cbegin(); it != sportMap.cend(); ++it)
+                {
+                    settingList = myvalues->value(it.value()).toString().split(splitter);
+                    sportLevels.insert(it.key(),settingList);
+                }
+
                 settingList.clear();
             myvalues->endGroup();
 
             myvalues->beginGroup("Range");
                 settingList = myvalues->allKeys();
 
-                for(int i = 0; i < settingList.count(); ++i)
+                QMap<QString,QPair<int,int>> ranges;
+                QPair<int,int> rangeStep;
+
+                for(QHash<QString,QString>::const_iterator it = sportMap.cbegin(); it != sportMap.cend(); ++it)
                 {
-                    rangeMap.insert(settingList.at(i),settings::set_rangeLevel(myvalues->value(settingList.at(i)).toString()));
+                    settingList = myvalues->value(it.value()).toString().split(splitter);
+                    for(int i = 0; i < settingList.count(); ++i)
+                    {
+                        rangeStep.first = settingList.at(i).split("-").first().toInt();
+                        rangeStep.second = settingList.at(i).split("-").last().toInt();
+                        ranges.insert(sportLevels.value(it.key()).at(i),rangeStep);
+                    }
+                    sportRangeMap.insert(it.key(),ranges);
+                    ranges.clear();
                 }
             myvalues->endGroup();
 
@@ -492,6 +559,10 @@ int settings::loadSettings()
                 listMap.insert("Mode",settingList);
                 settingList.clear();
 
+                settingList = myvalues->value("macroname").toString().split(splitter);
+                listMap.insert("macroname",settingList);
+                settingList.clear();
+
                 settingList = myvalues->value("lossborder").toString().split(splitter);
                 listMap.insert("lossborder",settingList);
                 settingList.clear();
@@ -504,17 +575,34 @@ int settings::loadSettings()
                 listMap.insert("modemacros",settingList);
                 settingList.clear();
 
+
+                settingList = myvalues->value("modemacros").toString().split(splitter);
+                for(int i = 0; i < listMap.value("Mode").count(); i++)
+                {
+                    settingString = settingList.at(i);
+                    tempList = settingString.split("|");
+                    for(int x = 0; x < listMap.value("macroname").count(); ++x)
+                    {
+                        tempMap.insert(listMap.value("macroname").at(x),tempList.at(x).toDouble());
+                    }
+                    modeTempMap.insert("modemacros",tempMap);
+                    foodmodeMap.insert(listMap.value("Mode").at(i),modeTempMap);
+                }
+                tempMap.clear();
+                modeTempMap.clear();
+
                 settingList = myvalues->value("losspercent").toString().split(splitter);
                 for(int i = 0; i < listMap.value("Mode").count(); i++)
                 {
                     settingString = settingList.at(i);
                     tempList = settingString.split("|");
+                    modeTempMap = foodmodeMap.value(listMap.value("Mode").at(i));
                     for(int x = 0; x < listMap.value("lossborder").count(); ++x)
                     {
                         tempMap.insert(listMap.value("lossborder").at(x),tempList.at(x).toDouble());
                     }
                     modeTempMap.insert("losspercent",tempMap);
-                    modeMap.insert(listMap.value("Mode").at(i),modeTempMap);
+                    foodmodeMap.insert(listMap.value("Mode").at(i),modeTempMap);
                 }
                 tempMap.clear();
                 modeTempMap.clear();
@@ -524,13 +612,13 @@ int settings::loadSettings()
                 {
                     settingString = settingList.at(i);
                     tempList = settingString.split("|");
-                    modeTempMap = modeMap.value(listMap.value("Mode").at(i));
+                    modeTempMap = foodmodeMap.value(listMap.value("Mode").at(i));
                     for(int x = 0; x < listMap.value("modeborder").count(); ++x)
                     {
                         tempMap.insert(listMap.value("modeborder").at(x),tempList.at(x).toDouble());
                     }
                     modeTempMap.insert("modepercent",tempMap);
-                    modeMap.insert(listMap.value("Mode").at(i),modeTempMap);
+                    foodmodeMap.insert(listMap.value("Mode").at(i),modeTempMap);
                 }
 
                 for(int i = 0; i < listMap.value("Mode").count(); i++)
@@ -557,8 +645,6 @@ int settings::loadSettings()
                 settingList.clear();
                 settingList = myvalues->value("mealdefault").toString().split(splitter);
                 doubleVector.insert("Mealdefault",set_doubleValues(&settingList));
-                settingList = myvalues->value("macros").toString().split(splitter);
-                doubleVector.insert("Macros",set_doubleValues(&settingList));
                 settingList = myvalues->value("macroheader").toString().split(splitter);
                 listMap.insert("MacroHeader",settingList);
                 settingString = myvalues->value("macrocolor").toString();
@@ -605,35 +691,6 @@ int settings::loadSettings()
                 intMap.insert("weekrange",myvalues->value("weekrange").toInt());
                 intMap.insert("weekdays",myvalues->value("weekdays").toInt());
             myvalues->endGroup();
-
-            myvalues->beginGroup("Sport");
-                settingList << myvalues->value("racesport").toString().split(splitter);
-                fill_sportDistance(&settingList,myvalues);
-                settingList.clear();
-                settingList <<  myvalues->value("sports").toString().split(splitter);
-                listMap.insert("Sport",myvalues->value("sports").toString().split(splitter));
-                listMap.insert("Sportuse",myvalues->value("sportuse").toString().split(splitter));
-                listMap.insert("Training",myvalues->value("training").toString().split(splitter));
-                listMap.insert("Cardio",myvalues->value("Cardio").toString().split(splitter));
-                listMap.insert("Muscular",myvalues->value("muscluar").toString().split(splitter));
-                listMap.insert("Program",myvalues->value("powerprogram").toString().split(splitter));
-                listMap.insert("Equipment",myvalues->value("equipment").toString().split(splitter));
-                settingString = myvalues->value("color").toString();
-                settings::fill_mapColor(&settingList,&settingString,false);
-            myvalues->endGroup();
-
-            for(int i = 0; i < settingList.count(); ++i)
-            {
-                if(settingList.at(i) == "Swim") SwimLabel = settingList.at(i);
-                else if(settingList.at(i) == "Bike") BikeLabel = settingList.at(i);
-                else if(settingList.at(i) == "Run") RunLabel = settingList.at(i);
-                else if(settingList.at(i) == "Ropejump") JumpLabel = settingList.at(i);
-                else if(settingList.at(i) == "Strength" || settingList.at(i) == "Power") StrengthLabel = settingList.at(i);
-                else if(settingList.at(i) == "Alt" || settingList.at(i) == "Alternative") AltLabel = settingList.at(i);
-                else if(settingList.at(i) == "Tria" || settingList.at(i) == "Triathlon") TriaLabel = settingList.at(i);
-                else if(settingList.at(i) == "Ath" || settingList.at(i) == "Athletic") AthLabel = settingList.at(i);
-                else if(settingList.at(i) == "Other") OtherLabel = settingList.at(i);
-            }
 
             sportIcon.insert(generalMap.value("sum"),":/images/icons/Summery.png");
             sportIcon.insert(SwimLabel,":/images/icons/Swimming.png");

@@ -29,14 +29,17 @@ public:
         painter->save();
         const QAbstractItemModel *model = index.model();
 
-        QString levelName;        
+        QString levelName,intName;
+
         if(index.parent().isValid())
         {
-            levelName = model->index(index.row(),1,index.parent()).data().toString();
+            levelName = model->index(index.row(),1,index.parent()).data(Qt::AccessibleTextRole).toString();
+            intName = model->index(index.row(),1,index.parent()).data(Qt::DisplayRole).toString();
         }
         else
         {
-            levelName = model->data(model->index(index.row(),1,QModelIndex())).toString();
+            levelName = model->index(index.row(),1).data(Qt::AccessibleTextRole).toString();
+            intName = model->index(index.row(),1).data(Qt::DisplayRole).toString();
         }
 
         QLinearGradient itemGradient(option.rect.topLeft(),option.rect.bottomLeft());

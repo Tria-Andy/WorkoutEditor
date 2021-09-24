@@ -47,6 +47,7 @@ protected:
 private:
     QString workoutImage;
     QHash<QString,QString> *fileMap;
+    QHash<QString,QStringList> sportLevelMap;
     QHash<QString,QHash<QString,QVector<QString>>> workoutMap;
     QHash<QString,QModelIndex> workoutIndex;
     QHash<QString,QString> workoutMapping;

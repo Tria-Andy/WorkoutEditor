@@ -968,7 +968,7 @@
                   <widget class="QWidget" name="widget_stressPlot" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                     <horstretch>2</horstretch>
+                     <horstretch>3</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
@@ -995,7 +995,7 @@
                   <widget class="QWidget" name="widget_distribution" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                     <horstretch>1</horstretch>
+                     <horstretch>2</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
@@ -2883,8 +2883,8 @@
                       <rect>
                        <x>0</x>
                        <y>0</y>
-                       <width>303</width>
-                       <height>200</height>
+                       <width>98</width>
+                       <height>71</height>
                       </rect>
                      </property>
                      <attribute name="label">
@@ -2940,8 +2940,8 @@
                       <rect>
                        <x>0</x>
                        <y>0</y>
-                       <width>303</width>
-                       <height>200</height>
+                       <width>98</width>
+                       <height>71</height>
                       </rect>
                      </property>
                      <attribute name="label">
@@ -2979,8 +2979,8 @@
                       <rect>
                        <x>0</x>
                        <y>0</y>
-                       <width>303</width>
-                       <height>200</height>
+                       <width>98</width>
+                       <height>71</height>
                       </rect>
                      </property>
                      <attribute name="label">

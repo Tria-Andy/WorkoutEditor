@@ -40,6 +40,7 @@ private:
 
     static QMap<QDate,double> weightMap;
     static QHash<QString,QHash<QString,QString>> rangeMap;
+    static QMap<QString,QMap<QString,QPair<int,int>>> sportRangeMap;
     static QHash<QString,QMap<QString,int>> macroMap;
 
     //Getter
@@ -57,9 +58,9 @@ private:
 
 protected:
     static QHash<QString,double> thresholdMap,athleteMap,doubleMap;
-    static QHash<QString,QString> generalMap,gcInfo,sportMap,triaMap,formatMap,fileMap;
+    static QHash<QString,QString> generalMap,gcInfo,sportMap,triaMap,formatMap,fileMap,levelMapping;
     static QHash<QString,QColor> colorMap;
-    static QHash<QString,QStringList> listMap,jsonTags;
+    static QHash<QString,QStringList> listMap,jsonTags,sportLevels;
     static QHash<QString,QMap<QString,QString>> sportDistance;
     static QStringList keyList,extkeyList;
     static QHash<QString,int> intMap;
@@ -75,16 +76,23 @@ public:
     static QPair<int,int> screenSize;
     //QMap/QHash Getter
     static QHash<QString,QColor> get_colorMap() {return colorMap;}
+    static QString get_generalValue(QString key) {return generalMap.value(key);}
     static QHash<QString,QVector<double>> doubleVector;
-    static QHash<QString,QHash<QString,QHash<QString,double>>> modeMap;
+    static QHash<QString,QHash<QString,QHash<QString,double>>> foodmodeMap;
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
     static QString get_rangeValues(QString key,QString value) {return rangeMap.value(key).value(value);}
+    static QPair<int,int> get_levelRange(QString sport,QString level) {return sportRangeMap.value(sport).value(level);}
+    static QMap<QString,QPair<int,int>> get_sportLevels(QString sport) {return sportRangeMap.value(sport);}
     static QString get_format(QString key) {return formatMap.value(key);}
     static QStringList get_listValues(QString key) {return listMap.value(key);}
     static QMap<QString,QString> get_sportDistance(QString key) {return sportDistance.value(key);}
     static QStringList get_jsonTags(QString key) {return jsonTags.value(key);}
     static QStringList* getHeaderMap(QString key){return headerMap.value(key);}
     static QStringList* get_xmlMapping(QString key) {return xmlmapping.value(key);}
+    static QString get_levelMap(QString level) {return levelMapping.value(level);}
+    static QStringList get_sportLevel(QString sport){return sportLevels.value(sport);}
+    static QHash<QString,QHash<QString,double>> get_foodModeValues(QString foodMode) {return foodmodeMap.value(foodMode);}
+
 
     static int get_fontValue(QString key) {return intMap.value(key);}
     static int get_intValue(QString key) {return intMap.value(key);}

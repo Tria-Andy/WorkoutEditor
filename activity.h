@@ -37,7 +37,7 @@ private:
     QMap<int,QVector<double>> polishData;
     QMap<int,QStringList> itemHeader,avgHeader;
     QHash<QString,int> paceTimeInZone,hfTimeInZone,hfZoneAvg;
-    QHash<QString,QPair<double,double>> rangeLevels;
+    QMap<QString,QPair<double,double>> rangeLevels;
     QHash<QString,QVector<double>> swimHFZoneFactor;
     QStringList levels;
     double polishFactor,hfMax,actWeight;
