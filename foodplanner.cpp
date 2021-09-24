@@ -20,11 +20,6 @@ foodplanner::foodplanner(schedule *p_Schedule)
     fileMap = settings::getStringMapPointer(settings::stingMap::File);
     doubleValues = settings::getdoubleMapPointer(settings::dMap::Double);
 
-    dayListHeader << "Cal (%)"
-                  << "Carbs ("+QString::number(settings::doubleVector.value("Macros").at(0))+"%)"
-                  << "Protein ("+QString::number(settings::doubleVector.value("Macros").at(1))+"%)"
-                  << "Fat ("+QString::number(settings::doubleVector.value("Macros").at(2))+"%)";
-
     for(int d = 1; d < 8; ++d)
     {
         dayHeader << QLocale().dayName(d);
@@ -393,6 +388,18 @@ void foodplanner::add_ingredient(QString section, QString foodName,QVector<doubl
     sectionItem->appendRow(itemList);
 }
 
+void foodplanner::set_dayListHeader(QString foodMode)
+{
+    dayListHeader.clear();
+    QHash<QString,double> macroValues = settings::get_foodModeValues(foodMode).value("modemacros");
+    QStringList macroNames = settings::get_listValues("macroname");
+
+    dayListHeader << "Cal (%)"
+                  << macroNames.at(0)+" ("+QString::number(macroValues.value(macroNames.at(0)))+"%)"
+                  << macroNames.at(1)+" ("+QString::number(macroValues.value(macroNames.at(1)))+"%)"
+                  << macroNames.at(2)+" ("+QString::number(macroValues.value(macroNames.at(2)))+"%)";
+}
+
 void foodplanner::update_ingredient(QString ingredID,QString name,QVector<double> values,int modelID)
 {
     QModelIndex index;
@@ -565,14 +572,15 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
     QStandardItem *weekItem = this->get_modelItem(summeryModel,calc_weekID(day),0);
     dayItem = weekItem->child(day.dayOfWeek()-1,0);
 
-    QVector<double> percent = settings::doubleVector.value(dayItem->data(Qt::AccessibleTextRole).toString());
-    double factor = ((percent.at(1) + percent.at(2)) / 2) / 100.0;
+    QHash<QString,QHash<QString,double>> foodModeValues = settings::get_foodModeValues(dayItem->data(Qt::AccessibleTextRole).toString());
+
+    double factor = ((foodModeValues.value("modepercent").value("high") + foodModeValues.value("modepercent").value("low")) / 2) / 100.0;
     double maxCalories = round(sumValues.at(3) - (sumValues.at(3) * factor));
-    double carbTarget = round(maxCalories * (settings::doubleVector.value("Macros").at(0) / 100.0) / 4.1);
+    double carbTarget = round(maxCalories * (foodModeValues.value("modemacros").value("Carbs") / 100.0) / 4.1);
 
     macroValues[0] = carbTarget;
-    macroValues[1] = round(maxCalories * (settings::doubleVector.value("Macros").at(1) / 100.0) / 4.1);
-    macroValues[2] = round(maxCalories * (settings::doubleVector.value("Macros").at(2) / 100.0) / 9.3);
+    macroValues[1] = round(maxCalories * (foodModeValues.value("modemacros").value("Protein") / 100.0) / 4.1);
+    macroValues[2] = round(maxCalories * (foodModeValues.value("modemacros").value("Fat") / 100.0) / 9.3);
     macroValues[3] = round(carbTarget * (doubleValues->value("DayFiber")));
     macroValues[4] = round(carbTarget * (doubleValues->value("DaySugar")));
 

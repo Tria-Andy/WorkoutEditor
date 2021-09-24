@@ -483,7 +483,7 @@ double calculation::current_dayCalories(QDate calcDate) const
         double age = QDate::currentDate().year() - athleteValues->value("yob");
         int sF = athleteValues->value("sex") == 0.0 ? 5 : -161;
 
-        return round((10*weight)+(6.25*height)-(5*age)+sF);
+        return round((9.99*weight)+(6.25*height)-(4.92*age)+sF);
     }
     if(calMethode == 1)
     {

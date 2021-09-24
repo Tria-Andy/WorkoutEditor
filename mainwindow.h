@@ -506,17 +506,7 @@ public:
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
-        QString lapName;
-        QString breakName = "Break";
-        QStringList levels = settings::get_listValues("Level");
-        QString levelName = breakName;
-
-        lapName = index.siblingAtColumn(0).data(Qt::DisplayRole).toString();
-
-        for(int i = 0; i < levels.count(); ++i)
-        {
-            if(lapName.contains(levels.at(i))) levelName = levels.at(i);
-        }
+        QString levelName = index.siblingAtColumn(0).data(Qt::AccessibleDescriptionRole).toString();
 
         QLinearGradient rowGradient(option.rect.topLeft(),option.rect.bottomLeft());
         rowGradient.setSpread(QGradient::RepeatSpread);
@@ -534,7 +524,7 @@ public:
             rowColor = settings::get_itemColor(levelName).toHsv();
             rowColor.setAlpha(100);
 
-            if(lapName == breakName)
+            if(levelName == settings::get_generalValue("breakname"))
             {
                 painter->setPen(Qt::white);
             }
@@ -833,7 +823,6 @@ public:
             painter->setPen(Qt::black);
         }
 
-
         itemGradient.setColorAt(0,gradColor);
         itemGradient.setColorAt(1,itemColor);
         painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
@@ -847,25 +836,25 @@ public:
 
     QPair<int,QColor> get_color(int dataValue, int dayCal,QString mode) const
     {
-        QVector<double> percent = settings::doubleVector.value(mode);
+        QHash<QString,double> modePercent = settings::get_foodModeValues(mode).value("modepercent");
         QPair<int,QColor> colorMap;
 
-        if(dataValue >= (dayCal*(percent.at(0)/100.0)))
+        if(dataValue >= (dayCal*(modePercent.value("max")/100.0)))
         {
             colorMap.first = 0;
             colorMap.second = settings::get_itemColor("max").toHsv();
         }
-        if(dataValue < (dayCal*(percent.at(0)/100.0)) && dataValue > (dayCal*(percent.at(1)/100.0)))
+        if(dataValue < (dayCal*(modePercent.value("max")/100.0)) && dataValue > (dayCal*(modePercent.value("high")/100.0)))
         {
             colorMap.first = 1;
             colorMap.second = settings::get_itemColor("high").toHsv();
         }
-        if(dataValue <= (dayCal*(percent.at(1)/100.0)) && dataValue > (dayCal*(percent.at(2)/100.0)))
+        if(dataValue <= (dayCal*(modePercent.value("high")/100.0)) && dataValue > (dayCal*(modePercent.value("low")/100.0)))
         {
             colorMap.first = 2;
             colorMap.second = settings::get_itemColor("low").toHsv();
         }
-        if(dataValue <= (dayCal*(percent.at(2)/100.0)))
+        if(dataValue <= (dayCal*(modePercent.value("low")/100.0)))
         {
             colorMap.first = 3;
             colorMap.second = settings::get_itemColor("min").toHsv();
@@ -890,10 +879,9 @@ public:
         foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
 
-        QString foodMode = index.data(Qt::UserRole).toString();
-
-        QVector<double> percent = settings::doubleVector.value(foodMode);
-        QHash<QString,double> lossMap = settings::modeMap.value(foodMode).value("losspercent");
+        QHash<QString,QHash<QString,double>> foodModeMap = settings::get_foodModeValues(index.data(Qt::UserRole).toString());
+        QHash<QString,double> lossMap = foodModeMap.value("losspercent");
+        QHash<QString,double> modePercent = foodModeMap.value("modepercent");
 
         int weekCal = index.model()->data(index.model()->index(6,index.column())).toInt();
         int avgDiff = index.model()->data(index.model()->index(5,index.column())).toInt();
@@ -918,22 +906,22 @@ public:
         }
         else if(index.row() == 7)
         {
-            if(index.data().toInt() >= (weekCal*(percent.at(0)/100.0)))
+            if(index.data().toInt() >= (weekCal*(modePercent.value("max")/100.0)))
             {
                 itemColor = settings::get_itemColor("max").toHsv();
                 painter->setPen(Qt::black);
             }
-            if(index.data().toInt() < (weekCal*(percent.at(0)/100.0)) && index.data().toInt() > (weekCal*(percent.at(1)/100.0)))
+            if(index.data().toInt() < (weekCal*(modePercent.value("max")/100.0)) && index.data().toInt() > (weekCal*(modePercent.value("high")/100.0)))
             {
                 itemColor = settings::get_itemColor("high").toHsv();
                 painter->setPen(Qt::black);
             }
-            if(index.data().toInt() <= (weekCal*(percent.at(1)/100.0)) && index.data().toInt() > (weekCal*(percent.at(2)/100.0)))
+            if(index.data().toInt() <= (weekCal*(modePercent.value("high")/100.0)) && index.data().toInt() > (weekCal*(modePercent.value("low")/100.0)))
             {
                 itemColor = settings::get_itemColor("low").toHsv();
                 painter->setPen(Qt::black);
             }
-            if(index.data().toInt() <= (weekCal*(percent.at(2)/100.0)))
+            if(index.data().toInt() <= (weekCal*(modePercent.value("low")/100.0)))
             {
                 itemColor = settings::get_itemColor("min").toHsv();
                 painter->setPen(Qt::black);
@@ -941,22 +929,22 @@ public:
         }
         else if(index.row() == 8)
         {
-            if((index.data().toInt()*-1) >= (avgDiff*(percent.at(0)/100.0)))
+            if((index.data().toInt()*-1) >= (avgDiff*(modePercent.value("max")/100.0)))
             {
                 itemColor = settings::get_itemColor("max").toHsv();
                 painter->setPen(Qt::black);
             }
-            if((index.data().toInt()*-1) < (avgDiff*(percent.at(0)/100.0)) && (index.data().toInt()*-1) > (avgDiff*(percent.at(1)/100.0)))
+            if((index.data().toInt()*-1) < (avgDiff*(modePercent.value("max")/100.0)) && (index.data().toInt()*-1) > (avgDiff*(modePercent.value("high")/100.0)))
             {
                 itemColor = settings::get_itemColor("high").toHsv();
                 painter->setPen(Qt::black);
             }
-            if((index.data().toInt()*-1) <= (avgDiff*(percent.at(1)/100.0)) && (index.data().toInt()*-1) > (avgDiff*(percent.at(2)/100.0)))
+            if((index.data().toInt()*-1) <= (avgDiff*(modePercent.value("high")/100.0)) && (index.data().toInt()*-1) > (avgDiff*(modePercent.value("low")/100.0)))
             {
                 itemColor = settings::get_itemColor("low").toHsv();
                 painter->setPen(Qt::black);
             }
-            if((index.data().toInt()*-1) <= (avgDiff*(percent.at(2)/100.0)))
+            if((index.data().toInt()*-1) <= (avgDiff*(modePercent.value("low")/100.0)))
             {
                 itemColor = settings::get_itemColor("min").toHsv();
                 painter->setPen(Qt::black);
@@ -1022,6 +1010,8 @@ public:
         painter->setFont(foodFont);
 
         double percent = index.data(Qt::UserRole).toDouble();
+        QHash<QString,double> modePercent = settings::get_foodModeValues(index.data(Qt::AccessibleTextRole).toString()).value("modemacros");
+        qDebug() << modePercent;
         double macroRange = settings::getdoubleMapPointer(settings::dMap::Double)->value("Macrorange")/100.0;
         gradColor.setHsv(0,0,200,150);
 
@@ -1039,25 +1029,23 @@ public:
             }
             else
             {
-                double perHigh = settings::doubleVector.value("Macros").at(index.column()-1);
-                double perLow = perHigh - perHigh*macroRange;
-                perHigh = perHigh + perHigh*macroRange;
+                QPair<QColor,QColor> macroColor;
 
-                if(percent < perLow)
-                {
-                    itemColor.setHsv(60,255,255,255);
-                    painter->setPen(Qt::black);
+                if(index.column() == 1)
+                {                    
+                    macroColor = check_MacroValue(percent,modePercent.value("Carbs"),macroRange);
                 }
-                else if(percent <= perHigh && percent >= perLow)
+                if(index.column() == 2)
                 {
-                    itemColor.setHsv(120,255,170,255);
-                    painter->setPen(Qt::black);
+                    macroColor = check_MacroValue(percent,modePercent.value("Protein"),macroRange);
                 }
-                else if(percent > perHigh)
+                if(index.column() == 3)
                 {
-                    itemColor.setHsv(0,255,255,255);
-                    painter->setPen(Qt::white);
+                    macroColor = check_MacroValue(percent,modePercent.value("Fat"),macroRange);
                 }
+
+                itemColor = macroColor.first;
+                painter->setPen(macroColor.second);
             }
         }
 
@@ -1071,6 +1059,37 @@ public:
 
         painter->restore();
     }
+
+    QPair<QColor,QColor> check_MacroValue(double percent,double macroValue,double range) const
+    {
+        QPair<QColor,QColor> macroColor;
+        double borderLow = macroValue - (macroValue*range);
+        double borderHigh = macroValue + (macroValue*range);
+
+        if(percent < borderLow)
+        {
+            macroColor.first.setHsv(60,255,255,255);
+            macroColor.second = Qt::black;
+        }
+        else if(percent <= borderHigh && percent>= borderLow)
+        {
+            macroColor.first.setHsv(120,255,170,255);
+            macroColor.second = Qt::black;
+        }
+        else if(percent > borderHigh)
+        {
+            macroColor.first.setHsv(0,255,255,255);
+            macroColor.second = Qt::white;
+        }
+        else
+        {
+            macroColor.first.setHsv(125,125,125,125);
+            macroColor.second = Qt::black;
+        }
+
+        return macroColor;
+    }
+
 };
 
 namespace Ui {

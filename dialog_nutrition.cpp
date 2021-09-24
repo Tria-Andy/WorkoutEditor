@@ -314,13 +314,13 @@ void Dialog_nutrition::calc_recipeValues()
     }
 
     ui->label_gramms->setText(QString::number(foodValues.at(0)));
-    ui->label_calories->setText(QString::number(round(foodValues.at(1))));
+    ui->label_calories->setText(QString::number(ceil(foodValues.at(1))));
 
-    ui->label_carbs->setText(QString::number(round(foodValues.at(2))));
-    ui->label_protein->setText(QString::number(round(foodValues.at(3))));
-    ui->label_fat->setText(QString::number(round(foodValues.at(4))));
-    ui->label_fiber->setText(QString::number(round(foodValues.at(5))));
-    ui->label_sugar->setText(QString::number(round(foodValues.at(6))));
+    ui->label_carbs->setText(QString::number(ceil(foodValues.at(2))));
+    ui->label_protein->setText(QString::number(ceil(foodValues.at(3))));
+    ui->label_fat->setText(QString::number(ceil(foodValues.at(4))));
+    ui->label_fiber->setText(QString::number(ceil(foodValues.at(5))));
+    ui->label_sugar->setText(QString::number(ceil(foodValues.at(6))));
 }
 
 void Dialog_nutrition::clear_recipeInfo()

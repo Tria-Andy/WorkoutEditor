@@ -439,7 +439,7 @@ void MainWindow::fill_foodSumTable(QDate startDate)
     QStandardItem *weekItem;
     QPair<double,double> minMax,calcWeight;
     QString mode = foodPlan->get_mode(startDate);
-    QHash<QString,double> lossMap = settings::modeMap.value(mode).value("losspercent");
+    QHash<QString,double> lossMap = settings::foodmodeMap.value(mode).value("losspercent");
     minMax.first = settings::doubleVector.value(mode).at(2)/100.0;
     minMax.second = settings::doubleVector.value(mode).at(1)/100.0;
     QVector<double> weekValues(5,0);
@@ -1611,10 +1611,12 @@ void MainWindow::set_activityTree()
                 if(currActivity->usePMData)
                 {
                     lapWork = currActivity->calc_totalWork(lapsStart.value().at(3),lapsStart.value().at(0),0);
+                    intItem->setData(0,Qt::AccessibleDescriptionRole,settings::get_levelMap(currActivity->checkRangeLevel(round(lapsStart.value().at(3)))));
                 }
                 else
                 {
                     lapWork = currActivity->calc_totalWork(lapPace,lapsStart.value().at(0),0);
+                    intItem->setData(0,Qt::AccessibleDescriptionRole,settings::get_levelMap(currActivity->checkRangeLevel(lapPace)));
                 }
 
                 if(currActivity->isBike || currActivity->isRun)
@@ -3226,6 +3228,10 @@ void MainWindow::selectFoodDay(int selectedDay)
         foodPlan->fill_copyMap(item->data(Qt::UserRole).toDate(),foodPlan->mealsHeader.at(section),false);
     }
 
+    QString foodMode = ui->listWidget_weekPlans->currentItem()->data(Qt::AccessibleDescriptionRole).toString();
+
+    foodPlan->set_dayListHeader(foodMode);
+
     ui->frame_dayShow->setVisible(true);
     ui->frame_menuEdit->setVisible(false);
     ui->tableWidget_selectedSection->clearContents();
@@ -3240,7 +3246,6 @@ void MainWindow::selectFoodDay(int selectedDay)
     QVector<double> sumCalories(4,0);
     QMap<int,QVector<double>> sumMap;
     int fiberSum = 0;
-
 
     QStandardItem *dayItem = foodPlan->get_proxyItem(0)->child(selectedDay,0);
     QStandardItem *sectionItem;
@@ -3285,6 +3290,7 @@ void MainWindow::selectFoodDay(int selectedDay)
             item = new QTableWidgetItem();
             item->setData(Qt::DisplayRole,QString::number(it.value().at(col))+" ("+QString::number(percent)+")");
             item->setData(Qt::UserRole,percent);
+            item->setData(Qt::AccessibleTextRole,foodMode);
             ui->tableWidget_selectedSection->setItem(it.key(),col,item);
         }
     }

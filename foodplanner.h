@@ -42,6 +42,7 @@ public:
     void update_foodPlanModel(QDate,QString,QMap<int,QList<QStandardItem*>>);
     void update_ingredient(QString,QString,QVector<double>,int);
     void add_ingredient(QString, QString,QVector<double>,int);
+    void set_dayListHeader(QString);
 
     void set_currentWeek(QDate);
     void update_fromSchedule();
