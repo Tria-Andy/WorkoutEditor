@@ -41,7 +41,7 @@ private:
     static QMap<QDate,double> weightMap;
     static QHash<QString,QHash<QString,QString>> rangeMap;
     static QMap<QString,QMap<QString,QPair<int,int>>> sportRangeMap;
-    static QHash<QString,QMap<QString,int>> macroMap;
+    static QMap<QString,QPair<double,double>> macroMap;
 
     //Getter
     static QColor get_colorRGB(QString,bool);
@@ -79,6 +79,7 @@ public:
     static QString get_generalValue(QString key) {return generalMap.value(key);}
     static QHash<QString,QVector<double>> doubleVector;
     static QHash<QString,QHash<QString,QHash<QString,double>>> foodmodeMap;
+    static QMap<QString,QPair<double,double>> get_macroMap(){return macroMap;}
     static QColor get_itemColor(QString key) {return colorMap.value(key);}
     static QString get_rangeValues(QString key,QString value) {return rangeMap.value(key).value(value);}
     static QPair<int,int> get_levelRange(QString sport,QString level) {return sportRangeMap.value(sport).value(level);}

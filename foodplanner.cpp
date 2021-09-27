@@ -515,7 +515,12 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
         sportMinutes = sportMinutes + (it.value().at(1)/60.0);
     }
 
-    sumValues[1] = ceil(((minutes - sportMinutes) * calMinute)+epoc);
+    int macroTEF = 0;
+    macroTEF = round((sumValues.at(5) * settings::get_macroMap().value("Carbs").first)*settings::get_macroMap().value("Carbs").second);
+    macroTEF = macroTEF + round((sumValues.at(6) * settings::get_macroMap().value("Protein").first)*settings::get_macroMap().value("Protein").second);
+    macroTEF = macroTEF +round((sumValues.at(7) * settings::get_macroMap().value("Fat").first)*settings::get_macroMap().value("Fat").second);
+
+    sumValues[1] = ceil(((minutes - sportMinutes) * calMinute)+epoc+macroTEF);
     sumValues[3] = sumValues.at(1) + sumValues.at(2);
     sumValues[4] = sumValues.at(3) - sumValues.at(0);
 
@@ -537,7 +542,6 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
             for(QMap<QDateTime,QPair<double,double>>::iterator it = estWeightMap.find(weightDay); it != estWeightMap.end(); ++it)
             {
                 weightChange.second = it.operator-(1).value().second + weightChange.first;
-                //weightChange.second = estWeightMap.value(it.key().addDays(-1)).second + weightChange.first;
                 weightChange.first = it.value().first;
                 estWeightMap.insert(it.key(),weightChange);
             }
@@ -576,11 +580,11 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
 
     double factor = ((foodModeValues.value("modepercent").value("high") + foodModeValues.value("modepercent").value("low")) / 2) / 100.0;
     double maxCalories = round(sumValues.at(3) - (sumValues.at(3) * factor));
-    double carbTarget = round(maxCalories * (foodModeValues.value("modemacros").value("Carbs") / 100.0) / 4.1);
+    double carbTarget = round(maxCalories * (foodModeValues.value("modemacros").value("Carbs") / 100.0) / settings::get_macroMap().value("Carbs").first);
 
     macroValues[0] = carbTarget;
-    macroValues[1] = round(maxCalories * (foodModeValues.value("modemacros").value("Protein") / 100.0) / 4.1);
-    macroValues[2] = round(maxCalories * (foodModeValues.value("modemacros").value("Fat") / 100.0) / 9.3);
+    macroValues[1] = round(maxCalories * (foodModeValues.value("modemacros").value("Protein") / 100.0) / settings::get_macroMap().value("Protein").first);
+    macroValues[2] = round(maxCalories * (foodModeValues.value("modemacros").value("Fat") / 100.0) / settings::get_macroMap().value("Fat").first);
     macroValues[3] = round(carbTarget * (doubleValues->value("DayFiber")));
     macroValues[4] = round(carbTarget * (doubleValues->value("DaySugar")));
 

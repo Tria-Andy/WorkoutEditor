@@ -65,6 +65,7 @@ QHash<QString,QStringList> settings::jsonTags;
 QHash<QString,QMap<QString,QString>> settings::sportDistance;
 QHash<QString,QVector<double>> settings::doubleVector;
 QHash<QString,QHash<QString,QHash<QString,double>>> settings::foodmodeMap;
+QMap<QString,QPair<double,double>> settings::macroMap;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
 QMap<QDate,double> settings::weightMap;
@@ -555,12 +556,15 @@ int settings::loadSettings()
             QHash<QString,double> tempMap;
             QHash<QString,QHash<QString,double>> modeTempMap;
 
-                settingList = myvalues->value("mode").toString().split(splitter);
-                listMap.insert("Mode",settingList);
+                settingList = myvalues->value("macroname").toString().split(splitter);
+                macroMap.insert(settingList.at(0),qMakePair(myvalues->value("macrocals").toString().split(splitter).at(0).toDouble(),myvalues->value("macrotef").toString().split(splitter).at(0).toDouble()/100.0));
+                macroMap.insert(settingList.at(1),qMakePair(myvalues->value("macrocals").toString().split(splitter).at(1).toDouble(),myvalues->value("macrotef").toString().split(splitter).at(1).toDouble()/100.0));
+                macroMap.insert(settingList.at(2),qMakePair(myvalues->value("macrocals").toString().split(splitter).at(2).toDouble(),myvalues->value("macrotef").toString().split(splitter).at(2).toDouble()/100.0));
+                listMap.insert("macroname",settingList);
                 settingList.clear();
 
-                settingList = myvalues->value("macroname").toString().split(splitter);
-                listMap.insert("macroname",settingList);
+                settingList = myvalues->value("mode").toString().split(splitter);
+                listMap.insert("Mode",settingList);
                 settingList.clear();
 
                 settingList = myvalues->value("lossborder").toString().split(splitter);

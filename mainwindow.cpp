@@ -3256,9 +3256,9 @@ void MainWindow::selectFoodDay(int selectedDay)
         for(int meal = 0; meal < sectionItem->rowCount();++meal)
         {
             mealCalories[0] = round(mealCalories.at(0) + sectionItem->child(meal,3)->data(Qt::DisplayRole).toDouble());
-            mealCalories[1] = round(mealCalories.at(1) + (sectionItem->child(meal,4)->data(Qt::DisplayRole).toDouble()*4.1));
-            mealCalories[2] = round(mealCalories.at(2) + (sectionItem->child(meal,5)->data(Qt::DisplayRole).toDouble()*4.1));
-            mealCalories[3] = round(mealCalories.at(3) + (sectionItem->child(meal,6)->data(Qt::DisplayRole).toDouble()*9.3));
+            mealCalories[1] = round(mealCalories.at(1) + (sectionItem->child(meal,4)->data(Qt::DisplayRole).toDouble()*settings::get_macroMap().value("Carbs").first));
+            mealCalories[2] = round(mealCalories.at(2) + (sectionItem->child(meal,5)->data(Qt::DisplayRole).toDouble()*settings::get_macroMap().value("Protein").first));
+            mealCalories[3] = round(mealCalories.at(3) + (sectionItem->child(meal,6)->data(Qt::DisplayRole).toDouble()*settings::get_macroMap().value("Fat").first));
             fiberSum = fiberSum + sectionItem->child(meal,7)->data(Qt::DisplayRole).toDouble();
         }
         sumMap.insert(section,mealCalories);
