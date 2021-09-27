@@ -726,7 +726,7 @@ double calculation::set_doubleValue(double value, bool setthree) const
 {
     if(setthree)
     {
-        return value = round( value * 1000.0 ) / 1000.0;
+        return round( value * 1000.0 ) / 1000.0;
     }
     else
     {
@@ -736,14 +736,14 @@ double calculation::set_doubleValue(double value, bool setthree) const
 
 int calculation::get_thresPercent(QString level, bool max) const
 {
-    QString range = settings::get_rangeValues(currentSport.toLower(),level);
+    QPair<int,int> levelMinMax = settings::get_levelRange(currentSport,level);
 
     if(max)
     {
-        return range.split("-").last().toInt();
+        return levelMinMax.first;
     }
     else
     {
-        return range.split("-").first().toInt();
+        return levelMinMax.second;
     }
 }

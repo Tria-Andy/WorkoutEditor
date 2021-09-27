@@ -251,6 +251,7 @@ void Dialog_workCreator::get_workouts(QString sport)
     QStringList levelNames = settings::get_sportLevel(sport);
     ui->comboBox_levelName->clear();
     ui->comboBox_levelName->addItems(levelNames);
+    levelList = levelNames;
 }
 
 void Dialog_workCreator::on_listWidget_workouts_itemClicked(QListWidgetItem *item)
@@ -823,11 +824,6 @@ void Dialog_workCreator::draw_plotGraphic(int dataPoints)
         ui->widget_plot->xAxis2->setRange(0,distSum+(distSum*0.015));
         ui->widget_plot->yAxis->setRange(0,thres_high+20.0);
         ui->widget_plot->yAxis2->setRange(0,thres_high+20.0);
-    }
-
-    if(!isSwim)
-    {
-        distSum = this->set_doubleValue(ceil(distSum*10.0)/10,false);
     }
 
     ui->widget_plot->replot();
