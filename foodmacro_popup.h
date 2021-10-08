@@ -23,17 +23,27 @@ public:
         itemGradient.setSpread(QGradient::ReflectSpread);
         QColor itemColor,gradColor;
         QStringList macroHeader = settings::get_listValues("MacroHeader");
+        double macroRange = settings::getdoubleMapPointer(settings::dMap::Double)->value("Macrorange")/100.0;
         QFont foodFont;
         foodFont.setPixelSize(settings::get_fontValue("fontSmall"));
         painter->setFont(foodFont);
-
+        double macroValue = 0;
         itemColor = settings::get_colorMap().value(macroHeader.at(index.row()));
         gradColor.setHsv(0,0,200,150);
 
         if(index.row() %2 == 1)
         {
-            if(index.data().toInt() > index.siblingAtRow(index.row()-1).data().toInt())
+            macroValue = index.siblingAtRow(index.row()-1).data().toInt()*macroRange;
+
+            if(index.data().toInt() > index.siblingAtRow(index.row()-1).data().toInt() && index.data().toInt() < (index.siblingAtRow(index.row()-1).data().toInt()+macroValue))
             {
+                itemColor.setHsv(60,125,255,200);
+                gradColor.setHsv(0,255,255,150);
+                painter->setPen(Qt::white);
+            }
+            else if(index.data().toInt() > index.siblingAtRow(index.row()-1).data().toInt())
+            {
+                itemColor.setHsv(0,125,255,150);
                 gradColor.setHsv(0,255,255,150);
                 painter->setPen(Qt::white);
             }

@@ -792,7 +792,7 @@ void schedule::check_workouts(QDate date)
                 add_contest(item->data(Qt::DisplayRole).toString(),date,contestValues);
             }
 
-            this->update_linkedWorkouts(date,dayItem->child(work,11)->data(Qt::DisplayRole).toString(),dayItem->child(work,0)->data(Qt::DisplayRole).toInt(),true);
+            this->update_linkedWorkouts(date,dayItem->child(work,12)->data(Qt::DisplayRole).toString(),dayItem->child(work,0)->data(Qt::DisplayRole).toInt(),true);
         }
     }
 }
@@ -992,7 +992,7 @@ void schedule::set_compValues(bool update,QDate workDate,QMap<int,QStringList> v
         }
     }
     compChanged->setData(workDate.addDays(1 - workDate.dayOfWeek()));
-    compChanged->triggered();
+    emit compChanged->triggered();
     this->recalc_stressValues();
 }
 
@@ -1011,6 +1011,8 @@ void schedule::update_compValues(QMap<QString,QVector<double>> *compSum,QMap<int
         {
             comp[0] = compSum->value(compSport).at(0) + amount;                                 //Workouts
             comp[1] = compSum->value(compSport).at(1) + it.value().at(5).toDouble();            //Duration
+            comp[2] = compSum->value(compSport).at(2) + (it.value().at(7).toDouble() / 10.0)
+                    +settings::epocLevelMap.value(it.value().at(10).toInt()).second;  //EPOC
             comp[3] = compSum->value(compSport).at(3) + it.value().at(6).toDouble();            //Distance
             comp[4] = compSum->value(compSport).at(4) + it.value().at(7).toDouble();            //Stress
             comp[5] = compSum->value(compSport).at(5) + it.value().at(8).toDouble();            //Work KJ
@@ -1019,6 +1021,7 @@ void schedule::update_compValues(QMap<QString,QVector<double>> *compSum,QMap<int
         {
             comp[0] = amount;
             comp[1] = it.value().at(5).toDouble();
+            comp[2] = (it.value().at(7).toDouble() / 10.0) +settings::epocLevelMap.value(it.value().at(10).toInt()).second;                     //EPOC
             comp[3] = it.value().at(6).toDouble();
             comp[4] = it.value().at(7).toDouble();
             comp[5] = it.value().at(8).toDouble();

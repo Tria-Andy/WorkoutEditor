@@ -96,6 +96,7 @@
        <widget class="QLabel" name="label_weekinfo">
         <property name="font">
          <font>
+          <family>Segoe UI</family>
           <pointsize>10</pointsize>
           <weight>75</weight>
           <bold>true</bold>
@@ -204,6 +205,7 @@
      </property>
      <property name="font">
       <font>
+       <family>Segoe UI</family>
        <pointsize>8</pointsize>
       </font>
      </property>
@@ -398,105 +400,36 @@
             <property name="spacing">
              <number>5</number>
             </property>
-            <item row="4" column="1" colspan="2">
-             <widget class="QComboBox" name="comboBox_workSport"/>
-            </item>
-            <item row="12" column="0">
-             <widget class="QLabel" name="label_9">
+            <item row="15" column="0">
+             <widget class="QLabel" name="label_11">
               <property name="text">
-               <string>Duration:</string>
+               <string>StressScore:</string>
               </property>
              </widget>
             </item>
-            <item row="12" column="1" colspan="2">
-             <widget class="QTimeEdit" name="timeEdit_workDuration">
-              <property name="currentSection">
-               <enum>QDateTimeEdit::HourSection</enum>
+            <item row="15" column="2">
+             <widget class="QLabel" name="label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
-              <property name="displayFormat">
-               <string>HH:mm:ss</string>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
               </property>
-             </widget>
-            </item>
-            <item row="7" column="1">
-             <widget class="QLineEdit" name="lineEdit_workComment"/>
-            </item>
-            <item row="22" column="0">
-             <widget class="QLabel" name="label_12">
               <property name="text">
-               <string>Work (KJ):</string>
+               <string>Level:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
-            <item row="6" column="1">
-             <widget class="QLineEdit" name="lineEdit_workTitle"/>
-            </item>
-            <item row="7" column="2">
-             <widget class="QToolButton" name="toolButton_comment">
+            <item row="14" column="0">
+             <widget class="QLabel" name="label_10">
               <property name="text">
-               <string>...</string>
-              </property>
-              <property name="icon">
-               <iconset resource="resources.qrc">
-                <normaloff>:/images/icons/Copy.png</normaloff>:/images/icons/Copy.png</iconset>
-              </property>
-              <property name="autoRaise">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="2">
-             <widget class="QToolButton" name="toolButton_title">
-              <property name="text">
-               <string>...</string>
-              </property>
-              <property name="icon">
-               <iconset resource="resources.qrc">
-                <normaloff>:/images/icons/Copy.png</normaloff>:/images/icons/Copy.png</iconset>
-              </property>
-              <property name="autoRaise">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Comment:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1" colspan="2">
-             <widget class="QComboBox" name="comboBox_workCode"/>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>Time:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_4">
-              <property name="text">
-               <string>Sport:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="14" column="1" colspan="2">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_workDistance">
-              <property name="decimals">
-               <number>3</number>
-              </property>
-              <property name="maximum">
-               <double>999.990000000000009</double>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="label_7">
-              <property name="text">
-               <string>Titel:</string>
+               <string>Distance:</string>
               </property>
              </widget>
             </item>
@@ -507,10 +440,10 @@
               </property>
              </widget>
             </item>
-            <item row="15" column="0">
-             <widget class="QLabel" name="label_11">
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_4">
               <property name="text">
-               <string>StressScore:</string>
+               <string>Sport:</string>
               </property>
              </widget>
             </item>
@@ -521,31 +454,153 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1" colspan="2">
-             <widget class="QTimeEdit" name="timeEdit_workTime"/>
-            </item>
-            <item row="14" column="0">
-             <widget class="QLabel" name="label_10">
+            <item row="12" column="0">
+             <widget class="QLabel" name="label_9">
               <property name="text">
-               <string>Distance:</string>
+               <string>Duration:</string>
               </property>
              </widget>
             </item>
-            <item row="24" column="1" colspan="2">
-             <widget class="QLineEdit" name="lineEdit_workPace">
-              <property name="enabled">
-               <bool>false</bool>
+            <item row="22" column="0">
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>Work (KJ):</string>
               </property>
              </widget>
             </item>
-            <item row="15" column="1" colspan="2">
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Time:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>Titel:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="15" column="1">
              <widget class="QSpinBox" name="spinBox_workStress">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>3</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="maximum">
                <number>999</number>
               </property>
              </widget>
             </item>
-            <item row="22" column="1" colspan="2">
+            <item row="7" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Comment:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="3">
+             <widget class="QToolButton" name="toolButton_title">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="resources.qrc">
+                <normaloff>:/images/icons/Copy.png</normaloff>:/images/icons/Copy.png</iconset>
+              </property>
+              <property name="autoRaise">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="3">
+             <widget class="QToolButton" name="toolButton_comment">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="resources.qrc">
+                <normaloff>:/images/icons/Copy.png</normaloff>:/images/icons/Copy.png</iconset>
+              </property>
+              <property name="autoRaise">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEdit_workTitle">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="3">
+             <widget class="QTimeEdit" name="timeEdit_workTime"/>
+            </item>
+            <item row="4" column="1" colspan="3">
+             <widget class="QComboBox" name="comboBox_workSport"/>
+            </item>
+            <item row="5" column="1" colspan="3">
+             <widget class="QComboBox" name="comboBox_workCode"/>
+            </item>
+            <item row="7" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEdit_workComment">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="1" colspan="3">
+             <widget class="QTimeEdit" name="timeEdit_workDuration">
+              <property name="currentSection">
+               <enum>QDateTimeEdit::HourSection</enum>
+              </property>
+              <property name="displayFormat">
+               <string>HH:mm:ss</string>
+              </property>
+             </widget>
+            </item>
+            <item row="14" column="1" colspan="3">
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_workDistance">
+              <property name="decimals">
+               <number>3</number>
+              </property>
+              <property name="maximum">
+               <double>999.990000000000009</double>
+              </property>
+             </widget>
+            </item>
+            <item row="22" column="1" colspan="3">
              <widget class="QSpinBox" name="spinBox_workKJoule">
               <property name="minimum">
                <number>0</number>
@@ -555,12 +610,22 @@
               </property>
              </widget>
             </item>
-            <item row="27" column="1" colspan="2">
+            <item row="24" column="1" colspan="3">
+             <widget class="QLineEdit" name="lineEdit_workPace">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="27" column="1" colspan="3">
              <widget class="QLineEdit" name="lineEdit_stdWorkID">
               <property name="enabled">
                <bool>false</bool>
               </property>
              </widget>
+            </item>
+            <item row="15" column="3">
+             <widget class="QComboBox" name="comboBox_epoc"/>
             </item>
            </layout>
           </widget>
@@ -948,9 +1013,7 @@
   <tabstop>comboBox_workSport</tabstop>
   <tabstop>comboBox_workCode</tabstop>
   <tabstop>lineEdit_workTitle</tabstop>
-  <tabstop>toolButton_title</tabstop>
   <tabstop>lineEdit_workComment</tabstop>
-  <tabstop>toolButton_comment</tabstop>
   <tabstop>timeEdit_workDuration</tabstop>
   <tabstop>doubleSpinBox_workDistance</tabstop>
   <tabstop>spinBox_workStress</tabstop>

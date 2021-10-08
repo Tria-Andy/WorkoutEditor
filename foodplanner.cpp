@@ -479,7 +479,7 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
     double epoc = 0;
     QMap<QString,QVector<double>> sportValues = schedulePtr->get_compValues()->value(day);
 
-    QVector<int> sumValues(10,0);
+    QVector<int> sumValues(12,0);
     QVector<int> macroValues(5,0);
 
     QStandardItem *dayItem,*sectionItem;
@@ -511,7 +511,7 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
     for(QMap<QString,QVector<double>>::const_iterator it = sportValues.cbegin(), end = sportValues.cend(); it != end; ++it)
     {
         sumValues[2] = sumValues.at(2) + it.value().at(5);
-        epoc = epoc + ceil(it.value().at(5)*(it.value().at(4)/1000));
+        epoc = epoc + ceil(it.value().at(5)*(it.value().at(2)/100));
         sportMinutes = sportMinutes + (it.value().at(1)/60.0);
     }
 
@@ -523,6 +523,8 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
     sumValues[1] = ceil(((minutes - sportMinutes) * calMinute)+epoc+macroTEF);
     sumValues[3] = sumValues.at(1) + sumValues.at(2);
     sumValues[4] = sumValues.at(3) - sumValues.at(0);
+    sumValues[10] = epoc;
+    sumValues[11] = macroTEF;
 
     double currentWeight = settings::get_weightforDate(day);
     QPair<double,double> weightChange;

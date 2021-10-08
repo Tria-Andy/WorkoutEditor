@@ -130,13 +130,6 @@ void Dialog_nutrition::on_listWidget_recipes_itemClicked(QListWidgetItem *selIte
             dayItem->setData(1,Qt::DisplayRole,it.key());
         }
     }
-
-
-
-    //ui->dateEdit_recipeFrom->setDate(recipeList.first());
-    //ui->dateEdit_recipeFrom->setDateRange(recipeList.first(),recipeList.last());
-    //ui->dateEdit_recipeSync->setDate(recipeList.first());
-    //ui->dateEdit_recipeSync->setDateRange(recipeList.first(),recipeList.last());
 }
 
 void Dialog_nutrition::set_listItems(QStandardItemModel *model,QListWidget *selList,QString value)

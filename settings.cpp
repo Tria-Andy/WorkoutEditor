@@ -68,6 +68,7 @@ QHash<QString,QHash<QString,QHash<QString,double>>> settings::foodmodeMap;
 QMap<QString,QPair<double,double>> settings::macroMap;
 QMap<int,QString> settings::sampList;
 QMap<int,QString> settings::intList;
+QMap<int,QPair<QString,double>> settings::epocLevelMap;
 QMap<QDate,double> settings::weightMap;
 QHash<QString,double> settings::thresholdMap;
 QHash<QString,double> settings::athleteMap;
@@ -417,11 +418,13 @@ int settings::loadSettings()
                 thresholdMap.insert("ropefactor",myvalues->value("ropefactor").toDouble());
                 thresholdMap.insert("swimfactor",myvalues->value("swimfactor").toDouble());
                 thresholdMap.insert("bikefactor",myvalues->value("bikefactor").toDouble());
-                thresholdMap.insert("wattfactor",myvalues->value("wattfactor").toDouble());
-                thresholdMap.insert("athfactor",myvalues->value("athfactor").toDouble());
+                thresholdMap.insert("wattfactor",myvalues->value("wattfactor").toDouble());          
                 thresholdMap.insert("runfactor",myvalues->value("runfactor").toDouble());
                 thresholdMap.insert("stgstress",myvalues->value("stgstress").toDouble());
                 thresholdMap.insert("athstress",myvalues->value("athstress").toDouble());
+                thresholdMap.insert("athhigh",myvalues->value("athhigh").toDouble());
+                thresholdMap.insert("athsecond",myvalues->value("athsecond").toDouble());
+                thresholdMap.insert("athfactor",myvalues->value("athfactor").toDouble());
                 thresholdMap.insert("runstress",myvalues->value("runstress").toDouble());
                 thresholdMap.insert("swimpace",myvalues->value("swimpace").toDouble());
                 thresholdMap.insert("bikepace",myvalues->value("bikepace").toDouble());
@@ -495,6 +498,12 @@ int settings::loadSettings()
                     sportLevels.insert(it.key(),settingList);
                 }
 
+                settingList = myvalues->value("epoclevel").toString().split(splitter);
+                tempList = myvalues->value("epocpercent").toString().split(splitter);
+                for(int i = 0; i < settingList.count(); ++i)
+                {
+                    epocLevelMap.insert(i,qMakePair(settingList.at(i),tempList.at(i).toDouble()));
+                }
                 settingList.clear();
             myvalues->endGroup();
 

@@ -93,7 +93,7 @@ public:
     static QString get_levelMap(QString level) {return levelMapping.value(level);}
     static QStringList get_sportLevel(QString sport){return sportLevels.value(sport);}
     static QHash<QString,QHash<QString,double>> get_foodModeValues(QString foodMode) {return foodmodeMap.value(foodMode);}
-
+    static QMap<int,QPair<QString,double>> epocLevelMap;
 
     static int get_fontValue(QString key) {return intMap.value(key);}
     static int get_intValue(QString key) {return intMap.value(key);}

@@ -56,6 +56,12 @@ day_popup::day_popup(QWidget *parent, const QDate w_date, schedule *p_sched,stan
 
     ui->comboBox_workCode->addItems(settings::get_listValues("WorkoutCode"));
     ui->comboBox_workSport->addItems(settings::get_listValues("Sport"));
+
+    for(QMap<int,QPair<QString,double>>::const_iterator it = settings::epocLevelMap.cbegin(); it != settings::epocLevelMap.cend(); ++it)
+    {
+        ui->comboBox_epoc->addItem(it.value().first);
+    }
+
     this->reset_controls();
     this->init_dayWorkouts(popupDate);
     ui->lineEdit_workoutInfo->setText(weekMeta.at(1)+" - Week: "+ weekMeta.at(0));
@@ -80,25 +86,24 @@ void day_popup::init_dayWorkouts(QDate workDate)
 
     ui->label_weekinfo->setText(workoutDate + " - Phase: " + weekMeta.at(1));
 
-    QString conString = " - ";
-    QString itemValue = QString();
-    QString delimiter = "#";
-
     for(QMap<int,QStringList>::const_iterator it = workoutMap.cbegin(); it != workoutMap.cend(); ++it)
     {
         this->set_currentSport(it.value().at(1));
 
         QTableWidgetItem *item = new QTableWidgetItem();
-        itemValue = it.value().at(1)+conString+it.value().at(2)+delimiter+
-                    set_sectoTime(it.value().at(0).toInt()).toString()+delimiter+
-                    it.value().at(3)+delimiter+
-                    it.value().at(4)+delimiter+
-                    set_time(it.value().at(5).toInt())+delimiter+
-                    it.value().at(6)+delimiter+
-                    it.value().at(7)+delimiter+
-                    it.value().at(8);
-        item->setData(Qt::DisplayRole,itemValue);
-        item->setData(Qt::AccessibleTextRole,it.value().at(1));
+        item->setData(Qt::DisplayRole,it.value().at(3));
+        item->setData(Qt::AccessibleTextRole,it.value().at(2));
+        item->setData(Qt::AccessibleDescriptionRole,it.value().at(4));
+        item->setData(Qt::ToolTipRole,it.value().at(1));
+        item->setData(Qt::DecorationRole,settings::get_itemColor(it.value().at(1)).toHsv());
+        item->setData(Qt::UserRole,set_sectoTime(it.value().at(0).toInt()).toString("hh:mm"));
+        item->setData(Qt::UserRole+1,set_time(it.value().at(5).toInt()));
+        item->setData(Qt::UserRole+2,it.value().at(6));
+        item->setData(Qt::UserRole+3,it.value().at(7));
+        item->setData(Qt::UserRole+4,it.value().at(8));
+        item->setData(Qt::UserRole+5,settings::epocLevelMap.value(it.value().at(10).toInt()).first);
+        item->setData(Qt::UserRole+6,ceil(it.value().at(8).toDouble() *(((it.value().at(7).toDouble()/10.0) +(settings::epocLevelMap.value(it.value().at(10).toInt()).second))/100.0)));
+
         ui->tableWidget_day->setItem(it.key(),0,item);
     }
 
@@ -190,6 +195,7 @@ void day_popup::set_controls(bool active)
     ui->doubleSpinBox_workDistance->setEnabled(active);
     ui->spinBox_workStress->setEnabled(active);
     ui->spinBox_workKJoule->setEnabled(active);
+    ui->comboBox_epoc->setEnabled(active);
 
     ui->toolButton_addWorkout->setEnabled(!active);
     ui->toolButton_addWorkout->setVisible(!active);
@@ -361,9 +367,9 @@ void day_popup::on_tableWidget_day_itemClicked(QTableWidgetItem *item)
     ui->spinBox_workStress->setValue(workValues.at(7).toInt());
     ui->spinBox_workKJoule->setValue(workValues.at(8).toInt());
     ui->lineEdit_workPace->setText(workValues.at(9));
-    ui->lineEdit_stdWorkID->setText(workValues.at(10));
-
-    this->set_comboWorkouts(workValues.at(10));
+    ui->lineEdit_stdWorkID->setText(workValues.at(11));
+    ui->comboBox_epoc->setCurrentIndex(workValues.at(10).toInt());
+    this->set_comboWorkouts(workValues.at(11));
     this->set_controls(true);
 }
 
@@ -439,7 +445,9 @@ void day_popup::set_result(int result)
             updateValues.append(QString::number(ui->spinBox_workStress->value()));
             updateValues.append(QString::number(ui->spinBox_workKJoule->value()));
             updateValues.append(ui->lineEdit_workPace->text());
+            updateValues.append(QString::number(ui->comboBox_epoc->currentIndex()));
             updateValues.append(ui->lineEdit_stdWorkID->text());
+
 
             workSchedule->update_linkedWorkouts(popupDate,ui->lineEdit_stdWorkID->text(),ui->spinBox_selWorkout->value(),false);
 
@@ -483,6 +491,7 @@ void day_popup::reset_controls()
     ui->lineEdit_workPace->setText("-");
     ui->lineEdit_stdWorkID->setText("-");
     ui->spinBox_selWorkout->setValue(-1);
+    ui->comboBox_epoc->setCurrentIndex(-1);
 
     this->set_comboWorkouts(QString());
     this->set_controls(false);
