@@ -477,6 +477,8 @@ void MainWindow::fill_foodSumTable(QDate startDate)
             }
         }
         ui->tableWidget_daySum->item(5,day)->setData(Qt::DisplayRole,QString::number(set_doubleValue(calcWeight.first,false))+" -> "+QString::number(set_doubleValue(calcWeight.second,false)));
+        ui->tableWidget_daySum->item(1,day)->setData(Qt::ToolTipRole,"TEF: "+QString::number(weekItem->child(day,0)->data(Qt::UserRole+11).toInt()));
+        ui->tableWidget_daySum->item(2,day)->setData(Qt::ToolTipRole,"EPOC: "+QString::number(weekItem->child(day,0)->data(Qt::UserRole+10).toInt()));
     }
 
     double startWeight = 0;
@@ -824,11 +826,9 @@ void MainWindow::workoutSchedule(QDate date)
     int dayCounter = 0;
     QMap<int, QStringList> dayWorkouts;
     QStringList weekInfo;
-    QString conString = " - ";
-    QString itemValue = QString();
-    QString delimiter = "#";
     QString stdConnect;
     QDate calcDate;
+    QSize workSize;
 
     this->set_tableWidgetItems(ui->tableWidget_schedule,weekRange,cal_header.count(),&schedule_del);
 
@@ -838,35 +838,86 @@ void MainWindow::workoutSchedule(QDate date)
         {
             calcDate = date.addDays(dayCounter);
             QTableWidgetItem *item = ui->tableWidget_schedule->item(row,col);
-            ui->tableWidget_schedule->openPersistentEditor(item);
 
             if(col == 0)
             {
                 weekInfo = workSchedule->get_weekScheduleMeta(calc_weekID(calcDate));
-                itemValue = weekInfo.at(0) + delimiter + weekInfo.at(1) + delimiter + weekInfo.at(2) + delimiter + foodPlan->get_mode(calcDate) +" "+weekInfo.at(3)+"kg - ("+QString::number(set_doubleValue(foodPlan->get_estimateWeight(calcDate.startOfDay().addSecs(calcDate.startOfDay().offsetFromUtc())).second,false))+")";
-                item->setData(Qt::UserRole,weekInfo.at(0));
+                item->setData(Qt::DisplayRole,weekInfo.at(0));
+                item->setData(Qt::AccessibleTextRole,weekInfo.at(1));
+                item->setData(Qt::AccessibleDescriptionRole,weekInfo.at(2));
+                item->setData(Qt::UserRole,weekInfo.at(3));
+                item->setData(Qt::UserRole+1,foodPlan->get_mode(calcDate));
+                item->setData(Qt::UserRole+2,set_doubleValue(foodPlan->get_estimateWeight(calcDate.startOfDay().addSecs(calcDate.startOfDay().offsetFromUtc())).second,false));
+
             }
             else
             {
                 dayWorkouts = workSchedule->get_workouts(true,calcDate.toString(dateFormat));
-                itemValue = calcDate.toString("dd MMM yy") +delimiter;
+                workSize.setWidth(ui->tableWidget_schedule->visualItemRect(item).width());
+                workSize.setHeight(ui->tableWidget_schedule->visualItemRect(item).height()/dayWorkouts.count());
+                qDebug() << ui->tableWidget_schedule->visualItemRect(item).height() << workSize.height();
+
+                QListWidget *workoutList = new QListWidget();
+                workoutList->setResizeMode(QListView::Adjust);
+                QListWidgetItem *workItem;
+                workItem = new QListWidgetItem();
+                workItem->setData(Qt::DisplayRole,calcDate);
+                workoutList->addItem(workItem);
+                QColor rectColor,gradColor;
+                gradColor.setHsv(0,0,180,200);
+
+                QLinearGradient rectGradient;
+                rectGradient.setCoordinateMode(QGradient::ObjectMode);
+                rectGradient.setSpread(QGradient::PadSpread);
+
+                if(calcDate == QDate::currentDate())
+                {
+                    rectColor.setHsv(0,255,255,225);
+                }
+                else
+                {
+                    rectColor.setHsv(360,0,85,200);
+                }
+
+                rectGradient.setColorAt(0,rectColor);
+                rectGradient.setColorAt(1,gradColor);
+
+                workItem->setData(Qt::BackgroundRole,QBrush(rectGradient));
+                workItem->setData(Qt::ForegroundRole,QBrush(Qt::white));
+
+
+
+                QSize workSize;
+                workSize.scale(item->sizeHint().width(),item->sizeHint().height()/dayWorkouts.count(),Qt::KeepAspectRatio);
+
                 for(QMap<int,QStringList>::const_iterator it = dayWorkouts.cbegin(), end = dayWorkouts.cend(); it != end; ++it)
                 {
-                    stdConnect = it.value().count() == 9 ? "\n" : "*\n";
-                    itemValue = itemValue + it.value().at(1) + conString + it.value().at(2) + stdConnect;
-                    itemValue = itemValue + it.value().at(4) +"\n";
-                    itemValue = itemValue + set_time(it.value().at(5).toInt()) + conString + it.value().at(6) + " km" + delimiter;
-                }
-                item->setData(Qt::UserRole,calcDate);
-                ++dayCounter;
-                itemValue.chop(1);
-            }
+                    rectGradient.setColorAt(0,settings::get_itemColor(it.value().at(1)));
+                    workItem = new QListWidgetItem();
+                    workItem->setData(Qt::DisplayRole,it.value().at(1)+"\n"+it.value().at(4));
+                    workItem->setData(Qt::DecorationRole,QIcon(settings::sportIcon.value(it.value().at(1))));
+                    workItem->setData(Qt::BackgroundRole,QBrush(rectGradient));
+                    workItem->setSizeHint(workSize);
 
-            item->setData(Qt::EditRole,itemValue);
+
+
+                    /*
+                    stdConnect = it.value().count() == 9 ? "\n" : "*\n";
+                    item->setData(Qt::DisplayRole,calcDate);
+                    item->setData(Qt::AccessibleTextRole,it.value().at(1));
+                    item->setData(Qt::AccessibleDescriptionRole,it.value().at(2)+stdConnect);
+                    item->setData(Qt::UserRole,it.value().at(4));
+                    item->setData(Qt::UserRole+1,it.value().at(5));
+                    item->setData(Qt::UserRole+2,it.value().at(6)+" km - ");
+                    item->setData(Qt::UserRole+3,settings::epocLevelMap.value(it.value().at(10).toInt()).first);
+                    */
+                    workoutList->addItem(workItem);
+                }
+
+                ui->tableWidget_schedule->setCellWidget(row,col,workoutList);
+                ++dayCounter;
+            }
             item->setTextAlignment(0);
-            itemValue.clear();
-            ui->tableWidget_schedule->editItem(item);
-            ui->tableWidget_schedule->closePersistentEditor(item);
         }
     }
     ui->comboBox_saisonName->setCurrentText(workSchedule->get_saisonDate(date));

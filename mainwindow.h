@@ -66,10 +66,7 @@ public:
         rectPen.setColor(Qt::black);
         rectPen.setWidth(1);
         QFont phase_font,content_font,date_font, work_font;
-        QString temp_value,dayDate;
-        QStringList phaseList = settings::get_listValues("Phase");
         QStringList sportList = settings::get_listValues("Sport");
-        QStringList workoutValues;
         QString delimiter = "#";
         QColor rectColor,gradColor;
         gradColor.setHsv(0,0,180,200);
@@ -83,11 +80,6 @@ public:
         work_font.setBold(false);
         work_font.setPixelSize(settings::get_fontValue("fontSmall")-1);
 
-        temp_value = index.data(Qt::DisplayRole).toString();
-        workoutValues = temp_value.split(delimiter);
-        dayDate = workoutValues.at(0);
-        dayDate = dayDate.left(7);
-
         QLinearGradient rectGradient;
         rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
         rectGradient.setSpread(QGradient::RepeatSpread);
@@ -97,7 +89,7 @@ public:
         headPath.addRoundedRect(rectHead,3,3);
         QRect rectHeadText(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,rectHead.height());
 
-
+        /*
         if(option.state & QStyle::State_Selected)
         {
             rectColor.setHsv(240,255,255,180);
@@ -114,6 +106,7 @@ public:
                 rectColor.setHsv(360,0,85,200);
             }
         }
+        */
         rectGradient.setColorAt(0,rectColor);
         rectGradient.setColorAt(1,gradColor);
 
@@ -124,19 +117,13 @@ public:
         painter->drawPath(headPath);
 
         painter->setPen(Qt::white);
-        painter->drawText(rectHeadText,Qt::AlignLeft | Qt::AlignVCenter, dayDate);
-
-        temp_value = index.data(Qt::DisplayRole).toString();
-        workoutValues = temp_value.split(delimiter,Qt::SkipEmptyParts);
-        workoutValues.removeFirst();
+        painter->drawText(rectHeadText,Qt::AlignLeft | Qt::AlignVCenter, index.data(Qt::DisplayRole).toString());
 
         if(index.column() != 0)
         {
-            QString workout;
-            temp_value = index.data(Qt::DisplayRole).toString();
-            workoutValues = temp_value.split(delimiter,Qt::SkipEmptyParts);
-            workoutValues.removeFirst();
+            /*
 
+            QString workout;
             if(!workoutValues.isEmpty())
             {
                 int height = static_cast<int>(floor((option.rect.height()*0.825) / workoutValues.count()));
@@ -186,16 +173,27 @@ public:
                 painter->drawPath(rectDay);
                 painter->drawText(rectEmpty,Qt::AlignCenter | Qt::AlignVCenter,settings::getStringMapPointer(settings::stingMap::General)->value("breakname"));
             }
+            */
         }
         else
         {
             QPainterPath phasePath;
-            temp_value = index.data(Qt::DisplayRole).toString();
-            workoutValues = index.data(Qt::DisplayRole).toString().split(delimiter,Qt::SkipEmptyParts);
-            int valueCount = workoutValues.count();
+            /*
+            qDebug() << index.data(Qt::DisplayRole);
+            qDebug() << index.data(Qt::AccessibleTextRole).toString().split("_").first();
+            qDebug() << index.data(Qt::AccessibleDescriptionRole);
+            qDebug() << index.data(Qt::UserRole);
+            qDebug() << index.data(Qt::UserRole+1);
+            qDebug() << index.data(Qt::UserRole+2);
+            */
 
-            if(!temp_value.isEmpty())
+
+
+            if(!index.data(Qt::DisplayRole).toString().isEmpty())
             {
+                rectColor = settings::get_itemColor(index.data(Qt::AccessibleTextRole).toString().split("_").first()).toHsv();
+
+                /*
                 for(int pos = 0; pos < phaseList.count();++pos)
                 {
                     if(temp_value.contains(phaseList.at(pos)))
@@ -208,6 +206,7 @@ public:
                         rectColor = settings::get_itemColor(generalValues->value("empty")).toHsv();
                     }
                 }
+                */
 
                 QRect rectPhase(option.rect.x(),rectHead.bottom(),option.rect.width(),option.rect.height()*0.825);
                 phasePath.addRoundedRect(rectPhase,4,4);
@@ -224,26 +223,11 @@ public:
                 painter->setBrush(rectGradient);
                 painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
                 painter->drawPath(phasePath);
-                painter->drawText(phaseName,Qt::AlignVCenter,workoutValues.at(1));
+                painter->drawText(phaseName,Qt::AlignVCenter,index.data(Qt::DisplayRole).toString());
 
-                if(valueCount == 2)
-                {
-                    painter->setFont(content_font);
-                    painter->drawText(phaseContent,Qt::AlignVCenter,"");
-                    painter->drawText(phaseGoal,Qt::AlignVCenter,"");
-                }
-                else if(valueCount == 3)
-                {
-                    painter->setFont(content_font);
-                    painter->drawText(phaseContent,Qt::AlignVCenter,workoutValues.at(2));
-                    painter->drawText(phaseGoal,Qt::AlignVCenter,"");
-                }
-                else if(valueCount == 4)
-                {
-                    painter->setFont(content_font);
-                    painter->drawText(phaseContent,Qt::AlignVCenter,workoutValues.at(2));
-                    painter->drawText(phaseGoal,Qt::AlignVCenter | Qt::TextWordWrap,workoutValues.at(3));
-                }
+                painter->setFont(content_font);
+                painter->drawText(phaseContent,Qt::AlignVCenter,index.data(Qt::AccessibleTextRole).toString());
+                painter->drawText(phaseGoal,Qt::AlignVCenter | Qt::TextWordWrap,index.data(Qt::AccessibleDescriptionRole).toString());
              }
         }
         painter->restore();
@@ -1011,7 +995,6 @@ public:
 
         double percent = index.data(Qt::UserRole).toDouble();
         QHash<QString,double> modePercent = settings::get_foodModeValues(index.data(Qt::AccessibleTextRole).toString()).value("modemacros");
-        qDebug() << modePercent;
         double macroRange = settings::getdoubleMapPointer(settings::dMap::Double)->value("Macrorange")/100.0;
         gradColor.setHsv(0,0,200,150);
 
