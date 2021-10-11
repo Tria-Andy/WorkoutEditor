@@ -89,7 +89,6 @@ public:
         headPath.addRoundedRect(rectHead,3,3);
         QRect rectHeadText(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,rectHead.height());
 
-        /*
         if(option.state & QStyle::State_Selected)
         {
             rectColor.setHsv(240,255,255,180);
@@ -97,7 +96,7 @@ public:
         }
         else
         {
-            if(QDate::fromString(workoutValues.at(0),"dd MMM yy").addYears(100) ==(QDate::currentDate()))
+            if(index.data(Qt::DisplayRole).toDate() ==QDate::currentDate())
             {
                 rectColor.setHsv(0,255,255,225);
             }
@@ -106,7 +105,7 @@ public:
                 rectColor.setHsv(360,0,85,200);
             }
         }
-        */
+
         rectGradient.setColorAt(0,rectColor);
         rectGradient.setColorAt(1,gradColor);
 
@@ -117,21 +116,19 @@ public:
         painter->drawPath(headPath);
 
         painter->setPen(Qt::white);
-        painter->drawText(rectHeadText,Qt::AlignLeft | Qt::AlignVCenter, index.data(Qt::DisplayRole).toString());
 
         if(index.column() != 0)
         {
-            /*
-
+            painter->drawText(rectHeadText,Qt::AlignLeft | Qt::AlignVCenter, index.data(Qt::DisplayRole).toDate().toString("dd MMM"));
             QString workout;
-            if(!workoutValues.isEmpty())
+            if(!index.data(Qt::DisplayRole).toString().isEmpty())
             {
-                int height = static_cast<int>(floor((option.rect.height()*0.825) / workoutValues.count()));
+                int height = static_cast<int>(floor((option.rect.height()*0.825) / index.data(Qt::UserRole).toInt()));
                 int yPos = rectHead.bottom();
 
-                for(int i = 0; i < workoutValues.count(); ++i)
+                for(int i = 0; i < index.data(Qt::UserRole).toInt(); ++i)
                 {
-                    workout = workoutValues.at(i);
+                    workout = index.data(Qt::UserRole+i+1).toString();
                     QPainterPath rectWork;
                     QRect rect_work(option.rect.x(),yPos,option.rect.width(),height-1);
                     rectWork.addRoundedRect(rect_work,4,4);
@@ -173,40 +170,16 @@ public:
                 painter->drawPath(rectDay);
                 painter->drawText(rectEmpty,Qt::AlignCenter | Qt::AlignVCenter,settings::getStringMapPointer(settings::stingMap::General)->value("breakname"));
             }
-            */
+
         }
         else
         {
+            painter->drawText(rectHeadText,Qt::AlignLeft | Qt::AlignVCenter, index.data(Qt::DisplayRole).toString());
             QPainterPath phasePath;
-            /*
-            qDebug() << index.data(Qt::DisplayRole);
-            qDebug() << index.data(Qt::AccessibleTextRole).toString().split("_").first();
-            qDebug() << index.data(Qt::AccessibleDescriptionRole);
-            qDebug() << index.data(Qt::UserRole);
-            qDebug() << index.data(Qt::UserRole+1);
-            qDebug() << index.data(Qt::UserRole+2);
-            */
-
-
 
             if(!index.data(Qt::DisplayRole).toString().isEmpty())
             {
                 rectColor = settings::get_itemColor(index.data(Qt::AccessibleTextRole).toString().split("_").first()).toHsv();
-
-                /*
-                for(int pos = 0; pos < phaseList.count();++pos)
-                {
-                    if(temp_value.contains(phaseList.at(pos)))
-                    {
-                        rectColor = settings::get_itemColor(phaseList.at(pos)).toHsv();
-                        break;
-                    }
-                    else
-                    {
-                        rectColor = settings::get_itemColor(generalValues->value("empty")).toHsv();
-                    }
-                }
-                */
 
                 QRect rectPhase(option.rect.x(),rectHead.bottom(),option.rect.width(),option.rect.height()*0.825);
                 phasePath.addRoundedRect(rectPhase,4,4);
@@ -223,11 +196,11 @@ public:
                 painter->setBrush(rectGradient);
                 painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
                 painter->drawPath(phasePath);
-                painter->drawText(phaseName,Qt::AlignVCenter,index.data(Qt::DisplayRole).toString());
+                painter->drawText(phaseName,Qt::AlignVCenter,index.data(Qt::AccessibleTextRole).toString());
 
                 painter->setFont(content_font);
-                painter->drawText(phaseContent,Qt::AlignVCenter,index.data(Qt::AccessibleTextRole).toString());
-                painter->drawText(phaseGoal,Qt::AlignVCenter | Qt::TextWordWrap,index.data(Qt::AccessibleDescriptionRole).toString());
+                painter->drawText(phaseContent,Qt::AlignVCenter,index.data(Qt::AccessibleDescriptionRole).toString());
+                painter->drawText(phaseGoal,Qt::AlignVCenter | Qt::TextWordWrap,index.data(Qt::UserRole).toString() +" - ("+ index.data(Qt::UserRole+1).toString()+")");
              }
         }
         painter->restore();
@@ -1217,6 +1190,7 @@ private slots:
     void refresh_saison();
     void selectionChanged_stressPlot();
     void refresh_summery();
+
 
     //Editor
     void on_horizontalSlider_factor_valueChanged(int value);
