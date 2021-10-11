@@ -86,9 +86,9 @@ Dialog_settings::Dialog_settings(QWidget *parent,schedule *psched,foodplanner *p
     ui->doubleSpinBox_min->setValue(settings::doubleVector.value(ui->comboBox_weightmode->currentText()).at(3));
     this->set_bottonColor(ui->toolButton_colormin,false);
 
-    ui->spinBox_carbs->setValue(settings::doubleVector.value("Macros").at(0));
-    ui->spinBox_protein->setValue(settings::doubleVector.value("Macros").at(1));
-    ui->spinBox_fat->setValue(settings::doubleVector.value("Macros").at(2));
+    //ui->spinBox_carbs->setValue(settings::doubleVector.value("Macros").at(0));
+    //ui->spinBox_protein->setValue(settings::doubleVector.value("Macros").at(1));
+    //ui->spinBox_fat->setValue(settings::doubleVector.value("Macros").at(2));
 
     for(int i = 0; i < 7; ++i)
     {

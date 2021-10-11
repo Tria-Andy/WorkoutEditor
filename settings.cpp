@@ -762,13 +762,20 @@ double settings::get_weightforDate(QDate actDate)
     QDate lastDate = weightMap.firstKey();
     double weightDate = 0;
 
+
     for(QMap<QDate,double>::const_iterator it = weightMap.cbegin(); it != weightMap.cend(); ++it)
-    {        
-        if(lastDate.daysTo(actDate) > 0 && (actDate.daysTo(it.key()) >= 0 && actDate.daysTo(it.key()) <= 6))
+    {
+        qDebug() << it.key() << actDate << actDate.daysTo(it.key());
+
+        if(actDate.daysTo(it.key()) == 0)
+        {
+            weightDate = it.value();
+        }
+        else if(lastDate.daysTo(actDate) >= 0 && (actDate.daysTo(it.key()) >= 0 && actDate.daysTo(it.key()) <= 6))
         {
             weightDate = weightMap.value(lastDate);
         }
-        if(actDate.daysTo(weightMap.lastKey()) < 0)
+        else
         {
             weightDate = weightMap.last();
         }
