@@ -135,15 +135,7 @@ public:
                     QRect rect_work_text(option.rect.x()+textMargin,yPos,option.rect.width()-textMargin,height-1);
                     yPos += height;
 
-                    for(int pos = 0; pos < sportList.count();++pos)
-                    {
-                        if(workout.contains(sportList.at(pos)))
-                        {
-                            rectColor = settings::get_itemColor(sportList.at(pos)).toHsv();
-                            break;
-                        }
-                    }
-
+                    rectColor = settings::get_itemColor(workout.split(" - ").first()).toHsv();
                     rectColor.setAlpha(225);
                     rectGradient.setColorAt(0,rectColor);
                     rectGradient.setColorAt(1,gradColor);
@@ -200,7 +192,7 @@ public:
 
                 painter->setFont(content_font);
                 painter->drawText(phaseContent,Qt::AlignVCenter,index.data(Qt::AccessibleDescriptionRole).toString());
-                painter->drawText(phaseGoal,Qt::AlignVCenter | Qt::TextWordWrap,index.data(Qt::UserRole).toString() +" - ("+ index.data(Qt::UserRole+1).toString()+")");
+                painter->drawText(phaseGoal,Qt::AlignVCenter | Qt::TextWordWrap,index.data(Qt::UserRole).toString() +" - ("+ index.data(Qt::UserRole+1).toString()+ "->"+index.data(Qt::UserRole+2).toString()+")");
              }
         }
         painter->restore();

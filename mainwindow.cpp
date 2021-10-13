@@ -656,6 +656,9 @@ void MainWindow::summery_Set(QDate date, int weekCount)
     QMap<QString,QVector<double>> sportSummery;
     QMap<QString,QVector<double>> calcSummery;
 
+    QMap<int,QPair<QString,QVector<double>>> sportSum;
+
+
     if(isWeekMode)
     {
         sumCounter = settings::getHeaderMap("summery")->count();
@@ -818,6 +821,9 @@ QString MainWindow::set_summeryString(int counter, QMap<QString,QVector<double>>
             valueString = valueString + "-" + QString::number(summery->value(sport).at(i));
         }
     }
+
+    qDebug() << valueString;
+
     return valueString;
 }
 
@@ -846,6 +852,7 @@ void MainWindow::workoutSchedule(QDate date)
                 item->setData(Qt::AccessibleDescriptionRole,weekInfo.at(2));
                 item->setData(Qt::UserRole,foodPlan->get_mode(calcDate)+" "+weekInfo.at(3));
                 item->setData(Qt::UserRole+1,set_doubleValue(foodPlan->get_estimateWeight(calcDate.startOfDay().addSecs(calcDate.startOfDay().offsetFromUtc())).second,false));
+                item->setData(Qt::UserRole+2,set_doubleValue(foodPlan->get_estimateWeight(calcDate.addDays(6).startOfDay().addSecs(calcDate.startOfDay().offsetFromUtc())).second,false));
             }
             else
             {
@@ -2921,7 +2928,7 @@ void MainWindow::on_calendarWidget_Food_clicked(const QDate &date)
 }
 
 void MainWindow::on_doubleSpinBox_portion_valueChanged(double value)
-{
+{    
     ui->lineEdit_calories->setText(QString::number(round(value * ui->spinBox_calories->value()/ui->spinBox_portFactor->value())));
 }
 
