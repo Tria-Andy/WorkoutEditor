@@ -53,11 +53,12 @@ public:
     QMap<QString,QStringList> *get_saisonValues() {return &saisonValues;}
     QMap<QDate,QPair<double,double> > stressValues;
     QMap<QDate,int> get_linkStdWorkouts(QString key) {return linkedWorkouts.value(key);}
-    QHash<QDate,QMap<QString,QVector<double> >> *get_compValues() {return &compMap;}
-    QMap<QString,QMap<QString,QVector<double>>> *get_compWeekValues() {return &compWeekMap;}
+    QMap<QString,QMap<QString,QVector<double>>> *get_compWeekValues() {return &phaseSumMap;}
     QHash<QString,QMap<QDate,QPair<QString,QString>>> saisonWeekMap;
     QHash<QString,QMap<QDate,QPair<QString,QString>>> *get_saisonWeekMap() {return &saisonWeekMap;}
     QMap<QDate,QPair<QString,QString>> *get_weekPhaseMap() {return &weekPhaseMap;}
+    QMap<QPair<int,QString>,QVector<double>> get_weekSummery(QString);
+    QVector<double> get_daySummery(QDate key) { return daySumMap.value(key);}
     QQueue<QDate> changedDays;
 
     void save_workouts(bool);
@@ -75,6 +76,7 @@ public:
     void set_weekMeta(QStringList);
     void set_weekScheduleMeta(QStringList);
 
+
     //Workout
     //Setter
     void set_isUpdated(bool updateFlag) {isUpdated = updateFlag;}
@@ -88,8 +90,6 @@ public:
     void remove_contest(QString,QDate);
 
 public slots:
-    void compValuesUpdate();
-
 
 signals:
     void compValueChanged();
@@ -111,9 +111,10 @@ private:
 
     QMap<QString,QStringList> saisonValues;
     QHash<QString,QMap<QDate,QStringList>> contestMap;
-    QMap<QDate,QPair<QString,QString>> weekPhaseMap;
-    QHash<QDate,QMap<QString,QVector<double>>> compMap;
-    QMap<QString,QMap<QString,QVector<double>>> compWeekMap;
+    QMap<QDate,QPair<QString,QString>> weekPhaseMap;    
+    QMap<QString,QMap<QString,QVector<double>>> weekSumMap;
+    QMap<QDate,QVector<double>> daySumMap;
+    QMap<QString,QMap<QString,QVector<double>>> phaseSumMap;
     QMap<QDate,QVector<double>> stressMap;
     QHash<QString,QMap<QDate,int>> linkedWorkouts;
     QModelIndex get_modelIndex(QStandardItemModel*,QString,int);
@@ -125,9 +126,8 @@ private:
     QCPGraph *ltsLine,*stsLine,*stressLine,*tsbLine;
     QCPRange xRange;
 
+    QMap<QString,QVector<double>> set_summeryValues(QStandardItem*);
     void reset_workTime();
-    void set_compValues(bool,QDate,QMap<int,QStringList>);
-    void update_compValues(QMap<QString,QVector<double>>*,QMap<int,QStringList>*);
     void recalc_stressValues();
     void remove_WeekofPast(QDate);
     void set_stressMap();

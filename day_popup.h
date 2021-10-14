@@ -92,38 +92,38 @@ public:
 
         if(!sport.isEmpty())
         {
-         QString workMeta;
-         int rectHeight = workInfo.height()*0.25;
-         int rectWidth = (option.rect.width()-rectHeight)/2;
+             QString workMeta;
+             int rectHeight = workInfo.height()*0.25;
+             int rectWidth = (option.rect.width()-rectHeight)/2;
 
-         workMeta = index.data(Qt::DisplayRole).toString()+"\n"+index.data(Qt::AccessibleDescriptionRole).toString()+" - "+index.data(Qt::UserRole+5).toString();
+             workMeta = index.data(Qt::DisplayRole).toString()+"\n"+index.data(Qt::AccessibleDescriptionRole).toString()+" - "+index.data(Qt::UserRole+5).toString();
 
-         QRect rectMeta(option.rect.x()+textMargin,workHead.bottom(),option.rect.width(),workInfo.height()*0.5);
+             QRect rectMeta(option.rect.x()+textMargin,workHead.bottom(),option.rect.width(),workInfo.height()*0.5);
 
-         QRect duraIcon(option.rect.x(),rectMeta.bottom(),rectHeight,rectHeight);
-         QRect duraValue(duraIcon.right()+textMargin,rectMeta.bottom(),rectWidth,rectHeight);
-         QRect distIcon(duraValue.right(),rectMeta.bottom(),rectHeight,rectHeight);
-         QRect distValue(distIcon.right()+textMargin,rectMeta.bottom(),rectWidth,rectHeight);
+             QRect duraIcon(option.rect.x(),rectMeta.bottom(),rectHeight,rectHeight);
+             QRect duraValue(duraIcon.right()+textMargin,rectMeta.bottom(),rectWidth,rectHeight);
+             QRect distIcon(duraValue.right(),rectMeta.bottom(),rectHeight,rectHeight);
+             QRect distValue(distIcon.right()+textMargin,rectMeta.bottom(),rectWidth,rectHeight);
 
-         QRect stressIcon(option.rect.x(),duraIcon.bottom(),rectHeight,rectHeight);
-         QRect stressValue(stressIcon.right()+textMargin,duraIcon.bottom(),rectWidth,rectHeight);
-         QRect workIcon(stressValue.right(),duraIcon.bottom(),rectHeight,rectHeight);
-         QRect workValue(workIcon.right()+textMargin,duraIcon.bottom(),rectWidth,rectHeight);
+             QRect stressIcon(option.rect.x(),duraIcon.bottom(),rectHeight,rectHeight);
+             QRect stressValue(stressIcon.right()+textMargin,duraIcon.bottom(),rectWidth,rectHeight);
+             QRect workIcon(stressValue.right(),duraIcon.bottom(),rectHeight,rectHeight);
+             QRect workValue(workIcon.right()+textMargin,duraIcon.bottom(),rectWidth,rectHeight);
 
-         painter->setBrush(rectGradient);
-         painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-         painter->setPen(Qt::black);
-         painter->setFont(workFont);
-         painter->drawPath(bodyPath);
-         painter->drawText(rectMeta,Qt::AlignLeft | Qt::AlignVCenter,workMeta);
-         painter->drawPixmap(duraIcon,settings::sportIcon.value("Duration"));
-         painter->drawText(duraValue,Qt::AlignLeft | Qt::AlignVCenter,index.data(Qt::UserRole+1).toString());
-         painter->drawPixmap(distIcon,settings::sportIcon.value("Distance"));
-         painter->drawText(distValue,Qt::AlignLeft | Qt::AlignVCenter,index.data(Qt::UserRole+2).toString());
-         painter->drawPixmap(stressIcon,settings::sportIcon.value("TSS"));
-         painter->drawText(stressValue,Qt::AlignLeft | Qt::AlignVCenter,index.data(Qt::UserRole+3).toString());
-         painter->drawPixmap(workIcon,settings::sportIcon.value("KJ"));
-         painter->drawText(workValue,Qt::AlignLeft | Qt::AlignVCenter,index.data(Qt::UserRole+4).toString()+" - ("+index.data(Qt::UserRole+6).toString()+")");
+             painter->setBrush(rectGradient);
+             painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+             painter->setPen(Qt::black);
+             painter->setFont(workFont);
+             painter->drawPath(bodyPath);
+             painter->drawText(rectMeta,Qt::AlignLeft | Qt::AlignVCenter,workMeta);
+             painter->drawPixmap(duraIcon,settings::sportIcon.value("Duration"));
+             painter->drawText(duraValue,Qt::AlignLeft | Qt::AlignVCenter,index.data(Qt::UserRole+1).toString());
+             painter->drawPixmap(distIcon,settings::sportIcon.value("Distance"));
+             painter->drawText(distValue,Qt::AlignLeft | Qt::AlignVCenter,index.data(Qt::UserRole+2).toString());
+             painter->drawPixmap(stressIcon,settings::sportIcon.value("TSS"));
+             painter->drawText(stressValue,Qt::AlignLeft | Qt::AlignVCenter,index.data(Qt::UserRole+3).toString());
+             painter->drawPixmap(workIcon,settings::sportIcon.value("KJ"));
+             painter->drawText(workValue,Qt::AlignLeft | Qt::AlignVCenter,index.data(Qt::UserRole+4).toString()+" - ("+index.data(Qt::UserRole+6).toString()+")");
         }
         painter->restore();
     }

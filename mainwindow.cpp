@@ -655,9 +655,7 @@ void MainWindow::summery_Set(QDate date, int weekCount)
 
     QMap<QString,QVector<double>> sportSummery;
     QMap<QString,QVector<double>> calcSummery;
-
-    QMap<int,QPair<QString,QVector<double>>> sportSum;
-
+    QList<QTableWidgetItem*> sumItems;
 
     if(isWeekMode)
     {
@@ -665,25 +663,33 @@ void MainWindow::summery_Set(QDate date, int weekCount)
         sportSummery.insert(sportUse,QVector<double>(sumCounter,0));
         ui->label_selection->setText("Week:");
 
-        QHash<QDate,QMap<QString,QVector<double> >> *comp = workSchedule->get_compValues();
+        QMap<QPair<int,QString>,QVector<double>> weekSummery = workSchedule->get_weekSummery(this->calc_weekID(date));
+        QTableWidgetItem *sumItem;
 
-        for(int day = 0; day < weekDays; ++day)
+        for(QMap<QPair<int,QString>,QVector<double>>::const_iterator it = weekSummery.cbegin(); it != weekSummery.cend(); ++it)
         {
-            calcSummery = comp->value(date.addDays(day));
+            sumItem = new QTableWidgetItem;
 
-            for(QMap<QString,QVector<double>>::const_iterator workout = calcSummery.cbegin(); workout != calcSummery.cend(); ++workout)
+            sumItem->setData(Qt::DisplayRole,it.key().second);
+
+            for(int i = 0; i < it.value().count(); ++i)
             {
-                    if(workout.key() != settings::OtherLabel)
-                    {
-                        if(!sportUseList.contains(workout.key())) sportUseList << workout.key();
-                    }
+                if(i == 2)
+                {
+                    sumItem->setData(Qt::UserRole+i,set_doubleValue((it.value().at(1) / weekSummery.first().at(1)) * 100.0,false));
+                }
+                else
+                {
+                    sumItem->setData(Qt::UserRole+i,set_doubleValue(it.value().at(i),false));
+                }
             }
-            this->summery_calc(&calcSummery,&sportSummery,&sportUseList,sumCounter);
+            sumItems.append(sumItem);
         }
 
         headerInfo = workSchedule->get_weekScheduleMeta(this->calc_weekID(date));
         headerString = "Week: " + headerInfo.at(0) + " - " + "Phase: " + headerInfo.at(1);
         ui->lineEdit_currentSelect->setText(headerInfo.at(0));
+
     }
     else
     {
@@ -744,29 +750,17 @@ void MainWindow::summery_Set(QDate date, int weekCount)
         }
     }
 
-    QMap<int,QString> sumValues;
     ui->tableWidget_summery->clear();
-    ui->tableWidget_summery->setRowCount(sportSummery.count());
+    ui->tableWidget_summery->setRowCount(sumItems.count());
     ui->tableWidget_summery->setHorizontalHeaderItem(0,new QTableWidgetItem());
     ui->tableWidget_summery->horizontalHeaderItem(0)->setData(Qt::DisplayRole,headerString);
     ui->tableWidget_summery->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignLeft);
 
-    for(int sports = 0; sports < sportUseList.count(); ++sports)
+    for(int item = 0; item < sumItems.count(); ++item)
     {
-        sportUse = sportUseList.at(sports);
-
-        if(sportSummery.contains(sportUse))
-        {
-            sumValues.insert(sports,this->set_summeryString(sumCounter,&sportSummery,sportUse));
-        }
+        ui->tableWidget_summery->setItem(item,0,sumItems.at(item));
     }
 
-    for(QMap<int,QString>::const_iterator it = sumValues.cbegin(), end = sumValues.cend(); it != end; ++it)
-    {
-        QTableWidgetItem *item = new QTableWidgetItem();
-        item->setData(Qt::DisplayRole,it.value());
-        ui->tableWidget_summery->setItem(it.key(),0,item);
-    }
 }
 
 void MainWindow::summery_calc(QMap<QString,QVector<double>> *calcSummery,QMap<QString,QVector<double>> *sportSummery,QStringList *sportUseList,int sumCounter)
@@ -797,34 +791,6 @@ void MainWindow::summery_calc(QMap<QString,QVector<double>> *calcSummery,QMap<QS
             sportSummery->insert(generalValues->value("sum"),calcSum);
         }
      }
-}
-
-QString MainWindow::set_summeryString(int counter, QMap<QString,QVector<double>> *summery,QString sport)
-{
-    QString valueString = sport;
-    uint weekComp = static_cast<uint>(summery->value(generalValues->value("sum")).at(1));
-    double sportComp = summery->value(sport).at(1);
-    double avgValue = sportComp/weekComp;
-
-    for(int i = 0; i < counter; ++i)
-    {
-        if(i == 1 && sport == generalValues->value("sum"))
-        {
-            valueString = valueString + "-" + QString::number(weekComp);
-        }
-        else if(i == 2)
-        {
-            valueString = valueString + "-" + QString::number(this->set_doubleValue(avgValue*100.0,false));
-        }
-        else
-        {
-            valueString = valueString + "-" + QString::number(summery->value(sport).at(i));
-        }
-    }
-
-    qDebug() << valueString;
-
-    return valueString;
 }
 
 void MainWindow::workoutSchedule(QDate date)
@@ -977,7 +943,7 @@ void MainWindow::saisonSchedule(QString phase)
         ui->tableWidget_saison->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     }
 
-    this->summery_Set(startDate,phaseWeeks);
+    //this->summery_Set(startDate,phaseWeeks);
 
     ui->spinBox_phaseWeeks->setValue(phaseWeeks);
     ui->dateEdit_phaseStart->setDate(startDate);

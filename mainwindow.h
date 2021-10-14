@@ -121,7 +121,8 @@ public:
         {
             painter->drawText(rectHeadText,Qt::AlignLeft | Qt::AlignVCenter, index.data(Qt::DisplayRole).toDate().toString("dd MMM"));
             QString workout;
-            if(!index.data(Qt::DisplayRole).toString().isEmpty())
+
+            if(index.data(Qt::UserRole).toInt() > 0)
             {
                 int height = static_cast<int>(floor((option.rect.height()*0.825) / index.data(Qt::UserRole).toInt()));
                 int yPos = rectHead.bottom();
@@ -310,8 +311,6 @@ public:
             rectGradient.setColorAt(0,rectColor);
             rectGradient.setColorAt(1,gradColor);
 
-            qDebug() << saison_values;
-
             if(!saison_values.isEmpty())
             {
                 QString phaseValue;
@@ -349,13 +348,10 @@ public:
         painter->save();
 
         QFont phase_font,date_font, work_font;
-        QStringList sum_values;
         QStringList sportList = settings::get_listValues("Sport");
-        QString delimiter = "-";
         QColor rectColor,gradColor;
         gradColor.setHsv(0,0,180,200);
         int textMargin = 2;
-        int celloffset = 21;
         phase_font.setBold(true);
         phase_font.setPixelSize(settings::get_fontValue("fontBig"));
         date_font.setBold(true);
@@ -367,81 +363,68 @@ public:
         rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
         rectGradient.setSpread(QGradient::RepeatSpread);
 
-        sum_values = index.data(Qt::DisplayRole).toString().split(delimiter);
-
-        for(int i = 0; i < sportList.count(); ++i)
-        {
-            if(sum_values.at(0) == sportList.at(i))
-            {
-                rectColor = settings::get_itemColor(sportList.at(i)).toHsv();
-                break;
-            }
-            else
-            {
-                //Summery
-                rectColor = settings::get_itemColor(generalValues->value("sum")).toHsv();
-            }
-        }
+        rectColor = settings::get_itemColor(index.data(Qt::DisplayRole).toString()).toHsv();
 
         rectColor.setAlpha(225);
         rectGradient.setColorAt(0,rectColor);
         rectGradient.setColorAt(1,gradColor);
 
-        QPainterPath rectHead;
-        QRect rect_head(option.rect.x(),option.rect.y(), option.rect.width(),20);
-        rectHead.addRoundedRect(rect_head,4,4);
-        QRect rect_head_text(option.rect.x()+textMargin,option.rect.y(), option.rect.width()-textMargin,20);
+        QPainterPath sportHead;
+        QRect rect_sportHead(option.rect.x(),option.rect.y(), option.rect.width(),option.rect.height()*0.20);
+        sportHead.addRoundedRect(rect_sportHead,5,5);
+
+        QRect rect_sportIcon(rect_sportHead.left(),option.rect.y(), rect_sportHead.height(),rect_sportHead.height());
+        QRect rect_sportHeadText(rect_sportIcon.right()+textMargin,option.rect.y(),option.rect.width()-rect_sportHead.height(),rect_sportHead.height());
 
         painter->setPen(Qt::black);
         painter->setBrush(rectGradient);
         painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-        painter->drawPath(rectHead);
+        painter->drawPath(sportHead);
         painter->setFont(date_font);
-        painter->drawText(rect_head_text,Qt::AlignLeft | Qt::AlignVCenter,sum_values.at(0));
+        painter->drawPixmap(rect_sportIcon,settings::sportIcon.value(index.data(Qt::DisplayRole).toString()));
+        painter->drawText(rect_sportHeadText,Qt::AlignLeft | Qt::AlignVCenter,index.data(Qt::DisplayRole).toString());
 
         QStringList *sumLabels = settings::getHeaderMap("summery");
-        QString labels;
-        for(int i = 0; i < sumLabels->count(); ++i)
-        {
-            labels = labels + sumLabels->at(i) +"\n";
-        }
-        labels.chop(1);
 
         QPainterPath rectSummery;
-        QRect rectSportSum(option.rect.x(),option.rect.y()+celloffset,option.rect.width(),option.rect.height()-celloffset-1);
-        rectSummery.addRoundedRect(rectSportSum,5,5);
-        QRect rectLabel(option.rect.x()+textMargin,option.rect.y()+celloffset+textMargin,(option.rect.width()/2)-textMargin,option.rect.height()-celloffset-textMargin-1);
+        QRect rect_sportSum(option.rect.x(),rect_sportHead.bottom()+1,option.rect.width(),option.rect.height()*0.8);
+        rectSummery.addRoundedRect(rect_sportSum,5,5);
 
-        rectGradient.setColorAt(0,rectColor);
-        rectGradient.setColorAt(1,gradColor);
+        int height = rect_sportSum.height() / sumLabels->count();
 
-        if(!sum_values.isEmpty())
+        QList<QRect> labelRect,sumRect;
+
+        painter->setBrush(rectGradient);
+        painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+        painter->setPen(Qt::black);
+        painter->drawPath(rectSummery);
+        painter->setFont(work_font);
+
+        for(int rect = 0; rect < sumLabels->count(); ++rect)
         {
-            QString partValue;
-
-            for(int i = 1; i < sum_values.count(); ++i)
+            if(rect == 0)
             {
-                if(i == 2)
-                {
-                    partValue = partValue + set_time(sum_values.at(i).toInt()) + "\n";
-                }
-                else
-                {
-                    partValue = partValue + sum_values.at(i) + "\n";
-                }
+                labelRect.append(QRect(option.rect.x()+textMargin,rect_sportSum.top(),option.rect.width()/2,height));
+                sumRect.append(QRect(labelRect.at(rect).right(),rect_sportSum.top(),option.rect.width()/2,height));
             }
-            partValue.chop(1);
+            else
+            {
+                labelRect.append(QRect(option.rect.x()+textMargin,labelRect.at(rect-1).bottom(),option.rect.width()/2,height));
+                sumRect.append(QRect(labelRect.at(rect).right(),sumRect.at(rect-1).bottom(),option.rect.width()/2,height));
+            }
 
-            QRect rectValues(option.rect.x()+(option.rect.width()/2),option.rect.y()+celloffset+textMargin,(option.rect.width()/2)-textMargin-1,option.rect.height()-+celloffset-textMargin-2);
+            painter->drawText(labelRect.at(rect),Qt::AlignLeft | Qt::AlignVCenter,sumLabels->at(rect));
 
-            painter->setBrush(rectGradient);
-            painter->setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-            painter->setPen(Qt::black);
-            painter->drawPath(rectSummery);
-            painter->setFont(work_font);
-            painter->drawText(rectLabel,Qt::AlignLeft,labels);
-            painter->drawText(rectValues,Qt::AlignLeft,partValue);
+            if(rect == 1)
+            {
+                painter->drawText(sumRect.at(rect),Qt::AlignLeft | Qt::AlignVCenter,set_time(index.data(Qt::UserRole+rect).toInt()));
+            }
+            else
+            {
+                painter->drawText(sumRect.at(rect),Qt::AlignLeft | Qt::AlignVCenter,index.data(Qt::UserRole+rect).toString());
+            }
         }
+
         painter->restore();
     }
 };
@@ -1103,7 +1086,7 @@ private:
     void openPreferences();
     void summery_Set(QDate,int);
     void summery_calc(QMap<QString,QVector<double>>*,QMap<QString,QVector<double>>*,QStringList*,int);
-    QString set_summeryString(int,QMap<QString,QVector<double>>*,QString);
+
     void set_saisonValues(QStringList*,QString,int);
     void workoutSchedule(QDate);
     void saisonSchedule(QString);

@@ -242,6 +242,7 @@ void schedule::calc_levelPlot(QDate startDate)
     zoneTicker->addTicks(tickCount, zoneLabel);
 
     levelPlot->xAxis->setTicker(zoneTicker);
+    levelPlot->xAxis->setTickLabelRotation(30);
     levelPlot->xAxis->setRange(-1,7);
     levelPlot->yAxis->setRange(0,100);
     levelPlot->xAxis->setLabel("Level");
@@ -402,7 +403,7 @@ void schedule::calc_compPlot(int plotCount, QDate startDate, QString sport)
 
         if(sport == settings::getStringMapPointer(settings::stingMap::General)->value("sum"))
         {
-            compValues = compWeekMap.value(weekID);
+            compValues = phaseSumMap.value(weekID);
             for(QMap<QString,QVector<double>>::const_iterator week = compValues.cbegin(); week != compValues.cend(); ++week)
             {
                 yWorks[vectorPos] += week.value().at(0);
@@ -413,10 +414,10 @@ void schedule::calc_compPlot(int plotCount, QDate startDate, QString sport)
         }
         else
         {
-            yWorks[vectorPos] = compWeekMap.value(weekID).value(sport).at(0);
-            yDura[vectorPos] = compWeekMap.value(weekID).value(sport).at(1)/60.0;
-            yDist[vectorPos] = compWeekMap.value(weekID).value(sport).at(3);
-            yStress[vectorPos] = compWeekMap.value(weekID).value(sport).at(4);
+            yWorks[vectorPos] = phaseSumMap.value(weekID).value(sport).at(0);
+            yDura[vectorPos] = phaseSumMap.value(weekID).value(sport).at(1)/60.0;
+            yDist[vectorPos] = phaseSumMap.value(weekID).value(sport).at(3);
+            yStress[vectorPos] = phaseSumMap.value(weekID).value(sport).at(4);
         }
         if(maxValues.at(0) < yDist.at(vectorPos)) maxValues[0] = yDist.at(vectorPos);
         if(maxValues.at(1) < yDura.at(vectorPos)) maxValues[1] = yDura.at(vectorPos);
@@ -484,6 +485,35 @@ void schedule::set_weekScheduleMeta(QStringList metaData)
     this->save_workouts(SCHEDULE);
 
     scheduleModel->blockSignals(false);
+}
+
+QMap<QPair<int,QString>,QVector<double>> schedule::get_weekSummery(QString weekID)
+{
+    QMap<QString,QVector<double>> sumMap = weekSumMap.value(weekID);
+    QMap<QPair<int,QString>,QVector<double>> weekSummery;
+    QPair<int,QString> sumKey;
+    QVector<double> summery(6,0);
+    int order = 0;
+
+    for(QMap<QString,QVector<double>>::const_iterator it = sumMap.cbegin(); it != sumMap.cend(); ++it)
+    {
+        for(int i = 0; i < it.value().count(); ++i)
+        {
+            summery[i] += it.value().at(i);
+        }
+
+        sumKey.first = ++order;
+        sumKey.second = it.key();
+        weekSummery.insert(sumKey,it.value());
+    }
+
+    sumKey.first = 0;
+    sumKey.second = "Summery";
+    summery[2] = 100.0;
+
+    weekSummery.insert(sumKey,summery);
+
+    return weekSummery;
 }
 
 QModelIndex schedule::get_modelIndex(QStandardItemModel *model,QString searchString, int col)
@@ -741,12 +771,6 @@ void schedule::remove_contest(QString saison, QDate contestDate)
     scheduleModel->removeRows(0,dayItem->rowCount(),dayItem->index());
 }
 
-void schedule::compValuesUpdate()
-{
-    qDebug() << "Refresh CompValues";
-}
-
-
 void schedule::check_workouts(QDate date)
 {
     QList<QStandardItem*> itemList;
@@ -830,7 +854,7 @@ QString schedule::get_saisonDate(QDate currDate)
 
 QStringList schedule::get_weekList()
 {    
-    QStringList weekList = compWeekMap.keys();
+    QStringList weekList = phaseSumMap.keys();
     std::sort(weekList.begin(),weekList.end());
     return weekList;
 }
@@ -871,7 +895,11 @@ void schedule::set_workoutData()
             dayItem->appendRow(itemList);
         }
         changedDays.enqueue(it.key());
-        this->set_compValues(true,it.key(),it.value());
+
+        weekSumMap.insert(calc_weekID(it.key()),this->set_summeryValues(dayItem->parent()));
+
+        compChanged->setData(it.key().addDays(1 - it.key().dayOfWeek()));
+        emit compChanged->triggered();
     }
     workoutUpdates.clear();
     isUpdated = true;
@@ -910,7 +938,7 @@ void schedule::set_weekCompValues(QStringList weekMeta,QMap<QString, QVector<dou
     QModelIndex weekIndex = this->get_modelIndex(phaseModel,weekMeta.at(0),0);
     QStandardItem *weekItem = phaseModel->itemFromIndex(weekIndex);
 
-    compWeekMap.insert(weekMeta.at(0),compValues);
+    phaseSumMap.insert(weekMeta.at(0),compValues);
 
     phaseModel->removeRows(0,weekItem->rowCount(),weekIndex);
 
@@ -935,101 +963,61 @@ void schedule::set_weekCompValues(QStringList weekMeta,QMap<QString, QVector<dou
     isUpdated = true;
 }
 
-void schedule::set_compValues(bool update,QDate workDate,QMap<int,QStringList> valueList)
+QMap<QString,QVector<double>> schedule::set_summeryValues(QStandardItem *weekItem)
 {
-    QMap<QString,QVector<double>> compSum;
-    QMap<int,QStringList> compValues;
+    QStandardItem *dayItem;
+    QDate calcDay;
+
+    QVector<double> sportSummery(6,0);
+    QVector<double> daysummery(5,0);
     QVector<double> stressValue(5);
-    stressValue.fill(0);
 
-    if(update)
+    QMap<QString,QVector<double>> summeryMap;
+    double epoc = 0;
+
+    for(int day = 0; day < weekItem->rowCount(); ++day)
     {
-        this->update_compValues(&compSum,&valueList);
-        compMap.insert(workDate,compSum);
-        compSum.clear();
-
-        stressValue[1] = stressMap.value(workDate).at(1);
-        stressValue[2] = stressMap.value(workDate).at(2);
-        compSum = compMap.value(workDate);
-
-        for(QMap<QString,QVector<double>>::const_iterator it = compSum.cbegin(), end = compSum.cend(); it != end; ++it)
+        dayItem = weekItem->child(day);
+        calcDay = QDate::fromString(dayItem->data(Qt::DisplayRole).toString(),dateFormat);
+        for(int work = 0; work < dayItem->rowCount(); ++work)
         {
-            stressValue[0] += it.value().at(4);
-            stressValue[3] += it.value().at(1);
-            stressValue[4] += it.value().at(3);
-        }
-        stressMap.insert(workDate,stressValue);
-    }
-    else
-    {
-        QStringList saisons = saisonValues.keys();
-        QDate compDate;
-        qint64 daysLeft;
-        for(int saison = 0; saison < saisons.count(); ++saison)
-        {
-            daysLeft = firstdayofweek.daysTo(QDate().fromString(saisonValues.value(saisons.at(saison)).at(1),dateFormat));
-            for(int day = -7; day <= daysLeft; ++day)
+            if(summeryMap.contains(dayItem->child(work,2)->data(Qt::DisplayRole).toString()))
             {
-                compDate = firstdayofweek.addDays(day);
-
-                this->check_workouts(compDate);
-                compValues = this->get_workouts(true,compDate.toString(dateFormat));
-                this->update_compValues(&compSum,&compValues);
-                compMap.insert(compDate,compSum);
-                compSum.clear();
-
-                stressValue.fill(0);
-                compSum = compMap.value(compDate);
-                for(QMap<QString,QVector<double>>::const_iterator it = compSum.cbegin(), end = compSum.cend(); it != end; ++it)
-                {
-                    stressValue[0] += it.value().at(4);
-                    stressValue[3] += it.value().at(1);
-                    stressValue[4] += it.value().at(3);
-                }
-                compSum.clear();
-                stressMap.insert(compDate,stressValue);
+                sportSummery = summeryMap.value(dayItem->child(work,2)->data(Qt::DisplayRole).toString());
+                sportSummery[0] += 1;
             }
+            else
+            {
+                sportSummery[0] = 1;
+            }
+            sportSummery[1] += dayItem->child(work,6)->data(Qt::DisplayRole).toDouble();
+            sportSummery[2] = 0;
+            sportSummery[3] += dayItem->child(work,7)->data(Qt::DisplayRole).toDouble();
+            sportSummery[4] += dayItem->child(work,8)->data(Qt::DisplayRole).toDouble();
+            sportSummery[5] += dayItem->child(work,9)->data(Qt::DisplayRole).toDouble();
+
+            epoc = ((dayItem->child(work,8)->data(Qt::DisplayRole).toDouble() / 10.0) + settings::epocLevelMap.value(dayItem->child(work,11)->data(Qt::DisplayRole).toInt()).second) / 100.0;
+
+            daysummery[0] += dayItem->child(work,6)->data(Qt::DisplayRole).toDouble();
+            daysummery[1] += dayItem->child(work,7)->data(Qt::DisplayRole).toDouble();
+            daysummery[2] += dayItem->child(work,8)->data(Qt::DisplayRole).toDouble();
+            daysummery[3] += dayItem->child(work,9)->data(Qt::DisplayRole).toDouble();
+            daysummery[4] += ceil(dayItem->child(work,9)->data(Qt::DisplayRole).toDouble() * epoc);
+
+            summeryMap.insert(dayItem->child(work,2)->data(Qt::DisplayRole).toString(),sportSummery);
+            sportSummery.fill(0);
         }
+        daySumMap.insert(calcDay,daysummery);
+
+        stressValue[0] = daysummery.at(2);
+        stressValue[3] = daysummery.at(0);
+        stressValue[4] = daysummery.at(1);
+
+        stressMap.insert(calcDay,stressValue);
+        this->recalc_stressValues();
+        daysummery.fill(0);
     }
-    compChanged->setData(workDate.addDays(1 - workDate.dayOfWeek()));
-    emit compChanged->triggered();
-    this->recalc_stressValues();
-}
-
-void schedule::update_compValues(QMap<QString,QVector<double>> *compSum,QMap<int,QStringList> *compValues)
-{
-    QVector<double> comp(settings::getHeaderMap("summery")->count());
-    comp.fill(0);
-    QString compSport;
-    int amount = 1;
-
-    for(QMap<int,QStringList>::const_iterator it = compValues->cbegin(), end = compValues->cend(); it != end; ++it)
-    {
-        compSport = it.value().at(1);
-
-        if(compSum->contains(compSport))
-        {
-            comp[0] = compSum->value(compSport).at(0) + amount;                                 //Workouts
-            comp[1] = compSum->value(compSport).at(1) + it.value().at(5).toDouble();            //Duration
-            comp[2] = compSum->value(compSport).at(2) + (it.value().at(7).toDouble() / 10.0)
-                    +settings::epocLevelMap.value(it.value().at(10).toInt()).second;  //EPOC
-            comp[3] = compSum->value(compSport).at(3) + it.value().at(6).toDouble();            //Distance
-            comp[4] = compSum->value(compSport).at(4) + it.value().at(7).toDouble();            //Stress
-            comp[5] = compSum->value(compSport).at(5) + it.value().at(8).toDouble();            //Work KJ
-        }
-        else
-        {
-            comp[0] = amount;
-            comp[1] = it.value().at(5).toDouble();
-            comp[2] = (it.value().at(7).toDouble() / 10.0) +settings::epocLevelMap.value(it.value().at(10).toInt()).second;                     //EPOC
-            comp[3] = it.value().at(6).toDouble();
-            comp[4] = it.value().at(7).toDouble();
-            comp[5] = it.value().at(8).toDouble();
-        }
-
-        compSum->insert(compSport,comp);
-        comp.fill(0);
-    }
+    return summeryMap;
 }
 
 void schedule::recalc_stressValues()
@@ -1100,7 +1088,7 @@ void schedule::set_saisonValues()
 
         mapValues.clear();
 
-        //Fill compWeekMap
+        //Fill phaseSumMap
         QStandardItem *saisonItem;
         saisonItem = phaseModel->item(saisons,0);
         QVector<double> sportValues(5,0);
@@ -1151,7 +1139,7 @@ void schedule::set_saisonValues()
                                 }
                             }
                         }
-                        compWeekMap.insert(mapKey,compValues);
+                        phaseSumMap.insert(mapKey,compValues);
                         weekPhaseMap.insert(startWeekDate,qMakePair(mapKey,phaseName));
                     }
                     saisonWeekMap.insert(saisonName,weekMapping);
@@ -1159,5 +1147,15 @@ void schedule::set_saisonValues()
             }
         }
     }
-    this->set_compValues(false,QDate(),QMap<int,QStringList>());
+
+    QStandardItem *weekItem;
+
+    for(int week = 0; week < scheduleModel->rowCount(); ++week)
+    {
+        weekItem = scheduleModel->item(week);
+        if(weekItem->hasChildren())
+        {
+            weekSumMap.insert(weekItem->data(Qt::DisplayRole).toString(),this->set_summeryValues(weekItem));
+        }
+    }
 }

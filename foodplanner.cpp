@@ -475,9 +475,8 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
 {
     const int minutes = 1440;
     double calMinute = round(this->current_dayCalories(day) * settings::doubleVector.value("palday").at(day.dayOfWeek()-1)) / minutes;
-    double sportMinutes = 0;
     double epoc = 0;
-    QMap<QString,QVector<double>> sportValues = schedulePtr->get_compValues()->value(day);
+    QVector<double> dayValues = schedulePtr->get_daySummery(day);
 
     QVector<int> sumValues(12,0);
     QVector<int> macroValues(5,0);
@@ -508,22 +507,16 @@ void foodplanner::update_summeryModel(QDate day,QStandardItem *calcItem,bool isM
         }
     }
 
-    for(QMap<QString,QVector<double>>::const_iterator it = sportValues.cbegin(), end = sportValues.cend(); it != end; ++it)
-    {
-        sumValues[2] = sumValues.at(2) + it.value().at(5);
-        epoc = epoc + ceil(it.value().at(5)*(it.value().at(2)/100));
-        sportMinutes = sportMinutes + (it.value().at(1)/60.0);
-    }
-
     int macroTEF = 0;
     macroTEF = round((sumValues.at(5) * settings::get_macroMap().value("Carbs").first)*settings::get_macroMap().value("Carbs").second);
     macroTEF = macroTEF + round((sumValues.at(6) * settings::get_macroMap().value("Protein").first)*settings::get_macroMap().value("Protein").second);
     macroTEF = macroTEF +round((sumValues.at(7) * settings::get_macroMap().value("Fat").first)*settings::get_macroMap().value("Fat").second);
 
-    sumValues[1] = ceil(((minutes - sportMinutes) * calMinute)+epoc+macroTEF);
-    sumValues[3] = sumValues.at(1) + sumValues.at(2);
+    sumValues[1] = ceil(((minutes - (dayValues.at(0)/60.0)) * calMinute)+epoc+macroTEF);
+    sumValues[2] = dayValues.at(3);
+    sumValues[3] = sumValues.at(1) + dayValues.at(3);
     sumValues[4] = sumValues.at(3) - sumValues.at(0);
-    sumValues[10] = epoc;
+    sumValues[10] = dayValues.at(4);
     sumValues[11] = macroTEF;
 
     double currentWeight = settings::get_weightforDate(day);
