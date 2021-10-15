@@ -3364,26 +3364,6 @@
                          </widget>
                         </item>
                         <item>
-                         <widget class="QSpinBox" name="spinBox_calories">
-                          <property name="enabled">
-                           <bool>false</bool>
-                          </property>
-                          <property name="maximum">
-                           <number>5000</number>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QSpinBox" name="spinBox_portFactor">
-                          <property name="enabled">
-                           <bool>false</bool>
-                          </property>
-                          <property name="maximum">
-                           <number>100</number>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
                          <widget class="QLineEdit" name="lineEdit_calories">
                           <property name="enabled">
                            <bool>false</bool>

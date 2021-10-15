@@ -400,6 +400,26 @@
             <property name="spacing">
              <number>5</number>
             </property>
+            <item row="24" column="1" colspan="3">
+             <widget class="QLineEdit" name="lineEdit_workPace">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1" colspan="3">
+             <widget class="QComboBox" name="comboBox_workSport"/>
+            </item>
+            <item row="6" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEdit_workTitle">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
             <item row="15" column="0">
              <widget class="QLabel" name="label_11">
               <property name="text">
@@ -407,64 +427,20 @@
               </property>
              </widget>
             </item>
-            <item row="15" column="2">
-             <widget class="QLabel" name="label">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>1</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
+            <item row="22" column="1" colspan="3">
+             <widget class="QSpinBox" name="spinBox_workKJoule">
+              <property name="minimum">
+               <number>0</number>
               </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="text">
-               <string>Level:</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              <property name="maximum">
+               <number>9999</number>
               </property>
              </widget>
             </item>
-            <item row="14" column="0">
-             <widget class="QLabel" name="label_10">
+            <item row="7" column="0">
+             <widget class="QLabel" name="label_8">
               <property name="text">
-               <string>Distance:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>Code:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_4">
-              <property name="text">
-               <string>Sport:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="24" column="0">
-             <widget class="QLabel" name="label_13">
-              <property name="text">
-               <string>Pace:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="12" column="0">
-             <widget class="QLabel" name="label_9">
-              <property name="text">
-               <string>Duration:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="22" column="0">
-             <widget class="QLabel" name="label_12">
-              <property name="text">
-               <string>Work (KJ):</string>
+               <string>Comment:</string>
               </property>
              </widget>
             </item>
@@ -475,10 +451,40 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="label_7">
+            <item row="12" column="1" colspan="3">
+             <widget class="QTimeEdit" name="timeEdit_workDuration">
+              <property name="currentSection">
+               <enum>QDateTimeEdit::HourSection</enum>
+              </property>
+              <property name="displayFormat">
+               <string>HH:mm:ss</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEdit_workComment">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="14" column="1" colspan="3">
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_workDistance">
+              <property name="decimals">
+               <number>3</number>
+              </property>
+              <property name="maximum">
+               <double>999.990000000000009</double>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_4">
               <property name="text">
-               <string>Titel:</string>
+               <string>Sport:</string>
               </property>
              </widget>
             </item>
@@ -492,13 +498,6 @@
               </property>
               <property name="maximum">
                <number>999</number>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Comment:</string>
               </property>
              </widget>
             </item>
@@ -519,6 +518,71 @@
               </property>
               <property name="autoRaise">
                <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="22" column="0">
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>Work (KJ):</string>
+              </property>
+             </widget>
+            </item>
+            <item row="24" column="0">
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>Pace:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="3">
+             <widget class="QTimeEdit" name="timeEdit_workTime"/>
+            </item>
+            <item row="15" column="3">
+             <widget class="QComboBox" name="comboBox_epoc">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>2</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="0">
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>Duration:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="27" column="1" colspan="3">
+             <widget class="QLineEdit" name="lineEdit_stdWorkID">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" colspan="3">
+             <widget class="QComboBox" name="comboBox_workCode"/>
+            </item>
+            <item row="14" column="0">
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>Distance:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Code:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>Titel:</string>
               </property>
              </widget>
             </item>
@@ -551,81 +615,24 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="1" colspan="2">
-             <widget class="QLineEdit" name="lineEdit_workTitle">
+            <item row="15" column="2">
+             <widget class="QLabel" name="label">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>1</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-             </widget>
-            </item>
-            <item row="2" column="1" colspan="3">
-             <widget class="QTimeEdit" name="timeEdit_workTime"/>
-            </item>
-            <item row="4" column="1" colspan="3">
-             <widget class="QComboBox" name="comboBox_workSport"/>
-            </item>
-            <item row="5" column="1" colspan="3">
-             <widget class="QComboBox" name="comboBox_workCode"/>
-            </item>
-            <item row="7" column="1" colspan="2">
-             <widget class="QLineEdit" name="lineEdit_workComment">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                <horstretch>1</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string>Level:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
-            </item>
-            <item row="12" column="1" colspan="3">
-             <widget class="QTimeEdit" name="timeEdit_workDuration">
-              <property name="currentSection">
-               <enum>QDateTimeEdit::HourSection</enum>
-              </property>
-              <property name="displayFormat">
-               <string>HH:mm:ss</string>
-              </property>
-             </widget>
-            </item>
-            <item row="14" column="1" colspan="3">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_workDistance">
-              <property name="decimals">
-               <number>3</number>
-              </property>
-              <property name="maximum">
-               <double>999.990000000000009</double>
-              </property>
-             </widget>
-            </item>
-            <item row="22" column="1" colspan="3">
-             <widget class="QSpinBox" name="spinBox_workKJoule">
-              <property name="minimum">
-               <number>0</number>
-              </property>
-              <property name="maximum">
-               <number>9999</number>
-              </property>
-             </widget>
-            </item>
-            <item row="24" column="1" colspan="3">
-             <widget class="QLineEdit" name="lineEdit_workPace">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="27" column="1" colspan="3">
-             <widget class="QLineEdit" name="lineEdit_stdWorkID">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="15" column="3">
-             <widget class="QComboBox" name="comboBox_epoc"/>
             </item>
            </layout>
           </widget>

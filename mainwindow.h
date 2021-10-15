@@ -96,7 +96,7 @@ public:
         }
         else
         {
-            if(index.data(Qt::DisplayRole).toDate() ==QDate::currentDate())
+            if(index.data(Qt::DisplayRole).toDate() == QDate::currentDate())
             {
                 rectColor.setHsv(0,255,255,225);
             }
@@ -348,7 +348,6 @@ public:
         painter->save();
 
         QFont phase_font,date_font, work_font;
-        QStringList sportList = settings::get_listValues("Sport");
         QColor rectColor,gradColor;
         gradColor.setHsv(0,0,180,200);
         int textMargin = 2;
@@ -485,8 +484,6 @@ class del_filelist : public QStyledItemDelegate
     void paint( QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
     {
         painter->save();
-        const QAbstractItemModel *model = index.model();
-        QString sportName = model->data(model->index(index.row(),2)).toString();
 
         QLinearGradient rowGradient(option.rect.topLeft(),option.rect.bottomLeft());
         rowGradient.setSpread(QGradient::RepeatSpread);
@@ -501,7 +498,7 @@ class del_filelist : public QStyledItemDelegate
         }
         else
         {
-            rowColor = settings::get_itemColor(sportName).toHsv();
+            rowColor = settings::get_itemColor(index.model()->data(index.model()->index(index.row(),2)).toString()).toHsv();
             rowColor.setAlpha(125);
             painter->setPen(Qt::black);
         }
@@ -522,13 +519,14 @@ class del_avgselect : public QStyledItemDelegate
 
 public:
     explicit del_avgselect(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
-    QString sport;
 
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         painter->save();
         QColor rectColor,gradColor;
         gradColor.setHsv(0,0,180,200);
+
+        QString sport = index.model()->data(index.model()->index(0,0),Qt::AccessibleTextRole).toString();
 
         QLinearGradient rectGradient;
         rectGradient.setCoordinateMode(QGradient::ObjectBoundingMode);

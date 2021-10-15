@@ -290,6 +290,8 @@ void foodplanner::set_summeryData(QStandardItem *weekItem)
     }
     sumRootItem->appendRow(weekList);
 
+    schedulePtr->foodMode.insert(weekItem->data(Qt::DisplayRole).toString(),qMakePair(foodMode,settings::get_foodModeValues(foodMode).value("losspercent").value("goal")/100.0));
+
     for(int day = 0; day < weekItem->rowCount(); ++day)
     {
         this->update_summeryModel(firstDay.addDays(day),weekItem->child(day,0),false);
@@ -826,15 +828,18 @@ void foodplanner::save_ingredList(int list)
 void foodplanner::update_foodMode(QDate weekStart,QString newMode)
 {
     QStandardItem *weekItem;
+    QString weekID = calc_weekID(weekStart);
 
-    weekItem = this->get_modelItem(summeryModel,calc_weekID(weekStart),0);
+    weekItem = this->get_modelItem(summeryModel,weekID,0);
 
     for(int day = 0; day < weekItem->rowCount(); day++)
     {
         weekItem->child(day,0)->setData(newMode,Qt::AccessibleTextRole);
     }
 
-    QModelIndex weekIndex = this->get_modelIndex(foodPlanModel,calc_weekID(weekStart),0);
+    schedulePtr->foodMode.insert(weekID,qMakePair(newMode,settings::get_foodModeValues(newMode).value("losspercent").value("goal")/100.0));
+
+    QModelIndex weekIndex = this->get_modelIndex(foodPlanModel,weekID,0);
     weekItem = foodPlanModel->itemFromIndex(weekIndex.siblingAtColumn(2));
     weekItem->setData(newMode,Qt::DisplayRole);
     weekItem = foodPlanModel->itemFromIndex(weekIndex);

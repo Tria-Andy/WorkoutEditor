@@ -237,8 +237,6 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->comboBox_weightmode->addItems(settings::get_listValues("Mode"));
         ui->comboBox_weightmode->setEnabled(false);
         ui->comboBox_weightmode->blockSignals(false);
-        ui->spinBox_calories->setVisible(false);
-        ui->spinBox_portFactor->setVisible(false);
 
         ui->toolButton_menuCopy->setEnabled(false);
         ui->toolButton_menuPaste->setEnabled(false);
@@ -676,7 +674,14 @@ void MainWindow::summery_Set(QDate date, int weekCount)
             {
                 if(i == 2)
                 {
-                    sumItem->setData(Qt::UserRole+i,set_doubleValue((it.value().at(1) / weekSummery.first().at(1)) * 100.0,false));
+                    if(weekSummery.first().at(1) == 0)
+                    {
+                        sumItem->setData(Qt::UserRole+i,0);
+                    }
+                    else
+                    {
+                        sumItem->setData(Qt::UserRole+i,set_doubleValue((it.value().at(1) / weekSummery.first().at(1)) * 100.0,false));
+                    }
                 }
                 else
                 {
@@ -1327,13 +1332,10 @@ void MainWindow::load_activity(const QString &filename,bool fullPath)
 
         if(actLoaded)
         {
-            qDebug() << "Loaded";
-
             currActivity->prepare_baseData();
             currActivity->set_activityData();
             ui->actionSelect_File->setEnabled(false);
             ui->actionReset->setEnabled(true);
-            avgSelect_del.sport = currActivity->get_currentSport();
 
             this->set_menuItems(EDITOR);
             this->set_activityTree();
@@ -1348,6 +1350,7 @@ void MainWindow::load_activity(const QString &filename,bool fullPath)
             ui->doubleSpinBox_intDistance->setEnabled(!currActivity->isSwim);
             this->set_tableWidgetItems(ui->tableWidget_avgValues,currActivity->averageHeader.count(),1,nullptr);
             this->set_tableHeader(ui->tableWidget_avgValues,&currActivity->averageHeader,true);
+            ui->tableWidget_avgValues->item(0,0)->setData(Qt::AccessibleTextRole,currActivity->get_currentSport());
 
             this->init_controlStyleSheets();
         }
@@ -1384,6 +1387,8 @@ void MainWindow::set_activityInfo()
         item->setData(Qt::DisplayRole,currActivity->activityInfo.value(currActivity->infoHeader->at(row)));
         ui->tableWidget_actInfo->setItem(row,0,item);
     }
+    ui->tableWidget_actInfo->item(0,0)->setData(Qt::AccessibleTextRole,currActivity->get_currentSport());
+
     ui->actionSave->setEnabled(true);
 }
 
@@ -1702,6 +1707,7 @@ void MainWindow::set_selecteditem(QTreeWidgetItem *selItem, int column)
         if(avgData)
         {
             ui->tableWidget_avgValues->item(0,0)->setData(Qt::DisplayRole,averageData.first);
+            ui->tableWidget_avgValues->item(0,0)->setData(Qt::AccessibleTextRole,currActivity->get_currentSport());
             ui->tableWidget_avgValues->item(1,0)->setData(Qt::DisplayRole,set_time(averageData.second.at(0)));
             ui->tableWidget_avgValues->item(1,0)->setData(Qt::UserRole,averageData.second.at(0));
             ui->tableWidget_avgValues->item(2,0)->setData(Qt::DisplayRole,set_time(averageData.second.at(1)));
@@ -2457,7 +2463,6 @@ void MainWindow::on_actionSelect_File_triggered()
 void MainWindow::on_actionReset_triggered()
 {
     this->clearActivtiy();
-    avgSelect_del.sport = QString();
     ui->horizontalSlider_factor->setEnabled(false);
 }
 
@@ -2763,18 +2768,18 @@ void MainWindow::set_selectedMeals(QTreeWidgetItem *listItem)
         }
     }
     ui->doubleSpinBox_portion->setValue(0);
+    ui->doubleSpinBox_portion->setProperty("Calories",listItem->data(2,Qt::DisplayRole).toInt());
     ui->lineEdit_Mealname->setText(listItem->data(0,Qt::DisplayRole).toString());
-    ui->spinBox_calories->setValue(listItem->data(2,Qt::DisplayRole).toInt());
 
     if(addnew)
     {
-        ui->spinBox_portFactor->setValue(portion);
+        ui->doubleSpinBox_portion->setProperty("Factor",portion);
         ui->doubleSpinBox_portion->setValue(portion);
         ui->toolButton_addMeal->setProperty("Editmode",ADD);
     }
     else
     {
-        ui->spinBox_portFactor->setValue(foodTree->currentItem()->data(1,Qt::DisplayRole).toInt());
+        ui->doubleSpinBox_portion->setProperty("Factor",foodTree->currentItem()->data(1,Qt::DisplayRole).toInt());
         ui->doubleSpinBox_portion->setValue(ui->listWidget_menuEdit->currentItem()->data(Qt::UserRole+1).toDouble());
         ui->toolButton_addMeal->setProperty("Editmode",EDIT);
     }
@@ -2786,7 +2791,6 @@ void MainWindow::reset_menuEdit()
     ui->toolButton_foodDown->setEnabled(false);
     ui->toolButton_menuEdit->setEnabled(false);
     ui->toolButton_menuClear->setEnabled(false);
-    ui->spinBox_portFactor->clear();
     ui->doubleSpinBox_portion->clear();
     ui->lineEdit_calories->clear();
     ui->lineEdit_editSection->clear();
@@ -2895,12 +2899,12 @@ void MainWindow::on_calendarWidget_Food_clicked(const QDate &date)
 
 void MainWindow::on_doubleSpinBox_portion_valueChanged(double value)
 {    
-    ui->lineEdit_calories->setText(QString::number(round(value * ui->spinBox_calories->value()/ui->spinBox_portFactor->value())));
+    ui->lineEdit_calories->setText(QString::number(round(value * ui->doubleSpinBox_portion->property("Calories").toInt()/ui->doubleSpinBox_portion->property("Factor").toInt())));
 }
 
 void MainWindow::on_toolButton_addMeal_clicked()
 {
-    double foodFactor = ui->doubleSpinBox_portion->value() / ui->spinBox_portFactor->value();
+    double foodFactor = ui->doubleSpinBox_portion->value() / ui->doubleSpinBox_portion->property("Factor").toInt();
     QString listName,foodName;
 
     QListWidgetItem *mealItem = nullptr;
@@ -3443,7 +3447,6 @@ void MainWindow::on_treeWidget_recipe_itemClicked(QTreeWidgetItem *item, int col
     }
     else
     {
-        //this->set_selectedMeals(item,item->data(1,Qt::DisplayRole).toDouble());
         this->set_selectedMeals(item);
     }
 }
@@ -3456,7 +3459,6 @@ void MainWindow::on_treeWidget_ingred_itemClicked(QTreeWidgetItem *item, int col
     }
     else
     {
-        //this->set_selectedMeals(item,item->data(1,Qt::DisplayRole).toDouble());
         this->set_selectedMeals(item);
     }
 }
@@ -3469,7 +3471,6 @@ void MainWindow::on_treeWidget_drink_itemClicked(QTreeWidgetItem *item, int colu
     }
     else
     {
-        //this->set_selectedMeals(item,item->data(1,Qt::DisplayRole).toDouble());
         this->set_selectedMeals(item);
     }
 }

@@ -19,7 +19,7 @@
 #include "dialog_week_copy.h"
 #include "ui_dialog_week_copy.h"
 
-Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedule *p_sched,bool hasWeek) :
+Dialog_week_copy::Dialog_week_copy(QWidget *parent,QString selected_week,schedule *p_sched, bool hasWeek) :
     QDialog(parent),
     ui(new Ui::Dialog_week_copy)
 {

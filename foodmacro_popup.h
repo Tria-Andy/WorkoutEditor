@@ -39,7 +39,7 @@ public:
             {
                 itemColor.setHsv(60,125,255,200);
                 gradColor.setHsv(0,255,255,150);
-                painter->setPen(Qt::white);
+                painter->setPen(Qt::darkGray);
             }
             else if(index.data().toInt() > index.siblingAtRow(index.row()-1).data().toInt())
             {
