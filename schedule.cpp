@@ -482,6 +482,15 @@ void schedule::set_weekScheduleMeta(QStringList metaData)
        scheduleModel->setData(weekIndex.siblingAtColumn(meta),metaData.at(meta));
     }
 
+    /*
+    for(int week = weekIndex.row(); week < scheduleModel->rowCount(); ++week)
+    {
+        qDebug() << scheduleModel->item(week,3)->data(Qt::DisplayRole);
+        qDebug() << scheduleModel->item(week,3)->data(Qt::DisplayRole).toDouble() - (scheduleModel->item(week,3)->data(Qt::DisplayRole).toDouble() * foodMode.value(scheduleModel->item(week,0)->data(Qt::DisplayRole).toString()).second);
+    }
+    */
+
+
     this->save_workouts(SCHEDULE);
 
     scheduleModel->blockSignals(false);

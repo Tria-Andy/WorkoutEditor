@@ -37,6 +37,7 @@ public:
     QStandardItemModel *scheduleModel,*phaseModel;
     QString dateFormat,longTime,shortTime;
     QHash<QDate,QMap<int,QStringList>> workoutUpdates;
+    QMap<QString,QPair<QString,double>> foodMode;
     QCustomPlot *stressPlot,*levelPlot,*compPlot;
 
     QString get_weekPhase(QDate,bool);
